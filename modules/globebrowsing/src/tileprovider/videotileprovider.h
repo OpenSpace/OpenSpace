@@ -54,16 +54,24 @@ public:
     int minLevel() override final;
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
-
     ChunkTile chunkTile(TileIndex tileIndex, int parents, int maxParents = 1337) override;
+
+
 
     static documentation::Documentation Documentation();
 
 private:
     void createFBO(int width, int height);
     void resizeFBO(int width, int height);
-    void handleMpvProperties(mpv_event* event);
+
+    // Libmpv
+    void initializeMpv(); // Called first time in postSyncPreDraw
+    void renderMpv(); // Called in postSyncPreDraw
     void handleMpvEvents();
+    void handleMpvProperties(mpv_event* event);
+    void swapBuffersMpv(); // Called in postDraw
+    void cleanUpMpv(); // Called in internalDeinitialze
+    static void on_mpv_render_update(void*);
 
     void internalInitialize() override final;
     void internalDeinitialize() override final;
@@ -92,8 +100,10 @@ private:
     mpv_handle* _mpvHandle = nullptr;
     mpv_render_context* _mpvRenderContext = nullptr;
     ghoul::opengl::Texture* _frameTexture = nullptr;
+    mpv_opengl_fbo _mpvFbo;
     GLuint _fbo = 0;
     TileTextureInitData::HashKey _frameTextureHashKey;
+    static int _wakeup;
 
     // libmpv property keys
     enum class LibmpvPropertyKey : uint64_t {

@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/time.h>
@@ -84,6 +85,8 @@ namespace {
 
 namespace openspace::globebrowsing {
 
+int VideoTileProvider::_wakeup = 0;
+
 void save_gray_frame(unsigned char* buf, int wrap, int xsize, int ysize,
                      const char* filename)
 {
@@ -112,8 +115,10 @@ void* getOpenGLProcAddress(void*, const char* name) {
     return reinterpret_cast<void*>(global::windowDelegate->openGLProcedureAddress(name));
 }
 
-void mpvRenderUpdate(void*) {
-    LINFO("libmpv: new video frame");
+void VideoTileProvider::on_mpv_render_update(void*) {
+    // The wakeup flag is set here to enable the mpv_render_context_render 
+    // path in the main loop.
+    _wakeup = 1;
 }
 
 documentation::Documentation VideoTileProvider::Documentation() {
@@ -145,6 +150,19 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary) {
     _startJ200Time = Time::convertTime(p.startTime);
     _endJ200Time = Time::convertTime(p.endTime);
     ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
+
+    global::callback::postSyncPreDraw->emplace_back([this]() {
+        // Initialize mpv here to ensure that the opengl context is the same as in for 
+        // the rendering
+        if (!_isInitialized) {
+            initializeMpv();
+        }
+        renderMpv();
+    });
+
+    global::callback::postDraw->emplace_back([this]() {
+        swapBuffersMpv();
+    });
 }
 
 Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
@@ -162,41 +180,6 @@ Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
     if (tileCache->exist(key)) {
         return tileCache->get(key);
     }
-
-    // TODO: Move this to GPU (shader)
-    /*
-    // If tile not found in cache then create it
-    const int wholeRowSize = _resolution.x * BytesPerPixel;
-    const int tileRowSize = TileSize.x * BytesPerPixel;
-
-    // The range of rows of the whole image that this tile needs
-    const glm::ivec2 rowRange = glm::ivec2(
-        TileSize.y * tileIndex.y,
-        TileSize.y * (tileIndex.y + 1)
-    );
-
-     {
-        ZoneScopedN("Copy Frame")
-        TracyGpuZone("Copy Frame")
-
-        // Copy every row inside the part of the texture we want for the tile
-        GLubyte* destination = _tilePixels;
-        GLubyte* source = &_glFrame->data[0][0];
-        // Traverse backwards so texture is placed correctly
-        for (int row = rowRange.y - 1; row >= rowRange.x; --row) {
-            // Find index of first item, row & col
-            int rowIndex = row * wholeRowSize;
-            int columnIndex = tileRowSize * tileIndex.x;
-
-            // Copy row
-            memcpy(destination, source + rowIndex + columnIndex, tileRowSize);
-
-            // Advance the destination pointer
-            destination += tileRowSize;
-        }
-        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    }*/
 
     // Bind the texture to the tile
     Tile ourTile = Tile{ _frameTexture, std::nullopt, Tile::Status::OK };
@@ -232,10 +215,7 @@ void VideoTileProvider::update() {
     if (!_isInitialized) {
         return;
     }
-
-    //Check mpv events
-    handleMpvEvents();
-
+    /*
     // Double check the video duration
     if (_videoDuration < 0.0) {
         int result = mpv_get_property_async(
@@ -346,7 +326,7 @@ void VideoTileProvider::update() {
     }
 
     // Check if it is time for a new frame
-    if (OSvideoTime - _currentVideoTime < _frameTime) {
+    if (OSvideoTime - _currentVideoTime < 2.0 * _frameTime) {
         if (_isWaiting) {
             return;
         }
@@ -375,23 +355,7 @@ void VideoTileProvider::update() {
         }
         _isWaiting = false;
     }
-
-    _tileIsReady = false;
-
-    // Render video frame to texture
-    mpv_opengl_fbo mpvfbo{ static_cast<int>(_fbo), _resolution.x, _resolution.y, 0 };
-    int flip_y{ 1 };
-
-    mpv_render_param params[] = {
-        {MPV_RENDER_PARAM_OPENGL_FBO, &mpvfbo},
-        {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
-        {MPV_RENDER_PARAM_INVALID, nullptr}
-    };
-
-    // See render_gl.h on what OpenGL environment mpv expects, and other API details
-    // This function fills the fbo and texture with data, after it we can get the data on the GPU, not the CPU
-    mpv_render_context_render(_mpvRenderContext, params);
-
+    */
     // TEST save a grayscale frame into a .pgm file
     // This ends up in OpenSpace\build\apps\OpenSpace
     // https://github.com/leandromoreira/ffmpeg-libav-tutorial/blob/master/0_hello_world.c
@@ -399,218 +363,8 @@ void VideoTileProvider::update() {
     snprintf(frame_filename, sizeof(frame_filename), "%s-%d.pgm", "frame", _codecContext->frame_number);
     save_gray_frame(_avFrame->data[0], _avFrame->linesize[0], _avFrame->width, _avFrame->height, frame_filename);
     */
-
     _tileIsReady = true;
     _prevVideoTime = _currentVideoTime;
-}
-
-void VideoTileProvider::handleMpvProperties(mpv_event* event) {
-    switch (static_cast<LibmpvPropertyKey>(event->reply_userdata)) {
-        case LibmpvPropertyKey::Duration: {
-            if (!event->data) {
-                LERROR("Could not find duration property");
-                break;
-            }
-
-            struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-            double* duration = static_cast<double*>(property->data);
-
-            if (!duration) {
-                LERROR("Could not find duration property");
-                break;
-            }
-
-            _videoDuration = *duration;
-            LINFO(fmt::format("Duration: {}", *duration));
-            break;
-        }
-        case LibmpvPropertyKey::Eof: {
-            if (!event->data) {
-                LERROR("Could not find eof property");
-                break;
-            }
-
-            struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-            int* eof = static_cast<int*>(property->data);
-
-            if (!eof) {
-                LERROR("Could not find eof property");
-                break;
-            }
-
-            _hasReachedEnd = *eof > 0;
-            break;
-        }
-        case LibmpvPropertyKey::Height: {
-            if (!event->data) {
-                LERROR("Could not find height property");
-                break;
-            }
-
-            struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-            int* height = static_cast<int*>(property->data);
-
-            if (!height) {
-                LERROR("Could not find height property");
-                break;
-            }
-
-            if (*height == _resolution.y) {
-                break;
-            }
-
-            LINFO(fmt::format("New height: {}", *height));
-
-            if (*height > 0) {
-                if (_resolution.x > 0 && _fbo > 0) {
-                    resizeFBO(_resolution.x, *height);
-                }
-                else {
-                    _resolution.y = *height;
-                }
-            }
-            else {
-                LERROR("Could not find height of video");
-            }
-            break;
-        }
-        case LibmpvPropertyKey::Meta: {
-            if (!event->data) {
-                LERROR("Could not find video parameters");
-                break;
-            }
-
-            mpv_node node;
-            int result = mpv_event_to_node(&node, event);
-            if (!checkMpvError(result)) {
-                LWARNING("Could not find video parameters of video");
-            }
-
-            if (node.format == MPV_FORMAT_NODE_MAP) {
-                for (int n = 0; n < node.u.list->num; n++) {
-                    if (node.u.list->values[n].format == MPV_FORMAT_STRING) {
-                        LINFO(node.u.list->values[n].u.string);
-                    }
-                }
-            }
-            else {
-                LWARNING("No meta data could be read");
-            }
-
-            break;
-        }
-        case LibmpvPropertyKey::Params: {
-            if (!event->data) {
-                LERROR("Could not find video parameters");
-                break;
-            }
-
-            mpv_node videoParams;
-            int result = mpv_event_to_node(&videoParams, event);
-            if (!checkMpvError(result)) {
-                LWARNING("Could not find video parameters of video");
-            }
-
-            if (videoParams.format == MPV_FORMAT_NODE_ARRAY ||
-                videoParams.format == MPV_FORMAT_NODE_MAP)
-            {
-                mpv_node_list* list = videoParams.u.list;
-
-                mpv_node width, height;
-                bool foundWidth = false;
-                bool foundHeight = false;
-                for (int i = 0; i < list->num; ++i) {
-                    if (foundWidth && foundHeight) {
-                        break;
-                    }
-
-                    if (list->keys[i] == "w") {
-                        width = list->values[i];
-                        foundWidth = true;
-                    }
-                    else if (list->keys[i] == "h") {
-                        height = list->values[i];
-                        foundHeight = true;
-                    }
-                }
-
-                if (!foundWidth || !foundHeight) {
-                    LERROR("Could not find width or height params");
-                    return;
-                }
-
-                int w = -1;
-                int h = -1;
-                if (width.format == MPV_FORMAT_INT64) {
-                    w = width.u.int64;
-                }
-                if (height.format == MPV_FORMAT_INT64) {
-                    h = height.u.int64;
-                }
-
-                if (w == -1 || h == -1) {
-                    LERROR("Invalid width or height params");
-                    return;
-                }
-                resizeFBO(w, h);
-            }
-            break;
-        }
-        case LibmpvPropertyKey::Time: {
-            if (!event->data) {
-                LERROR("Could not find playback time property");
-                break;
-            }
-
-            struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-            double* time = static_cast<double*>(property->data);
-
-            if (!time) {
-                LERROR("Could not find playback time property");
-                break;
-            }
-
-            _currentVideoTime = *time;
-            break;
-        }
-        case LibmpvPropertyKey::Width: {
-            if (!event->data) {
-                LERROR("Could not find height property");
-                break;
-            }
-
-            struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-            int* width = static_cast<int*>(property->data);
-
-            if (!width) {
-                LERROR("Could not find width property");
-                break;
-            }
-
-            if (*width == _resolution.y) {
-                break;
-            }
-
-            LINFO(fmt::format("New width: {}", *width));
-
-            if (*width > 0) {
-                if (_resolution.y > 0 && _fbo > 0) {
-                    resizeFBO(*width, _resolution.y);
-                }
-                else {
-                    _resolution.x = *width;
-                }
-            }
-            else {
-                LERROR("Could not find width of video");
-            }
-            break;
-        }
-        default: {
-            throw ghoul::MissingCaseException();
-            break;
-        }
-    }
 }
 
 ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
@@ -631,6 +385,130 @@ ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int max
     TileUvTransform uvTransform = { glm::vec2(offsetX, offsetY), ratios };
 
     return traverseTree(tileIndex, parents, maxParents, ascendToParent, uvTransform);
+}
+
+void VideoTileProvider::initializeMpv() {
+    _mpvHandle = mpv_create();
+    if (!_mpvHandle)
+        LINFO("mpv context init failed");
+
+    // Some minor options can only be set before mpv_initialize().
+    if (mpv_initialize(_mpvHandle) < 0)
+        LINFO("mpv init failed");
+
+    mpv_opengl_init_params gl_init_params{ getOpenGLProcAddress, nullptr };
+    int adv{ 1 }; // we will use the update callback
+    int blockTarget{ 0 }; // we will use the update callback
+
+    mpv_render_param params[]{
+        {MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL)},
+        {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
+        {MPV_RENDER_PARAM_ADVANCED_CONTROL, &adv},
+        {MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME, (int*)0},
+        {MPV_RENDER_PARAM_INVALID, nullptr},
+    };
+
+
+    // This makes mpv use the currently set GL context. It will use the callback
+    // (passed via params) to resolve GL builtin functions, as well as extensions.
+    if (mpv_render_context_create(&_mpvRenderContext, _mpvHandle, params) < 0)
+        LINFO("failed to initialize mpv GL context");
+
+    // When there is a need to call mpv_render_context_update(), which can
+    // request a new frame to be rendered.
+    // (Separate from the normal event handling mechanism for the sake of
+    //  users which run OpenGL on a different thread.)
+    mpv_render_context_set_update_callback(_mpvRenderContext, on_mpv_render_update, NULL);
+
+    // Load file
+    const char* cmd[] = { "loadfile", _videoFile.string().c_str(), NULL };
+    int result = mpv_command(_mpvHandle, cmd);
+    if (!checkMpvError(result)) {
+        LERROR("Could not open video file");
+        return;
+    }
+    mpv_set_option_string(_mpvHandle, "loop", "");
+    mpv_set_option_string(_mpvHandle, "gpu-api", "opengl");
+    mpv_set_option_string(_mpvHandle, "hwdec", "auto");
+    mpv_set_option_string(_mpvHandle, "vd-lavc-dr", "yes");
+    mpv_set_option_string(_mpvHandle, "terminal", "yes");
+
+    //Create FBO to render video into
+    createFBO(_resolution.x, _resolution.y);
+
+    // Print meta data
+    result = mpv_get_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::Meta),
+        "metadata",
+        MPV_FORMAT_NODE
+    );
+    if (!checkMpvError(result)) {
+        LWARNING("Could not load meta data");
+    }
+    
+    // Get resolution of video
+    result = mpv_get_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::Width),
+        "width", MPV_FORMAT_INT64
+    );
+
+    int result2 = mpv_get_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::Height),
+        "height",
+        MPV_FORMAT_INT64
+    );
+    
+    if (!checkMpvError(result) || !checkMpvError(result2)) {
+        LWARNING("Could not load video resolution");
+    }
+    // Find duration of video
+    result = mpv_get_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::Duration),
+       "duration",
+        MPV_FORMAT_DOUBLE
+    );
+    if (!checkMpvError(result)) {
+        LWARNING("Could not find video duration");
+    }
+
+    _videoDuration = 41.0;
+    _isInitialized = true;
+}
+
+void VideoTileProvider::renderMpv() {
+    handleMpvEvents();
+    mpv_opengl_fbo mpfbo{ static_cast<int>(_fbo), _resolution.x, _resolution.y, 0 };
+    int flip_y{ 1 };
+
+    mpv_render_param params[] = {
+        {MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo},
+        {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
+        {MPV_RENDER_PARAM_INVALID, nullptr}
+    };
+    // See render_gl.h on what OpenGL environment mpv expects, and
+    // other API details.
+    // See render_gl.h on what OpenGL environment mpv expects, and other API details
+    // This function fills the fbo and texture with data, after it we can get the data on 
+    // the GPU, not the CPU
+    if (_wakeup)
+    {
+        if ((mpv_render_context_update(_mpvRenderContext) & MPV_RENDER_UPDATE_FRAME))
+        {
+            // This "renders" to the video_framebuffer "linked by ID" in the
+            // params_fbo - BLOCKING
+            mpv_render_context_render(_mpvRenderContext, params);
+
+            /* TODO: remove this comment in case we never encounter this issue again */
+            // We have to set the Viewport on every cycle because 
+            // mpv_render_context_render internally rescales the fb of the context(?!)...
+            //glm::ivec2 window = global::windowDelegate->currentDrawBufferResolution();
+            //glViewport(0, 0, window.x, window.y);
+        }
+    }
 }
 
 void VideoTileProvider::handleMpvEvents() {
@@ -714,6 +592,232 @@ void VideoTileProvider::handleMpvEvents() {
     }
 }
 
+void VideoTileProvider::handleMpvProperties(mpv_event* event) {
+    switch (static_cast<LibmpvPropertyKey>(event->reply_userdata)) {
+    case LibmpvPropertyKey::Duration: {
+        if (!event->data) {
+            LERROR("Could not find duration property");
+            break;
+        }
+
+        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+        double* duration = static_cast<double*>(property->data);
+
+        if (!duration) {
+            LERROR("Could not find duration property");
+            break;
+        }
+
+        _videoDuration = *duration;
+        LINFO(fmt::format("Duration: {}", *duration));
+        break;
+    }
+    case LibmpvPropertyKey::Eof: {
+        if (!event->data) {
+            LERROR("Could not find eof property");
+            break;
+        }
+
+        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+        int* eof = static_cast<int*>(property->data);
+
+        if (!eof) {
+            LERROR("Could not find eof property");
+            break;
+        }
+
+        _hasReachedEnd = *eof > 0;
+        break;
+    }
+    case LibmpvPropertyKey::Height: {
+        if (!event->data) {
+            LERROR("Could not find height property");
+            break;
+        }
+
+        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+        int* height = static_cast<int*>(property->data);
+
+        if (!height) {
+            LERROR("Could not find height property");
+            break;
+        }
+
+        if (*height == _resolution.y) {
+            break;
+        }
+
+        LINFO(fmt::format("New height: {}", *height));
+
+        if (*height > 0) {
+            if (_resolution.x > 0 && _fbo > 0) {
+                resizeFBO(_resolution.x, *height);
+            }
+            else {
+                _resolution.y = *height;
+            }
+        }
+        else {
+            LERROR("Could not find height of video");
+        }
+        break;
+    }
+    case LibmpvPropertyKey::Meta: {
+        if (!event->data) {
+            LERROR("Could not find video parameters");
+            break;
+        }
+
+        mpv_node node;
+        int result = mpv_event_to_node(&node, event);
+        if (!checkMpvError(result)) {
+            LWARNING("Could not find video parameters of video");
+        }
+
+        if (node.format == MPV_FORMAT_NODE_MAP) {
+            for (int n = 0; n < node.u.list->num; n++) {
+                if (node.u.list->values[n].format == MPV_FORMAT_STRING) {
+                    LINFO(node.u.list->values[n].u.string);
+                }
+            }
+        }
+        else {
+            LWARNING("No meta data could be read");
+        }
+
+        break;
+    }
+    case LibmpvPropertyKey::Params: {
+        if (!event->data) {
+            LERROR("Could not find video parameters");
+            break;
+        }
+
+        mpv_node videoParams;
+        int result = mpv_event_to_node(&videoParams, event);
+        if (!checkMpvError(result)) {
+            LWARNING("Could not find video parameters of video");
+        }
+
+        if (videoParams.format == MPV_FORMAT_NODE_ARRAY ||
+            videoParams.format == MPV_FORMAT_NODE_MAP)
+        {
+            mpv_node_list* list = videoParams.u.list;
+
+            mpv_node width, height;
+            bool foundWidth = false;
+            bool foundHeight = false;
+            for (int i = 0; i < list->num; ++i) {
+                if (foundWidth && foundHeight) {
+                    break;
+                }
+
+                if (list->keys[i] == "w") {
+                    width = list->values[i];
+                    foundWidth = true;
+                }
+                else if (list->keys[i] == "h") {
+                    height = list->values[i];
+                    foundHeight = true;
+                }
+            }
+
+            if (!foundWidth || !foundHeight) {
+                LERROR("Could not find width or height params");
+                return;
+            }
+
+            int w = -1;
+            int h = -1;
+            if (width.format == MPV_FORMAT_INT64) {
+                w = width.u.int64;
+            }
+            if (height.format == MPV_FORMAT_INT64) {
+                h = height.u.int64;
+            }
+
+            if (w == -1 || h == -1) {
+                LERROR("Invalid width or height params");
+                return;
+            }
+            resizeFBO(w, h);
+        }
+        break;
+    }
+    case LibmpvPropertyKey::Time: {
+        if (!event->data) {
+            LERROR("Could not find playback time property");
+            break;
+        }
+
+        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+        double* time = static_cast<double*>(property->data);
+
+        if (!time) {
+            LERROR("Could not find playback time property");
+            break;
+        }
+
+        _currentVideoTime = *time;
+        break;
+    }
+    case LibmpvPropertyKey::Width: {
+        if (!event->data) {
+            LERROR("Could not find height property");
+            break;
+        }
+
+        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+        int* width = static_cast<int*>(property->data);
+
+        if (!width) {
+            LERROR("Could not find width property");
+            break;
+        }
+
+        if (*width == _resolution.y) {
+            break;
+        }
+
+        LINFO(fmt::format("New width: {}", *width));
+
+        if (*width > 0) {
+            if (_resolution.y > 0 && _fbo > 0) {
+                resizeFBO(*width, _resolution.y);
+            }
+            else {
+                _resolution.x = *width;
+            }
+        }
+        else {
+            LERROR("Could not find width of video");
+        }
+        break;
+    }
+    default: {
+        throw ghoul::MissingCaseException();
+        break;
+    }
+    }
+}
+
+void VideoTileProvider::swapBuffersMpv() {
+    if (_wakeup) {
+        mpv_render_context_report_swap(_mpvRenderContext);
+        _wakeup = 0;
+    }
+}
+
+void VideoTileProvider::cleanUpMpv() {
+    // Destroy the GL renderer and all of the GL objects it allocated. If video
+    // is still running, the video track will be deselected.
+    mpv_render_context_free(_mpvRenderContext);
+
+    mpv_destroy(_mpvHandle);
+
+    glDeleteFramebuffers(1, &_fbo);
+}
+
 int VideoTileProvider::minLevel() {
     return 1;
 }
@@ -729,125 +833,15 @@ void VideoTileProvider::reset() {
         return;
     }
     _tileIsReady = false;
-    internalDeinitialize();
-    internalInitialize();
+    cleanUpMpv();
+    initializeMpv();
 }
-
 
 float VideoTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-void VideoTileProvider::internalInitialize() {
-
-    std::string path = absPath(_videoFile).string();
-
-
-    // libmpv handle
-    _mpvHandle = mpv_create();
-    if (!_mpvHandle) {
-        LERROR("Could not create mpv handle");
-        return;
-    }
-
-    int result = mpv_initialize(_mpvHandle);
-    if (!checkMpvError(result)) {
-        LERROR("Could not initialize mpv");
-        return;
-    }
-    mpv_set_option_string(_mpvHandle, "terminal", "yes");
-    mpv_set_option_string(_mpvHandle, "msg-level", "all=v");
-    mpv_request_log_messages(_mpvHandle, "debug");
-
-    // Request log messages with level "info" or higher.
-    // They are received as MPV_EVENT_LOG_MESSAGE.
-    mpv_request_log_messages(_mpvHandle, "info");
-
-    // Set mpv parameters to render using openGL
-    mpv_opengl_init_params glInitParams{ getOpenGLProcAddress, nullptr};
-    mpv_render_param params[]{
-        {MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL)},
-        {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &glInitParams},
-        {MPV_RENDER_PARAM_INVALID, nullptr}
-    };
-
-    // This makes libmpv use the currently set OpenGL context. It will use the callback
-    // (passed via params) to resolve built in OpenGL functions, as well as extensions
-    result = mpv_render_context_create(&_mpvRenderContext, _mpvHandle, params);
-    if (!checkMpvError(result)) {
-        LERROR("Could not create mpv render context");
-        return;
-    }
-
-    // When there is a need to call mpv_render_context_update(), which can
-    // request a new frame to be rendered.
-    // (Separate from the normal event handling mechanism for the sake of
-    //  users which run OpenGL on a different thread.)
-    mpv_render_context_set_update_callback(_mpvRenderContext, mpvRenderUpdate, NULL);
-
-    // TODO: Load mpv configuration?
-    // TODO: Set default settings?
-
-    // Load file
-    const char* cmd[] = { "loadfile", _videoFile.string().c_str(), NULL };
-    result = mpv_command(_mpvHandle, cmd);
-    if (!checkMpvError(result)) {
-        LERROR("Could not open video file");
-        return;
-    }
-
-    //Observe video parameters
-    mpv_observe_property(_mpvHandle, 0, "video-params", MPV_FORMAT_NODE);
-
-    // Print meta data
-    result = mpv_get_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::Meta),
-        "metadata",
-        MPV_FORMAT_NODE
-    );
-    if (!checkMpvError(result)) {
-        LWARNING("Could not load meta data");
-    }
-
-
-    // Get resolution of video
-    result = mpv_get_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::Width),
-        "width", MPV_FORMAT_INT64
-    );
-
-    int result2 = mpv_get_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::Height),
-        "height",
-        MPV_FORMAT_INT64
-    );
-
-    if (!checkMpvError(result) || !checkMpvError(result2)) {
-        LWARNING("Could not load video resolution");
-    }
-
-    //Create FBO to render video into
-    createFBO(_resolution.x, _resolution.y);
-
-    // Find duration of video
-    result = mpv_get_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::Duration),
-       "duration",
-        MPV_FORMAT_DOUBLE
-    );
-    if (!checkMpvError(result)) {
-        LWARNING("Could not find video duration");
-    }
-    _videoDuration = 41.0;
-
-    // TODO: Find the estimated frame time of the video
-
-    _isInitialized = true;
-}
+void VideoTileProvider::internalInitialize() {}
 
 void VideoTileProvider::createFBO(int width, int height) {
     LINFO(fmt::format("Creating new FBO with width: {} and height: {}", width, height));
@@ -898,6 +892,9 @@ void VideoTileProvider::createFBO(int width, int height) {
 
     // Unbind FBO
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Render video frame to texture
+    _mpvFbo = mpv_opengl_fbo{ static_cast<int>(_fbo), _resolution.x, _resolution.y, 0 };
 }
 
 void VideoTileProvider::resizeFBO(int width, int height) {
@@ -917,19 +914,10 @@ void VideoTileProvider::resizeFBO(int width, int height) {
     createFBO(width, height);
 }
 
-VideoTileProvider::~VideoTileProvider() {
-
-}
+VideoTileProvider::~VideoTileProvider() {}
 
 void VideoTileProvider::internalDeinitialize() {
-    // lib mpv
-    // Destroy the GL renderer and all of the GL objects it allocated. If video
-    // is still running, the video track will be deselected.
-    mpv_render_context_free(_mpvRenderContext);
-
-    mpv_destroy(_mpvHandle);
-
-    glDeleteFramebuffers(1, &_fbo);
+    cleanUpMpv();
 }
 
 } // namespace openspace::globebrowsing
