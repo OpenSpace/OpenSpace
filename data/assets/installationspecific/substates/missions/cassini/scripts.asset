@@ -1,4 +1,4 @@
-local isOneScreen = false;
+local isOneScreen = true;
 local scripts = nil
 
 if isOneScreen then

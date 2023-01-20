@@ -184,7 +184,8 @@ local huygensScripts = [[
   -- Take a moment
   openspace.scriptScheduler.loadScheduledScript(
     "2005-01-14 09:05:55.000",
-    "openspace.time.interpolateDeltaTime(1)"
+    "openspace.time.interpolateDeltaTime(1)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 0)"
   )
 
   -- End

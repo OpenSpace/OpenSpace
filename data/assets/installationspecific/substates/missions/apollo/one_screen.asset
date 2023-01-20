@@ -29,12 +29,6 @@ local apollo8Scripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
   )
 
-  -- Speed up a little
-  openspace.scriptScheduler.loadScheduledScript(
-    "1968-12-21T12:56:51",
-    "openspace.time.interpolateDeltaTime(60)"
-  )
-
   -- Retarget to Earth and zoom out
   openspace.scriptScheduler.loadScheduledScript(
     "1968-12-21T13:06:51",
@@ -130,7 +124,8 @@ local apollo8Scripts = [[
   -- Take a moment to understand they landed
   openspace.scriptScheduler.loadScheduledScript(
     "1968-12-27T15:36:39",
-    "openspace.time.interpolateDeltaTime(1)"
+    "openspace.time.interpolateDeltaTime(1)" ..
+    "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 0)"
   )
 
   -- End
