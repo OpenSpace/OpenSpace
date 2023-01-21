@@ -231,6 +231,8 @@ std::string StringVerifier::type() const {
     return "String";
 }
 
+FileVerifier::FileVerifier() : StringVerifier(true) {}
+
 TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
                                     const std::string& key) const
 {
@@ -254,6 +256,8 @@ TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
 std::string FileVerifier::type() const {
     return "File";
 }
+
+DirectoryVerifier::DirectoryVerifier() : StringVerifier(true) {}
 
 TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
                                          const std::string& key) const
@@ -279,6 +283,8 @@ std::string DirectoryVerifier::type() const {
     return "Directory";
 }
 
+DateTimeVerifier::DateTimeVerifier() : StringVerifier(true) {}
+
 TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
                                         const std::string& key) const
 {
@@ -302,26 +308,6 @@ TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
         off.reason = TestResult::Offense::Reason::Verification;
         off.explanation = "Not a valid format, should be: YYYY MM DD hh:mm:ss";
         res.offenses.push_back(off);
-    }
-    // then check if valid date
-    else {
-        // normalize e.g. 29/02/2013 would become 01/03/2013
-        std::tm t_copy(t);
-        time_t when = mktime(&t_copy);
-        std::tm* norm = localtime(&when);
-
-        // validate (is the normalized date still the same?):
-        if (norm->tm_mday != t.tm_mday &&
-            norm->tm_mon != t.tm_mon &&
-            norm->tm_year != t.tm_year)
-        {
-            res.success = false;
-            TestResult::Offense off;
-            off.offender = key;
-            off.reason = TestResult::Offense::Reason::Verification;
-            off.explanation = "Not a valid date";
-            res.offenses.push_back(off);
-        }
     }
     return res;
 }
