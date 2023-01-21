@@ -108,7 +108,18 @@ Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
 }
 
 Scene::~Scene() {
-    clear();
+    LINFO("Clearing current scene graph");
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
+        if (node->identifier() == "Root") {
+            continue;
+        }
+        // There might still be scene graph nodes around that weren't removed by the asset
+        // manager as they would have been added manually by the user. This also serves as
+        // a backstop for assets that forgot to implement the onDeinitialize functions
+        node->deinitializeGL();
+        node->deinitialize();
+    }
+    _rootDummy.clearChildren();
     _rootDummy.setScene(nullptr);
 }
 
@@ -307,11 +318,6 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         // buffer, or something else like that preventing a large spike in uploads
         glGetError();
     }
-}
-
-void Scene::clear() {
-    LINFO("Clearing current scene graph");
-    _rootDummy.clearChildren();
 }
 
 const std::unordered_map<std::string, SceneGraphNode*>& Scene::nodesByIdentifier() const {
