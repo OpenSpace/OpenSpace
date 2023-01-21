@@ -30,6 +30,7 @@ set(HEADER_FILES
   dashboard/dashboarditemdistance.h
   dashboard/dashboarditemelapsedtime.h
   dashboard/dashboarditemframerate.h
+  dashboard/dashboarditeminputstate.h
   dashboard/dashboarditemmission.h
   dashboard/dashboarditemparallelconnection.h
   dashboard/dashboarditempropertyvalue.h
@@ -85,6 +86,7 @@ set(SOURCE_FILES
   dashboard/dashboarditemdistance.cpp
   dashboard/dashboarditemelapsedtime.cpp
   dashboard/dashboarditemframerate.cpp
+  dashboard/dashboarditeminputstate.cpp
   dashboard/dashboarditemmission.cpp
   dashboard/dashboarditemparallelconnection.cpp
   dashboard/dashboarditempropertyvalue.cpp
