@@ -32,6 +32,7 @@
 #include <ghoul/fmt.h>
 #include <QGridLayout>
 #include <QDialogButtonBox>
+#include <QFileDialog>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
@@ -41,6 +42,7 @@
 
 ScriptlogDialog::ScriptlogDialog(QWidget* parent)
     : QDialog(parent)
+    , _scriptLogFile(openspace::global::configuration->scriptLog)
 {
     setWindowTitle("Scriptlog");
     createWidgets();
@@ -63,10 +65,31 @@ void ScriptlogDialog::createWidgets() {
     QGridLayout* layout = new QGridLayout(this);
     {
         QLabel* heading = new QLabel(QString::fromStdString(fmt::format(
-            "Choose commands from \"{}\"", openspace::global::configuration->scriptLog
+            "Choose commands from \"{}\"", _scriptLogFile
         )));
         heading->setObjectName("heading");
         layout->addWidget(heading, 0, 0, 1, 2);
+
+        QPushButton* open = new QPushButton;
+        open->setIcon(open->style()->standardIcon(QStyle::SP_FileIcon));
+        connect(
+            open, &QPushButton::clicked,
+            [this, heading]() {
+                QString file = QFileDialog::getOpenFileName(
+                    this,
+                    "Select log file",
+                    "",
+                    "*.txt"
+                );
+                _scriptLogFile = file.toStdString();
+        
+                heading->setText(QString::fromStdString(fmt::format(
+                    "Choose commands from \"{}\"", _scriptLogFile
+                )));
+                loadScriptFile();
+            }
+        );
+        layout->addWidget(open, 0, 1, Qt::AlignRight);
     }
 
     _filter = new QLineEdit;
@@ -100,7 +123,9 @@ void ScriptlogDialog::createWidgets() {
 }
 
 void ScriptlogDialog::loadScriptFile() {
-    std::string log = absPath(openspace::global::configuration->scriptLog).string();
+    _scripts.clear();
+
+    std::string log = absPath(_scriptLogFile).string();
     QFile file(QString::fromStdString(log));
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);

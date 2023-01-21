@@ -50,6 +50,7 @@ private:
     QListWidget* _scriptlogList = nullptr;
     QLineEdit* _filter = nullptr;
     QPushButton* _reloadFile = nullptr;
+    std::string _scriptLogFile;
     std::vector<std::string> _scripts;
 };
 
