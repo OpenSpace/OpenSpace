@@ -85,12 +85,6 @@ public:
     virtual ~Scene() override;
 
     /**
-     * Clear the scene graph,
-     * i.e. set the root node to nullptr and deallocate all scene graph nodes.
-     */
-    void clear();
-
-    /**
      * Attach node to the root
      */
     void attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node);
