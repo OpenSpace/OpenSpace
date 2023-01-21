@@ -961,7 +961,7 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
                           std::optional<std::string> onChange)
 {
     T* p = new T(info);
-    if (onChange.has_value()) {
+    if (onChange.has_value() && !onChange->empty()) {
         p->onChange(
             [p, script = *onChange]() {
                 using namespace ghoul::lua;
@@ -976,6 +976,23 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
     openspace::global::userPropertyOwner->addProperty(p);
 }
 
+/**
+ * Creates a new property that lives in the `UserProperty` group.
+ * 
+ * \param identifier The identifier that is going to be used for the new property
+ * \param type The type of the property, has to be one of "DMat2Property",
+ *        "DMat3Property", "DMat4Property", "Mat2Property", "Mat3Property",
+ *        "Mat4Property", "BoolProperty", "DoubleProperty", "FloatProperty",
+ *        "IntProperty", "StringProperty", "StringListProperty", "LongProperty",
+ *        "ShortProperty", "UIntProperty", "ULongProperty", "DVec2Property",
+ *        "DVec3Property", "DVec4Property", "IVec2Property", "IVec3Property",
+ *        "IVec4Property", "UVec2Property", "UVec3Property", "UVec4Property",
+ *        "Vec2Property", "Vec3Property", "Vec4Property"
+ * \param guiName The name that the property uses in the user interface. If this value is
+ *        not provided, the `identifier` is used instead
+ * \param description A description what the property is used for
+ * \param onChange A Lua script that will be executed whenever the property changes
+ */
 [[codegen::luawrap]] void addCustomProperty(std::string identifier, std::string type,
                                             std::optional<std::string> guiName,
                                             std::optional<std::string> description,
@@ -1043,6 +1060,9 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
     else if (type == "StringProperty") {
         createCustomProperty<properties::StringProperty>(info, std::move(onChange));
     }
+    else if (type == "StringListProperty") {
+        createCustomProperty<properties::StringListProperty>(info, std::move(onChange));
+    }
     else if (type == "LongProperty") {
         createCustomProperty<properties::LongProperty>(info, std::move(onChange));
     }
@@ -1093,6 +1113,9 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
     }
     else if (type == "Vec4Property") {
         createCustomProperty<properties::Vec4Property>(info, std::move(onChange));
+    }
+    else {
+        throw ghoul::lua::LuaError(fmt::format("Unsupported type {}", type));
     }
 }
 
