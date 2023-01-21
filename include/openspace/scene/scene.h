@@ -253,6 +253,13 @@ public:
     std::vector<properties::Property*> propertiesMatchingRegex(
         std::string propertyString);
 
+    /**
+     * Returns a list of all unique tags that are used in the currently loaded scene.
+     *
+     * \return A list of all unique tags that are used in the currently loaded scene.
+     */
+    std::vector<std::string> allTags();
+
 private:
     /**
      * Accepts string version of a property value from a profile, converts it to the

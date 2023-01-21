@@ -754,6 +754,16 @@ std::vector<properties::Property*> Scene::propertiesMatchingRegex(
     return findMatchesInAllProperties(propertyString, allProperties(), "");
 }
 
+std::vector<std::string> Scene::allTags() {
+    std::set<std::string> result;
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
+        const std::vector<std::string>& tags = node->tags();
+        result.insert(tags.begin(), tags.end());
+    }
+
+    return std::vector<std::string>(result.begin(), result.end());
+}
+
 scripting::LuaLibrary Scene::luaLibrary() {
     return {
         "",
