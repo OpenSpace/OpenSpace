@@ -274,12 +274,12 @@ bool LabelParser::create() {
                         spiceInstrument.push_back(_instrumentID);
 
                         Image image = {
-                            TimeRange(startTime, stopTime),
-                            imagePath,
-                            spiceInstrument,
-                            _target,
-                            false,
-                            false
+                            .timeRange = TimeRange(startTime, stopTime),
+                            .path = imagePath,
+                            .activeInstruments = spiceInstrument,
+                            .target = _target,
+                            .isPlaceholder = false,
+                            .projected = false
                         };
 
                         _subsetMap[image.target]._subset.push_back(image);

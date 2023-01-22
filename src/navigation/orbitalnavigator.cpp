@@ -589,8 +589,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         glm::dvec3(0.0);
 
     CameraPose pose = {
-        _camera->positionVec3() + anchorDisplacement,
-        _camera->rotationQuaternion()
+        .position = _camera->positionVec3() + anchorDisplacement,
+        .rotation = _camera->rotationQuaternion()
     };
 
     const bool hasPreviousPositions =
@@ -602,10 +602,10 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         const glm::dvec3 cameraToAnchor =
             *_previousAnchorNodePosition - prevCameraPosition;
 
-        Displacement anchorToAim = {
+        Displacement anchorToAim = Displacement(
             *_previousAimNodePosition - *_previousAnchorNodePosition,
             aimPos - anchorPos
-        };
+        );
 
         anchorToAim = interpolateRetargetAim(
             deltaTime,

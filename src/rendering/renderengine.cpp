@@ -1144,12 +1144,12 @@ void RenderEngine::renderCameraInformation() {
 
     using FR = ghoul::fontrendering::FontRenderer;
 
-    _cameraButtonLocations.rotation = {
+    _cameraButtonLocations.rotation = glm::ivec4(
         fontResolution().x - rotationBox.x - XSeparation,
         fontResolution().y - penPosY,
         rotationBox.x,
         rotationBox.y
-    };
+    );
     FR::defaultRenderer().render(
         *_fontCameraInfo,
         glm::vec2(fontResolution().x - rotationBox.x - XSeparation, penPosY),
@@ -1160,12 +1160,12 @@ void RenderEngine::renderCameraInformation() {
 
     const glm::vec2 zoomBox = _fontCameraInfo->boundingBox("Zoom");
 
-    _cameraButtonLocations.zoom = {
+    _cameraButtonLocations.zoom = glm::ivec4(
         fontResolution().x - zoomBox.x - XSeparation,
         fontResolution().y - penPosY,
         zoomBox.x,
         zoomBox.y
-    };
+    );
     FR::defaultRenderer().render(
         *_fontCameraInfo,
         glm::vec2(fontResolution().x - zoomBox.x - XSeparation, penPosY),
@@ -1176,12 +1176,12 @@ void RenderEngine::renderCameraInformation() {
 
     const glm::vec2 rollBox = _fontCameraInfo->boundingBox("Roll");
 
-    _cameraButtonLocations.roll = {
+    _cameraButtonLocations.roll = glm::ivec4(
         fontResolution().x - rollBox.x - XSeparation,
         fontResolution().y - penPosY,
         rollBox.x,
         rollBox.y
-    };
+    );
     FR::defaultRenderer().render(
         *_fontCameraInfo,
         glm::vec2(fontResolution().x - rollBox.x - XSeparation, penPosY),

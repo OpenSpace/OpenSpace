@@ -384,11 +384,11 @@ void CameraDialog::approved() {
             !_navState.upY->text().isEmpty() &&
             !_navState.upZ->text().isEmpty())
         {
-            glm::dvec3 u = {
+            glm::dvec3 u = glm::dvec3(
                 _navState.upX->text().toDouble(),
                 _navState.upY->text().toDouble(),
                 _navState.upZ->text().toDouble()
-            };
+            );
             nav.up = u;
         }
         else {

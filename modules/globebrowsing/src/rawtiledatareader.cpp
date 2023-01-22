@@ -69,51 +69,51 @@ struct MemoryLocation {
 
 // The memory locations are grouped to be mostly cache-aligned
 constexpr std::array<MemoryLocation, 42> NoDataAvailableData = {
-    MemoryLocation{ 296380, std::byte(205) },
-    MemoryLocation{ 296381, std::byte(205) },
-    MemoryLocation{ 296382, std::byte(205) },
-    MemoryLocation{ 296383, std::byte(255) },
-    MemoryLocation{ 296384, std::byte(224) },
-    MemoryLocation{ 296385, std::byte(224) },
-    MemoryLocation{ 296386, std::byte(224) },
-    MemoryLocation{ 296387, std::byte(255) },
-    MemoryLocation{ 296388, std::byte(244) },
-    MemoryLocation{ 296389, std::byte(244) },
-    MemoryLocation{ 296390, std::byte(244) },
-    MemoryLocation{ 296391, std::byte(255) },
+    MemoryLocation { .offset = 296380, .value = std::byte(205) },
+    MemoryLocation { .offset = 296381, .value = std::byte(205) },
+    MemoryLocation { .offset = 296382, .value = std::byte(205) },
+    MemoryLocation { .offset = 296383, .value = std::byte(255) },
+    MemoryLocation { .offset = 296384, .value = std::byte(224) },
+    MemoryLocation { .offset = 296385, .value = std::byte(224) },
+    MemoryLocation { .offset = 296386, .value = std::byte(224) },
+    MemoryLocation { .offset = 296387, .value = std::byte(255) },
+    MemoryLocation { .offset = 296388, .value = std::byte(244) },
+    MemoryLocation { .offset = 296389, .value = std::byte(244) },
+    MemoryLocation { .offset = 296390, .value = std::byte(244) },
+    MemoryLocation { .offset = 296391, .value = std::byte(255) },
 
-    MemoryLocation{ 269840, std::byte(209) },
-    MemoryLocation{ 269841, std::byte(209) },
-    MemoryLocation{ 269842, std::byte(209) },
-    MemoryLocation{ 269844, std::byte(203) },
-    MemoryLocation{ 269845, std::byte(203) },
-    MemoryLocation{ 269846, std::byte(203) },
-    MemoryLocation{ 269852, std::byte(221) },
-    MemoryLocation{ 269853, std::byte(221) },
-    MemoryLocation{ 269854, std::byte(221) },
-    MemoryLocation{ 269856, std::byte(225) },
-    MemoryLocation{ 269857, std::byte(225) },
-    MemoryLocation{ 269858, std::byte(225) },
-    MemoryLocation{ 269860, std::byte(218) },
-    MemoryLocation{ 269861, std::byte(218) },
+    MemoryLocation { .offset = 269840, .value = std::byte(209) },
+    MemoryLocation { .offset = 269841, .value = std::byte(209) },
+    MemoryLocation { .offset = 269842, .value = std::byte(209) },
+    MemoryLocation { .offset = 269844, .value = std::byte(203) },
+    MemoryLocation { .offset = 269845, .value = std::byte(203) },
+    MemoryLocation { .offset = 269846, .value = std::byte(203) },
+    MemoryLocation { .offset = 269852, .value = std::byte(221) },
+    MemoryLocation { .offset = 269853, .value = std::byte(221) },
+    MemoryLocation { .offset = 269854, .value = std::byte(221) },
+    MemoryLocation { .offset = 269856, .value = std::byte(225) },
+    MemoryLocation { .offset = 269857, .value = std::byte(225) },
+    MemoryLocation { .offset = 269858, .value = std::byte(225) },
+    MemoryLocation { .offset = 269860, .value = std::byte(218) },
+    MemoryLocation { .offset = 269861, .value = std::byte(218) },
 
-    MemoryLocation{ 240349, std::byte(203) },
-    MemoryLocation{ 240350, std::byte(203) },
-    MemoryLocation{ 240352, std::byte(205) },
-    MemoryLocation{ 240353, std::byte(204) },
-    MemoryLocation{ 240354, std::byte(205) },
+    MemoryLocation { .offset = 240349, .value = std::byte(203) },
+    MemoryLocation { .offset = 240350, .value = std::byte(203) },
+    MemoryLocation { .offset = 240352, .value = std::byte(205) },
+    MemoryLocation { .offset = 240353, .value = std::byte(204) },
+    MemoryLocation { .offset = 240354, .value = std::byte(205) },
 
-    MemoryLocation{ 0, std::byte(204) },
-    MemoryLocation{ 7, std::byte(255) },
-    MemoryLocation{ 520, std::byte(204) },
-    MemoryLocation{ 880, std::byte(204) },
-    MemoryLocation{ 883, std::byte(255) },
-    MemoryLocation{ 91686, std::byte(204) },
-    MemoryLocation{ 372486, std::byte(204) },
-    MemoryLocation{ 670483, std::byte(255) },
-    MemoryLocation{ 231684, std::byte(202) },
-    MemoryLocation{ 232092, std::byte(202) },
-    MemoryLocation{ 235921, std::byte(203) },
+    MemoryLocation { .offset = 0, .value = std::byte(204) },
+    MemoryLocation { .offset = 7, .value = std::byte(255) },
+    MemoryLocation { .offset = 520, .value = std::byte(204) },
+    MemoryLocation { .offset = 880, .value = std::byte(204) },
+    MemoryLocation { .offset = 883, .value = std::byte(255) },
+    MemoryLocation { .offset = 91686, .value = std::byte(204) },
+    MemoryLocation { .offset = 372486, .value = std::byte(204) },
+    MemoryLocation { .offset = 670483, .value = std::byte(255) },
+    MemoryLocation { .offset = 231684, .value = std::byte(202) },
+    MemoryLocation { .offset = 232092, .value = std::byte(202) },
+    MemoryLocation { .offset = 235921, .value = std::byte(203) },
 };
 
 enum class Side {
@@ -304,10 +304,10 @@ bool isInside(const PixelRegion& lhs, const PixelRegion& rhs) {
 }
 
 IODescription cutIODescription(IODescription& io, Side side, int pos) {
-    glm::dvec2 ratio = {
+    glm::dvec2 ratio = glm::dvec2(
         io.write.region.numPixels.x / static_cast<double>(io.read.region.numPixels.x),
         io.write.region.numPixels.y / static_cast<double>(io.read.region.numPixels.y)
-    };
+    );
 
     IODescription whatCameOff = io;
     whatCameOff.read.region = globalCut(io.read.region, side, pos);
@@ -785,13 +785,14 @@ IODescription RawTileDataReader::ioDescription(const TileIndex& tileIndex) const
     io.write.region.numPixels = _initData.dimensions;
 
     io.read.overview = 0;
-    io.read.fullRegion.start = { 0, 0 };
-    io.read.fullRegion.numPixels = { _rasterXSize, _rasterYSize };
+    io.read.fullRegion.start = glm::ivec2(0, 0);
+    io.read.fullRegion.numPixels = glm::ivec2(_rasterXSize, _rasterYSize);
     // For correct sampling in dataset, we need to pad the texture tile
 
-    PixelRegion scaledPadding;
-    scaledPadding.start = _initData.tilePixelStartOffset;
-    scaledPadding.numPixels = _initData.tilePixelSizeDifference;
+    PixelRegion scaledPadding = {
+        .start = _initData.tilePixelStartOffset,
+        .numPixels = _initData.tilePixelSizeDifference
+    };
 
     const double scale = static_cast<double>(io.read.region.numPixels.x) /
                          static_cast<double>(io.write.region.numPixels.x);

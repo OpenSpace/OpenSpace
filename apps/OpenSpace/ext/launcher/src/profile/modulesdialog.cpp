@@ -37,7 +37,7 @@
 using namespace openspace;
 
 namespace {
-    const Profile::Module Blank = { "", "", "" };
+    const Profile::Module Blank = Profile::Module("", std::nullopt, std::nullopt);
 } // namespace
 
 ModulesDialog::ModulesDialog(QWidget* parent,

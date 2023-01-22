@@ -727,10 +727,14 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         TracyGpuZone("Render")
 
         RenderData newData = {
-            data.camera,
-            data.time,
-            data.renderBinMask,
-            { _worldPositionCached, _worldRotationCached, _worldScaleCached }
+            .camera = data.camera,
+            .time = data.time,
+            .renderBinMask = data.renderBinMask,
+            .modelTransform = {
+                .translation = _worldPositionCached,
+                .rotation = _worldRotationCached,
+                .scale = _worldScaleCached
+            }
         };
 
         _renderable->render(newData, tasks);

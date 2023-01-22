@@ -51,7 +51,7 @@
 namespace {
     constexpr std::string_view _loggerCat = "FramebufferRenderer";
 
-    constexpr glm::vec4 PosBufferClearVal = { 1e32, 1e32, 1e32, 1.f };
+    constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
     constexpr std::array<const char*, 9> HDRUniformNames = {
         "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma",
@@ -964,7 +964,7 @@ void FramebufferRenderer::updateRaycastData() {
     for (VolumeRaycaster* raycaster : raycasters) {
         ZoneScopedN("raycaster")
 
-        RaycastData data = { nextId++, "Helper" };
+        RaycastData data = { .id = nextId++, .namespaceName = "Helper" };
 
         const std::string& vsPath = raycaster->boundsVertexShaderPath();
         std::string fsPath = raycaster->boundsFragmentShaderPath();
@@ -1033,7 +1033,7 @@ void FramebufferRenderer::updateDeferredcastData() {
         global::deferredcasterManager->deferredcasters();
     int nextId = 0;
     for (Deferredcaster* caster : deferredcasters) {
-        DeferredcastData data = { nextId++, "HELPER" };
+        DeferredcastData data = { .id = nextId++, .namespaceName = "HELPER" };
 
         std::filesystem::path vsPath = caster->deferredcastVSPath();
         std::filesystem::path fsPath = caster->deferredcastFSPath();
@@ -1133,10 +1133,9 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     Time time = global::timeManager->time();
 
     RenderData data = {
-        *camera,
-        std::move(time),
-        0,
-        {}
+        .camera = *camera,
+        .time = std::move(time),
+        .renderBinMask = 0
     };
     RendererTasks tasks;
 

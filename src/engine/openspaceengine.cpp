@@ -486,7 +486,11 @@ void OpenSpaceEngine::initializeGL() {
     bool debugActive = global::configuration->openGLDebugContext.isActive;
 
     // Debug output is not available before 4.3
-    const ghoul::systemcapabilities::Version minVersion = { 4, 3, 0 };
+    const ghoul::systemcapabilities::Version minVersion = {
+        .major = 4,
+        .minor = 3,
+        .release = 0
+    };
     if (debugActive && OpenGLCap.openGLVersion() < minVersion) {
         LINFO("OpenGL Debug context requested, but insufficient version available");
         debugActive = false;

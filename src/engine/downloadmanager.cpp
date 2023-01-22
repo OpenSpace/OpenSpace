@@ -172,9 +172,9 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
             }
 
             ProgressInformation p = {
-                future,
-                std::chrono::system_clock::now(),
-                &progressCb
+                .future = future,
+                .startTime = std::chrono::system_clock::now(),
+                .callback = &progressCb
             };
             #if LIBCURL_VERSION_NUM >= 0x072000
             // xferinfo was introduced in 7.32.0, if a lower curl version is used the

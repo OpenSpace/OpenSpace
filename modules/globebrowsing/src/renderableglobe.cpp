@@ -1875,13 +1875,13 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     const Geodetic2 southWest = patch.corner(Quad::SOUTH_WEST);
 
     const Geodetic2 geoDiffPatch = {
-        northEast.lat - southWest.lat,
-        northEast.lon - southWest.lon
+        .lat = northEast.lat - southWest.lat,
+        .lon = northEast.lon - southWest.lon
     };
 
     const Geodetic2 geoDiffPoint = {
-        geodeticPosition.lat - southWest.lat,
-        geodeticPosition.lon - southWest.lon
+        .lat = geodeticPosition.lat - southWest.lat,
+        .lon = geodeticPosition.lon - southWest.lon
     };
     const glm::vec2 patchUV = glm::vec2(
         geoDiffPoint.lon / geoDiffPatch.lon,

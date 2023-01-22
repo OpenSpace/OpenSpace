@@ -47,11 +47,31 @@ struct Group {
 };
 
 constexpr std::array<Group, 5> Groups = {
-    Group{ Group::ID::HeightLayers, "HeightLayers", "Height Layers" },
-    Group{ Group::ID::ColorLayers, "ColorLayers", "Color Layers" },
-    Group{ Group::ID::Overlays, "Overlays", "Overlays" },
-    Group{ Group::ID::NightLayers, "NightLayers", "Night Layers" },
-    Group{ Group::ID::WaterMasks, "WaterMasks", "Water Masks" }
+    Group {
+        .id = Group::ID::HeightLayers,
+        .identifier = "HeightLayers",
+        .name = "Height Layers"
+    },
+    Group {
+        .id = Group::ID::ColorLayers,
+        .identifier = "ColorLayers",
+        .name = "Color Layers"
+    },
+    Group {
+        .id = Group::ID::Overlays,
+        .identifier = "Overlays",
+        .name = "Overlays"
+    },
+    Group {
+        .id = Group::ID::NightLayers,
+        .identifier = "NightLayers",
+        .name = "Night Layers"
+    },
+    Group {
+        .id = Group::ID::WaterMasks,
+        .identifier = "WaterMasks",
+        .name = "Water Masks"
+    }
 };
 
 
@@ -76,16 +96,46 @@ struct Layer {
 };
 
 constexpr std::array<Layer, 10> Layers = {
-    Layer{ Layer::ID::DefaultTileLayer, "DefaultTileLayer" },
-    Layer{ Layer::ID::SingleImageTileLayer, "SingleImageTileLayer" },
-    Layer{ Layer::ID::ImageSequenceTileLayer, "ImageSequenceTileLayer" },
-    Layer{ Layer::ID::SizeReferenceTileLayer, "SizeReferenceTileLayer" },
-    Layer{ Layer::ID::TemporalTileLayer, "TemporalTileLayer" },
-    Layer{ Layer::ID::TileIndexTileLayer, "TileIndexTileLayer" },
-    Layer{ Layer::ID::ByIndexTileLayer, "ByIndexTileLayer" },
-    Layer{ Layer::ID::ByLevelTileLayer, "ByLevelTileLayer" },
-    Layer{ Layer::ID::SolidColor, "SolidColor" },
-    Layer{ Layer::ID::SpoutImageTileLayer, "SpoutImageTileLayer" }
+    Layer {
+        .id = Layer::ID::DefaultTileLayer,
+        .identifier = "DefaultTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::SingleImageTileLayer,
+        .identifier = "SingleImageTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::ImageSequenceTileLayer,
+        .identifier = "ImageSequenceTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::SizeReferenceTileLayer,
+        .identifier = "SizeReferenceTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::TemporalTileLayer,
+        .identifier = "TemporalTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::TileIndexTileLayer,
+        .identifier = "TileIndexTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::ByIndexTileLayer,
+        .identifier = "ByIndexTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::ByLevelTileLayer,
+        .identifier = "ByLevelTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::SolidColor,
+        .identifier = "SolidColor"
+    },
+    Layer {
+        .id = Layer::ID::SpoutImageTileLayer,
+        .identifier = "SpoutImageTileLayer"
+    }
 };
 
 
@@ -102,9 +152,18 @@ struct Adjustment {
 };
 
 constexpr std::array<Adjustment, 3> Adjustments = {
-    Adjustment{ Adjustment::ID::None, "None" },
-    Adjustment{ Adjustment::ID::ChromaKey, "ChromaKey" },
-    Adjustment{ Adjustment::ID::TransferFunction, "TransferFunction" }
+    Adjustment {
+        .id = Adjustment::ID::None,
+        .identifier = "None"
+    },
+    Adjustment {
+        .id = Adjustment::ID::ChromaKey,
+        .identifier = "ChromaKey"
+    },
+    Adjustment {
+        .id = Adjustment::ID::TransferFunction,
+        .identifier = "TransferFunction"
+    }
 };
 
 
@@ -123,11 +182,11 @@ struct Blend {
 };
 
 constexpr std::array<Blend, 5> Blends = {
-    Blend{ Blend::ID::Normal, "Normal" },
-    Blend{ Blend::ID::Multiply, "Multiply" },
-    Blend{ Blend::ID::Add, "Add" },
-    Blend{ Blend::ID::Subtract, "Subtract" },
-    Blend{ Blend::ID::Color, "Color" }
+    Blend { .id = Blend::ID::Normal, .identifier = "Normal" },
+    Blend { .id = Blend::ID::Multiply, .identifier = "Multiply" },
+    Blend { .id = Blend::ID::Add, .identifier = "Add" },
+    Blend { .id = Blend::ID::Subtract, .identifier = "Subtract" },
+    Blend { .id = Blend::ID::Color, .identifier = "Color" }
 };
 
 } // namespace openspace::globebrowsing::layers

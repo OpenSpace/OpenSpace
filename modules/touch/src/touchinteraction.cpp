@@ -591,7 +591,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& lis
             const bool isVisibleX = (ndc.x >= -1.0 && ndc.x <= 1.0);
             const bool isVisibleY = (ndc.y >= -1.0 && ndc.y <= 1.0);
             if (isVisibleX && isVisibleY) {
-                glm::dvec2 cursor = { xCo, yCo };
+                glm::dvec2 cursor = glm::dvec2(xCo, yCo);
 
                 const double ndcDist = glm::length(ndc - cursor);
                 // We either want to select the object if it's bounding sphere as been
@@ -607,10 +607,10 @@ void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& lis
                         "Picking candidate based on direct touch"
                     );
 #endif //#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
-                    currentlyPicked = {
+                    currentlyPicked = std::pair(
                         node,
                         -std::numeric_limits<double>::max()
-                    };
+                    );
                 }
                 else if (ndcDist <= _pickingRadiusMinimum) {
                     // The node was considered due to minimum picking distance radius
@@ -644,7 +644,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
                                            const std::vector<TouchInput>& lastProcessed)
 {
     glm::fvec2 lastCentroid = _centroid;
-    _centroid = { 0.f, 0.f };
+    _centroid = glm::vec2(0.f, 0.f);
     for (const TouchInputHolder& inputHolder : list) {
         _centroid += glm::vec2(
             inputHolder.latestInput().x,

@@ -156,7 +156,7 @@ void AssetTreeModel::importModelData(const std::string& assetBasePath,
     std::string assetList = assets.useQtFileSystemModelToTraverseDir(assetBasePath);
     assetList += assets.useQtFileSystemModelToTraverseDir(userAssetBasePath, true);
     std::istringstream iss(assetList);
-    ImportElement rootElem = { "", 0, false };
+    ImportElement rootElem = ImportElement("", 0, false);
 
     if (importGetNextLine(rootElem, iss)) {
         importInsertItem(iss, _rootItem.get(), rootElem, 0);

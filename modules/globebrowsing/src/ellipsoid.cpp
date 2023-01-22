@@ -133,8 +133,8 @@ double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) 
     );
 
     const Geodetic2 pMid = {
-        (p1.lat + p2.lat) / 2.0,
-        (p1.lon + p2.lon) / 2.0
+        .lat = (p1.lat + p2.lat) / 2.0,
+        .lon = (p1.lon + p2.lon) / 2.0
     };
     const glm::dvec3 centralNormal = cartesianSurfacePosition(pMid);
 

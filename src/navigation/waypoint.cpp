@@ -42,7 +42,7 @@ namespace openspace::interaction {
 Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref)
     : _nodeIdentifier(ref)
 {
-    _pose = { pos, rot };
+    _pose = { .position = pos, .rotation = rot };
 
     const SceneGraphNode* node = sceneGraphNode(_nodeIdentifier);
     if (!node) {

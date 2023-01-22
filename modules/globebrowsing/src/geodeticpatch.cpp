@@ -132,8 +132,8 @@ double GeodeticPatch::maxLon() const {
 
 bool GeodeticPatch::contains(const Geodetic2& p) const {
     const Geodetic2 diff = {
-        _center.lat - p.lat,
-        _center.lon - p.lon
+        .lat = _center.lat - p.lat,
+        .lon = _center.lon - p.lon
     };
     return glm::abs(diff.lat) <= _halfSize.lat && glm::abs(diff.lon) <= _halfSize.lon;
 }
@@ -166,8 +166,8 @@ Geodetic2 GeodeticPatch::clamp(const Geodetic2& p) const {
 Geodetic2 GeodeticPatch::closestCorner(const Geodetic2& p) const {
     // LatLon vector from patch center to the point
     const Geodetic2 centerToPoint = {
-        p.lat - _center.lat,
-        p.lon - _center.lon
+        .lat = p.lat - _center.lat,
+        .lon = p.lon - _center.lon
     };
 
     // Normalize the difference angles to be centered around 0.
