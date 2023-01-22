@@ -125,8 +125,18 @@ void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     const double now = currentApplicationTimeForInterpolation();
     const bool pause = isPaused();
 
-    const TimeKeyframeData current = { time(), deltaTime(), false, false };
-    const TimeKeyframeData next = { Time(targetTime), targetDeltaTime(), pause, false };
+    const TimeKeyframeData current = {
+        .time = time(),
+        .delta = deltaTime(),
+        .pause = false,
+        .jump = false
+    };
+    const TimeKeyframeData next = {
+        .time = Time(targetTime),
+        .delta = targetDeltaTime(),
+        .pause = pause,
+        .jump = false
+    };
 
     clearKeyframes();
     addKeyframe(now, current);
@@ -748,8 +758,18 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
         time().j2000Seconds() + (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration
     );
 
-    TimeKeyframeData currentKeyframe = { time(), _deltaTime, false, false };
-    TimeKeyframeData futureKeyframe = { newTime, newDeltaTime, false, false };
+    TimeKeyframeData currentKeyframe = {
+        .time = time(),
+        .delta = _deltaTime,
+        .pause = false,
+        .jump = false
+    };
+    TimeKeyframeData futureKeyframe = {
+        .time = newTime,
+        .delta = newDeltaTime,
+        .pause = false,
+        .jump = false
+    };
 
     _targetDeltaTime = newDeltaTime;
 
@@ -854,8 +874,18 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
         time().j2000Seconds() + (_deltaTime + targetDelta) * 0.5 * interpolationDuration
     );
 
-    TimeKeyframeData currentKeyframe = { time(), _deltaTime, false, false };
-    TimeKeyframeData futureKeyframe = { newTime, _targetDeltaTime, pause, false };
+    TimeKeyframeData currentKeyframe = {
+        .time = time(),
+        .delta = _deltaTime,
+        .pause = false,
+        .jump = false
+    };
+    TimeKeyframeData futureKeyframe = {
+        .time = newTime,
+        .delta = _targetDeltaTime,
+        .pause = pause,
+        .jump = false
+    };
     _timePaused = pause;
 
     double now = isPlayingBackSessionRecording() ?

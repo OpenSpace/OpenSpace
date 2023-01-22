@@ -42,11 +42,11 @@ void WebsocketCameraStates::updateStateFromInput(
                                          const WebsocketInputStates& websocketInputStates,
                                                  double deltaTime)
 {
-    std::pair<bool, glm::dvec2> globalRotation = { false, glm::dvec2(0.0) };
-    std::pair<bool, double> zoom = { false, 0.0 };
-    std::pair<bool, glm::dvec2> localRoll = { false, glm::dvec2(0.0) };
-    std::pair<bool, glm::dvec2> globalRoll = { false, glm::dvec2(0.0) };
-    std::pair<bool, glm::dvec2> localRotation = { false, glm::dvec2(0.0) };
+    std::pair<bool, glm::dvec2> globalRotation = std::pair(false, glm::dvec2(0.0));
+    std::pair<bool, double> zoom = std::pair(false, 0.0);
+    std::pair<bool, glm::dvec2> localRoll = std::pair(false, glm::dvec2(0.0));
+    std::pair<bool, glm::dvec2> globalRoll = std::pair(false, glm::dvec2(0.0));
+    std::pair<bool, glm::dvec2> localRotation = std::pair(false, glm::dvec2(0.0));
 
     if (!websocketInputStates.empty()) {
         for (int i = 0; i < WebsocketInputState::MaxAxes; ++i) {

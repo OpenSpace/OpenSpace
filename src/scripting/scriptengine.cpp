@@ -673,8 +673,8 @@ void ScriptEngine::addBaseLibrary() {
     ZoneScoped
 
     LuaLibrary lib = {
-        "",
-        {
+        .name = "",
+        .functions = {
             {
                 "printTrace",
                 &luascriptfunctions::printTrace,

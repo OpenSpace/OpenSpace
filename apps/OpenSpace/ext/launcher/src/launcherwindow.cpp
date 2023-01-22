@@ -158,11 +158,11 @@ namespace {
         std::ofstream outFile;
         try {
             outFile.open(path, std::ofstream::out);
-            sgct::config::GeneratorVersion genEntry = {
+            sgct::config::GeneratorVersion genEntry = sgct::config::GeneratorVersion(
                 "OpenSpace",
                 OPENSPACE_VERSION_MAJOR,
                 OPENSPACE_VERSION_MINOR
-            };
+            );
             outFile << sgct::serializeConfig(
                 cluster,
                 genEntry

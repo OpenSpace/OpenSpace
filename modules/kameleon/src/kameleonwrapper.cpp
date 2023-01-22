@@ -136,29 +136,29 @@ bool KameleonWrapper::open(const std::string& filename) {
         LDEBUG(fmt::format("y: {}", _yCoordVar));
         LDEBUG(fmt::format("z: {}", _zCoordVar));
 
-        _min = {
+        _min = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "actual_min").getAttributeFloat(),
             _model->getVariableAttribute(_yCoordVar, "actual_min").getAttributeFloat(),
             _model->getVariableAttribute(_zCoordVar, "actual_min").getAttributeFloat()
-        };
+        );
 
-        _max = {
+        _max = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "actual_max").getAttributeFloat(),
             _model->getVariableAttribute(_yCoordVar, "actual_max").getAttributeFloat(),
             _model->getVariableAttribute(_zCoordVar, "actual_max").getAttributeFloat()
-        };
+        );
 
-        _validMin = {
+        _validMin = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "valid_min").getAttributeFloat(),
             _model->getVariableAttribute(_yCoordVar, "valid_min").getAttributeFloat(),
             _model->getVariableAttribute(_zCoordVar, "valid_min").getAttributeFloat()
-        };
+        );
 
-        _validMax = {
+        _validMax = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "valid_max").getAttributeFloat(),
             _model->getVariableAttribute(_yCoordVar, "valid_max").getAttributeFloat(),
             _model->getVariableAttribute(_zCoordVar, "valid_max").getAttributeFloat()
-        };
+        );
 
         return true;
     }
@@ -700,11 +700,11 @@ glm::vec3 KameleonWrapper::modelBarycenterOffset() const {
         return glm::vec3(0.f);
     }
 
-    glm::vec3 offset = {
+    glm::vec3 offset = glm::vec3(
         _min.x + (std::abs(_min.x) + std::abs(_max.x)) / 2.f,
         _min.y + (std::abs(_min.y) + std::abs(_max.y)) / 2.f,
         _min.z + (std::abs(_min.z) + std::abs(_max.z)) / 2.f
-    };
+    );
     return offset;
 }
 
@@ -725,11 +725,11 @@ glm::vec3 KameleonWrapper::modelScale() const {
         return glm::vec3(1.f);
     }
 
-    glm::vec3 scale = {
+    glm::vec3 scale = glm::vec3(
         _max.x - _min.x,
         _max.y - _min.y,
         _max.z - _min.z
-    };
+    );
     return scale;
 }
 
@@ -907,57 +907,57 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
         trajectory.push_back(pos);
 
         // Calculate new position with Lorentz force quation and Runge-Kutta 4th order
-        glm::vec3 B = {
+        glm::vec3 B = glm::vec3(
             _interpolator->interpolate(bxID, pos.x, pos.y, pos.z),
             _interpolator->interpolate(byID, pos.x, pos.y, pos.z),
             _interpolator->interpolate(bzID, pos.x, pos.y, pos.z)
-        };
+        );
 
-        glm::vec3 E = {
+        glm::vec3 E = glm::vec3(
             _interpolator->interpolate(jxID, pos.x, pos.y, pos.z),
             _interpolator->interpolate(jyID, pos.x, pos.y, pos.z),
             _interpolator->interpolate(jzID, pos.x, pos.y, pos.z)
-        };
+        );
         const glm::vec3 k1 = glm::normalize(eCharge * (E + glm::cross(v0, B)));
         const glm::vec3 k1Pos = pos + step / 2.f * v0 + step * step / 8.f * k1;
 
-        B = {
+        B = glm::vec3(
             _interpolator->interpolate(bxID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(byID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(bzID, k1Pos.x, k1Pos.y, k1Pos.z)
-        };
-        E = {
+        );
+        E = glm::vec3(
             _interpolator->interpolate(jxID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(jyID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(jzID, k1Pos.x, k1Pos.y, k1Pos.z)
-        };
+        );
         const glm::vec3 v1 = v0 + step / 2.f * k1;
         const glm::vec3 k2 = glm::normalize(eCharge * (E + glm::cross(v1, B)));
 
-        B = {
+        B = glm::vec3(
             _interpolator->interpolate(bxID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(byID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(bzID, k1Pos.x, k1Pos.y, k1Pos.z)
-        };
-        E = {
+        );
+        E = glm::vec3(
             _interpolator->interpolate(jxID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(jyID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(jzID, k1Pos.x, k1Pos.y, k1Pos.z)
-        };
+        );
         const glm::vec3 v2 = v0 + step / 2.f * k2;
         const glm::vec3 k3 = glm::normalize(eCharge * (E + glm::cross(v2, B)));
         const glm::vec3 k3Pos = pos + step * v0 + step * step / 2.f * k1;
 
-        B = {
+        B = glm::vec3(
             _interpolator->interpolate(bxID, k3Pos.x, k3Pos.y, k3Pos.z),
             _interpolator->interpolate(byID, k3Pos.x, k3Pos.y, k3Pos.z),
             _interpolator->interpolate(bzID, k3Pos.x, k3Pos.y, k3Pos.z)
-        };
-        E = {
+        );
+        E = glm::vec3(
             _interpolator->interpolate(jxID, k3Pos.x, k3Pos.y, k3Pos.z),
             _interpolator->interpolate(jyID, k3Pos.x, k3Pos.y, k3Pos.z),
             _interpolator->interpolate(jzID, k3Pos.x, k3Pos.y, k3Pos.z)
-        };
+        );
         const glm::vec3 v3 = v0 + step * k3;
         const glm::vec3 k4 = glm::normalize(eCharge * (E + glm::cross(v3, B)));
 

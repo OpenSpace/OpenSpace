@@ -49,13 +49,13 @@ namespace {
     };
 
     const std::array<TimeInterval, 7> TimeIntervals = {
-        TimeInterval{ 31536000, "year" },
-        TimeInterval{ 18144000, "month" },
-        TimeInterval{ 604800, "week" },
-        TimeInterval{ 86400, "day" },
-        TimeInterval{ 3600, "hour" },
-        TimeInterval{ 60, "minute" },
-        TimeInterval{ 1, "second" }
+        TimeInterval(31536000, "year"),
+        TimeInterval(18144000, "month"),
+        TimeInterval(604800, "week"),
+        TimeInterval(86400, "day"),
+        TimeInterval(3600, "hour"),
+        TimeInterval(60, "minute"),
+        TimeInterval(1, "second")
     };
 
     std::string checkForTimeDescription(int intervalIndex, double value) {

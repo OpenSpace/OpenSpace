@@ -418,10 +418,10 @@ TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dic
             if (dict.hasValue<glm::dvec2>(key)) {
                 glm::dvec2 value = dict.value<glm::dvec2>(key);
                 glm::dvec2 intPart;
-                glm::bvec2 isInt = {
+                glm::bvec2 isInt = glm::bvec2(
                     modf(value.x, &intPart.x) == 0.0,
                     modf(value.y, &intPart.y) == 0.0
-                };
+                );
                 if (isInt.x && isInt.y) {
                     TestResult res;
                     res.success = true;
@@ -473,11 +473,11 @@ TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dic
             if (dict.hasValue<glm::dvec3>(key)) {
                 glm::dvec3 value = dict.value<glm::dvec3>(key);
                 glm::dvec3 intPart;
-                glm::bvec3 isInt = {
+                glm::bvec3 isInt = glm::bvec3(
                     modf(value.x, &intPart.x) == 0.0,
                     modf(value.y, &intPart.y) == 0.0,
                     modf(value.z, &intPart.z) == 0.0
-                };
+                );
                 if (isInt.x && isInt.y && isInt.z) {
                     TestResult res;
                     res.success = true;
@@ -529,12 +529,12 @@ TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dic
             if (dict.hasValue<glm::dvec4>(key)) {
                 glm::dvec4 value = dict.value<glm::dvec4>(key);
                 glm::dvec4 intPart;
-                glm::bvec4 isInt = {
+                glm::bvec4 isInt = glm::bvec4(
                     modf(value.x, &intPart.x) == 0.0,
                     modf(value.y, &intPart.y) == 0.0,
                     modf(value.z, &intPart.z) == 0.0,
                     modf(value.w, &intPart.w) == 0.0
-                };
+                );
                 if (isInt.x && isInt.y && isInt.z && isInt.w) {
                     TestResult res;
                     res.success = true;

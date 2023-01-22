@@ -148,7 +148,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
         // If the remaining time is below 5 minutes, we switch over to seconds display
         if (remaining < 5 * 60) {
-            remainingConv = { remaining, "seconds" };
+            remainingConv = std::pair(remaining, "seconds");
         }
 
         const int Size = 25;

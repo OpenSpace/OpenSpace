@@ -50,7 +50,7 @@ struct RawTile {
     std::unique_ptr<std::byte[]> imageData;
     TileMetaData tileMetaData;
     std::optional<TileTextureInitData> textureInitData;
-    TileIndex tileIndex = { 0, 0, 0 };
+    TileIndex tileIndex = TileIndex(0, 0, 0);
     ReadError error = ReadError::None;
     GLuint pbo = 0;
 };

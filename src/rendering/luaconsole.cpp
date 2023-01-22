@@ -528,7 +528,11 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                         // We only want to remove the autocomplete info if we just
                         // entered the 'default' openspace namespace
                         if (command.substr(0, pos + 1) == "openspace.") {
-                            _autoCompleteInfo = { NoAutoComplete, false, "" };
+                            _autoCompleteInfo = {
+                                .lastIndex = NoAutoComplete,
+                                .hasInitialValue = false,
+                                .initialValue = ""
+                            };
                         }
                     }
                 }
@@ -542,7 +546,11 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         // If any other key is pressed, we want to remove our previous findings
         // The special case for Shift is necessary as we want to allow Shift+TAB
         if (!modifierShift) {
-            _autoCompleteInfo = { NoAutoComplete, false, "" };
+            _autoCompleteInfo = {
+                .lastIndex = NoAutoComplete,
+                .hasInitialValue = false,
+                .initialValue = ""
+            };
         }
     }
 
