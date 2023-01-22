@@ -196,7 +196,8 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                           const std::vector<openspace::properties::Property*>& properties,
                                                              double interpolationDuration,
                                                              const std::string& groupName,
-                                                     ghoul::EasingFunction easingFunction)
+                                                     ghoul::EasingFunction easingFunction,
+                                                                   std::string postScript)
 {
     using namespace openspace;
     using ghoul::lua::errorLocation;
@@ -244,6 +245,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 global::renderEngine->scene()->addPropertyInterpolation(
                     prop,
                     static_cast<float>(interpolationDuration),
+                    std::move(postScript),
                     easingFunction
                 );
             }
@@ -283,7 +285,7 @@ namespace openspace::luascriptfunctions {
 
 int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
                            lua_State* L, double duration,
-                           ghoul::EasingFunction easingFunction)
+                           ghoul::EasingFunction easingFunction, std::string postScript)
 {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
@@ -313,6 +315,7 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
             global::renderEngine->scene()->addPropertyInterpolation(
                 &prop,
                 static_cast<float>(duration),
+                std::move(postScript),
                 easingFunction
             );
         }
@@ -321,7 +324,7 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
 }
 
 int propertySetValue(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::property_setValue");
+    ghoul::lua::checkArgumentsAndThrow(L, { 2, 6 }, "lua::property_setValue");
     defer { lua_settop(L, 0); };
 
     std::string uriOrRegex =
@@ -330,6 +333,7 @@ int propertySetValue(lua_State* L) {
     double interpolationDuration = 0.0;
     std::string easingMethodName;
     ghoul::EasingFunction easingMethod = ghoul::EasingFunction::Linear;
+    std::string postScript;
 
     if (lua_gettop(L) >= 3) {
         if (ghoul::lua::hasValue<double>(L, 3)) {
@@ -351,8 +355,12 @@ int propertySetValue(lua_State* L) {
             }
         }
 
-        if (lua_gettop(L) == 5) {
-            optimization = ghoul::lua::value<std::string>(L, 5, ghoul::lua::PopValue::No);
+        if (lua_gettop(L) >= 5) {
+            postScript = ghoul::lua::value<std::string>(L, 5, ghoul::lua::PopValue::No);
+        }
+
+        if (lua_gettop(L) == 6) {
+            optimization = ghoul::lua::value<std::string>(L, 6, ghoul::lua::PopValue::No);
         }
 
         // Later functions expect the value to be at the last position on the stack
@@ -392,9 +400,9 @@ int propertySetValue(lua_State* L) {
             allProperties(),
             interpolationDuration,
             groupName,
-            easingMethod
+            easingMethod,
+            std::move(postScript)
         );
-        return 0;
     }
     else if (optimization == "regex") {
         applyRegularExpression(
@@ -403,7 +411,8 @@ int propertySetValue(lua_State* L) {
             allProperties(),
             interpolationDuration,
             "",
-            easingMethod
+            easingMethod,
+            std::move(postScript)
         );
     }
     else if (optimization == "single") {
@@ -423,7 +432,8 @@ int propertySetValue(lua_State* L) {
             uriOrRegex,
             L,
             interpolationDuration,
-            easingMethod
+            easingMethod,
+            std::move(postScript)
         );
     }
     else {

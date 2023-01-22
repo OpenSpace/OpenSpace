@@ -439,6 +439,7 @@ std::chrono::steady_clock::time_point Scene::currentTimeForInterpolation() {
 }
 
 void Scene::addPropertyInterpolation(properties::Property* prop, float durationSeconds,
+                                     std::string postScript,
                                      ghoul::EasingFunction easingFunction)
 {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
@@ -465,6 +466,7 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
         if (info.prop == prop) {
             info.beginTime = now;
             info.durationSeconds = durationSeconds;
+            info.postScript = std::move(postScript),
             info.easingFunction = func;
             // If we found it, we can break since we make sure that each property is only
             // represented once in this
@@ -473,12 +475,12 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
     }
 
     PropertyInterpolationInfo i = {
-        prop,
-        now,
-        durationSeconds,
-        func
+        .prop = prop,
+        .beginTime = now,
+        .durationSeconds = durationSeconds,
+        .postScript = std::move(postScript),
+        .easingFunction = func
     };
-
     _propertyInterpolationInfos.push_back(std::move(i));
 }
 
@@ -513,13 +515,12 @@ void Scene::updateInterpolations() {
     steady_clock::time_point now = currentTimeForInterpolation();
     // First, let's update the properties
     for (PropertyInterpolationInfo& i : _propertyInterpolationInfos) {
-        long long usPassed = duration_cast<std::chrono::microseconds>(
-            now - i.beginTime
-        ).count();
+        long long us =
+            duration_cast<std::chrono::microseconds>(now - i.beginTime).count();
 
         const float t = glm::clamp(
             static_cast<float>(
-                static_cast<double>(usPassed) /
+                static_cast<double>(us) /
                 static_cast<double>(i.durationSeconds * 1000000)
             ),
             0.f,
@@ -537,6 +538,13 @@ void Scene::updateInterpolations() {
         i.isExpired = (t == 1.f);
 
         if (i.isExpired) {
+            if (!i.postScript.empty()) {
+                global::scriptEngine->queueScript(
+                    std::move(i.postScript),
+                    scripting::ScriptEngine::RemoteScripting::No
+                );
+            }
+
             global::eventEngine->publishEvent<events::EventInterpolationFinished>(i.prop);
         }
     }
@@ -584,7 +592,8 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
             allProperties(),
             0.0,
             groupName,
-            ghoul::EasingFunction::Linear
+            ghoul::EasingFunction::Linear,
+            ""
         );
         // Clear lua state stack
         lua_settop(L, 0);
