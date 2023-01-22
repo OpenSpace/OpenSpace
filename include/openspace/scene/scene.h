@@ -29,6 +29,7 @@
 
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/scriptengine.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/exception.h>
@@ -176,12 +177,16 @@ public:
      * \param prop The property that should be called to update itself every frame until
      *        \p durationSeconds seconds have passed
      * \param durationSeconds The number of seconds that the interpolation will run for
+     * \param postScript A Lua script that will be executed when the interpolation
+     *        finishes
+     * \param easingFunction A function that determines who the interpolation occurs
      *
      * \pre \p prop must not be \c nullptr
      * \pre \p durationSeconds must be positive and not 0
      * \post A new interpolation record exists for \p that is not expired
      */
     void addPropertyInterpolation(properties::Property* prop, float durationSeconds,
+        std::string postScript = "",
         ghoul::EasingFunction easingFunction = ghoul::EasingFunction::Linear);
 
     /**
@@ -340,6 +345,8 @@ private:
         properties::Property* prop;
         std::chrono::time_point<std::chrono::steady_clock> beginTime;
         float durationSeconds;
+        std::string postScript;
+        
         ghoul::EasingFunc<float> easingFunction;
         bool isExpired = false;
     };
