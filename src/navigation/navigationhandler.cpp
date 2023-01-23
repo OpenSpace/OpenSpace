@@ -639,7 +639,8 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::TriggerIdleBehavior,
             codegen::lua::ListAllJoysticks,
             codegen::lua::TargetNextInterestingAnchor,
-            codegen::lua::TargetPreviousInterestingAnchor
+            codegen::lua::TargetPreviousInterestingAnchor,
+            codegen::lua::DistanceToFocus
         }
     };
 }
