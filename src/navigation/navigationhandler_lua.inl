@@ -406,6 +406,18 @@ joystickAxis(std::string joystickName, int axis)
     return global::navigationHandler->listAllJoysticks();
 }
 
+/**
+ * Returns the distance in meters to the current focus node
+ */
+[[codegen::luawrap]] double distanceToFocus() {
+    using namespace openspace;
+
+    const SceneGraphNode * focus = global::navigationHandler->anchorNode();
+    Camera * camera = global::navigationHandler->camera();
+
+    return glm::distance(camera->positionVec3(), focus->worldPosition());
+}
+
 #include "navigationhandler_lua_codegen.cpp"
 
 } // namespace
