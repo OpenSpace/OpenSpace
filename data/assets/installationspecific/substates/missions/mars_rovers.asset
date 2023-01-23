@@ -8,7 +8,7 @@ local enterStateSettings = [[
 
   -- Reset things that might have been set during the state (either here or from webpage)
 local leaveStateSettings = [[
-  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-jezeros.Settings.Opacity", 0.0, 1.0);
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-jezero.Settings.Opacity", 0.0, 1.0);
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Settings.Opacity", 0.0, 1.0)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled", false)
   openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.IncludeRoll", false);
