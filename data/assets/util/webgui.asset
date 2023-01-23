@@ -73,7 +73,6 @@ end)
 
 function setCefRoute(route)
   local port = openspace.getPropertyValue("Modules.WebGui.Port")
-  openspace.printFatal(port)
   -- As a developer, you can manually serve the webgui from port 4690
   -- with the command `npm start` in the web gui repository
   if guiCustomization.webguiDevelopmentMode then
