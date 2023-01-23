@@ -779,7 +779,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
         {
             {
                 "setPropertyValue",
-                &luascriptfunctions::propertySetValue,
+                &luascriptfunctions::propertySetValue<false>,
                 {},
                 "",
                 "Sets all property(s) identified by the URI (with potential wildcards) "
@@ -791,20 +791,16 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "function if a 'duration' has been specified. If 'duration' is 0, this "
                 "parameter value is ignored. Otherwise, it can be one of many supported "
                 "easing functions. See easing.h for available functions. The fifth "
-                "argument must be either empty, 'regex', or 'single'. If the fifth"
-                "argument is empty (the default), the URI is interpreted using a "
-                "wildcard in which '*' is expanded to '(.*)' and bracketed components "
-                "'{ }' are interpreted as group tag names. Then, the passed value will "
-                "be set on all properties that fit the regex + group name combination. "
-                "If the fifth argument is 'regex' neither the '*' expansion, nor the "
-                "group tag expansion is performed and the first argument is used as an "
-                "ECMAScript style regular expression that matches against the fully "
-                "qualified IDs of properties. If the fifth argument is 'single' no "
-                "substitutions are performed and exactly 0 or 1 properties are changed"
+                "argument is another Lua script that will be executed when the "
+                "interpolation provided in parameter 3 finishes.\n"
+                "The URI is interpreted using a wildcard in which '*' is expanded to "
+                "'(.*)' and bracketed components '{ }' are interpreted as group tag "
+                "names. Then, the passed value will be set on all properties that fit "
+                "the regex + group name combination."
             },
             {
                 "setPropertyValueSingle",
-                &luascriptfunctions::propertySetValueSingle,
+                &luascriptfunctions::propertySetValue<true>,
                 {},
                 "",
                 "Sets the property identified by the URI in the first argument. The "
@@ -816,7 +812,9 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "specified. If 'duration' is 0, this parameter value is ignored. "
                 "Otherwise, it has to be 'linear', 'easein', 'easeout', or 'easeinout'. "
                 "This is the same as calling the setValue method and passing 'single' as "
-                "the fourth argument to setPropertyValue"
+                "the fourth argument to setPropertyValue. The fifth argument is another "
+                "Lua script that will be executed when the interpolation provided in "
+                "parameter 3 finishes."
             },
             {
                 "getPropertyValue",
