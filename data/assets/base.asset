@@ -4,10 +4,6 @@
 
 asset.require("./base_blank")
 
--- Modules and component settings
-asset.require("modules/exoplanets/exoplanets")
-asset.require("modules/skybrowser/skybrowser")
-
 -- Specifying which other assets should be loaded in this scene
 asset.require("scene/solarsystem/sun/sun")
 asset.require("scene/solarsystem/sun/glare")
