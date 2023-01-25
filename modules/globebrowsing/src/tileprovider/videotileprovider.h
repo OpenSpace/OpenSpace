@@ -104,6 +104,8 @@ private:
     GLuint _fbo = 0;
     TileTextureInitData::HashKey _frameTextureHashKey;
     static int _wakeup;
+    double _lastFrameTime = 0.0;
+    bool _didRender = false;
 
     // libmpv property keys
     enum class LibmpvPropertyKey : uint64_t {

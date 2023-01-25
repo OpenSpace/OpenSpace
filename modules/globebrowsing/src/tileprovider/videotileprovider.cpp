@@ -398,12 +398,13 @@ void VideoTileProvider::initializeMpv() {
 
     mpv_opengl_init_params gl_init_params{ getOpenGLProcAddress, nullptr };
     int adv{ 1 }; // we will use the update callback
+    int blockTime{ 0 }; // Decouple mpv from waiting to get the correct fps
 
     mpv_render_param params[]{
         {MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL)},
         {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
         {MPV_RENDER_PARAM_ADVANCED_CONTROL, &adv},
-        {MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME, (int*)0},
+        {MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME, &blockTime},
         {MPV_RENDER_PARAM_INVALID, nullptr},
     };
 
@@ -430,6 +431,7 @@ void VideoTileProvider::initializeMpv() {
     mpv_set_option_string(_mpvHandle, "hwdec", "auto");
     mpv_set_option_string(_mpvHandle, "vd-lavc-dr", "yes");
     mpv_set_option_string(_mpvHandle, "terminal", "yes");
+    mpv_set_option_string(_mpvHandle, "video-timing-offset", "0");
 
     //Create FBO to render video into
     createFBO(_resolution.x, _resolution.y);
@@ -479,25 +481,29 @@ void VideoTileProvider::initializeMpv() {
 
 void VideoTileProvider::renderMpv() {
     handleMpvEvents();
-    mpv_opengl_fbo mpfbo{ static_cast<int>(_fbo), _resolution.x, _resolution.y, 0 };
-    int flip_y{ 1 };
 
-    mpv_render_param params[] = {
-        {MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo},
-        {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
-        {MPV_RENDER_PARAM_INVALID, nullptr}
-    };
-    // See render_gl.h on what OpenGL environment mpv expects, and
-    // other API details.
-    // See render_gl.h on what OpenGL environment mpv expects, and other API details
-    // This function fills the fbo and texture with data, after it we can get the data on 
-    // the GPU, not the CPU
-    if (_wakeup)
+    
+    double nowJ200 = global::timeManager->time().j2000Seconds();
+    double timeSinceLastRender = nowJ200 - _lastFrameTime;
+    bool shouldRender = timeSinceLastRender >= _frameTime;
+
+    if (_wakeup && shouldRender)
     {
         if ((mpv_render_context_update(_mpvRenderContext) & MPV_RENDER_UPDATE_FRAME))
         {
+            // See render_gl.h on what OpenGL environment mpv expects, and other API 
+            // details. This function fills the fbo and texture with data, after it 
+            // we can get the data on the GPU, not the CPU
+            mpv_opengl_fbo mpfbo{ static_cast<int>(_fbo), _resolution.x, _resolution.y, 0 };
+            int flip_y{ 1 };
+
+            mpv_render_param params[] = {
+                {MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo},
+                {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
+                {MPV_RENDER_PARAM_INVALID, nullptr}
+            };
             // This "renders" to the video_framebuffer "linked by ID" in the
-            // params_fbo - BLOCKING
+            // params_fbo
             mpv_render_context_render(_mpvRenderContext, params);
 
             /* TODO: remove this comment in case we never encounter this issue again */
@@ -505,6 +511,11 @@ void VideoTileProvider::renderMpv() {
             // mpv_render_context_render internally rescales the fb of the context(?!)...
             //glm::ivec2 window = global::windowDelegate->currentDrawBufferResolution();
             //glViewport(0, 0, window.x, window.y);
+            
+            // Save the time for when this frame was rendered to know when to render next
+            // frame
+            _lastFrameTime = global::timeManager->time().j2000Seconds();
+            _didRender = true;
         }
     }
 }
@@ -800,9 +811,10 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
 }
 
 void VideoTileProvider::swapBuffersMpv() {
-    if (_wakeup) {
+    if (_wakeup && _didRender) {
         mpv_render_context_report_swap(_mpvRenderContext);
         _wakeup = 0;
+        _didRender = 0;
     }
 }
 
