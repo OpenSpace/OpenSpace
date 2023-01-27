@@ -13,9 +13,11 @@ local cbrState = {
         ]] .. util.startOrbiting() .. [[
         ]] .. util.orbitOnArrival() .. [[
         openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
     ]],
     Exit = [[
         ]] .. util.stopOrbiting() .. [[
+          openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false);
         openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
     ]]
 }

@@ -14,10 +14,12 @@ local exoplanetsState = {
         ]] .. util.startOrbiting() .. [[
         ]] .. util.interpolateProperty(opacityUri, 1.0, 2) .. [[
         openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
     ]],
     Exit = [[
         ]] .. util.interpolateProperty(opacityUri, 0.0, 2) .. [[
         ]] .. util.stopOrbiting() .. [[
+          openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false);
         openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
     ]]
 }

@@ -197,6 +197,7 @@ private:
     };
 
     LimitZoomOut _limitZoomOut;
+    properties::BoolProperty _disableZoom;
 
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;

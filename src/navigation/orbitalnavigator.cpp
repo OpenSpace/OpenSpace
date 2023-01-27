@@ -286,6 +286,12 @@ namespace {
         "or canceled, in seconds"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DisableZoomInfo = {
+        "DisableZoom",
+        "Disable Zoom navigation",
+        "If true, the zoom navigation is disabled. If false, then the Zoom navigation is enabled"
+    };
+
     constexpr std::string_view IdleKeyOrbit = "Orbit";
     constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
     constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
@@ -383,6 +389,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
     , _websocketStates(_websocketSensitivity, 1 / (_friction.friction + 0.0000001))
+    , _disableZoom(DisableZoomInfo, false)
 {
     _anchor.onChange([this]() {
         if (_anchor.value().empty()) {
@@ -558,6 +565,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_mouseSensitivity);
     addProperty(_joystickSensitivity);
     addProperty(_websocketSensitivity);
+    addProperty(_disableZoom);
 }
 
 glm::dvec3 OrbitalNavigator::anchorNodeToCameraVector() const {
@@ -732,17 +740,19 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         posHandle
     );
 
-    // Perform the vertical movements based on user input
-    pose.position = translateVertically(deltaTime, pose.position, anchorPos, posHandle);
-    std::optional<double> maxHeight = _limitZoomOut.isEnabled ?
-        static_cast<double>(_limitZoomOut.maximumAllowedDistance) : std::optional<double>();
-    pose.position = pushToSurface(
-        static_cast<double>(_minimumAllowedDistance),
-        pose.position,
-        anchorPos,
-        posHandle,
-        maxHeight
-    );
+    if (!_disableZoom) {
+        // Perform the vertical movements based on user input
+        pose.position = translateVertically(deltaTime, pose.position, anchorPos, posHandle);
+        std::optional<double> maxHeight = _limitZoomOut.isEnabled ?
+            static_cast<double>(_limitZoomOut.maximumAllowedDistance) : std::optional<double>();
+        pose.position = pushToSurface(
+            static_cast<double>(_minimumAllowedDistance),
+            pose.position,
+            anchorPos,
+            posHandle,
+            maxHeight
+        );
+    }
 
     pose.rotation = composeCameraRotation(camRot);
 
