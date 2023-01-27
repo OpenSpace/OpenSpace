@@ -56,7 +56,7 @@ for i, moon in ipairs(carpoGroup) do
       FadeDistances = { 1.0, 100.0 },
       FadeWidths = { 0.0, 100.0 }
     },
-    Tag = { "solarsystem_labels", "moon_labels" },
+    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moon.Identifier .. " Label",
       Path = "/Solar System/Planets/Jupiter/Moons",
