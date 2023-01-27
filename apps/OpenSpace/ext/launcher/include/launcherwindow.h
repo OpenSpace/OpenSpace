@@ -93,6 +93,7 @@ private:
 
     void openProfileEditor(const std::string& profile, bool isUserProfile);
     void openWindowEditor(const std::string& winCfg, bool isUserWinCfg);
+    void editRefusalDialog(const std::string title, const std::string msg);
 
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);
@@ -109,8 +110,11 @@ private:
     const std::vector<std::string>& _readOnlyProfiles;
     bool _shouldLaunch = false;
     int _userAssetCount = 0;
+    int _userConfigStartingIdx = 0;
     int _userConfigCount = 0;
+    int _preDefinedConfigStartingIdx = 0;
     const std::string _sgctConfigName;
+    int _windowConfigBoxIndexSgctCfgDefault = 0;
 
     QComboBox* _profileBox = nullptr;
     QComboBox* _windowConfigBox = nullptr;

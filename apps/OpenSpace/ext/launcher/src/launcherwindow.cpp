@@ -338,9 +338,20 @@ QWidget* LauncherWindow::createCentralWidget() {
             std::filesystem::path pathSelected = absPath(selectedWindowConfig());
             bool isUserConfig = isUserConfigSelected();
             std::string fileSelected = pathSelected.generic_string();
-            if (_windowConfigBox->currentIndex() > 0
-                && std::filesystem::is_regular_file(pathSelected))
-            {
+            if (_windowConfigBox->currentIndex() == _windowConfigBoxIndexSgctCfgDefault) {
+                editRefusalDialog(
+                    "Editor Option Not Available",
+                    "Cannot edit the 'Default' SGCT configuration string (isn't a file)"
+                );
+            }
+            else if (_windowConfigBox->currentIndex() >= _preDefinedConfigStartingIdx) {
+                editRefusalDialog(
+                    "Editor Option Not Available",
+                    fmt::format("Cannot edit '{}' since it is one of the configuration "
+                        "files provided in the OpenSpace installation", fileSelected)
+                );
+            }
+            else if (std::filesystem::is_regular_file(pathSelected)) {
                 openWindowEditor(fileSelected, isUserConfig);
             }
         }
@@ -540,12 +551,17 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     _windowConfigBox->clear();
 
     _userConfigCount = 0;
+    _userConfigStartingIdx = 0;
+    _preDefinedConfigStartingIdx = 0;
     _windowConfigBox->addItem(QString::fromStdString("--- User Configurations ---"));
     const QStandardItemModel* model =
         qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
 
+
     model->item(_userConfigCount)->setEnabled(false);
-    ++_userConfigCount;
+    _userConfigCount++;
+    _userConfigStartingIdx++;
+    _preDefinedConfigStartingIdx++;
 
     bool hasXmlConfig = false;
 
@@ -560,14 +576,16 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     for (const fs::directory_entry& p : files) {
         bool isConfigFile = handleConfigurationFile(*_windowConfigBox, p);
         if (isConfigFile) {
-            ++_userConfigCount;
+            _userConfigCount++;
+            _userConfigStartingIdx++;
+            _preDefinedConfigStartingIdx++;
         }
-
         hasXmlConfig |= p.path().extension() == ".xml";
     }
     _windowConfigBox->addItem(QString::fromStdString("--- OpenSpace Configurations ---"));
     model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
     model->item(_userConfigCount)->setEnabled(false);
+    _preDefinedConfigStartingIdx++;
 
     if (std::filesystem::exists(_configPath)) {
         // Sort files
@@ -601,7 +619,10 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     }
 
     // Always add the .cfg sgct default as first item
-    _windowConfigBox->insertItem(0, QString::fromStdString(_sgctConfigName));
+    _windowConfigBox->insertItem(
+        _windowConfigBoxIndexSgctCfgDefault,
+        QString::fromStdString(_sgctConfigName)
+    );
     // Try to find the requested configuration file and set it as the current one. As we
     // have support for function-generated configuration files that will not be in the
     // list we need to add a preset that doesn't exist a file for
@@ -611,11 +632,16 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     }
     else {
         // Add the requested preset at the top
-        _windowConfigBox->insertItem(1, QString::fromStdString(preset));
+        _windowConfigBox->insertItem(
+                _windowConfigBoxIndexSgctCfgDefault + 1,
+            QString::fromStdString(preset)
+        );
         // Increment the user config count because there is an additional option added
         // before the user config options
         _userConfigCount++;
-        _windowConfigBox->setCurrentIndex(1);
+        _userConfigStartingIdx++;
+        _preDefinedConfigStartingIdx++;
+        _windowConfigBox->setCurrentIndex(_windowConfigBoxIndexSgctCfgDefault + 1);
     }
 }
 
@@ -659,12 +685,18 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     }
 }
 
+void LauncherWindow::editRefusalDialog(const std::string title, const std::string msg) {
+    QMessageBox msgBox;
+    msgBox.setText(QString::fromUtf8(msg.c_str()));
+    msgBox.setWindowTitle(QString::fromUtf8(title.c_str()));
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.exec();
+}
+
 void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinCfg) {
     std::string saveWindowCfgPath = isUserWinCfg ? _userConfigPath : _configPath;
     int ret = QDialog::DialogCode::Rejected;
     sgct::config::Cluster preview;
-    std::string resultMessage;
-
     if (winCfg.empty()) {
         SgctEdit editor(this, _userConfigPath);
         ret = editor.exec();
@@ -684,8 +716,15 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                 preview = sgct::readConfig(winCfg);
                 sgct::validateConfigAgainstSchema(
                     winCfg,
+                    _configPath + "/schema/sgct.schema.json",
+                    "This configuration file is unable to generate a proper display"
+                );
+                sgct::validateConfigAgainstSchema(
+                    winCfg,
                     _configPath + "/schema/sgcteditor.schema.json",
-                    resultMessage
+                    "This configuration file is valid for generating a display, but "
+                    "its format does not match the window editor requirements and "
+                    "cannot be opened in the editor"
                 );
                 SgctEdit editor(
                     preview,
@@ -704,34 +743,28 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                 }
             }
             else {
-                std::string versionDescription = fmt::format(
-                    "This file does not meet the minimum required version of {}.",
-                    minimumVersion.versionString()
+                editRefusalDialog(
+                    "File Format Version Error",
+                    fmt::format(
+                        "File '{}' does not meet the minimum required version of {}.",
+                        winCfg,
+                        minimumVersion.versionString()
+                    )
                 );
-                //std::cout << versionDescription << std::endl;
-                QMessageBox msgBox;
-                msgBox.setText(QString::fromUtf8(versionDescription.c_str()));
-                msgBox.setWindowTitle("File Format Version Error");
-                msgBox.setIcon(QMessageBox::Warning);
-                msgBox.exec();
             }
         }
         catch (sgct::Error& e) {
-            std::cout << e.message << std::endl;
-            QMessageBox msgBox;
-            msgBox.setText(QString::fromUtf8(e.message.c_str()));
-            msgBox.setWindowTitle("Format Validation Error");
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.exec();
+            editRefusalDialog(
+                "Format Validation Error",
+                fmt::format("Error in file '{}':  {}", winCfg, e.message)
+            );
         }
-        catch (std::runtime_error& e) {
-            std::cout << e.what() << std::endl;
-            QMessageBox msgBox;
-            msgBox.setText(QString::fromUtf8(std::string(e.what()).c_str()));
-            msgBox.setWindowTitle("Format Validation Error");
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.exec();
-        }
+/*        catch (std::runtime_error& e) {
+            editRefusalDialog(
+                "Format Validation Error",
+                fmt::format("Error in file '{}':  {}", winCfg, e.what())
+            );
+        }*/
     }
 }
 
