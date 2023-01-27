@@ -32,7 +32,7 @@ local layer = {
   Name = Name,
   Enabled = asset.enabled,
   Type = "ImageSequenceTileLayer",
-  FolderPath = imagesDestination,
+  FolderPath = syncedDirectory .. "4096",
   Description = Description
 }
 

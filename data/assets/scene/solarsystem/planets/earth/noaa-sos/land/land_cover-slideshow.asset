@@ -26,7 +26,7 @@ local syncedDirectory = asset.syncedResource({
   UnzipFiles = true
 })
 
-local labelsDestination = syncedDirectory .. "labels"
+local labelsDestination = syncedDirectory .. "labels/"
 
 local layer = {
   Identifier = Identifier,

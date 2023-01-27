@@ -21,7 +21,7 @@ local syncedDirectory = asset.syncedResource({
 })
 
 local imagesDestination = syncedDirectory .. "4096"
-local colorbarDestination = syncedDirectory .. "colorbarcolorbar"
+local colorbarDestination = syncedDirectory .. "colorbar/"
 
 local background1layer = {
   Identifier = Identifier .. "-background-14a",

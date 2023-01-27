@@ -21,8 +21,6 @@ local syncedDirectory = asset.syncedResource({
   UnzipFiles = true
 })
 
-local imagesDestination = 
-
 local layer = {
   Identifier = Identifier,
   Name = Name,

@@ -20,8 +20,7 @@ local syncedDirectory = asset.syncedResource({
   Type = "HttpSynchronization",
   Identifier = Identifier,
   Version = 1,
-  UnzipFiles = true,
-  UnzipFilesDestination = "foo"
+  UnzipFiles = true
 })
 
 local layer = {
