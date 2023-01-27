@@ -162,7 +162,7 @@ namespace {
                 "OpenSpace",
                 OPENSPACE_VERSION_MAJOR,
                 OPENSPACE_VERSION_MINOR
-            );
+            };
             outFile << sgct::serializeConfig(
                 cluster,
                 genEntry
