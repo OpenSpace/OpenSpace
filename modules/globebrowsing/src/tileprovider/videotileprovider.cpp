@@ -480,13 +480,46 @@ void VideoTileProvider::initializeMpv() {
 }
 
 void VideoTileProvider::renderMpv() {
+    const double now = global::timeManager->time().j2000Seconds();
+    double percentage = 0.0;
+    if (now > _endJ200Time) {
+        percentage = 1.0;
+    }
+    else if (now < _startJ200Time) {
+        percentage = 0.0;
+    }
+    else {
+        percentage = (now - _startJ200Time) / (_endJ200Time - _startJ200Time);
+    }
+    double time = percentage * _videoDuration;
+    percentage *= 100.0;
+    //LINFO(std::to_string(time));
+    /*
+    int result = mpv_set_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::PlaybackTime),
+        "percent-pos",
+        MPV_FORMAT_DOUBLE,
+        &percentage
+    );
+    if (!checkMpvError(result)) {
+        LWARNING("Could not seek in video");
+    }
+    */
+    std::string timeString = std::to_string(time);
+    const char* params = timeString.c_str();
+    const char* args[] = { "seek", params, "absolute", NULL};
+    int result = mpv_command_async(_mpvHandle, static_cast<uint64_t>(LibmpvPropertyKey::Command),
+        args);
+    if (!checkMpvError(result)) {
+        LINFO("PROBLEM");
+    }
     handleMpvEvents();
 
-    
     double nowJ200 = global::timeManager->time().j2000Seconds();
     double timeSinceLastRender = nowJ200 - _lastFrameTime;
     bool shouldRender = timeSinceLastRender >= _frameTime;
-
+    shouldRender = true;
     if (_wakeup && shouldRender)
     {
         if ((mpv_render_context_update(_mpvRenderContext) & MPV_RENDER_UPDATE_FRAME))

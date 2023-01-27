@@ -115,7 +115,7 @@ private:
         Meta,
         Params,
         Time,
-        Width
+        Command
     };
 };
 
