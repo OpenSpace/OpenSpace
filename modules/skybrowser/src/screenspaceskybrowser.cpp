@@ -105,7 +105,7 @@ documentation::Documentation ScreenSpaceSkyBrowser::Documentation() {
 ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , WwtCommunicator(dictionary)
-    , _textureQuality(TextureQualityInfo, 0.5f, 0.25f, 1.f)
+    , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
     , _isHidden(IsHiddenInfo, true)
 {
     _identifier = makeUniqueIdentifier(_identifier);
