@@ -147,6 +147,10 @@ std::string TargetBrowserPair::targetNodeId() const {
     return _targetNode->identifier();
 }
 
+bool TargetBrowserPair::pointSpaceCraft() const {
+    return _browser->pointSpaceCraft();
+}
+
 double TargetBrowserPair::verticalFov() const {
     return _browser->verticalFov();
 }
@@ -271,6 +275,10 @@ void TargetBrowserPair::setImageCollectionIsLoaded(bool isLoaded) {
 
 void TargetBrowserPair::applyRoll() {
     _targetRenderable->applyRoll();
+}
+
+void TargetBrowserPair::setPointSpaceCraft(bool shouldPoint) {
+    _browser->setPointSpaceCraft(shouldPoint);
 }
 
 void TargetBrowserPair::incrementallyAnimateToCoordinate() {

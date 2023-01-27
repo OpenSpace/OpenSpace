@@ -75,6 +75,7 @@ public:
     void setBrowserRatio(float ratio);
     void setVerticalFovWithScroll(float scroll);
     void setImageCollectionIsLoaded(bool isLoaded);
+    void setPointSpaceCraft(bool shouldPoint);
     void applyRoll();
 
     double verticalFov() const;
@@ -85,6 +86,7 @@ public:
     std::string browserId() const;
     std::string targetRenderableId() const;
     std::string targetNodeId() const;
+    bool pointSpaceCraft() const;
 
     ScreenSpaceSkyBrowser* browser() const;
     std::vector<int> selectedImages() const;

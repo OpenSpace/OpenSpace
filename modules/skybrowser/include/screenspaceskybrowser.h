@@ -49,12 +49,14 @@ public:
     float opacity() const;
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     bool isInitialized() const;
+    bool pointSpaceCraft() const;
 
     double setVerticalFovWithScroll(float scroll);
     void setOpacity(float opacity);
     void setRatio(float ratio);
     void setIdInBrowser() const;
     void setIsInitialized(bool isInitialized);
+    void setPointSpaceCraft(bool point);
 
     void updateTextureResolution();
 
@@ -70,6 +72,7 @@ private:
     static constexpr int RadiusTimeOut = 25;
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
+    properties::BoolProperty _pointSpaceCraft;
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
     std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 

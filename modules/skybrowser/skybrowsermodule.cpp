@@ -537,7 +537,6 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::ScrollOverBrowser,
             codegen::lua::LoadingImageCollectionComplete,
             codegen::lua::ShowAllTargetsAndBrowsers,
-            codegen::lua::PointSpaceCraft,
             codegen::lua::GetWwtImageCollectionUrl,
             codegen::lua::StopAnimations,
             codegen::lua::SetBorderRadius,

@@ -70,12 +70,22 @@ namespace {
         "be"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo PointSpaceCraftInfo = {
+        "PointSpaceCraft",
+        "Point Space Craft",
+        "If checked, spacecrafts will point towards the coordinate of an image upon "
+        "selection."
+    };
+
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
         // [[codegen::verbatim(TextureQualityInfo.description)]]
         std::optional<float> textureQuality;
 
         // [[codegen::verbatim(IsHiddenInfo.description)]]
         std::optional<bool> isHidden;
+
+        // [[codegen::verbatim(PointSpaceCraftInfo.description)]]
+        std::optional<bool> pointSpaceCraft;
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
@@ -107,6 +117,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     , WwtCommunicator(dictionary)
     , _textureQuality(TextureQualityInfo, 0.5f, 0.25f, 1.f)
     , _isHidden(IsHiddenInfo, true)
+    , _pointSpaceCraft(PointSpaceCraftInfo, false)
 {
     _identifier = makeUniqueIdentifier(_identifier);
 
@@ -114,6 +125,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _textureQuality = p.textureQuality.value_or(_textureQuality);
     _isHidden = p.isHidden.value_or(_isHidden);
+    _pointSpaceCraft = p.pointSpaceCraft.value_or(_pointSpaceCraft);
 
     addProperty(_isHidden);
     addProperty(_url);
@@ -121,6 +133,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     addProperty(_reload);
     addProperty(_textureQuality);
     addProperty(_verticalFov);
+    addProperty(_pointSpaceCraft);
 
     _textureQuality.onChange([this]() { _textureDimensionsIsDirty = true; });
 
@@ -183,12 +196,20 @@ bool ScreenSpaceSkyBrowser::isInitialized() const {
     return _isInitialized;
 }
 
+bool ScreenSpaceSkyBrowser::pointSpaceCraft() const {
+    return _pointSpaceCraft;
+}
+
 void ScreenSpaceSkyBrowser::setIdInBrowser() const {
     WwtCommunicator::setIdInBrowser(identifier());
 }
 
 void ScreenSpaceSkyBrowser::setIsInitialized(bool isInitialized) {
     _isInitialized = isInitialized;
+}
+
+void ScreenSpaceSkyBrowser::setPointSpaceCraft(bool point) {
+    _pointSpaceCraft = point;
 }
 
 void ScreenSpaceSkyBrowser::updateTextureResolution() {
