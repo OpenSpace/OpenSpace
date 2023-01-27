@@ -64,7 +64,7 @@ struct ShutdownInformation {
 
 struct CommandlineArguments {
     std::string configurationName;
-    std::string configurationOverride;
+    std::vector<std::string> configurationOverride;
 };
 
 class OpenSpaceEngine : public properties::PropertyOwner {

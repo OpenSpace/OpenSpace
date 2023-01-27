@@ -301,24 +301,24 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         if (p.gui->name.has_value()) {
             result->setGuiName(*p.gui->name);
             result->_guiDisplayName = result->guiName();
-            result->addProperty(result->_guiDisplayName);
         }
+        result->addProperty(result->_guiDisplayName);
 
         if (p.gui->description.has_value()) {
             result->setDescription(*p.gui->description);
             result->_guiDescription = result->description();
-            result->addProperty(result->_guiDescription);
         }
+        result->addProperty(result->_guiDescription);
 
         if (p.gui->hidden.has_value()) {
             result->_guiHidden = *p.gui->hidden;
-            result->addProperty(result->_guiHidden);
         }
+        result->addProperty(result->_guiHidden);
 
         if (p.gui->path.has_value()) {
             result->_guiPath = *p.gui->path;
-            result->addProperty(result->_guiPath);
         }
+        result->addProperty(result->_guiPath);
     }
 
     result->_boundingSphere = p.boundingSphere.value_or(result->_boundingSphere);
@@ -485,7 +485,7 @@ ghoul::opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner({ "" })
     , _guiHidden(GuiHiddenInfo)
-    , _guiPath(GuiPathInfo)
+    , _guiPath(GuiPathInfo, "/")
     , _guiDisplayName(GuiNameInfo)
     , _guiDescription(GuiDescriptionInfo)
     , _transform {

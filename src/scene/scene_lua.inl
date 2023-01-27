@@ -323,55 +323,69 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
     return 0;
 }
 
+template <bool optimization>
 int propertySetValue(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 6 }, "lua::property_setValue");
+    int nParameters = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 2, 6 },
+        "lua::property_setValue"
+    );
     defer { lua_settop(L, 0); };
 
     std::string uriOrRegex =
         ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No);
-    std::string optimization;
     double interpolationDuration = 0.0;
     std::string easingMethodName;
     ghoul::EasingFunction easingMethod = ghoul::EasingFunction::Linear;
     std::string postScript;
 
-    if (lua_gettop(L) >= 3) {
+    // Extracting the parameters. These are the options that we have:
+    // 1. <uri> <value>
+    // 2. <uri> <value> <duration>
+    // 3. <uri> <value> <duration> <easing>
+    // 4. <uri> <value> <duration> <easing> <postscript>
+
+    if (nParameters >= 3) {
+        // Later functions expect the value to be at the last position on the stack
+        lua_pushvalue(L, 2);
+
         if (ghoul::lua::hasValue<double>(L, 3)) {
             interpolationDuration =
                 ghoul::lua::value<double>(L, 3, ghoul::lua::PopValue::No);
         }
         else {
-            optimization = ghoul::lua::value<std::string>(L, 3, ghoul::lua::PopValue::No);
+            std::string msg = fmt::format(
+                "Unexpected type {} in argument 3",
+                ghoul::lua::luaTypeToString(lua_type(L, 3))
+            );
+            return ghoul::lua::luaError(L, msg);
         }
-
-        if (lua_gettop(L) >= 4) {
-            if (ghoul::lua::hasValue<double>(L, 4)) {
-                interpolationDuration =
-                    ghoul::lua::value<double>(L, 4, ghoul::lua::PopValue::No);
-            }
-            else {
-                easingMethodName =
-                    ghoul::lua::value<std::string>(L, 4, ghoul::lua::PopValue::No);
-            }
-        }
-
-        if (lua_gettop(L) >= 5) {
-            postScript = ghoul::lua::value<std::string>(L, 5, ghoul::lua::PopValue::No);
-        }
-
-        if (lua_gettop(L) == 6) {
-            optimization = ghoul::lua::value<std::string>(L, 6, ghoul::lua::PopValue::No);
-        }
-
-        // Later functions expect the value to be at the last position on the stack
-        lua_pushvalue(L, 2);
     }
-
-    if ((interpolationDuration == 0.0) && !easingMethodName.empty()) {
-        LWARNINGC(
-            "property_setValue",
-            "Easing method specified while interpolation duration is equal to 0"
-        );
+    if (nParameters >= 4) {
+        if (ghoul::lua::hasValue<std::string>(L, 4)) {
+            easingMethodName =
+                ghoul::lua::value<std::string>(L, 4, ghoul::lua::PopValue::No);
+        }
+        else {
+            std::string msg = fmt::format(
+                "Unexpected type {} in argument 4",
+                ghoul::lua::luaTypeToString(lua_type(L, 4))
+            );
+            return ghoul::lua::luaError(L, msg);
+        }
+    }
+    if (nParameters == 5) {
+        if (ghoul::lua::hasValue<std::string>(L, 5)) {
+            postScript =
+                ghoul::lua::value<std::string>(L, 5, ghoul::lua::PopValue::No);
+        }
+        else {
+            std::string msg = fmt::format(
+                "Unexpected type {} in argument 5",
+                ghoul::lua::luaTypeToString(lua_type(L, 5))
+            );
+            return ghoul::lua::luaError(L, msg);
+        }
     }
 
     if (!easingMethodName.empty()) {
@@ -387,35 +401,7 @@ int propertySetValue(lua_State* L) {
         }
     }
 
-    if (optimization.empty()) {
-        std::string groupName;
-        if (doesUriContainGroupTag(uriOrRegex, groupName)) {
-            // Remove group name from start of regex and replace with '*'
-            uriOrRegex = removeGroupNameFromUri(uriOrRegex);
-        }
-
-        applyRegularExpression(
-            L,
-            uriOrRegex,
-            allProperties(),
-            interpolationDuration,
-            groupName,
-            easingMethod,
-            std::move(postScript)
-        );
-    }
-    else if (optimization == "regex") {
-        applyRegularExpression(
-            L,
-            uriOrRegex,
-            allProperties(),
-            interpolationDuration,
-            "",
-            easingMethod,
-            std::move(postScript)
-        );
-    }
-    else if (optimization == "single") {
+    if (optimization) {
         properties::Property* prop = property(uriOrRegex);
         if (!prop) {
             LERRORC(
@@ -437,28 +423,23 @@ int propertySetValue(lua_State* L) {
         );
     }
     else {
-        LERRORC(
-            "lua::propertySetValue",
-            fmt::format(
-                "{}: Unexpected optimization '{}'",
-                ghoul::lua::errorLocation(L), optimization
-            )
+        std::string groupName;
+        if (doesUriContainGroupTag(uriOrRegex, groupName)) {
+            // Remove group name from start of regex and replace with '*'
+            uriOrRegex = removeGroupNameFromUri(uriOrRegex);
+        }
+
+        applyRegularExpression(
+            L,
+            uriOrRegex,
+            allProperties(),
+            interpolationDuration,
+            groupName,
+            easingMethod,
+            std::move(postScript)
         );
     }
     return 0;
-}
-
-int propertySetValueSingle(lua_State* L) {
-    const int n = lua_gettop(L);
-    if (n == 3) {
-        // If we pass three arguments, the third one is the interpolation factor and the
-        // user did not specify an easing factor, so we have to add that manually before
-        // adding the single optimization
-        ghoul::lua::push(L, ghoul::nameForEasingFunction(ghoul::EasingFunction::Linear));
-    }
-
-    ghoul::lua::push(L, "single");
-    return propertySetValue(L);
 }
 
 int propertyGetValue(lua_State* L) {

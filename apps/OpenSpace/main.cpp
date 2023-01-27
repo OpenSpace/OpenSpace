@@ -33,6 +33,7 @@
 #include <ghoul/fmt.h>
 #include <ghoul/glm.h>
 #include <ghoul/cmdparser/commandlineparser.h>
+#include <ghoul/cmdparser/multiplecommand.h>
 #include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
@@ -1108,7 +1109,7 @@ int main(int argc, char* argv[]) {
         "current working directory"
     ));
 
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<ghoul::cmdparser::MultipleCommand<std::string>>(
         commandlineArguments.configurationOverride, "--config", "-c",
         "Provides the ability to pass arbitrary Lua code to the application that will be "
         "evaluated after the configuration file has been loaded but before the other "
@@ -1181,10 +1182,14 @@ int main(int argc, char* argv[]) {
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
+        std::string override;
+        for (const std::string& arg : commandlineArguments.configurationOverride) {
+            override += arg + ";";
+        }
         *global::configuration = configuration::loadConfigurationFromFile(
             configurationFilePath.string(),
             size,
-            commandlineArguments.configurationOverride
+            override
         );
 
         // Determining SGCT configuration file

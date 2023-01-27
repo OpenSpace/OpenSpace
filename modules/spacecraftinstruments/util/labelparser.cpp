@@ -58,13 +58,10 @@ LabelParser::LabelParser(std::string fileName, const ghoul::Dictionary& dictiona
         if (decoderStr == "Instrument") {
             // for each playbook call -> create a Decoder object
             for (std::string_view key : typeDict.keys()) {
-                std::string currentKey = fmt::format("{}.{}", decoderStr, key);
-
-                if (!dictionary.hasValue<ghoul::Dictionary>(currentKey)) {
+                if (!typeDict.hasValue<ghoul::Dictionary>(key)) {
                     continue;
                 }
-                ghoul::Dictionary decoderDict =
-                    dictionary.value<ghoul::Dictionary>(currentKey);
+                ghoul::Dictionary decoderDict = typeDict.value<ghoul::Dictionary>(key);
 
                 std::unique_ptr<Decoder> decoder = Decoder::createFromDictionary(
                     decoderDict,
