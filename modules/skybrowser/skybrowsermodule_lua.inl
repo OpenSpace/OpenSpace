@@ -41,16 +41,15 @@ namespace {
 constexpr std::string_view _loggerCat = "SkyBrowserModule";
 
 bool browserBelongsToCurrentNode(std::string identifier) {
-    std::string delimiter = "_";
-    size_t found = identifier.find(delimiter);
+    size_t found = identifier.find('-');
     std::string errorMessage = "The Sky Browser encountered a problem when it tried to "
         "initialize the browser";
-    if (found == identifier.size()) {
+    if (found == std::string::npos) {
         throw ghoul::RuntimeError(errorMessage);
     }
     else {
         std::string res = identifier.substr(found + 1, identifier.size());
-        if (res == "") {
+        if (res.empty()) {
             throw ghoul::RuntimeError(errorMessage);
         }
         // Convert the last char to an int
@@ -59,9 +58,9 @@ bool browserBelongsToCurrentNode(std::string identifier) {
     }
 }
 
-std::string getPrunedIdentifer(std::string identifier) {
-    std::string delimiter = "_";
-    std::string res = identifier.substr(0, identifier.find(delimiter));
+std::string prunedIdentifier(std::string identifier) {
+    // Removes the node number at the end of the identifier
+    std::string res = identifier.substr(0, identifier.find('-'));
     return res;
 }
 
@@ -197,7 +196,7 @@ std::string getPrunedIdentifer(std::string identifier) {
     if (!browserBelongsToCurrentNode(identifier)) {
         return;
     }
-    std::string prunedId = getPrunedIdentifer(identifier);
+    std::string prunedId = prunedIdentifier(identifier);
     // Load images from url
     LINFO("Connection established to WorldWide Telescope application in " + prunedId);
     LINFO("Loading image collections to " + prunedId);
@@ -273,7 +272,7 @@ std::string getPrunedIdentifer(std::string identifier) {
         return;
     }
 
-    std::string prunedId = getPrunedIdentifer(identifier);
+    std::string prunedId = prunedIdentifier(identifier);
     LINFO("Initializing sky browser " + prunedId);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(prunedId);
@@ -801,7 +800,7 @@ std::string getPrunedIdentifer(std::string identifier) {
     if (!browserBelongsToCurrentNode(identifier)) {
         return;
     }
-    std::string prunedId = getPrunedIdentifer(identifier);
+    std::string prunedId = prunedIdentifier(identifier);
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(prunedId);
