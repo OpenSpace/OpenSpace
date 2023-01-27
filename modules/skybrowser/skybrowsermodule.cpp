@@ -323,7 +323,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
     if (!found.has_value()) {
         return;
     }
-    const ImageData image = found.value();
+    const ImageData image = *found;
     // Only move and show circle if the image has coordinates
     if (!(_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem)) {
         return;

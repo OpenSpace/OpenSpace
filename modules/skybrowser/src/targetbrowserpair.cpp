@@ -162,8 +162,10 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     std::vector<std::string> selectedImagesIndices;
     
     for (const std::string& imageUrl : selectedImages()) {
+        bool imageExists = module->wwtDataHandler().image(imageUrl).has_value();
+        ghoul_assert(imageExists, "Image doesn't exist in the wwt catalog!");
         selectedImagesIndices.push_back(
-            module->wwtDataHandler().image(imageUrl).value().identifier
+            module->wwtDataHandler().image(imageUrl)->identifier
         );
     }
 

@@ -183,8 +183,7 @@ namespace {
     }
 
     std::optional<openspace::ImageData> 
-    loadImageFromNode(const tinyxml2::XMLElement* node, const std::string& collection,
-                      const std::string& identifier)
+    loadImageFromNode(const tinyxml2::XMLElement* node, const std::string& collection)
     {
         using namespace openspace;
 
@@ -255,7 +254,7 @@ namespace {
             fov,
             equatorialSpherical,
             equatorialCartesian,
-            identifier
+            ""
         };
     }
 } //namespace
@@ -330,6 +329,21 @@ void WwtDataHandler::loadImages(const std::string& root,
             saveImagesFromXml(rootNode, collectionName);
         }
     }
+    // Sort images. Copy images to vector
+    std::vector<ImageData> _imageVector;
+    for (const auto& [id, img] : _images) {
+        _imageVector.push_back(img);
+    }
+    // Sort
+    std::sort(_imageVector.begin(), _imageVector.end(),
+        [](const ImageData& lhs, const ImageData& rhs) {
+            return lhs.name < rhs.name;
+        }
+    );
+    // Set the identifiers to the correct order
+    for (int i = 0; i < _imageVector.size(); i++) {
+        _images[_imageVector[i].imageUrl].identifier = std::to_string(i);
+    }
 
     LINFO(fmt::format("Loaded {} WorldWide Telescope images", _images.size()));
 }
@@ -362,9 +376,8 @@ void WwtDataHandler::saveImagesFromXml(const tinyxml2::XMLElement* root,
         const std::string name = node->Name();
         // If node is an image or place, load it
         if (name == ImageSet || name == Place) {
-            std::string identifier = std::to_string(_images.size());
             std::optional<ImageData> image = loadImageFromNode(
-                node, collection, identifier
+                node, collection
             );
             if (image.has_value()) {
                 _images.insert({ image.value().imageUrl, std::move(*image) });
