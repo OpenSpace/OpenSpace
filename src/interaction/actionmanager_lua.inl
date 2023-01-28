@@ -115,6 +115,9 @@ namespace {
     }
     if (action.hasValue<std::string>("GuiPath")) {
         a.guiPath = action.value<std::string>("GuiPath");
+        if (!a.guiPath.starts_with('/')) {
+            throw ghoul::RuntimeError("Action's GuiPath must start with /");
+        }
     }
     if (action.hasValue<bool>("IsLocal")) {
         bool value = action.value<bool>("IsLocal");

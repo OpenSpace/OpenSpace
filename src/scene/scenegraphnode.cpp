@@ -316,6 +316,9 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         result->addProperty(result->_guiHidden);
 
         if (p.gui->path.has_value()) {
+            if (!p.gui->path->starts_with('/')) {
+                throw ghoul::RuntimeError("GuiPath must start with /");
+            }
             result->_guiPath = *p.gui->path;
         }
         result->addProperty(result->_guiPath);
