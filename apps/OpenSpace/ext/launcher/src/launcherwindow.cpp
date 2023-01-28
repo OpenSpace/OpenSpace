@@ -711,9 +711,27 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
     else {
         try {
             sgct::config::GeneratorVersion previewGenVersion =
-                sgct::readJsonGeneratorVersion(winCfg);
+                sgct::readConfigGenerator(winCfg);
             if (previewGenVersion.versionCheck(minimumVersion)) {
-                preview = sgct::readConfig(winCfg);
+                try {
+                    preview = sgct::readConfig(
+                        winCfg,
+                        "This configuration file is unable to generate a proper display "
+                        "due to a problem detected in the readConfig function"
+                    );
+                }
+                catch (std::runtime_error& e) {
+                    //Re-throw an SGCT error exception with the runtime exception message
+                    throw sgct::Error(
+                        sgct::Error::Component::ReadConfig,
+                        6082,
+                        fmt::format(
+                            "Importing of this configuration file failed because of a "
+                            "problem detected in the readConfig function: {}",
+                            e.what()
+                        )
+                    );
+                }
                 sgct::validateConfigAgainstSchema(
                     winCfg,
                     _configPath + "/schema/sgct.schema.json",
@@ -759,12 +777,12 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                 fmt::format("Error in file '{}':  {}", winCfg, e.message)
             );
         }
-/*        catch (std::runtime_error& e) {
+        catch (std::runtime_error& e) {
             editRefusalDialog(
                 "Format Validation Error",
                 fmt::format("Error in file '{}':  {}", winCfg, e.what())
             );
-        }*/
+        }
     }
 }
 
