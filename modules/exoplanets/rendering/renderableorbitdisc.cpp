@@ -77,8 +77,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply Color",
-        "If set, the disc's texture is multiplied with this color. "
-        "Useful for applying a color grayscale images"
+        "If set, the disc's texture is multiplied with this color. Useful for applying a "
+        "color grayscale images"
     };
 
     struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {

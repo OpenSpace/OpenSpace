@@ -63,8 +63,7 @@ namespace {
         "The constellations that are selected are displayed on the celestial sphere"
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
-    {
+    const static openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the constellations"

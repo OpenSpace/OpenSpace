@@ -47,7 +47,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DistanceUnitInfo = {
         "DistanceUnit",
         "Distance Unit",
-        "Property to define the unit in which the distance should be displayed"
+        "Property to define the unit in which the distance should be displayed. "
         "Defaults to 'km' if not specified"
     };
 

@@ -242,9 +242,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
         "MagnitudeExponent",
         "Magnitude Exponent",
-        "Adjust star magnitude by 10^MagnitudeExponent. "
-        "Stars closer than this distance are given full opacity. "
-        "Farther away, stars dim proportionally to the logarithm of their distance"
+        "Adjust star magnitude by 10^MagnitudeExponent. Stars closer than this distance "
+        "are given full opacity. Farther away, stars dim proportionally to the "
+        "logarithm of their distance"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderMethodOptionInfo = {
@@ -301,7 +301,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrightnessPercentInfo = {
-        "BrightnessPercen",
+        "BrightnessPercent",
         "App Brightness Contribution",
         "App Brightness Contribution"
     };

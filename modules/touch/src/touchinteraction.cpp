@@ -243,7 +243,7 @@ namespace {
         "Zoom In Limit",
         "The minimum distance from the anchor that you are allowed to navigate to. "
         "Its purpose is to limit zooming in on a node. If this value is not set it "
-        "defaults to the surface of the current anchor. "
+        "defaults to the surface of the current anchor."
     };
 
     // Compute coefficient of decay based on current frametime; if frametime has been
@@ -286,7 +286,7 @@ TouchInteraction::TouchInteraction()
         0.01f,
         0.25f
     )
-    , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 1.f, 1.01f)
+    , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 0.01f, 10000.0f)
     , _zoomInLimit(ZoomInLimitInfo, -1.0, 0.0, std::numeric_limits<double>::max())
     , _zoomOutLimit(
         ZoomOutLimitInfo,
@@ -591,7 +591,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& lis
             const bool isVisibleX = (ndc.x >= -1.0 && ndc.x <= 1.0);
             const bool isVisibleY = (ndc.y >= -1.0 && ndc.y <= 1.0);
             if (isVisibleX && isVisibleY) {
-                glm::dvec2 cursor = { xCo, yCo };
+                glm::dvec2 cursor = glm::dvec2(xCo, yCo);
 
                 const double ndcDist = glm::length(ndc - cursor);
                 // We either want to select the object if it's bounding sphere as been
@@ -607,10 +607,10 @@ void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& lis
                         "Picking candidate based on direct touch"
                     );
 #endif //#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
-                    currentlyPicked = {
+                    currentlyPicked = std::pair(
                         node,
                         -std::numeric_limits<double>::max()
-                    };
+                    );
                 }
                 else if (ndcDist <= _pickingRadiusMinimum) {
                     // The node was considered due to minimum picking distance radius
@@ -644,7 +644,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
                                            const std::vector<TouchInput>& lastProcessed)
 {
     glm::fvec2 lastCentroid = _centroid;
-    _centroid = { 0.f, 0.f };
+    _centroid = glm::vec2(0.f, 0.f);
     for (const TouchInputHolder& inputHolder : list) {
         _centroid += glm::vec2(
             inputHolder.latestInput().x,

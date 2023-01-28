@@ -480,7 +480,10 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
 
         // Regardless of what happens next, the position of every second element is going
         // to be the same. Only the color attribute might change
-        first = { { 0.f, 0.f, 0.f }, RenderInformation::VertexColorTypeDefaultStart};
+        first = {
+            .position = { 0.f, 0.f, 0.f },
+            .color = RenderInformation::VertexColorTypeDefaultStart
+        };
 
         if (!isInFov) {
             // If the target is not in the field of view, we don't need to perform any
@@ -488,9 +491,8 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
             const glm::vec3 o = orthogonalProjection(bound, time, target);
 
             second = {
-                { o.x, o.y, o.z },
-                 // This had a different color (0.4) before ---abock
-                RenderInformation::VertexColorTypeDefaultEnd
+                .position = { o.x, o.y, o.z },
+                .color = RenderInformation::VertexColorTypeDefaultEnd
             };
         }
         else {
@@ -531,16 +533,16 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                 srfVec *= _standOffDistance;
 
                 second = {
-                    { srfVec.x, srfVec.y, srfVec.z },
-                    RenderInformation::VertexColorTypeIntersectionEnd
+                    .position = { srfVec.x, srfVec.y, srfVec.z },
+                    .color = RenderInformation::VertexColorTypeIntersectionEnd
                 };
             }
             else {
                 // This point did not intersect the target though others did
                 const glm::vec3 o = orthogonalProjection(bound, time, target);
                 second = {
-                    { o.x, o.y, o.z },
-                    RenderInformation::VertexColorTypeInFieldOfView
+                    .position = { o.x, o.y, o.z },
+                    .color = RenderInformation::VertexColorTypeInFieldOfView
                 };
             }
         }
@@ -626,15 +628,15 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                 if (intercepts(tBound)) {
                     const glm::vec3 icpt = interceptVector(tBound);
                     _orthogonalPlane.data[indexForBounds(i) + m] = {
-                        { icpt.x, icpt.y, icpt.z },
-                        RenderInformation::VertexColorTypeSquare
+                        .position = { icpt.x, icpt.y, icpt.z },
+                        .color = RenderInformation::VertexColorTypeSquare
                     };
                 }
                 else {
                     const glm::vec3 o = orthogonalProjection(tBound, time, target);
                     _orthogonalPlane.data[indexForBounds(i) + m] = {
-                        { o.x, o.y, o.z },
-                        RenderInformation::VertexColorTypeSquare
+                        .position = { o.x, o.y, o.z },
+                        .color = RenderInformation::VertexColorTypeSquare
                     };
                 }
             }

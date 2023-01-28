@@ -469,7 +469,7 @@ bool FixedRotation::initialize() {
     }
 
     // No need to hold on to the data
-    _constructorDictionary = {};
+    _constructorDictionary = ghoul::Dictionary();
     return res;
 }
 

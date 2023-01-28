@@ -17,9 +17,10 @@ local speck = asset.syncedResource({
   Name = "Grids Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_grids_speck",
-  Version = 2
+  Version = 3
 })
 
+local lightHour = 1.0792528488E12
 local lightDay = 2.59020684E13
 local lightMonth = 7.771E14
 local lightYear = 9.4605284E15
@@ -232,6 +233,37 @@ local galacticLabels = {
   },
   GUI = {
     Name = "Galactic Sphere Labels",
+    Path = "/Other/Grids"
+  }
+}
+
+local plane1lh = {
+  Identifier = "1lhGrid",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = eclipticRotationMatrix
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "1lh.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 9.5,
+      MinMaxSize = { 0, 30 },
+      Unit = "Km"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightHour, 2*lightHour }
+  },
+  GUI = {
+    Name = "1lh Grid",
     Path = "/Other/Grids"
   }
 }
@@ -585,7 +617,7 @@ local plane20Gly = {
 
 local nodes = {
   radio, oort, ecliptic, eclipticLabels, equatorial, equatorialLabels,
-  galactic, galacticLabels, plane1ld, plane1lm, plane1ly, plane10ly,
+  galactic, galacticLabels, plane1lh, plane1ld, plane1lm, plane1ly, plane10ly,
   plane100ly, plane1kly, plane10kly, plane100kly, plane1Mly, plane10Mly, plane100Mly,
   plane20Gly
 }

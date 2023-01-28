@@ -20,26 +20,21 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
 
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
   Type = "ImageSequenceTileLayer",
-  FolderPath = imagesDestination,
+  FolderPath = syncedDirectory .. "2048",
   Description = Description
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "2048.zip", imagesDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

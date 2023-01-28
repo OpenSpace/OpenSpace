@@ -169,7 +169,10 @@ ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParen
         ti.level--;
     };
 
-    TileUvTransform uvTransform = { glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f) };
+    TileUvTransform uvTransform = {
+        .uvOffset = glm::vec2(0.f, 0.f),
+        .uvScale = glm::vec2(1.f, 1.f)
+    };
 
     // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller
     for (int i = 0; i < parents && tileIndex.level > 1; i++) {
@@ -221,8 +224,8 @@ ChunkTilePile TileProvider::chunkTilePile(TileIndex tileIndex, int pileSize) {
             if (i == 0) {
                 // First iteration
                 chunkTilePile[i]->tile = DefaultTile;
-                chunkTilePile[i]->uvTransform.uvOffset = { 0.f, 0.f };
-                chunkTilePile[i]->uvTransform.uvScale = { 1.f, 1.f };
+                chunkTilePile[i]->uvTransform.uvOffset = glm::vec2(0.f, 0.f);
+                chunkTilePile[i]->uvTransform.uvScale = glm::vec2(1.f, 1.f);
             }
             else {
                 // We are iterating through the array one-by-one, so we are guaranteed

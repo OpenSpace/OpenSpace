@@ -208,7 +208,7 @@ TEST_CASE("SelectionProperty: Value From Copying Variable", "[selectionproperty]
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    p = { "a", "b" };
+    p = std::set<std::string>{ "a", "b" };
 
     CHECK(p.value() == std::set<std::string>{ "a", "b" });
 }
@@ -217,10 +217,10 @@ TEST_CASE("SelectionProperty: Re-set Options After Selection", "[selectionproper
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    p = { "a", "b" };
+    p = std::set<std::string>{ "a", "b" };
 
-    p.setOptions({ "a", "c", "d" }); // b no longer included
-                                     // => should be removed from selection
+    p.setOptions(std::vector<std::string>{ "a", "c", "d" }); // b no longer included
+                                                             // => should be removed
 
     CHECK(p.value() == std::set<std::string>{ "a" });
 }

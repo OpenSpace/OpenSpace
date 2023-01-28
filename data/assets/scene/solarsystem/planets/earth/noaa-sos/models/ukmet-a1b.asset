@@ -22,10 +22,9 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
@@ -34,7 +33,7 @@ local layer = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = imagesDestination,
+    Folder = syncedDirectory .. "2100",
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "000_%Y_1_A1B_HQ.png"
@@ -53,11 +52,6 @@ local colorbar = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "2100.zip", imagesDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.addScreenSpaceRenderable(colorbar)
 end)

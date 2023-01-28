@@ -81,8 +81,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
         "VisibilityDistance",
         "VisibilityDistance",
-        "The distace in world coordinates between node and camera "
-        "at which the screenspace object will become visible",
+        "The distace in world coordinates between node and camera at which the "
+        "screenspace object will become visible",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -101,10 +101,9 @@ namespace {
         "InteractionSphere",
         "Interaction Sphere",
         "The minimum radius that the camera is allowed to get close to this scene graph "
-        "node. This value is "
-        "only used as an override to the bounding sphere calculated by the Renderable, "
-        "if present. If this value is -1, the Renderable's computed interaction sphere "
-        "is used",
+        "node. This value is only used as an override to the bounding sphere calculated "
+        "by the Renderable, if present. If this value is -1, the Renderable's computed "
+        "interaction sphere is used",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -125,32 +124,31 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
         "GuiPath",
         "Gui Path",
-        "This is the path for the scene graph node in the gui "
-        "example: /Solar System/Planets/Earth",
+        "This is the path for the scene graph node in the gui example: "
+        "/Solar System/Planets/Earth",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
         "GuiName",
         "Gui Name",
-        "This is the name for the scene graph node in the gui "
-        "example: Earth",
+        "This is the name for the scene graph node in the gui. Example: Earth",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
         "GuiDescription",
         "Gui Description",
-        "This is the description for the scene graph node to be shown in the gui "
-        "example: Earth is a special place",
+        "This is the description for the scene graph node to be shown in the gui. "
+        "Example: Earth is a special place",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiHiddenInfo = {
         "GuiHidden",
         "Gui Hidden",
-        "This represents if the scene graph node should be shown in the gui "
-        "example: false",
+        "This represents if the scene graph node should be shown in the gui. "
+        "Example: false",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -303,24 +301,24 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         if (p.gui->name.has_value()) {
             result->setGuiName(*p.gui->name);
             result->_guiDisplayName = result->guiName();
-            result->addProperty(result->_guiDisplayName);
         }
+        result->addProperty(result->_guiDisplayName);
 
         if (p.gui->description.has_value()) {
             result->setDescription(*p.gui->description);
             result->_guiDescription = result->description();
-            result->addProperty(result->_guiDescription);
         }
+        result->addProperty(result->_guiDescription);
 
         if (p.gui->hidden.has_value()) {
             result->_guiHidden = *p.gui->hidden;
-            result->addProperty(result->_guiHidden);
         }
+        result->addProperty(result->_guiHidden);
 
         if (p.gui->path.has_value()) {
             result->_guiPath = *p.gui->path;
-            result->addProperty(result->_guiPath);
         }
+        result->addProperty(result->_guiPath);
     }
 
     result->_boundingSphere = p.boundingSphere.value_or(result->_boundingSphere);
@@ -487,7 +485,7 @@ ghoul::opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner({ "" })
     , _guiHidden(GuiHiddenInfo)
-    , _guiPath(GuiPathInfo)
+    , _guiPath(GuiPathInfo, "/")
     , _guiDisplayName(GuiNameInfo)
     , _guiDescription(GuiDescriptionInfo)
     , _transform {
@@ -729,10 +727,14 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         TracyGpuZone("Render")
 
         RenderData newData = {
-            data.camera,
-            data.time,
-            data.renderBinMask,
-            { _worldPositionCached, _worldRotationCached, _worldScaleCached }
+            .camera = data.camera,
+            .time = data.time,
+            .renderBinMask = data.renderBinMask,
+            .modelTransform = {
+                .translation = _worldPositionCached,
+                .rotation = _worldRotationCached,
+                .scale = _worldScaleCached
+            }
         };
 
         _renderable->render(newData, tasks);

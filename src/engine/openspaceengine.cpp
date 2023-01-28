@@ -486,7 +486,11 @@ void OpenSpaceEngine::initializeGL() {
     bool debugActive = global::configuration->openGLDebugContext.isActive;
 
     // Debug output is not available before 4.3
-    const ghoul::systemcapabilities::Version minVersion = { 4, 3, 0 };
+    const ghoul::systemcapabilities::Version minVersion = {
+        .major = 4,
+        .minor = 3,
+        .release = 0
+    };
     if (debugActive && OpenGLCap.openGLVersion() < minVersion) {
         LINFO("OpenGL Debug context requested, but insufficient version available");
         debugActive = false;
@@ -684,20 +688,6 @@ void OpenSpaceEngine::loadAssets() {
         global::windowDelegate->setSynchronization(true);
         global::windowDelegate->setBarrier(true);
     };
-
-    if (_scene) {
-        ZoneScopedN("Reset scene")
-
-        global::syncEngine->removeSyncables(global::timeManager->syncables());
-        if (_scene && _scene->camera()) {
-            global::syncEngine->removeSyncables(_scene->camera()->syncables());
-        }
-        global::renderEngine->setScene(nullptr);
-        global::renderEngine->setCamera(nullptr);
-        global::navigationHandler->setCamera(nullptr);
-        _scene->clear();
-        global::rootPropertyOwner->removePropertySubOwner(_scene.get());
-    }
 
     std::unique_ptr<SceneInitializer> sceneInitializer;
     if (global::configuration->useMultithreadedInitialization) {

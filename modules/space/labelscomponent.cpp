@@ -85,9 +85,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
         "FaceCamera",
         "Face Camera",
-        "If enabled, the labels will be rotated to face the camera. "
-        "For non-linear display rendering (for example fisheye) this should be set to "
-        "false."
+        "If enabled, the labels will be rotated to face the camera. For non-linear "
+        "display rendering (for example fisheye) this should be set to false."
     };
 
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {

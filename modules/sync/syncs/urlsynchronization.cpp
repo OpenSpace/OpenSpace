@@ -146,7 +146,13 @@ void UrlSynchronization::start() {
 
         for (const std::string& url : _urls) {
             if (_filename.empty() || _urls.size() > 1) {
-                std::string name = std::filesystem::path(url).filename().string();
+                std::filesystem::path fn = std::filesystem::path(url).filename();
+                if (fn.empty() && url.back() == '/') {
+                    // If the user provided a path that ends in / the `filename` will
+                    // result in an empty path with causes the downloading to fail
+                    fn = std::filesystem::path(url).parent_path().filename();
+                }
+                std::string name = fn.string();
 
                 // We can not create filenames with question marks
                 name.erase(std::remove(name.begin(), name.end(), '?'), name.end());

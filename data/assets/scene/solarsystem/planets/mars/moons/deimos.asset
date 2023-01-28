@@ -19,6 +19,7 @@ local kernels = asset.syncedResource({
 local Deimos = {
   Identifier = "Deimos",
   Parent = transforms.MarsBarycenter.Identifier,
+  InteractionSphere = 8000,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",

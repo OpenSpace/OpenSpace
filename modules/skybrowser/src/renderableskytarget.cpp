@@ -58,7 +58,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RectangleThresholdInfo = {
         "RectangleThreshold",
         "Rectangle Threshold",
-        "When the field of view is larger than the rectangle threshold, a rectangle will"
+        "When the field of view is larger than the rectangle threshold, a rectangle will "
         "be rendered in the target"
     };
 
@@ -188,7 +188,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
     const bool showRectangle = _verticalFov > _showRectangleThreshold;
 
-    glm::vec4 color = { glm::vec3(_borderColor) / 255.f, 1.0 };
+    glm::vec4 color = glm::vec4(glm::vec3(_borderColor) / 255.f, 1.0);
 
     _shader->activate();
     _shader->setUniform("opacity", opacity());

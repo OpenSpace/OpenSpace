@@ -197,12 +197,12 @@ bool HongKangParser::create() {
 
                 // fill image
                 Image image = {
-                    TimeRange(time, time + Exposure),
-                    _defaultCaptureImage.string(),
-                    std::move(cameraSpiceID),
-                    cameraTarget,
-                    true,
-                    false
+                    .timeRange = TimeRange(time, time + Exposure),
+                    .path = _defaultCaptureImage.string(),
+                    .activeInstruments = std::move(cameraSpiceID),
+                    .target = cameraTarget,
+                    .isPlaceholder = true,
+                    .projected = false
                 };
 
                 // IFF spacecraft has decided to switch target, store in target
@@ -239,18 +239,18 @@ bool HongKangParser::create() {
                         );
                         std::string scannerTarget = findPlaybookSpecifiedTarget(line);
 
-                        TimeRange scanRange = { scanStart, scanStop };
+                        TimeRange scanRange = TimeRange(scanStart, scanStop);
                         ghoul_assert(scanRange.isDefined(), "Invalid time range");
                         _instrumentTimes.emplace_back(it->first, scanRange);
 
                         // store individual image
                         Image image = {
-                            scanRange,
-                            _defaultCaptureImage.string(),
-                            it->second->translations(),
-                            cameraTarget,
-                            true,
-                            false
+                            .timeRange = scanRange,
+                            .path = _defaultCaptureImage.string(),
+                            .activeInstruments = it->second->translations(),
+                            .target = cameraTarget,
+                            .isPlaceholder = true,
+                            .projected = false
                         };
                         _subsetMap[scannerTarget]._subset.push_back(std::move(image));
                         _subsetMap[scannerTarget]._range.include(scanStart);
@@ -265,7 +265,7 @@ bool HongKangParser::create() {
             // we have reached the end of a scan or consecutive capture sequence
             if (captureStart != -1) {
                 // end of capture sequence for camera, store end time of this sequence
-                TimeRange cameraRange = { captureStart, time };
+                TimeRange cameraRange = TimeRange(captureStart, time);
                 ghoul_assert(cameraRange.isDefined(), "Invalid time range");
                 _instrumentTimes.emplace_back(previousCamera, cameraRange);
                 captureStart = -1;

@@ -116,9 +116,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CutOffThresholdInfo = {
         "CutOffThreshold",
         "Cut Off Threshold",
-        "Set threshold for when to cut off star rendering. "
-        "Stars closer than this threshold are given full opacity. "
-        "Farther away, stars dim proportionally to the 4-logarithm of their distance"
+        "Set threshold for when to cut off star rendering. Stars closer than this "
+        "threshold are given full opacity. Farther away, stars dim proportionally to the "
+        "4-logarithm of their distance"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SharpnessInfo = {
@@ -136,8 +136,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CloseUpBoostDistInfo = {
         "CloseUpBoostDist",
         "Close-Up Boost Distance [pc]",
-        "Set the distance where stars starts to increase in size. Unit is Parsec"
-        "[Works only with billboards]"
+        "Set the distance where stars starts to increase in size. Unit is Parsec [Works "
+        "only with billboards]"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TmPointFilterSizeInfo = {
@@ -182,8 +182,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FirstRowInfo = {
         "FirstRow",
         "First Row to Read",
-        "Defines the first row that will be read from the specified FITS file"
-        "No need to define if data already has been processed. [Works only with "
+        "Defines the first row that will be read from the specified FITS file No need to "
+        "define if data already has been processed. [Works only with "
         "FileReaderOption::Fits]"
     };
 
@@ -198,9 +198,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColumnNamesInfo = {
         "ColumnNames",
         "Column Names",
-        "A list of strings with the names of all the columns that are to be "
-        "read from the specified FITS file. No need to define if data already "
-        "has been processed. [Works only with FileReaderOption::Fits]"
+        "A list of strings with the names of all the columns that are to be read from "
+        "the specified FITS file. No need to define if data already has been processed. "
+        "[Works only with FileReaderOption::Fits]"
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumRenderedStarsInfo = {
@@ -212,8 +212,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CpuRamBudgetInfo = {
         "CpuRamBudget",
         "CPU RAM Budget",
-        "Current remaining budget (bytes) on the CPU RAM for loading more node data "
-        "files"
+        "Current remaining budget (bytes) on the CPU RAM for loading more node data files"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GpuStreamBudgetInfo = {
@@ -246,51 +245,50 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FilterPosXInfo = {
         "FilterPosX",
         "PosX Threshold",
-        "If defined then only stars with Position X values between [min, max] "
-        "will be rendered (if min is set to 0.0 it is read as -Inf, "
-        "if max is set to 0.0 it is read as +Inf). Measured in kiloParsec"
+        "If defined then only stars with Position X values between [min, max] will be "
+        "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
+        "read as +Inf). Measured in kiloParsec"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterPosYInfo = {
         "FilterPosY",
         "PosY Threshold",
-        "If defined then only stars with Position Y values between [min, max] "
-        "will be rendered (if min is set to 0.0 it is read as -Inf, "
-        "if max is set to 0.0 it is read as +Inf). Measured in kiloParsec"
+        "If defined then only stars with Position Y values between [min, max] will be "
+        "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
+        "read as +Inf). Measured in kiloParsec"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterPosZInfo = {
         "FilterPosZ",
         "PosZ Threshold",
-        "If defined then only stars with Position Z values between [min, max] "
-        "will be rendered (if min is set to 0.0 it is read as -Inf, "
-        "if max is set to 0.0 it is read as +Inf). Measured in kiloParsec"
+        "If defined then only stars with Position Z values between [min, max] will be "
+        "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
+        "read as +Inf). Measured in kiloParsec"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterGMagInfo = {
         "FilterGMag",
         "GMag Threshold",
-        "If defined then only stars with G mean magnitude values between [min, max] "
-        "will be rendered (if min is set to 20.0 it is read as -Inf, "
-        "if max is set to 20.0 it is read as +Inf). If min = max then all values "
-        "equal min|max will be filtered away"
+        "If defined then only stars with G mean magnitude values between [min, max] will "
+        "be rendered (if min is set to 20.0 it is read as -Inf, if max is set to 20.0 it "
+        "is read as +Inf). If min = max then all values equal min|max will be filtered "
+        "away"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterBpRpInfo = {
         "FilterBpRp",
         "Bp-Rp Threshold",
-        "If defined then only stars with Bp-Rp color values between [min, max] "
-        "will be rendered (if min is set to 0.0 it is read as -Inf, "
-        "if max is set to 0.0 it is read as +Inf). If min = max then all values "
-        "equal min|max will be filtered away"
+        "If defined then only stars with Bp-Rp color values between [min, max] will be "
+        "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
+        "read as +Inf). If min = max then all values equal min|max will be filtered away"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterDistInfo = {
         "FilterDist",
         "Dist Threshold",
-        "If defined then only stars with Distances values between [min, max] "
-        "will be rendered (if min is set to 0.0 it is read as -Inf, "
-        "if max is set to 0.0 it is read as +Inf). Measured in kParsec"
+        "If defined then only stars with Distances values between [min, max] will be "
+        "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
+        "read as +Inf). Measured in kParsec"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReportGlErrorsInfo = {

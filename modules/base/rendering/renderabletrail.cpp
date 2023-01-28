@@ -117,7 +117,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering Mode",
-        "Determines how the trail should be rendered to the screen.If 'Lines' is "
+        "Determines how the trail should be rendered to the screen. If 'Lines' is "
         "selected, only the line part is visible, if 'Points' is selected, only the "
         "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts"
     };
