@@ -967,6 +967,38 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
     openspace::global::userPropertyOwner->addProperty(p);
 }
 
+enum class [[codegen::enum]] CustomPropertyType {
+    DMat2Property,
+    DMat3Property,
+    DMat4Property,
+    Mat2Property,
+    Mat3Property,
+    Mat4Property,
+    BoolProperty,
+    DoubleProperty,
+    FloatProperty,
+    IntProperty,
+    StringProperty,
+    StringListProperty,
+    LongProperty,
+    ShortProperty,
+    UShortProperty,
+    UIntProperty,
+    ULongProperty,
+    DVec2Property,
+    DVec3Property,
+    DVec4Property,
+    IVec2Property,
+    IVec3Property,
+    IVec4Property,
+    UVec2Property,
+    UVec3Property,
+    UVec4Property,
+    Vec2Property,
+    Vec3Property,
+    Vec4Property
+};
+
 /**
  * Creates a new property that lives in the `UserProperty` group.
  * 
@@ -984,12 +1016,14 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
  * \param description A description what the property is used for
  * \param onChange A Lua script that will be executed whenever the property changes
  */
-[[codegen::luawrap]] void addCustomProperty(std::string identifier, std::string type,
+[[codegen::luawrap]] void addCustomProperty(std::string identifier,
+                                            CustomPropertyType type,
                                             std::optional<std::string> guiName,
                                             std::optional<std::string> description,
                                             std::optional<std::string> onChange)
 {
     using namespace openspace;
+    using namespace openspace::properties;
 
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Identifier must not empty");
@@ -1013,101 +1047,101 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
         guiName->c_str() :
         identifier.c_str();
 
-    properties::Property::PropertyInfo info = {
+    Property::PropertyInfo info = {
         identifier.c_str(),
         gui,
         description.has_value() ? description->c_str() : ""
     };
-    if (type == "DMat2Property") {
-        createCustomProperty<properties::DMat2Property>(info, std::move(onChange));
+    switch (type) {
+        case CustomPropertyType::DMat2Property:
+            createCustomProperty<DMat2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DMat3Property:
+            createCustomProperty<DMat3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DMat4Property:
+            createCustomProperty<DMat4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Mat2Property:
+            createCustomProperty<Mat2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Mat3Property:
+            createCustomProperty<Mat3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Mat4Property:
+            createCustomProperty<Mat4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::BoolProperty:
+            createCustomProperty<BoolProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DoubleProperty:
+            createCustomProperty<DoubleProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::FloatProperty:
+            createCustomProperty<FloatProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::IntProperty:
+            createCustomProperty<IntProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::StringProperty:
+            createCustomProperty<StringProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::StringListProperty:
+            createCustomProperty<StringListProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::LongProperty:
+            createCustomProperty<LongProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::ShortProperty:
+            createCustomProperty<ShortProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UIntProperty:
+            createCustomProperty<UIntProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::ULongProperty:
+            createCustomProperty<ULongProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UShortProperty:
+            createCustomProperty<UShortProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DVec2Property:
+            createCustomProperty<DVec2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DVec3Property:
+            createCustomProperty<DVec3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DVec4Property:
+            createCustomProperty<DVec4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::IVec2Property:
+            createCustomProperty<IVec2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::IVec3Property:
+            createCustomProperty<IVec3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::IVec4Property:
+            createCustomProperty<IVec4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UVec2Property:
+            createCustomProperty<UVec2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UVec3Property:
+            createCustomProperty<UVec3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UVec4Property:
+            createCustomProperty<UVec4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Vec2Property:
+            createCustomProperty<Vec2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Vec3Property:
+            createCustomProperty<Vec3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Vec4Property:
+            createCustomProperty<Vec4Property>(info, std::move(onChange));
+            return;
     }
-    else if (type == "DMat3Property") {
-        createCustomProperty<properties::DMat3Property>(info, std::move(onChange));
-    }
-    else if (type == "DMat4Property") {
-        createCustomProperty<properties::DMat4Property>(info, std::move(onChange));
-    }
-    else if (type == "Mat2Property") {
-        createCustomProperty<properties::Mat2Property>(info, std::move(onChange));
-    }
-    else if (type == "Mat3Property") {
-        createCustomProperty<properties::Mat3Property>(info, std::move(onChange));
-    }
-    else if (type == "Mat4Property") {
-        createCustomProperty<properties::Mat4Property>(info, std::move(onChange));
-    }
-    else if (type == "BoolProperty") {
-        createCustomProperty<properties::BoolProperty>(info, std::move(onChange));
-    }
-    else if (type == "DoubleProperty") {
-        createCustomProperty<properties::DoubleProperty>(info, std::move(onChange));
-    }
-    else if (type == "FloatProperty") {
-        createCustomProperty<properties::FloatProperty>(info, std::move(onChange));
-    }
-    else if (type == "IntProperty") {
-        createCustomProperty<properties::IntProperty>(info, std::move(onChange));
-    }
-    else if (type == "StringProperty") {
-        createCustomProperty<properties::StringProperty>(info, std::move(onChange));
-    }
-    else if (type == "StringListProperty") {
-        createCustomProperty<properties::StringListProperty>(info, std::move(onChange));
-    }
-    else if (type == "LongProperty") {
-        createCustomProperty<properties::LongProperty>(info, std::move(onChange));
-    }
-    else if (type == "ShortProperty") {
-        createCustomProperty<properties::ShortProperty>(info, std::move(onChange));
-    }
-    else if (type == "UIntProperty") {
-        createCustomProperty<properties::UIntProperty>(info, std::move(onChange));
-    }
-    else if (type == "ULongProperty") {
-        createCustomProperty<properties::ULongProperty>(info, std::move(onChange));
-    }
-    else if (type == "UShortProperty") {
-        createCustomProperty<properties::UShortProperty>(info, std::move(onChange));
-    }
-    else if (type == "DVec2Property") {
-        createCustomProperty<properties::DVec2Property>(info, std::move(onChange));
-    }
-    else if (type == "DVec3Property") {
-        createCustomProperty<properties::DVec3Property>(info, std::move(onChange));
-    }
-    else if (type == "DVec4Property") {
-        createCustomProperty<properties::DVec4Property>(info, std::move(onChange));
-    }
-    else if (type == "IVec2Property") {
-        createCustomProperty<properties::IVec2Property>(info, std::move(onChange));
-    }
-    else if (type == "IVec3Property") {
-        createCustomProperty<properties::IVec3Property>(info, std::move(onChange));
-    }
-    else if (type == "IVec4Property") {
-        createCustomProperty<properties::IVec4Property>(info, std::move(onChange));
-    }
-    else if (type == "UVec2Property") {
-        createCustomProperty<properties::UVec2Property>(info, std::move(onChange));
-    }
-    else if (type == "UVec3Property") {
-        createCustomProperty<properties::UVec3Property>(info, std::move(onChange));
-    }
-    else if (type == "UVec4Property") {
-        createCustomProperty<properties::UVec4Property>(info, std::move(onChange));
-    }
-    else if (type == "Vec2Property") {
-        createCustomProperty<properties::Vec2Property>(info, std::move(onChange));
-    }
-    else if (type == "Vec3Property") {
-        createCustomProperty<properties::Vec3Property>(info, std::move(onChange));
-    }
-    else if (type == "Vec4Property") {
-        createCustomProperty<properties::Vec4Property>(info, std::move(onChange));
-    }
-    else {
-        throw ghoul::lua::LuaError(fmt::format("Unsupported type {}", type));
-    }
+    throw std::runtime_error("Missing case label");
 }
 
 [[codegen::luawrap]] void removeCustomProperty(std::string identifier) {
