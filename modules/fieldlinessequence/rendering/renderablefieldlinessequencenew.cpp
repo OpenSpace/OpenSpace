@@ -37,7 +37,6 @@
 #include <ghoul/opengl/textureunit.h>
 #include <thread>
 
-
 namespace {
     constexpr std::string_view _loggerCat = "RenderableFieldlinesSequenceNew";
 
@@ -195,6 +194,9 @@ namespace {
         // masked by. Should be entered as {min value, max value} per range
         std::optional<std::vector<glm::vec2>> maskingRanges;
 
+        // [[codegen::verbatim(DomainEnabledInfo.description)]]
+        std::optional<bool> domainEnabled;
+
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
@@ -204,10 +206,9 @@ namespace {
         std::optional<double> manualTimeOffset;
 
         enum class [[codegen::map(openspace::fls::Model)]] Model {
-            Batsrus = 0,
+            Batsrus,
             Enlil,
-            Pfss,
-            Invalid
+            Pfss
         };
         // Currently supports: batsrus, enlil & pfss. Not specified -> model == invalid
         // which just means that the scaleFactor (scaleToMeters) will be 1.f assuming
@@ -264,6 +265,7 @@ std::vector<std::string>
     extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
 std::unordered_map<std::string, std::vector<glm::vec3>>
     extractSeedPointsFromFiles(std::filesystem::path);
+const double extractTriggerTimeFromFilename(std::filesystem::path filePath);
 
 documentation::Documentation RenderableFieldlinesSequenceNew::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_renderablefieldlinessequencenew");
@@ -351,15 +353,20 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     }
 
     if (p.simulationModel.has_value()) {
-        _model = codegen::map<openspace::fls::Model>(*p.simulationModel);
+        try {
+            _model = codegen::map<openspace::fls::Model>(*p.simulationModel);
+        }
+        catch (const std::exception& e) {
+            _model = fls::Model::Invalid;
+        }
     }
     else {
         _model = fls::Model::Invalid;
+        _domainEnabled = false;
     }
-    if (_model != fls::Model::Invalid) {
-        //maybe this should be called even if model is invalid
-        setModelDependentConstants();
-    }
+    //maybe this should be called even if model is invalid
+    setModelDependentConstants();
+
     // setting scaling factor after model to support unknown model (model = invalid, but
     // scaling factor specified.
     _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
@@ -384,11 +391,11 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
             file.timestamp = -1.0;
             _files.push_back(file);
         }
-        computeSequenceEndTime();
     }
 
     if (_loadingType == LoadingType::StaticLoading){
         staticallyLoadFiles(p.seedPointDirectory, p.tracingVariable);
+        computeSequenceEndTime();
     }
 
     _extraVars = p.extraVariables.value_or(_extraVars);
@@ -400,6 +407,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     _flowSpeed = p.flowSpeed.value_or(_flowSpeed);
     _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
     _maskingQuantity = p.maskingQuantity.value_or(_maskingQuantity);
+    _domainEnabled = p.domainEnabled.value_or(_domainEnabled);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
 
@@ -412,7 +420,9 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     _colorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
     if (p.colorMethod.has_value()) {
         _colorMethod = static_cast<int>(
-            codegen::map<openspace::RenderableFieldlinesSequenceNew::ColorMethod>(*p.colorMethod)
+            codegen::map<openspace::RenderableFieldlinesSequenceNew::ColorMethod>(
+                *p.colorMethod
+            )
         );
     }
     else {
@@ -436,9 +446,6 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     else {
         _maskingRanges.push_back(glm::vec2(-100000.f, 100000.f)); // some default values
     }
-
-
-
 }
 
 void RenderableFieldlinesSequenceNew::setupDynamicDownloading(
@@ -499,9 +506,11 @@ void RenderableFieldlinesSequenceNew::staticallyLoadFiles(
                     file.state.loadStateFromJson(
                         file.path.string(), _model, _scalingFactor
                     );
+                file.timestamp = extractTriggerTimeFromFilename(file.path);
                 break;
             case SourceFileType::Osfls:
                 loadSuccess = file.state.loadStateFromOsfls(file.path.string());
+                file.timestamp = extractTriggerTimeFromFilename(file.path);
                 break;
             default:
                 break;
@@ -514,6 +523,9 @@ void RenderableFieldlinesSequenceNew::staticallyLoadFiles(
         }
     }
     std::sort(_files.begin(), _files.end());
+    if (!_files.empty()) {
+        _atLeastOneFileLoaded = true;
+    }
 }
 
 std::vector<std::string>
@@ -617,9 +629,14 @@ extractSeedPointsFromFiles(std::filesystem::path filePath)
 }
 
 void RenderableFieldlinesSequenceNew::initialize() {
-    _transferFunction = std::make_unique<TransferFunction>(
-        absPath(_colorTablePaths[0]).string()
-    );
+    if (_colorTablePaths.empty()) {
+        _colorMethod = static_cast<int>(ColorMethod::Uniform);
+    }
+    else {
+        _transferFunction = std::make_unique<TransferFunction>(
+            absPath(_colorTablePaths[0]).string()
+        );
+    }
 }
 
 void RenderableFieldlinesSequenceNew::initializeGL() {
@@ -642,8 +659,10 @@ void RenderableFieldlinesSequenceNew::initializeGL() {
 
 void RenderableFieldlinesSequenceNew::setupProperties() {
     addProperty(_colorABlendEnabled);
+    addProperty(_domainEnabled);
     addProperty(_flowEnabled);
     addProperty(_maskingEnabled); //hasExtra
+    addProperty(_lineWidth);
 
     // Add Property Groups
     addPropertySubOwner(_colorGroup);
@@ -653,7 +672,13 @@ void RenderableFieldlinesSequenceNew::setupProperties() {
 
     _colorUniform.setViewOption(properties::Property::ViewOptions::Color);
     _colorGroup.addProperty(_colorUniform);
+    _colorGroup.addProperty(_colorMethod);
     _colorGroup.addProperty(_colorQuantity);// hasExtra
+    _colorQuantityMinMax.setViewOption(
+        properties::Property::ViewOptions::MinMaxRange
+    );
+    _colorGroup.addProperty(_colorQuantityMinMax);
+    //_colorGroup.addProperty(_colorTablePaths[0].c_str());
 
     _domainGroup.addProperty(_domainX);
     _domainGroup.addProperty(_domainY);
@@ -667,6 +692,7 @@ void RenderableFieldlinesSequenceNew::setupProperties() {
     _flowGroup.addProperty(_flowParticleSpacing);
     _flowGroup.addProperty(_flowSpeed);
 
+    _maskingGroup.addProperty(_maskingQuantity);
     _maskingMinMax.setViewOption(properties::Property::ViewOptions::MinMaxRange);// hasExtra
     _maskingGroup.addProperty(_maskingMinMax);// hasExtra
 
@@ -674,7 +700,6 @@ void RenderableFieldlinesSequenceNew::setupProperties() {
         _maskingMinMax = _maskingRanges[_colorQuantity];// hasExtra
     //}
 
-    addProperty(_lineWidth);
 }
 
 void RenderableFieldlinesSequenceNew::definePropertyCallbackFunctions() {
@@ -732,24 +757,22 @@ void RenderableFieldlinesSequenceNew::setModelDependentConstants() {
     _domainR = glm::vec2(0.f, limit * 1.5f);
 }
 
-const double extractTriggerTimeFromOsfls(std::string filePath) {
+const double extractTriggerTimeFromFilename(std::filesystem::path filePath) {
     // number of  characters in filename (excluding '.osfls')
-    constexpr int FilenameSize = 23;
+    //constexpr int FilenameSize = 23;
     // size(".osfls")
-    constexpr int ExtSize = 6;
-    const size_t strLength = filePath.size();
-    // Extract the filename from the path (without extension)
-    std::string timeString = filePath.substr(
-        strLength - FilenameSize - ExtSize,
-        FilenameSize - 1
-    );
+    //std::string wholefileName = filePath.filename().string();
+    //std::string extension = filePath.extension().string();
+    //int ExtSize = extension.length(); // 6 for .osfls
+    std::string fileName = filePath.stem().string(); // excludes extention
+
     // Ensure the separators are correct
-    timeString.replace(4, 1, "-");
-    timeString.replace(7, 1, "-");
-    timeString.replace(13, 1, ":");
-    timeString.replace(16, 1, ":");
-    timeString.replace(19, 1, ".");
-    return Time::convertTime(timeString);
+    fileName.replace(4, 1, "-");
+    fileName.replace(7, 1, "-");
+    fileName.replace(13, 1, ":");
+    fileName.replace(16, 1, ":");
+    fileName.replace(19, 1, ".");
+    return Time::convertTime(fileName);
 }
 
 void RenderableFieldlinesSequenceNew::deinitializeGL() {
@@ -774,7 +797,7 @@ void RenderableFieldlinesSequenceNew::deinitializeGL() {
     bool printedWarning = false;
     while (_isLoadingStateFromDisk) {
         if (!printedWarning) {
-            LWARNING("Trying to destroy class when an active thread is still using it");
+            LWARNING("Currently downloading file, exiting might take longer than usual");
             printedWarning = true;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -798,8 +821,10 @@ void RenderableFieldlinesSequenceNew::loadFile(File& file) {
                 file.state = FieldlinesState::createStateFromOsfls(file.path.string());
                 //const bool success = file.state.loadStateFromOsfls(file.path.string());
                 file.status = File::FileStatus::Loaded;
-                file.timestamp = extractTriggerTimeFromOsfls(file.path.string());
+                file.timestamp = extractTriggerTimeFromFilename(file.path);
                 computeSequenceEndTime();
+                _atLeastOneFileLoaded = true;
+                _isLoadingStateFromDisk = false;
             }
             catch(const std::exception& e ) {
                 LERROR(e.what());
@@ -880,8 +905,7 @@ void RenderableFieldlinesSequenceNew::updateDynamicDownloading(const double curr
         File newFile;
         newFile.path = filePath;
         newFile.status = File::FileStatus::Downloaded;
-        //TODO Elon, if other than osfls, check for file type and extract timestamp correct
-        const double time = extractTriggerTimeFromOsfls(filePath.filename().string());
+        const double time = extractTriggerTimeFromFilename(filePath.filename());
         newFile.timestamp = time;
 
         auto inserted = insertToFilesInOrder(std::move(newFile));
@@ -891,7 +915,6 @@ void RenderableFieldlinesSequenceNew::updateDynamicDownloading(const double curr
     // if all files are moved into _sourceFiles then we can
     // empty the DynamicDownloaderManager _downloadedFiles;
     _dynamicdownloaderManager->clearDownloaded();
-    computeSequenceEndTime();
 }
 
 void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
@@ -914,11 +937,42 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
         default:
             break;
     }
+    computeSequenceEndTime();
 
-    const bool isInInterval = _files.size() > 0 &&
+    if (_firstLoad && _atLeastOneFileLoaded) {
+        size_t nExtraQuantities;
+        for (File& f : _files) {
+            if (f.status != File::FileStatus::Loaded) {
+                continue;
+            }
+            nExtraQuantities = f.state.nExtraQuantities();
+            const std::vector<std::string>& extraNamesVec =
+                f.state.extraQuantityNames();
+            for (int i = 0; i < static_cast<int>(nExtraQuantities); ++i) {
+                _colorQuantity.addOption(i, extraNamesVec[i]);
+                _maskingQuantity.addOption(i, extraNamesVec[i]);
+            }
+            break;
+        }
+        _firstLoad = false;
+
+        // Each quantity should have its own color table and color table range
+        // no more, no less
+        _colorTablePaths.resize(nExtraQuantities, _colorTablePaths.back());
+        _transferFunction = std::make_unique<TransferFunction>(
+            absPath(_colorTablePaths[0]).string()
+        );
+        _colorTableRanges.resize(nExtraQuantities, _colorTableRanges.back());
+        _maskingRanges.resize(nExtraQuantities, _maskingRanges.back());
+    }
+
+
+    bool isInInterval = _files.size() > 0 &&
         currentTime >= _files[0].timestamp &&
         currentTime < _sequenceEndTime;
-
+    if (_files.size() == 1 && _loadingType == LoadingType::StaticLoading) {
+        isInInterval = true;
+    }
     if (!isInInterval) {
         return;
     }
@@ -945,13 +999,14 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
 
     }
 
-    if (_shouldUpdateColorBuffer) {
+//    if (_shouldUpdateColorBuffer) {
         updateVertexColorBuffer();
-    }
+//    }
 
-    if (_shouldUpdateMaskingBuffer) {
+//    if (_shouldUpdateMaskingBuffer) {
         updateVertexMaskingBuffer();
-    }
+//    }
+        updateVertexPositionBuffer();
 }
 
 void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTasks&) {
@@ -1112,6 +1167,16 @@ void RenderableFieldlinesSequenceNew::updateVertexMaskingBuffer() {
         _maskingQuantity,
         success
     );
+
+    float i = *std::min_element(maskings.begin(), maskings.end());
+    std::string min = std::to_string(i);
+    float a = *std::max_element(maskings.begin(), maskings.end());
+    std::string max = std::to_string(a);
+    LWARNING(fmt::format("min :{}", min));
+    LWARNING(fmt::format("max :{}", max));
+    const std::vector<std::string>& names = state.extraQuantityNames();
+    std::string name = names[_maskingQuantity];
+    LWARNING(fmt::format("name:{}", name));
 
     if (success) {
         glBufferData(

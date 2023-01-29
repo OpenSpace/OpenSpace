@@ -15,12 +15,15 @@ local fieldlineTest = {
     Renderable = {
         Type = "RenderableFieldlinesSequenceNew",
         SourceFolder = fieldlinesDirectory,
-        LineWidth = 10,
         InputFileType = "Osfls",
+        SimulationModel = "Batsrus",
         ColorMethod = "ByQuantity",
         ColorQuantity = 4, --speed
         ColorTableRanges = {{50,300}},
-        ColorTablePaths = {transferFunction}
+        ColorTablePaths = {transferFunction},
+        MaskingEnabled = true,
+        MaskingQuantity = 5,      -- corresponds to "topology"
+        MaskingRanges = {{-0, 0}},  --closed only
     },
     GUI = {
         Path = "/Solar System/heliosphere",

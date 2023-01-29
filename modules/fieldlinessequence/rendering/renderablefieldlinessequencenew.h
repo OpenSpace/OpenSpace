@@ -46,7 +46,7 @@ namespace openspace {
 class RenderableFieldlinesSequenceNew : public Renderable {
 public:
     //0: static loading and static downloading
-    //1: dynamic loading but static downloading
+    //1: dynamic loading and static downloading
     //2: dynamic loading and dynamic downloading
     enum class LoadingType {
         StaticLoading = 0,
@@ -221,7 +221,7 @@ private:
     // Index of the extra quantity to use for masking
     properties::OptionProperty _maskingQuantity;
 
-    // Whether or not to use Domain
+    // Whether or not to use Domain limits
     properties::BoolProperty _domainEnabled;
     // Group to hold the Domain properties
     properties::PropertyOwner _domainGroup;
@@ -245,6 +245,8 @@ private:
     std::vector<glm::vec2> _colorTableRanges;
     // Values represents min & max limits for valid masking range
     std::vector<glm::vec2> _maskingRanges;
+    // At least one file in data set needs to be loaded to read extra variable
+    bool _firstLoad = true;
 
 };
 
