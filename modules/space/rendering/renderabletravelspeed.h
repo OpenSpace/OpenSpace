@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/uniformcache.h>
 
@@ -62,7 +63,7 @@ private:
     properties::StringProperty _targetName;
     SceneGraphNode* _targetNode = nullptr;
     properties::DoubleProperty _travelSpeed;
-    properties::IntProperty _indicatorLength;
+    properties::FloatProperty _indicatorLength;
     properties::IntProperty _fadeLength;
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _lineColor;

@@ -37,7 +37,7 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 2> UniformNames = {"lineColor", "opacity"};
+    constexpr std::array<const char*, 2> UniformNames = { "lineColor", "opacity" };
 
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",
@@ -90,7 +90,7 @@ namespace {
         std::optional<float> lineWidth;
 
         // [[codegen::verbatim(IndicatorLengthInfo.description)]]
-        std::optional<int> indicatorLength;
+        std::optional<float> indicatorLength;
 
         // [[codegen::verbatim(FadeLengthInfo.description)]]
         std::optional<int> fadeLength;
@@ -113,7 +113,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
         1.0,
         distanceconstants::LightSecond
       )
-    , _indicatorLength(IndicatorLengthInfo, 1, 1, 360)
+    , _indicatorLength(IndicatorLengthInfo, 1.f, 0.f, 360.f)
     , _fadeLength(FadeLengthInfo, 1, 0, 360)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
