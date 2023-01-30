@@ -64,7 +64,7 @@ for i, moon in ipairs(carpoGroup) do
     }
   }
 
-  -- Hacky solution to issue where the main label gets culled due to it's onscreen size.
+  -- Hacky solution to issue where the main label gets culled due to its onscreen size.
   -- We need the size of the original label to be that big as it needs to be eligible from long distances when focusing on Jupiter. 
   moon_labels[i+1] = {
     Identifier = moon.Identifier .. "LabelNear",
@@ -95,11 +95,11 @@ end
 local nodes = proceduralGlobes.createGlobes(carpoGroup)
 
 asset.onInitialize(function() 
-  for i, node in ipairs(nodes) do
+  for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
 
-  for i, moonlabel in ipairs(moon_labels) do
+  for _, moonlabel in ipairs(moon_labels) do
     openspace.addSceneGraphNode(moonlabel)
   end
 end)
@@ -114,7 +114,7 @@ asset.onDeinitialize(function()
   end
 end)
 
-for i, node in ipairs(nodes) do
+for _, node in ipairs(nodes) do
   asset.export(node)
 end
 

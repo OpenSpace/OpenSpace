@@ -137,11 +137,11 @@ end
 local nodes = proceduralGlobes.createGlobes(himaliaGroup)
 
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
+  for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
 
-  for i, moonlabel in ipairs(moon_labels) do
+  for _, moonlabel in ipairs(moon_labels) do
     openspace.addSceneGraphNode(moonlabel)
   end
 end)
@@ -156,7 +156,7 @@ asset.onDeinitialize(function()
   end
 end)
 
-for i, node in ipairs(nodes) do
+for _, node in ipairs(nodes) do
   asset.export(node)
 end
 

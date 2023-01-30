@@ -111,7 +111,7 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 
-  for i, moonlabel in ipairs(moon_labels) do
+  for _, moonlabel in ipairs(moon_labels) do
     openspace.addSceneGraphNode(moonlabel)
   end
 end)

@@ -147,7 +147,7 @@ local shepherdGroup = {
   }
 }
 
---Generate all moon labels
+-- Generate all moon labels
 local moon_labels = {}
 
 for i, moon in ipairs(shepherdGroup) do
