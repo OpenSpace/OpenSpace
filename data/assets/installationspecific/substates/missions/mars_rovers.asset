@@ -101,6 +101,8 @@ local perseveranceState = {
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-jezero.Settings.Opacity", 1.0, 5.0);
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Settings.Opacity", 1.0, 5.0);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.MinimumAllowedDistance", 10);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoomOut.Enabled", false);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.EnabledMinimumAllowedDistanceLimit", false);
     openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.DisableZoom", true);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
     ]] .. util.setOrbitSpeedFactor(0.6) .. [[

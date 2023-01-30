@@ -753,20 +753,21 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     if (!_disableZoom) {
         // Perform the vertical movements based on user input
         pose.position = translateVertically(deltaTime, pose.position, anchorPos, posHandle);
+
+        std::optional<double> maxHeight = _limitZoomOut.isEnabled ?
+            static_cast<double>(_limitZoomOut.maximumAllowedDistance) : std::optional<double>();
+
+        double minHeight = _enableMinimumAllowedDistanceLimit ?
+            static_cast<double>(_minimumAllowedDistance) : 0.0;
+
+        pose.position = pushToSurface(
+            minHeight,
+            pose.position,
+            anchorPos,
+            posHandle,
+            maxHeight
+        );
     }
-
-    std::optional<double> maxHeight = _limitZoomOut.isEnabled ?
-        static_cast<double>(_limitZoomOut.maximumAllowedDistance) : std::optional<double>();
-    double minHeight = _enableMinimumAllowedDistanceLimit ?
-        static_cast<double>(_minimumAllowedDistance) : 0.0;
-
-    pose.position = pushToSurface(
-        minHeight,
-        pose.position,
-        anchorPos,
-        posHandle,
-        maxHeight
-    );
 
     pose.rotation = composeCameraRotation(camRot);
 
@@ -1583,7 +1584,10 @@ glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
         glm::sign(dot(actualSurfaceToCamera, referenceSurfaceOutDirection));
 
     // Adjustment for if the camera is inside the min distance
-    double adjustment = glm::max(minHeightAboveGround - surfaceToCameraSigned, 0.0);
+    double adjustment = 0.0;
+    if (std::abs(minHeightAboveGround) > std::numeric_limits<double>::epsilon()) {
+        adjustment = glm::max(minHeightAboveGround - surfaceToCameraSigned, 0.0);
+    }
 
     // Adjustment for if the camera is outside the max distance
     // Only apply if the min adjustment not already applied
