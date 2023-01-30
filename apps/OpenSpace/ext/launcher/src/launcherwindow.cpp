@@ -41,8 +41,6 @@
 #include <fstream>
 #include <iostream>
 #include <random>
-#include <sgct/error.h>
-#include <sgct/readconfig.h>
 
 using namespace openspace;
 
@@ -774,13 +772,13 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
         catch (sgct::Error& e) {
             editRefusalDialog(
                 "Format Validation Error",
-                fmt::format("Error in file '{}':  {}", winCfg, e.message)
+                fmt::format("Error in file '{}':\n{}", winCfg, e.message)
             );
         }
         catch (std::runtime_error& e) {
             editRefusalDialog(
                 "Format Validation Error",
-                fmt::format("Error in file '{}':  {}", winCfg, e.what())
+                fmt::format("Error in file '{}':\n{}", winCfg, e.what())
             );
         }
     }
