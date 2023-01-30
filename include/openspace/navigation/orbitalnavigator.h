@@ -188,6 +188,7 @@ private:
     properties::BoolProperty _followAnchorNodeRotation;
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
+    properties::BoolProperty _enableMinimumAllowedDistanceLimit;
 
     struct LimitZoomOut : public properties::PropertyOwner {
         LimitZoomOut();

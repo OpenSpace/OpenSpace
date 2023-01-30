@@ -162,6 +162,14 @@ namespace {
         "the set maximum allowed distance"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo
+        EnabledMinimumAllowedDistanceLimitInfo = {
+        "EnabledMinimumAllowedDistanceLimit",
+        "Enable minimum allowed distance limit",
+        "Enables or disables that the camera cannot go closer to an object than "
+        "the set minimum allowed distance"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo MaximumDistanceInfo = {
         "MaximumAllowedDistance",
         "Maximum Allowed Distance",
@@ -370,6 +378,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _retargetAim(RetargetAimInfo)
     , _followAnchorNodeRotation(FollowAnchorNodeInfo, true)
     , _followAnchorNodeRotationDistance(FollowAnchorNodeDistanceInfo, 5.f, 0.f, 20.f)
+    , _enableMinimumAllowedDistanceLimit(EnabledMinimumAllowedDistanceLimitInfo, true)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
@@ -539,6 +548,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_retargetAim);
     addProperty(_followAnchorNodeRotation);
     addProperty(_followAnchorNodeRotationDistance);
+    addProperty(_enableMinimumAllowedDistanceLimit);
     addProperty(_minimumAllowedDistance);
 
     addProperty(_useAdaptiveStereoscopicDepth);
@@ -743,16 +753,20 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     if (!_disableZoom) {
         // Perform the vertical movements based on user input
         pose.position = translateVertically(deltaTime, pose.position, anchorPos, posHandle);
-        std::optional<double> maxHeight = _limitZoomOut.isEnabled ?
-            static_cast<double>(_limitZoomOut.maximumAllowedDistance) : std::optional<double>();
-        pose.position = pushToSurface(
-            static_cast<double>(_minimumAllowedDistance),
-            pose.position,
-            anchorPos,
-            posHandle,
-            maxHeight
-        );
     }
+
+    std::optional<double> maxHeight = _limitZoomOut.isEnabled ?
+        static_cast<double>(_limitZoomOut.maximumAllowedDistance) : std::optional<double>();
+    double minHeight = _enableMinimumAllowedDistanceLimit ?
+        static_cast<double>(_minimumAllowedDistance) : 0.0;
+
+    pose.position = pushToSurface(
+        minHeight,
+        pose.position,
+        anchorPos,
+        posHandle,
+        maxHeight
+    );
 
     pose.rotation = composeCameraRotation(camRot);
 
