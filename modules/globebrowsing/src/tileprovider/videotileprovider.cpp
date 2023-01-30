@@ -87,22 +87,6 @@ namespace openspace::globebrowsing {
 
 int VideoTileProvider::_wakeup = 0;
 
-void save_gray_frame(unsigned char* buf, int wrap, int xsize, int ysize,
-                     const char* filename)
-{
-    FILE* f;
-    int i;
-    f = fopen(filename, "w");
-    // writing the minimal required header for a pgm file format
-    // portable graymap format -> https://en.wikipedia.org/wiki/Netpbm_format#PGM_example
-    fprintf(f, "P5\n%d %d\n%d\n", xsize, ysize, 255);
-
-    // writing line by line
-    for (i = 0; i < ysize; i++)
-        fwrite(buf + i * wrap, 1, xsize, f);
-    fclose(f);
-}
-
 bool checkMpvError(int status) {
     if (status < 0) {
         LERROR(fmt::format("Libmpv API error: {}", mpv_error_string(status)));
@@ -356,13 +340,7 @@ void VideoTileProvider::update() {
         _isWaiting = false;
     }
     */
-    // TEST save a grayscale frame into a .pgm file
-    // This ends up in OpenSpace\build\apps\OpenSpace
-    // https://github.com/leandromoreira/ffmpeg-libav-tutorial/blob/master/0_hello_world.c
-    /*char frame_filename[1024];
-    snprintf(frame_filename, sizeof(frame_filename), "%s-%d.pgm", "frame", _codecContext->frame_number);
-    save_gray_frame(_avFrame->data[0], _avFrame->linesize[0], _avFrame->width, _avFrame->height, frame_filename);
-    */
+
     _tileIsReady = true;
     _prevVideoTime = _currentVideoTime;
 }
@@ -397,8 +375,10 @@ void VideoTileProvider::initializeMpv() {
         LINFO("mpv init failed");
 
     mpv_opengl_init_params gl_init_params{ getOpenGLProcAddress, nullptr };
-    int adv{ 1 }; // we will use the update callback
-    int blockTime{ 0 }; // Decouple mpv from waiting to get the correct fps
+    int adv{ 1 }; // Use libmpv advanced mode since we will use the update callback
+    // Decouple mpv from waiting to get the correct fps. Use with flag video-timing-offset
+    // set to 0
+    int blockTime{ 0 }; 
 
     mpv_render_param params[]{
         {MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL)},
@@ -426,11 +406,25 @@ void VideoTileProvider::initializeMpv() {
         LERROR("Could not open video file");
         return;
     }
+    // Set libmpv flags
+    // Loop video
+    // https://mpv.io/manual/master/#options-loop
     mpv_set_option_string(_mpvHandle, "loop", "");
+    // Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
+    // https://mpv.io/manual/master/#options-gpu-api
     mpv_set_option_string(_mpvHandle, "gpu-api", "opengl");
+    // Enable hardware decoding
+    // https://mpv.io/manual/master/#options-hwdec
     mpv_set_option_string(_mpvHandle, "hwdec", "auto");
+    // Enable direct rendering (default: auto). If this is set to yes, the video will be 
+    // decoded directly to GPU video memory (or staging buffers). 
+    // https://mpv.io/manual/master/#options-vd-lavc-dr
     mpv_set_option_string(_mpvHandle, "vd-lavc-dr", "yes");
+    // Print libmpv couts to the terminal
+    // https://mpv.io/manual/master/#options-terminal
     mpv_set_option_string(_mpvHandle, "terminal", "yes");
+    // Control how long before video display target time the frame should be rendered
+    // https://mpv.io/manual/master/#options-video-timing-offset
     mpv_set_option_string(_mpvHandle, "video-timing-offset", "0");
 
     //Create FBO to render video into
@@ -509,8 +503,12 @@ void VideoTileProvider::renderMpv() {
     std::string timeString = std::to_string(time);
     const char* params = timeString.c_str();
     const char* args[] = { "seek", params, "absolute", NULL};
-    int result = mpv_command_async(_mpvHandle, static_cast<uint64_t>(LibmpvPropertyKey::Command),
-        args);
+    int result = mpv_command_async(
+        _mpvHandle, 
+        static_cast<uint64_t>(LibmpvPropertyKey::Command),
+        args
+    );
+
     if (!checkMpvError(result)) {
         LINFO("PROBLEM");
     }
@@ -527,7 +525,8 @@ void VideoTileProvider::renderMpv() {
             // See render_gl.h on what OpenGL environment mpv expects, and other API 
             // details. This function fills the fbo and texture with data, after it 
             // we can get the data on the GPU, not the CPU
-            mpv_opengl_fbo mpfbo{ static_cast<int>(_fbo), _resolution.x, _resolution.y, 0 };
+            int fboInt = static_cast<int>(_fbo);
+            mpv_opengl_fbo mpfbo{ fboInt , _resolution.x, _resolution.y, 0 };
             int flip_y{ 1 };
 
             mpv_render_param params[] = {
@@ -844,6 +843,7 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
 }
 
 void VideoTileProvider::swapBuffersMpv() {
+    // Only swap buffers if there was a frame rendered and there is a new frame waiting
     if (_wakeup && _didRender) {
         mpv_render_context_report_swap(_mpvRenderContext);
         _wakeup = 0;
