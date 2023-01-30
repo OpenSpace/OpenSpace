@@ -1,8 +1,8 @@
 local layer = {
   Identifier = "TestVideo",
   File = "C:/Users/ylvaselling/Documents/Work/Testmovies/result.mp4",
-  StartTime = '2022 09 03 21:00:00',
-  EndTime = '2022 10 05 21:00:00',
+  StartTime = '2023 01 29 20:00:00',
+  EndTime = '2023 01 29 21:00:00',
   Name = "Test Video",
   Enabled = asset.enabled,
   Type = "VideoTileLayer",
