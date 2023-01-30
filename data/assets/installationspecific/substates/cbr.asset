@@ -30,23 +30,12 @@ local states = { cbrState }
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
 
-local earthDistance = 20000000
-
-local flyToEarth = [[
-  openspace.time.setPause(true);
-  ]] .. util.setCurveType("Linear") .. [[ 
-  openspace.pathnavigation.flyToHeight(
-    "Earth",
-    ]] .. tostring(earthDistance) .. [[
-  );
-]]
-
 local transitions = {
   -- Transition to/from this state
   {
     From = "Home",
     To = "CBR",
-    Action = flyToEarth
+    Action = [[]] -- This flight happens on the webpage
   },
   {
     From = "CBR",

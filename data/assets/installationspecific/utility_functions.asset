@@ -1,4 +1,4 @@
----------------------------------------------------------------- 
+----------------------------------------------------------------
 -- GENERAL USEFUL THINGS
 ----------------------------------------------------------------
 
@@ -76,23 +76,23 @@ local setOrbitSpeedFactor = function(value)
     openspace.setPropertyValueSingle(
       'NavigationHandler.OrbitalNavigator.IdleBehavior.SpeedFactor',
       ]] .. tostring(value) .. [[
-    )    
+    )
   ]]
 end
 
 -- Change or retarget anchor
-local changeAnchor = function(name, interpolationTime) 
+local changeAnchor = function(name, interpolationTime)
   return [[
     openspace.setPropertyValueSingle(
       "NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime",
       ]] .. tostring(interpolationTime) .. [[
-    ) 
+    )
     openspace.setPropertyValueSingle(
-      "NavigationHandler.OrbitalNavigator.RetargetAnchor", 
+      "NavigationHandler.OrbitalNavigator.RetargetAnchor",
       nil
     )
     openspace.setPropertyValueSingle(
-      "NavigationHandler.OrbitalNavigator.Anchor", 
+      "NavigationHandler.OrbitalNavigator.Anchor",
       "]] .. name .. [["
     )
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", '')
@@ -126,9 +126,9 @@ end
 local flyLinearlyToNode = function(node, distance)
   return [[
     openspace.pathnavigation.createPath({
-      TargetType = 'Node', 
-      Target = ']] .. node ..[[', 
-      Height = ]] .. tostring(distance or nil) .. [[, 
+      TargetType = 'Node',
+      Target = ']] .. node ..[[',
+      Height = ]] .. tostring(distance or nil) .. [[,
       PathType = "Linear"
     })
   ]]
@@ -147,7 +147,7 @@ local setCurveType = function(type)
   end
 
   return [[
-    openspace.setPropertyValueSingle('NavigationHandler.PathNavigator.DefaultPathType', 
+    openspace.setPropertyValueSingle('NavigationHandler.PathNavigator.DefaultPathType',
     ]] .. tostring(typeAsInt) .. [[)
   ]]
 end
