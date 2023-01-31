@@ -506,8 +506,11 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
 
 void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& list) {
     // trim list to only contain visible nodes that make sense
-    std::string selectables[30] = {
-        "Sun", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus",
+    // @TODO (emmbr 2023-01-31) This hardcoded list should be removed and replaced by something
+    // else. Either a type of renderable that can always be directly manipulated, or a list
+    // that can be set in config/assets. Or both?
+    std::string selectables[31] = {
+        "Sun", "Mercury", "Venus", "Earth", "Mars", "Ceres", "Jupiter", "Saturn", "Uranus",
         "Neptune", "Pluto", "Moon", "Titan", "Rhea", "Mimas", "Iapetus", "Enceladus",
         "Dione", "Io", "Ganymede", "Europa", "Callisto", "NewHorizons", "Styx", "Nix",
         "Kerberos", "Hydra", "Charon", "Tethys", "OsirisRex", "Bennu"
