@@ -35,7 +35,7 @@
 #include <core/md_allocator.h>
 #include <core/md_str.h>
 #include <core/md_log.h>
-#include <core/md_string_builder.h>
+#include <core/md_str_builder.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -249,8 +249,8 @@ static uint32_t compile_shader_from_source(str_t src, GLenum type, str_t defines
         type == GL_TESS_CONTROL_SHADER || type == GL_TESS_EVALUATION_SHADER);
 
     uint32_t shader = glCreateShader(type);
-    md_string_builder_t builder = {};
-    md_string_builder_init(&builder, default_temp_allocator);
+    md_strb_t builder = {};
+    md_strb_init(&builder, default_temp_allocator);
 
     // Skip to first # which should contain version
     while(src.len > 0 && src.ptr[0] != '#') {
@@ -263,30 +263,30 @@ static uint32_t compile_shader_from_source(str_t src, GLenum type, str_t defines
         str_t version_str = {};
 
         if (str_equal_cstr_n(src, "#version ", 9)) {
-            if (!extract_line(&version_str, &src)) {
-                md_print(MD_LOG_TYPE_ERROR, "Failed to extract version string!");
+            if (!str_extract_line(&version_str, &src)) {
+                MD_LOG_ERROR("Failed to extract version string!");
                 return 0;
             }
-            md_string_builder_append_str(&builder, version_str);
-            md_string_builder_append_str(&builder, defines);
-            md_string_builder_append_char(&builder, '\n');
+            md_strb_str(&builder, version_str);
+            md_strb_str(&builder, defines);
+            md_strb_char(&builder, '\n');
         }
         else {
-            md_string_builder_append_str(&builder, defines);
-            md_string_builder_append_char(&builder, '\n');
+            md_strb_str(&builder, defines);
+            md_strb_char(&builder, '\n');
         }
-        md_string_builder_append_str(&builder, src);
-        final_src = md_string_builder_to_string(&builder);
+        md_strb_str(&builder, src);
+        final_src = md_strb_to_str(&builder);
     }
 
     glShaderSource(shader, 1, &final_src.ptr, nullptr);
-    md_string_builder_free(&builder);
+    md_strb_free(&builder);
 
     glCompileShader(shader);
 
     char buffer[1024];
     if (get_shader_compile_error(buffer, sizeof(buffer), shader)) {
-        md_printf(MD_LOG_TYPE_ERROR, "%s\n", buffer);
+        MD_LOG_ERROR("%s\n", buffer);
         return 0;
     }
 
@@ -305,7 +305,7 @@ static uint32_t setup_program_from_source(str_t name, str_t f_shader_src, str_t 
         glAttachShader(program, f_shader);
         glLinkProgram(program);
         if (get_program_link_error(buffer, sizeof(buffer), program)) {
-            md_printf(MD_LOG_TYPE_ERROR, "Error while linking %.*s program:\n%s", (int)name.len, name.ptr, buffer);
+            MD_LOG_ERROR("Error while linking %.*s program:\n%s", (int)name.len, name.ptr, buffer);
             glDeleteProgram(program);
             return 0;
         }
@@ -422,9 +422,9 @@ void initialize_rnd_tex(uint32_t rnd_tex) {
 float compute_sharpness(float radius) { return 30.f / sqrtf(radius); }
 
 void initialize(int width, int height) {
-    gl.ssao.hbao.program_persp = setup_program_from_source(MAKE_STR("ssao persp"), f_shader_src_ssao, MAKE_STR("#define AO_PERSPECTIVE 1"));
-    gl.ssao.hbao.program_ortho = setup_program_from_source(MAKE_STR("ssao ortho"), f_shader_src_ssao, MAKE_STR("#define AO_PERSPECTIVE 0"));
-    gl.ssao.blur.program       = setup_program_from_source(MAKE_STR("ssao blur"),  f_shader_src_ssao_blur);
+    gl.ssao.hbao.program_persp = setup_program_from_source(STR("ssao persp"), f_shader_src_ssao, STR("#define AO_PERSPECTIVE 1"));
+    gl.ssao.hbao.program_ortho = setup_program_from_source(STR("ssao ortho"), f_shader_src_ssao, STR("#define AO_PERSPECTIVE 0"));
+    gl.ssao.blur.program       = setup_program_from_source(STR("ssao blur"),  f_shader_src_ssao_blur);
     
     if (!gl.ssao.hbao.fbo) glGenFramebuffers(1, &gl.ssao.hbao.fbo);
     if (!gl.ssao.blur.fbo) glGenFramebuffers(1, &gl.ssao.blur.fbo);
@@ -496,7 +496,7 @@ static struct {
 } shading;
 
 void initialize() {
-    shading.program = setup_program_from_source(MAKE_STR("deferred shading"), f_shader_src_deferred_shading);
+    shading.program = setup_program_from_source(STR("deferred shading"), f_shader_src_deferred_shading);
     shading.uniform_loc.texture_depth = glGetUniformLocation(shading.program, "u_texture_depth");
     shading.uniform_loc.texture_color = glGetUniformLocation(shading.program, "u_texture_color");
     shading.uniform_loc.texture_normal = glGetUniformLocation(shading.program, "u_texture_normal");
@@ -556,26 +556,26 @@ static struct {
 void initialize() {
     {
         // PASSTHROUGH
-        passthrough.program = setup_program_from_source(MAKE_STR("Passthrough"), f_shader_src_tonemap_passthrough);
+        passthrough.program = setup_program_from_source(STR("Passthrough"), f_shader_src_tonemap_passthrough);
         passthrough.uniform_loc.texture = glGetUniformLocation(passthrough.program, "u_texture");
     }
     {
         // EXPOSURE GAMMA
-        exposure_gamma.program = setup_program_from_source(MAKE_STR("Exposure Gamma"), f_shader_src_tonemap_exposure_gamma);
+        exposure_gamma.program = setup_program_from_source(STR("Exposure Gamma"), f_shader_src_tonemap_exposure_gamma);
         exposure_gamma.uniform_loc.texture = glGetUniformLocation(exposure_gamma.program, "u_texture");
         exposure_gamma.uniform_loc.exposure = glGetUniformLocation(exposure_gamma.program, "u_exposure");
         exposure_gamma.uniform_loc.gamma = glGetUniformLocation(exposure_gamma.program, "u_gamma");
     }
     {
         // FILMIC (UNCHARTED)
-        filmic.program = setup_program_from_source(MAKE_STR("Filmic"), f_shader_src_tonemap_filmic);
+        filmic.program = setup_program_from_source(STR("Filmic"), f_shader_src_tonemap_filmic);
         filmic.uniform_loc.texture = glGetUniformLocation(filmic.program, "u_texture");
         filmic.uniform_loc.exposure = glGetUniformLocation(filmic.program, "u_exposure");
         filmic.uniform_loc.gamma = glGetUniformLocation(filmic.program, "u_gamma");
     }
     {
         // ACES
-        ACES.program = setup_program_from_source(MAKE_STR("ACES"), f_shader_src_tonemap_aces);
+        ACES.program = setup_program_from_source(STR("ACES"), f_shader_src_tonemap_aces);
         ACES.uniform_loc.texture = glGetUniformLocation(ACES.program, "u_texture");
         ACES.uniform_loc.exposure = glGetUniformLocation(ACES.program, "u_exposure");
         ACES.uniform_loc.gamma = glGetUniformLocation(ACES.program, "u_gamma");
@@ -595,7 +595,7 @@ void shutdown() {
 namespace dof {
 void initialize(int32_t width, int32_t height) {
     {
-        gl.bokeh_dof.half_res.program = setup_program_from_source(MAKE_STR("DOF prepass"), f_shader_src_dof_halfres_prepass);
+        gl.bokeh_dof.half_res.program = setup_program_from_source(STR("DOF prepass"), f_shader_src_dof_halfres_prepass);
         if (gl.bokeh_dof.half_res.program) {
             gl.bokeh_dof.half_res.uniform_loc.tex_depth = glGetUniformLocation(gl.bokeh_dof.half_res.program, "u_tex_depth");
             gl.bokeh_dof.half_res.uniform_loc.tex_color = glGetUniformLocation(gl.bokeh_dof.half_res.program, "u_tex_color");
@@ -621,14 +621,14 @@ void initialize(int32_t width, int32_t height) {
         glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gl.bokeh_dof.half_res.tex.color_coc, 0);
         GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
-            md_print(MD_LOG_TYPE_ERROR, "Something went wrong when generating framebuffer for DOF");
+            MD_LOG_ERROR("Something went wrong when generating framebuffer for DOF");
         }
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     }
 
     // DOF
     {
-        gl.bokeh_dof.program = setup_program_from_source(MAKE_STR("Bokeh DOF"), f_shader_src_dof);
+        gl.bokeh_dof.program = setup_program_from_source(STR("Bokeh DOF"), f_shader_src_dof);
         if (gl.bokeh_dof.program) {
             gl.bokeh_dof.uniform_loc.tex_color = glGetUniformLocation(gl.bokeh_dof.program, "u_half_res");
             gl.bokeh_dof.uniform_loc.tex_color = glGetUniformLocation(gl.bokeh_dof.program, "u_tex_color");
@@ -650,7 +650,7 @@ static uint32_t program_col = 0;
 static int uniform_loc_texture = -1;
 static int uniform_loc_color = -1;
 
-constexpr str_t f_shader_src_tex = MAKE_STR(R"(
+constexpr str_t f_shader_src_tex = STR(R"(
 #version 150 core
 
 uniform sampler2D u_texture;
@@ -662,7 +662,7 @@ void main() {
 }
 )");
 
-constexpr str_t f_shader_src_col = MAKE_STR(R"(
+constexpr str_t f_shader_src_col = STR(R"(
 #version 150 core
 
 uniform vec4 u_color;
@@ -674,10 +674,10 @@ void main() {
 )");
 
 void initialize() {
-    program_tex = setup_program_from_source(MAKE_STR("blit texture"), f_shader_src_tex);
+    program_tex = setup_program_from_source(STR("blit texture"), f_shader_src_tex);
     uniform_loc_texture = glGetUniformLocation(program_tex, "u_texture");
 
-    program_col = setup_program_from_source(MAKE_STR("blit color"), f_shader_src_col);
+    program_col = setup_program_from_source(STR("blit color"), f_shader_src_col);
     uniform_loc_color = glGetUniformLocation(program_col, "u_color");
 }
 
@@ -717,7 +717,7 @@ struct {
 
 void initialize(int32_t width, int32_t height) {
     {
-        blit_velocity.program = setup_program_from_source(MAKE_STR("screen-space velocity"), f_shader_src_vel_blit);
+        blit_velocity.program = setup_program_from_source(STR("screen-space velocity"), f_shader_src_vel_blit);
 		blit_velocity.uniform_loc.tex_depth = glGetUniformLocation(blit_velocity.program, "u_tex_depth");
         blit_velocity.uniform_loc.curr_clip_to_prev_clip_mat = glGetUniformLocation(blit_velocity.program, "u_curr_clip_to_prev_clip_mat");
         blit_velocity.uniform_loc.jitter_uv = glGetUniformLocation(blit_velocity.program, "u_jitter_uv");
@@ -726,15 +726,15 @@ void initialize(int32_t width, int32_t height) {
     {
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
-        str_t defines = MAKE_STR("#define TILE_SIZE " TOSTRING(VEL_TILE_SIZE));
-        blit_tilemax.program = setup_program_from_source(MAKE_STR("tilemax"), f_shader_src_vel_tilemax, defines);
+        str_t defines = STR("#define TILE_SIZE " TOSTRING(VEL_TILE_SIZE));
+        blit_tilemax.program = setup_program_from_source(STR("tilemax"), f_shader_src_vel_tilemax, defines);
         blit_tilemax.uniform_loc.tex_vel = glGetUniformLocation(blit_tilemax.program, "u_tex_vel");
         blit_tilemax.uniform_loc.tex_vel_texel_size = glGetUniformLocation(blit_tilemax.program, "u_tex_vel_texel_size");
 #undef STRINGIFY
 #undef TOSTRING
     }
     {
-        blit_neighbormax.program = setup_program_from_source(MAKE_STR("neighbormax"), f_shader_src_vel_neighbormax);
+        blit_neighbormax.program = setup_program_from_source(STR("neighbormax"), f_shader_src_vel_neighbormax);
         blit_neighbormax.uniform_loc.tex_vel = glGetUniformLocation(blit_neighbormax.program, "u_tex_vel");
         blit_neighbormax.uniform_loc.tex_vel_texel_size = glGetUniformLocation(blit_neighbormax.program, "u_tex_vel_texel_size");
     }
@@ -773,7 +773,7 @@ void initialize(int32_t width, int32_t height) {
         glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gl.velocity.tex_neighbormax, 0);
         GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
-            md_print(MD_LOG_TYPE_ERROR, "Something went wrong in creating framebuffer for velocity");
+            MD_LOG_ERROR("Something went wrong in creating framebuffer for velocity");
         }
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     }
@@ -790,8 +790,8 @@ void shutdown() {
 namespace temporal {
 void initialize() {
     {
-        gl.temporal.with_motion_blur.program = setup_program_from_source(MAKE_STR("temporal aa + motion-blur"), f_shader_src_temporal);
-        gl.temporal.no_motion_blur.program   = setup_program_from_source(MAKE_STR("temporal aa"), f_shader_src_temporal, MAKE_STR("#define USE_MOTION_BLUR 0\n"));
+        gl.temporal.with_motion_blur.program = setup_program_from_source(STR("temporal aa + motion-blur"), f_shader_src_temporal);
+        gl.temporal.no_motion_blur.program   = setup_program_from_source(STR("temporal aa"), f_shader_src_temporal, STR("#define USE_MOTION_BLUR 0\n"));
 
         gl.temporal.with_motion_blur.uniform_loc.tex_linear_depth = glGetUniformLocation(gl.temporal.with_motion_blur.program, "u_tex_linear_depth");
         gl.temporal.with_motion_blur.uniform_loc.tex_main = glGetUniformLocation(gl.temporal.with_motion_blur.program, "u_tex_main");
@@ -824,7 +824,7 @@ void shutdown() {}
 namespace sharpen {
 static uint32_t program = 0;
 void initialize() {
-    constexpr str_t f_shader_src_sharpen = MAKE_STR(
+    constexpr str_t f_shader_src_sharpen = STR(
  R"(
 #version 150 core
 
@@ -841,7 +841,7 @@ void main() {
     const float weight[2] = float[2](1.4, -0.1);
     out_frag = vec4(vec3(weight[0] * cc + weight[1] * (cl + ct + cr + cb)), 1.0);
 })");
-    program = setup_program_from_source(MAKE_STR("sharpen"), f_shader_src_sharpen);
+    program = setup_program_from_source(STR("sharpen"), f_shader_src_sharpen);
 }
 
 void sharpen(uint32_t in_texture) {
@@ -869,8 +869,8 @@ void initialize(int width, int height) {
     gl.v_shader_fs_quad = compile_shader_from_source(v_shader_src_fs_quad, GL_VERTEX_SHADER);
 
     // LINEARIZE DEPTH
-    gl.linear_depth.program_persp = setup_program_from_source(MAKE_STR("linearize depth persp"), f_shader_src_linearize_depth, MAKE_STR("#define PERSPECTIVE 1"));
-    gl.linear_depth.program_ortho = setup_program_from_source(MAKE_STR("linearize depth ortho"), f_shader_src_linearize_depth, MAKE_STR("#define PERSPECTIVE 0"));
+    gl.linear_depth.program_persp = setup_program_from_source(STR("linearize depth persp"), f_shader_src_linearize_depth, STR("#define PERSPECTIVE 1"));
+    gl.linear_depth.program_ortho = setup_program_from_source(STR("linearize depth ortho"), f_shader_src_linearize_depth, STR("#define PERSPECTIVE 0"));
 
     if (!gl.linear_depth.texture) glGenTextures(1, &gl.linear_depth.texture);
     glBindTexture(GL_TEXTURE_2D, gl.linear_depth.texture);
@@ -887,7 +887,7 @@ void initialize(int width, int height) {
         glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gl.linear_depth.texture, 0);
         GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
-            md_print(MD_LOG_TYPE_ERROR, "Something went wrong in creating framebuffer for depth linearization");
+            MD_LOG_ERROR("Something went wrong in creating framebuffer for depth linearization");
         }
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     }
@@ -936,7 +936,7 @@ void initialize(int width, int height) {
 
         GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
-            md_print(MD_LOG_TYPE_ERROR, "Something went wrong in creating framebuffer for targets");
+            MD_LOG_ERROR("Something went wrong in creating framebuffer for targets");
         }
 
         GLenum buffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};

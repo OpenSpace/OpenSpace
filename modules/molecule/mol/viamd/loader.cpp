@@ -2,7 +2,7 @@
 #include "loader.h"
 
 #include <core/md_allocator.h>
-#include <core/md_array.inl>
+#include <core/md_array.h>
 #include <core/md_log.h>
 #include <core/md_simd.h>
 #include <core/md_bitfield.h>
@@ -243,7 +243,7 @@ md_trajectory_i* open_file(str_t filename, const md_molecule_t* mol, md_allocato
 
     md_trajectory_api* api = get_api(filename);
     if (!api) {
-        md_printf(MD_LOG_TYPE_ERROR, "Unsupported file extension: '%.*s'", filename.len, filename.ptr);
+        MD_LOG_ERROR("Unsupported file extension: '%.*s'", filename.len, filename.ptr);
         return nullptr;
     }
 
@@ -253,7 +253,7 @@ md_trajectory_i* open_file(str_t filename, const md_molecule_t* mol, md_allocato
     }
     
     if (md_trajectory_num_atoms(internal_traj) != mol->atom.count) {
-        md_printf(MD_LOG_TYPE_ERROR, "Trajectory is not compatible with the loaded molecule.");
+        MD_LOG_ERROR("Trajectory is not compatible with the loaded molecule.");
         api->destroy(internal_traj);
         return nullptr;
     }
@@ -291,7 +291,7 @@ bool close(md_trajectory_i* traj) {
         memset(traj, 0, sizeof(md_trajectory_i));
         return true;
     }
-    md_print(MD_LOG_TYPE_ERROR, "Attempting to free trajectory which was not loaded with loader");
+    MD_LOG_ERROR("Attempting to free trajectory which was not loaded with loader");
     ASSERT(false);
     return false;
 }
@@ -309,7 +309,7 @@ bool set_recenter_target(md_trajectory_i* traj, const md_bitfield_t* atom_mask) 
         }
         return true;
     }
-    md_print(MD_LOG_TYPE_ERROR, "Supplied trajectory was not loaded with loader");
+    MD_LOG_ERROR("Supplied trajectory was not loaded with loader");
     return false;
 }
 
@@ -321,7 +321,7 @@ bool clear_cache(md_trajectory_i* traj) {
         md_frame_cache_clear(&loaded_traj->cache);
         return true;
     }
-    md_print(MD_LOG_TYPE_ERROR, "Supplied trajectory was not loaded with loader");
+    MD_LOG_ERROR("Supplied trajectory was not loaded with loader");
     return false;
 }
 

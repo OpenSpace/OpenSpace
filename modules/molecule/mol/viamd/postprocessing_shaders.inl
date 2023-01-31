@@ -1,4 +1,4 @@
-static constexpr str_t v_shader_src_fs_quad = MAKE_STR(
+static constexpr str_t v_shader_src_fs_quad = STR(
 R"(
 #version 150 core
 
@@ -16,7 +16,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_linearize_depth = MAKE_STR(
+static constexpr str_t f_shader_src_linearize_depth = STR(
 R"(
 #version 150 core
 
@@ -52,7 +52,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_ssao = MAKE_STR(
+static constexpr str_t f_shader_src_ssao = STR(
 R"(
 #version 150 core
 
@@ -235,7 +235,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_ssao_blur = MAKE_STR(
+static constexpr str_t f_shader_src_ssao_blur = STR(
 R"(
 #version 150 core
 
@@ -288,7 +288,7 @@ void main()
 }
 )");
 
-static constexpr str_t f_shader_src_deferred_shading = MAKE_STR(
+static constexpr str_t f_shader_src_deferred_shading = STR(
 R"(
 #version 150 core
 
@@ -384,7 +384,7 @@ void main() {
 
 // ------ TONEMAP ------
 
-static constexpr str_t f_shader_src_tonemap_passthrough = MAKE_STR(
+static constexpr str_t f_shader_src_tonemap_passthrough = STR(
 R"(
 #version 150 core
 uniform sampler2D u_texture;
@@ -396,7 +396,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_tonemap_exposure_gamma = MAKE_STR(
+static constexpr str_t f_shader_src_tonemap_exposure_gamma = STR(
 R"(
 #version 150 core
 
@@ -414,7 +414,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_tonemap_filmic = MAKE_STR(
+static constexpr str_t f_shader_src_tonemap_filmic = STR(
 R"(
 #version 150 core
 
@@ -457,7 +457,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_tonemap_aces = MAKE_STR(
+static constexpr str_t f_shader_src_tonemap_aces = STR(
 R"(
 #version 150 core
 
@@ -519,7 +519,7 @@ void main() {
 
 // ------ DOF ------
 
-static constexpr str_t f_shader_src_dof_halfres_prepass = MAKE_STR(
+static constexpr str_t f_shader_src_dof_halfres_prepass = STR(
 R"(
 #version 150 core
 
@@ -546,7 +546,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_dof = MAKE_STR(
+static constexpr str_t f_shader_src_dof = STR(
 R"(
 #version 150 core
 #pragma optionNV(unroll all)
@@ -655,7 +655,7 @@ void main() {
 
 // ------ SCREEN SPACE VELOCITY ------
 
-static constexpr str_t f_shader_src_vel_blit = MAKE_STR(
+static constexpr str_t f_shader_src_vel_blit = STR(
 R"(
 #version 150 core
 
@@ -684,7 +684,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_vel_tilemax = MAKE_STR(
+static constexpr str_t f_shader_src_vel_tilemax = STR(
 R"(
 #version 150 core
 
@@ -722,7 +722,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_vel_neighbormax = MAKE_STR(
+static constexpr str_t f_shader_src_vel_neighbormax = STR(
 R"(
 #version 150 core
 
@@ -760,7 +760,7 @@ void main() {
 
 // ------ Temporal AA and motion blur ------
 
-static constexpr str_t f_shader_src_temporal = MAKE_STR(
+static constexpr str_t f_shader_src_temporal = STR(
 R"(
 #version 150 core
 
