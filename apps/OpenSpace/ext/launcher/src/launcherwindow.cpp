@@ -725,7 +725,7 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                         6082,
                         fmt::format(
                             "Importing of this configuration file failed because of a "
-                            "problem detected in the readConfig function: {}",
+                            "problem detected in the readConfig function:\n\n{}",
                             e.what()
                         )
                     );
@@ -772,13 +772,13 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
         catch (sgct::Error& e) {
             editRefusalDialog(
                 "Format Validation Error",
-                fmt::format("Error in file '{}':\n{}", winCfg, e.message)
+                fmt::format("Error in file '{}':\n\n{}", winCfg, e.message)
             );
         }
         catch (std::runtime_error& e) {
             editRefusalDialog(
                 "Format Validation Error",
-                fmt::format("Error in file '{}':\n{}", winCfg, e.what())
+                fmt::format("Error in file '{}':\n\n{}", winCfg, e.what())
             );
         }
     }
