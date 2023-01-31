@@ -93,7 +93,7 @@ namespace {
         std::optional<float> indicatorLength;
 
         // [[codegen::verbatim(FadeLengthInfo.description)]]
-        std::optional<int> fadeLength;
+        std::optional<float> fadeLength;
     };
 #include "renderabletravelspeed_codegen.cpp"
 } // namespace
@@ -114,7 +114,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
         distanceconstants::LightSecond
       )
     , _indicatorLength(IndicatorLengthInfo, 1.f, 0.f, 360.f)
-    , _fadeLength(FadeLengthInfo, 1, 0, 360)
+    , _fadeLength(FadeLengthInfo, 1.f, 0.f, 360.f)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
