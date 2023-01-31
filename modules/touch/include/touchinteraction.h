@@ -67,9 +67,16 @@ public:
     TouchInteraction();
 
     // for interpretInteraction()
-    enum Type { ROT = 0, PINCH, PAN, ROLL, PICK, ZOOM_OUT };
+    enum Type {
+        ROTATION = 0,
+        PINCH,
+        PAN,
+        ROLL,
+        PICK,
+        ZOOM_OUT
+    };
 
-    // Stores the velocity in all 6DOF
+    // Stores the velocity in all 6 DOF
     struct VelocityStates {
         glm::dvec2 orbit = glm::dvec2(0.0);
         double zoom = 0.0;
@@ -194,7 +201,7 @@ private:
 
     int pinchConsecCt = 0;
     double pinchConsecZoomFactor = 0;
-    //int stepVelUpdate = 0;
+    int stepVelUpdate = 0;
 #endif
     std::array<TouchInputHolder, 2> _pinchInputs;
     // Class variables

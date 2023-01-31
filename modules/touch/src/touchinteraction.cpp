@@ -675,7 +675,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
         distInput = p;
     }
     // find the slowest moving finger - used in roll interpretation
-    double minDiff = 1000;
+    double minDiff = 1000.0;
     for (const TouchInputHolder& inputHolder : list) {
         const auto it = std::find_if(
             lastProcessed.cbegin(),
@@ -710,12 +710,14 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
                 lastProcessed.end(),
                 [&inputHolder](const TouchInput& input) {
                     return inputHolder.holdsInput(input);
-                });
-            double res = 0.0;
+                }
+            );
 
+            double res = 0.0;
             float lastAngle = lastPoint.angleToPos(_centroid.x, _centroid.y);
             float currentAngle =
                 inputHolder.latestInput().angleToPos(_centroid.x, _centroid.y);
+
             if (lastAngle > currentAngle + 1.5 * glm::pi<float>()) {
                 res = currentAngle + (2.0 * glm::pi<float>() - lastAngle);
             }
@@ -725,6 +727,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
             else {
                 res = currentAngle - lastAngle;
             }
+
             if (std::abs(res) < _rollAngleThreshold) {
                 return 1000.0;
             }
@@ -738,6 +741,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
         _centroid,
         lastCentroid
     ) / list.size();
+
 #ifdef TOUCH_DEBUG_PROPERTIES
     _debugProperties.normalizedCentroidDistance = normalizedCentroidDistance;
     _debugProperties.rollOn = rollOn;
@@ -751,7 +755,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
         return PICK;
     }
     else if (list.size() == 1) {
-        return ROT;
+        return ROTATION;
     }
     else {
         float avgDistance = static_cast<float>(std::abs(dist - lastDist));
@@ -790,13 +794,14 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
     const int action = interpretInteraction(list, lastProcessed);
     const SceneGraphNode* anchor =
         global::navigationHandler->orbitalNavigator().anchorNode();
+
     if (!anchor) {
         return;
     }
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     const std::map<int, std::string> interactionNames = {
-        { ROT, "Rotation" },
+        { ROTATION, "Rotation" },
         { PINCH, "Pinch" },
         { PAN, "Pan" },
         { ROLL, "Roll" },
@@ -822,7 +827,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
     const float aspectRatio =
         static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
     switch (action) {
-        case ROT: { // add rotation velocity
+        case ROTATION: { // add rotation velocity
             _vel.orbit += glm::dvec2(inputHolder.speedX() *
                           _sensitivity.orbit.x, inputHolder.speedY() *
                           _sensitivity.orbit.y);
@@ -1018,7 +1023,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
         // rotations
         // To avoid problem with lookup in up direction
         const dmat4 lookAtMat = lookAt(
-            dvec3(0, 0, 0),
+            dvec3(0.0, 0.0, 0.0),
             directionToCenter,
             normalize(camDirection + lookUp)
         );
@@ -1037,7 +1042,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
         }
         {
             // Panning (local rotation)
-            const dvec3 eulerAngles(_vel.pan.y * dt, _vel.pan.x * dt, 0);
+            const dvec3 eulerAngles(_vel.pan.y * dt, _vel.pan.x * dt, 0.0);
             const dquat rotationDiff = dquat(eulerAngles);
             localCamRot = localCamRot * rotationDiff;
 
@@ -1049,7 +1054,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
         }
         {
             // Orbit (global rotation)
-            const dvec3 eulerAngles(_vel.orbit.y * dt, _vel.orbit.x * dt, 0);
+            const dvec3 eulerAngles(_vel.orbit.y * dt, _vel.orbit.x * dt, 0.0);
             const dquat rotationDiffCamSpace = dquat(eulerAngles);
 
             const dquat rotationDiffWorldSpace = globalCamRot * rotationDiffCamSpace *
@@ -1062,8 +1067,9 @@ void TouchInteraction::step(double dt, bool directTouch) {
             directionToCenter = normalize(-centerToCam);
             const dvec3 lookUpWhenFacingCenter = globalCamRot *
                                            dvec3(_camera->lookUpVectorCameraSpace());
+
             const dmat4 lookAtMatrix = lookAt(
-                dvec3(0, 0, 0),
+                dvec3(0.0, 0.0, 0.0),
                 directionToCenter,
                 lookUpWhenFacingCenter);
             globalCamRot = normalize(quat_cast(inverse(lookAtMatrix)));
@@ -1108,7 +1114,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
             }
             const double currentPosDistance = length(centerToCamera);
 
-            //Apply the velocity to update camera position
+            // Apply the velocity to update camera position
             double zoomVelocity = _vel.zoom;
             if (!directTouch) {
                 const double distanceFromSurface =
