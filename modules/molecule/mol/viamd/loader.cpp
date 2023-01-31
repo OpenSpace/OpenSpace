@@ -162,7 +162,7 @@ bool decode_frame_data(struct md_trajectory_o* inst, const void* data_ptr, [[may
                 int64_t count = md_bitfield_popcount(&loaded_traj->recenter_target);
                 if (count > 0) {
                     // Allocate data for substructure
-                    int64_t stride = ROUND_UP(count, md_simd_widthf);
+                    const int64_t stride = ROUND_UP(count, md_simd_f32_width);
                     const int64_t mem_size = stride * 4 * sizeof(float);
                     void* mem_ptr = md_alloc(alloc, mem_size);
                     float* tmp_x = (float*)mem_ptr + 0 * stride;
@@ -186,10 +186,12 @@ bool decode_frame_data(struct md_trajectory_o* inst, const void* data_ptr, [[may
                     // Compute deperiodized com for substructure
                     vec3_t com;
                     if (have_box) {
-                        com = md_util_compute_com_periodic(tmp_x, tmp_y, tmp_z, tmp_w, count, box_ext);
+                        com = md_util_compute_com_periodic_soa(tmp_x, tmp_y, tmp_z, tmp_w, count, box_ext);
+                        // Ensure that the periodic com resides within the period of the box
+                        com = vec3_deperiodize(com, box_ext * 0.5f, box_ext);
                     }
                     else {
-                        com = md_util_compute_com(tmp_x, tmp_y, tmp_z, tmp_w, count);
+                        com = md_util_compute_com_soa(tmp_x, tmp_y, tmp_z, tmp_w, count);
                     }
 
                     // Translate all

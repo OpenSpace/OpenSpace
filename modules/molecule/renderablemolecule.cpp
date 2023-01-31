@@ -29,7 +29,6 @@
 #include "glbinding/gl/bitfield.h"
 #include "glbinding/gl/enum.h"
 #include "glbinding/gl/functions.h"
-#include "openspace/engine/windowdelegate.h"
 #include "mol/viamd/postprocessing.h"
 #include "mol/cache.h"
 #include "mol/util.h"
@@ -39,16 +38,20 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 
-#include <openspace/documentation/documentation.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/globals.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/httprequest.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/timemanager.h>
 
-#include <core/md_array.inl>
-#include <md_util.h>
+#include <openspace/scripting/scriptengine.h>
+
+#include <core/md_array.h>
 #include <core/md_allocator.h>
+#include <md_util.h>
 
 // COMBAK: because my ide complains
 #ifndef ZoneScoped
@@ -72,6 +75,11 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
     out_color = color;
 }
 )";
+
+enum class AnimationRepeatMode {
+    PingPong,
+    Wrap
+};
 
 namespace {
     constexpr const char* _loggerCat = "RenderableMolecule";
@@ -112,12 +120,6 @@ namespace {
         "Scale for the Geometric representation of atoms"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
-        "AnimationSpeed",
-        "Animation Speed",
-        "Playback speed of the animation (in frames per second)"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SSAOEnabledInfo = {
         "SSAOEnabled",
         "Enable SSAO",
@@ -146,6 +148,30 @@ namespace {
         "Exposure",
         "Exposure",
         "Exposure, Controls the Exposure setting for the tonemap"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnsurePbcInfo = {
+        "EnsurePbc",
+        "Ensure PBC",
+        "Ensure Periodic Boundry Constraints (Ensures post interpolation that structures remain within the simulation volume)"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo AnimationFrameInfo = {
+        "AnimationFrame",
+        "Animation Frame",
+        "Local simulation time, unit in frames"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
+        "AnimationSpeed",
+        "Animation Speed",
+        "Playback speed of the animation (in frames per second)"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo AnimationRepeatModeInfo = {
+        "AnimationRepeatMode",
+        "Animation Repeat Mode",
+        "Controls how the animation should be repeated"
     };
 
     constexpr const char* RepresentationsDescription = "Representations";
@@ -185,9 +211,6 @@ namespace {
         // [[codegen::verbatim(TrajectoryFileInfo.description)]]
         std::string trajectoryFile;
 
-        // [[codegen::verbatim(AnimationSpeedInfo.description)]]
-        std::optional<float> animationSpeed;
-
         // [[codegen::verbatim(SSAOEnabledInfo.description)]]
         std::optional<bool> ssaoEnabled;
 
@@ -202,6 +225,23 @@ namespace {
 
         // [[codegen::verbatim(ExposureInfo.description)]]
         std::optional<float> exposure;
+
+        // [[codegen::verbatim(EnsurePbcInfo.description)]]
+        std::optional<bool> ensurePbc;
+
+        // [[codegen::verbatim(AnimationFrameInfo.description)]]
+        std::optional<double> animationFrame;
+
+        // [[codegen::verbatim(AnimationSpeedInfo.description)]]
+        std::optional<double> animationSpeed;
+
+        enum class [[codegen::map(AnimationRepeatMode)]] AnimationRepeatMode {
+            PingPong,
+            Wrap
+        };
+
+        // [[codegen::verbatim(AnimationRepeatModeInfo.description)]]
+        std::optional<AnimationRepeatMode> animationRepeatMode;
     };
 
 #include "renderablemolecule_codegen.cpp"
@@ -299,6 +339,51 @@ namespace openspace {
         }
     }
 
+    void RenderableMolecule::setAnimationFrame(double t) {
+        if (_trajectory) {
+            switch (static_cast<AnimationRepeatMode>(_animationRepeatMode.value())) {
+            case AnimationRepeatMode::PingPong:
+                if (t < _animationFrame.minValue()) {
+                    t = 0;
+                    _animationDir = -_animationDir;
+                } else if (t > _animationFrame.maxValue()) {
+                    t = _animationFrame.maxValue();
+                    _animationDir = -_animationDir;
+                }
+                break;
+            case AnimationRepeatMode::Wrap:
+                if (t < _animationFrame.minValue()) {
+                    t = _animationFrame.maxValue();
+                } else if (t > _animationFrame.maxValue()) {
+                    t = _animationFrame.minValue();
+                }
+                break;
+            default:
+                ghoul_assert(false, "Don't end up here!");
+            }
+
+            mol::util::interpolate_coords(_molecule, _trajectory, mol::util::InterpolationType::Cubic, t, _ensurePbc);
+            md_gl_molecule_set_atom_position(&_gl_molecule, 0, (uint32_t)_molecule.atom.count, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
+        }
+    }
+
+    double RenderableMolecule::getAnimationFrame() {
+        if (_trajectory) {
+            const double duration = (double)md_trajectory_num_frames(_trajectory);
+            switch (static_cast<AnimationRepeatMode>(_animationRepeatMode.value())) {
+            case AnimationRepeatMode::PingPong:
+
+                break;
+            case AnimationRepeatMode::Wrap:
+
+                break;
+            default:
+                ghoul_assert(false, "Don't end up here!");
+            }
+        }
+        return 0;
+    }
+
     documentation::Documentation RenderableMolecule::Documentation() {
         return codegen::doc<Parameters>("molecule_renderablemolecule");
     }
@@ -308,23 +393,29 @@ namespace openspace {
         _representations({"Representations"}),
         _moleculeFile(MoleculeFileInfo),
         _trajectoryFile(TrajectoryFileInfo),
-        _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 100.f),
         _ssaoEnabled(SSAOEnabledInfo),
         _ssaoIntensity(SSAOIntensityInfo, 12.f, 0.f, 100.f),
         _ssaoRadius(SSAORadiusInfo, 6.f, 0.f, 100.f),
         _ssaoBias(SSAOBiasInfo, 0.1f, 0.0f, 1.0f),
-        _exposure(ExposureInfo, 0.3f, 0.1f, 10.f)
+        _exposure(ExposureInfo, 0.3f, 0.1f, 10.f),
+        _ensurePbc(EnsurePbcInfo, false),
+        _animationFrame(AnimationFrameInfo, 0.0, 0.0),
+        _animationSpeed(AnimationSpeedInfo, 1.f, -100.f, 100.f),
+        _animationRepeatMode(AnimationRepeatModeInfo),
+        _animationDir(1.0)
     {
+        
+        _localEpoch = openspace::global::timeManager->time().j2000Seconds();
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
         _moleculeFile = p.moleculeFile;
         _trajectoryFile = p.trajectoryFile;
-        _animationSpeed = p.animationSpeed.value_or(1.f);
         _ssaoEnabled = p.ssaoEnabled.value_or(true);
         _ssaoIntensity = p.ssaoIntensity.value_or(12.f);
         _ssaoRadius = p.ssaoRadius.value_or(12.f);
         _ssaoBias = p.ssaoBias.value_or(0.1f);
         _exposure = p.exposure.value_or(0.3f);
+        _ensurePbc = p.ensurePbc.value_or(false);
 
         if (p.representations.has_value()) {
             const auto& reps = p.representations.value();
@@ -345,14 +436,39 @@ namespace openspace {
             // Add a default representation if none were supplied
             addRepresentation(mol::rep::Type::SpaceFill, mol::rep::Color::Cpk, "", 1.0f);
         }
+
+        _animationFrame = p.animationFrame.value_or(0.0);
+        _animationSpeed = p.animationSpeed.value_or(1.0);
+        _animationRepeatMode.addOptions({
+            { static_cast<int>(AnimationRepeatMode::PingPong), "PingPong" },
+            { static_cast<int>(AnimationRepeatMode::Wrap), "Wrap" },
+        });
+
+        if (p.animationRepeatMode.has_value()) {
+            _animationRepeatMode = static_cast<int>(codegen::map<AnimationRepeatMode>(*p.animationRepeatMode));
+        } else {
+            _animationRepeatMode = static_cast<int>(AnimationRepeatMode::PingPong);
+        }
+
+        // Remove read only if we have a valid trajectory
+        _animationFrame.setReadOnly(true);
+        _animationSpeed.setReadOnly(true);
+        _animationRepeatMode.setReadOnly(true);
     
         addPropertySubOwner(_representations);
-        addProperty(_animationSpeed);
         addProperty(_ssaoEnabled);
         addProperty(_ssaoIntensity);
         addProperty(_ssaoRadius);
         addProperty(_ssaoBias);
         addProperty(_exposure);
+        addProperty(_ensurePbc);
+        addProperty(_animationFrame);
+        addProperty(_animationSpeed);
+        addProperty(_animationRepeatMode);
+
+        _animationFrame.onChange([this]() mutable {
+            setAnimationFrame(_animationFrame);
+        });
     }
 
     RenderableMolecule::~RenderableMolecule() {
@@ -448,15 +564,23 @@ namespace openspace {
         else
             _renderableInView = false;
 
-        double t = data.time.j2000Seconds();
-
         // update animation
         if (_trajectory) {
-            mol::util::interpolate_coords(_molecule.atom.x, _molecule.atom.y, _molecule.atom.z, _molecule.atom.count, t, mol::util::Interpolation::Cubic, _trajectory);
-        }
+            // Delta time progression between frames in seconds
+            double dt = data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds();
+            
 
-        // update gl repr
-        md_gl_molecule_set_atom_position(&_gl_molecule, 0, (uint32_t)_molecule.atom.count, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
+            //double traj_dur = static_cast<double>(MAX(0, md_trajectory_num_frames(_trajectory) - 1));
+            //double t = fract(data.time.j2000Seconds() / traj_dur) * traj_dur;
+            //double t = _animationFrame + dt * _animationSpeed * _animationDir;
+
+            /*
+            global::scriptEngine->queueScript(
+                fmt::format("openspace.setPropertyValueSingle('{}', {});", _animationFrame.fullyQualifiedIdentifier(), t),
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+            */
+        }
     }
 
     static double normalizeDouble(double input) {
@@ -645,6 +769,13 @@ namespace openspace {
                 LERROR("failed to initialize trajectory: failed to load file");
                 return;
             }
+
+            double last_frame = static_cast<double>(MAX(0, md_trajectory_num_frames(_trajectory) - 1));
+            _animationFrame.setMaxValue(last_frame);
+
+            _animationFrame.setReadOnly(false);
+            _animationSpeed.setReadOnly(false);
+            _animationRepeatMode.setReadOnly(false);
         }
     }
 

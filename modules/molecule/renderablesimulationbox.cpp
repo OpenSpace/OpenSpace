@@ -24,45 +24,36 @@
 
 #include "renderablesimulationbox.h"
 
-//#include "../md_concat.h"
 #include "billboard.h"
 
 #include "glbinding/gl/bitfield.h"
 #include "glbinding/gl/enum.h"
 #include "glbinding/gl/functions.h"
+
+#include <core/md_allocator.h>
+#include <core/md_array.h>
 #include <md_util.h>
-#include <core/md_array.inl>
 #include <md_script.h>
 #include <md_filter.h>
-#include "openspace/engine/windowdelegate.h"
+
 #include "mol/viamd/coloring.h"
 #include "mol/viamd/loader.h"
 #include "mol/viamd/postprocessing.h"
 #include "mol/cache.h"
+#include "mol/util.h"
 
 #include <glm/gtc/random.hpp>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/openglstatecache.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include "openspace/engine/windowdelegate.h"
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/httprequest.h>
-
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/opengl/openglstatecache.h>
-//#include <openspace/util/boxgeometry.h>
-//#include <openspace/util/distanceconstants.h>
-
+#include <openspace/util/httprequest.h>
 #include <openspace/util/updatestructures.h>
-
-#include <md_pdb.h>
-#include <md_gro.h>
-#include <md_xyz.h>
-#include <md_frame_cache.h>
-#include <core/md_allocator.h>
-
-#include "mol/util.h"
 
 // COMBAK: because my ide complains
 #ifndef ZoneScoped
@@ -556,13 +547,18 @@ void RenderableSimulationBox::update(const UpdateData& data) {
     else
         _renderableInView = false;
 
-    double t = data.time.j2000Seconds();
-    double dt = t - data.previousFrameTime.j2000Seconds();
+    double t_cur= data.time.j2000Seconds();
+    double dt = t_cur - data.previousFrameTime.j2000Seconds();
     
     for (molecule_data_t& mol : _molecules) {
         // update animation
         if (mol.trajectory) {
-            mol::util::interpolate_coords(mol.molecule.atom.x, mol.molecule.atom.y, mol.molecule.atom.z, mol.molecule.atom.count, t, mol::util::Interpolation::Cubic, mol.trajectory);
+            // Emulate PingPong animation by manipulating the local time t_local per trajectory
+            const double t_dur = static_cast<double>(MAX(0, md_trajectory_num_frames(mol.trajectory) - 1));
+            double t_loc = fract(t_cur / (2.0 * t_dur));
+            double t = t_loc < 0.5 ? (t_loc * 2.0) : (1.0 - t_loc * 2.0);
+
+            mol::util::interpolate_coords(mol.molecule, mol.trajectory, mol::util::InterpolationType::Cubic, t);
             md_gl_molecule_set_atom_position(&mol.drawMol, 0, uint32_t(mol.molecule.atom.count), mol.molecule.atom.x, mol.molecule.atom.y, mol.molecule.atom.z, 0);
         }
     

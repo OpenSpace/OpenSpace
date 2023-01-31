@@ -27,8 +27,10 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
 #include <md_gl.h>
 #include <md_molecule.h>
@@ -55,15 +57,19 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    
     void addRepresentation(mol::rep::Type type = mol::rep::Type::SpaceFill, mol::rep::Color color = mol::rep::Color::Cpk, std::string filter = "all", float scale = 1.0f);
+    
+    void setAnimationFrame(double t);
+    double getAnimationFrame();
+
     void initMolecule(std::string_view mol_file, std::string_view traj_file = {});
     void freeMolecule();
     void updateRepresentationsGL();
 
     bool _renderableInView; // indicates whether the molecule is in view in any camera's viewpoint
 
-    double _frame;
+    // This represents the epoch which we derive our local frame time from
+    double _localEpoch;
 
     md_molecule_t _molecule;
     const md_trajectory_i* _trajectory;
@@ -75,14 +81,19 @@ private:
     std::vector<md_gl_representation_t> _gl_representations;
     properties::PropertyOwner  _representations;
     
-    properties::StringProperty _moleculeFile;
-    properties::StringProperty _trajectoryFile;
-    properties::FloatProperty _animationSpeed;
-    properties::BoolProperty _ssaoEnabled;
-    properties::FloatProperty _ssaoIntensity;
-    properties::FloatProperty _ssaoRadius;
-    properties::FloatProperty _ssaoBias;
-    properties::FloatProperty _exposure;
+    properties::StringProperty  _moleculeFile;
+    properties::StringProperty  _trajectoryFile;
+    properties::BoolProperty    _ssaoEnabled;
+    properties::FloatProperty   _ssaoIntensity;
+    properties::FloatProperty   _ssaoRadius;
+    properties::FloatProperty   _ssaoBias;
+    properties::FloatProperty   _exposure;
+    properties::BoolProperty    _ensurePbc;
+    properties::DoubleProperty  _animationFrame;
+    properties::DoubleProperty  _animationSpeed;
+    properties::OptionProperty  _animationRepeatMode;
+
+    double _animationDir;
 };
 
 } // namespace openspace
