@@ -157,7 +157,6 @@ private:
     Camera* _camera = nullptr;
 
     // Property variables
-    properties::StringProperty _origin;
     properties::BoolProperty _unitTest;
     properties::BoolProperty _touchActive;
     properties::BoolProperty _disableZoom;

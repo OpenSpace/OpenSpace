@@ -68,12 +68,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "TouchInteraction";
 
-    constexpr openspace::properties::Property::PropertyInfo OriginInfo = {
-        "Origin",
-        "Origin",
-        "" // @TODO Missing documentation
-    };
-
     constexpr openspace::properties::Property::PropertyInfo UnitTestInfo = {
         "UnitTest",
         "Take a unit test saving the LM data into file",
@@ -260,7 +254,6 @@ namespace openspace {
 
 TouchInteraction::TouchInteraction()
     : properties::PropertyOwner({ "TouchInteraction" })
-    , _origin(OriginInfo)
     , _unitTest(UnitTestInfo, false)
     , _touchActive(EventsInfo, false)
     , _disableZoom(DisableZoomInfo, false)
@@ -340,17 +333,6 @@ TouchInteraction::TouchInteraction()
     addPropertySubOwner(_debugProperties);
 #endif
 
-    _origin.onChange([this]() {
-        SceneGraphNode* node = sceneGraphNode(_origin.value());
-        if (node) {
-            setFocusNode(node);
-        }
-        else {
-            LWARNING(fmt::format(
-                "Could not find a node in scenegraph called '{}'", _origin.value()
-            ));
-        }
-    });
     _time = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::high_resolution_clock::now().time_since_epoch()
     );
