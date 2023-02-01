@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -115,7 +115,7 @@ std::string_view Time::ISO8601() const {
     ZoneScoped
 
     constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
-    constexpr const int S = sizeof(Format);
+    constexpr int S = sizeof(Format);
     char* b = reinterpret_cast<char*>(
         global::memoryManager->TemporaryMemory.allocate(S)
     );
@@ -127,7 +127,7 @@ std::string_view Time::ISO8601() const {
 
 void Time::ISO8601(char* buffer) const {
     constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
-    constexpr const int S = sizeof(Format) + 1;
+    constexpr int S = sizeof(Format) + 1;
     std::memset(buffer, 0, S);
     SpiceManager::ref().dateFromEphemerisTime(_time, buffer, S, Format);
 }
@@ -167,7 +167,8 @@ scripting::LuaLibrary Time::luaLibrary() {
             codegen::lua::CurrentTimeSpice,
             codegen::lua::CurrentWallTime,
             codegen::lua::CurrentApplicationTime,
-            codegen::lua::AdvancedTime
+            codegen::lua::AdvancedTime,
+            codegen::lua::ConvertTime,
         }
     };
 }

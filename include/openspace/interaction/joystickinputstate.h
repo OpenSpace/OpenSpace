@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,11 +74,11 @@ struct JoystickInputState {
 
 /// The maximum number of joysticks that are supported by this system. This number is
 /// derived from the available GLFW constants
-constexpr const int MaxJoysticks = 16;
+constexpr int MaxJoysticks = 16;
 struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks> {
     /// The maximum number of joysticks that are supported by this system. This number is
     /// derived from the available GLFW constants
-    static constexpr const int MaxNumJoysticks = 16;
+    static constexpr int MaxNumJoysticks = 16;
 
     /**
      * This function return the number of axes the joystick with the given name has

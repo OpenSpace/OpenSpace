@@ -2,11 +2,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "TextureSpout",
+  Enabled = asset.enabled,
   SpoutName = "SPOUT_TERRA_RECEIVER",
   Type = "SpoutImageTileLayer"
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -123,9 +123,6 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(tex, ortho) _uniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
-
-    properties::Property::Visibility _currentVisibility =
-        properties::Property::Visibility::Developer;
 
     std::vector<ImGuiContext*> _contexts;
 

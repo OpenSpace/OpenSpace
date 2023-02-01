@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,7 @@ namespace {
         "FilePath",
         "File Path",
         "The path of the GDAL file or the image file that is to be used in this tile "
-        "provider."
+        "provider"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TilePixelSizeInfo = {
@@ -45,7 +45,7 @@ namespace {
         "This value is the preferred size (in pixels) for each tile. Choosing the right "
         "value is a tradeoff between more efficiency (larger images) and better quality "
         "(smaller images). The tile pixel size has to be smaller than the size of the "
-        "complete image if a single image is used."
+        "complete image if a single image is used"
     };
 
     struct [[codegen::Dictionary(DefaultTileProvider)]] Parameters {
@@ -94,7 +94,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     // 1. Get required Keys
     _filePath = p.filePath;
 
-    _layerGroupID = layergroupid::GroupID(p.layerGroupID);
+    _layerGroupID = layers::Group::ID(p.layerGroupID);
 
     // 2. Initialize default values for any optional Keys
     // getValue does not work for integers
@@ -102,11 +102,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     _padTiles = p.padTiles.value_or(_padTiles);
 
     // Only preprocess height layers by default
-    switch (_layerGroupID) {
-        case layergroupid::GroupID::HeightLayers: _performPreProcessing = true; break;
-        default:                                  _performPreProcessing = false; break;
-    }
-
+    _performPreProcessing = _layerGroupID == layers::Group::ID::HeightLayers;
     _performPreProcessing = p.performPreProcessing.value_or(_performPreProcessing);
 
     TileTextureInitData initData(
@@ -139,7 +135,10 @@ Tile DefaultTileProvider::tile(const TileIndex& tileIndex) {
     if (tileIndex.level > maxLevel()) {
         return Tile{ nullptr, std::nullopt, Tile::Status::OutOfRange };
     }
-    const cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    const cache::ProviderTileKey key = {
+        .tileIndex = tileIndex,
+        .providerID = uniqueIdentifier
+    };
     cache::MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     Tile tile = tileCache->get(key);
@@ -158,7 +157,10 @@ Tile::Status DefaultTileProvider::tileStatus(const TileIndex& index) {
         return Tile::Status::OutOfRange;
     }
 
-    const cache::ProviderTileKey key = { index, uniqueIdentifier };
+    const cache::ProviderTileKey key = {
+        .tileIndex = index,
+        .providerID = uniqueIdentifier
+    };
     cache::MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     return tileCache->get(key).status;
@@ -175,7 +177,10 @@ void DefaultTileProvider::update() {
 
     std::optional<RawTile> tile = _asyncTextureDataProvider->popFinishedRawTile();
     if (tile) {
-        const cache::ProviderTileKey key = { tile->tileIndex, uniqueIdentifier };
+        const cache::ProviderTileKey key = {
+            .tileIndex = tile->tileIndex,
+            .providerID = uniqueIdentifier
+        };
         cache::MemoryAwareTileCache* tileCache =
             global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
         ghoul_assert(!tileCache->exist(key), "Tile must not be existing in cache");

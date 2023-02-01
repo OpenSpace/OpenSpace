@@ -1,19 +1,12 @@
 local colorLayersPath = "./layers/colorlayers"
 
-local colorLayer = asset.require(colorLayersPath .. "/io_texture")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Io.Renderable.Layers.ColorLayers." ..
-    colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require(colorLayersPath .. "/io_texture", true)
 
 
 asset.meta = {
   Name = "Default Io Layers",
   Version = "1.0",
-  Description = [[ Default Io layers are: Io Texture]],
+  Description = "Default Io layers are: Io Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

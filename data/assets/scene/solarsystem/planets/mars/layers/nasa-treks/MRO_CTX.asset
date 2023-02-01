@@ -1,0 +1,611 @@
+-- This file was automatically generated using a script found at
+-- https://github.com/OpenSpace/scripts/treks-to-openspace. See the README.md file
+-- in that repository for more information on how to run the script to update these
+-- files. In particular in the case of errors, prefer to change that script rather
+-- than the individual files
+
+local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Mars.Identifier
+
+local treks_b21_017819_2025_xn_22n048w = {
+  Identifier = "b21_017819_2025_xn_22n048w",
+  Name = [[MRO CTX, 22n048w Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/22n048w_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Acheron_Fossae_CTX_BlockAdj_dd = {
+  Identifier = "Acheron_Fossae_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Acheron Fossae Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Acheron_Fossae_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Acidalia_Plantia_CTX_BlockAdj_dd = {
+  Identifier = "Acidalia_Plantia_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Acidalia Plantia Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Acidalia_Plantia_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Arabia_Terra_CTX_BlockAdj_dd = {
+  Identifier = "Arabia_Terra_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Arabia Terra Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Arabia_Terra_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Aram_Chaos_CTX_BlockAdj_dd = {
+  Identifier = "Aram_Chaos_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Aram Chaos Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Aram_Chaos_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Arcadia_CTX_BlockAdj_dd = {
+  Identifier = "Arcadia_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Arcadia Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Arcadia_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Arcadia_Planitia_CTX_BlockAdj_dd = {
+  Identifier = "Arcadia_Planitia_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Arcadia Planitia Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Arcadia_Planitia_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Ausonia_CTX_BlockAdj_dd = {
+  Identifier = "Ausonia_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Ausonia Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Ausonia_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Cerberus_CTX_BlockAdj_dd = {
+  Identifier = "Cerberus_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Cerberus Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Cerberus_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_DEM_1m_ColumbiaHills_fixed = {
+  Identifier = "DEM_1m_ColumbiaHills_fixed",
+  Name = [[MRO CTX, Columbia Hills DEM]],
+  FilePath = asset.localResource("MRO_CTX/Columbia_Hills_DEM.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Columbus_Crater_CTX_BlockAdj_dd = {
+  Identifier = "Columbus_Crater_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Columbus Crater Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Columbus_Crater_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Copernicus_Crater_CTX_BlockAdj_dd = {
+  Identifier = "Copernicus_Crater_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Copernicus Crater Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Copernicus_Crater_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Coprates_EMelas_Chasm_CTX_BlockAdj_dd = {
+  Identifier = "Coprates_EMelas_Chasm_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Coprates EMelas Chasm Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Coprates_EMelas_Chasm_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_curiosity_ctx_mosaic = {
+  Identifier = "curiosity_ctx_mosaic",
+  Name = [[MRO CTX, Curiosity Roving Site Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Curiosity_Roving_Site_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Deuteronilus1_2_CTX_BlockAdj_dd = {
+  Identifier = "Deuteronilus1_2_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Deuteronilus Mensae Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Deuteronilus_Mensae_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_CTX_DEM_East_Melas = {
+  Identifier = "CTX_DEM_East_Melas",
+  Name = [[MRO CTX, East Melas DEM]],
+  FilePath = asset.localResource("MRO_CTX/East_Melas_DEM.vrt"),
+  Description = [[This is a digital elevation model (DEM) for the Eastern Melas Chasma region of Valles Marineris. It is one of the areas identified as a potential Exploration Zone (EZ) for human exploration of Mars. This DEM was generated by combining 9 stereographic pairs of CTX images. Each individual pair was taken of the same area but from different angles. The nine pairs were joined together to cover a broad area of the EZ. This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars. The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_CTX_Shade_East_Melas = {
+  Identifier = "CTX_Shade_East_Melas",
+  Name = [[MRO CTX, East Melas Hillshade]],
+  FilePath = asset.localResource("MRO_CTX/East_Melas_Hillshade.vrt"),
+  Description = [[This is a hillshade rendition of the digital elevation model (DEM) for the Eastern Melas Chasma region of Valles Marineris. It is one of the areas identified as a potential Exploration Zone (EZ) for human exploration of Mars. The hillshade layer is a shaded relief view of the DEM, making it particularly easy to visualize surface topography. The DEM was generated by combining 9 stereographic pairs of CTX images. Each individual pair was taken of the same area but from different angles. The nine pairs were joined together to cover a broad area of the EZ. This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars. The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_NE_Marineris_Crater_CTX_BlockAdj_dd = {
+  Identifier = "NE_Marineris_Crater_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Eastern Valles Marineris Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Eastern_Valles_Marineris_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_SE_Marineris_CTX_BlockAdj_dd = {
+  Identifier = "SE_Marineris_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Equatorial Valles Marineries Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Equatorial_Valles_Marineries_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Erebus_Montes_CTX_BlockAdj_dd = {
+  Identifier = "Erebus_Montes_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Erebus Montes Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Erebus_Montes_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Gale_CTX_BlockAdj_dd = {
+  Identifier = "Gale_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Gale Crater Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Gale_Crater_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Gusev_CTX_BlockAdj_dd = {
+  Identifier = "Gusev_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Gusev Crater Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Gusev_Crater_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Hadriacus_CTX_BlockAdj_dd = {
+  Identifier = "Hadriacus_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Hadriacus Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Hadriacus_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Hale_Crater_CTX_BlockAdj_dd = {
+  Identifier = "Hale_Crater_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Hale Crater Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Hale_Crater_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Hebrus_CTX_BlockAdj_dd = {
+  Identifier = "Hebrus_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Hebrus Valles Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Hebrus_Valles_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Hellas_Hellas2_CTX_BlockAdj_dd = {
+  Identifier = "Hellas_Hellas2_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Hellas Eastern Rim Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Hellas_Eastern_Rim_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Hellas3_CTX_BlockAdj_dd = {
+  Identifier = "Hellas3_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Hellas Mesopotamia Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Hellas_Mesopotamia_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Huygens_CTX_BlockAdj_dd = {
+  Identifier = "Huygens_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Huygens Crater Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Huygens_Crater_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Hypanis_Delta_CTX_BlockAdj_dd = {
+  Identifier = "Hypanis_Delta_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Hypanis Delta Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Hypanis_Delta_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Ismenius_Cavus_CTX_BlockAdj_dd = {
+  Identifier = "Ismenius_Cavus_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Ismenius Cavus Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Ismenius_Cavus_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Jezero_CTX_BlockAdj_dd = {
+  Identifier = "Jezero_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Jezero Mosaic, Preliminary]],
+  FilePath = asset.localResource("MRO_CTX/Jezero_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Kasei_Valles_CTX_BlockAdj_dd = {
+  Identifier = "Kasei_Valles_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Kasei Valles Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Kasei_Valles_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Mawrth_Valles_CTX_BlockAdj_dd = {
+  Identifier = "Mawrth_Valles_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Mawrth Vallis Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Mawrth_Vallis_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_McLaughlin_Crater_CTX_BlockAdj_dd = {
+  Identifier = "McLaughlin_Crater_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, McLaughlin Crater Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/McLaughlin_Crater_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_S_Meridiani_Sinus_Planium_CTX_BlockAdj_dd = {
+  Identifier = "S_Meridiani_Sinus_Planium_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Meridiani Planum - Sinus Meridiani Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Meridiani_Planum_-_Sinus_Meridiani_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_CTX_beta01_uncontrolled_5m_Caltech = {
+  Identifier = "CTX_beta01_uncontrolled_5m_Caltech",
+  Name = [[MRO CTX, Mosaic Global Uncontrolled (Caltech)]],
+  FilePath = asset.localResource("MRO_CTX/Mosaic_Global_Uncontrolled_Caltech.vrt"),
+  Description = [[This is a preliminary uncontrolled Context Camera (CTX) mosaic, called beta01, that the Murray Lab at Caltech has created to (1) generate a list of orbits that will be included in the final mosaic, (2) decipher challenges involved with generating a product of this unprecedented scale, and (3) solicit feedback from the Mars science community for how best to generate the mosaic in a way that helps as diverse a group of scientists as possible. The CTX camera, as managed by Malin Space Science Systems (MSSS), has attained near global coverage of Mars at the scale of ~5 m/pixel. All data used in the construction of this CTX global mosaic have been publicly released and are freely available via the NASA Planetary Data System. The Murray Lab/Caltech grants free use of the beta01 version of the mosaic for all purposes. When used, data credit should be: NASA/JPL/MSSS/The Caltech Murray Lab/Esri. This tiled web service, as hosted by Esri, is made available using lossy Jpeg compression at an 8 bit data range.  
+
+To access Esri's Tiled Web Service for this mosaic, go to https://usgs.maps.arcgis.com/home/item.html?id=b164957a19544f55a8d6a001c952a590. To download the data, go to  http://murray-lab.caltech.edu/CTX/.
+
+
+Credit: NASA/JPL/MSSS/The Caltech Murray Lab/Esri]]
+}
+
+local treks_InSightCTXMosaic_112917 = {
+  Identifier = "InSightCTXMosaic_112917",
+  Name = [[MRO CTX, Mosaic InSight]],
+  FilePath = asset.localResource("MRO_CTX/Mosaic_InSight.vrt"),
+  Description = [[This is a 5m/px CTX orthophoto mosaic of the InSight Landing Site.  After being transformed using a spline transformation, each image had the exterior 100m of pixels removed and was detrended by fitting a third order polynomial and subtracting it from each image. All of the detrended images were then mosaiced into a single image and color balanced using Distributed Gradient-Domain processing.]]
+}
+
+local treks_olympus_monseq = {
+  Identifier = "olympus_monseq",
+  Name = [[MRO CTX, Mosaic Olympus Mons]],
+  FilePath = asset.localResource("MRO_CTX/Mosaic_Olympus_Mons.vrt"),
+  Description = [[This is a beta section of a CTX global mosaic produced by Jay Dickson. It was created by map projecting CT
+X images with ISIS3, and color balancing/stitching the images with Adobe Photoshop. A footprint layer shows the seams
+ of image boundaries.    
+reference:
+Dickson et al. 2018 LPSC programs with abstracts https://www.hou.usra.edu/meetings/lpsc2018/pdf/2480.pdf]]
+}
+
+local treks_Newton_Crater_CTX_BlockAdj_dd = {
+  Identifier = "Newton_Crater_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Newton Crater Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Newton_Crater_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Noactis_Landing_CTX_BlockAdj_dd = {
+  Identifier = "Noactis_Landing_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Noctis Landing Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Noctis_Landing_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Protonilus_CTX_BlockAdj_dd = {
+  Identifier = "Protonilus_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Protonilus Mensae Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Protonilus_Mensae_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_S_Nectaris_Fossae_CTX_BlockAdj_dd = {
+  Identifier = "S_Nectaris_Fossae_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Southern Nectaris Fossae Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Southern_Nectaris_Fossae_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_DEM_1m_VictoriaCrater = {
+  Identifier = "DEM_1m_VictoriaCrater",
+  Name = [[MRO CTX, Victoria Crater DEM]],
+  FilePath = asset.localResource("MRO_CTX/Victoria_Crater_DEM.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Viking_CTX_BlockAdj_dd = {
+  Identifier = "Viking_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Viking 1 Landing Site Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Viking_1_Landing_Site_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_b16_015887_2280_xn_48n225w = {
+  Identifier = "b16_015887_2280_xn_48n225w",
+  Name = [[MRO CTX, Viking 2 Landing Site Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Viking_2_Landing_Site_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_West_Candor_Chasma_longlat = {
+  Identifier = "West_Candor_Chasma_longlat",
+  Name = [[MRO CTX, West Candor Chasma Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/West_Candor_Chasma_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_West_Candor_Chasma_DEM_longlat = {
+  Identifier = "West_Candor_Chasma_DEM_longlat",
+  Name = [[MRO CTX, West Candor DEM]],
+  FilePath = asset.localResource("MRO_CTX/West_Candor_DEM.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Noachis_CTX_BlockAdj_dd = {
+  Identifier = "Noachis_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Western Noachis Terra Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Western_Noachis_Terra_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+local treks_Zephyria_CTX_BlockAdj_dd = {
+  Identifier = "Zephyria_CTX_BlockAdj_dd",
+  Name = [[MRO CTX, Zephyria Planum Mosaic]],
+  FilePath = asset.localResource("MRO_CTX/Zephyria_Planum_Mosaic.vrt"),
+  Description = [[This data was acquired using the Context Camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_b21_017819_2025_xn_22n048w)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Acheron_Fossae_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Acidalia_Plantia_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Arabia_Terra_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Aram_Chaos_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Arcadia_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Arcadia_Planitia_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Ausonia_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Cerberus_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_DEM_1m_ColumbiaHills_fixed)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Columbus_Crater_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Copernicus_Crater_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Coprates_EMelas_Chasm_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_curiosity_ctx_mosaic)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Deuteronilus1_2_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_CTX_DEM_East_Melas)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_CTX_Shade_East_Melas)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_NE_Marineris_Crater_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_SE_Marineris_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Erebus_Montes_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Gale_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Gusev_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Hadriacus_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Hale_Crater_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Hebrus_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Hellas_Hellas2_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Hellas3_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Huygens_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Hypanis_Delta_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Ismenius_Cavus_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Jezero_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Kasei_Valles_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Mawrth_Valles_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_McLaughlin_Crater_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_S_Meridiani_Sinus_Planium_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_CTX_beta01_uncontrolled_5m_Caltech)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_InSightCTXMosaic_112917)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_olympus_monseq)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Newton_Crater_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Noactis_Landing_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Protonilus_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_S_Nectaris_Fossae_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_DEM_1m_VictoriaCrater)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Viking_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_b16_015887_2280_xn_48n225w)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_West_Candor_Chasma_longlat)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_West_Candor_Chasma_DEM_longlat)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Noachis_CTX_BlockAdj_dd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Zephyria_CTX_BlockAdj_dd)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_b21_017819_2025_xn_22n048w")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Acheron_Fossae_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Acidalia_Plantia_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Arabia_Terra_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Aram_Chaos_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Arcadia_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Arcadia_Planitia_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Ausonia_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Cerberus_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_DEM_1m_ColumbiaHills_fixed")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Columbus_Crater_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Copernicus_Crater_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Coprates_EMelas_Chasm_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_curiosity_ctx_mosaic")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Deuteronilus1_2_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_CTX_DEM_East_Melas")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_CTX_Shade_East_Melas")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_NE_Marineris_Crater_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_SE_Marineris_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Erebus_Montes_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Gale_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Gusev_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Hadriacus_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Hale_Crater_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Hebrus_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Hellas_Hellas2_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Hellas3_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Huygens_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Hypanis_Delta_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Ismenius_Cavus_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Jezero_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Kasei_Valles_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Mawrth_Valles_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_McLaughlin_Crater_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_S_Meridiani_Sinus_Planium_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_CTX_beta01_uncontrolled_5m_Caltech")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_InSightCTXMosaic_112917")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_olympus_monseq")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Newton_Crater_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Noactis_Landing_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Protonilus_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_S_Nectaris_Fossae_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_DEM_1m_VictoriaCrater")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Viking_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_b16_015887_2280_xn_48n225w")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_West_Candor_Chasma_longlat")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_West_Candor_Chasma_DEM_longlat")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Noachis_CTX_BlockAdj_dd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Zephyria_CTX_BlockAdj_dd")
+end)
+
+asset.export("b21_017819_2025_xn_22n048w", treks_b21_017819_2025_xn_22n048w)
+asset.export("Acheron_Fossae_CTX_BlockAdj_dd", treks_Acheron_Fossae_CTX_BlockAdj_dd)
+asset.export("Acidalia_Plantia_CTX_BlockAdj_dd", treks_Acidalia_Plantia_CTX_BlockAdj_dd)
+asset.export("Arabia_Terra_CTX_BlockAdj_dd", treks_Arabia_Terra_CTX_BlockAdj_dd)
+asset.export("Aram_Chaos_CTX_BlockAdj_dd", treks_Aram_Chaos_CTX_BlockAdj_dd)
+asset.export("Arcadia_CTX_BlockAdj_dd", treks_Arcadia_CTX_BlockAdj_dd)
+asset.export("Arcadia_Planitia_CTX_BlockAdj_dd", treks_Arcadia_Planitia_CTX_BlockAdj_dd)
+asset.export("Ausonia_CTX_BlockAdj_dd", treks_Ausonia_CTX_BlockAdj_dd)
+asset.export("Cerberus_CTX_BlockAdj_dd", treks_Cerberus_CTX_BlockAdj_dd)
+asset.export("DEM_1m_ColumbiaHills_fixed", treks_DEM_1m_ColumbiaHills_fixed)
+asset.export("Columbus_Crater_CTX_BlockAdj_dd", treks_Columbus_Crater_CTX_BlockAdj_dd)
+asset.export("Copernicus_Crater_CTX_BlockAdj_dd", treks_Copernicus_Crater_CTX_BlockAdj_dd)
+asset.export("Coprates_EMelas_Chasm_CTX_BlockAdj_dd", treks_Coprates_EMelas_Chasm_CTX_BlockAdj_dd)
+asset.export("curiosity_ctx_mosaic", treks_curiosity_ctx_mosaic)
+asset.export("Deuteronilus1_2_CTX_BlockAdj_dd", treks_Deuteronilus1_2_CTX_BlockAdj_dd)
+asset.export("CTX_DEM_East_Melas", treks_CTX_DEM_East_Melas)
+asset.export("CTX_Shade_East_Melas", treks_CTX_Shade_East_Melas)
+asset.export("NE_Marineris_Crater_CTX_BlockAdj_dd", treks_NE_Marineris_Crater_CTX_BlockAdj_dd)
+asset.export("SE_Marineris_CTX_BlockAdj_dd", treks_SE_Marineris_CTX_BlockAdj_dd)
+asset.export("Erebus_Montes_CTX_BlockAdj_dd", treks_Erebus_Montes_CTX_BlockAdj_dd)
+asset.export("Gale_CTX_BlockAdj_dd", treks_Gale_CTX_BlockAdj_dd)
+asset.export("Gusev_CTX_BlockAdj_dd", treks_Gusev_CTX_BlockAdj_dd)
+asset.export("Hadriacus_CTX_BlockAdj_dd", treks_Hadriacus_CTX_BlockAdj_dd)
+asset.export("Hale_Crater_CTX_BlockAdj_dd", treks_Hale_Crater_CTX_BlockAdj_dd)
+asset.export("Hebrus_CTX_BlockAdj_dd", treks_Hebrus_CTX_BlockAdj_dd)
+asset.export("Hellas_Hellas2_CTX_BlockAdj_dd", treks_Hellas_Hellas2_CTX_BlockAdj_dd)
+asset.export("Hellas3_CTX_BlockAdj_dd", treks_Hellas3_CTX_BlockAdj_dd)
+asset.export("Huygens_CTX_BlockAdj_dd", treks_Huygens_CTX_BlockAdj_dd)
+asset.export("Hypanis_Delta_CTX_BlockAdj_dd", treks_Hypanis_Delta_CTX_BlockAdj_dd)
+asset.export("Ismenius_Cavus_CTX_BlockAdj_dd", treks_Ismenius_Cavus_CTX_BlockAdj_dd)
+asset.export("Jezero_CTX_BlockAdj_dd", treks_Jezero_CTX_BlockAdj_dd)
+asset.export("Kasei_Valles_CTX_BlockAdj_dd", treks_Kasei_Valles_CTX_BlockAdj_dd)
+asset.export("Mawrth_Valles_CTX_BlockAdj_dd", treks_Mawrth_Valles_CTX_BlockAdj_dd)
+asset.export("McLaughlin_Crater_CTX_BlockAdj_dd", treks_McLaughlin_Crater_CTX_BlockAdj_dd)
+asset.export("S_Meridiani_Sinus_Planium_CTX_BlockAdj_dd", treks_S_Meridiani_Sinus_Planium_CTX_BlockAdj_dd)
+asset.export("CTX_beta01_uncontrolled_5m_Caltech", treks_CTX_beta01_uncontrolled_5m_Caltech)
+asset.export("InSightCTXMosaic_112917", treks_InSightCTXMosaic_112917)
+asset.export("olympus_monseq", treks_olympus_monseq)
+asset.export("Newton_Crater_CTX_BlockAdj_dd", treks_Newton_Crater_CTX_BlockAdj_dd)
+asset.export("Noactis_Landing_CTX_BlockAdj_dd", treks_Noactis_Landing_CTX_BlockAdj_dd)
+asset.export("Protonilus_CTX_BlockAdj_dd", treks_Protonilus_CTX_BlockAdj_dd)
+asset.export("S_Nectaris_Fossae_CTX_BlockAdj_dd", treks_S_Nectaris_Fossae_CTX_BlockAdj_dd)
+asset.export("DEM_1m_VictoriaCrater", treks_DEM_1m_VictoriaCrater)
+asset.export("Viking_CTX_BlockAdj_dd", treks_Viking_CTX_BlockAdj_dd)
+asset.export("b16_015887_2280_xn_48n225w", treks_b16_015887_2280_xn_48n225w)
+asset.export("West_Candor_Chasma_longlat", treks_West_Candor_Chasma_longlat)
+asset.export("West_Candor_Chasma_DEM_longlat", treks_West_Candor_Chasma_DEM_longlat)
+asset.export("Noachis_CTX_BlockAdj_dd", treks_Noachis_CTX_BlockAdj_dd)
+asset.export("Zephyria_CTX_BlockAdj_dd", treks_Zephyria_CTX_BlockAdj_dd)
+
+
+asset.meta = {
+  Name = [[NASA Treks Layers for Mars MRO_CTX],
+  Version = "1.0",
+  Author = "NASA/Treks",
+  URL = "https://trek.nasa.gov/mars",
+  License = "NASA/Treks",
+  Description = [[MRO_CTX layers from NASA/Treks for Mars]]
+}

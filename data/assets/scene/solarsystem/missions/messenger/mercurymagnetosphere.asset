@@ -11,7 +11,7 @@ local localFolder = asset.syncedResource({
 
 local MercuryRadius = 2.4397E6
 
-local Magnetosphere = {   
+local Magnetosphere = {
   Name = "Mercury Magnetosphere",
   Identifier = "MercuryMagnetosphere",
   Parent = mercuryTransforms.MercuryBarycenter.Identifier,
@@ -56,9 +56,9 @@ local Magnetosphere = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Magnetosphere)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Magnetosphere)
 end)
-  
+
 asset.export(Magnetosphere)

@@ -2,7 +2,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local BENNU_BODY = "2101955"
+local BENNU_BODY = 2101955
 
 local BennuBarycenter = {
   Identifier = "BennuBarycenter",
@@ -23,9 +23,9 @@ local BennuBarycenter = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(BennuBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(BennuBarycenter)
 end)
-  
+
 asset.export(BennuBarycenter)

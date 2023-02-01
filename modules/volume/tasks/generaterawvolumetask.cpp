@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -132,17 +132,31 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
 
     if (!_hasFile && !_hasFunction) {
-        std::cout << "Either a data file or a function is required to generate this volume task!" << std::endl;
+        // @TODO Temp log category, which should be updated in the "real" cosmic life task
+
+        LERRORC(
+            "TEMP_RawVolumeTask",
+            "Either a data file or a function is required to generate this volume task!"
+        );
     }
     else if (_hasFile) {
+        // THIS IS THE OLD/USUAL WAY OF LOADING THE DATASET output file
         // _dataset = speck::data::loadFileWithCache(_speckFile);
+
+         // @TODO (emmbr) Create a new special task for generating the volumes,
+        // to avoid conflicts with master. Check with Brian what he has done for this
+
         std::ifstream data(_file);
         if (!data) {
-            std::cout << "Error opening output file" << std::endl;
+            // @TODO Temp log category, which should be updated in the "real" cosmic life task
+            LERRORC(
+                "TEMP_RawVolumeTask",
+                fmt::format("Error opening output file '{}'", _file)
+            );
         };
 
         // Save volume values in 1D vector and get index of each coordinates (x,y,z) by:
-        // index = x + dim_x*y + dim_x*dim_y*z 
+        // index = x + dim_x*y + dim_x*dim_y*z
         // coord_value = vector[ index ]
         std::vector<float> flatten_volume_vector;
         std::string line;
@@ -150,7 +164,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
         while (std::getline(data, line)) {
             flatten_volume_vector.push_back(std::stof(line));
         };
-        
+
 
         rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
             int index = cell.x + (_dimensions.x * cell.y) + (_dimensions.x * _dimensions.y * cell.z);

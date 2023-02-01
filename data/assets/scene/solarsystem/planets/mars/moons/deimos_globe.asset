@@ -37,7 +37,7 @@ local DeimosGlobe = {
   GUI = {
     Name = "Deimos_Globe",
     Path = "/Solar System/Planets/Mars",
-    Description = [[One of two moons of Mars.]]
+    Description = "One of two moons of Mars"
   }
 }
 
@@ -55,9 +55,8 @@ asset.export(DeimosGlobe)
 asset.meta = {
   Name = "Deimos Globe",
   Version = "1.0",
-  Description = [[ RenderableGlobe for Deimos.]],
+  Description = "RenderableGlobe for Deimos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Deimos"}
+  License = "MIT license"
 }

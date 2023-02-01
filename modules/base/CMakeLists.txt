@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -28,7 +28,9 @@ set(HEADER_FILES
   dashboard/dashboarditemangle.h
   dashboard/dashboarditemdate.h
   dashboard/dashboarditemdistance.h
+  dashboard/dashboarditemelapsedtime.h
   dashboard/dashboarditemframerate.h
+  dashboard/dashboarditeminputstate.h
   dashboard/dashboarditemmission.h
   dashboard/dashboarditemparallelconnection.h
   dashboard/dashboarditempropertyvalue.h
@@ -44,7 +46,7 @@ set(HEADER_FILES
   rendering/grids/renderablesphericalgrid.h
   rendering/renderablecartesianaxes.h
   rendering/renderabledisc.h
-  rendering/renderablelabels.h
+  rendering/renderablelabel.h
   rendering/renderablemodel.h
   rendering/renderablenodeline.h
   rendering/renderableplane.h
@@ -82,7 +84,9 @@ set(SOURCE_FILES
   dashboard/dashboarditemangle.cpp
   dashboard/dashboarditemdate.cpp
   dashboard/dashboarditemdistance.cpp
+  dashboard/dashboarditemelapsedtime.cpp
   dashboard/dashboarditemframerate.cpp
+  dashboard/dashboarditeminputstate.cpp
   dashboard/dashboarditemmission.cpp
   dashboard/dashboarditemparallelconnection.cpp
   dashboard/dashboarditempropertyvalue.cpp
@@ -98,7 +102,7 @@ set(SOURCE_FILES
   rendering/grids/renderablesphericalgrid.cpp
   rendering/renderablecartesianaxes.cpp
   rendering/renderabledisc.cpp
-  rendering/renderablelabels.cpp
+  rendering/renderablelabel.cpp
   rendering/renderablemodel.cpp
   rendering/renderablenodeline.cpp
   rendering/renderableplane.cpp
@@ -164,4 +168,15 @@ create_new_module(
   base_module
   STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+)
+target_precompile_headers(${base_module} PRIVATE
+  <openspace/documentation/documentation.h>
+  <openspace/documentation/verifier.h>
+  <openspace/properties/numericalproperty.h>
+  <openspace/rendering/renderable.h>
+  <ghoul/opengl/programobject.h>
+  <ghoul/opengl/shaderobject.h>
+  <ghoul/opengl/uniformcache.h>
+  <future>
+  <map>
 )

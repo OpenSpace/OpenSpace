@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,9 +43,9 @@
 #include "scriptengine_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "ScriptEngine";
+    constexpr std::string_view _loggerCat = "ScriptEngine";
 
-    constexpr const int TableOffset = -3; // top-first argument-second argument
+    constexpr int TableOffset = -3; // top-first argument-second argument
 
     struct [[codegen::Dictionary(Documentation)]] Parameters {
         std::string name;
@@ -84,8 +84,8 @@ namespace {
 
     void toJson(const openspace::scripting::LuaLibrary& library, std::stringstream& json)
     {
-        constexpr const char* replStr = R"("{}": "{}", )";
-        constexpr const char* replStr2 = R"("{}": "{}")";
+        constexpr std::string_view replStr = R"("{}": "{}", )";
+        constexpr std::string_view replStr2 = R"("{}": "{}")";
 
         using namespace openspace;
         using namespace openspace::scripting;
@@ -199,7 +199,7 @@ void ScriptEngine::initializeLuaState(lua_State* state) {
     const int top = lua_gettop(state);
 
     lua_newtable(state);
-    lua_setglobal(state, OpenSpaceLibraryName);
+    lua_setglobal(state, OpenSpaceLibraryName.data());
 
     LDEBUG("Add OpenSpace modules");
     for (LuaLibrary& lib : _registeredLibraries) {
@@ -253,10 +253,7 @@ bool ScriptEngine::hasLibrary(const std::string& name) {
 bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback) {
     ZoneScoped
 
-    if (script.empty()) {
-        LWARNING("Script was empty");
-        return false;
-    }
+    ghoul_assert(!script.empty(), "Script must not be empty");
 
     if (_logScripts) {
         // Write command to log before it's executed
@@ -323,7 +320,7 @@ bool ScriptEngine::runScriptFile(const std::filesystem::path& filename) {
 
 bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& name) {
     bool result = false;
-    lua_getglobal(state, OpenSpaceLibraryName);
+    lua_getglobal(state, OpenSpaceLibraryName.data());
     const bool hasOpenSpaceLibrary = lua_istable(state, -1);
     if (!hasOpenSpaceLibrary) {
         LFATAL("OpenSpace library was not created in initialize method");
@@ -348,7 +345,7 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
         case LUA_TSTRING:
             LERROR(fmt::format("Library name '{}' specifies a string", name));
             break;
-        case LUA_TTABLE: {
+        case LUA_TTABLE:
             if (hasLibrary(name)) {
                 LERROR(fmt::format(
                     "Library with name '{}' has been registered before", name
@@ -358,7 +355,6 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
                 LERROR(fmt::format("Library name '{}' specifies a table", name));
             }
             break;
-        }
         case LUA_TFUNCTION:
             LERROR(fmt::format("Library name '{}' specifies a function", name));
             break;
@@ -449,12 +445,10 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                 library.documentations.push_back(std::move(func));
             }
             catch (const documentation::SpecificationError& e) {
-                for (const documentation::TestResult::Offense& o : e.result.offenses)
-                {
+                for (const documentation::TestResult::Offense& o : e.result.offenses) {
                     LERRORC(o.offender, ghoul::to_string(o.reason));
                 }
-                for (const documentation::TestResult::Warning& w : e.result.warnings)
-                {
+                for (const documentation::TestResult::Warning& w : e.result.warnings) {
                     LWARNINGC(w.offender, ghoul::to_string(w.reason));
                 }
             }
@@ -464,25 +458,13 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
     }
 }
 
-void ScriptEngine::remapPrintFunction() {
-    //ghoul::lua::logStack(_state);
- //   lua_getglobal(_state, _luaGlobalNamespace.c_str());
-    //ghoul::lua::logStack(_state);
- //   lua_pushstring(_state, _printFunctionName.c_str());
-    //ghoul::lua::logStack(_state);
- //   lua_pushcfunction(_state, _printFunctionReplacement);
-    //ghoul::lua::logStack(_state);
- //   lua_settable(_state, _setTableOffset);
-    //ghoul::lua::logStack(_state);
-}
-
 bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
     ZoneScoped
 
     ghoul_assert(state, "State must not be nullptr");
     const int top = lua_gettop(state);
 
-    lua_getglobal(state, OpenSpaceLibraryName);
+    lua_getglobal(state, OpenSpaceLibraryName.data());
     if (library.name.empty()) {
         addLibraryFunctions(state, library, Replace::Yes);
         lua_pop(state, 1);
@@ -549,7 +531,7 @@ std::string ScriptEngine::generateJson() const {
     return json.str();
 }
 
-bool ScriptEngine::writeLog(const std::string& script) {
+void ScriptEngine::writeLog(const std::string& script) {
     ZoneScoped
 
     // Check that logging is enabled and initialize if necessary
@@ -572,12 +554,12 @@ bool ScriptEngine::writeLog(const std::string& script) {
                     std::filesystem::path(_logFilename)
                 ));
 
-                return false;
+                return;
             }
         }
         else {
             _logScripts = false;
-            return false;
+            return;
         }
     }
 
@@ -585,13 +567,10 @@ bool ScriptEngine::writeLog(const std::string& script) {
     std::ofstream file(_logFilename, std::ofstream::app);
     if (!file.good()) {
         LERROR(fmt::format("Could not open file '{}' for logging scripts", _logFilename));
-        return false;
+        return;
     }
 
-    file << script << std::endl;
-    file.close();
-
-    return true;
+    file << script << '\n';
 }
 
 void ScriptEngine::preSync(bool isMaster) {
@@ -677,15 +656,16 @@ void ScriptEngine::postSync(bool isMaster) {
     }
 }
 
-void ScriptEngine::queueScript(const std::string& script,
+void ScriptEngine::queueScript(std::string script,
                                ScriptEngine::RemoteScripting remoteScripting,
                                ScriptCallback callback)
 {
     ZoneScoped
 
-    if (!script.empty()) {
-        _incomingScripts.push({ script, remoteScripting, callback });
+    if (script.empty()) {
+        return;
     }
+    _incomingScripts.push({ std::move(script), remoteScripting, std::move(callback) });
 }
 
 
@@ -693,8 +673,8 @@ void ScriptEngine::addBaseLibrary() {
     ZoneScoped
 
     LuaLibrary lib = {
-        "",
-        {
+        .name = "",
+        .functions = {
             {
                 "printTrace",
                 &luascriptfunctions::printTrace,
@@ -702,7 +682,7 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Trace'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead."
+                "printed, for all other types, the type is printed instead"
             },
             {
                 "printDebug",
@@ -711,7 +691,7 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Debug'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead."
+                "printed, for all other types, the type is printed instead"
             },
             {
                 "printInfo",
@@ -720,7 +700,7 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Info'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead."
+                "printed, for all other types, the type is printed instead"
             },
             {
                 "printWarning",
@@ -729,7 +709,7 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Warning'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead."
+                "printed, for all other types, the type is printed instead"
             },
             {
                 "printError",
@@ -738,7 +718,7 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Error'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead."
+                "printed, for all other types, the type is printed instead"
             },
             {
                 "printFatal",
@@ -747,7 +727,7 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Fatal'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead."
+                "printed, for all other types, the type is printed instead"
             },
             codegen::lua::AbsolutePath,
             codegen::lua::SetPathToken,

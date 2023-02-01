@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,9 +32,9 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "SelectionProperty";
+    constexpr std::string_view _loggerCat = "SelectionProperty";
 
-    constexpr const char* OptionsKey = "Options";
+    constexpr std::string_view OptionsKey = "Options";
 } // namespace
 
 namespace openspace::properties {
@@ -43,7 +43,7 @@ SelectionProperty::SelectionProperty(Property::PropertyInfo info)
     : TemplateProperty(std::move(info), std::set<std::string>())
 {}
 
-std::string SelectionProperty::className() const {
+std::string_view SelectionProperty::className() const {
     return "SelectionProperty";
 }
 
@@ -132,8 +132,8 @@ void SelectionProperty::clearOptions() {
 std::set<std::string> SelectionProperty::fromLuaConversion(lua_State* state,
                                                            bool& success) const
 {
-    static const int KEY = -2;
-    static const int VAL = -1;
+    constexpr int KEY = -2;
+    constexpr int VAL = -1;
 
     if (!lua_istable(state, VAL)) {
         LERROR("Parameter passed to the property is not a table");

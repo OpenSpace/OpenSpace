@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,8 +35,6 @@
 #include <variant>
 
 namespace {
-    constexpr const char* TempSuffix = ".tmp";
-
     struct [[codegen::Dictionary(UrlSynchronization)]] Parameters {
         // The URL or urls from where the files are downloaded. If multiple URLs are
         // provided, all files will be downloaded to the same directory and the filename
@@ -147,14 +145,20 @@ void UrlSynchronization::start() {
         std::vector<std::unique_ptr<HttpFileDownload>> downloads;
 
         for (const std::string& url : _urls) {
-            if (_filename.empty()) {
-                std::string name = std::filesystem::path(url).filename().string();
+            if (_filename.empty() || _urls.size() > 1) {
+                std::filesystem::path fn = std::filesystem::path(url).filename();
+                if (fn.empty() && url.back() == '/') {
+                    // If the user provided a path that ends in / the `filename` will
+                    // result in an empty path with causes the downloading to fail
+                    fn = std::filesystem::path(url).parent_path().filename();
+                }
+                std::string name = fn.string();
 
                 // We can not create filenames with question marks
                 name.erase(std::remove(name.begin(), name.end(), '?'), name.end());
                 _filename = name;
             }
-            std::filesystem::path destination = directory() / (_filename + TempSuffix);
+            std::filesystem::path destination = directory() / (_filename + ".tmp");
 
             auto download = std::make_unique<HttpFileDownload>(
                 url,

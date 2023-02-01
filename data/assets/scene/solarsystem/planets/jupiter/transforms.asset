@@ -23,11 +23,11 @@ local JupiterBarycenter = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JupiterBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JupiterBarycenter)
 end)
-  
+
 asset.export(JupiterBarycenter)
 
 
@@ -35,7 +35,7 @@ asset.export(JupiterBarycenter)
 asset.meta = {
   Name = "Jupiter Transforms",
   Version = "1.1",
-  Description = [[ Jupiter Barycenter transform ]],
+  Description = "Jupiter Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

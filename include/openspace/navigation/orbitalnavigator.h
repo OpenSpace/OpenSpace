@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -382,8 +382,8 @@ private:
      * vector coincides with the axis, and should be used with care.
      *
      * Used for:
-     * IdleBehavior::Behavior::OrbitAtConstantLat ( axis = north = z-axis ) and
-     * IdleBehavior::Behavior::OrbitAroundUp ( axis = up = y-axis )
+     * IdleBehavior::Behavior::OrbitAtConstantLat (axis = north = z-axis) and
+     * IdleBehavior::Behavior::OrbitAroundUp (axis = up = y-axis)
      *
      * \param axis The axis to arbit around, given in model coordinates of the anchor
      * \param deltaTime The time step to use for the motion. Controls the rotation angle

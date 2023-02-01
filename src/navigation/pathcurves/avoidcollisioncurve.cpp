@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,19 +33,20 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/collisionhelper.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "AvoidCollisionCurve";
+    constexpr std::string_view _loggerCat = "AvoidCollisionCurve";
 
-    constexpr const double CloseToNodeThresholdRadiusMultiplier = 5.0;
-    constexpr const double AvoidCollisionDistanceRadiusMultiplier = 3.0;
-    constexpr const double CollisionBufferSizeRadiusMultiplier = 1.0;
-    constexpr const int MaxAvoidCollisionSteps = 10;
+    constexpr double CloseToNodeThresholdRadiusMultiplier = 5.0;
+    constexpr double AvoidCollisionDistanceRadiusMultiplier = 3.0;
+    constexpr double CollisionBufferSizeRadiusMultiplier = 1.0;
+    constexpr int MaxAvoidCollisionSteps = 10;
 
-    constexpr const double Epsilon = 1e-5;
+    constexpr double Epsilon = 1e-5;
 } // namespace
 
 namespace openspace::interaction {
@@ -152,8 +153,11 @@ void AvoidCollisionCurve::removeCollisions(int step) {
             glm::dvec3 p1 = glm::inverse(modelTransform) * glm::dvec4(lineStart, 1.0);
             glm::dvec3 p2 = glm::inverse(modelTransform) * glm::dvec4(lineEnd, 1.0);
 
-            // Sphere to check for collision
-            double radius = node->boundingSphere();
+            // Sphere to check for collision. Make sure it does not have radius zero.
+            const double minValidBoundingSphere =
+                global::navigationHandler->pathNavigator().minValidBoundingSphere();
+
+            double radius = std::max(node->boundingSphere(), minValidBoundingSphere);
             glm::dvec3 center = glm::dvec3(0.0, 0.0, 0.0);
 
             // Add a buffer to avoid passing too close to the node.
@@ -207,6 +211,13 @@ void AvoidCollisionCurve::removeCollisions(int step) {
 
             glm::dvec3 extraKnot = collisionPoint -
                 avoidCollisionDistance * glm::normalize(orthogonal);
+
+            // Don't add invalid positions (indicating precision issues)
+            if (glm::any(glm::isnan(extraKnot))) {
+                throw InsufficientPrecisionError(
+                    "Insufficient precision for avoid collision computation"
+                );
+            }
 
             _points.insert(_points.begin() + i + 2, extraKnot);
 

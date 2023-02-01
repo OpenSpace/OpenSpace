@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,11 +33,11 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    constexpr const char* GlslRaycastPath =
+    constexpr std::string_view GlslRaycastPath =
         "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
-    constexpr const char* GlslBoundsVsPath =
+    constexpr std::string_view GlslBoundsVsPath =
         "${MODULES}/galaxy/shaders/raycasterbounds_vs.glsl";
-    constexpr const char* GlslBoundsFsPath =
+    constexpr std::string_view GlslBoundsFsPath =
         "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
 } // namespace
 
@@ -141,15 +141,15 @@ bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPos
 }
 
 std::string GalaxyRaycaster::boundsVertexShaderPath() const {
-    return GlslBoundsVsPath;
+    return std::string(GlslBoundsVsPath);
 }
 
 std::string GalaxyRaycaster::boundsFragmentShaderPath() const {
-    return GlslBoundsFsPath;
+    return std::string(GlslBoundsFsPath);
 }
 
 std::string GalaxyRaycaster::raycasterPath() const {
-    return GlslRaycastPath;
+    return std::string(GlslRaycastPath);
 }
 
 std::string GalaxyRaycaster::helperPath() const {

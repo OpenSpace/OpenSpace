@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -23,20 +23,20 @@
 ##########################################################################################
 
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+cmake_policy(SET CMP0120 NEW)
 
 project(OpenSpace)
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 18)
+set(OPENSPACE_VERSION_MINOR 19)
 set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "Beta-11")
+set(OPENSPACE_VERSION_STRING "<dev>")
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
 set(GHOUL_BASE_DIR "${OPENSPACE_BASE_DIR}/ext/ghoul")
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
@@ -109,6 +109,8 @@ endif ()
 option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
 
 if (MSVC)
+  option(OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION "Raise exceptions when encountering Inf's or Nan's in floating point numbers" OFF)
+
   option(OPENSPACE_OPTIMIZATION_ENABLE_AVX "Enable AVX instruction set for compilation" OFF)
   option(OPENSPACE_OPTIMIZATION_ENABLE_AVX2 "Enable AVX2 instruction set for compilation" OFF)
   option(OPENSPACE_OPTIMIZATION_ENABLE_AVX512 "Enable AVX2 instruction set for compilation" OFF)
@@ -137,32 +139,30 @@ if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++ -lc++abi")
   else ()
-    if(NOT CMAKE_BUILD_TYPE)
+    if (NOT CMAKE_BUILD_TYPE)
       #Can set to "RelWithDebInfo" or "Debug" also, but problems occur if this is blank by default
       set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type" FORCE)
-    endif()
+    endif ()
     if (NOT DEFINED CMAKE_CXX_FLAGS OR CMAKE_CXX_FLAGS MATCHES "")
       set(CMAKE_CXX_FLAGS " ")
-    endif()
+    endif ()
     STRING(FIND ${CMAKE_CXX_FLAGS} "GLM_ENABLE_EXPERIMENTAL" GLM_FLAG_POS)
     if (${GLM_FLAG_POS} EQUAL -1)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGLM_ENABLE_EXPERIMENTAL" CACHE STRING "" FORCE)
-    endif()
+    endif ()
     set(OpenGL_GL_PREFERENCE "GLVND" CACHE STRING "OpenGL Preference setting necessary for linux" FORCE)
     #Fix for gcc tolerating space in target name
     if (NOT DEFINED CMAKE_C_FLAGS OR CMAKE_C_FLAGS MATCHES "")
       set(CMAKE_C_FLAGS " ")
-    endif()
+    endif ()
     STRING(FIND ${CMAKE_C_FLAGS} "_GNU_SOURCE" GNUSOURCE_FLAG_POS)
     if (${GNUSOURCE_FLAG_POS} EQUAL -1)
       set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE" CACHE STRING "" FORCE)
-    endif()
+    endif ()
   endif ()
-  set(ASSIMP_BUILD_MINIZIP ON CACHE BOOL "Set to have assimp build minizip" FORCE)
 endif ()
 
 add_subdirectory(ext)
-
 add_subdirectory(src)
 
 add_subdirectory(support/coding/codegen)
@@ -197,6 +197,7 @@ if (APPLE)
     "~/Qt/5.11/clang_64/lib/cmake"
     "~/Qt/5.12/clang_64/lib/cmake"
     "~/Qt/5.15.1/clang_64/lib/cmake"
+    "~/Qt/6.2.3/macos/lib/cmake"
   )
 endif ()
 
@@ -228,7 +229,7 @@ end_header("End: Configuring Applications")
 
 if (MSVC AND TARGET OpenSpace)
   set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT OpenSpace)
-endif()
+endif ()
 
 
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)

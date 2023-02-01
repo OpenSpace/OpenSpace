@@ -10,6 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Name = "Silicon Abundance",
   Identifier = "ssimap_02122015",
+  Enabled = asset.enabled,
   FilePath = texturesPath .. "ssimap_02122015.png",
   BlendMode = "Multiply",
 }
@@ -29,7 +30,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Mercury Silicon Abundance",
   Version = "1.0",
-  Description = [[ Silicon Abundance layer for Mercury globe]],
+  Description = "Silicon Abundance layer for Mercury globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

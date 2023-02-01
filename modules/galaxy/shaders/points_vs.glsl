@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,6 +39,7 @@ uniform dmat4 modelMatrix;
 uniform dvec3 eyePosition;
 
 const double PARSEC = 3.08567756E16;
+
 
 void main() {
 	vs_position = vec4(in_position, 1.0);

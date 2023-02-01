@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,8 +62,7 @@ public:
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */
-    void bind(ghoul::opengl::ProgramObject& programObject,
-        const LayerGroup& layerGroup, const std::string& nameBase, int category);
+    void bind(ghoul::opengl::ProgramObject& programObject, const LayerGroup& layerGroup);
 
     /**
     * Deactivates any <code>TextureUnit</code>s assigned by this object.

@@ -2,8 +2,14 @@ local fade_up_trails = {
   Identifier = "os.fade_up_trails",
   Name = "Show All Trails",
   Command = [[
-      openspace.setPropertyValue("Scene.*Trail.Renderable.Fade", 1, 2);
-      openspace.setPropertyValue("Scene.*trail.Renderable.Fade", 1, 2);
+    local capList = openspace.getProperty("Scene.*Trail.Renderable.Fade");
+    for _,v in ipairs(capList) do
+      openspace.setPropertyValueSingle(v, 1, 2);
+    end
+    local list = openspace.getProperty("Scene.*trail.Renderable.Fade");
+    for _,v in ipairs(list) do
+      openspace.setPropertyValueSingle(v, 1, 2);
+    end
   ]],
   Documentation = "Fade up all enabled trails in the Scene",
   GuiPath = "/Trails",
@@ -15,8 +21,14 @@ local fade_down_trails = {
   Identifier = "os.fade_down_trails",
   Name = "Hide All Trails",
   Command = [[
-      openspace.setPropertyValue("Scene.*Trail.Renderable.Fade", 0, 2);
-      openspace.setPropertyValue("Scene.*trail.Renderable.Fade", 0, 2);
+    local capList = openspace.getProperty("Scene.*Trail.Renderable.Fade");
+    for _,v in ipairs(capList) do
+      openspace.setPropertyValueSingle(v, 0, 2);
+    end
+    local list = openspace.getProperty("Scene.*trail.Renderable.Fade");
+    for _,v in ipairs(list) do
+      openspace.setPropertyValueSingle(v, 0, 2);
+    end
   ]],
   Documentation = "Fade down all enabled trails in the Scene",
   GuiPath = "/Trails",

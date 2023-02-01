@@ -1,0 +1,90 @@
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../kernels')
+
+
+local JMC1 = {
+  Identifier = "JuiceJMC1",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_JMC-1",
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "JUICE_JMC-1",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "JUICE_JMC-1 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The field-of-views for the Juice Monitoring cameras"
+  }
+}
+
+local JMC2 = {
+  Identifier = "JuiceJMC2",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_JMC-2",
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "JUICE_JMC-2",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "JUICE_JMC-2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The field-of-views for the Juice Monitoring cameras"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JMC1)
+  openspace.addSceneGraphNode(JMC2)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JMC2)
+  openspace.removeSceneGraphNode(JMC1)
+end)
+
+asset.export(JMC1)
+asset.export(JMC2)
+
+
+asset.meta = {
+  Name = "JMC",
+  Version = "1.0",
+  Description = [[
+    Shows the field-view for the Juice Monitoring Cameras (JMC) onboard Juice, which
+    provide status information about the deployment of various Juice systems, like the
+    solar array, antenna, etc. See https://microcameras.space/project/juice/ for more
+    information.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

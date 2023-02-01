@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -105,6 +105,12 @@ struct WindowDelegate {
     uint64_t (*swapGroupFrameNumber)() = []() { return uint64_t(0); };
 
     void (*setScreenshotFolder)(std::string) = [](std::string) {};
+
+    void (*showStatistics)(bool) = [](bool) {};
+
+    int (*numberOfNodes)() = []() { return 0; };
+
+    int (*currentNode)() = []() { return 0; };
 };
 
 } // namespace openspace

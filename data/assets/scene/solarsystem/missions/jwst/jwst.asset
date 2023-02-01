@@ -2,6 +2,8 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 asset.require("spice/base")
+asset.require("scene/solarsystem/planets/earth/layers/colorlayers/terra_modis_temporal")
+asset.require("scene/solarsystem/planets/earth/layers/colorlayers/esri_viirs_combo")
 
 local models = asset.syncedResource({
   Name = "JWST Model",
@@ -131,7 +133,7 @@ local JWSTLabel = {
     End = endTime
   },
   Renderable = {
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "JWST",
     FontSize = 50,
     Size = 6.5,
@@ -222,6 +224,5 @@ asset.meta = {
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"JWSTBand", "JWSTModel", "JWSTFov", "JWSTLabel"}
+  License = "MIT license"
 }

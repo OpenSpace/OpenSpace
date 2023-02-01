@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
         "FormatString",
         "Format String",
-        "The format text describing how this dashboard item renders it's text. This text "
+        "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will contain the date"
     };
 
@@ -91,7 +91,11 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     );
 
     try {
-        RenderFont(*_font, penPosition, fmt::format(_formatString.value().c_str(), time));
+        RenderFont(
+            *_font,
+            penPosition,
+            fmt::format(fmt::runtime(_formatString.value()), time)
+        );
     }
     catch (const fmt::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
@@ -103,7 +107,7 @@ glm::vec2 DashboardItemDate::size() const {
     ZoneScoped
 
     std::string_view time = global::timeManager->time().UTC();
-    return _font->boundingBox(fmt::format(_formatString.value().c_str(), time));
+    return _font->boundingBox(fmt::format(fmt::runtime(_formatString.value()), time));
 }
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,8 +60,7 @@ TEST_CASE("StringListProperty: Get String Value", "[stringlistproperty]") {
     const std::vector<std::string> list{ "a", "b", "c" };
     p.setValue(list);
 
-    std::string res;
-    p.getStringValue(res);
+    std::string res = p.stringValue();
 
     CHECK(res == "[\"a\",\"b\",\"c\"]");
 }
@@ -160,8 +159,7 @@ TEST_CASE("IntListProperty: Get String Value", "[intlistproperty]") {
     const std::vector<int> list{ 1, 2, 3 };
     p.setValue(list);
 
-    std::string res;
-    p.getStringValue(res);
+    std::string res = p.stringValue();
 
     CHECK(res == "[1,2,3]");
 }
@@ -221,7 +219,7 @@ TEST_CASE("IntListProperty: Get Lua Value", "[intlistproperty]") {
     p.getLuaValue(L);
 
     CHECK(ghoul::lua::luaValueToString(L, 1) ==
-        "{ [1] = 1.000000, [2] = 2.000000, [3] = 3.000000 }"
+        "{ [1] = 1, [2] = 2, [3] = 3 }"
     );
 }
 
@@ -271,8 +269,7 @@ TEST_CASE("DoubleListProperty: Get String Value", "[doublelistproperty]") {
     const std::vector<double> list{ 1.0, 2.0, 3.0 };
     p.setValue(list);
 
-    std::string res;
-    p.getStringValue(res);
+    std::string res = p.stringValue();
 
     CHECK(res == "[1.0,2.0,3.0]");
 }
@@ -324,14 +321,14 @@ TEST_CASE("DoubleListProperty: Invalid Set Lua Value - Not List", "[doublelistpr
 TEST_CASE("DoubleListProperty: Get Lua Value", "[doublelistproperty]") {
     openspace::properties::DoubleListProperty p({ "id", "gui", "desc" });
 
-    const std::vector<double> list{ 1.0, 2.0, 3.0 };
+    const std::vector<double> list{ 1.0, 2.1, 3.2 };
     p.setValue(list);
 
     ghoul::lua::LuaState L;
     p.getLuaValue(L);
 
     CHECK(ghoul::lua::luaValueToString(L, 1) ==
-        "{ [1] = 1.000000, [2] = 2.000000, [3] = 3.000000 }"
+        "{ [1] = 1, [2] = 2.1, [3] = 3.2 }"
     );
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,26 +64,24 @@
 
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
-constexpr const char* monthNumber(const char* month) {
-    if      (ghoul::equal(month, "JAN")) return "01";
-    else if (ghoul::equal(month, "FEB")) return "02";
-    else if (ghoul::equal(month, "MAR")) return "03";
-    else if (ghoul::equal(month, "APR")) return "04";
-    else if (ghoul::equal(month, "MAY")) return "05";
-    else if (ghoul::equal(month, "JUN")) return "06";
-    else if (ghoul::equal(month, "JUL")) return "07";
-    else if (ghoul::equal(month, "AUG")) return "08";
-    else if (ghoul::equal(month, "SEP")) return "09";
-    else if (ghoul::equal(month, "OCT")) return "10";
-    else if (ghoul::equal(month, "NOV")) return "11";
-    else if (ghoul::equal(month, "DEC")) return "12";
-    else                                 return "";
-}
-
-
 namespace {
-    using json = nlohmann::json;
-    constexpr const char* _loggerCat = "IswaManager";
+    constexpr std::string_view _loggerCat = "IswaManager";
+
+    constexpr std::string_view monthNumber(std::string_view month) {
+        if (month == "JAN") return "01";
+        else if (month == "FEB") return "02";
+        else if (month == "MAR") return "03";
+        else if (month == "APR") return "04";
+        else if (month == "MAY") return "05";
+        else if (month == "JUN") return "06";
+        else if (month == "JUL") return "07";
+        else if (month == "AUG") return "08";
+        else if (month == "SEP") return "09";
+        else if (month == "OCT") return "10";
+        else if (month == "NOV") return "11";
+        else if (month == "DEC") return "12";
+        else                     return "";
+    }
 
     void createScreenSpace(int id) {
         std::string idStr = std::to_string(id);
@@ -92,7 +90,6 @@ namespace {
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
-
 } // namespace
 
 namespace openspace {
@@ -178,7 +175,7 @@ void IswaManager::addIswaCygnet(int id, const std::string& type, std::string gro
                 metaFuture.json = res;
 
                 //convert to json
-                json j = json::parse(res);
+                nlohmann::json j = nlohmann::json::parse(res);
 
                 // Check what kind of geometry here
                 if (j["Coordinate Type"].is_null()) {
@@ -278,7 +275,7 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
     std::getline(ss, token, ' ');
     url += token + "-";
     std::getline(ss, token, ' ');
-    url = url + monthNumber(token.c_str()) + "-";
+    url = fmt::format("{}{}-", url, monthNumber(token));
     std::getline(ss, token, 'T');
     url += token + "%20";
     std::getline(ss, token, '.');
@@ -357,7 +354,7 @@ std::string IswaManager::jsonPlaneToLuaTable(MetadataFuture& data) {
     if (data.json.empty()) {
         return "";
     }
-    json j = json::parse(data.json);
+    nlohmann::json j = nlohmann::json::parse(data.json);
 
     std::string parent = j["Central Body"];
     std::string frame = j["Coordinates"];
@@ -473,7 +470,7 @@ std::string IswaManager::jsonSphereToLuaTable(MetadataFuture& data) {
         return "";
     }
 
-    json j = json::parse(data.json);
+    nlohmann::json j = nlohmann::json::parse(data.json);
     j = j["metadata"];
     std::string parent = j["central_body"];
     parent[0] = static_cast<char>(toupper(static_cast<int>(parent[0])));
@@ -667,16 +664,16 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath,
 
 void IswaManager::fillCygnetInfo(std::string jsonString) {
     if (jsonString != "") {
-        json j = json::parse(jsonString);
+        nlohmann::json j = nlohmann::json::parse(jsonString);
 
         std::set<std::string> lists  =  {"listOfPriorityCygnets", "listOfOKCygnets"
                                         // ,"listOfStaleCygnets", "listOfInactiveCygnets",
                                         };
 
         for (const std::string& list : lists) {
-            json jsonList = j[list];
+            nlohmann::json jsonList = j[list];
             for (size_t i = 0; i < jsonList.size(); ++i) {
-                json jCygnet = jsonList.at(i);
+                nlohmann::json jCygnet = jsonList.at(i);
 
                 std::string name = jCygnet["cygnetDisplayTitle"];
                 std::replace(name.begin(), name.end(),'.', ',');
@@ -706,23 +703,23 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
         std::ifstream jsonFile(cdfFile);
 
         if (jsonFile.is_open()) {
-            json cdfGroups = json::parse(jsonFile);
+            nlohmann::json cdfGroups = nlohmann::json::parse(jsonFile);
             for(size_t i = 0; i < cdfGroups.size(); ++i) {
-                json cdfGroup = cdfGroups.at(i);
+                nlohmann::json cdfGroup = cdfGroups.at(i);
 
                 std::string groupName = cdfGroup["group"];
                 std::string fieldlineSeedsIndexFile = cdfGroup["fieldlinefile"];
 
                 if (_cdfInformation.find(groupName) != _cdfInformation.end()) {
-                    LWARNING("CdfGroup with name" + groupName + " already exists.");
+                    LWARNING("CdfGroup with name" + groupName + " already exists");
                     return;
                 }
 
                 _cdfInformation[groupName] = std::vector<CdfInfo>();
 
-                json cdfs = cdfGroup["cdfs"];
+                nlohmann::json cdfs = cdfGroup["cdfs"];
                 for (size_t j = 0; j < cdfs.size(); j++) {
-                    json cdf = cdfs.at(j);
+                    nlohmann::json cdf = cdfs.at(j);
 
                     std::string name = cdf["name"];
                     std::string path = cdf["path"];

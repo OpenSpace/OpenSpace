@@ -1,0 +1,96 @@
+local jupiterTransforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
+local kernels = asset.require('./kernels')
+
+
+local Juice = {
+  Identifier = "Juice",
+  Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JUICE",
+      Observer = "JUPITER BARYCENTER",
+      Kernels = kernels.Kernels
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "JUICE_SPACECRAFT",
+      DestinationFrame = "GALACTIC",
+      Kernels = kernels.Kernels
+    },
+  },
+  GUI = {
+    Name = "Juice",
+    Path = "/Solar System/Missions/Juice",
+    Description = "The position of Juice in the reference frame of Jupiter"
+  }
+}
+
+local GanymedePosition = {
+  Identifier = "GanymedePosition",
+  Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "GANYMEDE",
+      Observer = "JUPITER BARYCENTER",
+      Kernels = kernels.Kernels
+    }
+  },
+  GUI = {
+    Path = "/Solar System/Planets/Jupiter/Moons",
+    Description = "Ganymede's position relative to Jupiter as an inertial reference frame"
+  }
+}
+
+local GPHIO = {
+  Identifier = "GPHIO",
+  Parent = GanymedePosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "GPHIO",
+      DestinationFrame = "GALACTIC",
+      Kernels = kernels.Kernels
+    }
+  },
+  GUI = {
+    Name = "GPHIO",
+    Path = "/Solar System/Missions/Juice",
+    Description = [[A rotating coordinate system called Ganymede Phi-Omega (G_PHI_O). The
+      X axis is pointing in the direction of corotational flow (System III flow), Z is
+      parallel to the Jovian spin axis (Omega), and Y completes the right handed set. The
+      basis vectors are fixed at the time of Ganymede closest approach (2000-12-28
+      08:25:28)]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Juice)
+  openspace.addSceneGraphNode(GanymedePosition)
+  openspace.addSceneGraphNode(GPHIO)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GPHIO)
+  openspace.removeSceneGraphNode(GanymedePosition)
+  openspace.removeSceneGraphNode(Juice)
+end)
+
+asset.export(Juice)
+asset.export(GanymedePosition)
+asset.export(GPHIO)
+
+
+asset.meta = {
+  Name = "Transformations for the JUICE mission profile",
+  Version = "1.0",
+  Description = [[
+    Contains all of the base transformations necessary for the JUICE mission in the Jovian
+    system
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

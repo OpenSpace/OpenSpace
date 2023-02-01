@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/properties/list/stringlistproperty.h>
 #include <map>
 #include <memory>
 #include <vector>
@@ -123,7 +124,10 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    /// The list of all registered OpenSpaceModule%s
+    /// The list of all names of all registered OpenSpaceModules
+    properties::StringListProperty _allModules;
+
+    /// The list of all registered OpenSpaceModules
     std::vector<std::unique_ptr<OpenSpaceModule>> _modules;
 };
 

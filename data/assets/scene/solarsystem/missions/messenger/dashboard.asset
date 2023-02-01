@@ -11,7 +11,7 @@ local distance = {
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(distance)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.dashboard.removeDashboardItem(distance)
 end)

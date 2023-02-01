@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,13 +74,13 @@ struct TileProvider : public properties::PropertyOwner {
     static unsigned int NumTileProviders;
 
     static std::unique_ptr<TileProvider> createFromDictionary(
-        layergroupid::TypeID layerTypeID, const ghoul::Dictionary& dictionary);
+        layers::Layer::ID layerTypeID, const ghoul::Dictionary& dictionary);
 
     static void initializeDefaultTile();
     static void deinitializeDefaultTile();
 
     TileProvider();
-    virtual ~TileProvider() = default;
+    ~TileProvider() override = default;
 
     void initialize();
     void deinitialize();

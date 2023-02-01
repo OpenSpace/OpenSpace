@@ -37,7 +37,7 @@ local PhobosGlobe = {
   GUI = {
     Name = "Phobos_Globe",
     Path = "/Solar System/Planets/Mars",
-    Description = [[One of two moons of Mars.]]
+    Description = "One of two moons of Mars"
   }
 }
 
@@ -55,9 +55,8 @@ asset.export(PhobosGlobe)
 asset.meta = {
   Name = "Phobos Globe",
   Version = "1.0",
-  Description = [[ RenderableGlobe for Phobos.]],
+  Description = "RenderableGlobe for Phobos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Phobos"}
+  License = "MIT license"
 }

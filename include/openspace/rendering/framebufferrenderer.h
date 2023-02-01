@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,11 +54,10 @@ struct RaycasterTask;
 class Scene;
 struct UpdateStructures;
 
-class FramebufferRenderer : public RaycasterListener,
-                            public DeferredcasterListener
+class FramebufferRenderer final : public RaycasterListener, public DeferredcasterListener
 {
 public:
-    virtual ~FramebufferRenderer() = default;
+    virtual ~FramebufferRenderer() override = default;
 
     void initialize();
     void deinitialize();

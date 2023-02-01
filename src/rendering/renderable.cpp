@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,13 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
@@ -38,19 +40,19 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyType = "Type";
+    constexpr std::string_view KeyType = "Type";
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this object will be visible or not."
+        "This setting determines whether this object will be visible or not"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
         "This value determines the opacity of this renderable. A value of 0 means "
-        "completely transparent."
+        "completely transparent"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
@@ -68,7 +70,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
         "Type",
         "Renderable Type",
-        "This tells the type of the renderable.",
+        "This tells the type of the renderable",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -77,7 +79,15 @@ namespace {
         "RenderBinMode",
         "Render Bin Mode",
         "This value specifies if the renderable should be rendered in the Background,"
-        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step.",
+        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step",
+        openspace::properties::Property::Visibility::Developer
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DimInAtmosphereInfo = {
+        "DimInAtmosphere",
+        "Dim In Atmosphere",
+        "Enables/Disables if the object should be dimmed when the camera is in the "
+        "sunny part of an atmosphere",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -106,6 +116,9 @@ namespace {
 
         // [[codegen::verbatim(RenderableRenderBinModeInfo.description)]]
         std::optional<RenderBinMode> renderBinMode;
+
+        // [[codegen::verbatim(DimInAtmosphereInfo.description)]]
+        std::optional<bool> dimInAtmosphere;
     };
 #include "renderable_codegen.cpp"
 } // namespace
@@ -146,6 +159,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _renderableType(RenderableTypeInfo, "Renderable")
+    , _dimInAtmosphere(DimInAtmosphereInfo, false)
 {
     ZoneScoped
 
@@ -170,6 +184,14 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
     _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
+    _enabled.onChange([this]() {
+        if (isEnabled()) {
+            global::eventEngine->publishEvent<events::EventRenderableEnabled>(_parent);
+        }
+        else {
+            global::eventEngine->publishEvent<events::EventRenderableDisabled>(_parent);
+        }
+    });
 
     _enabled.onChange([this]() {
         if (isEnabled()) {
@@ -194,6 +216,9 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     if (p.renderBinMode.has_value()) {
         setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
     }
+
+    _dimInAtmosphere = p.dimInAtmosphere.value_or(_dimInAtmosphere);
+    addProperty(_dimInAtmosphere);
 }
 
 void Renderable::initialize() {}
@@ -251,6 +276,10 @@ bool Renderable::matchesRenderBinMask(int binMask) {
     return binMask & static_cast<int>(renderBin());
 }
 
+void Renderable::setFade(float fade) {
+    _fade = fade;
+}
+
 bool Renderable::isVisible() const {
     return _enabled && _opacity > 0.f && _fade > 0.f;
 }
@@ -293,7 +322,12 @@ void Renderable::registerUpdateRenderBinFromOpacity() {
 }
 
 float Renderable::opacity() const {
-    return _opacity * _fade;
+    // Rendering should depend on if camera is in the atmosphere and if camera is at the
+    // dark part of the globe
+    const float dimming = _dimInAtmosphere ?
+        global::navigationHandler->camera()->atmosphereDimmingFactor() :
+        1.f;
+    return _opacity * _fade * dimming;
 }
 
 }  // namespace openspace

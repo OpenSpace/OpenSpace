@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/speckloader.h>
+#include <modules/space/labelscomponent.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -43,7 +43,6 @@
 #include <unordered_map>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::fontrendering { class Font; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -56,7 +55,7 @@ namespace documentation { struct Documentation; }
 class RenderableBillboardsCloud : public Renderable {
 public:
     explicit RenderableBillboardsCloud(const ghoul::Dictionary& dictionary);
-    ~RenderableBillboardsCloud() = default;
+    ~RenderableBillboardsCloud() override = default;
 
     void initialize() override;
     void initializeGL() override;
@@ -79,19 +78,16 @@ private:
     void renderPolygonGeometry(GLuint vao);
     void renderBillboards(const RenderData& data, const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
-    void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-        const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
-    bool _textColorIsDirty = true;
     bool _hasSpriteTexture = false;
     bool _spriteTextureIsDirty = true;
     bool _hasColorMapFile = false;
     bool _isColorMapExact = false;
     bool _hasDatavarSize = false;
     bool _hasPolygon = false;
-    bool _hasLabel = false;
+    bool _hasLabels = false;
 
     int _polygonSides = 0;
 
@@ -101,10 +97,6 @@ private:
     properties::BoolProperty _useColorMap;
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;
-    properties::Vec3Property _textColor;
-    properties::FloatProperty _textOpacity;
-    properties::FloatProperty _textSize;
-    properties::IVec2Property _textMinMaxSize;
     properties::BoolProperty _drawElements;
     properties::BoolProperty _drawLabels;
     properties::BoolProperty _pixelSizeControl;
@@ -133,19 +125,18 @@ private:
         hasDvarScaling
     ) _uniformCache;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
-
     std::string _speckFile;
     std::string _colorMapFile;
-    std::string _labelFile;
     std::string _colorOptionString;
     std::string _datavarSizeOptionString;
 
     DistanceUnit _unit = DistanceUnit::Parsec;
 
     speck::Dataset _dataset;
-    speck::Labelset _labelset;
     speck::ColorMap _colorMap;
+
+    // Everything related to the labels is handled by LabelsComponent
+    std::unique_ptr<LabelsComponent> _labels;
 
     std::vector<glm::vec2> _colorRangeData;
     std::unordered_map<int, std::string> _optionConversionMap;

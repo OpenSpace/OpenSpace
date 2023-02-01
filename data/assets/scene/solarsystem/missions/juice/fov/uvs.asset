@@ -1,0 +1,58 @@
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../kernels')
+
+
+local UVS = {
+  Identifier = "JuiceUVS",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_UVS",
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "JUICE_UVS",
+      Method = "POLYGON",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "UVS FOV",
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The field-of-view for the UVS instrument onboard Juice"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(UVS)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(UVS)
+end)
+
+asset.export(UVS)
+
+
+asset.meta = {
+  Name = "UVS",
+  Version = "1.0",
+  Description = [[
+    Shows the field-view for the Ultraviolet Spectograph (UVS), which is measuring the
+    composition, chemistry, structure, and variability of Europa's atmopshere. See
+    https://www.lpi.usra.edu/opag/meetings/aug2015/presentations/day-1/8_b_retherford.pdf
+    for more information.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

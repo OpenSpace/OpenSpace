@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -111,10 +111,9 @@ std::string SpacecraftInstrumentsModule::frameFromBody(const std::string& body) 
         }
     }
 
-    constexpr const char* unionPrefix = "IAU_";
-
+    constexpr std::string_view unionPrefix = "IAU_";
     if (body.find(unionPrefix) == std::string::npos) {
-        return unionPrefix + body;
+        return fmt::format("{}{}", unionPrefix, body);
     }
     else {
         return body;

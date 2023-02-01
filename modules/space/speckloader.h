@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,6 +68,7 @@ struct Labelset {
 
     struct Entry {
         glm::vec3 position = glm::vec3(0.f);
+        std::string identifier;
         std::string text;
     };
     std::vector<Entry> entries;

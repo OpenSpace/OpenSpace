@@ -1,0 +1,34 @@
+-- This file was automatically generated using a script found at
+-- https://github.com/OpenSpace/scripts/treks-to-openspace. See the README.md file
+-- in that repository for more information on how to run the script to update these
+-- files. In particular in the case of errors, prefer to change that script rather
+-- than the individual files
+
+local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Mars.Identifier
+
+local treks_THEMIS_DayIR_ControlledMosaics_100m_v2_oct2018 = {
+  Identifier = "THEMIS_DayIR_ControlledMosaics_100m_v2_oct2018",
+  Name = [[MO THEMIS-IR Day, Global Mosaic]],
+  FilePath = asset.localResource("MO_THEMIS-IR_Day/Global_Mosaic.vrt"),
+  Description = [[This data was acquired using the Thermal Emission Imaging System instrument aboard NASA's Mars Odyssey spacecraft. Odyssey was launched on April 7, 2001 and arrived at Mars on October 24, 2001. It maintains a polar orbit around Mars with an altitude of about 3,800 km or 2,400 miles. Odyssey's mission includes studying the mineralogy of Mars' surface (especially looking at minerals formed in the presence of water), detecting water and shallow buried ice, and studying the radiation environment. The Thermal Emission Imaging System (THEMIS) instrument is a camera system that gathers data in infrared and visible light. The infrared images sample nine different wavelengths allowing spectra to be constructed and compositions of imaged surfaces to be inferred. Daytime infrared Themis images typically emphasize topography, with warmer sunward slopes being brighter than cooler shaded slopes. Nighttime Themis images emphasize differences in thermal inertia between areas being observed, giving insights into the physical characteristics of the surfaces. This map is a THEMIS daytime infrared map. The 2017 release featured preliminary geodetically controlled mosaics tied to a known coordinate system (USGS Viking Orbiter MDIM 2.1), spatially adjusted to align feature boundaries, and orthoprojected at 100 m/pixel scale. Further adjustments have been processed for the 2018 release of this final mosaic.]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_THEMIS_DayIR_ControlledMosaics_100m_v2_oct2018)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_THEMIS_DayIR_ControlledMosaics_100m_v2_oct2018")
+end)
+
+asset.export("THEMIS_DayIR_ControlledMosaics_100m_v2_oct2018", treks_THEMIS_DayIR_ControlledMosaics_100m_v2_oct2018)
+
+
+asset.meta = {
+  Name = [[NASA Treks Layers for Mars MO_THEMIS-IR_Day],
+  Version = "1.0",
+  Author = "NASA/Treks",
+  URL = "https://trek.nasa.gov/mars",
+  License = "NASA/Treks",
+  Description = [[MO_THEMIS-IR_Day layers from NASA/Treks for Mars]]
+}

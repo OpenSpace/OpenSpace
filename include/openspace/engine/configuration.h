@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -141,7 +141,7 @@ struct Configuration {
 std::filesystem::path findConfiguration(const std::string& filename = "openspace.cfg");
 
 Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
-    const glm::ivec2& primaryMonitorResolution, const std::string& overrideScript);
+    const glm::ivec2& primaryMonitorResolution, std::string_view overrideScript);
 
 } // namespace openspace::configuration
 

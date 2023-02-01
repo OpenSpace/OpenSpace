@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,10 +52,10 @@ namespace {
     };
 
     constexpr std::array<QRectF, 4> DefaultWindowSizes = {
-        QRectF{ 50.f, 50.f, 1280.f, 720.f },
-        QRectF{ 150.f, 150.f, 1280.f, 720.f },
-        QRectF{ 50.f, 50.f, 1280.f, 720.f },
-        QRectF{ 150.f, 150.f, 1280.f, 720.f }
+        QRectF(50.f, 50.f, 1280.f, 720.f),
+        QRectF(150.f, 150.f, 1280.f, 720.f),
+        QRectF(50.f, 50.f, 1280.f, 720.f),
+        QRectF(150.f, 150.f, 1280.f, 720.f)
     };
 
     constexpr int LineEditWidthFixedWindowSize = 50;
@@ -63,6 +63,7 @@ namespace {
     constexpr float DefaultFovV = 50.534f;
     constexpr float DefaultHeightOffset = 0.f;
     constexpr int MaxWindowSizePixels = 10000;
+    constexpr double FovEpsilon = 0.00001;
 
     QList<QString> monitorNames(const std::vector<QRect>& resolutions) {
         QList<QString> monitorNames;
@@ -117,7 +118,7 @@ void WindowControl::createWidgets(const QColor& windowColor) {
     )));
     layout->addWidget(_windowNumber, 0, 0, 1, 8, Qt::AlignCenter);
     {
-        QString tip = "The name for the window (displayed in title bar).";
+        QString tip = "The name for the window (displayed in title bar)";
 
         QLabel* labelName = new QLabel("Name");
         labelName->setToolTip(tip);
@@ -127,7 +128,7 @@ void WindowControl::createWidgets(const QColor& windowColor) {
         _windowName->setToolTip(tip);
         layout->addWidget(_windowName, 1, 1, 1, 7);
     }
-    QString tip = "The monitor where this window is located.";
+    QString tip = "The monitor where this window is located";
 
     _monitor = new QComboBox;
     _monitor->addItems(monitorNames(_monitorResolutions));
@@ -206,7 +207,7 @@ void WindowControl::createWidgets(const QColor& windowColor) {
         QLabel* offset = new QLabel("Offset");
         offset->setToolTip(
             "The x,y location of the window's upper left corner from monitor's "
-            "upper-left corner origin (pixels)."
+            "upper-left corner origin (pixels)"
         );
         offset->setFixedWidth(55);
         layout->addWidget(offset, 4, 0);
@@ -355,8 +356,8 @@ QWidget* WindowControl::createPlanarWidget() {
     layout->addWidget(fovH, 1, 0);
 
     _planar.fovH = new QDoubleSpinBox;
-    _planar.fovH->setMinimum(0.0);
-    _planar.fovH->setMaximum(180.0);
+    _planar.fovH->setMinimum(FovEpsilon);
+    _planar.fovH->setMaximum(180.0 - FovEpsilon);
     _planar.fovH->setValue(DefaultFovH);
     _planar.fovH->setEnabled(false);
     _planar.fovH->setToolTip(hfovTip);
@@ -373,12 +374,12 @@ QWidget* WindowControl::createPlanarWidget() {
     layout->addWidget(fovV, 2, 0);
 
     _planar.fovV = new QDoubleSpinBox;
-    _planar.fovH->setMinimum(0.0);
-    _planar.fovH->setMaximum(90.0);
-    _planar.fovH->setValue(DefaultFovV);
+    _planar.fovV->setMinimum(FovEpsilon);
+    _planar.fovV->setMaximum(180.0 - FovEpsilon);
+    _planar.fovV->setValue(DefaultFovV);
     _planar.fovV->setEnabled(false);
     _planar.fovV->setToolTip(vfovTip);
-    _planar.fovH->setSizePolicy(
+    _planar.fovV->setSizePolicy(
         QSizePolicy::MinimumExpanding,
         QSizePolicy::MinimumExpanding
     );
@@ -419,7 +420,7 @@ QWidget* WindowControl::createFisheyeWidget() {
         "This projection provides a rendering in a format that is suitable for "
         "planetariums and other immersive environments. A field-of-view of 180 degrees "
         "is presented as a circular image in the center of the screen. For this "
-        "projection a square window is suggested, but not necessary."
+        "projection a square window is suggested, but not necessary"
     );
     info->setObjectName("info");
     info->setWordWrap(true);
@@ -464,7 +465,7 @@ QWidget* WindowControl::createSphericalMirrorWidget() {
         "This projection is rendering a image suite for use with a spherical mirror "
         "projection as described by Paul Bourke (http://paulbourke.net/dome/mirrordome/) "
         "and which is a low-cost yet effective way to provide content for a sphericalal "
-        "display surface using a regular projector."
+        "display surface using a regular projector"
     );
     info->setObjectName("info");
     info->setWordWrap(true);
@@ -502,7 +503,7 @@ QWidget* WindowControl::createCylindricalWidget() {
         "This projection type provides a cylindrical rendering that covers 360 degrees "
         "around the camera, which can be useful in immersive environments that are not "
         "spherical, but where, for example, all walls of a room are covered with "
-        "projectors."
+        "projectors"
     );
     info->setObjectName("info");
     info->setWordWrap(true);
@@ -555,7 +556,7 @@ QWidget* WindowControl::createEquirectangularWidget() {
         "This projection provides the rendering as an image in equirectangular "
         "projection, which is a common display type for 360 surround video. When "
         "uploading a video in equirectangular projection to YouTube, for example, it "
-        "will use it as a 360 video."
+        "will use it as a 360 video"
     );
     info->setObjectName("info");
     info->setWordWrap(true);
@@ -685,11 +686,17 @@ sgct::config::Projections WindowControl::generateProjectionInformation() const {
             }
         case ProjectionIndices::Planar:
             {
+                double fovH = _planar.fovH->text().toFloat();
+                fovH = std::clamp(fovH, FovEpsilon, 180.0 - FovEpsilon);
+                
+                double fovV = _planar.fovV->text().toFloat();
+                fovV = std::clamp(fovV, FovEpsilon, 180.0 - FovEpsilon);
+
                 // The negative values for left & down are due to SGCT's convention
                 PlanarProjection projection;
-                projection.fov.right = _planar.fovH->text().toFloat() / 2.0;
+                projection.fov.right = fovH / 2.0;
                 projection.fov.left = -projection.fov.right;
-                projection.fov.up = _planar.fovV->text().toFloat() / 2.0;
+                projection.fov.up = fovV / 2.0;
                 projection.fov.down = -projection.fov.up;
                 return projection;
             }
@@ -700,17 +707,17 @@ sgct::config::Projections WindowControl::generateProjectionInformation() const {
 
 sgct::config::Window WindowControl::generateWindowInformation() const {
     sgct::config::Window window;
-    window.size = { _sizeX->text().toInt(), _sizeY->text().toInt() };
+    window.size = sgct::ivec2(_sizeX->text().toInt(), _sizeY->text().toInt());
     QRect resolution = _monitorResolutions[_monitor->currentIndex()];
-    window.pos = {
+    window.pos = sgct::ivec2(
         resolution.x() + _offsetX->text().toInt(),
         resolution.y() + _offsetY->text().toInt()
-    };
+    );
 
     sgct::config::Viewport vp;
     vp.isTracked = true;
-    vp.position = { 0.f, 0.f };
-    vp.size = { 1.f, 1.f };
+    vp.position = sgct::vec2(0.f, 0.f);
+    vp.size = sgct::vec2(1.f, 1.f);
     vp.projection = generateProjectionInformation();
     window.viewports.push_back(vp);
     

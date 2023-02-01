@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -446,6 +446,8 @@ target_include_directories(openspace-core
 )
 
 target_precompile_headers(openspace-core PRIVATE
+  <openspace/json.h>
+  <openspace/properties/numericalproperty.h>
   [["ghoul/fmt.h"]]
   [["ghoul/glm.h"]]
   [["ghoul/misc/assert.h"]]
@@ -453,12 +455,19 @@ target_precompile_headers(openspace-core PRIVATE
   [["ghoul/misc/exception.h"]]
   [["ghoul/misc/invariants.h"]]
   [["ghoul/misc/profiling.h"]]
+  [["ghoul/opengl/ghoul_gl.h"]]
   <algorithm>
+  <any>
   <array>
+  <deque>
+  <filesystem>
+  <fstream>
+  <future>
   <map>
   <memory>
   <string>
   <utility>
+  <variant>
   <vector>
 )
 

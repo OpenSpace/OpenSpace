@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* _loggerCat = "TimeManager";
+    constexpr std::string_view _loggerCat = "TimeManager";
 
     // Properties for time interpolation
     // These are used when setting the time from lua time interpolation functions,
@@ -74,7 +74,7 @@ namespace {
         "when interpolating"
     };
 
-    constexpr const char* DeltaTimeStepsKeybindsGuiPath = "/Time/Delta Time Steps";
+    constexpr std::string_view DeltaTimeStepsKeybindsGuiPath = "/Time/Delta Time Steps";
 }
 
 namespace openspace {
@@ -125,8 +125,18 @@ void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     const double now = currentApplicationTimeForInterpolation();
     const bool pause = isPaused();
 
-    const TimeKeyframeData current = { time(), deltaTime(), false, false };
-    const TimeKeyframeData next = { Time(targetTime), targetDeltaTime(), pause, false };
+    const TimeKeyframeData current = {
+        .time = time(),
+        .delta = deltaTime(),
+        .pause = false,
+        .jump = false
+    };
+    const TimeKeyframeData next = {
+        .time = Time(targetTime),
+        .delta = targetDeltaTime(),
+        .pause = pause,
+        .jump = false
+    };
 
     clearKeyframes();
     addKeyframe(now, current);
@@ -460,7 +470,7 @@ void TimeManager::setDeltaTimeSteps(std::vector<double> deltaTimes) {
 }
 
 void TimeManager::addDeltaTimesKeybindings() {
-    constexpr const std::array<Key, 10> Keys = {
+    constexpr std::array<Key, 10> Keys = {
         Key::Num1,
         Key::Num2,
         Key::Num3,
@@ -576,7 +586,7 @@ const Timeline<TimeKeyframeData>& TimeManager::timeline() const {
     return _timeline;
 }
 
-std::vector<Syncable*> TimeManager::getSyncables() {
+std::vector<Syncable*> TimeManager::syncables() {
     return { &_currentTime, &_integrateFromTime };
 }
 
@@ -748,8 +758,18 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
         time().j2000Seconds() + (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration
     );
 
-    TimeKeyframeData currentKeyframe = { time(), _deltaTime, false, false };
-    TimeKeyframeData futureKeyframe = { newTime, newDeltaTime, false, false };
+    TimeKeyframeData currentKeyframe = {
+        .time = time(),
+        .delta = _deltaTime,
+        .pause = false,
+        .jump = false
+    };
+    TimeKeyframeData futureKeyframe = {
+        .time = newTime,
+        .delta = newDeltaTime,
+        .pause = false,
+        .jump = false
+    };
 
     _targetDeltaTime = newDeltaTime;
 
@@ -854,8 +874,18 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
         time().j2000Seconds() + (_deltaTime + targetDelta) * 0.5 * interpolationDuration
     );
 
-    TimeKeyframeData currentKeyframe = { time(), _deltaTime, false, false };
-    TimeKeyframeData futureKeyframe = { newTime, _targetDeltaTime, pause, false };
+    TimeKeyframeData currentKeyframe = {
+        .time = time(),
+        .delta = _deltaTime,
+        .pause = false,
+        .jump = false
+    };
+    TimeKeyframeData futureKeyframe = {
+        .time = newTime,
+        .delta = _targetDeltaTime,
+        .pause = pause,
+        .jump = false
+    };
     _timePaused = pause;
 
     double now = isPlayingBackSessionRecording() ?

@@ -1,0 +1,94 @@
+-- This file was automatically generated using a script found at
+-- https://github.com/OpenSpace/scripts/treks-to-openspace. See the README.md file
+-- in that repository for more information on how to run the script to update these
+-- files. In particular in the case of errors, prefer to change that script rather
+-- than the individual files
+
+local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Mars.Identifier
+
+local treks_HRSC_Martian_east = {
+  Identifier = "HRSC_Martian_east",
+  Name = [[Mars Express HRSC, Martian Path Eastern Section Color Mosaic]],
+  FilePath = asset.localResource("Mars_Express_HRSC/Martian_Path_Eastern_Section_Color_Mosaic.vrt"),
+  Description = [[This layer is a greyscale mosaic assembled using data from the High Resolution Stereo Camera aboard the European Space Agency's Mars Express orbiter. HRSC is being used to obtain color and stereo images that will map 100% of Mars' surface at resolution better than 30 m/pixel, and 50% of the surface at better than 15 m/pixel. Each of the nine CCD lines of HRSC, a linescan imager (pushbroom camera), contains 5184 pixels. The channels consist of red, green, blue, near-infrared, three stereo channels (backward, nadir, and forward) and two photometric channels. The digital elevation model used for this layer is a combination of data derived from the HRSC and the Mars Orbiter Laser Altimeter.]]
+}
+
+local treks_MC11E_HRMOSCO_COL = {
+  Identifier = "MC11E_HRMOSCO_COL",
+  Name = [[Mars Express HRSC, Martian Path MC11 Quad Color Mosaic]],
+  FilePath = asset.localResource("Mars_Express_HRSC/Martian_Path_MC11_Quad_Color_Mosaic.vrt"),
+  Description = [[This layer is a combined color mosaic and 50 meter digital terrain model assembled using data from the High Resolution Stereo Camera (HRSC) aboard the European Space Agency's Mars Express orbiter. It covers the MC-11 quadrangle on Mars. For the purposes of mapping, the United States Geological Survey (USGS) has divided the surface of Mars into 30 quadrangles, labeled MC-1 through MC-30 (MC for Mars Chart). Each of the quadrangles also has a proper name derived from a prominent surface feature within the quadrangle. Much of the story of the Martian takes place within MC-11, also known as Oxia Palus. Fortunately, MC-11 happens to be the first complete quadrangle the European Space Agency produced as an HRSC 50m digital terrain model and image mosaic. HRSC is being used to obtain color and stereo images that will map 100% of Mars' surface at resolution better than 30 m/pixel, and 50% of the surface at better than 15 m/pixel. Each of the nine CCD lines of HRSC, a linescan imager (pushbroom camera), contains 5184 pixels. The channels consist of red, green, blue, near-infrared, three stereo channels (backward, nadir, and forward) and two photometric channels. This mosaic was produced by the Global Topography and Mosaic Generation Task Group of the HRSC-Team by joining nearly 100 contiguous HRSC stereo strips. HRSC data provided by ESA/DLR/FU Berlin and the Mars Express HRSC-Team.]]
+}
+
+local treks_MC11E_HRMOSND_ND5 = {
+  Identifier = "MC11E_HRMOSND_ND5",
+  Name = [[Mars Express HRSC, Martian Path MC11 Quad Mosaic]],
+  FilePath = asset.localResource("Mars_Express_HRSC/Martian_Path_MC11_Quad_Mosaic.vrt"),
+  Description = [[This layer is a combined greyscale mosaic and 50 meter digital terrain model assembled using data from the High Resolution Stereo Camera (HRSC) aboard the European Space Agency's Mars Express orbiter. It covers the MC-11 quadrangle on Mars. For the purposes of mapping, the United States Geological Survey (USGS) has divided the surface of Mars into 30 quadrangles, labeled MC-1 through MC-30 (MC for Mars Chart). Each of the quadrangles also has a proper name derived from a prominent surface feature within the quadrangle. Much of the story of the Martian takes place within MC-11, also known as Oxia Palus. Fortunately, MC-11 happens to be the first complete quadrangle the European Space Agency produced as an HRSC 50m digital terrain model and image mosaic. HRSC is being used to obtain color and stereo images that will map 100% of Mars' surface at resolution better than 30 m/pixel, and 50% of the surface at better than 15 m/pixel. Each of the nine CCD lines of HRSC, a linescan imager (pushbroom camera), contains 5184 pixels. The channels consist of red, green, blue, near-infrared, three stereo channels (backward, nadir, and forward) and two photometric channels. While this mosaic lacks the color information shown in the color mosaic, it does show finer detail. This mosaic was produced by the Global Topography and Mosaic Generation Task Group of the HRSC-Team by joining nearly 100 contiguous HRSC stereo strips. HRSC data provided by ESA/DLR/FU Berlin and the Mars Express HRSC-Team.]]
+}
+
+local treks_hrsc_mawrth_vallis_color = {
+  Identifier = "hrsc_mawrth_vallis_color",
+  Name = [[Mars Express HRSC, Mawrth Vallis Color Mosaic]],
+  FilePath = asset.localResource("Mars_Express_HRSC/Mawrth_Vallis_Color_Mosaic.vrt"),
+  Description = [[This layer is a greyscale mosaic assembled using data from the High Resolution Stereo Camera aboard the European Space Agency's Mars Express orbiter. HRSC is being used to obtain color and stereo images that will map 100% of Mars' surface at resolution better than 30 m/pixel, and 50% of the surface at better than 15 m/pixel. Each of the nine CCD lines of HRSC, a linescan imager (pushbroom camera), contains 5184 pixels. The channels consist of red, green, blue, near-infrared, three stereo channels (backward, nadir, and forward) and two photometric channels. The digital elevation model used for this layer is a combination of data derived from the HRSC and the Mars Orbiter Laser Altimeter.]]
+}
+
+local treks_hrsc_mawrth_vallis = {
+  Identifier = "hrsc_mawrth_vallis",
+  Name = [[Mars Express HRSC, Mawrth Vallis Mosaic]],
+  FilePath = asset.localResource("Mars_Express_HRSC/Mawrth_Vallis_Mosaic.vrt"),
+  Description = [[This layer is a greyscale mosaic assembled using data from the High Resolution Stereo Camera aboard the European Space Agency's Mars Express orbiter. HRSC is being used to obtain color and stereo images that will map 100% of Mars' surface at resolution better than 30 m/pixel, and 50% of the surface at better than 15 m/pixel. Each of the nine CCD lines of HRSC, a linescan imager (pushbroom camera), contains 5184 pixels. The channels consist of red, green, blue, near-infrared, three stereo channels (backward, nadir, and forward) and two photometric channels. The digital elevation model used for this layer is a combination of data derived from the HRSC and the Mars Orbiter Laser Altimeter.]]
+}
+
+local treks_h2942_0000_nd3 = {
+  Identifier = "h2942_0000_nd3",
+  Name = [[Mars Express HRSC, Viking 1 Landing Site Mosaic]],
+  FilePath = asset.localResource("Mars_Express_HRSC/Viking_1_Landing_Site_Mosaic.vrt"),
+  Description = [[This layer is a greyscale mosaic assembled using data from the High Resolution Stereo Camera aboard the European Space Agency's Mars Express orbiter. HRSC is being used to obtain color and stereo images that will map 100% of Mars' surface at resolution better than 30 m/pixel, and 50% of the surface at better than 15 m/pixel. Each of the nine CCD lines of HRSC, a linescan imager (pushbroom camera), contains 5184 pixels. The channels consist of red, green, blue, near-infrared, three stereo channels (backward, nadir, and forward) and two photometric channels. The digital elevation model used for this layer is a combination of data derived from the HRSC and the Mars Orbiter Laser Altimeter.]]
+}
+
+local treks_h1394_0000_nd3 = {
+  Identifier = "h1394_0000_nd3",
+  Name = [[Mars Express HRSC, Viking 2 Landing Site Mosaic]],
+  FilePath = asset.localResource("Mars_Express_HRSC/Viking_2_Landing_Site_Mosaic.vrt"),
+  Description = [[This layer is a greyscale mosaic assembled using data from the High Resolution Stereo Camera aboard the European Space Agency's Mars Express orbiter. HRSC is being used to obtain color and stereo images that will map 100% of Mars' surface at resolution better than 30 m/pixel, and 50% of the surface at better than 15 m/pixel. Each of the nine CCD lines of HRSC, a linescan imager (pushbroom camera), contains 5184 pixels. The channels consist of red, green, blue, near-infrared, three stereo channels (backward, nadir, and forward) and two photometric channels. The digital elevation model used for this layer is a combination of data derived from the HRSC and the Mars Orbiter Laser Altimeter.]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_HRSC_Martian_east)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_MC11E_HRMOSCO_COL)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_MC11E_HRMOSND_ND5)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_hrsc_mawrth_vallis_color)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_hrsc_mawrth_vallis)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_h2942_0000_nd3)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_h1394_0000_nd3)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_HRSC_Martian_east")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_MC11E_HRMOSCO_COL")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_MC11E_HRMOSND_ND5")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_hrsc_mawrth_vallis_color")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_hrsc_mawrth_vallis")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_h2942_0000_nd3")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_h1394_0000_nd3")
+end)
+
+asset.export("HRSC_Martian_east", treks_HRSC_Martian_east)
+asset.export("MC11E_HRMOSCO_COL", treks_MC11E_HRMOSCO_COL)
+asset.export("MC11E_HRMOSND_ND5", treks_MC11E_HRMOSND_ND5)
+asset.export("hrsc_mawrth_vallis_color", treks_hrsc_mawrth_vallis_color)
+asset.export("hrsc_mawrth_vallis", treks_hrsc_mawrth_vallis)
+asset.export("h2942_0000_nd3", treks_h2942_0000_nd3)
+asset.export("h1394_0000_nd3", treks_h1394_0000_nd3)
+
+
+asset.meta = {
+  Name = [[NASA Treks Layers for Mars Mars_Express_HRSC],
+  Version = "1.0",
+  Author = "NASA/Treks",
+  URL = "https://trek.nasa.gov/mars",
+  License = "NASA/Treks",
+  Description = [[Mars_Express_HRSC layers from NASA/Treks for Mars]]
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,21 +28,16 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/keys.h>
+#include <openspace/openspace.h>
 #include <ghoul/ghoul.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/fmt.h>
+#include <ghoul/glm.h>
 #include <ghoul/cmdparser/commandlineparser.h>
+#include <ghoul/cmdparser/multiplecommand.h>
 #include <ghoul/cmdparser/singlecommand.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/consolelog.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/misc/stacktrace.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif
@@ -54,25 +49,17 @@
 #include <sgct/log.h>
 #include <sgct/projection/fisheye.h>
 #include <sgct/projection/nonlinearprojection.h>
-#include <sgct/screencapture.h>
 #include <sgct/settings.h>
 #include <sgct/user.h>
-#include <sgct/viewport.h>
+#include <sgct/window.h>
 #include <stb_image.h>
 #include <Tracy.hpp>
-#include <chrono>
-#include <ctime>
-#include <filesystem>
-#include <memory>
+#include <iostream>
+#include <string_view>
 
 #ifdef WIN32
-#include <openspace/openspace.h>
-#include <ghoul/misc/stacktrace.h>
-#include <ghoul/fmt.h>
 #include <Windows.h>
 #include <dbghelp.h>
-#include <shellapi.h>
-#include <shlobj.h>
 #endif // WIN32
 
 #ifdef OPENVR_SUPPORT
@@ -87,6 +74,10 @@
 #include "nvToolsExt.h"
 #endif // OPENSPACE_HAS_NVTOOLS
 
+#ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+#include <float.h>
+#endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+
 #include <launcherwindow.h>
 #include <QApplication>
 
@@ -95,9 +86,9 @@ using namespace sgct;
 
 namespace {
 
-constexpr const char* _loggerCat = "main";
-constexpr const char* SpoutTag = "Spout";
-constexpr const char* OpenVRTag = "OpenVR";
+constexpr std::string_view _loggerCat = "main";
+constexpr std::string_view SpoutTag = "Spout";
+constexpr std::string_view OpenVRTag = "OpenVR";
 
 // @TODO (abock, 2020-04-09): These state variables should disappear
 const Window* currentWindow = nullptr;
@@ -226,21 +217,20 @@ void checkJoystickStatus() {
             state.isConnected = true;
             state.name = glfwGetJoystickName(i);
 
-            std::fill(state.axes.begin(), state.axes.end(), 0.f);
-            std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
-
             // Check axes and buttons
             glfwGetJoystickAxes(i, &state.nAxes);
             glfwGetJoystickButtons(i, &state.nButtons);
+            state.axes.resize(state.nAxes);
+            state.buttons.resize(state.nButtons);
+
+            std::fill(state.axes.begin(), state.axes.end(), 0.f);
+            std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
         }
 
         const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
-        state.axes.resize(state.nAxes);
         std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
 
         const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
-        state.buttons.resize(state.nButtons);
-
         for (int j = 0; j < state.nButtons; ++j) {
             const bool currentlyPressed = buttons[j] == GLFW_PRESS;
 
@@ -270,6 +260,15 @@ void checkJoystickStatus() {
             }
         }
     }
+}
+
+bool isGuiWindow(sgct::Window* window) {
+    if (Engine::instance().windows().size() == 1) {
+        // If we only have one window, assume it's also the GUI window.
+        // It might not have been given the 'GUI' tag
+        return true;
+    }
+    return window->hasTag("GUI");
 }
 
 //
@@ -570,7 +569,7 @@ void mainPostDrawFunc() {
 
 
 void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action action,
-                          int)
+                          int, sgct::Window* window)
 {
     ZoneScoped
     LTRACE("main::mainKeyboardCallback(begin)");
@@ -578,7 +577,9 @@ void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action 
     const openspace::Key k = openspace::Key(key);
     const KeyModifier m = KeyModifier(modifiers);
     const KeyAction a = KeyAction(action);
-    global::openSpaceEngine->keyboardCallback(k, m, a);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+
+    global::openSpaceEngine->keyboardCallback(k, m, a, isGui);
 
     LTRACE("main::mainKeyboardCallback(begin)");
 }
@@ -586,7 +587,7 @@ void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action 
 
 
 void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier modifiers,
-                             sgct::Action action)
+                             sgct::Action action, sgct::Window* window)
 {
     ZoneScoped
     LTRACE("main::mainMouseButtonCallback(begin)");
@@ -594,36 +595,42 @@ void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier modifiers,
     const openspace::MouseButton k = openspace::MouseButton(key);
     const openspace::MouseAction a = openspace::MouseAction(action);
     const openspace::KeyModifier m = openspace::KeyModifier(modifiers);
-    global::openSpaceEngine->mouseButtonCallback(k, a, m);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+
+    global::openSpaceEngine->mouseButtonCallback(k, a, m, isGui);
 
     LTRACE("main::mainMouseButtonCallback(end)");
 }
 
 
 
-void mainMousePosCallback(double x, double y) {
+void mainMousePosCallback(double x, double y, sgct::Window* window) {
     ZoneScoped
-    global::openSpaceEngine->mousePositionCallback(x, y);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+    global::openSpaceEngine->mousePositionCallback(x, y, isGui);
 }
 
 
 
-void mainMouseScrollCallback(double posX, double posY) {
+void mainMouseScrollCallback(double posX, double posY, sgct::Window* window) {
     ZoneScoped
     LTRACE("main::mainMouseScrollCallback(begin");
 
-    global::openSpaceEngine->mouseScrollWheelCallback(posX, posY);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+    global::openSpaceEngine->mouseScrollWheelCallback(posX, posY, isGui);
 
     LTRACE("main::mainMouseScrollCallback(end)");
 }
 
 
 
-void mainCharCallback(unsigned int codepoint, int modifiers) {
+void mainCharCallback(unsigned int codepoint, int modifiers, sgct::Window* window) {
     ZoneScoped
 
     const KeyModifier m = KeyModifier(modifiers);
-    global::openSpaceEngine->charCallback(codepoint, m);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+
+    global::openSpaceEngine->charCallback(codepoint, m, isGui);
 }
 
 
@@ -906,7 +913,9 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
         ZoneScoped
 
-        Engine::instance().windows().front()->setHorizFieldOfView(hFovDeg);
+        for (std::unique_ptr<sgct::Window> const& w : Engine::instance().windows()) {
+            w->setHorizFieldOfView(hFovDeg);
+        }
     };
     #ifdef WIN32
     sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
@@ -937,6 +946,15 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.setScreenshotFolder = [](std::string path) {
         Settings::instance().setCapturePath(std::move(path));
+    };
+    sgctDelegate.showStatistics = [](bool enabled) {
+        Engine::instance().setStatsGraphVisibility(enabled);
+    };
+    sgctDelegate.numberOfNodes = []() {
+        return ClusterManager::instance().numberOfNodes();
+    };
+    sgctDelegate.currentNode = []() {
+        return ClusterManager::instance().thisNodeId();
     };
 }
 
@@ -1037,6 +1055,11 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
 }
 
 int main(int argc, char* argv[]) {
+#ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+    _clearfp();
+    _controlfp(_controlfp(0, 0) & ~(_EM_ZERODIVIDE | _EM_OVERFLOW), _MCW_EM);
+#endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
 #endif // WIN32
@@ -1083,10 +1106,10 @@ int main(int argc, char* argv[]) {
         commandlineArguments.configurationName, "--file", "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
-        "current working directory."
+        "current working directory"
     ));
 
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<ghoul::cmdparser::MultipleCommand<std::string>>(
         commandlineArguments.configurationOverride, "--config", "-c",
         "Provides the ability to pass arbitrary Lua code to the application that will be "
         "evaluated after the configuration file has been loaded but before the other "
@@ -1094,7 +1117,7 @@ int main(int argc, char* argv[]) {
         "configuration file without editing the file on disk, for example in a "
         "planetarium environment. Please not that the Lua script must not contain any - "
         "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
-        "evaluated before it is passed to OpenSpace."
+        "evaluated before it is passed to OpenSpace"
     ));
 
     // setCommandLine returns a reference to the vector that will be filled later
@@ -1159,10 +1182,14 @@ int main(int argc, char* argv[]) {
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
+        std::string override;
+        for (const std::string& arg : commandlineArguments.configurationOverride) {
+            override += arg + ";";
+        }
         *global::configuration = configuration::loadConfigurationFromFile(
             configurationFilePath.string(),
             size,
-            commandlineArguments.configurationOverride
+            override
         );
 
         // Determining SGCT configuration file

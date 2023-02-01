@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <array>
@@ -56,7 +57,7 @@ public:
     double averageFrameTime() const;
 
 private:
-    static const int TotalSamples = 10;
+    static constexpr int TotalSamples = 10;
     int _nSamples = 0;
     double _samples[TotalSamples];
     int _index = 0;
@@ -67,9 +68,16 @@ public:
     TouchInteraction();
 
     // for interpretInteraction()
-    enum Type { ROT = 0, PINCH, PAN, ROLL, PICK, ZOOM_OUT };
+    enum Type {
+        ROTATION = 0,
+        PINCH,
+        PAN,
+        ROLL,
+        PICK,
+        ZOOM_OUT
+    };
 
-    // Stores the velocity in all 6DOF
+    // Stores the velocity in all 6 DOF
     struct VelocityStates {
         glm::dvec2 orbit = glm::dvec2(0.0);
         double zoom = 0.0;
@@ -146,7 +154,7 @@ private:
     void decelerate(double dt);
 
     // Resets all properties that can be changed in the GUI to default
-    void resetToDefault();
+    void resetPropertiesToDefault();
 
     Camera* _camera = nullptr;
 
@@ -154,7 +162,9 @@ private:
     properties::StringProperty _origin;
     properties::BoolProperty _unitTest;
     properties::BoolProperty _touchActive;
-    properties::BoolProperty _reset;
+    properties::BoolProperty _disableZoom;
+    properties::BoolProperty _disableRoll;
+    properties::TriggerProperty _reset;
     properties::IntProperty _maxTapTime;
     properties::IntProperty _deceleratesPerSecond;
     properties::FloatProperty _touchScreenSize;
@@ -192,7 +202,7 @@ private:
 
     int pinchConsecCt = 0;
     double pinchConsecZoomFactor = 0;
-    //int stepVelUpdate = 0;
+    int stepVelUpdate = 0;
 #endif
     std::array<TouchInputHolder, 2> _pinchInputs;
     // Class variables

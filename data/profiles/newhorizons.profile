@@ -1,7 +1,7 @@
 {
   "actions": [
     {
-      "documentation": "Sets the focus of the camera on 'NewHorizons'.",
+      "documentation": "Sets the focus of the camera on 'NewHorizons'",
       "gui_path": "/Missions/New Horizons",
       "identifier": "profile.focus.newhorizons",
       "is_local": false,
@@ -25,7 +25,7 @@
       "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'PlutoProjection') ;openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
     },
     {
-      "documentation": "Sets the focus of the camera on 'Charon'.",
+      "documentation": "Sets the focus of the camera on 'Charon'",
       "gui_path": "/Missions/New Horizons",
       "identifier": "profile.focus.charon",
       "is_local": false,
@@ -41,7 +41,7 @@
       "script": "local enabled = openspace.getPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection'); openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection', not enabled); openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.PerformProjection', not enabled);"
     },
     {
-      "documentation": "Removes all image projections from Pluto and Charon.",
+      "documentation": "Removes all image projections from Pluto and Charon",
       "gui_path": "/Missions/New Horizons",
       "identifier": "profile.clear_image_projections",
       "is_local": false,
@@ -49,7 +49,7 @@
       "script": "openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections', true); openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections', true);"
     },
     {
-      "documentation": "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections.",
+      "documentation": "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections",
       "gui_path": "/Missions/New Horizons",
       "identifier": "profile.setup.approach",
       "is_local": false,
@@ -57,7 +57,7 @@
       "script": "openspace.time.setTime('2015-07-14T09:00:00.00');openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections', true);openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections', true);"
     },
     {
-      "documentation": "Increases the height map exaggeration on Pluto.",
+      "documentation": "Increases the height map exaggeration on Pluto",
       "gui_path": "/Missions/New Horizons",
       "identifier": "profile.pluto.increase_height_exaggeration",
       "is_local": false,
@@ -65,7 +65,7 @@
       "script": "openspace.setPropertyValueSingle(\"Scene.PlutoProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.PlutoProjection.Renderable.HeightExaggeration\") + 5000);"
     },
     {
-      "documentation": "Decreases the height map exaggeration on Pluto.",
+      "documentation": "Decreases the height map exaggeration on Pluto",
       "gui_path": "/Missions/New Horizons",
       "identifier": "profile.pluto.decrease_height_exaggeration",
       "is_local": false,
@@ -73,7 +73,7 @@
       "script": "openspace.setPropertyValueSingle(\"Scene.PlutoProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.PlutoProjection.Renderable.HeightExaggeration\") - 5000);"
     },
     {
-      "documentation": "Increases the height map exaggeration on Charon.",
+      "documentation": "Increases the height map exaggeration on Charon",
       "gui_path": "/Missions/New Horizons",
       "identifier": "profile.charon.increase_height_exaggeration",
       "is_local": false,
@@ -81,7 +81,7 @@
       "script": "openspace.setPropertyValueSingle(\"Scene.CharonProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.CharonProjection.Renderable.HeightExaggeration\") + 5000);"
     },
     {
-      "documentation": "Decreases the height map exaggeration on Charon.",
+      "documentation": "Decreases the height map exaggeration on Charon",
       "gui_path": "/Missions/New Horizons",
       "identifier": "profile.charon.decrease_height_exaggeration",
       "is_local": false,
@@ -89,7 +89,7 @@
       "script": "openspace.setPropertyValueSingle(\"Scene.CharonProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.CharonProjection.Renderable.HeightExaggeration\") - 5000);"
     },
     {
-      "documentation": "Toggles the visibility of the trail behind Pluto.",
+      "documentation": "Toggles the visibility of the trail behind Pluto",
       "gui_path": "/Missions/New Horizons",
       "identifier": "profile.toggle.pluto_trail",
       "is_local": false,
@@ -97,7 +97,7 @@
       "script": "openspace.setPropertyValueSingle('Scene.PlutoBarycentricTrail.Renderable.Enabled', not openspace.getPropertyValue('Scene.PlutoBarycentricTrail.Renderable.Enabled'));"
     },
     {
-      "documentation": "Toggles the visibility of the text labels of Pluto, Charon, Hydra, Nix, Kerberos, and Styx.",
+      "documentation": "Toggles the visibility of the text labels of Pluto, Charon, Hydra, Nix, Kerberos, and Styx",
       "gui_path": "/Missions/New Horizons",
       "identifier": "profile.toggle.pluto_labels",
       "is_local": false,
@@ -105,7 +105,7 @@
       "script": "local list = {\"Scene.PlutoText.Renderable.Enabled\", \"Scene.CharonText.Renderable.Enabled\", \"Scene.HydraText.Renderable.Enabled\", \"Scene.NixText.Renderable.Enabled\", \"Scene.KerberosText.Renderable.Enabled\", \"Scene.StyxText.Renderable.Enabled\"}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
     },
     {
-      "documentation": "Toggles the visibility of the labels for the New Horizons instruments.",
+      "documentation": "Toggles the visibility of the labels for the New Horizons instruments",
       "gui_path": "/Missions/New Horizons",
       "identifier": "profile.toggle_nh_labels",
       "is_local": false,
@@ -113,7 +113,7 @@
       "script": "local v = openspace.getPropertyValue(\"Scene.Labels.Renderable.Opacity\"); if v <= 0.5 then openspace.setPropertyValueSingle(\"Scene.Labels.Renderable.Opacity\",1.0,2.0) else openspace.setPropertyValueSingle(\"Scene.Labels.Renderable.Opacity\",0.0,2.0) end"
     },
     {
-      "documentation": "Toggles the visibility of the shadow visualization of Pluto and Charon.",
+      "documentation": "Toggles the visibility of the shadow visualization of Pluto and Charon",
       "gui_path": "/Missions/New Horizons",
       "identifier": "profile.toggle_shadows",
       "is_local": false,
@@ -254,7 +254,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This profile shows the acquisition of NASA New Horizons’ images of the Plutonian system in July 2015. The profile starts at around 10:00 on July 14th, around 10 minutes before a new image campaign starts. By selecting Pluto as the Origin and moving time faster, you can see the imprint of the instrument’s field-of-view on the planetary surface and see the images being projected. A timer on the top left of the screen shows when the next image is being taken.",
+    "description": "This profile shows the acquisition of NASA New Horizons' images of the Plutonian system in July 2015. The profile starts at around 10:00 on July 14th, around 10 minutes before a new image campaign starts. By selecting Pluto as the Origin and moving time faster, you can see the imprint of the instrument's field-of-view on the planetary surface and see the images being projected. A timer on the top left of the screen shows when the next image is being taken",
     "license": "MIT License",
     "name": "New Horizons",
     "url": "https://www.openspaceproject.com",

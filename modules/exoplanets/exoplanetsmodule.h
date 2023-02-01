@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ public:
     constexpr static const char* Name = "Exoplanets";
 
     ExoplanetsModule();
-    virtual ~ExoplanetsModule() = default;
+    ~ExoplanetsModule() override = default;
 
     bool hasDataFiles() const;
     std::string exoplanetsDataPath() const;
@@ -61,6 +61,7 @@ public:
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
 
+    properties::BoolProperty _enabled;
     properties::StringProperty _exoplanetsDataFolder;
     properties::StringProperty _bvColorMapPath;
     properties::StringProperty _starTexturePath;
@@ -74,8 +75,6 @@ protected:
     properties::BoolProperty _useOptimisticZone;
 
     properties::FloatProperty _habitableZoneOpacity;
-
-    properties::BoolProperty _enabled;
 };
 
 } // namespace openspace

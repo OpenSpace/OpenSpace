@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -23,7 +23,7 @@
 ##########################################################################################
 
 function (set_openspace_compile_settings target)
-  target_compile_features(${target} PRIVATE cxx_std_17)
+  target_compile_features(${target} PUBLIC cxx_std_20)
 
   set(MSVC_WARNINGS
     "/MP"       # Multi-threading support
@@ -78,7 +78,6 @@ function (set_openspace_compile_settings target)
     "-Wbitfield-constant-conversion"
     "-Wbool-conversions"
     "-Wcast-align"
-    "-Wcast-function-type"
     "-Wcast-qual"
     "-Wcomma"
     "-Wconditional-uninitialized"
@@ -143,7 +142,7 @@ function (set_openspace_compile_settings target)
     "-Wvla"
     "-Wzero-as-null-pointer-constant"
     
-    "-Wno-attributes=codegen::"
+    "-Wno-attributes"
     "-Wno-missing-braces"
     "-Wno-unknown-attributes"
   )
@@ -196,6 +195,8 @@ function (set_openspace_compile_settings target)
     # Boost as of 1.64 still uses unary_function unless we define this
     target_compile_definitions(${target} PRIVATE "_HAS_AUTO_PTR_ETC")
     target_compile_definitions(${target} PRIVATE "NOMINMAX")
+    target_compile_definitions(${target} PRIVATE "WIN32_LEAN_AND_MEAN")
+    target_compile_definitions(${target} PRIVATE "VC_EXTRALEAN")
   elseif (NOT LINUX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if (OPENSPACE_WARNINGS_AS_ERRORS)
       target_compile_options(${target} PRIVATE "-Werror")

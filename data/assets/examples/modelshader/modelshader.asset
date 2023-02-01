@@ -39,9 +39,9 @@ local model = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(model)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(model)
 end)
-  
+
 asset.export(model)

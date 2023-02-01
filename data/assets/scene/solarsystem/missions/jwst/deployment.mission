@@ -1,0 +1,25 @@
+return
+{
+  Name = "JWST_Deployment",
+  Phases = {
+    { Name = "Solar_Array_Deploy", TimeRange = { Start = "2021-DEC-25 12:50:20", End = "2021-DEC-25 12:50:42" },
+    { Name = "Communication_Antenna_Deploy", TimeRange = { Start = "2021-DEC-26 06:20:00", End = "2021-DEC-26 11:59:00" },
+    { Name = "Front_Palette_Deploy", TimeRange = { Start = "2021-DEC-28 06:40:35", End = "2021-DEC-28 18:20:00" },
+    { Name = "Rear_Palette_Deploy", TimeRange = { Start = "2021-DEC-28 21:11:00", End = "2021-DEC-29 00:20:00" },
+    { Name = "Base_Rise_Deploy", TimeRange = { Start = "2021-DEC-29 00:42:00", End = "2021-DEC-30 05:55:00" },
+    { Name = "Aft_Flap_Deploy", TimeRange = { Start = "2021-DEC-30 09:20:00", End = "2021-DEC-30 13:57:00" },
+    { Name = "Front_Right_Membrane_Restraints_Release", TimeRange = { Start = "2021-DEC-30 14:29:00", End = "2021-DEC-30 15:15:39" },
+    { Name = "Front_Left_Membrane_Restraints_Release", TimeRange = { Start = "2021-DEC-30 15:29:13", End = "2021-DEC-30 16:58:20" },
+    { Name = "Rear_Membrane_Restraints_Release", TimeRange = { Start = "2021-DEC-30 17:17:00", End = "2021-DEC-30 20:50:56" },
+    { Name = "Core_Cover_Release", TimeRange = { Start = "2021-DEC-30 21:35:49", End = "2021-DEC-30 22:20:00" },
+    { Name = "Right_Mid_Boom_Extend", TimeRange = { Start = "2021-DEC-30 23:49:43", End = "2021-DEC-31 06:02:05" },
+    { Name = "Left_Mid_Boom_Extend", TimeRange = { Start = "2021-DEC-31 06:02:05", End = "2021-DEC-31 10:26:00" },
+    { Name = "Sun_Shield_Membrane_Stretching", TimeRange = { Start = "2021-DEC-31 10:29:14", End = "2021-DEC-31 10:40:00" },
+    { Name = "Sun_Shield_Layers_Separate", TimeRange = { Start = "2022-JAN-01 00:56:49", End = "2022-JAN-01 03:16:02" },
+    { Name = "Bottom_Panel_Deploy", TimeRange = { Start = "2022-JAN-01 04:05:00", End = "2022-JAN-01 05:10:00" },
+    { Name = "Secondary_Mirror_Deploy", TimeRange = { Start = "2022-JAN-01 12:20:00", End = "2022-JAN-05 22:53:00" },
+    { Name = "Aft_Radiator_Delopy", TimeRange = { Start = "2022-JAN-06 00:40:48", End = "2022-JAN-06 04:25:00" },
+    { Name = "Right_Main_Mirror_Deploy", TimeRange = { Start = "2022-JAN-06 21:50:00", End = "2022-JAN-08 01:00:48" },
+    { Name = "Left_Main_Mirror_Deploy", TimeRange = { Start = "2022-JAN-08 11:20:00", End = "2022-JAN-09 07:20:00" }
+  }
+}

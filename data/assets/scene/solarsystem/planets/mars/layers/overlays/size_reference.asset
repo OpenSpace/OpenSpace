@@ -4,6 +4,7 @@ local globeIdentifier = marsAsset.Identifier
 local layer ={
   Identifier = "Size_Reference",
   Name = "Size Reference",
+  Enabled = asset.enabled,
   Type = "SizeReferenceTileLayer",
   Radii = marsAsset.Renderable.Radii
 }
@@ -23,7 +24,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Mars Size Reference",
   Version = "1.0",
-  Description = [[ This asset supplies a size reference layer for the Mars globe.]],
+  Description = "This asset supplies a size reference layer for the Mars globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

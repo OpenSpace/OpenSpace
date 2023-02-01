@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -75,7 +75,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string actio
         LWARNINGC(
             "bindKey",
             "Windows does not support binding keys to Shift + Keypad as it will "
-            "internally convert these into Home, End, etc, keys."
+            "internally convert these into Home, End, etc, keys"
         );
     }
 #endif // WIN32
@@ -88,7 +88,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string actio
 void KeybindingManager::removeKeyBinding(const KeyWithModifier& key) {
     // Erase-remove idiom does not work for std::multimap so we have to do this on foot
 
-    for (auto it = _keyLua.begin(); it != _keyLua.end(); ) {
+    for (auto it = _keyLua.begin(); it != _keyLua.end();) {
         // If the current iterator is the key that we are looking for, delete it
         // (std::multimap::erase will return the iterator to the next element for us)
         if (it->first == key) {

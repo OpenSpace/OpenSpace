@@ -58,11 +58,11 @@ local object = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(object)
 end)
-  
+
 asset.export(object)
 
 
@@ -70,7 +70,7 @@ asset.export(object)
 asset.meta = {
   Name = "Sloan Digital Sky Survey",
   Version = "2.1",
-  Description = [[Digital Universe asset for The Sloan Digital Sky Survey (SDSS).]],
+  Description = "Digital Universe asset for The Sloan Digital Sky Survey (SDSS)",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

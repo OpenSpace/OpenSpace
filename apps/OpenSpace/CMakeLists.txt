@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -25,7 +25,6 @@
 include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 
 # We are getting all_enabled_modules from the handle_applications.cmake file which gets
 # it from the main CMakeLists file
@@ -106,11 +105,16 @@ target_compile_definitions(OpenSpace PRIVATE
   ${SPOUT_DEFINITIONS}
 )
 
+if (OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION)
+  target_compile_definitions(OpenSpace PRIVATE "OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION")
+endif ()
+
 begin_header("Dependency: SGCT")
 
 set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_FREETYPE OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
+set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
 target_link_libraries(OpenSpace PRIVATE sgct)
@@ -136,6 +140,18 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
 target_link_libraries(OpenSpace PRIVATE openspace-ui-launcher)
 end_header("Dependency: Profile Editor")
 
+if (WIN32)
+  # Find the windeployqt application
+  get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
+  get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+  find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
+  add_custom_command(
+    TARGET OpenSpace POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime \"$<TARGET_FILE:OpenSpace>\"
+    COMMENT "Deploying Qt libraries"
+  )
+endif ()
+
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the
@@ -156,7 +172,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   set_cef_targets("${CEF_ROOT}" OpenSpace)
   run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
 elseif ()
-  message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
+  message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")
 endif ()
 
 if (MSVC)
@@ -168,4 +184,11 @@ endif ()
 
 if (OPENSPACE_NVTOOLS_ENABLED)
   target_link_libraries(OpenSpace PRIVATE "${OPENSPACE_NVTOOLS_PATH}/lib/x64/nvToolsExt64_1.lib")
+endif ()
+
+if (WIN32)
+  add_custom_command(TARGET OpenSpace POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:OpenSpace> $<TARGET_FILE_DIR:OpenSpace>
+    COMMAND_EXPAND_LISTS
+  )
 endif ()

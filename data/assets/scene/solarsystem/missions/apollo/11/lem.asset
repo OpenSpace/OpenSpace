@@ -60,11 +60,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo11Lem)
   openspace.addSceneGraphNode(Apollo11LemModel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo11LemModel)
   openspace.removeSceneGraphNode(Apollo11Lem)
 end)
-    
+
 asset.export(Apollo11Lem)
 asset.export(Apollo11LemModel)

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -47,5 +47,19 @@ create_new_module(
   cefwebgui_module
   ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
 )
+
+target_precompile_headers(${cefwebgui_module} PRIVATE
+  [["include/capi/cef_base_capi.h"]]
+  [["include/cef_render_handler.h"]]
+  <string>
+  <sstream>
+  <istream>
+  <ostream>
+)
+if (WIN32)
+  target_precompile_headers(${cefwebgui_module} PRIVATE
+    <Windows.h>
+  )
+endif ()
 
 set_modules_dependency_on_cef_libraries(${cefwebgui_module})

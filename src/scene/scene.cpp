@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,15 +51,16 @@
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <string>
 #include <stack>
 
 #include "scene_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "Scene";
-    constexpr const char* KeyIdentifier = "Identifier";
-    constexpr const char* KeyParent = "Parent";
+    constexpr std::string_view _loggerCat = "Scene";
+    constexpr std::string_view KeyIdentifier = "Identifier";
+    constexpr std::string_view KeyParent = "Parent";
 
 #ifdef TRACY_ENABLE
     constexpr const char* renderBinToString(int renderBin) {
@@ -97,14 +98,28 @@ Scene::InvalidSceneError::InvalidSceneError(std::string msg, std::string comp)
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     : properties::PropertyOwner({"Scene", "Scene"})
+    , _camera(std::make_unique<Camera>())
     , _initializer(std::move(initializer))
 {
     _rootDummy.setIdentifier(SceneGraphNode::RootNodeIdentifier);
     _rootDummy.setScene(this);
+
+    _camera->setParent(&_rootDummy);
 }
 
 Scene::~Scene() {
-    clear();
+    LINFO("Clearing current scene graph");
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
+        if (node->identifier() == "Root") {
+            continue;
+        }
+        // There might still be scene graph nodes around that weren't removed by the asset
+        // manager as they would have been added manually by the user. This also serves as
+        // a backstop for assets that forgot to implement the onDeinitialize functions
+        node->deinitializeGL();
+        node->deinitialize();
+    }
+    _rootDummy.clearChildren();
     _rootDummy.setScene(nullptr);
 }
 
@@ -116,10 +131,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
     return _rootDummy.detachChild(node);
 }
 
-void Scene::setCamera(std::unique_ptr<Camera> camera) {
-    _camera = std::move(camera);
-}
-
 Camera* Scene::camera() const {
     return _camera.get();
 }
@@ -127,7 +138,7 @@ Camera* Scene::camera() const {
 void Scene::registerNode(SceneGraphNode* node) {
     if (_nodesByIdentifier.count(node->identifier())) {
         throw Scene::InvalidSceneError(
-            "Node with identifier " + node->identifier() + " already exits."
+            "Node with identifier " + node->identifier() + " already exists"
         );
     }
 
@@ -250,75 +261,6 @@ bool Scene::isInitializing() const {
     return _initializer->isInitializing();
 }
 
-/*
-void Scene::initialize() {
-    bool useMultipleThreads = true;
-    if (OsEng.configurationManager().hasKey(
-        ConfigurationManager::KeyUseMultithreadedInitialization
-    ))
-    {
-        useMultipleThreads = OsEng.configurationManager().value<bool>(
-            ConfigurationManager::KeyUseMultithreadedInitialization
-        );
-    }
-
-    auto initFunction = [](SceneGraphNode* node){
-        try {
-            OsEng.loadingScreen().updateItem(
-                node->name(),
-                LoadingScreen::ItemStatus::Initializing
-            );
-            node->initialize();
-            OsEng.loadingScreen().tickItem();
-            OsEng.loadingScreen().updateItem(
-                node->name(),
-                LoadingScreen::ItemStatus::Finished
-            );
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERROR(node->name() << " not initialized.");
-            LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
-            OsEng.loadingScreen().updateItem(
-                node->name(),
-                LoadingScreen::ItemStatus::Failed
-            );
-        }
-
-    };
-
-    if (useMultipleThreads) {
-        unsigned int nThreads = std::thread::hardware_concurrency();
-
-        ghoul::ThreadPool pool(nThreads == 0 ? 2 : nThreads - 1);
-
-        OsEng.loadingScreen().postMessage("Initializing scene");
-
-        for (SceneGraphNode* node : _topologicallySortedNodes) {
-            pool.queue(initFunction, node);
-        }
-
-        pool.stop();
-    }
-    else {
-        for (SceneGraphNode* node : _topologicallySortedNodes) {
-            initFunction(node);
-        }
-    }
-}
-
-void Scene::initializeGL() {
-    for (SceneGraphNode* node : _topologicallySortedNodes) {
-        try {
-            node->initializeGL();
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERROR(node->name() << " not initialized.");
-            LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
-        }
-    }
-}
-*/
-
 void Scene::update(const UpdateData& data) {
     ZoneScoped
 
@@ -334,6 +276,7 @@ void Scene::update(const UpdateData& data) {
     if (_dirtyNodeRegistry) {
         updateNodeRegistry();
     }
+    _camera->setAtmosphereDimmingFactor(1.f);
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             node->update(data);
@@ -375,11 +318,6 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         // buffer, or something else like that preventing a large spike in uploads
         glGetError();
     }
-}
-
-void Scene::clear() {
-    LINFO("Clearing current scene graph");
-    _rootDummy.clearChildren();
 }
 
 const std::unordered_map<std::string, SceneGraphNode*>& Scene::nodesByIdentifier() const {
@@ -501,6 +439,7 @@ std::chrono::steady_clock::time_point Scene::currentTimeForInterpolation() {
 }
 
 void Scene::addPropertyInterpolation(properties::Property* prop, float durationSeconds,
+                                     std::string postScript,
                                      ghoul::EasingFunction easingFunction)
 {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
@@ -527,6 +466,7 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
         if (info.prop == prop) {
             info.beginTime = now;
             info.durationSeconds = durationSeconds;
+            info.postScript = std::move(postScript),
             info.easingFunction = func;
             // If we found it, we can break since we make sure that each property is only
             // represented once in this
@@ -535,12 +475,12 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
     }
 
     PropertyInterpolationInfo i = {
-        prop,
-        now,
-        durationSeconds,
-        func
+        .prop = prop,
+        .beginTime = now,
+        .durationSeconds = durationSeconds,
+        .postScript = std::move(postScript),
+        .easingFunction = func
     };
-
     _propertyInterpolationInfos.push_back(std::move(i));
 }
 
@@ -575,13 +515,12 @@ void Scene::updateInterpolations() {
     steady_clock::time_point now = currentTimeForInterpolation();
     // First, let's update the properties
     for (PropertyInterpolationInfo& i : _propertyInterpolationInfos) {
-        long long usPassed = duration_cast<std::chrono::microseconds>(
-            now - i.beginTime
-        ).count();
+        long long us =
+            duration_cast<std::chrono::microseconds>(now - i.beginTime).count();
 
         const float t = glm::clamp(
             static_cast<float>(
-                static_cast<double>(usPassed) /
+                static_cast<double>(us) /
                 static_cast<double>(i.durationSeconds * 1000000)
             ),
             0.f,
@@ -599,6 +538,13 @@ void Scene::updateInterpolations() {
         i.isExpired = (t == 1.f);
 
         if (i.isExpired) {
+            if (!i.postScript.empty()) {
+                global::scriptEngine->queueScript(
+                    std::move(i.postScript),
+                    scripting::ScriptEngine::RemoteScripting::No
+                );
+            }
+
             global::eventEngine->publishEvent<events::EventInterpolationFinished>(i.prop);
         }
     }
@@ -607,9 +553,7 @@ void Scene::updateInterpolations() {
         std::remove_if(
             _propertyInterpolationInfos.begin(),
             _propertyInterpolationInfos.end(),
-            [](const PropertyInterpolationInfo& i) {
-                return i.isExpired;
-            }
+            [](const PropertyInterpolationInfo& i) { return i.isExpired; }
         ),
         _propertyInterpolationInfos.end()
     );
@@ -648,9 +592,10 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
             allProperties(),
             0.0,
             groupName,
-            ghoul::EasingFunction::Linear
+            ghoul::EasingFunction::Linear,
+            ""
         );
-        //Clear lua state stack
+        // Clear lua state stack
         lua_settop(L, 0);
     }
 }
@@ -686,7 +631,7 @@ ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,
 
     switch (pType) {
         case PropertyValueType::Boolean:
-            result = (value == "true") ? true : false;
+            result = (value == "true");
             break;
         case PropertyValueType::Float:
             result = std::stof(value);
@@ -812,13 +757,29 @@ PropertyValueType Scene::propertyValueType(const std::string& value) {
     }
 }
 
+std::vector<properties::Property*> Scene::propertiesMatchingRegex(
+                                                              std::string propertyString)
+{
+    return findMatchesInAllProperties(propertyString, allProperties(), "");
+}
+
+std::vector<std::string> Scene::allTags() {
+    std::set<std::string> result;
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
+        const std::vector<std::string>& tags = node->tags();
+        result.insert(tags.begin(), tags.end());
+    }
+
+    return std::vector<std::string>(result.begin(), result.end());
+}
+
 scripting::LuaLibrary Scene::luaLibrary() {
     return {
         "",
         {
             {
                 "setPropertyValue",
-                &luascriptfunctions::propertySetValue,
+                &luascriptfunctions::propertySetValue<false>,
                 {},
                 "",
                 "Sets all property(s) identified by the URI (with potential wildcards) "
@@ -830,20 +791,16 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "function if a 'duration' has been specified. If 'duration' is 0, this "
                 "parameter value is ignored. Otherwise, it can be one of many supported "
                 "easing functions. See easing.h for available functions. The fifth "
-                "argument must be either empty, 'regex', or 'single'. If the fifth"
-                "argument is empty (the default), the URI is interpreted using a "
-                "wildcard in which '*' is expanded to '(.*)' and bracketed components "
-                "'{ }' are interpreted as group tag names. Then, the passed value will "
-                "be set on all properties that fit the regex + group name combination. "
-                "If the fifth argument is 'regex' neither the '*' expansion, nor the "
-                "group tag expansion is performed and the first argument is used as an "
-                "ECMAScript style regular expression that matches against the fully "
-                "qualified IDs of properties. If the fifth argument is 'single' no "
-                "substitutions are performed and exactly 0 or 1 properties are changed."
+                "argument is another Lua script that will be executed when the "
+                "interpolation provided in parameter 3 finishes.\n"
+                "The URI is interpreted using a wildcard in which '*' is expanded to "
+                "'(.*)' and bracketed components '{ }' are interpreted as group tag "
+                "names. Then, the passed value will be set on all properties that fit "
+                "the regex + group name combination."
             },
             {
                 "setPropertyValueSingle",
-                &luascriptfunctions::propertySetValueSingle,
+                &luascriptfunctions::propertySetValue<true>,
                 {},
                 "",
                 "Sets the property identified by the URI in the first argument. The "
@@ -855,30 +812,19 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "specified. If 'duration' is 0, this parameter value is ignored. "
                 "Otherwise, it has to be 'linear', 'easein', 'easeout', or 'easeinout'. "
                 "This is the same as calling the setValue method and passing 'single' as "
-                "the fourth argument to setPropertyValue."
-            },
-            {
-                "hasProperty",
-                &luascriptfunctions::propertyHasProperty,
-                {},
-                "",
-                "Returns whether a property with the given URI exists"
+                "the fourth argument to setPropertyValue. The fifth argument is another "
+                "Lua script that will be executed when the interpolation provided in "
+                "parameter 3 finishes."
             },
             {
                 "getPropertyValue",
                 &luascriptfunctions::propertyGetValue,
                 {},
                 "",
-                "Returns the value the property, identified by the provided URI."
+                "Returns the value the property, identified by the provided URI"
             },
-            {
-                "getProperty",
-                &luascriptfunctions::propertyGetProperty,
-                {},
-                "",
-                "Returns a list of property identifiers that match the passed regular "
-                "expression"
-            },
+            codegen::lua::HasProperty,
+            codegen::lua::GetProperty,
             codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,
             codegen::lua::AddSceneGraphNode,

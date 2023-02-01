@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -375,7 +375,7 @@ public:
      * This destructor will cancel any ongoing download and wait for its completion, so it
      * might not block for a short amount of time.
      */
-    virtual ~HttpFileDownload() = default;
+    virtual ~HttpFileDownload() override = default;
 
     /**
      * Returns the path where the contents of the URL provided in the constructor will be
@@ -417,7 +417,7 @@ private:
     static std::mutex _directoryCreationMutex;
 
     /// The maximum number of file handles that all HttpFileDownloads combined can use up
-    static constexpr const int MaxFileHandles = 32;
+    static constexpr int MaxFileHandles = 32;
 
     /// Stores the number of currently open file handles across all HttpFileDownloads
     static std::atomic_int nCurrentFileHandles;
@@ -443,7 +443,7 @@ public:
      * This destructor will cancel any ongoing download and wait for its completion, so it
      * might not block for a short amount of time.
      */
-    virtual ~HttpMemoryDownload() = default;
+    virtual ~HttpMemoryDownload() override = default;
 
     /**
      * Returns a reference to the buffer that is used to store the contents of the URL
