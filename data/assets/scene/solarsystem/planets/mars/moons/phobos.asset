@@ -20,6 +20,7 @@ local kernels = asset.syncedResource({
 local Phobos = {
   Identifier = "Phobos",
   Parent = transforms.MarsBarycenter.Identifier,
+  InteractionSphere = 15000,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
@@ -78,12 +79,39 @@ local PhobosTrail = {
   }
 }
 
+local PhobosLabel = {
+  Identifier = "PhobosLabel",
+  Parent = Phobos.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Phobos",
+    FontSize = 70.0,
+    Size = 5.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 30.0, 1000.0 },
+    FadeWidths = { 30.0, 2000.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Phobos Label",
+    Path = "/Solar System/Planets/Mars/Moons",
+    Description = "Label for Mars' moon Phobos"
+  }
+}
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Phobos)
   openspace.addSceneGraphNode(PhobosTrail)
+  openspace.addSceneGraphNode(PhobosLabel)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PhobosLabel)
   openspace.removeSceneGraphNode(PhobosTrail)
   openspace.removeSceneGraphNode(Phobos)
 end)

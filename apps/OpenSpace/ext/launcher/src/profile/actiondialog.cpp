@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -97,9 +97,9 @@ void ActionDialog::createWidgets() {
     //  *----------------------*---------------*----------------*
     //  | [+] [-]              |               | <Save> <Cancel>|    Row 14
     //  *----------------------*---------------*----------------*
-    //  |=======================================================|    Row 14
+    //  |=======================================================|    Row 16
     //  *----------------------*---------------*----------------*
-    //  |                                      | <Save> <Cancel>|    Row 15
+    //  |                                      | <Save> <Cancel>|    Row 17
     //  *----------------------*---------------*----------------*
 
     QGridLayout* layout = new QGridLayout(this);
@@ -113,18 +113,18 @@ void ActionDialog::createWidgets() {
     clearKeybindingFields();
 
     layout->addWidget(new Line, 16, 0, 1, 3);
-    
-    QDialogButtonBox* buttonBox = new QDialogButtonBox;
-    buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+
+    _mainButtons = new QDialogButtonBox;
+    _mainButtons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
     QObject::connect(
-        buttonBox, &QDialogButtonBox::accepted,
+        _mainButtons, &QDialogButtonBox::accepted,
         this, &ActionDialog::applyChanges
     );
     QObject::connect(
-        buttonBox, &QDialogButtonBox::rejected,
+        _mainButtons, &QDialogButtonBox::rejected,
         this, &ActionDialog::reject
     );
-    layout->addWidget(buttonBox, 17, 2, Qt::AlignRight);
+    layout->addWidget(_mainButtons, 17, 2, Qt::AlignRight);
 }
 
 void ActionDialog::createActionWidgets(QGridLayout* layout) {
@@ -523,12 +523,19 @@ void ActionDialog::actionSelected() {
         _actionWidgets.addButton->setEnabled(false);
         _actionWidgets.removeButton->setEnabled(true);
         _actionWidgets.saveButtons->setEnabled(true);
+        if (_mainButtons) {
+            _mainButtons->setEnabled(false);
+        }
     }
     else {
         // No action selected
         _actionWidgets.addButton->setEnabled(true);
         _actionWidgets.removeButton->setEnabled(false);
         _actionWidgets.saveButtons->setEnabled(false);
+        //Keybinding panel must also be in valid state to re-enable main start button
+        if (_mainButtons && !_keybindingWidgets.saveButtons->isEnabled()) {
+            _mainButtons->setEnabled(true);
+        }
     }
 }
 
@@ -587,7 +594,11 @@ void ActionDialog::actionSaved() {
     
 
     action->name = _actionWidgets.name->text().toStdString();
-    action->guiPath = _actionWidgets.guiPath->text().toStdString();
+    std::string guiPath = _actionWidgets.guiPath->text().toStdString();
+    if (!guiPath.starts_with('/')) {
+        guiPath = "/" + guiPath;
+    }
+    action->guiPath = guiPath;
     action->documentation = _actionWidgets.documentation->text().toStdString();
     action->isLocal = _actionWidgets.isLocal->isChecked();
     action->script = _actionWidgets.script->toPlainText().toStdString();
@@ -705,12 +716,19 @@ void ActionDialog::keybindingSelected() {
         _keybindingWidgets.saveButtons->button(QDialogButtonBox::Save)->setEnabled(
             _keybindingWidgets.key->currentIndex() > 0
         );
+        if (_mainButtons) {
+            _mainButtons->setEnabled(false);
+        }
     }
     else {
         // No keybinding selected
         _keybindingWidgets.addButton->setEnabled(true);
         _keybindingWidgets.removeButton->setEnabled(false);
         _keybindingWidgets.saveButtons->setEnabled(false);
+        //Action panel must also be in valid state to re-enable main start button
+        if (_mainButtons && !_actionWidgets.saveButtons->isEnabled()) {
+            _mainButtons->setEnabled(true);
+        }
     }
 }
 
@@ -719,6 +737,16 @@ void ActionDialog::keybindingActionSelected(int) {
 }
 
 void ActionDialog::keybindingSaved() {
+    if (_keybindingWidgets.key->currentIndex() == -1) {
+        QMessageBox::critical(this, "Missing key", "Key must have an assignment");
+        return;
+    }
+    //A selection can be made from the combo box without typing text, but selecting from
+    //the combo will fill the text, so using the text box as criteria covers both cases.
+    if (_keybindingWidgets.actionText->text().isEmpty()) {
+        QMessageBox::critical(this, "Missing action", "Key action must not be empty");
+        return;
+    }
     Profile::Keybinding* keybinding = selectedKeybinding();
     ghoul_assert(keybinding, "There must be a selected keybinding at this point");
 
@@ -758,5 +786,11 @@ void ActionDialog::clearKeybindingFields() {
 }
 
 void ActionDialog::keybindingRejected() {
+    bool isKeyEmpty = (_keybindingsData.back().key.key == Key::Unknown);
+    bool isActionEmpty = _keybindingsData.back().action.empty();
+    if (isKeyEmpty || isActionEmpty) {
+        delete _keybindingWidgets.list->takeItem(_keybindingWidgets.list->count() - 1);
+        _keybindingsData.erase(_keybindingsData.begin() + _keybindingsData.size() - 1);
+    }
     clearKeybindingFields();
 }

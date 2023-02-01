@@ -51,11 +51,39 @@ local Iapetus = {
   }
 }
 
+local IapetusLabel = {
+  Identifier = "IapetusLabel",
+  Parent = Iapetus.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Iapetus",
+    FontSize = 70.0,
+    Size = 6.2,
+    MinMaxSize = { 1, 35 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.5, 20.0 },
+    FadeWidths = { 0.3, 20.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Iapetus Label",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = "Label for Saturn's moon Iapetus"
+  }
+}
+
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Iapetus)
+  openspace.addSceneGraphNode(IapetusLabel)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IapetusLabel)
   openspace.removeSceneGraphNode(Iapetus)
 end)
 

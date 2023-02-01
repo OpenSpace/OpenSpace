@@ -1,3 +1,5 @@
+asset.require("./jwst")
+
 local point_jwst = {
   Identifier = "event.jwst.point",
   Name = "Point JWST",

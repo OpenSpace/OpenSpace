@@ -20,6 +20,7 @@ local omm = asset.syncedResource({
 local issPosition = {
   Identifier = "ISSPosition",
   Parent = transforms.EarthInertial.Identifier,
+  BoundingSphere = 54.5, -- half the width
   Transform = {
     Translation = {
       Type = "GPTranslation",

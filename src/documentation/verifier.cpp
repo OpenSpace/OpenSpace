@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -231,6 +231,8 @@ std::string StringVerifier::type() const {
     return "String";
 }
 
+FileVerifier::FileVerifier() : StringVerifier(true) {}
+
 TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
                                     const std::string& key) const
 {
@@ -254,6 +256,8 @@ TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
 std::string FileVerifier::type() const {
     return "File";
 }
+
+DirectoryVerifier::DirectoryVerifier() : StringVerifier(true) {}
 
 TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
                                          const std::string& key) const
@@ -279,6 +283,8 @@ std::string DirectoryVerifier::type() const {
     return "Directory";
 }
 
+DateTimeVerifier::DateTimeVerifier() : StringVerifier(true) {}
+
 TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
                                         const std::string& key) const
 {
@@ -302,26 +308,6 @@ TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
         off.reason = TestResult::Offense::Reason::Verification;
         off.explanation = "Not a valid format, should be: YYYY MM DD hh:mm:ss";
         res.offenses.push_back(off);
-    }
-    // then check if valid date
-    else {
-        // normalize e.g. 29/02/2013 would become 01/03/2013
-        std::tm t_copy(t);
-        time_t when = mktime(&t_copy);
-        std::tm* norm = localtime(&when);
-
-        // validate (is the normalized date still the same?):
-        if (norm->tm_mday != t.tm_mday &&
-            norm->tm_mon != t.tm_mon &&
-            norm->tm_year != t.tm_year)
-        {
-            res.success = false;
-            TestResult::Offense off;
-            off.offender = key;
-            off.reason = TestResult::Offense::Reason::Verification;
-            off.explanation = "Not a valid date";
-            res.offenses.push_back(off);
-        }
     }
     return res;
 }
@@ -432,10 +418,10 @@ TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dic
             if (dict.hasValue<glm::dvec2>(key)) {
                 glm::dvec2 value = dict.value<glm::dvec2>(key);
                 glm::dvec2 intPart;
-                glm::bvec2 isInt = {
+                glm::bvec2 isInt = glm::bvec2(
                     modf(value.x, &intPart.x) == 0.0,
                     modf(value.y, &intPart.y) == 0.0
-                };
+                );
                 if (isInt.x && isInt.y) {
                     TestResult res;
                     res.success = true;
@@ -487,11 +473,11 @@ TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dic
             if (dict.hasValue<glm::dvec3>(key)) {
                 glm::dvec3 value = dict.value<glm::dvec3>(key);
                 glm::dvec3 intPart;
-                glm::bvec3 isInt = {
+                glm::bvec3 isInt = glm::bvec3(
                     modf(value.x, &intPart.x) == 0.0,
                     modf(value.y, &intPart.y) == 0.0,
                     modf(value.z, &intPart.z) == 0.0
-                };
+                );
                 if (isInt.x && isInt.y && isInt.z) {
                     TestResult res;
                     res.success = true;
@@ -543,12 +529,12 @@ TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dic
             if (dict.hasValue<glm::dvec4>(key)) {
                 glm::dvec4 value = dict.value<glm::dvec4>(key);
                 glm::dvec4 intPart;
-                glm::bvec4 isInt = {
+                glm::bvec4 isInt = glm::bvec4(
                     modf(value.x, &intPart.x) == 0.0,
                     modf(value.y, &intPart.y) == 0.0,
                     modf(value.z, &intPart.z) == 0.0,
                     modf(value.w, &intPart.w) == 0.0
-                };
+                );
                 if (isInt.x && isInt.y && isInt.z && isInt.w) {
                     TestResult res;
                     res.success = true;

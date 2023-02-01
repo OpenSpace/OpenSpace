@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -28,9 +28,9 @@ cmake_policy(SET CMP0120 NEW)
 project(OpenSpace)
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 18)
+set(OPENSPACE_VERSION_MINOR 19)
 set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "Beta-11")
+set(OPENSPACE_VERSION_STRING "<dev>")
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")

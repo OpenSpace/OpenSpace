@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -190,15 +190,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
         "ZFightingPercentage",
         "Z-Fighting Percentage",
-        "The percentage of the correct distance to the surface being shadowed. "
-        "Possible values: [0.0, 1.0]"
+        "The percentage of the correct distance to the surface being shadowed. Possible "
+        "values: [0.0, 1.0]"
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberShadowSamplesInfo = {
         "NumberShadowSamples",
         "Number of Shadow Samples",
-        "The number of samples used during shadow mapping calculation "
-        "(Percentage Closer Filtering)"
+        "The number of samples used during shadow mapping calculation (Percentage Closer "
+        "Filtering)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetLodScaleFactorInfo = {
@@ -1875,13 +1875,13 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     const Geodetic2 southWest = patch.corner(Quad::SOUTH_WEST);
 
     const Geodetic2 geoDiffPatch = {
-        northEast.lat - southWest.lat,
-        northEast.lon - southWest.lon
+        .lat = northEast.lat - southWest.lat,
+        .lon = northEast.lon - southWest.lon
     };
 
     const Geodetic2 geoDiffPoint = {
-        geodeticPosition.lat - southWest.lat,
-        geodeticPosition.lon - southWest.lon
+        .lat = geodeticPosition.lat - southWest.lat,
+        .lon = geodeticPosition.lon - southWest.lon
     };
     const glm::vec2 patchUV = glm::vec2(
         geoDiffPoint.lon / geoDiffPatch.lon,

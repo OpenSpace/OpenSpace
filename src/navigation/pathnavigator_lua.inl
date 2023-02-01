@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,7 @@ namespace {
 // Returns true if a camera path is currently running, and false otherwise.
 [[codegen::luawrap]] bool isFlying() {
     using namespace openspace;
-    bool hasFinished = global::navigationHandler->pathNavigator().hasFinished();
-    return !hasFinished;
+    return global::openSpaceEngine->currentMode() == OpenSpaceEngine::Mode::CameraPath;
 }
 
 // Continue playing a paused camera path.

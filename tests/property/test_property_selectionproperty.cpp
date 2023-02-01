@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -208,7 +208,7 @@ TEST_CASE("SelectionProperty: Value From Copying Variable", "[selectionproperty]
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    p = { "a", "b" };
+    p = std::set<std::string>{ "a", "b" };
 
     CHECK(p.value() == std::set<std::string>{ "a", "b" });
 }
@@ -217,10 +217,10 @@ TEST_CASE("SelectionProperty: Re-set Options After Selection", "[selectionproper
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    p = { "a", "b" };
+    p = std::set<std::string>{ "a", "b" };
 
-    p.setOptions({ "a", "c", "d" }); // b no longer included
-                                     // => should be removed from selection
+    p.setOptions(std::vector<std::string>{ "a", "c", "d" }); // b no longer included
+                                                             // => should be removed
 
     CHECK(p.value() == std::set<std::string>{ "a" });
 }

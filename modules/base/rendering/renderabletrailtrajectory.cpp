@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -240,9 +240,11 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
     // If we are inside the valid time, we additionally want to draw a line from the last
     // correct point to the current location of the object
-    if (data.time.j2000Seconds() >= _start &&
+    if (data.time.j2000Seconds() > _start &&
         data.time.j2000Seconds() <= _end && !_renderFullTrail)
     {
+        ghoul_assert(_primaryRenderInformation.count > 0, "No vertices available");
+
         // Copy the last valid location
         glm::dvec3 v0(
             _vertexArray[_primaryRenderInformation.count - 1].x,

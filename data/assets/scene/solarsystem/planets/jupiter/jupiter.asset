@@ -48,10 +48,14 @@ local JupiterLabel = {
     Type = "RenderableLabel",
     Text = "Jupiter",
     FontSize = 70.0,
-    Size = 8.77,
-    MinMaxSize = { 1, 100 },
+    Size = 8.75,
+    MinMaxSize = { 1, 50 },
     OrientationOption = "Camera View Direction",
-    BlendMode = "Additive"
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 3.0, 40.0 },
+    FadeWidths = { 1.0, 60.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {

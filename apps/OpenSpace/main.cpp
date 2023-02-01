@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@
 #include <ghoul/fmt.h>
 #include <ghoul/glm.h>
 #include <ghoul/cmdparser/commandlineparser.h>
+#include <ghoul/cmdparser/multiplecommand.h>
 #include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
@@ -912,7 +913,9 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
         ZoneScoped
 
-        Engine::instance().windows().front()->setHorizFieldOfView(hFovDeg);
+        for (std::unique_ptr<sgct::Window> const& w : Engine::instance().windows()) {
+            w->setHorizFieldOfView(hFovDeg);
+        }
     };
     #ifdef WIN32
     sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
@@ -1106,7 +1109,7 @@ int main(int argc, char* argv[]) {
         "current working directory"
     ));
 
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<ghoul::cmdparser::MultipleCommand<std::string>>(
         commandlineArguments.configurationOverride, "--config", "-c",
         "Provides the ability to pass arbitrary Lua code to the application that will be "
         "evaluated after the configuration file has been loaded but before the other "
@@ -1179,10 +1182,14 @@ int main(int argc, char* argv[]) {
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
+        std::string override;
+        for (const std::string& arg : commandlineArguments.configurationOverride) {
+            override += arg + ";";
+        }
         *global::configuration = configuration::loadConfigurationFromFile(
             configurationFilePath.string(),
             size,
-            commandlineArguments.configurationOverride
+            override
         );
 
         // Determining SGCT configuration file

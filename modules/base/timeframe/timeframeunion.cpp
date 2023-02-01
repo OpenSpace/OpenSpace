@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,9 +34,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TimeFramesInfo = {
         "TimeFrames",
         "Time Frames",
-        "A vector of time frames to combine into one. "
-        "The time frame is active when any of the contained time frames are, "
-        "but not in gaps between contained time frames"
+        "A vector of time frames to combine into one. The time frame is active when any "
+        "of the contained time frames are, but not in gaps between contained time frames"
     };
 
     struct [[codegen::Dictionary(TimeFrameUnion)]] Parameters {

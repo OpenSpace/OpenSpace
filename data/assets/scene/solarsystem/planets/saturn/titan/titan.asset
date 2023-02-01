@@ -51,11 +51,40 @@ local Titan = {
   }
 }
 
+
+local TitanLabel = {
+  Identifier = "TitanLabel",
+  Parent = Titan.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Titan",
+    FontSize = 70.0,
+    Size = 6.2,
+    MinMaxSize = { 1, 35 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.5, 20.0 },
+    FadeWidths = { 0.3, 20.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Titan Label",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = "Label for Saturn's moon Titan"
+  }
+}
+
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Titan)
+  openspace.addSceneGraphNode(TitanLabel)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TitanLabel)
   openspace.removeSceneGraphNode(Titan)
 end)
 

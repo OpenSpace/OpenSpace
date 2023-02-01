@@ -20,10 +20,11 @@ local images = asset.syncedResource({
   Name = "Rosetta Images",
   Type = "HttpSynchronization",
   Identifier = "rosettaimages",
-  Version = 2
+  Version = 2,
+  UnzipFiles = true
 })
 
-local imagesDestination = images .. "images"
+local imagesDestination = images .. "images_v1_v2"
 
 local Barycenter = {
   Identifier = "67PBarycenter",
@@ -70,7 +71,7 @@ local Comet67P = {
               Spice  = { "ROS_NAVCAM-A" }
             }
           },
-          Target = { 
+          Target = {
             Read  = {
               "TARGET_NAME",
               "INSTRUMENT_HOST_NAME",
@@ -129,15 +130,6 @@ local Trail67P = {
     Path = "/Solar System/Comets/67P Churymov-Gerasimenko"
   }
 }
-
-asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting Rosetta images")
-    openspace.unzipFile(images .. "images_v1_v2.zip", imagesDestination, true)
-  end
-end)
-
-
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Barycenter)
