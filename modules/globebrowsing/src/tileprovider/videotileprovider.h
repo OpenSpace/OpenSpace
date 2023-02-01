@@ -56,13 +56,19 @@ public:
     float noDataValueAsFloat() override final;
     ChunkTile chunkTile(TileIndex tileIndex, int parents, int maxParents = 1337) override;
 
-
+    void pause();
+    void play();
 
     static documentation::Documentation Documentation();
 
 private:
     void createFBO(int width, int height);
     void resizeFBO(int width, int height);
+    double correctVideoPlaybackTime() const;
+    bool isWithingStartEndTime() const;
+    void pauseVideoIfOutsideValidTime();
+    void seekToTime(double time);
+    void updateStretchingOfTime();
 
     // Libmpv
     void initializeMpv(); // Called first time in postSyncPreDraw
@@ -105,7 +111,9 @@ private:
     TileTextureInitData::HashKey _frameTextureHashKey;
     static int _wakeup;
     double _lastFrameTime = 0.0;
+    double _lastSeek = -1.0;
     bool _didRender = false;
+    bool _isPaused = false;
 
     // libmpv property keys
     enum class LibmpvPropertyKey : uint64_t {
@@ -116,8 +124,13 @@ private:
         Params,
         Time,
         Command,
-        Width
+        Width,
+        FrameCount,
+        Pause
     };
+
+    void observePropertyMpv(std::string name, mpv_format format, LibmpvPropertyKey key);
+    void setPropertyStringMpv(std::string name, std::string value);
 };
 
 } // namespace openspace::globebrowsing

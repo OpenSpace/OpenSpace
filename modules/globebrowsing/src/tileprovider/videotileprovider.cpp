@@ -85,39 +85,58 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-int VideoTileProvider::_wakeup = 0;
+    int VideoTileProvider::_wakeup = 0;
 
-bool checkMpvError(int status) {
-    if (status < 0) {
-        LERROR(fmt::format("Libmpv API error: {}", mpv_error_string(status)));
-        return false;
+    bool checkMpvError(int status) {
+        if (status < 0) {
+            LERROR(fmt::format("Libmpv API error: {}", mpv_error_string(status)));
+            return false;
+        }
+        return true;
     }
-    return true;
-}
 
-void* getOpenGLProcAddress(void*, const char* name) {
-    return reinterpret_cast<void*>(global::windowDelegate->openGLProcedureAddress(name));
-}
+    void* getOpenGLProcAddress(void*, const char* name) {
+        return reinterpret_cast<void*>(
+            global::windowDelegate->openGLProcedureAddress(name)
+        );
+    }
 
-void VideoTileProvider::on_mpv_render_update(void*) {
-    // The wakeup flag is set here to enable the mpv_render_context_render 
-    // path in the main loop.
-    _wakeup = 1;
-}
+    void VideoTileProvider::on_mpv_render_update(void*) {
+        // The wakeup flag is set here to enable the mpv_render_context_render 
+        // path in the main loop.
+        _wakeup = 1;
+    }
 
-documentation::Documentation VideoTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_videotileprovider");
-}
+    void VideoTileProvider::observePropertyMpv(std::string name, mpv_format format, 
+                                               LibmpvPropertyKey key) {
+        mpv_observe_property(
+            _mpvHandle, 
+            static_cast<uint64_t>(key), 
+            name.c_str(), 
+            format
+        );
+    }
 
-VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary) {
-    ZoneScoped
+    void VideoTileProvider::setPropertyStringMpv(std::string name, std::string value) {
+        int result = mpv_set_property_string(_mpvHandle, name.c_str(), value.c_str());
+        if (!checkMpvError(result)) {
+            LWARNING(fmt::format("Error setting property {}", name));
+        }
+    }
 
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+    documentation::Documentation VideoTileProvider::Documentation() {
+        return codegen::doc<Parameters>("globebrowsing_videotileprovider");
+    }
 
-    _videoFile = p.file;
+    VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary) {
+        ZoneScoped
 
-    if (p.animationMode.has_value()) {
-        switch (*p.animationMode) {
+            const Parameters p = codegen::bake<Parameters>(dictionary);
+
+        _videoFile = p.file;
+
+        if (p.animationMode.has_value()) {
+            switch (*p.animationMode) {
             case Parameters::AnimationMode::RealTimeLoopFromStart:
                 _animationMode = AnimationMode::RealTimeLoopFromStart;
                 break;
@@ -129,221 +148,60 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary) {
                 break;
             default:
                 throw ghoul::MissingCaseException();
+            }
         }
-    }
-    _startJ200Time = Time::convertTime(p.startTime);
-    _endJ200Time = Time::convertTime(p.endTime);
-    ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
+        _startJ200Time = Time::convertTime(p.startTime);
+        _endJ200Time = Time::convertTime(p.endTime);
+        ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
 
-    global::callback::postSyncPreDraw->emplace_back([this]() {
-        // Initialize mpv here to ensure that the opengl context is the same as in for 
-        // the rendering
+        global::callback::postSyncPreDraw->emplace_back([this]() {
+            // Initialize mpv here to ensure that the opengl context is the same as in for 
+            // the rendering
+            if (!_isInitialized) {
+                initializeMpv();
+            }
+            else {
+                renderMpv();
+            }
+        });
+
+        global::callback::postDraw->emplace_back([this]() {
+            swapBuffersMpv();
+        });
+    }
+
+    Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
+        ZoneScoped
+
         if (!_isInitialized) {
-            initializeMpv();
+            return Tile();
         }
-        renderMpv();
-    });
 
-    global::callback::postDraw->emplace_back([this]() {
-        swapBuffersMpv();
-    });
-}
+        // Always check that our framebuffer is ok
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            LINFO("Framebuffer is not complete");
+        }
 
-Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
-    ZoneScoped
-
-    if (!_isInitialized) {
-        return Tile();
+        return Tile{ _frameTexture, std::nullopt, Tile::Status::OK };
     }
 
-    // Look for tile in cache
-    cache::ProviderTileKey key = { tileIndex, _prevVideoTime }; // TODO: Improve caching with a better id
-    cache::MemoryAwareTileCache* tileCache =
-        global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
-
-    if (tileCache->exist(key)) {
-        return tileCache->get(key);
-    }
-
-    // Bind the texture to the tile
-    Tile ourTile = Tile{ _frameTexture, std::nullopt, Tile::Status::OK };
-    tileCache->put(key, _frameTextureHashKey, ourTile);
-
-    return ourTile;
-}
-
-Tile::Status VideoTileProvider::tileStatus(const TileIndex& tileIndex) {
-    if (tileIndex.level > maxLevel()) {
-        return Tile::Status::OutOfRange;
-    }
-    else if (_tileIsReady) {
-        return Tile::Status::OK;
-    }
-    else {
-        return Tile::Status::Unavailable;
-    }
-}
-
-TileDepthTransform VideoTileProvider::depthTransform() {
-    return { 0.f, 1.f };
-}
-
-void VideoTileProvider::update() {
-    ZoneScoped
-
-    // Always check that our framebuffer is ok
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LINFO("Framebuffer is not complete");
-    }
-
-    if (!_isInitialized) {
-        return;
-    }
-    /*
-    // Double check the video duration
-    if (_videoDuration < 0.0) {
-        int result = mpv_get_property_async(
-            _mpvHandle,
-            static_cast<uint64_t>(LibmpvPropertyKey::Duration),
-            "duration",
-            MPV_FORMAT_DOUBLE
-        );
-        if (!checkMpvError(result)) {
-            LWARNING("Could not find video duration");
-            return;
+    Tile::Status VideoTileProvider::tileStatus(const TileIndex& tileIndex) {
+        if (tileIndex.level > maxLevel()) {
+            return Tile::Status::OutOfRange;
+        }
+        else if (_tileIsReady) {
+            return Tile::Status::OK;
+        }
+        else {
+            return Tile::Status::Unavailable;
         }
     }
 
-    const double now = global::timeManager->time().j2000Seconds();
-    double OSvideoTime = 0.0;
-    double percentage = 0.0;
-
-    switch (_animationMode) {
-        case AnimationMode::MapToSimulationTime:
-            // Check so we are currently in interval where video is playing
-            if (now > _endJ200Time || now < _startJ200Time) {
-                LINFO(fmt::format(
-                    "Time '{}' is not during video", now
-                ));
-                return;
-            }
-            percentage = (now - _startJ200Time) / (_endJ200Time - _startJ200Time);
-            OSvideoTime = percentage * _videoDuration;
-            break;
-        case AnimationMode::RealTimeLoopFromStart:
-            OSvideoTime = std::fmod(now - _startJ200Time, _videoDuration);
-            if (OSvideoTime < 0.0) {
-                OSvideoTime += _videoDuration;
-            }
-            break;
-        case AnimationMode::RealTimeLoopInfinitely:
-            OSvideoTime =
-                _videoDuration - abs(
-                    fmod(now - _startJ200Time, 2 * _videoDuration) - _videoDuration
-                );
-            break;
-        default:
-            throw ghoul::MissingCaseException();
-    }
-    if (OSvideoTime > _videoDuration || OSvideoTime < 0.0) {
-        LWARNING("Video time is outside range of video");
-        return;
+    TileDepthTransform VideoTileProvider::depthTransform() {
+        return { 0.f, 1.f };
     }
 
-    // Check if we have reached the end of the file
-    int result = mpv_get_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::Eof),
-        "eof-reached",
-        MPV_FORMAT_FLAG
-    );
-    if (!checkMpvError(result)) {
-        LWARNING("Could not check if end of video reached");
-    }
-
-    if (_hasReachedEnd) {
-        LINFO("Reached end of video");
-        return;
-    }
-
-    result = mpv_get_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::Time),
-        "playback-time",
-        MPV_FORMAT_DOUBLE
-    );
-    if (!checkMpvError(result)) {
-        LWARNING("Could not find current time in video");
-    }
-
-    if (_currentVideoTime > _videoDuration || _currentVideoTime < 0.0) {
-        LWARNING("Current time is outside range of video");
-        return;
-    }
-
-    LINFO(fmt::format(
-        "OS video time: {}, mpv current time: {}",
-        OSvideoTime, _currentVideoTime
-    ));
-
-    // TODO: deal with backwards
-    // Are we going backwards?
-    if (global::timeManager->deltaTime() < 0) {
-        LINFO("Backwards");
-    }
-
-    // Check if we need to seek in the video
-    if (OSvideoTime - _currentVideoTime > 2.0 * _frameTime) {
-        LINFO(fmt::format(
-            "Seek needed OS curr: {}, video curr: {}",
-            OSvideoTime, _currentVideoTime
-        ));
-        result = mpv_set_property(
-            _mpvHandle,
-            "playback-time",
-            MPV_FORMAT_DOUBLE,
-            &OSvideoTime
-        );
-        if (!checkMpvError(result)) {
-            LWARNING("Could not seek in video");
-        }
-    }
-
-    // Check if it is time for a new frame
-    if (OSvideoTime - _currentVideoTime < 2.0 * _frameTime) {
-        if (_isWaiting) {
-            return;
-        }
-
-        // Don't need a new frame just now
-        LINFO("Waiting..");
-
-        int setPauseTrue = 1;
-        result = mpv_set_property(_mpvHandle, "pause", MPV_FORMAT_FLAG, &setPauseTrue);
-        if (!checkMpvError(result)) {
-            LWARNING("Could not pause video");
-        }
-
-        _isWaiting = true;
-        return;
-    }
-
-    // If we get this far then we want a new frame
-    if (_isWaiting) {
-        LINFO("Continue");
-
-        int setPauseFalse = 0;
-        result = mpv_set_property(_mpvHandle, "pause", MPV_FORMAT_FLAG, &setPauseFalse);
-        if (!checkMpvError(result)) {
-            LWARNING("Could not un-pause video");
-        }
-        _isWaiting = false;
-    }
-    */
-
-    _tileIsReady = true;
-    _prevVideoTime = _currentVideoTime;
-}
+    void VideoTileProvider::update() {}
 
 ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
     ZoneScoped
@@ -365,115 +223,149 @@ ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int max
     return traverseTree(tileIndex, parents, maxParents, ascendToParent, uvTransform);
 }
 
+void VideoTileProvider::pause() {
+    bool pause = true;
+    int result = mpv_set_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::Pause),
+        "pause",
+        MPV_FORMAT_FLAG,
+        &pause
+    );
+    _isPaused = true;
+    if (!checkMpvError(result)) {
+        LWARNING("Error when pausing video");
+    }
+}
+
+void VideoTileProvider::play() {
+    bool pause = false;
+    int result = mpv_set_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::Pause),
+        "pause",
+        MPV_FORMAT_FLAG,
+        &pause
+    );
+    _isPaused = false;
+    if (!checkMpvError(result)) {
+        LWARNING("Error when playing video");
+    }
+}
+
 void VideoTileProvider::initializeMpv() {
     _mpvHandle = mpv_create();
-    if (!_mpvHandle)
-        LINFO("mpv context init failed");
+    if (!_mpvHandle) {
+        LINFO("LibMpv: mpv context init failed");
+    }
 
-    // Some minor options can only be set before mpv_initialize().
-    if (mpv_initialize(_mpvHandle) < 0)
+    // Set libmpv flags before initializing 
+    // See order at https://github.com/mpv-player/mpv/blob/master/libmpv/client.h#L420
+    // Avoiding async calls in uninitialized state
+    
+    // Loop video
+    // https://mpv.io/manual/master/#options-loop
+    setPropertyStringMpv("loop", "");
+    
+    // Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
+    // https://mpv.io/manual/master/#options-gpu-api
+    setPropertyStringMpv("gpu-api", "opengl");
+
+    // Enable hardware decoding
+    // https://mpv.io/manual/master/#options-hwdec
+    setPropertyStringMpv("hwdec", "auto");
+
+    // Enable direct rendering (default: auto). If this is set to yes, the video will be 
+    // decoded directly to GPU video memory (or staging buffers). 
+    // https://mpv.io/manual/master/#options-vd-lavc-dr
+    setPropertyStringMpv("vd-lavc-dr", "yes");
+
+    // Print libmpv couts to the terminal
+    // https://mpv.io/manual/master/#options-terminal
+    setPropertyStringMpv("terminal", "yes");
+
+    // Control how long before video display target time the frame should be rendered
+    // https://mpv.io/manual/master/#options-video-timing-offset
+    setPropertyStringMpv("video-timing-offset", "0");
+
+    setPropertyStringMpv("load-stats-overlay", "");
+
+    //mpv_set_property_string(_mpvHandle, "script-opts", "autoload-disabled=yes");
+    
+    // Verbose mode
+    //mpv_set_property_string(_mpvHandle, "msg-level", "all=v");
+    //mpv_request_log_messages(_mpvHandle, "debug");
+    
+    if (mpv_initialize(_mpvHandle) < 0) {
         LINFO("mpv init failed");
+    }
 
     mpv_opengl_init_params gl_init_params{ getOpenGLProcAddress, nullptr };
-    int adv{ 1 }; // Use libmpv advanced mode since we will use the update callback
+    int adv = 1; // Use libmpv advanced mode since we will use the update callback
     // Decouple mpv from waiting to get the correct fps. Use with flag video-timing-offset
     // set to 0
-    int blockTime{ 0 }; 
+    int blockTime = 0;
 
     mpv_render_param params[]{
         {MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL)},
         {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
         {MPV_RENDER_PARAM_ADVANCED_CONTROL, &adv},
         {MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME, &blockTime},
-        {MPV_RENDER_PARAM_INVALID, nullptr},
+        {MPV_RENDER_PARAM_INVALID, nullptr}
     };
 
     // This makes mpv use the currently set GL context. It will use the callback
     // (passed via params) to resolve GL builtin functions, as well as extensions.
-    if (mpv_render_context_create(&_mpvRenderContext, _mpvHandle, params) < 0)
-        LINFO("failed to initialize mpv GL context");
+    if (mpv_render_context_create(&_mpvRenderContext, _mpvHandle, params) < 0) {
+        LINFO("Failed to initialize libmpv OpenGL context");
+    }
 
     // When there is a need to call mpv_render_context_update(), which can
     // request a new frame to be rendered.
     // (Separate from the normal event handling mechanism for the sake of
     //  users which run OpenGL on a different thread.)
-    mpv_render_context_set_update_callback(_mpvRenderContext, on_mpv_render_update, NULL);
+    mpv_render_context_set_update_callback(
+        _mpvRenderContext, 
+        on_mpv_render_update, 
+        nullptr
+    );
 
     // Load file
-    const char* cmd[] = { "loadfile", _videoFile.string().c_str(), NULL };
+    const char* cmd[] = { "loadfile", _videoFile.string().c_str(), nullptr };
     int result = mpv_command(_mpvHandle, cmd);
     if (!checkMpvError(result)) {
         LERROR("Could not open video file");
         return;
     }
-    // Set libmpv flags
-    // Loop video
-    // https://mpv.io/manual/master/#options-loop
-    mpv_set_option_string(_mpvHandle, "loop", "");
-    // Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
-    // https://mpv.io/manual/master/#options-gpu-api
-    mpv_set_option_string(_mpvHandle, "gpu-api", "opengl");
-    // Enable hardware decoding
-    // https://mpv.io/manual/master/#options-hwdec
-    mpv_set_option_string(_mpvHandle, "hwdec", "auto");
-    // Enable direct rendering (default: auto). If this is set to yes, the video will be 
-    // decoded directly to GPU video memory (or staging buffers). 
-    // https://mpv.io/manual/master/#options-vd-lavc-dr
-    mpv_set_option_string(_mpvHandle, "vd-lavc-dr", "yes");
-    // Print libmpv couts to the terminal
-    // https://mpv.io/manual/master/#options-terminal
-    mpv_set_option_string(_mpvHandle, "terminal", "yes");
-    // Control how long before video display target time the frame should be rendered
-    // https://mpv.io/manual/master/#options-video-timing-offset
-    mpv_set_option_string(_mpvHandle, "video-timing-offset", "0");
 
     //Create FBO to render video into
     createFBO(_resolution.x, _resolution.y);
 
-    // Print meta data
-    result = mpv_get_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::Meta),
-        "metadata",
-        MPV_FORMAT_NODE
-    );
-    if (!checkMpvError(result)) {
-        LWARNING("Could not load meta data");
-    }
-    
-    // Get resolution of video
-    result = mpv_get_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::Width),
-        "width", MPV_FORMAT_INT64
-    );
+    //Observe video parameters
+    observePropertyMpv("video-params", MPV_FORMAT_NODE, LibmpvPropertyKey::Params);
+    observePropertyMpv("pause", MPV_FORMAT_FLAG, LibmpvPropertyKey::Pause);
+    observePropertyMpv("time-pos", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Time);
+    observePropertyMpv("duration", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Duration);
+    observePropertyMpv("height", MPV_FORMAT_INT64, LibmpvPropertyKey::Height);
+    observePropertyMpv("width", MPV_FORMAT_INT64, LibmpvPropertyKey::Width);
+    observePropertyMpv("metadata", MPV_FORMAT_NODE, LibmpvPropertyKey::Meta);
 
-    int result2 = mpv_get_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::Height),
-        "height",
-        MPV_FORMAT_INT64
-    );
-    
-    if (!checkMpvError(result) || !checkMpvError(result2)) {
-        LWARNING("Could not load video resolution");
-    }
-    // Find duration of video
-    result = mpv_get_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::Duration),
-       "duration",
-        MPV_FORMAT_DOUBLE
-    );
-    if (!checkMpvError(result)) {
-        LWARNING("Could not find video duration");
+    _videoDuration = 41.0; // TODO: Remove. Unit: seconds
+
+    if (_animationMode == AnimationMode::MapToSimulationTime) {
+        updateStretchingOfTime();
+        pauseVideoIfOutsideValidTime();
     }
 
-    _videoDuration = 41.0;
     _isInitialized = true;
 }
 
-void VideoTileProvider::renderMpv() {
+bool VideoTileProvider::isWithingStartEndTime() const {
+    const double now = global::timeManager->time().j2000Seconds();
+    return now <= _endJ200Time && now >= _startJ200Time;
+}
+
+double VideoTileProvider::correctVideoPlaybackTime() const {
     const double now = global::timeManager->time().j2000Seconds();
     double percentage = 0.0;
     if (now > _endJ200Time) {
@@ -485,43 +377,73 @@ void VideoTileProvider::renderMpv() {
     else {
         percentage = (now - _startJ200Time) / (_endJ200Time - _startJ200Time);
     }
-    double time = percentage * _videoDuration;
-    percentage *= 100.0;
-    //LINFO(std::to_string(time));
-    /*
-    int result = mpv_set_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::PlaybackTime),
-        "percent-pos",
-        MPV_FORMAT_DOUBLE,
-        &percentage
-    );
-    if (!checkMpvError(result)) {
-        LWARNING("Could not seek in video");
-    }
-    */
-    std::string timeString = std::to_string(time);
-    const char* params = timeString.c_str();
-    const char* args[] = { "seek", params, "absolute", NULL};
-    int result = mpv_command_async(
-        _mpvHandle, 
-        static_cast<uint64_t>(LibmpvPropertyKey::Command),
-        args
-    );
+    return percentage * _videoDuration;
+}
 
-    if (!checkMpvError(result)) {
-        LINFO("PROBLEM");
+void VideoTileProvider::pauseVideoIfOutsideValidTime() {
+    if (!isWithingStartEndTime() && !_isPaused) {
+        pause();
     }
+    else if (isWithingStartEndTime() && _isPaused) {
+        play();
+    }
+}
+
+void VideoTileProvider::seekToTime(double time) {
+    bool isPlaying = !_isPaused;
+    bool seekIsDifferent = abs(time - _lastSeek) > _frameTime;
+    if (seekIsDifferent) {
+        // Pause while seeking
+        pause();
+        // Seek
+        std::string timeString = std::to_string(time);
+        const char* params = timeString.c_str();
+        const char* args[] = { "seek", params, "absolute", NULL };
+        int result = mpv_command_async(
+            _mpvHandle,
+            static_cast<uint64_t>(LibmpvPropertyKey::Command),
+            args
+        );
+        if (!checkMpvError(result)) {
+            LINFO("Seek resulted in invalid operation");
+        }
+
+        _lastSeek = time;
+        // Play if video was playing before seek
+        if (isPlaying) {
+            play();
+        }
+    }
+}
+
+void VideoTileProvider::updateStretchingOfTime() {
+    double deltaTime = global::timeManager->deltaTime();
+    // If were going backwards in time, we don't need to play the video forwards
+    if (deltaTime < 0) {
+        pause();
+    }
+    else {
+        double stretchedTime = (_endJ200Time - _startJ200Time) / deltaTime; // seconds
+        std::string stringStretch = std::to_string(_videoDuration / stretchedTime);
+        setPropertyStringMpv("speed", stringStretch.c_str()); // TODO: Make async
+    }
+}
+
+void VideoTileProvider::renderMpv() {
+
+    pauseVideoIfOutsideValidTime();
+
     handleMpvEvents();
+    
+    double time = correctVideoPlaybackTime();
+    bool shouldSeek = abs(time - _currentVideoTime) > _frameTime;
+    
+    if (shouldSeek) {
+        seekToTime(time);
+    }
 
-    double nowJ200 = global::timeManager->time().j2000Seconds();
-    double timeSinceLastRender = nowJ200 - _lastFrameTime;
-    bool shouldRender = timeSinceLastRender >= _frameTime;
-    shouldRender = true;
-    if (_wakeup && shouldRender)
-    {
-        if ((mpv_render_context_update(_mpvRenderContext) & MPV_RENDER_UPDATE_FRAME))
-        {
+    if (_wakeup) {
+        if ((mpv_render_context_update(_mpvRenderContext) & MPV_RENDER_UPDATE_FRAME)) {
             // See render_gl.h on what OpenGL environment mpv expects, and other API 
             // details. This function fills the fbo and texture with data, after it 
             // we can get the data on the GPU, not the CPU
@@ -543,11 +465,9 @@ void VideoTileProvider::renderMpv() {
             // mpv_render_context_render internally rescales the fb of the context(?!)...
             //glm::ivec2 window = global::windowDelegate->currentDrawBufferResolution();
             //glViewport(0, 0, window.x, window.y);
-            
-            // Save the time for when this frame was rendered to know when to render next
-            // frame
-            _lastFrameTime = global::timeManager->time().j2000Seconds();
             _didRender = true;
+            // Since all tiles use the same texture, all tiles are ready now
+            _tileIsReady = true;
         }
     }
 }
@@ -604,6 +524,34 @@ void VideoTileProvider::handleMpvEvents() {
                         return;
                     }
                 }
+                if (strcmp(prop->name, "time-pos") == 0 &&
+                    prop->format == MPV_FORMAT_DOUBLE)
+                {
+                    int result = mpv_get_property_async(
+                        _mpvHandle,
+                        static_cast<uint64_t>(LibmpvPropertyKey::Time),
+                        "time-pos",
+                        MPV_FORMAT_DOUBLE
+                    );
+                    if (!checkMpvError(result)) {
+                        LWARNING("Could not find time property");
+                        return;
+                    }
+                }
+                if (strcmp(prop->name, "duration") == 0 &&
+                    prop->format == MPV_FORMAT_DOUBLE)
+                {
+                    int result = mpv_get_property_async(
+                        _mpvHandle,
+                        static_cast<uint64_t>(LibmpvPropertyKey::Time),
+                        "duration",
+                        MPV_FORMAT_DOUBLE
+                    );
+                    if (!checkMpvError(result)) {
+                        LWARNING("Could not find time property");
+                        return;
+                    }
+                }
                 break;
             }
             case MPV_EVENT_LOG_MESSAGE: {
@@ -612,6 +560,13 @@ void VideoTileProvider::handleMpvEvents() {
                 std::stringstream ss;
                 ss << "[" << msg->prefix << "] " << msg->level << ": " << msg->text;
                 LINFO(ss.str());
+                break;
+            }
+            case MPV_EVENT_COMMAND_REPLY: {
+                int result = event->error;
+                if (!checkMpvError) {
+                    LINFO("Command Error");
+                }
                 break;
             }
             case MPV_EVENT_GET_PROPERTY_REPLY: {
@@ -650,6 +605,7 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
         }
 
         _videoDuration = *duration;
+        updateStretchingOfTime();
         LINFO(fmt::format("Duration: {}", *duration));
         break;
     }
@@ -798,8 +754,10 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
             LERROR("Could not find playback time property");
             break;
         }
-
+        _prevVideoTime = _currentVideoTime;
         _currentVideoTime = *time;
+        // Time has changed - we don't have a texture yet
+        _tileIsReady = false;
         break;
     }
     case LibmpvPropertyKey::Width: {
@@ -833,6 +791,24 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
         else {
             LERROR("Could not find width of video");
         }
+        break;
+    }
+    case LibmpvPropertyKey::FrameCount: {
+        if (!event->data) {
+            LERROR("Could not find height property");
+            break;
+        }
+
+        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+        int* count = static_cast<int*>(property->data);
+
+        if (!count) {
+            LERROR("Could not find width property");
+            break;
+        }
+
+        // LINFO(fmt::format("Frame count: {}", *count));
+
         break;
     }
     default: {
@@ -875,7 +851,6 @@ void VideoTileProvider::reset() {
     if (_videoFile.empty()) {
         return;
     }
-    _tileIsReady = false;
     cleanUpMpv();
     initializeMpv();
 }
