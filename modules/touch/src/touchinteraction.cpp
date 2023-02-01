@@ -268,7 +268,7 @@ TouchInteraction::TouchInteraction()
     , _touchActive(EventsInfo, false)
     , _disableZoom(DisableZoomInfo, false)
     , _disableRoll(DisableRollInfo, false)
-    , _reset(SetDefaultInfo, false)
+    , _reset(SetDefaultInfo)
     , _maxTapTime(MaxTapTimeInfo, 300, 10, 1000)
     , _deceleratesPerSecond(DecelatesPerSecondInfo, 240, 60, 300)
     , _touchScreenSize(TouchScreenSizeInfo, 55.0f, 5.5f, 150.0f)
@@ -366,6 +366,10 @@ TouchInteraction::TouchInteraction()
     _time = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::high_resolution_clock::now().time_since_epoch()
     );
+
+    _reset.onChange([&]() {
+        resetPropertiesToDefault();
+    });
 }
 
 void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>& list,
@@ -389,6 +393,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
             high_resolution_clock::now().time_since_epoch()
         );
         if ((timestamp - _time).count() < _maxTapTime) {
+            LINFO("Double tap!");
             _doubleTap = true;
             _tap = false;
         }
@@ -1195,9 +1200,6 @@ void TouchInteraction::step(double dt, bool directTouch) {
         _tap = false;
         _doubleTap = false;
         _zoomOutTap = false;
-        if (_reset) {
-            resetToDefault();
-        }
     }
 }
 
@@ -1264,11 +1266,10 @@ void TouchInteraction::resetAfterInput() {
 }
 
 // Reset all property values to default
-void TouchInteraction::resetToDefault() {
+void TouchInteraction::resetPropertiesToDefault() {
     _unitTest.set(false);
     _disableZoom.set(false);
     _disableRoll.set(false);
-    _reset.set(false);
     _maxTapTime.set(300);
     _deceleratesPerSecond.set(240);
     _touchScreenSize.set(55.0f);

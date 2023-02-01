@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <array>
@@ -153,7 +154,7 @@ private:
     void decelerate(double dt);
 
     // Resets all properties that can be changed in the GUI to default
-    void resetToDefault();
+    void resetPropertiesToDefault();
 
     Camera* _camera = nullptr;
 
@@ -163,7 +164,7 @@ private:
     properties::BoolProperty _touchActive;
     properties::BoolProperty _disableZoom;
     properties::BoolProperty _disableRoll;
-    properties::BoolProperty _reset;
+    properties::TriggerProperty _reset;
     properties::IntProperty _maxTapTime;
     properties::IntProperty _deceleratesPerSecond;
     properties::FloatProperty _touchScreenSize;
