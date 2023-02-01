@@ -64,7 +64,7 @@ private:
     SceneGraphNode* _targetNode = nullptr;
     properties::DoubleProperty _travelSpeed;
     properties::FloatProperty _indicatorLength;
-    properties::IntProperty _fadeLength;
+    properties::FloatProperty _fadeLength;
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _lineColor;
 
