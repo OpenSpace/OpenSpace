@@ -487,7 +487,7 @@ ghoul::opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;
 
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner({ "" })
-    , _guiHidden(GuiHiddenInfo)
+    , _guiHidden(GuiHiddenInfo, false)
     , _guiPath(GuiPathInfo, "/")
     , _guiDisplayName(GuiNameInfo)
     , _guiDescription(GuiDescriptionInfo)
