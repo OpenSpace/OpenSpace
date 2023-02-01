@@ -22,7 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <openspace/util/timeline.h>
 #include <openspace/util/time.h>
@@ -42,13 +43,13 @@ TEST_CASE("TimeLine: Query Keyframes", "[timeline]") {
 
     REQUIRE(timeline.nKeyframes() == 2);
 
-    CHECK(timeline.firstKeyframeAfter(0.0)->data == Approx(1.f));
-    CHECK(timeline.firstKeyframeAfter(0.0, false)->data == Approx(1.f));
-    CHECK(timeline.firstKeyframeAfter(0.0, true)->data == Approx(0.f));
+    CHECK(timeline.firstKeyframeAfter(0.0)->data == Catch::Approx(1.f));
+    CHECK(timeline.firstKeyframeAfter(0.0, false)->data == Catch::Approx(1.f));
+    CHECK(timeline.firstKeyframeAfter(0.0, true)->data == Catch::Approx(0.f));
 
-    CHECK(timeline.lastKeyframeBefore(1.0)->data == Approx(0.f));
-    CHECK(timeline.lastKeyframeBefore(1.0, false)->data == Approx(0.f));
-    CHECK(timeline.lastKeyframeBefore(1.0, true)->data == Approx(1.f));
+    CHECK(timeline.lastKeyframeBefore(1.0)->data == Catch::Approx(0.f));
+    CHECK(timeline.lastKeyframeBefore(1.0, false)->data == Catch::Approx(0.f));
+    CHECK(timeline.lastKeyframeBefore(1.0, true)->data == Catch::Approx(1.f));
 }
 
 TEST_CASE("TimeLine: Remove Keyframes", "[timeline]") {
