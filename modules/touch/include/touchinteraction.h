@@ -50,9 +50,9 @@ class SceneGraphNode;
 // Class used for keeping track of the recent average frame time
 class FrameTimeAverage {
 public:
-    //Update the circular buffer with the most recent frame time
+    // Update the circular buffer with the most recent frame time
     void updateWithNewFrame(double sample);
-    //Get the value of the most recent average frame time (seconds)
+    // Get the value of the most recent average frame time (seconds)
     double averageFrameTime() const;
 
 private:
@@ -66,7 +66,7 @@ class TouchInteraction : public properties::PropertyOwner {
 public:
     TouchInteraction();
 
-    // for interpretInteraction()
+    // For interpretInteraction()
     enum Type {
         ROTATION = 0,
         PINCH,
@@ -83,7 +83,8 @@ public:
         glm::dvec2 pan = glm::dvec2(0.0);
     };
 
-    /* Main function call
+    /**
+     * Main function call
      * 1 Checks if doubleTap occured
      * 2 If the node in focus is large enough and all contact points have selected it,
      * calls directControl() function for direct-manipulation
@@ -94,7 +95,7 @@ public:
      * 5 Compute the new total velocities after interaction
      * 6 Evaluate if directControl should be called next frame- true if all contact points
      * select the same node and said node is larger than _nodeRadiusThreshold
-    */
+     */
 
     void updateStateFromInput(const std::vector<TouchInputHolder>& list,
         std::vector<TouchInput>& lastProcessed);
@@ -107,30 +108,26 @@ public:
 
     // Sets _tap to true, called if tap occured current frame (called from touchmodule)
     void tap();
-    // Set touchactive as true from the touchmodule if incoming list isn't empty, used to
-    // void mouse input
-    void touchEventActive(bool active);
 
-    // Get & Setters
-    Camera* getCamera();
-    const SceneGraphNode* getFocusNode();
-    void setFocusNode(const SceneGraphNode* focusNode);
     void setCamera(Camera* camera);
 
 private:
-    /* Function that calculates the new camera state such that it minimizes the L2 error
+    /**
+     * Function that calculates the new camera state such that it minimizes the L2 error
      * in screenspace
      * between contact points and surface coordinates projected to clip space using LMA
      */
     void directControl(const std::vector<TouchInputHolder>& list);
 
-    /* Traces each contact point into the scene as a ray
+    /**
+     * Traces each contact point into the scene as a ray
      * if the ray hits a node, save the id, node and surface coordinates the cursor hit
      * in the list _selected
      */
     void findSelectedNode(const std::vector<TouchInputHolder>& list);
 
-    /* Returns an int (ROT = 0, PINCH, PAN, ROLL, PICK) for what interaction to be used,
+    /**
+     * Returns an int (ROT = 0, PINCH, PAN, ROLL, PICK) for what interaction to be used,
      * depending on what input was gotten
      */
     int interpretInteraction(const std::vector<TouchInputHolder>& list,
@@ -140,13 +137,14 @@ private:
     void computeVelocities(const std::vector<TouchInputHolder>& list,
         const std::vector<TouchInput>& lastProcessed);
 
-    //Compute velocity based on double-tap for zooming
+    // Compute velocity based on double-tap for zooming
     double computeTapZoomDistance(double zoomGain);
 
-    //Compute coefficient for velocity decay to be applied in decceleration
+    // Compute coefficient for velocity decay to be applied in decceleration
     double computeConstTimeDecayCoefficient(double velocity);
 
-    /* Decelerate the velocities. Function is called in step() but is dereferenced from
+    /**
+     * Decelerate the velocities. Function is called in step() but is dereferenced from
      * frame time to assure same behaviour on all systems
      */
     void decelerate(double dt);
@@ -158,8 +156,6 @@ private:
 
     // Property variables
     properties::BoolProperty _unitTest;
-    properties::BoolProperty _touchActive;
-
     properties::BoolProperty _disableZoom;
     properties::BoolProperty _disableRoll;
     properties::TriggerProperty _reset;
@@ -201,6 +197,7 @@ private:
     int stepVelUpdate = 0;
 #endif
     std::array<TouchInputHolder, 2> _pinchInputs;
+
     // Class variables
     VelocityStates _vel;
     VelocityStates _lastVel;
@@ -208,7 +205,6 @@ private:
 
     double _projectionScaleFactor = 1.000004;
     double _currentRadius = 1.0;
-    double _slerpdT = 10001.0;
     double _timeSlack = 0.0;
     std::chrono::milliseconds _time;
     bool _directTouchMode = false;

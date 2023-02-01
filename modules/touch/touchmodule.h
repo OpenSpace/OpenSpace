@@ -64,7 +64,9 @@ private:
     std::vector<TouchInput> _deferredRemovals;
     std::vector<TouchInput> _lastTouchInputs;
 
-    properties::BoolProperty _touchActive;
+    properties::BoolProperty _touchIsEnabled;
+    properties::BoolProperty _hasActiveTouchEvent;
+
     // contains an id and the Point that was processed last frame
     glm::ivec2 _webPositionCallback = glm::ivec2(0);
 #ifdef WIN32

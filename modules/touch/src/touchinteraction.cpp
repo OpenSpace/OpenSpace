@@ -89,13 +89,6 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
-        "TouchEvents",
-        "Touch event is active",
-        "True if we have a touch event",
-        openspace::properties::Property::Visibility::Hidden
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
         "SetDefault",
         "Reset all properties to default",
@@ -255,7 +248,6 @@ namespace openspace {
 TouchInteraction::TouchInteraction()
     : properties::PropertyOwner({ "TouchInteraction" })
     , _unitTest(UnitTestInfo, false)
-    , _touchActive(EventsInfo, false)
     , _disableZoom(DisableZoomInfo, false)
     , _disableRoll(DisableRollInfo, false)
     , _reset(SetDefaultInfo)
@@ -302,7 +294,6 @@ TouchInteraction::TouchInteraction()
     // Calculated with two vectors with known diff in length, then
     // projDiffLength/diffLength.
 {
-    addProperty(_touchActive);
     addProperty(_disableZoom);
     addProperty(_disableRoll);
     addProperty(_unitTest);
@@ -1028,6 +1019,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
         }
 
         decelerate(dt);
+
         // Update the camera state
         _camera->setPositionVec3(camPos);
         _camera->setRotation(globalCamRot * localCamRot);
@@ -1139,32 +1131,9 @@ void TouchInteraction::tap() {
     _tap = true;
 }
 
-void TouchInteraction::touchEventActive(bool active) {
-    _touchActive = active;
-}
-
-// Get & Setters
-Camera* TouchInteraction::getCamera() {
-    return _camera;
-}
-
-const SceneGraphNode* TouchInteraction::getFocusNode() {
-    return global::navigationHandler->orbitalNavigator().anchorNode();
-}
 void TouchInteraction::setCamera(Camera* camera) {
     _camera = camera;
 }
-void TouchInteraction::setFocusNode(const SceneGraphNode* focusNode) {
-    if (focusNode) {
-        global::navigationHandler->orbitalNavigator().setAnchorNode(
-            focusNode->identifier()
-        );
-    }
-    else {
-        global::navigationHandler->orbitalNavigator().setAnchorNode("");
-    }
-}
-
 void FrameTimeAverage::updateWithNewFrame(double sample) {
     if (sample > 0.0005) {
         _samples[_index++] = sample;
