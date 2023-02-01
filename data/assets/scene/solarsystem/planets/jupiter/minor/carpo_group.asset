@@ -39,13 +39,14 @@ local carpoGroup = {
 local moon_labels = {}
 
 for i, moon in ipairs(carpoGroup) do
+  local moonName = moon.GUI.Name or moon.Identifier
   moon_labels[i] = {
     Identifier = moon.Identifier .. "Label",
     Parent = moon.Identifier,
     Renderable = {
       Enabled = false,
       Type = "RenderableLabel",
-      Text = moon.Identifier,
+      Text = moonName,
       FontSize = 70.0,
       Size = 7.1,
       MinMaxSize = { 1, 25 },
@@ -58,21 +59,21 @@ for i, moon in ipairs(carpoGroup) do
     },
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
-      Name = moon.Identifier .. " Label",
+      Name = moonName .. " Label",
       Path = "/Solar System/Planets/Jupiter/Moons",
-      Description = "Label for Jupiter's moon " .. moon.Identifier .. " (Carpo group)"
+      Description = "Label for Jupiter's moon " .. moonName .. " (Carpo group)"
     }
   }
 
-  -- Hacky solution to issue where the main label gets culled due to its onscreen size.
-  -- We need the size of the original label to be that big as it needs to be eligible from long distances when focusing on Jupiter. 
+  -- 'Hacky' solution to case where the main label gets culled on approach due to its onscreen size.
+  -- We need the size of the original label to be big as it needs to be legible from long distances when focusing on Jupiter. 
   moon_labels[i+1] = {
     Identifier = moon.Identifier .. "LabelNear",
     Parent = moon.Identifier,
     Renderable = {
       Enabled = false,
       Type = "RenderableLabel",
-      Text = moon.Identifier,
+      Text = moonName,
       FontSize = 70.0,
       Size = 5.5,
       MinMaxSize = { 1, 25 },
@@ -85,9 +86,9 @@ for i, moon in ipairs(carpoGroup) do
     },
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
-      Name = moon.Identifier .. " Label (Near)",
+      Name = moonName .. " Label (Near)",
       Path = "/Solar System/Planets/Jupiter/Moons",
-      Description = "Transitional Label for close-range viewing"
+      Description = "Transitional Label for close-range viewing of " .. moonName .. " (Carpo group)"
     }
   }
 end

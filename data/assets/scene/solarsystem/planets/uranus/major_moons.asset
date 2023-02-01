@@ -103,13 +103,14 @@ local majorMoons = {
 local moon_labels = {}
 
 for i, moon in ipairs(majorMoons) do
+  local moonName = moon.GUI.Name or moon.Identifier
   moon_labels[i] = {
     Identifier = moon.Identifier .. "Label",
     Parent = moon.Identifier,
     Renderable = {
       Enabled = false,
       Type = "RenderableLabel",
-      Text = moon.Identifier,
+      Text = moonName,
       FontSize = 70.0,
       Size = 5.9,
       MinMaxSize = { 1, 25 },
@@ -122,9 +123,9 @@ for i, moon in ipairs(majorMoons) do
     },
     Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
     GUI = {
-      Name = moon.Identifier .. " Label",
+      Name = moonName .. " Label",
       Path = "/Solar System/Planets/Uranus/Moons",
-      Description = "Label for Uranus' moon " .. moon.Identifier .. " (Major moon)"
+      Description = "Label for Uranus' moon " .. moonName .. " (Major moon)"
     }
   }
 end

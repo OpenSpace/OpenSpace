@@ -211,13 +211,14 @@ local anankeGroup = {
 local moon_labels = {}
 
 for i, moon in ipairs(anankeGroup) do
+  local moonName = moon.GUI.Name or moon.Identifier
   moon_labels[i] = {
     Identifier = moon.Identifier .. "Label",
     Parent = moon.Identifier,
     Renderable = {
       Enabled = false,
       Type = "RenderableLabel",
-      Text = moon.Identifier,
+      Text = moonName,
       FontSize = 70.0,
       Size = 7.1,
       MinMaxSize = { 1, 25 },
@@ -230,9 +231,9 @@ for i, moon in ipairs(anankeGroup) do
     },
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
-      Name = moon.Identifier .. " Label",
+      Name = moonName .. " Label",
       Path = "/Solar System/Planets/Jupiter/Moons",
-      Description = "Label for Jupiter's moon " .. moon.Identifier .. " (Ananke group)"
+      Description = "Label for Jupiter's moon " .. moonName .. " (Ananke group)"
     }
   }
 end
