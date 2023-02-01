@@ -99,7 +99,7 @@ private:
     bool _hasDatavarSize = false;
     bool _hasPolygon = false;
     bool _hasLabel = false;
-   
+
     int _polygonSides = 0;
 
     GLuint _pTexture = 0;
@@ -134,14 +134,14 @@ private:
     ghoul::opengl::ProgramObject* _program = nullptr;
     ghoul::opengl::ProgramObject* _renderToPolygonProgram = nullptr;
 
-    // variables that are sent to the shaders 
+    // variables that are sent to the shaders
     UniformCache(
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
         minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
         correctionSizeFactor, color, alphaValue, scaleFactor, up, right, fadeInValue,
         screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling
     ) _uniformCache;
-   
+
     // font variable from ghoul library
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
@@ -169,7 +169,7 @@ private:
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
-    // For polygons -- needed? 
+    // For polygons -- needed?
     GLuint _polygonVao = 0;
     GLuint _polygonVbo = 0;
 };

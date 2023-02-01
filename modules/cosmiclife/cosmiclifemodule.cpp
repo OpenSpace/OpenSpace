@@ -24,10 +24,7 @@
 
 #include <modules/cosmiclife/cosmiclifemodule.h>
 
-/*#include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
-#include <modules/digitaluniverse/rendering/renderabledumeshes.h>
-#include <modules/digitaluniverse/rendering/renderableplanescloud.h>*/
-#include <modules/cosmiclife/rendering/renderablecosmicpoints.h> 
+#include <modules/cosmiclife/rendering/renderablecosmicpoints.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
@@ -49,9 +46,6 @@ void CosmicLifeModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
     fRenderable->registerClass<RenderableCosmicPoints>("RenderableCosmicPoints");
-    // fRenderable->registerClass<RenderableBillboardsCloud>("RenderableBillboardsCloud");
-    // fRenderable->registerClass<RenderablePlanesCloud>("RenderablePlanesCloud");
-    // fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
 }
 
 void CosmicLifeModule::internalDeinitializeGL() {
@@ -61,10 +55,7 @@ void CosmicLifeModule::internalDeinitializeGL() {
 
 std::vector<documentation::Documentation> CosmicLifeModule::documentations() const {
     return {
-        RenderableCosmicPoints::Documentation(),
-        // RenderableBillboardsCloud::Documentation(),
-        // RenderablePlanesCloud::Documentation(),
-        // RenderableDUMeshes::Documentation()
+        RenderableCosmicPoints::Documentation()
     };
 }
 

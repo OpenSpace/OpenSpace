@@ -587,7 +587,7 @@ RenderableCosmicPoints::RenderableCosmicPoints(const ghoul::Dictionary& dictiona
     _useLinearFiltering = p.useLinearFiltering.value_or(_useLinearFiltering);
     _useLinearFiltering.onChange([&]() { _dataIsDirty = true; });
     addProperty(_useLinearFiltering);
-    
+
 
    // registerUpdateRenderBinFromOpacity();
 
@@ -831,7 +831,7 @@ void RenderableCosmicPoints::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)); 
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
     glm::mat4 projectionMatrix = data.camera.projectionMatrix();
@@ -858,7 +858,6 @@ void RenderableCosmicPoints::render(const RenderData& data, RendererTasks&) {
     }
 
     if (_drawLabels && _hasLabel) {
-
         if (_enableLabelFadingEffect) {
             float distanceNodeToCamera = static_cast<float>(
                 glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
@@ -871,8 +870,7 @@ void RenderableCosmicPoints::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableCosmicPoints::update(const UpdateData&) {
-
-      if (_dataIsDirty && _hasSpeckFile) {
+    if (_dataIsDirty && _hasSpeckFile) {
         ZoneScopedN("Data dirty")
         TracyGpuZone("Data dirty")
         LDEBUG("Regenerating data");
@@ -1255,7 +1253,7 @@ void RenderableCosmicPoints::loadPolygonGeometryForRendering() {
 }
 
 float RenderableCosmicPoints::computeFadeFactor(float distanceNodeToCamera) const {
-    float distanceUnit = toMeter(_unit); 
+    float distanceUnit = toMeter(_unit);
 
     float x = distanceNodeToCamera;
     float startX = _fadeLabelDistances.value().x * distanceUnit;
@@ -1270,7 +1268,7 @@ float RenderableCosmicPoints::computeFadeFactor(float distanceNodeToCamera) cons
         return std::clamp(f1, 0.f, 1.f);
     }
     else if (x > startX && x < endX) {
-        return 1.f; 
+        return 1.f;
     }
     else { // x >= endX
         float f2 = 1.f - (x - endX) / fadingEndDistance;
