@@ -65,7 +65,6 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
-<<<<<<< HEAD
     const GLenum ColorAttachmentArray[3] = {
        GL_COLOR_ATTACHMENT0,
        GL_COLOR_ATTACHMENT1,
@@ -80,10 +79,6 @@ namespace {
 
     constexpr std::array<const char*, 11> UniformNames = {
         "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
-=======
-    constexpr std::array<const char*, 12> UniformNames = {
-        "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
->>>>>>> master
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",
         "specularIntensity", "gBufferDepthTexture"
