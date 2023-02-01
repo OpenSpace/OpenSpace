@@ -87,7 +87,7 @@ public:
      * 1 Checks if doubleTap occured
      * 2 If the node in focus is large enough and all contact points have selected it,
      * calls directControl() function for direct-manipulation
-     * 3 Updates std::vector<SelectedBody> _selected (only if LMA successfully
+     * 3 Updates std::vector<SelectedBody> _selectedContactPoints (only if LMA successfully
      * converged, avoids interaction to snap on LMA fails)
      * 4 If directControl() wasn't called this frame, interpret the incoming
      * list and decide what type of interaction this frame should do
@@ -109,7 +109,7 @@ public:
     void tap();
     // Set touchactive as true from the touchmodule if incoming list isn't empty, used to
     // void mouse input
-    void touchActive(bool active);
+    void touchEventActive(bool active);
 
     // Get & Setters
     Camera* getCamera();
@@ -159,6 +159,7 @@ private:
     // Property variables
     properties::BoolProperty _unitTest;
     properties::BoolProperty _touchActive;
+
     properties::BoolProperty _disableZoom;
     properties::BoolProperty _disableRoll;
     properties::TriggerProperty _reset;
@@ -216,8 +217,8 @@ private:
     bool _doubleTap = false;
     bool _zoomOutTap = false;
     bool _lmSuccess = true;
-    std::vector<DirectInputSolver::SelectedBody> _selected;
-    DirectInputSolver _solver;
+    std::vector<DirectInputSolver::SelectedBody> _selectedContactPoints;
+    DirectInputSolver _directInputSolver;
 
     glm::vec2 _centroid = glm::vec2(0.f);
 

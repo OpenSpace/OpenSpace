@@ -91,8 +91,8 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
         "TouchEvents",
+        "Touch event is active",
         "True if we have a touch event",
-        "",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -405,7 +405,9 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
         resetAfterInput();
     }
 
-    if (_directTouchMode && _selected.size() > 0 && numFingers == _selected.size()) {
+    if (_directTouchMode && _selectedContactPoints.size() > 0 &&
+        numFingers == _selectedContactPoints.size())
+    {
 #ifdef TOUCH_DEBUG_PROPERTIES
         _debugProperties.interactionMode = "Direct";
 #endif
@@ -425,7 +427,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
     _wasPrevModeDirectTouch = _directTouchMode;
     // Evaluates if current frame is in directTouchMode (will be used next frame)
     _directTouchMode =
-        (_currentRadius > _nodeRadiusThreshold && _selected.size() == numFingers);
+        (_currentRadius > _nodeRadiusThreshold && _selectedContactPoints.size() == numFingers);
 }
 
 void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) {
@@ -450,8 +452,8 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     std::vector<double> par(6, 0.0);
     par[0] = _lastVel.orbit.x; // use _lastVel for orbit
     par[1] = _lastVel.orbit.y;
-    _lmSuccess = _solver.solve(list, _selected, &par, *_camera);
-    int nDof = _solver.nDof();
+    _lmSuccess = _directInputSolver.solve(list, _selectedContactPoints, &par, *_camera);
+    int nDof = _directInputSolver.nDof();
 
     if (_lmSuccess && !_unitTest) {
         // If good values were found set new camera state
@@ -530,7 +532,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& lis
         }
     }
 
-    _selected = std::move(newContactPoints);
+    _selectedContactPoints = std::move(newContactPoints);
 }
 
 int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list,
@@ -833,23 +835,18 @@ double TouchInteraction::computeConstTimeDecayCoefficient(double velocity) {
     if (stepsToDecay > 0.0 && std::abs(velocity) > postDecayVelocityTarget) {
         return std::pow(postDecayVelocityTarget / std::abs(velocity), 1.0 / stepsToDecay);
     }
-    else {
-        return 1.0;
-    }
+    return 1.0;
 }
 
 double TouchInteraction::computeTapZoomDistance(double zoomGain) {
     const SceneGraphNode* anchor =
         global::navigationHandler->orbitalNavigator().anchorNode();
+
     if (!anchor) {
         return 0.0;
     }
 
-    double dist = glm::distance(
-        _camera->positionVec3(),
-        global::navigationHandler->orbitalNavigator().anchorNode()->worldPosition()
-    );
-
+    double dist = glm::distance(_camera->positionVec3(), anchor->worldPosition());
     dist -= anchor->interactionSphere();
 
     double newVelocity = dist * _tapZoomFactor;
@@ -1094,7 +1091,7 @@ void TouchInteraction::resetAfterInput() {
     _debugProperties.nFingers = 0;
     _debugProperties.interactionMode = "None";
 #endif
-    if (_directTouchMode && !_selected.empty() && _lmSuccess) {
+    if (_directTouchMode && !_selectedContactPoints.empty() && _lmSuccess) {
         double spinDelta = _spinSensitivity / global::windowDelegate->averageDeltaTime();
         if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) {
              // allow node to start "spinning" after direct-manipulation finger is let go
@@ -1114,7 +1111,7 @@ void TouchInteraction::resetAfterInput() {
     _pinchInputs[0].clearInputs();
     _pinchInputs[1].clearInputs();
 
-    _selected.clear();
+    _selectedContactPoints.clear();
 }
 
 // Reset all property values to default
@@ -1142,7 +1139,7 @@ void TouchInteraction::tap() {
     _tap = true;
 }
 
-void TouchInteraction::touchActive(bool active) {
+void TouchInteraction::touchEventActive(bool active) {
     _touchActive = active;
 }
 

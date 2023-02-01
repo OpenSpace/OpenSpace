@@ -145,10 +145,12 @@ bool TouchModule::processNewInput() {
         removeTouchInput(removal);
     }
 
-    // Set touch property to active (to void mouse input, mainly for mtdev bridges)
-    _touch.touchActive(!_touchPoints.empty());
+    bool touchHappened = !_touchPoints.empty();
 
-    if (!_touchPoints.empty()) {
+    // Set touch property to active (to void mouse input, mainly for mtdev bridges)
+    _touch.touchEventActive(touchHappened);
+
+    if (touchHappened) {
         global::interactionMonitor->markInteraction();
     }
 
