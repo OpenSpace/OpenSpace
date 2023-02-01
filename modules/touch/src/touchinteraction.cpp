@@ -396,7 +396,6 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
             high_resolution_clock::now().time_since_epoch()
         );
         if ((timestamp - _time).count() < _maxTapTime) {
-            LINFO("Double tap!");
             _doubleTap = true;
             _tap = false;
         }
