@@ -71,12 +71,6 @@ namespace {
        GL_COLOR_ATTACHMENT2,
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
-        "EnableAnimation",
-        "Enable Animation",
-        "Enable or disable the animation for the model if it has any"
-    };
-
     constexpr std::array<const char*, 11> UniformNames = {
         "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
