@@ -396,8 +396,8 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
         resetAfterInput();
     }
 
-    if (_directTouchMode && _selectedContactPoints.size() > 0 &&
-        numFingers == _selectedContactPoints.size())
+    if (_directTouchMode && _selectedNodeSurfacePoints.size() > 0 &&
+        numFingers == _selectedNodeSurfacePoints.size())
     {
 #ifdef TOUCH_DEBUG_PROPERTIES
         _debugProperties.interactionMode = "Direct";
@@ -405,7 +405,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
         directControl(list);
     }
     if (_lmSuccess) {
-        findSelectedNode(list);
+        updateNodeSurfacePoints(list);
     }
 
     if (!_directTouchMode) {
@@ -416,9 +416,10 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
     }
 
     _wasPrevModeDirectTouch = _directTouchMode;
+
     // Evaluates if current frame is in directTouchMode (will be used next frame)
-    _directTouchMode =
-        (_currentRadius > _nodeRadiusThreshold && _selectedContactPoints.size() == numFingers);
+    _directTouchMode = _currentRadius > _nodeRadiusThreshold &&
+        _selectedNodeSurfacePoints.size() == numFingers;
 }
 
 void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) {
@@ -443,7 +444,7 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     std::vector<double> par(6, 0.0);
     par[0] = _lastVel.orbit.x; // use _lastVel for orbit
     par[1] = _lastVel.orbit.y;
-    _lmSuccess = _directInputSolver.solve(list, _selectedContactPoints, &par, *_camera);
+    _lmSuccess = _directInputSolver.solve(list, _selectedNodeSurfacePoints, &par, *_camera);
     int nDof = _directInputSolver.nDof();
 
     if (_lmSuccess && !_unitTest) {
@@ -477,16 +478,10 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     }
 }
 
-void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& list) {
+void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolder>& list) {
     glm::dquat camToWorldSpace = _camera->rotationQuaternion();
     glm::dvec3 camPos = _camera->positionVec3();
-    std::vector<DirectInputSolver::SelectedBody> newContactPoints;
-
-    // node & distance
-    std::pair<SceneGraphNode*, double> currentlyPicked = {
-        nullptr,
-        std::numeric_limits<double>::max()
-    };
+    std::vector<DirectInputSolver::SelectedBody> surfacePoints;
 
     for (const TouchInputHolder& inputHolder : list) {
         // normalized -1 to 1 coordinates on screen
@@ -499,34 +494,37 @@ void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& lis
 
         size_t id = inputHolder.fingerId();
 
-        // Compute positions on anchor node
+        // Compute positions on anchor node, by checking if touch input
+        // intersect interaction sphere
         const SceneGraphNode* anchor =
             global::navigationHandler->orbitalNavigator().anchorNode();
         SceneGraphNode* node = sceneGraphNode(anchor->identifier());
-        {
-            // Check if touch input intersects interaction sphere
-            double intersectionDist = 0.0;
-            const bool intersected = glm::intersectRaySphere(
-                camPos,
-                raytrace,
-                node->worldPosition(),
-                node->interactionSphere() * node->interactionSphere(),
-                intersectionDist
-            );
-            if (intersected) {
-                glm::dvec3 intersectionPos = camPos + raytrace * intersectionDist;
-                glm::dvec3 pointInModelView = glm::inverse(node->worldRotationMatrix()) *
-                                              (intersectionPos - node->worldPosition());
 
-                newContactPoints.push_back({ id, node, pointInModelView });
-            }
+        double intersectionDist = 0.0;
+        const bool intersected = glm::intersectRaySphere(
+            camPos,
+            raytrace,
+            node->worldPosition(),
+            node->interactionSphere() * node->interactionSphere(),
+            intersectionDist
+        );
+
+        if (intersected) {
+            glm::dvec3 intersectionPos = camPos + raytrace * intersectionDist;
+            glm::dvec3 pointInModelView = glm::inverse(node->worldRotationMatrix()) *
+                                            (intersectionPos - node->worldPosition());
+
+            // Note that node is saved as the direct input solver was initially
+            // implemented to handle touch contact points on multiple nodes
+            surfacePoints.push_back({ id, node, pointInModelView });
         }
     }
 
-    _selectedContactPoints = std::move(newContactPoints);
+    _selectedNodeSurfacePoints = std::move(surfacePoints);
 }
 
-int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list,
+TouchInteraction::InteractionType
+TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list,
                                            const std::vector<TouchInput>& lastProcessed)
 {
     glm::fvec2 lastCentroid = _centroid;
@@ -677,7 +675,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
 void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& list,
                                          const std::vector<TouchInput>& lastProcessed)
 {
-    const int action = interpretInteraction(list, lastProcessed);
+    const InteractionType action = interpretInteraction(list, lastProcessed);
     const SceneGraphNode* anchor =
         global::navigationHandler->orbitalNavigator().anchorNode();
 
@@ -1083,7 +1081,7 @@ void TouchInteraction::resetAfterInput() {
     _debugProperties.nFingers = 0;
     _debugProperties.interactionMode = "None";
 #endif
-    if (_directTouchMode && !_selectedContactPoints.empty() && _lmSuccess) {
+    if (_directTouchMode && !_selectedNodeSurfacePoints.empty() && _lmSuccess) {
         double spinDelta = _spinSensitivity / global::windowDelegate->averageDeltaTime();
         if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) {
              // allow node to start "spinning" after direct-manipulation finger is let go
@@ -1103,7 +1101,7 @@ void TouchInteraction::resetAfterInput() {
     _pinchInputs[0].clearInputs();
     _pinchInputs[1].clearInputs();
 
-    _selectedContactPoints.clear();
+    _selectedNodeSurfacePoints.clear();
 }
 
 // Reset all property values to default

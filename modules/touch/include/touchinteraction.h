@@ -66,8 +66,7 @@ class TouchInteraction : public properties::PropertyOwner {
 public:
     TouchInteraction();
 
-    // For interpretInteraction()
-    enum Type {
+    enum InteractionType {
         ROTATION = 0,
         PINCH,
         PAN,
@@ -120,17 +119,17 @@ private:
     void directControl(const std::vector<TouchInputHolder>& list);
 
     /**
-     * Traces each contact point into the scene as a ray
-     * if the ray hits a node, save the id, node and surface coordinates the cursor hit
-     * in the list _selected
+     * Traces each contact point into the scene as a ray and find the intersection
+     * points on the surface of the current anchor node, if any. Saves the input id
+     * the node and surface coordinates the cursor hit
      */
-    void findSelectedNode(const std::vector<TouchInputHolder>& list);
+    void updateNodeSurfacePoints(const std::vector<TouchInputHolder>& list);
 
     /**
-     * Returns an int (ROT = 0, PINCH, PAN, ROLL, PICK) for what interaction to be used,
-     * depending on what input was gotten
+     * Returns an enum for what interaction to be used, depending on what input was
+     * received
      */
-    int interpretInteraction(const std::vector<TouchInputHolder>& list,
+    InteractionType interpretInteraction(const std::vector<TouchInputHolder>& list,
         const std::vector<TouchInput>& lastProcessed);
 
     // Compute new velocity according to the interpreted action
@@ -213,7 +212,7 @@ private:
     bool _doubleTap = false;
     bool _zoomOutTap = false;
     bool _lmSuccess = true;
-    std::vector<DirectInputSolver::SelectedBody> _selectedContactPoints;
+    std::vector<DirectInputSolver::SelectedBody> _selectedNodeSurfacePoints;
     DirectInputSolver _directInputSolver;
 
     glm::vec2 _centroid = glm::vec2(0.f);
