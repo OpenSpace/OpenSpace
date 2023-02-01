@@ -77,7 +77,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UnitTestInfo = {
         "UnitTest",
         "Take a unit test saving the LM data into file",
-        "" // @TODO Missing documentation
+        "LM - least-squares minimization using Levenberg-Marquardt algorithm."
+        "Used to find a new camera state from touch points when doing direct "
+        "manipulation",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableZoomInfo = {
@@ -471,7 +474,7 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     LINFO("DirectControl");
 #endif
 
-    // finds best transform values for the new camera state and stores them in par
+    // Find best transform values for the new camera state and store them in par
     std::vector<double> par(6, 0.0);
     par[0] = _lastVel.orbit.x; // use _lastVel for orbit
     par[1] = _lastVel.orbit.y;
@@ -479,7 +482,7 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     int nDof = _solver.nDof();
 
     if (_lmSuccess && !_unitTest) {
-        // if good values were found set new camera state
+        // If good values were found set new camera state
         _vel.orbit = glm::dvec2(par.at(0), par.at(1));
         if (nDof > 2) {
             if (!_disableZoom) {
@@ -504,7 +507,7 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     }
     else {
         // prevents touch to infinitely be active (due to windows bridge case where event
-        // doesnt get consumed sometimes when LMA fails to converge)
+        // doesn't get consumed sometimes when LMA fails to converge)
         resetAfterInput();
     }
 }
