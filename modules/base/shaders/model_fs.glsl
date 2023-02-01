@@ -48,20 +48,10 @@ uniform vec4 color_specular;
 uniform int nLightSources;
 uniform vec3 lightDirectionsViewSpace[8];
 uniform float lightIntensities[8];
-uniform sampler2D gBufferDepthTexture;
 
 
 Fragment getFragment() {
   Fragment frag;
-
-  // Manual depth test
-  float gBufferDepth =
-    denormalizeFloat(texture(gBufferDepthTexture, viewportPixelCoord).x);
-  if (vs_screenSpaceDepth > gBufferDepth) {
-    frag.color = vec4(0.f);
-    frag.depth = gBufferDepth;
-    return frag;
-  }
 
   // Render invisible mesh with flashy procedural material
   if (use_forced_color) {

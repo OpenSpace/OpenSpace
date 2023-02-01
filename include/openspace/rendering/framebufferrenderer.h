@@ -99,43 +99,6 @@ public:
     void initialize();
     void deinitialize();
 
-    // Functions to access the G-buffer textures
-    /**
-     * Gives access to the color texture of the G-buffer. NOTE: This texture is used for
-     * the majority of rendering the scene and might be already in use. Use CAUTION when
-     * using this function. The size of the texture is the resolution of the viewport.
-     *
-     * \return GLuint identifier of the color texture of the G-buffer
-     */
-    GLuint gBufferColorTexture();
-
-    /**
-     * Gives access to the position texture of the G-buffer. NOTE: This texture is used for
-     * the majority of rendering the scene and might be already in use. Use CAUTION when
-     * using this function. The size of the texture is the resolution of the viewport.
-     *
-     * \return GLuint identifier of the position texture of the G-buffer
-     */
-    GLuint gBufferPositionTexture();
-
-    /**
-     * Gives access to the normal texture of the G-buffer. NOTE: This texture is used for
-     * the majority of rendering the scene and might be already in use. Use CAUTION when
-     * using this function. The size of the texture is the resolution of the viewport.
-     *
-     * \return GLuint identifier of the normal texture of the G-buffer
-     */
-    GLuint gBufferNormalTexture();
-
-    /**
-     * Gives access to the depth texture of the G-buffer. NOTE: This texture is used for
-     * the majority of rendering the scene and might be already in use. Use CAUTION when
-     * using this function. The size of the texture is the resolution of the viewport.
-     *
-     * \return GLuint identifier of the depth texture of the G-buffer
-     */
-    GLuint gBufferDepthTexture();
-
     void updateResolution();
     void updateRaycastData();
     void updateDeferredcastData();

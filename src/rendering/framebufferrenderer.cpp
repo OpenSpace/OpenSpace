@@ -111,29 +111,6 @@ GLuint FramebufferRenderer::additionalDepthTexture() {
     return _exitDepthTexture;
 }
 
-//=========================================//
-//=====  Access to G-buffer textures  =====//
-//=========================================//
-// Gives access to the color texture of the G-buffer
-GLuint FramebufferRenderer::gBufferColorTexture() {
-    return _gBuffers.colorTexture;
-}
-
-//  Gives access to the position texture of the G-buffer
-GLuint FramebufferRenderer::gBufferPositionTexture() {
-    return _gBuffers.positionTexture;
-}
-
-//  Gives access to the normal texture of the G-buffer
-GLuint FramebufferRenderer::gBufferNormalTexture() {
-    return _gBuffers.normalTexture;
-}
-
-//  Gives access to the depth texture of the G-buffer
-GLuint FramebufferRenderer::gBufferDepthTexture() {
-    return _gBuffers.depthTexture;
-}
-
 void FramebufferRenderer::initialize() {
     ZoneScoped
     TracyGpuZone("Rendering initialize");

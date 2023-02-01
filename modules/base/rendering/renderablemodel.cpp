@@ -71,11 +71,11 @@ namespace {
        GL_COLOR_ATTACHMENT2,
     };
 
-    constexpr std::array<const char*, 11> UniformNames = {
+    constexpr std::array<const char*, 10> UniformNames = {
         "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",
-        "specularIntensity", "gBufferDepthTexture"
+        "specularIntensity"
     };
 
     constexpr std::array<const char*, 5> UniformOpacityNames = {
@@ -739,18 +739,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
         _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
         _program->setUniform(_uniformCache.performShading, _performShading);
-
-        // Bind the G-buffer depth texture for a manual depth test for the second pass
-        ghoul::opengl::TextureUnit gBufferDepthTextureUnit;
-        gBufferDepthTextureUnit.activate();
-        glBindTexture(
-            GL_TEXTURE_2D,
-            global::renderEngine->renderer()->gBufferDepthTexture()
-        );
-        _program->setUniform(
-            _uniformCache.gBufferDepthTexture,
-            gBufferDepthTextureUnit
-        );
 
         // Configure blending
         glEnablei(GL_BLEND, 0);

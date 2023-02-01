@@ -106,7 +106,7 @@ private:
     UniformCache(nLightSources, lightDirectionsViewSpace, lightIntensities,
         modelViewTransform, normalTransform, projectionTransform,
         performShading, ambientIntensity, diffuseIntensity,
-        specularIntensity, gBufferDepthTexture) _uniformCache;
+        specularIntensity) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
 
