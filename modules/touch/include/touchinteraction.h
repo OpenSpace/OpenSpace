@@ -41,7 +41,6 @@
 #include <memory>
 
 //#define TOUCH_DEBUG_PROPERTIES
-//#define TOUCH_DEBUG_NODE_PICK_MESSAGES
 
 namespace openspace {
 
@@ -73,7 +72,6 @@ public:
         PINCH,
         PAN,
         ROLL,
-        PICK,
         ZOOM_OUT
     };
 
@@ -184,9 +182,7 @@ private:
     properties::FloatProperty _centroidStillThreshold;
     properties::BoolProperty  _panEnabled;
     properties::FloatProperty _interpretPan;
-    properties::FloatProperty _slerpTime;
     properties::Vec4Property _friction;
-    properties::FloatProperty _pickingRadiusMinimum;
     properties::FloatProperty _constTimeDecay_secs;
 
 #ifdef TOUCH_DEBUG_PROPERTIES
@@ -222,10 +218,8 @@ private:
     bool _zoomOutTap = false;
     bool _lmSuccess = true;
     std::vector<DirectInputSolver::SelectedBody> _selected;
-    SceneGraphNode* _pickingSelected = nullptr;
     DirectInputSolver _solver;
 
-    glm::dquat _toSlerp = glm::dquat(1.0, 0.0, 0.0, 0.0);
     glm::vec2 _centroid = glm::vec2(0.f);
 
     FrameTimeAverage _frameTimeAvg;

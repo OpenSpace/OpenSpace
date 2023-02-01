@@ -221,12 +221,6 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SlerpTimeInfo = {
-        "SlerpTime",
-        "Time to slerp in seconds to new orientation with new node picking",
-        "" // @TODO Missing documentation
-    };
-
     constexpr openspace::properties::Property::PropertyInfo FrictionInfo = {
         "Friction",
         "Friction for different interactions (orbit, zoom, roll, pan)",
@@ -302,18 +296,11 @@ TouchInteraction::TouchInteraction()
     , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f, 0.0001f)
     , _panEnabled(PanModeInfo, false)
     , _interpretPan(PanDeltaDistanceInfo, 0.015f, 0.f, 0.1f)
-    , _slerpTime(SlerpTimeInfo, 3.f, 0.1f, 5.f)
     , _friction(
         FrictionInfo,
         glm::vec4(0.025f, 0.025f, 0.02f, 0.001f),
         glm::vec4(0.f),
         glm::vec4(0.2f)
-    )
-    , _pickingRadiusMinimum(
-        { "Picking Radius", "Minimum radius for picking in NDC coordinates", "" },
-        0.1f,
-        0.f,
-        1.f
     )
     , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.0f)
     , _pinchInputs({ TouchInput(0, 0, 0.0, 0.0, 0.0), TouchInput(0, 0, 0.0, 0.0, 0.0) })
@@ -347,9 +334,7 @@ TouchInteraction::TouchInteraction()
     addProperty(_centroidStillThreshold);
     addProperty(_panEnabled);
     addProperty(_interpretPan);
-    addProperty(_slerpTime);
     addProperty(_friction);
-    addProperty(_pickingRadiusMinimum);
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     addPropertySubOwner(_debugProperties);
@@ -512,35 +497,15 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
 }
 
 void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& list) {
-    // trim list to only contain visible nodes that make sense
-    // @TODO (emmbr 2023-01-31) This hardcoded list should be removed and replaced by something
-    // else. Either a type of renderable that can always be directly manipulated, or a list
-    // that can be set in config/assets. Or both?
-    std::string selectables[31] = {
-        "Sun", "Mercury", "Venus", "Earth", "Mars", "Ceres", "Jupiter", "Saturn", "Uranus",
-        "Neptune", "Pluto", "Moon", "Titan", "Rhea", "Mimas", "Iapetus", "Enceladus",
-        "Dione", "Io", "Ganymede", "Europa", "Callisto", "NewHorizons", "Styx", "Nix",
-        "Kerberos", "Hydra", "Charon", "Tethys", "OsirisRex", "Bennu"
-    };
-    std::vector<SceneGraphNode*> selectableNodes;
-    for (SceneGraphNode* node : global::renderEngine->scene()->allSceneGraphNodes()) {
-        for (const std::string& name : selectables) {
-            if (node->identifier() == name) {
-                selectableNodes.push_back(node);
-            }
-        }
-    }
-
     glm::dquat camToWorldSpace = _camera->rotationQuaternion();
     glm::dvec3 camPos = _camera->positionVec3();
-    std::vector<DirectInputSolver::SelectedBody> newSelected;
+    std::vector<DirectInputSolver::SelectedBody> newContactPoints;
 
     // node & distance
     std::pair<SceneGraphNode*, double> currentlyPicked = {
         nullptr,
         std::numeric_limits<double>::max()
     };
-
 
     for (const TouchInputHolder& inputHolder : list) {
         // normalized -1 to 1 coordinates on screen
@@ -553,16 +518,18 @@ void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& lis
 
         size_t id = inputHolder.fingerId();
 
-        for (SceneGraphNode* node : selectableNodes) {
-            double interactionSphereSquared =
-                node->interactionSphere() * node->interactionSphere();
-            glm::dvec3 camToSelectable = node->worldPosition() - camPos;
+        // Compute positions on anchor node
+        const SceneGraphNode* anchor =
+            global::navigationHandler->orbitalNavigator().anchorNode();
+        SceneGraphNode* node = sceneGraphNode(anchor->identifier());
+        {
+            // Check if touch input intersects interatcion sphere
             double intersectionDist = 0.0;
             const bool intersected = glm::intersectRaySphere(
                 camPos,
                 raytrace,
                 node->worldPosition(),
-                interactionSphereSquared,
+                node->interactionSphere() * node->interactionSphere(),
                 intersectionDist
             );
             if (intersected) {
@@ -570,84 +537,12 @@ void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& lis
                 glm::dvec3 pointInModelView = glm::inverse(node->worldRotationMatrix()) *
                                               (intersectionPos - node->worldPosition());
 
-                // Add id, node and surface coordinates to the selected list
-                auto oldNode = std::find_if(
-                    newSelected.begin(),
-                    newSelected.end(),
-                    [id](const DirectInputSolver::SelectedBody& s) { return s.id == id; }
-                );
-                if (oldNode != newSelected.end()) {
-                    const double oldNodeDist = glm::length(
-                        oldNode->node->worldPosition() - camPos
-                    );
-                    if (glm::length(camToSelectable) < oldNodeDist) {
-                         // new node is closer, remove added node and add the new one
-                         // instead
-                        newSelected.pop_back();
-                        newSelected.push_back({ id, node, pointInModelView });
-                    }
-                }
-                else {
-                    newSelected.push_back({ id, node, pointInModelView });
-                }
-            }
-
-            // Compute locations in view space to perform the picking
-            glm::dvec4 clip = glm::dmat4(_camera->projectionMatrix()) *
-                              _camera->combinedViewMatrix() *
-                              glm::vec4(node->worldPosition(), 1.0);
-            glm::dvec2 ndc = clip / clip.w;
-
-            const bool isVisibleX = (ndc.x >= -1.0 && ndc.x <= 1.0);
-            const bool isVisibleY = (ndc.y >= -1.0 && ndc.y <= 1.0);
-            if (isVisibleX && isVisibleY) {
-                glm::dvec2 cursor = glm::dvec2(xCo, yCo);
-
-                const double ndcDist = glm::length(ndc - cursor);
-                // We either want to select the object if it's bounding sphere as been
-                // touched (checked by the first part of this loop above) or if the touch
-                // point is within a minimum distance of the center
-
-                // If the user touched the planet directly, this is definitely the one
-                // they are interested in  =>  minimum distance
-                if (intersected) {
-#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
-                    LINFOC(
-                        node->identifier(),
-                        "Picking candidate based on direct touch"
-                    );
-#endif //#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
-                    currentlyPicked = std::pair(
-                        node,
-                        -std::numeric_limits<double>::max()
-                    );
-                }
-                else if (ndcDist <= _pickingRadiusMinimum) {
-                    // The node was considered due to minimum picking distance radius
-#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
-                    LINFOC(
-                        node->identifier(),
-                        "Picking candidate based on proximity"
-                    );
-#endif //#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
-                    const double dist = length(camToSelectable);
-                    if (dist < currentlyPicked.second) {
-                        currentlyPicked = std::make_pair(node, dist);
-                    }
-                }
+                newContactPoints.push_back({ id, node, pointInModelView });
             }
         }
     }
 
-    // If an item has been picked, it's in the first position of the vector now
-    if (SceneGraphNode* node = currentlyPicked.first) {
-        _pickingSelected = node;
-#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
-        LINFOC("Picking", "Picked node: " + _pickingSelected->identifier());
-#endif //#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
-    }
-
-    _selected = std::move(newSelected);
+    _selected = std::move(newContactPoints);
 }
 
 int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list,
@@ -758,9 +653,11 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
     if (_zoomOutTap) {
         return ZOOM_OUT;
     }
-    else if (_doubleTap) {
-        return PICK;
-    }
+    //else if (_doubleTap) {
+    //    // TODO: Maybe bring this back at some point, but make sure double tapping works
+    //    // and that picking is implemented nicely.
+    //    return PICK;
+    //}
     else if (list.size() == 1) {
         return ROTATION;
     }
@@ -811,8 +708,8 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
         { ROTATION, "Rotation" },
         { PINCH, "Pinch" },
         { PAN, "Pan" },
-        { ROLL, "Roll" },
-        { PICK, "Pick" }
+        { ROLL, "Roll" }//,
+        //{ PICK, "Pick" }
     };
     _debugProperties.interpretedInteraction = interactionNames.at(action);
 
@@ -928,31 +825,6 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             _constTimeDecayCoeff.pan = computeConstTimeDecayCoefficient(panVelocityAvg);
             break;
         }
-        case PICK: {
-            // pick something in the scene as focus node
-            if (_pickingSelected) {
-                setFocusNode(_pickingSelected);
-
-                // rotate camera to look at new focus, using slerp quat
-                glm::dvec3 camToFocus = _pickingSelected->worldPosition() -
-                                        _camera->positionVec3();
-                glm::dvec3 forward = glm::normalize(_camera->viewDirectionWorldSpace());
-                double angle = glm::angle(forward, camToFocus);
-                glm::dvec3 axis = glm::normalize(glm::cross(forward, camToFocus));
-                _toSlerp.x = axis.x * sin(angle / 2.0);
-                _toSlerp.y = axis.y * sin(angle / 2.0);
-                _toSlerp.z = axis.z * sin(angle / 2.0);
-                _toSlerp.w = cos(angle / 2.0);
-                _slerpdT = 0.0;
-            }
-            else {
-                 // zooms in to current if PICK interpret happened but only space was
-                 // selected
-                 _vel.zoom = computeTapZoomDistance(0.3);
-                 _constTimeDecayCoeff.zoom = computeConstTimeDecayCoefficient(_vel.zoom);
-            }
-            break;
-        }
         case ZOOM_OUT: {
             if (_disableZoom) {
                 break;
@@ -1015,7 +887,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
 
      // since functions cant be called directly (TouchInteraction not a subclass of
      // InteractionMode)
-    setFocusNode(global::navigationHandler->orbitalNavigator().anchorNode());
+    //setFocusNode(global::navigationHandler->orbitalNavigator().anchorNode());
     if (anchor && _camera) {
         // Create variables from current state
         dvec3 camPos = _camera->positionVec3();
@@ -1052,12 +924,6 @@ void TouchInteraction::step(double dt, bool directTouch) {
             const dvec3 eulerAngles(_vel.pan.y * dt, _vel.pan.x * dt, 0.0);
             const dquat rotationDiff = dquat(eulerAngles);
             localCamRot = localCamRot * rotationDiff;
-
-            // if we have chosen a new focus node
-            if (_slerpdT < _slerpTime) {
-                _slerpdT += 0.1 * dt;
-                localCamRot = slerp(localCamRot, _toSlerp, _slerpdT / _slerpTime);
-            }
         }
         {
             // Orbit (global rotation)
@@ -1264,7 +1130,6 @@ void TouchInteraction::resetAfterInput() {
     _pinchInputs[1].clearInputs();
 
     _selected.clear();
-    _pickingSelected = nullptr;
 }
 
 // Reset all property values to default
@@ -1285,7 +1150,6 @@ void TouchInteraction::resetPropertiesToDefault() {
     _inputStillThreshold.set(0.0005f);
     _centroidStillThreshold.set(0.0018f);
     _interpretPan.set(0.015f);
-    _slerpTime.set(3.0f);
     _friction.set(glm::vec4(0.025f, 0.025f, 0.02f, 0.02f));
 }
 
