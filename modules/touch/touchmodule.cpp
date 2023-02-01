@@ -234,13 +234,13 @@ void TouchModule::updateOrAddTouchInput(TouchInput input) {
 
 void TouchModule::removeTouchInput(TouchInput input) {
     _deferredRemovals.emplace_back(input);
-    //Check for "tap" gesture:
+    // Check for "tap" gesture:
     for (TouchInputHolder& inputHolder : _touchPoints) {
         if (inputHolder.holdsInput(input)) {
             inputHolder.tryAddInput(input);
             const double totalTime = inputHolder.gestureTime();
             const float totalDistance = inputHolder.gestureDistance();
-            //Magic values taken from tuioear.cpp:
+            // Magic values taken from tuioear.cpp:
             const bool isWithinTapTime = totalTime < 0.18;
             const bool wasStationary = totalDistance < 0.0004f;
             if (isWithinTapTime && wasStationary && _touchPoints.size() == 1 &&
