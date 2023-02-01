@@ -272,12 +272,12 @@ TouchInteraction::TouchInteraction()
     , _maxTapTime(MaxTapTimeInfo, 300, 10, 1000)
     , _deceleratesPerSecond(DecelatesPerSecondInfo, 240, 60, 300)
     , _touchScreenSize(TouchScreenSizeInfo, 55.0f, 5.5f, 150.0f)
-    , _tapZoomFactor(TapZoomFactorInfo, 0.2f, 0.f, 0.5f)
+    , _tapZoomFactor(TapZoomFactorInfo, 0.2f, 0.f, 0.5f, 0.01f)
     , _pinchZoomFactor(PinchZoomFactorInfo, 0.01f, 0.f, 0.2f)
     , _nodeRadiusThreshold(DirectManipulationInfo, 0.2f, 0.0f, 1.0f)
-    , _rollAngleThreshold(RollThresholdInfo, 0.025f, 0.f, 0.05f)
-    , _orbitSpeedThreshold(OrbitSpinningThreshold, 0.005f, 0.f, 0.01f)
-    , _spinSensitivity(SpinningSensitivityInfo, 0.25f, 0.f, 2.f)
+    , _rollAngleThreshold(RollThresholdInfo, 0.025f, 0.f, 0.05f, 0.001f)
+    , _orbitSpeedThreshold(OrbitSpinningThreshold, 0.005f, 0.f, 0.01f, 0.0001f)
+    , _spinSensitivity(SpinningSensitivityInfo, 0.25f, 0.f, 2.f, 0.01f)
     , _zoomSensitivityExponential(ZoomSensitivityExpInfo, 1.03f, 1.0f, 1.1f)
     , _zoomSensitivityProportionalDist(ZoomSensitivityPropInfo, 11.f, 5.f, 50.f)
     , _zoomSensitivityDistanceThreshold(
@@ -294,15 +294,15 @@ TouchInteraction::TouchInteraction()
         1000.0,
         std::numeric_limits<double>::max()
     )
-    , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
+    , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f, 0.0001f)
     // used to void wrongly interpreted roll interactions
-    , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f)
+    , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f, 0.0001f)
     , _panEnabled(PanModeInfo, false)
     , _interpretPan(PanDeltaDistanceInfo, 0.015f, 0.f, 0.1f)
     , _slerpTime(SlerpTimeInfo, 3.f, 0.1f, 5.f)
     , _friction(
         FrictionInfo,
-        glm::vec4(0.025f, 0.025f, 0.02f, 0.02f),
+        glm::vec4(0.025f, 0.025f, 0.02f, 0.001f),
         glm::vec4(0.f),
         glm::vec4(0.2f)
     )
