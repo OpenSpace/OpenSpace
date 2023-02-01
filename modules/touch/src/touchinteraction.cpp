@@ -285,7 +285,7 @@ TouchInteraction::TouchInteraction()
         std::numeric_limits<double>::max()
     )
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f, 0.0001f)
-    // used to void wrongly interpreted roll interactions
+    // Used to void wrongly interpreted roll interactions
     , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f, 0.0001f)
     , _panEnabled(PanModeInfo, false)
     , _interpretPan(PanDeltaDistanceInfo, 0.015f, 0.f, 0.1f)
@@ -299,7 +299,7 @@ TouchInteraction::TouchInteraction()
     , _pinchInputs({ TouchInput(0, 0, 0.0, 0.0, 0.0), TouchInput(0, 0, 0.0, 0.0, 0.0) })
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0, 2.75, glm::dvec2(0.08, 0.045) }
-    // calculated with two vectors with known diff in length, then
+    // Calculated with two vectors with known diff in length, then
     // projDiffLength/diffLength.
 {
     addProperty(_touchActive);
@@ -357,7 +357,10 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
     }
 
     if (_tap) {
-        // check for doubletap
+        // @TODO (2023-02-01, emmbr) This if is not triggered on every touch tap.
+        // Why?
+
+        // Check for doubletap
         using namespace std::chrono;
         milliseconds timestamp = duration_cast<milliseconds>(
             high_resolution_clock::now().time_since_epoch()
@@ -368,25 +371,28 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
         }
         _time = timestamp;
     }
+
     // Code for lower-right corner double-tap to zoom-out
-    const glm::vec2 res = global::windowDelegate->currentWindowSize();
-    const glm::vec2 pos = list[0].latestInput().screenCoordinates(res);
+    {
+        const glm::vec2 res = global::windowDelegate->currentWindowSize();
+        const glm::vec2 pos = list[0].latestInput().screenCoordinates(res);
 
-    const float bottomCornerSizeForZoomTap_fraction = 0.08f;
-    const int zoomTapThresholdX = static_cast<int>(
-        res.x * (1.f - bottomCornerSizeForZoomTap_fraction)
-    );
-    const int zoomTapThresholdY = static_cast<int>(
-        res.y * (1.f - bottomCornerSizeForZoomTap_fraction)
-    );
+        const float bottomCornerSizeForZoomTap_fraction = 0.08f;
+        const int zoomTapThresholdX = static_cast<int>(
+            res.x * (1.f - bottomCornerSizeForZoomTap_fraction)
+        );
+        const int zoomTapThresholdY = static_cast<int>(
+            res.y * (1.f - bottomCornerSizeForZoomTap_fraction)
+        );
 
-    const bool isTapInLowerRightCorner =
-        (std::abs(pos.x) > zoomTapThresholdX && std::abs(pos.y) > zoomTapThresholdY);
+        const bool isTapInLowerRightCorner =
+            (std::abs(pos.x) > zoomTapThresholdX && std::abs(pos.y) > zoomTapThresholdY);
 
-    if (_doubleTap && isTapInLowerRightCorner) {
-        _zoomOutTap = true;
-        _tap = false;
-        _doubleTap = false;
+        if (_doubleTap && isTapInLowerRightCorner) {
+            _zoomOutTap = true;
+            _tap = false;
+            _doubleTap = false;
+        }
     }
 
     size_t numFingers = list.size();
@@ -417,7 +423,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
     }
 
     _wasPrevModeDirectTouch = _directTouchMode;
-    // evaluates if current frame is in directTouchMode (will be used next frame)
+    // Evaluates if current frame is in directTouchMode (will be used next frame)
     _directTouchMode =
         (_currentRadius > _nodeRadiusThreshold && _selected.size() == numFingers);
 }
@@ -505,7 +511,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& lis
             global::navigationHandler->orbitalNavigator().anchorNode();
         SceneGraphNode* node = sceneGraphNode(anchor->identifier());
         {
-            // Check if touch input intersects interatcion sphere
+            // Check if touch input intersects interaction sphere
             double intersectionDist = 0.0;
             const bool intersected = glm::intersectRaySphere(
                 camPos,
@@ -540,7 +546,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
     }
     _centroid /= static_cast<float>(list.size());
 
-    // see if the distance between fingers changed - used in pan interpretation
+    // See if the distance between fingers changed - used in pan interpretation
     double dist = 0;
     double lastDist = 0;
     TouchInput distInput = list[0].latestInput();
@@ -558,7 +564,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
                     glm::dvec2(distInput.x, distInput.y));
         distInput = p;
     }
-    // find the slowest moving finger - used in roll interpretation
+    // Find the slowest moving finger - used in roll interpretation
     double minDiff = 1000.0;
     for (const TouchInputHolder& inputHolder : list) {
         const auto it = std::find_if(
@@ -583,7 +589,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
             minDiff = diff;
         }
     }
-    // find if all fingers angles are high - used in roll interpretation
+    // Find if all fingers angles are high - used in roll interpretation
     double rollOn = std::accumulate(
         list.begin(),
         list.end(),
@@ -636,21 +642,22 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
         return ZOOM_OUT;
     }
     //else if (_doubleTap) {
-    //    // TODO: Maybe bring this back at some point, but make sure double tapping works
-    //    // and that picking is implemented nicely.
-    //    return PICK;
+    //    // This used to do picking of objects to change focus nodes, but did
+    //    // not quite work and was at the time considered an undesired feature.
+    //    // @TODO (2023-02-01, emmbr) Maybe bring picking back in the future, but then
+    //    // double tap needs to work more reliably
     //}
     else if (list.size() == 1) {
         return ROTATION;
     }
     else {
         float avgDistance = static_cast<float>(std::abs(dist - lastDist));
-        // if average distance between 3 fingers are constant we have panning
+        // If average distance between 3 fingers are constant we have panning
         if (_panEnabled && (avgDistance < _interpretPan && list.size() == 3)) {
             return PAN;
         }
 
-        // we have roll if one finger is still, or the total roll angles around the
+        // We have roll if one finger is still, or the total roll angles around the
         // centroid is over _rollAngleThreshold (_centroidStillThreshold is used to void
         // misinterpretations)
         else if (std::abs(minDiff) < _inputStillThreshold ||
@@ -690,8 +697,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
         { ROTATION, "Rotation" },
         { PINCH, "Pinch" },
         { PAN, "Pan" },
-        { ROLL, "Roll" }//,
-        //{ PICK, "Pick" }
+        { ROLL, "Roll" }
     };
     _debugProperties.interpretedInteraction = interactionNames.at(action);
 
@@ -713,7 +719,8 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
     const float aspectRatio =
         static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
     switch (action) {
-        case ROTATION: { // add rotation velocity
+        case ROTATION: {
+            // Add rotation velocity
             _vel.orbit += glm::dvec2(inputHolder.speedX() *
                           _sensitivity.orbit.x, inputHolder.speedY() *
                           _sensitivity.orbit.y);
@@ -728,8 +735,8 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
                 break;
             }
 
-             // add zooming velocity - dependant on distance difference between contact
-             // points this/first frame
+            // Add zooming velocity - dependant on distance difference between contact
+            // points this/first frame
             using namespace glm;
             const TouchInput& startFinger0 = _pinchInputs[0].firstInput();
             const TouchInput& startFinger1 = _pinchInputs[1].firstInput();
@@ -759,7 +766,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
                 break;
             }
 
-            // add global roll rotation velocity
+            // Add global roll rotation velocity
             double rollFactor = std::accumulate(
                 list.begin(),
                 list.end(),
@@ -778,7 +785,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
                         _centroid.x,
                         _centroid.y
                     );
-                    // if's used to set angles 359 + 1 = 0 and 0 - 1 = 359
+                    // Ifs used to set angles 359 + 1 = 0 and 0 - 1 = 359
                     if (lastAngle > currentAngle + 1.5 * glm::pi<float>()) {
                         res += currentAngle + (2 * glm::pi<float>() - lastAngle);
                     }
@@ -800,7 +807,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
                 break;
             }
 
-            // add local rotation velocity
+            // Add local rotation velocity
             _vel.pan += glm::dvec2(inputHolder.speedX() *
                         _sensitivity.pan.x, inputHolder.speedY() * _sensitivity.pan.y);
             double panVelocityAvg = glm::distance(_vel.pan.x, _vel.pan.y);
@@ -812,7 +819,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
                 break;
             }
 
-            // zooms out from current if triple tap occurred
+            // Zooms out from current if triple tap occurred
             _vel.zoom = computeTapZoomDistance(-1.0);
             _constTimeDecayCoeff.zoom = computeConstTimeDecayCoefficient(_vel.zoom);
         }
@@ -867,9 +874,6 @@ void TouchInteraction::step(double dt, bool directTouch) {
     const SceneGraphNode* anchor =
         global::navigationHandler->orbitalNavigator().anchorNode();
 
-     // since functions cant be called directly (TouchInteraction not a subclass of
-     // InteractionMode)
-    //setFocusNode(global::navigationHandler->orbitalNavigator().anchorNode());
     if (anchor && _camera) {
         // Create variables from current state
         dvec3 camPos = _camera->positionVec3();
@@ -881,8 +885,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
         const dvec3 camDirection = _camera->viewDirectionWorldSpace();
 
         // Make a representation of the rotation quaternion with local and global
-        // rotations
-        // To avoid problem with lookup in up direction
+        // rotations. To avoid problem with lookup in up direction
         const dmat4 lookAtMat = lookAt(
             dvec3(0.0, 0.0, 0.0),
             directionToCenter,
