@@ -23,7 +23,7 @@ local fieldlineTest = {
         ColorTablePaths = {transferFunction},
         MaskingEnabled = true,
         MaskingQuantity = 5,      -- corresponds to "topology"
-        MaskingRanges = {{-0, 0}},  --closed only
+        MaskingRanges = {-0, 0},  --closed only
     },
     GUI = {
         Path = "/Solar System/heliosphere",

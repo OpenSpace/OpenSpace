@@ -245,6 +245,8 @@ private:
     std::vector<glm::vec2> _colorTableRanges;
     // Values represents min & max limits for valid masking range
     std::vector<glm::vec2> _maskingRanges;
+    // Selected range for the active quantity to be masked out
+    glm::vec2 _selectedMaskingRanges;
     // At least one file in data set needs to be loaded to read extra variable
     bool _firstLoad = true;
 

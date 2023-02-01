@@ -190,9 +190,9 @@ namespace {
         std::optional<bool> maskingEnabled;
         // [[codegen::verbatim(MaskingQuantityInfo.description)]]
         std::optional<int> maskingQuantity;
-        // List of ranges for which their corresponding parameters values will be
-        // masked by. Should be entered as {min value, max value} per range
-        std::optional<std::vector<glm::vec2>> maskingRanges;
+        // Rrange for which their corresponding quantity parameter value will be
+        // masked by. Should be entered as {min value, max value}
+        std::optional<glm::vec2> maskingRanges;
 
         // [[codegen::verbatim(DomainEnabledInfo.description)]]
         std::optional<bool> domainEnabled;
@@ -440,8 +440,12 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
         _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
     }
 
+    // Sorry about the confusion here with the masking. To not change peoples masking
+    // settings i kept the parameter for the assets to be "MaskingRanges", but a single
+    // vec2-value instead of a vector. What is given from the asset, is stored as the
+    // selected range.
     if (p.maskingRanges.has_value()) {
-        _maskingRanges = *p.maskingRanges;
+        _selectedMaskingRanges = *p.maskingRanges;
     }
     else {
         _maskingRanges.push_back(glm::vec2(-100000.f, 100000.f)); // some default values
@@ -509,8 +513,7 @@ void RenderableFieldlinesSequenceNew::staticallyLoadFiles(
                 file.timestamp = extractTriggerTimeFromFilename(file.path);
                 break;
             case SourceFileType::Osfls:
-                loadSuccess = file.state.loadStateFromOsfls(file.path.string());
-                file.timestamp = extractTriggerTimeFromFilename(file.path);
+                loadFile(file);
                 break;
             default:
                 break;
@@ -697,7 +700,7 @@ void RenderableFieldlinesSequenceNew::setupProperties() {
     _maskingGroup.addProperty(_maskingMinMax);// hasExtra
 
     //if (!_maskingRanges.empty()) {
-        _maskingMinMax = _maskingRanges[_colorQuantity];// hasExtra
+        _maskingMinMax = _maskingRanges[_maskingQuantity];// hasExtra
     //}
 
 }
@@ -822,7 +825,6 @@ void RenderableFieldlinesSequenceNew::loadFile(File& file) {
                 //const bool success = file.state.loadStateFromOsfls(file.path.string());
                 file.status = File::FileStatus::Loaded;
                 file.timestamp = extractTriggerTimeFromFilename(file.path);
-                computeSequenceEndTime();
                 _atLeastOneFileLoaded = true;
                 _isLoadingStateFromDisk = false;
             }
@@ -909,7 +911,6 @@ void RenderableFieldlinesSequenceNew::updateDynamicDownloading(const double curr
         newFile.timestamp = time;
 
         auto inserted = insertToFilesInOrder(std::move(newFile));
-        //updateActiveIndex(currentTime);
     }
 
     // if all files are moved into _sourceFiles then we can
@@ -941,13 +942,15 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
 
     if (_firstLoad && _atLeastOneFileLoaded) {
         size_t nExtraQuantities;
-        for (File& f : _files) {
-            if (f.status != File::FileStatus::Loaded) {
+            // loop just to find the first one that is loaded, then it will break out
+        std::vector<File>::iterator f;
+        for (f = _files.begin(); f != _files.end(); f++) {
+            if (f->status != File::FileStatus::Loaded) {
                 continue;
             }
-            nExtraQuantities = f.state.nExtraQuantities();
+            nExtraQuantities = f->state.nExtraQuantities();
             const std::vector<std::string>& extraNamesVec =
-                f.state.extraQuantityNames();
+                f->state.extraQuantityNames();
             for (int i = 0; i < static_cast<int>(nExtraQuantities); ++i) {
                 _colorQuantity.addOption(i, extraNamesVec[i]);
                 _maskingQuantity.addOption(i, extraNamesVec[i]);
@@ -956,16 +959,27 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
         }
         _firstLoad = false;
 
-        // Each quantity should have its own color table and color table range
-        // no more, no less
-        _colorTablePaths.resize(nExtraQuantities, _colorTablePaths.back());
         _transferFunction = std::make_unique<TransferFunction>(
             absPath(_colorTablePaths[0]).string()
         );
+
+        /////////////////////////
+        bool success;
+        const std::vector<std::vector<float>>& quantities = f->state.extraQuantities();
+        for (auto toMask : quantities) {
+            float fmin = *std::min_element(toMask.begin(), toMask.end());
+            std::string smin = std::to_string(fmin);
+            float fmax = *std::max_element(toMask.begin(), toMask.end());
+            std::string smax = std::to_string(fmax);
+            LWARNING(fmt::format("min :{}", smin));
+            LWARNING(fmt::format("max :{}", smax));
+            ////////////////////////
+            _maskingRanges.push_back({ fmin, fmax });
+        }
+
         _colorTableRanges.resize(nExtraQuantities, _colorTableRanges.back());
         _maskingRanges.resize(nExtraQuantities, _maskingRanges.back());
     }
-
 
     bool isInInterval = _files.size() > 0 &&
         currentTime >= _files[0].timestamp &&
@@ -985,16 +999,19 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
     if (_activeIndex == -1 ||
         // if currentTime < active timestamp, it means that we stepped back to a
         // time represented by another state
+        // _activeIndex has already been checked if it is <0 in the line above
         currentTime < _files[_activeIndex].timestamp ||
         // if currentTime >= next timestamp, it means that we stepped forward to a
         // time represented by another state
         (nextIndex < _files.size() && currentTime >= _files[nextIndex].timestamp))
     {
         _activeIndex = updateActiveIndex(currentTime);
+        // check again after updating
         if (_activeIndex == -1) return;
         if (_files[_activeIndex].status == File::FileStatus::Downloaded) {
             // if LoadingType is StaticLoading all files will be Loaded
             loadFile(_files[_activeIndex]);
+            computeSequenceEndTime();
         }
 
     }
