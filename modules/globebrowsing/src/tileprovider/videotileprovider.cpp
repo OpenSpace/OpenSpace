@@ -59,6 +59,31 @@ namespace {
         "'YYYY MM DD hh:mm:ss'."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AnimationModeInfo = {
+        "AnimationMode",
+        "Animation Mode",
+        "Determines the way the video should be played. The start and end time of the "
+        "video can be set, or the video can be played as a loop in real time."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PlayInfo = {
+        "Play",
+        "Play",
+        "Play video"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PauseInfo = {
+        "Pause",
+        "Pause",
+        "Pause video"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo GoToStartInfo = {
+        "GoToStart",
+        "Go To Start",
+        "Go to start in video"
+    };
+
     struct [[codegen::Dictionary(VideoTileProvider)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
@@ -71,8 +96,7 @@ namespace {
 
         enum class AnimationMode {
             MapToSimulationTime = 0,
-            RealTimeLoopFromStart,
-            RealTimeLoopInfinitely
+            RealTimeLoop
         };
 
         // The mode of how the animation should be played back.
@@ -85,123 +109,136 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-    int VideoTileProvider::_wakeup = 0;
+int VideoTileProvider::_wakeup = 0;
 
-    bool checkMpvError(int status) {
-        if (status < 0) {
-            LERROR(fmt::format("Libmpv API error: {}", mpv_error_string(status)));
-            return false;
+bool checkMpvError(int status) {
+    if (status < 0) {
+        LERROR(fmt::format("Libmpv API error: {}", mpv_error_string(status)));
+        return false;
+    }
+    return true;
+}
+
+void* getOpenGLProcAddress(void*, const char* name) {
+    return reinterpret_cast<void*>(
+        global::windowDelegate->openGLProcedureAddress(name)
+    );
+}
+
+void VideoTileProvider::on_mpv_render_update(void*) {
+    // The wakeup flag is set here to enable the mpv_render_context_render 
+    // path in the main loop.
+    _wakeup = 1;
+}
+
+void VideoTileProvider::observePropertyMpv(std::string name, mpv_format format, 
+                                           LibmpvPropertyKey key) {
+    mpv_observe_property(
+        _mpvHandle, 
+        static_cast<uint64_t>(key), 
+        name.c_str(), 
+        format
+    );
+}
+
+void VideoTileProvider::setPropertyStringMpv(std::string name, std::string value) {
+    int result = mpv_set_property_string(_mpvHandle, name.c_str(), value.c_str());
+    if (!checkMpvError(result)) {
+        LWARNING(fmt::format("Error setting property {}", name));
+    }
+}
+
+documentation::Documentation VideoTileProvider::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_videotileprovider");
+}
+
+VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary) 
+    : _play(PlayInfo)
+    , _pause(PauseInfo)
+    , _goToStart(GoToStartInfo)
+{
+    ZoneScoped
+
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _videoFile = p.file;
+   
+    if (p.animationMode.has_value()) {
+        switch (*p.animationMode) {
+        case Parameters::AnimationMode::RealTimeLoop:
+            _animationMode = AnimationMode::RealTimeLoop;
+            break;
+        case Parameters::AnimationMode::MapToSimulationTime:
+            _animationMode = AnimationMode::MapToSimulationTime;
+            break;
+        default:
+            throw ghoul::MissingCaseException();
         }
-        return true;
     }
 
-    void* getOpenGLProcAddress(void*, const char* name) {
-        return reinterpret_cast<void*>(
-            global::windowDelegate->openGLProcedureAddress(name)
-        );
+    if (_animationMode == AnimationMode::RealTimeLoop) {
+        // Video interaction. Only valid for real time looping
+        _play.onChange([this]() { play(); });
+        addProperty(_play);
+        _pause.onChange([this]() { pause(); });
+        addProperty(_pause);
+        _goToStart.onChange([this]() { goToStart(); });
+        addProperty(_goToStart);
     }
-
-    void VideoTileProvider::on_mpv_render_update(void*) {
-        // The wakeup flag is set here to enable the mpv_render_context_render 
-        // path in the main loop.
-        _wakeup = 1;
-    }
-
-    void VideoTileProvider::observePropertyMpv(std::string name, mpv_format format, 
-                                               LibmpvPropertyKey key) {
-        mpv_observe_property(
-            _mpvHandle, 
-            static_cast<uint64_t>(key), 
-            name.c_str(), 
-            format
-        );
-    }
-
-    void VideoTileProvider::setPropertyStringMpv(std::string name, std::string value) {
-        int result = mpv_set_property_string(_mpvHandle, name.c_str(), value.c_str());
-        if (!checkMpvError(result)) {
-            LWARNING(fmt::format("Error setting property {}", name));
-        }
-    }
-
-    documentation::Documentation VideoTileProvider::Documentation() {
-        return codegen::doc<Parameters>("globebrowsing_videotileprovider");
-    }
-
-    VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary) {
-        ZoneScoped
-
-            const Parameters p = codegen::bake<Parameters>(dictionary);
-
-        _videoFile = p.file;
-
-        if (p.animationMode.has_value()) {
-            switch (*p.animationMode) {
-            case Parameters::AnimationMode::RealTimeLoopFromStart:
-                _animationMode = AnimationMode::RealTimeLoopFromStart;
-                break;
-            case Parameters::AnimationMode::RealTimeLoopInfinitely:
-                _animationMode = AnimationMode::RealTimeLoopInfinitely;
-                break;
-            case Parameters::AnimationMode::MapToSimulationTime:
-                _animationMode = AnimationMode::MapToSimulationTime;
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-            }
-        }
+    else if (_animationMode == AnimationMode::MapToSimulationTime) {
         _startJ200Time = Time::convertTime(p.startTime);
         _endJ200Time = Time::convertTime(p.endTime);
         ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
-
-        global::callback::postSyncPreDraw->emplace_back([this]() {
-            // Initialize mpv here to ensure that the opengl context is the same as in for 
-            // the rendering
-            if (!_isInitialized) {
-                initializeMpv();
-            }
-            else {
-                renderMpv();
-            }
-        });
-
-        global::callback::postDraw->emplace_back([this]() {
-            swapBuffersMpv();
-        });
     }
-
-    Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
-        ZoneScoped
-
+    
+    global::callback::postSyncPreDraw->emplace_back([this]() {
+        // Initialize mpv here to ensure that the opengl context is the same as in for 
+        // the rendering
         if (!_isInitialized) {
-            return Tile();
-        }
-
-        // Always check that our framebuffer is ok
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            LINFO("Framebuffer is not complete");
-        }
-
-        return Tile{ _frameTexture, std::nullopt, Tile::Status::OK };
-    }
-
-    Tile::Status VideoTileProvider::tileStatus(const TileIndex& tileIndex) {
-        if (tileIndex.level > maxLevel()) {
-            return Tile::Status::OutOfRange;
-        }
-        else if (_tileIsReady) {
-            return Tile::Status::OK;
+            initializeMpv();
         }
         else {
-            return Tile::Status::Unavailable;
+            renderMpv();
         }
+    });
+
+    global::callback::postDraw->emplace_back([this]() {
+        swapBuffersMpv();
+    });
+}
+
+Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
+    ZoneScoped
+
+    if (!_isInitialized) {
+        return Tile();
     }
 
-    TileDepthTransform VideoTileProvider::depthTransform() {
-        return { 0.f, 1.f };
+    // Always check that our framebuffer is ok
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        LINFO("Framebuffer is not complete");
     }
 
-    void VideoTileProvider::update() {}
+    return Tile{ _frameTexture, std::nullopt, Tile::Status::OK };
+}
+
+Tile::Status VideoTileProvider::tileStatus(const TileIndex& tileIndex) {
+    if (tileIndex.level > maxLevel()) {
+        return Tile::Status::OutOfRange;
+    }
+    else if (_tileIsReady) {
+        return Tile::Status::OK;
+    }
+    else {
+        return Tile::Status::Unavailable;
+    }
+}
+
+TileDepthTransform VideoTileProvider::depthTransform() {
+    return { 0.f, 1.f };
+}
+
+void VideoTileProvider::update() {}
 
 ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
     ZoneScoped
@@ -252,6 +289,11 @@ void VideoTileProvider::play() {
         LWARNING("Error when playing video");
     }
 }
+
+void VideoTileProvider::goToStart() {
+    seekToTime(0.0);
+}
+
 
 void VideoTileProvider::initializeMpv() {
     _mpvHandle = mpv_create();
@@ -391,7 +433,7 @@ void VideoTileProvider::pauseVideoIfOutsideValidTime() {
 
 void VideoTileProvider::seekToTime(double time) {
     bool isPlaying = !_isPaused;
-    bool seekIsDifferent = abs(time - _lastSeek) > _frameTime;
+    bool seekIsDifferent = abs(time - _currentVideoTime) > _frameTime;
     if (seekIsDifferent) {
         // Pause while seeking
         pause();
@@ -408,7 +450,6 @@ void VideoTileProvider::seekToTime(double time) {
             LINFO("Seek resulted in invalid operation");
         }
 
-        _lastSeek = time;
         // Play if video was playing before seek
         if (isPlaying) {
             play();
@@ -431,16 +472,19 @@ void VideoTileProvider::updateStretchingOfTime() {
 
 void VideoTileProvider::renderMpv() {
 
-    pauseVideoIfOutsideValidTime();
+    if (_animationMode == AnimationMode::MapToSimulationTime) {
+        pauseVideoIfOutsideValidTime();
 
-    handleMpvEvents();
-    
-    double time = correctVideoPlaybackTime();
-    bool shouldSeek = abs(time - _currentVideoTime) > _frameTime;
-    
-    if (shouldSeek) {
-        seekToTime(time);
+        double time = correctVideoPlaybackTime();
+        bool shouldSeek = abs(time - _currentVideoTime) > _frameTime;
+
+        if (shouldSeek) {
+            seekToTime(time);
+        }
     }
+   
+    handleMpvEvents();
+
 
     if (_wakeup) {
         if ((mpv_render_context_update(_mpvRenderContext) & MPV_RENDER_UPDATE_FRAME)) {
@@ -605,7 +649,10 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
         }
 
         _videoDuration = *duration;
-        updateStretchingOfTime();
+        if (_animationMode == AnimationMode::MapToSimulationTime) {
+            updateStretchingOfTime();
+        }
+
         LINFO(fmt::format("Duration: {}", *duration));
         break;
     }

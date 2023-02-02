@@ -27,6 +27,7 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
+#include <openspace/properties/triggerproperty.h>
 #include <ghoul/glm.h>
 
 // libmpv
@@ -58,10 +59,15 @@ public:
 
     void pause();
     void play();
+    void goToStart();
 
     static documentation::Documentation Documentation();
 
 private:
+    properties::TriggerProperty _play;
+    properties::TriggerProperty _pause;
+    properties::TriggerProperty _goToStart;
+
     void createFBO(int width, int height);
     void resizeFBO(int width, int height);
     double correctVideoPlaybackTime() const;
@@ -84,11 +90,10 @@ private:
 
     enum class AnimationMode {
         MapToSimulationTime = 0,
-        RealTimeLoopFromStart,
-        RealTimeLoopInfinitely
+        RealTimeLoop
     };
 
-    AnimationMode _animationMode = AnimationMode::MapToSimulationTime;
+    AnimationMode _animationMode = AnimationMode::RealTimeLoop; // Default is to loop
     std::filesystem::path _videoFile;
     double _startJ200Time = 0.0;
     double _endJ200Time = 0.0;
@@ -110,8 +115,6 @@ private:
     GLuint _fbo = 0;
     TileTextureInitData::HashKey _frameTextureHashKey;
     static int _wakeup;
-    double _lastFrameTime = 0.0;
-    double _lastSeek = -1.0;
     bool _didRender = false;
     bool _isPaused = false;
 
