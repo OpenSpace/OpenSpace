@@ -111,6 +111,7 @@ private:
     skybrowser::Animation<glm::dvec3> _targetAnimation =
         skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
     bool _targetIsAnimating = false;
+    bool _fovIsAnimating = false;
 
     // Dragging
     glm::dvec3 _startTargetPosition = glm::dvec3(0.0);
