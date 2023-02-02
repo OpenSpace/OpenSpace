@@ -30,10 +30,14 @@
 #include "openspace/navigation/navigationhandler.h"
 #include "openspace/navigation/orbitalnavigator.h"
 #include "openspace/rendering/renderengine.h"
+#include <openspace/query/query.h>
+#include "glm/gtx/projection.hpp"
+#include "glm/gtx/vector_angle.hpp"
 
 namespace {
     constexpr std::string_view _loggerCat = "CosmicSonification";
     constexpr double DistancePrecision = 0.1;
+    constexpr double AnglePrecision = 0.05;
     constexpr double MeterToKilometer = 1000.0;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo CosmicSonificationInfo = {
@@ -88,7 +92,11 @@ void CosmicSonification::threadMain(std::atomic<bool>& isRunning) {
         // Get the current focus
         focusNode = global::navigationHandler->orbitalNavigator().anchorNode();
 
-        subscripbeFocusDistance(scene, cameraPosition, focusNode);
+        //subscripbeFocusDistance(scene, cameraPosition, focusNode);
+        subscripbeNodeDistance(scene, camera, "Strepsirrhini_volume_center");
+        subscripbeNodeDistance(scene, camera, "Platyrrhini_volume_center");
+        subscripbeNodeDistance(scene, camera, "Catarrhini_volume_center");
+        subscripbeNodeDistance(scene, camera, "Hominoidea_volume_center");
     }
 }
 
@@ -101,10 +109,10 @@ void CosmicSonification::subscripbeFocusDistance(const Scene* scene,
     double distance = glm::length(cameraToNode);
 
     // Don't send if the data is the same
-    if (abs(distance - _prevDistance) < DistancePrecision) {
+    if (abs(distance - _prevFocusDistance) < DistancePrecision) {
         return;
     }
-    _prevDistance = distance;
+    _prevFocusDistance = distance;
 
     // Create the data structore for the message
     std::string label = "/cosmicFocus";
@@ -114,6 +122,82 @@ void CosmicSonification::subscripbeFocusDistance(const Scene* scene,
 
     data[1].type = SonificationModule::OscDataType::String;
     data[1].stringValue = focusNode->identifier();
+
+    // Send the message via Osc
+    SonificationModule::ref().sendOscMessage(label, data);
+}
+
+void CosmicSonification::subscripbeNodeDistance(const Scene* scene, const Camera* camera,
+                                                const std::string& identifier)
+{
+    // Find node
+    SceneGraphNode* node = sceneGraphNode(identifier);
+    if (!node) {
+        return;
+    }
+
+    // Find entry in subscription list
+    auto findIdentifier = [identifier](std::pair<std::string, std::vector<double>> p) {
+        return p.first == identifier;
+    };
+    bool isNew = false;
+    auto it = std::find_if(_nodeSubscriptions.begin(), _nodeSubscriptions.end(), findIdentifier);
+    if (it == _nodeSubscriptions.end()) {
+        _nodeSubscriptions.push_back({ identifier, {0.0, 0.0} });
+        it = _nodeSubscriptions.end() - 1;
+        isNew = true;
+    }
+
+    // Calculate distance to current focus
+    glm::dvec3 cameraToNode = node->worldPosition() - camera->positionVec3();
+    double distance = glm::length(cameraToNode);
+
+    // Don't send if the data is the same
+    bool distanceDirty = false;
+    if (abs(distance - (* it).second[0]) > DistancePrecision) {
+        distanceDirty = true;
+    }
+
+    //Calculate angle from camera to the planet in the camera plane
+    //Project v down to the camera plane, Pplane(v)
+    //Pn(v) is v projected on the normal n of the plane
+    //Pplane(v) = v - Pn(v)
+    glm::dvec3 cameraToProjectedNode = cameraToNode -
+        glm::proj(cameraToNode, camera->lookUpVectorWorldSpace());
+
+    double angle = glm::orientedAngle(glm::normalize(camera->viewDirectionWorldSpace()),
+        glm::normalize(cameraToProjectedNode),
+        camera->lookUpVectorWorldSpace());
+
+    bool angleDirty = false;
+    if (abs(angle - (*it).second[1]) > AnglePrecision) {
+        angleDirty = true;
+    }
+
+    if (isNew) {
+        distanceDirty = true;
+        angleDirty = true;
+    }
+
+    if (!distanceDirty && !angleDirty) {
+        return;
+    }
+
+    if (distanceDirty) {
+        (*it).second[0] = distance;
+    }
+    if (angleDirty) {
+        (*it).second[1] = angle;
+    }
+
+    // Create the data structore for the message
+    std::string label = "/" + identifier;
+    std::vector<SonificationModule::OscDataEntry> data(2);
+    data[0].type = SonificationModule::OscDataType::Double;
+    data[0].doubleValue = distance;
+
+    data[1].type = SonificationModule::OscDataType::Double;
+    data[1].doubleValue = angle;
 
     // Send the message via Osc
     SonificationModule::ref().sendOscMessage(label, data);

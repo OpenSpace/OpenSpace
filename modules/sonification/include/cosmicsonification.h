@@ -47,9 +47,14 @@ private:
     std::atomic<bool> _isRunning;
 
     void threadMain(std::atomic<bool>& isRunning);
+
     void subscripbeFocusDistance(const Scene* scene,
         const glm::dvec3 cameraPosition, const SceneGraphNode* focusNode);
-    double _prevDistance;
+    void subscripbeNodeDistance(const Scene* scene,
+        const Camera* camera, const std::string& distance);
+
+    std::vector<std::pair<std::string, std::vector<double>>> _nodeSubscriptions;
+    double _prevFocusDistance;
 };
 
 } // openspace namespace
