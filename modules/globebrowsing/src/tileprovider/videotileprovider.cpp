@@ -245,8 +245,15 @@ Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         LINFO("Framebuffer is not complete");
     }
-
-    return Tile{ _frameTexture.get(), std::nullopt, Tile::Status::OK};
+    uint64_t hash = tileIndex.hashKey();
+    if (_tileCache.find(hash) == _tileCache.end()) {
+        _tileCache[hash] = Tile{
+            _frameTexture.get(), 
+            std::nullopt, 
+            Tile::Status::OK
+        };
+    }
+    return _tileCache[hash];
 }
 
 Tile::Status VideoTileProvider::tileStatus(const TileIndex& tileIndex) {

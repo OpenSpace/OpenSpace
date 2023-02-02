@@ -132,6 +132,9 @@ private:
     static int _wakeup;
     bool _didRender = false;
     bool _isPaused = false;
+
+    // Cache for rendering the same frame
+    std::map<TileIndex::TileHashKey, Tile> _tileCache;
 };
 
 } // namespace openspace::globebrowsing
