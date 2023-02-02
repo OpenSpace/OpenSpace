@@ -241,15 +241,54 @@ local innerMoons = {
   }
 }
 
+-- Generate all moon labels
+local moon_labels = {}
+
+for i, moon in ipairs(innerMoons) do
+  local moonName = moon.GUI.Name or moon.Identifier
+  moon_labels[i] = {
+    Identifier = moon.Identifier .. "Label",
+    Parent = moon.Identifier,
+    Renderable = {
+      Enabled = false,
+      Type = "RenderableLabel",
+      Text = moonName,
+      FontSize = 70.0,
+      Size = 5.5,
+      MinMaxSize = { 1, 17 },
+      OrientationOption = "Camera View Direction",
+      BlendMode = "Normal",
+      EnableFading = true,
+      FadeUnit = "Mm",
+      FadeDistances = { 100.0, 500.0 },
+      FadeWidths = { 25.0, 500.0 }
+    },
+    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+    GUI = {
+      Name = moonName .. " Label",
+      Path = "/Solar System/Planets/Uranus/Moons",
+      Description = "Label for Uranus' moon " .. moonName .. " (inner group)"
+    }
+  }
+end
+
 local nodes = proceduralGlobes.createGlobes(innerMoons)
 
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
+
+  for _, moon in ipairs(moon_labels) do
+    openspace.addSceneGraphNode(moon)
+  end
 end)
 
 asset.onDeinitialize(function()
+  for i = #moon_labels, 1, -1 do
+    openspace.removeSceneGraphNode(moon_labels[i])
+  end
+
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end

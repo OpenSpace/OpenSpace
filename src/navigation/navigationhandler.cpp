@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -380,6 +380,14 @@ bool NavigationHandler::disabledKeybindings() const {
     return _disableKeybindings;
 }
 
+bool NavigationHandler::disabledMouse() const {
+    return _disableMouseInputs;
+}
+
+bool NavigationHandler::disabledJoystick() const {
+    return _disableJoystickInputs;
+}
+
 NavigationState NavigationHandler::navigationState() const {
     const SceneGraphNode* referenceFrame = _orbitalNavigator.followingAnchorRotation() ?
         _orbitalNavigator.anchorNode() :
@@ -631,7 +639,10 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::TriggerIdleBehavior,
             codegen::lua::ListAllJoysticks,
             codegen::lua::TargetNextInterestingAnchor,
-            codegen::lua::TargetPreviousInterestingAnchor
+            codegen::lua::TargetPreviousInterestingAnchor,
+            codegen::lua::DistanceToFocus,
+            codegen::lua::DistanceToFocusBoundingSphere,
+            codegen::lua::DistanceToFocusInteractionSphere
         }
     };
 }

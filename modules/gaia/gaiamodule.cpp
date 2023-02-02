@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,12 +62,12 @@ std::vector<documentation::Documentation> GaiaModule::documentations() const {
 }
 
 scripting::LuaLibrary GaiaModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "gaia";
-    res.scripts = {
-        absPath("${MODULE_GAIA}/scripts/filtering.lua")
+    return {
+        .name = "gaia",
+        .scripts = {
+            absPath("${MODULE_GAIA}/scripts/filtering.lua")
+        }
     };
-    return res;
 }
 
 } // namespace openspace

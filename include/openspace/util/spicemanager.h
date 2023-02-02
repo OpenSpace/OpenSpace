@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -556,6 +556,12 @@ public:
                 "Error converting ephemeris time '{}' to date with format '{}'",
                     ephemerisTime, format
             ));
+        }
+
+        if (outBuf[0] == '*') {
+            // The conversion failed and we need to use et2utc
+            constexpr int SecondsPrecision = 3;
+            et2utc_c(ephemerisTime, "C", SecondsPrecision, bufferSize, outBuf);
         }
     }
 

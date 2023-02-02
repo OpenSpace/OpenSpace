@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -230,11 +230,11 @@ void EventHandler::initialize() {
                     BrowserInstance::SingleClick
                 );
 #endif
-                _validTouchStates.emplace_back(input);
             }
-            else {
-                _validTouchStates.emplace_back(input);
-            }
+
+            _validTouchStates.emplace_back(input);
+
+            global::interactionMonitor->markInteraction();
             return true;
         }
     );
@@ -269,6 +269,7 @@ void EventHandler::initialize() {
                 _leftButton.down = true;
                 _browserInstance->sendMouseMoveEvent(mouseEvent());
 #endif // WIN32
+                global::interactionMonitor->markInteraction();
                 return true;
             }
             else if (it != _validTouchStates.cend()) {

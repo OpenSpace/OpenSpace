@@ -1,6 +1,7 @@
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+asset.require("scene/solarsystem/planets/earth/lagrange_points/L2")
 
 local kernels = asset.syncedResource({
   Name = "JWST Kernel",
@@ -78,8 +79,12 @@ local JWSTRotation = {
   }
 }
 
--- Reparent the JWSTPosition node when the data changes at 25 Jan 2022
+-- Reparent the JWSTPosition node when the data changes
 asset.onInitialize(function()
+  openspace.addSceneGraphNode(JWSTPosition)
+  openspace.addSceneGraphNode(JWSTRotation)
+
+  -- Set correct parent during run-time
   openspace.scriptScheduler.loadScheduledScript(
     detachTime,
     [[openspace.setParent("JWSTPosition", "EarthCenter")]],
@@ -95,8 +100,15 @@ asset.onInitialize(function()
     1 -- Not default group, never clear this script
   )
 
-  openspace.addSceneGraphNode(JWSTPosition)
-  openspace.addSceneGraphNode(JWSTRotation)
+  -- Set correct parent at the start
+  local now = openspace.time.currentTime();
+  if now < openspace.time.convertTime(detachTime) then
+    openspace.setParent("JWSTPosition", "EarthIAU")
+  elseif now > openspace.time.convertTime(L2orbitInsertionTime) then
+    openspace.setParent("JWSTPosition", "L2")
+  else
+    openspace.setParent("JWSTPosition", "EarthCenter")
+  end
 end)
 
 asset.onDeinitialize(function()

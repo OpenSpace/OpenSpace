@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -256,15 +256,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     _meridianShift = p.meridianShift.value_or(_meridianShift);
     addProperty(_meridianShift);
 
-    // @TODO (abock, 2021-03-26)  Poking into the Geometry dictionary is not really
-    // optimal as we don't have local control over how the dictionary is checked. We
-    // should instead ask the geometry whether it has a radius or not
-    double radius = std::pow(10.0, 9.0);
-    if (dict.hasValue<double>(KeyRadius)) {
-        radius = dict.value<double>(KeyRadius);
-    }
-    setBoundingSphere(radius);
-
     addPropertySubOwner(_projectionComponent);
 
     _heightExaggeration.setExponent(3.f);
@@ -291,6 +282,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     else {
         _radius = std::get<glm::vec3>(p.radius);
     }
+    setBoundingSphere(glm::compMax(_radius.value()));
     _radius.onChange([&]() { createSphere(); });
     addProperty(_radius);
 

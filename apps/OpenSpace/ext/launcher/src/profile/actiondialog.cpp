@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -594,7 +594,11 @@ void ActionDialog::actionSaved() {
     
 
     action->name = _actionWidgets.name->text().toStdString();
-    action->guiPath = _actionWidgets.guiPath->text().toStdString();
+    std::string guiPath = _actionWidgets.guiPath->text().toStdString();
+    if (!guiPath.starts_with('/')) {
+        guiPath = "/" + guiPath;
+    }
+    action->guiPath = guiPath;
     action->documentation = _actionWidgets.documentation->text().toStdString();
     action->isLocal = _actionWidgets.isLocal->isChecked();
     action->script = _actionWidgets.script->toPlainText().toStdString();

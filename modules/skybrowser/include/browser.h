@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
-#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/ivec2property.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -74,17 +74,17 @@ public:
     void updateBrowserSize();
     void reload();
 
-    glm::vec2 browserPixelDimensions() const;
+    void setRatio(float ratio);
     float browserRatio() const;
-    void setCallbackDimensions(const std::function<void(const glm::dvec2&)>& function);
 
 protected:
-    properties::Vec2Property _browserDimensions;
+    properties::IVec2Property _browserDimensions;
     properties::StringProperty _url;
     properties::TriggerProperty _reload;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
+    void updateBrowserDimensions();
     void executeJavascript(const std::string& script) const;
 
     bool _isUrlDirty = false;
