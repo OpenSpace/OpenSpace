@@ -100,11 +100,11 @@ namespace {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
 
-        // [[codegen::verbatim(DurationInfo.description)]]
-        double duration;
-
         // [[codegen::verbatim(ResolutionInfo.description)]]
         glm::ivec2 resolution;
+
+        // [[codegen::verbatim(DurationInfo.description)]]
+        std::optional<double> duration;
 
         // [[codegen::verbatim(StartTimeInfo.description)]]
         std::optional<std::string> startTime [[codegen::datetime()]];
@@ -182,7 +182,6 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _videoFile = p.file;
-    _videoDuration = p.duration;
     _videoResolution = p.resolution;
    
     if (p.animationMode.has_value()) {
@@ -213,6 +212,11 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
                 " end time");
             return;
         }
+        if (!p.duration.has_value()) {
+            LERROR("Video tile layer tried to map to simulation time but duration");
+            return;
+        }
+        _videoDuration = *p.duration;
         _startJ200Time = Time::convertTime(*p.startTime);
         _endJ200Time = Time::convertTime(*p.endTime);
         ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
@@ -425,8 +429,6 @@ void VideoTileProvider::initializeMpv() {
     observePropertyMpv("height", MPV_FORMAT_INT64, LibmpvPropertyKey::Height);
     observePropertyMpv("width", MPV_FORMAT_INT64, LibmpvPropertyKey::Width);
     observePropertyMpv("metadata", MPV_FORMAT_NODE, LibmpvPropertyKey::Meta);
-
-    _videoDuration = 41.0; // TODO: Remove. Unit: seconds
 
     if (_animationMode == AnimationMode::MapToSimulationTime) {
         updateStretchingOfTime();
