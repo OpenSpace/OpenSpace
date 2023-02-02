@@ -110,10 +110,9 @@ private:
     // libmpv
     mpv_handle* _mpvHandle = nullptr;
     mpv_render_context* _mpvRenderContext = nullptr;
-    ghoul::opengl::Texture* _frameTexture = nullptr;
+    std::unique_ptr<ghoul::opengl::Texture>_frameTexture = nullptr;
     mpv_opengl_fbo _mpvFbo;
     GLuint _fbo = 0;
-    TileTextureInitData::HashKey _frameTextureHashKey;
     static int _wakeup;
     bool _didRender = false;
     bool _isPaused = false;

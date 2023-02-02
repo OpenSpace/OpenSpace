@@ -219,7 +219,7 @@ Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
         LINFO("Framebuffer is not complete");
     }
 
-    return Tile{ _frameTexture, std::nullopt, Tile::Status::OK };
+    return Tile{ _frameTexture.get(), std::nullopt, Tile::Status::OK};
 }
 
 Tile::Status VideoTileProvider::tileStatus(const TileIndex& tileIndex) {
@@ -921,21 +921,12 @@ void VideoTileProvider::createFBO(int width, int height) {
 
     glGenFramebuffers(1, &_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-
-    cache::MemoryAwareTileCache* tileCache =
-        global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
-
-    // Create or get a texture with this initialization data
-    TileTextureInitData initData(
-        width,
-        height,
-        GL_UNSIGNED_BYTE,                       // TODO: What format should we use?
-        ghoul::opengl::Texture::Format::RGBA,
-        TileTextureInitData::PadTiles::No,
-        TileTextureInitData::ShouldAllocateDataOnCPU::No
+    
+    _frameTexture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(width, height, 1),
+        GL_TEXTURE_2D
     );
-    _frameTexture = tileCache->texture(initData);
-    _frameTextureHashKey = initData.hashKey;
+    _frameTexture->uploadTexture();
 
     // Configure
     _frameTexture->bind();
@@ -974,7 +965,7 @@ void VideoTileProvider::resizeFBO(int width, int height) {
 
     // Delete old FBO and texture
     glDeleteFramebuffers(1, &_fbo);
-    delete _frameTexture;
+    _frameTexture.reset(nullptr);
 
     createFBO(width, height);
 }
