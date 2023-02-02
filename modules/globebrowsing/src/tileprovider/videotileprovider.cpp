@@ -84,15 +84,33 @@ namespace {
         "Go to start in video"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DurationInfo = {
+        "Duration",
+        "Duration",
+        "Duration of video, in seconds"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
+        "Resolution",
+        "Resolution",
+        "Resolution of video, in pixels"
+    };
+
     struct [[codegen::Dictionary(VideoTileProvider)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
 
+        // [[codegen::verbatim(DurationInfo.description)]]
+        double duration;
+
+        // [[codegen::verbatim(ResolutionInfo.description)]]
+        glm::ivec2 resolution;
+
         // [[codegen::verbatim(StartTimeInfo.description)]]
-        std::string startTime [[codegen::datetime()]];
+        std::optional<std::string> startTime [[codegen::datetime()]];
 
         // [[codegen::verbatim(EndTimeInfo.description)]]
-        std::string endTime [[codegen::datetime()]];
+        std::optional<std::string> endTime [[codegen::datetime()]];
 
         enum class AnimationMode {
             MapToSimulationTime = 0,
@@ -156,12 +174,16 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     : _play(PlayInfo)
     , _pause(PauseInfo)
     , _goToStart(GoToStartInfo)
+    , _videoDuration(DurationInfo, 0.0)
+    , _videoResolution(ResolutionInfo, glm::ivec2(0))
 {
     ZoneScoped
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _videoFile = p.file;
+    _videoDuration = p.duration;
+    _videoResolution = p.resolution;
    
     if (p.animationMode.has_value()) {
         switch (*p.animationMode) {
@@ -186,8 +208,13 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
         addProperty(_goToStart);
     }
     else if (_animationMode == AnimationMode::MapToSimulationTime) {
-        _startJ200Time = Time::convertTime(p.startTime);
-        _endJ200Time = Time::convertTime(p.endTime);
+        if (!p.startTime.has_value() || !p.endTime.has_value()) {
+            LERROR("Video tile layer tried to map to simulation time but lacked start or"
+                " end time");
+            return;
+        }
+        _startJ200Time = Time::convertTime(*p.startTime);
+        _endJ200Time = Time::convertTime(*p.endTime);
         ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
     }
     
@@ -381,7 +408,7 @@ void VideoTileProvider::initializeMpv() {
     }
 
     //Create FBO to render video into
-    createFBO(_resolution.x, _resolution.y);
+    createFBO(_videoResolution.value().x, _videoResolution.value().y);
 
     //Observe video parameters
     observePropertyMpv("video-params", MPV_FORMAT_NODE, LibmpvPropertyKey::Params);
@@ -433,7 +460,7 @@ void VideoTileProvider::pauseVideoIfOutsideValidTime() {
 
 void VideoTileProvider::seekToTime(double time) {
     bool isPlaying = !_isPaused;
-    bool seekIsDifferent = abs(time - _currentVideoTime) > _frameTime;
+    bool seekIsDifferent = abs(time - _currentVideoTime) > SeekThreshold;
     if (seekIsDifferent) {
         // Pause while seeking
         pause();
@@ -476,7 +503,7 @@ void VideoTileProvider::renderMpv() {
         pauseVideoIfOutsideValidTime();
 
         double time = correctVideoPlaybackTime();
-        bool shouldSeek = abs(time - _currentVideoTime) > _frameTime;
+        bool shouldSeek = abs(time - _currentVideoTime) > SeekThreshold;
 
         if (shouldSeek) {
             seekToTime(time);
@@ -492,7 +519,11 @@ void VideoTileProvider::renderMpv() {
             // details. This function fills the fbo and texture with data, after it 
             // we can get the data on the GPU, not the CPU
             int fboInt = static_cast<int>(_fbo);
-            mpv_opengl_fbo mpfbo{ fboInt , _resolution.x, _resolution.y, 0 };
+            mpv_opengl_fbo mpfbo{ 
+                fboInt , 
+                _videoResolution.value().x, 
+                _videoResolution.value().y, 0 
+            };
             int flip_y{ 1 };
 
             mpv_render_param params[] = {
@@ -687,18 +718,20 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
             break;
         }
 
-        if (*height == _resolution.y) {
+        if (*height == _videoResolution.value().y) {
             break;
         }
 
         LINFO(fmt::format("New height: {}", *height));
 
         if (*height > 0) {
-            if (_resolution.x > 0 && _fbo > 0) {
-                resizeFBO(_resolution.x, *height);
+            if (_videoResolution.value().x > 0 && _fbo > 0) {
+                resizeFBO(_videoResolution.value().x, *height);
             }
             else {
-                _resolution.y = *height;
+                glm::ivec2 newValue = _videoResolution.value();
+                newValue.y = *height;
+                _videoResolution = newValue;
             }
         }
         else {
@@ -820,18 +853,20 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
             break;
         }
 
-        if (*width == _resolution.y) {
+        if (*width == _videoResolution.value().y) {
             break;
         }
 
         LINFO(fmt::format("New width: {}", *width));
 
         if (*width > 0) {
-            if (_resolution.y > 0 && _fbo > 0) {
-                resizeFBO(*width, _resolution.y);
+            if (_videoResolution.value().y > 0 && _fbo > 0) {
+                resizeFBO(*width, _videoResolution.value().y);
             }
             else {
-                _resolution.x = *width;
+                glm::ivec2 newValue = _videoResolution.value();
+                newValue.x = *width;
+                _videoResolution = newValue;
             }
         }
         else {
@@ -916,7 +951,7 @@ void VideoTileProvider::createFBO(int width, int height) {
     }
 
     // Update resolution of video
-    _resolution = glm::ivec2(width, height);
+    _videoResolution = glm::ivec2(width, height);
 
     glGenFramebuffers(1, &_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
@@ -949,18 +984,23 @@ void VideoTileProvider::createFBO(int width, int height) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Render video frame to texture
-    _mpvFbo = mpv_opengl_fbo{ static_cast<int>(_fbo), _resolution.x, _resolution.y, 0 };
+    _mpvFbo = mpv_opengl_fbo{ 
+        static_cast<int>(_fbo), 
+        _videoResolution.value().x, 
+        _videoResolution.value().y, 
+        0 
+    };
 }
 
 void VideoTileProvider::resizeFBO(int width, int height) {
     LINFO(fmt::format("Resizing FBO with width: {} and height: {}", width, height));
 
-    if (width == _resolution.x && height == _resolution.y) {
+    if (width == _videoResolution.value().x && height == _videoResolution.value().y) {
         return;
     }
 
     // Update resolution of video
-    _resolution = glm::ivec2(width, height);
+    _videoResolution = glm::ivec2(width, height);
 
     // Delete old FBO and texture
     glDeleteFramebuffers(1, &_fbo);

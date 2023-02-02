@@ -28,6 +28,8 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
 #include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 #include <ghoul/glm.h>
 
 // libmpv
@@ -60,56 +62,14 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    // Time for 1 frame when 24 fps (1.0 / 24.0). Chose 24 fps as this is the lowest 
+    // probably fps we'll encounter
+    static constexpr double SeekThreshold = 0.0417; 
     properties::TriggerProperty _play;
     properties::TriggerProperty _pause;
     properties::TriggerProperty _goToStart;
-
-    void createFBO(int width, int height);
-    void resizeFBO(int width, int height);
-    double correctVideoPlaybackTime() const;
-    bool isWithingStartEndTime() const;
-    void pauseVideoIfOutsideValidTime();
-    void seekToTime(double time);
-    void updateStretchingOfTime();
-
-    // Libmpv
-    void initializeMpv(); // Called first time in postSyncPreDraw
-    void renderMpv(); // Called in postSyncPreDraw
-    void handleMpvEvents();
-    void handleMpvProperties(mpv_event* event);
-    void swapBuffersMpv(); // Called in postDraw
-    void cleanUpMpv(); // Called in internalDeinitialze
-    static void on_mpv_render_update(void*);
-
-    void internalInitialize() override final;
-    void internalDeinitialize() override final;
-
-    enum class AnimationMode {
-        MapToSimulationTime = 0,
-        RealTimeLoop
-    };
-
-    AnimationMode _animationMode = AnimationMode::RealTimeLoop; // Default is to loop
-    std::filesystem::path _videoFile;
-    double _startJ200Time = 0.0;
-    double _endJ200Time = 0.0;
-    double _videoDuration = -1.0;
-    double _currentVideoTime = 0.0;
-    double _frameTime = 1.0 / 24.0;
-    bool _hasReachedEnd = false;
-    bool _tileIsReady = false;
-    bool _isInitialized = false;
-    glm::ivec2 _resolution = { 2048, 1024 };
-
-    // libmpv
-    mpv_handle* _mpvHandle = nullptr;
-    mpv_render_context* _mpvRenderContext = nullptr;
-    std::unique_ptr<ghoul::opengl::Texture>_frameTexture = nullptr;
-    mpv_opengl_fbo _mpvFbo;
-    GLuint _fbo = 0;
-    static int _wakeup;
-    bool _didRender = false;
-    bool _isPaused = false;
+    properties::DoubleProperty _videoDuration;
+    properties::IVec2Property _videoResolution;
 
     // libmpv property keys
     enum class LibmpvPropertyKey : uint64_t {
@@ -125,8 +85,53 @@ private:
         Pause
     };
 
+    enum class AnimationMode {
+        MapToSimulationTime = 0,
+        RealTimeLoop
+    };
+
+    void createFBO(int width, int height);
+    void resizeFBO(int width, int height);
+    
+    // Map to simulation time functions
+    double correctVideoPlaybackTime() const;
+    bool isWithingStartEndTime() const;
+    void pauseVideoIfOutsideValidTime();
+    void updateStretchingOfTime();
+
+    // Libmpv
+    void initializeMpv(); // Called first time in postSyncPreDraw
+    void renderMpv(); // Called in postSyncPreDraw
+    void handleMpvEvents();
+    void handleMpvProperties(mpv_event* event);
+    void swapBuffersMpv(); // Called in postDraw
+    void cleanUpMpv(); // Called in internalDeinitialze
+    static void on_mpv_render_update(void*);
     void observePropertyMpv(std::string name, mpv_format format, LibmpvPropertyKey key);
     void setPropertyStringMpv(std::string name, std::string value);
+    void seekToTime(double time);
+
+    void internalInitialize() override final;
+    void internalDeinitialize() override final;
+
+    AnimationMode _animationMode = AnimationMode::RealTimeLoop; // Default is to loop
+    std::filesystem::path _videoFile;
+    double _startJ200Time = 0.0;
+    double _endJ200Time = 0.0;
+    double _currentVideoTime = 0.0;
+    bool _hasReachedEnd = false;
+    bool _tileIsReady = false;
+    bool _isInitialized = false;
+
+    // libmpv
+    mpv_handle* _mpvHandle = nullptr;
+    mpv_render_context* _mpvRenderContext = nullptr;
+    std::unique_ptr<ghoul::opengl::Texture>_frameTexture = nullptr;
+    mpv_opengl_fbo _mpvFbo;
+    GLuint _fbo = 0;
+    static int _wakeup;
+    bool _didRender = false;
+    bool _isPaused = false;
 };
 
 } // namespace openspace::globebrowsing
