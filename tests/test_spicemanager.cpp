@@ -22,7 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -332,9 +333,9 @@ TEST_CASE("SpiceManager: Get Target Position", "[spicemanager]") {
             );
         }()
     );
-    CHECK(pos[0] == Approx(targetPosition[0]));
-    CHECK(pos[1] == Approx(targetPosition[1]));
-    CHECK(pos[2] == Approx(targetPosition[2]));
+    CHECK(pos[0] == Catch::Approx(targetPosition[0]));
+    CHECK(pos[1] == Catch::Approx(targetPosition[1]));
+    CHECK(pos[2] == Catch::Approx(targetPosition[2]));
 
     openspace::SpiceManager::deinitialize();
 }
@@ -365,8 +366,8 @@ TEST_CASE("SpiceManager: Get Target State", "[spicemanager]") {
 
     // x,y,z
     for (int i = 0; i < 3; i++){
-        CHECK(state[i] == Approx(res.position[i]));
-        CHECK(state[i+3] == Approx(res.velocity[i]));
+        CHECK(state[i] == Catch::Approx(res.position[i]));
+        CHECK(state[i+3] == Catch::Approx(res.velocity[i]));
     }
 
     openspace::SpiceManager::deinitialize();
@@ -395,7 +396,7 @@ TEST_CASE("SpiceManager: Transform matrix", "[spicemanager]") {
    // check for matrix consistency
    for (int i = 0; i < 6; i++) {
        for (int j = 0; j < 6; j++) {
-           CHECK(referenceMatrix[i][j] == Approx(stateMatrix[i * 6 + j]));
+           CHECK(referenceMatrix[i][j] == Catch::Approx(stateMatrix[i * 6 + j]));
        }
    }
 
@@ -429,7 +430,7 @@ TEST_CASE("SpiceManager: Get Position Transform Matrix", "[spicemanager]") {
     // check for matrix consistency
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            CHECK(referenceMatrix[i][j] == Approx(positionMatrix[j][i]));
+            CHECK(referenceMatrix[i][j] == Catch::Approx(positionMatrix[j][i]));
         }
     }
 
@@ -453,7 +454,7 @@ TEST_CASE("SpiceManager: Get Position Transform Matrix", "[spicemanager]") {
     position = positionMatrix * position;
     // check transformed values match 
     for (int i = 0; i < 3; i++) {
-        CHECK(position[i] == Approx(state_t[i]));
+        CHECK(position[i] == Catch::Approx(state_t[i]));
     }
 
     openspace::SpiceManager::deinitialize();
@@ -489,7 +490,7 @@ TEST_CASE("SpiceManager: Get Field Of View", "[spicemanager]") {
     for (size_t i = 0; i < res.bounds.size(); i++) {
         for (size_t j = 0; j < 3; j++) {
             CHECK(
-                bounds_ref[i][j] == Approx(res.bounds[i][static_cast<glm::length_t>(j)])
+                bounds_ref[i][j] == Catch::Approx(res.bounds[i][static_cast<glm::length_t>(j)])
             );
         }
     }

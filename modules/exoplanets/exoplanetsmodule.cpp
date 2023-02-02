@@ -113,8 +113,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShowHabitableZoneInfo = {
         "ShowHabitableZone",
         "Show Habitable Zone",
-        "If true, the habitable zone disc is enabled per default when an "
-        "exoplanet system is created"
+        "If true, the habitable zone disc is enabled per default when an exoplanet "
+        "system is created"
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseOptimisticZoneInfo = {
@@ -275,7 +275,7 @@ float ExoplanetsModule::habitableZoneOpacity() const {
 void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
-    _enabled = p.enabled.value_or(true);
+    _enabled = p.enabled.value_or(_enabled);
 
     if (p.dataFolder.has_value()) {
         _exoplanetsDataFolder = p.dataFolder.value().string();

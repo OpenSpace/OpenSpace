@@ -33,7 +33,7 @@
 
 namespace openspace {
 
-    class TuioEar;
+class TuioEar;
 
 #ifdef WIN32
 class Win32TouchHook;

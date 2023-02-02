@@ -39,7 +39,21 @@ bool ShortcutTopic::isDone() const {
 
 std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
     std::vector<nlohmann::json> json;
-    for (const interaction::Action& action : global::actionManager->actions()) {
+    std::vector<interaction::Action> actions = global::actionManager->actions();
+    std::sort(
+        actions.begin(),
+        actions.end(),
+        [](const interaction::Action& lhs, const interaction::Action& rhs) {
+            if (!lhs.name.empty() && !rhs.name.empty()) {
+                return lhs.name < rhs.name;
+            }
+            else {
+                return lhs.identifier < rhs.identifier;
+            }
+        }
+    );
+
+    for (const interaction::Action& action : actions) {
         nlohmann::json shortcutJson = {
             { "identifier", action.identifier },
             { "name", action.name },

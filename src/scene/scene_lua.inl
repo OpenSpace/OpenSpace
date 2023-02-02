@@ -196,7 +196,8 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                           const std::vector<openspace::properties::Property*>& properties,
                                                              double interpolationDuration,
                                                              const std::string& groupName,
-                                                     ghoul::EasingFunction easingFunction)
+                                                     ghoul::EasingFunction easingFunction,
+                                                                   std::string postScript)
 {
     using namespace openspace;
     using ghoul::lua::errorLocation;
@@ -244,6 +245,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 global::renderEngine->scene()->addPropertyInterpolation(
                     prop,
                     static_cast<float>(interpolationDuration),
+                    std::move(postScript),
                     easingFunction
                 );
             }
@@ -283,7 +285,7 @@ namespace openspace::luascriptfunctions {
 
 int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
                            lua_State* L, double duration,
-                           ghoul::EasingFunction easingFunction)
+                           ghoul::EasingFunction easingFunction, std::string postScript)
 {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
@@ -313,6 +315,7 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
             global::renderEngine->scene()->addPropertyInterpolation(
                 &prop,
                 static_cast<float>(duration),
+                std::move(postScript),
                 easingFunction
             );
         }
@@ -320,50 +323,69 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
     return 0;
 }
 
+template <bool optimization>
 int propertySetValue(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::property_setValue");
+    int nParameters = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 2, 6 },
+        "lua::property_setValue"
+    );
     defer { lua_settop(L, 0); };
 
     std::string uriOrRegex =
         ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No);
-    std::string optimization;
     double interpolationDuration = 0.0;
     std::string easingMethodName;
     ghoul::EasingFunction easingMethod = ghoul::EasingFunction::Linear;
+    std::string postScript;
 
-    if (lua_gettop(L) >= 3) {
+    // Extracting the parameters. These are the options that we have:
+    // 1. <uri> <value>
+    // 2. <uri> <value> <duration>
+    // 3. <uri> <value> <duration> <easing>
+    // 4. <uri> <value> <duration> <easing> <postscript>
+
+    if (nParameters >= 3) {
+        // Later functions expect the value to be at the last position on the stack
+        lua_pushvalue(L, 2);
+
         if (ghoul::lua::hasValue<double>(L, 3)) {
             interpolationDuration =
                 ghoul::lua::value<double>(L, 3, ghoul::lua::PopValue::No);
         }
         else {
-            optimization = ghoul::lua::value<std::string>(L, 3, ghoul::lua::PopValue::No);
+            std::string msg = fmt::format(
+                "Unexpected type {} in argument 3",
+                ghoul::lua::luaTypeToString(lua_type(L, 3))
+            );
+            return ghoul::lua::luaError(L, msg);
         }
-
-        if (lua_gettop(L) >= 4) {
-            if (ghoul::lua::hasValue<double>(L, 4)) {
-                interpolationDuration =
-                    ghoul::lua::value<double>(L, 4, ghoul::lua::PopValue::No);
-            }
-            else {
-                easingMethodName =
-                    ghoul::lua::value<std::string>(L, 4, ghoul::lua::PopValue::No);
-            }
-        }
-
-        if (lua_gettop(L) == 5) {
-            optimization = ghoul::lua::value<std::string>(L, 5, ghoul::lua::PopValue::No);
-        }
-
-        // Later functions expect the value to be at the last position on the stack
-        lua_pushvalue(L, 2);
     }
-
-    if ((interpolationDuration == 0.0) && !easingMethodName.empty()) {
-        LWARNINGC(
-            "property_setValue",
-            "Easing method specified while interpolation duration is equal to 0"
-        );
+    if (nParameters >= 4) {
+        if (ghoul::lua::hasValue<std::string>(L, 4)) {
+            easingMethodName =
+                ghoul::lua::value<std::string>(L, 4, ghoul::lua::PopValue::No);
+        }
+        else {
+            std::string msg = fmt::format(
+                "Unexpected type {} in argument 4",
+                ghoul::lua::luaTypeToString(lua_type(L, 4))
+            );
+            return ghoul::lua::luaError(L, msg);
+        }
+    }
+    if (nParameters == 5) {
+        if (ghoul::lua::hasValue<std::string>(L, 5)) {
+            postScript =
+                ghoul::lua::value<std::string>(L, 5, ghoul::lua::PopValue::No);
+        }
+        else {
+            std::string msg = fmt::format(
+                "Unexpected type {} in argument 5",
+                ghoul::lua::luaTypeToString(lua_type(L, 5))
+            );
+            return ghoul::lua::luaError(L, msg);
+        }
     }
 
     if (!easingMethodName.empty()) {
@@ -379,34 +401,7 @@ int propertySetValue(lua_State* L) {
         }
     }
 
-    if (optimization.empty()) {
-        std::string groupName;
-        if (doesUriContainGroupTag(uriOrRegex, groupName)) {
-            // Remove group name from start of regex and replace with '*'
-            uriOrRegex = removeGroupNameFromUri(uriOrRegex);
-        }
-
-        applyRegularExpression(
-            L,
-            uriOrRegex,
-            allProperties(),
-            interpolationDuration,
-            groupName,
-            easingMethod
-        );
-        return 0;
-    }
-    else if (optimization == "regex") {
-        applyRegularExpression(
-            L,
-            uriOrRegex,
-            allProperties(),
-            interpolationDuration,
-            "",
-            easingMethod
-        );
-    }
-    else if (optimization == "single") {
+    if (optimization) {
         properties::Property* prop = property(uriOrRegex);
         if (!prop) {
             LERRORC(
@@ -423,32 +418,28 @@ int propertySetValue(lua_State* L) {
             uriOrRegex,
             L,
             interpolationDuration,
-            easingMethod
+            easingMethod,
+            std::move(postScript)
         );
     }
     else {
-        LERRORC(
-            "lua::propertySetValue",
-            fmt::format(
-                "{}: Unexpected optimization '{}'",
-                ghoul::lua::errorLocation(L), optimization
-            )
+        std::string groupName;
+        if (doesUriContainGroupTag(uriOrRegex, groupName)) {
+            // Remove group name from start of regex and replace with '*'
+            uriOrRegex = removeGroupNameFromUri(uriOrRegex);
+        }
+
+        applyRegularExpression(
+            L,
+            uriOrRegex,
+            allProperties(),
+            interpolationDuration,
+            groupName,
+            easingMethod,
+            std::move(postScript)
         );
     }
     return 0;
-}
-
-int propertySetValueSingle(lua_State* L) {
-    const int n = lua_gettop(L);
-    if (n == 3) {
-        // If we pass three arguments, the third one is the interpolation factor and the
-        // user did not specify an easing factor, so we have to add that manually before
-        // adding the single optimization
-        ghoul::lua::push(L, ghoul::nameForEasingFunction(ghoul::EasingFunction::Linear));
-    }
-
-    ghoul::lua::push(L, "single");
-    return propertySetValue(L);
 }
 
 int propertyGetValue(lua_State* L) {
@@ -961,7 +952,7 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
                           std::optional<std::string> onChange)
 {
     T* p = new T(info);
-    if (onChange.has_value()) {
+    if (onChange.has_value() && !onChange->empty()) {
         p->onChange(
             [p, script = *onChange]() {
                 using namespace ghoul::lua;
@@ -976,12 +967,63 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
     openspace::global::userPropertyOwner->addProperty(p);
 }
 
-[[codegen::luawrap]] void addCustomProperty(std::string identifier, std::string type,
+enum class [[codegen::enum]] CustomPropertyType {
+    DMat2Property,
+    DMat3Property,
+    DMat4Property,
+    Mat2Property,
+    Mat3Property,
+    Mat4Property,
+    BoolProperty,
+    DoubleProperty,
+    FloatProperty,
+    IntProperty,
+    StringProperty,
+    StringListProperty,
+    LongProperty,
+    ShortProperty,
+    UShortProperty,
+    UIntProperty,
+    ULongProperty,
+    DVec2Property,
+    DVec3Property,
+    DVec4Property,
+    IVec2Property,
+    IVec3Property,
+    IVec4Property,
+    UVec2Property,
+    UVec3Property,
+    UVec4Property,
+    Vec2Property,
+    Vec3Property,
+    Vec4Property
+};
+
+/**
+ * Creates a new property that lives in the `UserProperty` group.
+ * 
+ * \param identifier The identifier that is going to be used for the new property
+ * \param type The type of the property, has to be one of "DMat2Property",
+ *        "DMat3Property", "DMat4Property", "Mat2Property", "Mat3Property",
+ *        "Mat4Property", "BoolProperty", "DoubleProperty", "FloatProperty",
+ *        "IntProperty", "StringProperty", "StringListProperty", "LongProperty",
+ *        "ShortProperty", "UIntProperty", "ULongProperty", "DVec2Property",
+ *        "DVec3Property", "DVec4Property", "IVec2Property", "IVec3Property",
+ *        "IVec4Property", "UVec2Property", "UVec3Property", "UVec4Property",
+ *        "Vec2Property", "Vec3Property", "Vec4Property"
+ * \param guiName The name that the property uses in the user interface. If this value is
+ *        not provided, the `identifier` is used instead
+ * \param description A description what the property is used for
+ * \param onChange A Lua script that will be executed whenever the property changes
+ */
+[[codegen::luawrap]] void addCustomProperty(std::string identifier,
+                                            CustomPropertyType type,
                                             std::optional<std::string> guiName,
                                             std::optional<std::string> description,
                                             std::optional<std::string> onChange)
 {
     using namespace openspace;
+    using namespace openspace::properties;
 
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Identifier must not empty");
@@ -1005,92 +1047,101 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
         guiName->c_str() :
         identifier.c_str();
 
-    properties::Property::PropertyInfo info = {
+    Property::PropertyInfo info = {
         identifier.c_str(),
         gui,
         description.has_value() ? description->c_str() : ""
     };
-    if (type == "DMat2Property") {
-        createCustomProperty<properties::DMat2Property>(info, std::move(onChange));
+    switch (type) {
+        case CustomPropertyType::DMat2Property:
+            createCustomProperty<DMat2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DMat3Property:
+            createCustomProperty<DMat3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DMat4Property:
+            createCustomProperty<DMat4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Mat2Property:
+            createCustomProperty<Mat2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Mat3Property:
+            createCustomProperty<Mat3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Mat4Property:
+            createCustomProperty<Mat4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::BoolProperty:
+            createCustomProperty<BoolProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DoubleProperty:
+            createCustomProperty<DoubleProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::FloatProperty:
+            createCustomProperty<FloatProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::IntProperty:
+            createCustomProperty<IntProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::StringProperty:
+            createCustomProperty<StringProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::StringListProperty:
+            createCustomProperty<StringListProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::LongProperty:
+            createCustomProperty<LongProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::ShortProperty:
+            createCustomProperty<ShortProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UIntProperty:
+            createCustomProperty<UIntProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::ULongProperty:
+            createCustomProperty<ULongProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UShortProperty:
+            createCustomProperty<UShortProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DVec2Property:
+            createCustomProperty<DVec2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DVec3Property:
+            createCustomProperty<DVec3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DVec4Property:
+            createCustomProperty<DVec4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::IVec2Property:
+            createCustomProperty<IVec2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::IVec3Property:
+            createCustomProperty<IVec3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::IVec4Property:
+            createCustomProperty<IVec4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UVec2Property:
+            createCustomProperty<UVec2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UVec3Property:
+            createCustomProperty<UVec3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UVec4Property:
+            createCustomProperty<UVec4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Vec2Property:
+            createCustomProperty<Vec2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Vec3Property:
+            createCustomProperty<Vec3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Vec4Property:
+            createCustomProperty<Vec4Property>(info, std::move(onChange));
+            return;
     }
-    else if (type == "DMat3Property") {
-        createCustomProperty<properties::DMat3Property>(info, std::move(onChange));
-    }
-    else if (type == "DMat4Property") {
-        createCustomProperty<properties::DMat4Property>(info, std::move(onChange));
-    }
-    else if (type == "Mat2Property") {
-        createCustomProperty<properties::Mat2Property>(info, std::move(onChange));
-    }
-    else if (type == "Mat3Property") {
-        createCustomProperty<properties::Mat3Property>(info, std::move(onChange));
-    }
-    else if (type == "Mat4Property") {
-        createCustomProperty<properties::Mat4Property>(info, std::move(onChange));
-    }
-    else if (type == "BoolProperty") {
-        createCustomProperty<properties::BoolProperty>(info, std::move(onChange));
-    }
-    else if (type == "DoubleProperty") {
-        createCustomProperty<properties::DoubleProperty>(info, std::move(onChange));
-    }
-    else if (type == "FloatProperty") {
-        createCustomProperty<properties::FloatProperty>(info, std::move(onChange));
-    }
-    else if (type == "IntProperty") {
-        createCustomProperty<properties::IntProperty>(info, std::move(onChange));
-    }
-    else if (type == "LongProperty") {
-        createCustomProperty<properties::LongProperty>(info, std::move(onChange));
-    }
-    else if (type == "ShortProperty") {
-        createCustomProperty<properties::ShortProperty>(info, std::move(onChange));
-    }
-    else if (type == "UIntProperty") {
-        createCustomProperty<properties::UIntProperty>(info, std::move(onChange));
-    }
-    else if (type == "ULongProperty") {
-        createCustomProperty<properties::ULongProperty>(info, std::move(onChange));
-    }
-    else if (type == "UShortProperty") {
-        createCustomProperty<properties::UShortProperty>(info, std::move(onChange));
-    }
-    else if (type == "DVec2Property") {
-        createCustomProperty<properties::DVec2Property>(info, std::move(onChange));
-    }
-    else if (type == "DVec3Property") {
-        createCustomProperty<properties::DVec3Property>(info, std::move(onChange));
-    }
-    else if (type == "DVec4Property") {
-        createCustomProperty<properties::DVec4Property>(info, std::move(onChange));
-    }
-    else if (type == "IVec2Property") {
-        createCustomProperty<properties::IVec2Property>(info, std::move(onChange));
-    }
-    else if (type == "IVec3Property") {
-        createCustomProperty<properties::IVec3Property>(info, std::move(onChange));
-    }
-    else if (type == "IVec4Property") {
-        createCustomProperty<properties::IVec4Property>(info, std::move(onChange));
-    }
-    else if (type == "UVec2Property") {
-        createCustomProperty<properties::UVec2Property>(info, std::move(onChange));
-    }
-    else if (type == "UVec3Property") {
-        createCustomProperty<properties::UVec3Property>(info, std::move(onChange));
-    }
-    else if (type == "UVec4Property") {
-        createCustomProperty<properties::UVec4Property>(info, std::move(onChange));
-    }
-    else if (type == "Vec2Property") {
-        createCustomProperty<properties::Vec2Property>(info, std::move(onChange));
-    }
-    else if (type == "Vec3Property") {
-        createCustomProperty<properties::Vec3Property>(info, std::move(onChange));
-    }
-    else if (type == "Vec4Property") {
-        createCustomProperty<properties::Vec4Property>(info, std::move(onChange));
-    }
+    throw std::runtime_error("Missing case label");
 }
 
 [[codegen::luawrap]] void removeCustomProperty(std::string identifier) {

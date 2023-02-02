@@ -557,6 +557,12 @@ public:
                     ephemerisTime, format
             ));
         }
+
+        if (outBuf[0] == '*') {
+            // The conversion failed and we need to use et2utc
+            constexpr int SecondsPrecision = 3;
+            et2utc_c(ephemerisTime, "C", SecondsPrecision, bufferSize, outBuf);
+        }
     }
 
     std::string dateFromEphemerisTime(double ephemerisTime, const char* format);

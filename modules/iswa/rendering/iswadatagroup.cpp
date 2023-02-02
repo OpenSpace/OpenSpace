@@ -79,7 +79,6 @@ namespace {
         "Data Options",
         "" // @TODO Missing documentation
     };
-
 } // namespace
 
 namespace openspace{

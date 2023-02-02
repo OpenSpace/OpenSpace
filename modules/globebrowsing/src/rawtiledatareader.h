@@ -98,7 +98,7 @@ private:
 
     const TileTextureInitData _initData;
     const PerformPreprocessing _preprocess;
-    TileDepthTransform _depthTransform = { 0.f, 0.f };
+    TileDepthTransform _depthTransform = { .scale = 0.f, .offset = 0.f };
 
     mutable std::mutex _datasetLock;
 };

@@ -77,7 +77,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
         "Trail Fade",
-        "This value determines how fast the trail fades and is an appearance property. "
+        "This value determines how fast the trail fades and is an appearance property."
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {

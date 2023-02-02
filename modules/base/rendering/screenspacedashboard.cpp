@@ -119,7 +119,7 @@ bool ScreenSpaceDashboard::isReady() const {
 void ScreenSpaceDashboard::update() {
     if (global::windowDelegate->windowHasResized()) {
         const glm::ivec2 size = global::windowDelegate->currentDrawBufferResolution();
-        _size = { 0.f, 0.f, size.x, size.y };
+        _size = glm::vec4(0.f, 0.f, size.x, size.y);
         createFramebuffer();
     }
 }

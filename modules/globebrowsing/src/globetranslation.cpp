@@ -61,10 +61,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AltitudeInfo = {
         "Altitude",
         "Altitude",
-        "The altitude in meters. "
-        "If the 'UseHeightmap' property is 'true', this is an offset from the actual "
-        "surface of the globe. If not, this is an offset from the reference ellipsoid."
-        "The default value is 0.0"
+        "The altitude in meters. If the 'UseHeightmap' property is 'true', this is an "
+        "offset from the actual surface of the globe. If not, this is an offset from the "
+        "reference ellipsoid. The default value is 0.0"
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseHeightmapInfo = {

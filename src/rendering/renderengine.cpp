@@ -111,7 +111,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShowCameraInfo = {
         "ShowCamera",
         "Shows information about the current camera state, such as friction",
-        "This value determines whether the information about the current camrea state is "
+        "This value determines whether the information about the current camera state is "
         "shown on the screen"
     };
 
@@ -174,31 +174,31 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScreenSpaceRotationInfo = {
         "ScreenSpaceRotation",
         "Screen Space Rotation",
-        "Applies a rotation to all screen space renderables. "
-        "Defined using pitch, yaw, roll in radians"
+        "Applies a rotation to all screen space renderables. Defined using pitch, yaw, "
+        "roll in radians"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MasterRotationInfo = {
         "MasterRotation",
         "Master Rotation",
-        "Applies a view rotation for only the master node, defined using "
-        "pitch, yaw, roll in radians. This can be used to compensate the master view "
-        "direction for tilted display systems in clustered immersive environments"
+        "Applies a view rotation for only the master node, defined using pitch, yaw, "
+        "roll in radians.This can be used to compensate the master view direction for "
+        "tilted display systems in clustered immersive environments"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableHDRPipelineInfo = {
        "DisableHDRPipeline",
        "Disable HDR Rendering",
-       "If this value is enabled, the rendering will disable the HDR color handling "
-       "and the LDR color pipeline will be used. Be aware of possible over exposure "
-       "in the final colors"
+       "If this value is enabled, the rendering will disable the HDR color handling and "
+       "the LDR color pipeline will be used. Be aware of possible over exposure in the "
+        "final colors"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HDRExposureInfo = {
         "HDRExposure",
         "HDR Exposure",
-        "This value determines the amount of light per unit area reaching the "
-        "equivalent of an electronic image sensor"
+        "This value determines the amount of light per unit area reaching the equivalent "
+        "of an electronic image sensor"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
@@ -1144,12 +1144,12 @@ void RenderEngine::renderCameraInformation() {
 
     using FR = ghoul::fontrendering::FontRenderer;
 
-    _cameraButtonLocations.rotation = {
+    _cameraButtonLocations.rotation = glm::ivec4(
         fontResolution().x - rotationBox.x - XSeparation,
         fontResolution().y - penPosY,
         rotationBox.x,
         rotationBox.y
-    };
+    );
     FR::defaultRenderer().render(
         *_fontCameraInfo,
         glm::vec2(fontResolution().x - rotationBox.x - XSeparation, penPosY),
@@ -1160,12 +1160,12 @@ void RenderEngine::renderCameraInformation() {
 
     const glm::vec2 zoomBox = _fontCameraInfo->boundingBox("Zoom");
 
-    _cameraButtonLocations.zoom = {
+    _cameraButtonLocations.zoom = glm::ivec4(
         fontResolution().x - zoomBox.x - XSeparation,
         fontResolution().y - penPosY,
         zoomBox.x,
         zoomBox.y
-    };
+    );
     FR::defaultRenderer().render(
         *_fontCameraInfo,
         glm::vec2(fontResolution().x - zoomBox.x - XSeparation, penPosY),
@@ -1176,12 +1176,12 @@ void RenderEngine::renderCameraInformation() {
 
     const glm::vec2 rollBox = _fontCameraInfo->boundingBox("Roll");
 
-    _cameraButtonLocations.roll = {
+    _cameraButtonLocations.roll = glm::ivec4(
         fontResolution().x - rollBox.x - XSeparation,
         fontResolution().y - penPosY,
         rollBox.x,
         rollBox.y
-    };
+    );
     FR::defaultRenderer().render(
         *_fontCameraInfo,
         glm::vec2(fontResolution().x - rollBox.x - XSeparation, penPosY),

@@ -49,9 +49,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LinesInfo = {
         "NumLines",
         "Number of Lines",
-        "The number of lines connecting the two shapes of the prism. "
-        "They will be evenly distributed around the bounding circle that makes "
-        "up the shape of the prism"
+        "The number of lines connecting the two shapes of the prism. They will be evenly "
+        "distributed around the bounding circle that makes up the shape of the prism"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
@@ -63,8 +62,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BaseRadiusInfo = {
         "BaseRadius",
         "Base Radius",
-        "The radius of the base of the prism's shape, in meters. By default it is "
-        "given the same radius as the outer shape"
+        "The radius of the base of the prism's shape, in meters. By default it is given "
+        "the same radius as the outer shape"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {

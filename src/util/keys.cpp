@@ -36,6 +36,11 @@ namespace openspace {
 
 KeyWithModifier stringToKey(std::string str) {
     std::vector<std::string> tokens = ghoul::tokenizeString(str, '+');
+    // "Keypad +" will tokenize into "Keypad " + ""
+    if (tokens.size() == 2 && tokens[0] == "Keypad " && tokens[1].empty()) {
+        tokens = { std::string("Keypad +") };
+    }
+
     std::vector<std::string> originalTokens = tokens;
     for (std::string& t : tokens) {
         std::transform(

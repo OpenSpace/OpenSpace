@@ -62,17 +62,17 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
-        "EnableAnimation",
-        "Enable Animation",
-        "Enable or disable the animation for the model if it has any"
-    };
-
     constexpr std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",
         "specularIntensity", "opacityBlending"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
+        "EnableAnimation",
+        "Enable Animation",
+        "Enable or disable the animation for the model if it has any"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {

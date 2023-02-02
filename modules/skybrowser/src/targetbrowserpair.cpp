@@ -293,10 +293,17 @@ void TargetBrowserPair::incrementallyAnimateToCoordinate() {
         aimTargetGalactic(_targetNode->identifier(), _targetAnimation.newValue());
         _fovAnimation.start();
         _targetIsAnimating = false;
+        _fovIsAnimating = true;
     }
+    // After the target has animated to its position, animate the field of view 
     if (_fovAnimation.isAnimating()) {
         _browser->setVerticalFov(_fovAnimation.newValue());
         _targetRenderable->setVerticalFov(_browser->verticalFov());
+    }
+    else if (!_fovAnimation.isAnimating() && _fovIsAnimating) {
+        // Set the finished field of view
+        setVerticalFov(_fovAnimation.newValue());
+        _fovIsAnimating = false;
     }
 }
 

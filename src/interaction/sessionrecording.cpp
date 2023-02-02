@@ -66,8 +66,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderPlaybackInfo = {
         "RenderInfo",
         "Render Playback Information",
-        "If enabled, information about a currently played back session "
-        "recording is rendering to screen"
+        "If enabled, information about a currently played back session recording is "
+        "rendering to screen"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IgnoreRecordedScaleInfo = {
@@ -231,9 +231,9 @@ bool SessionRecording::startRecording(const std::string& filename) {
         // Record the current delta time as the first property to save in the file.
         // This needs to be saved as a baseline whether or not it changes during recording
         _timestamps3RecordStarted = {
-            _timestampRecordStarted,
-            0.0,
-            global::timeManager->time().j2000Seconds()
+            .timeOs = _timestampRecordStarted,
+            .timeRec = 0.0,
+            .timeSim = global::timeManager->time().j2000Seconds()
         };
 
         recordCurrentTimePauseState();

@@ -377,15 +377,9 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner&
 }
 
 void PropertyOwner::setIdentifier(std::string identifier) {
-    ghoul_precondition(
-        _identifier.find_first_of("\t\n ") == std::string::npos,
-        "Identifier must not contain any whitespaces"
-    );
-    ghoul_precondition(
-        _identifier.find_first_of('.') == std::string::npos,
-        "Identifier must not contain any dots"
-    );
-
+    if (identifier.find_first_of(". \t\n") != std::string::npos) {
+        throw ghoul::RuntimeError("Identifier must not contain any dots or whitespaces");
+    }
     _identifier = std::move(identifier);
 }
 

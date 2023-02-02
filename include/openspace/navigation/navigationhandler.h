@@ -91,6 +91,8 @@ public:
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
     bool disabledKeybindings() const;
+    bool disabledMouse() const;
+    bool disabledJoystick() const;
 
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);

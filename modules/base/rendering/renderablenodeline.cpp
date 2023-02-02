@@ -42,15 +42,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
         "Start Node",
-        "The identifier of the node the line starts from. "
-        "Defaults to 'Root' if not specified. "
+        "The identifier of the node the line starts from. Defaults to 'Root' if not "
+        "specified."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
         "EndNode",
         "End Node",
-        "The identifier of the node the line ends at. "
-        "Defaults to 'Root' if not specified. "
+        "The identifier of the node the line ends at. Defaults to 'Root' if not "
+        "specified."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {

@@ -229,12 +229,12 @@ bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
     }
 
     FunctionData fData = {
-        selectedPoints,
-        screenPoints,
-        _nDof,
-        &camera,
-        selectedBodies.at(0).node,
-        _lmstat
+        .selectedPoints = selectedPoints,
+        .screenPoints = screenPoints,
+        .nDOF = _nDof,
+        .camera = &camera,
+        .node = selectedBodies.at(0).node,
+        .stats = _lmstat
     };
     void* dataPtr = reinterpret_cast<void*>(&fData);
 

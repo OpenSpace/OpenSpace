@@ -11,7 +11,8 @@ local fieldlineData  = asset.syncedResource({
   Name = "Fieldlines Data PFSS",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-pfss",
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
 
 local darkenSun = {
@@ -63,11 +64,6 @@ local PFSS = {
 
 asset.onInitialize(function ()
   openspace.action.registerAction(darkenSun)
-
-  if not openspace.directoryExists(PFSSPaths.SolarSoft) then
-    openspace.printInfo("Extracting " .. "Fieldlines from PFSS model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "leilas_solar_soft.zip", PFSSPaths.SolarSoft, true)
-  end
 
   openspace.addSceneGraphNode(PFSS)
 

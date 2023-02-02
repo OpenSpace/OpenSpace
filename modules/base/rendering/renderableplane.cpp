@@ -79,8 +79,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply Color",
-        "If set, the plane's texture is multiplied with this color. "
-        "Useful for applying a color grayscale images"
+        "If set, the plane's texture is multiplied with this color. Useful for applying "
+        "a color grayscale images"
     };
 
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {

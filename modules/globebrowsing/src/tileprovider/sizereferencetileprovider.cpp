@@ -94,12 +94,12 @@ Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
     }
 
     std::string text = fmt::format(" {:.0f} {:s}", tileLongitudalLength, unit);
-    glm::vec2 textPosition = {
+    glm::vec2 textPosition = glm::vec2(
         0.f,
         aboveEquator ?
             fontSize / 2.f :
             initData.dimensions.y - 3.f * fontSize / 2.f
-    };
+    );
 
     return TextTileProvider::renderTile(tileIndex, text, textPosition, glm::vec4(1.f));
 }

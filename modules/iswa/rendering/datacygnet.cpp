@@ -80,7 +80,6 @@ namespace {
         "Transfer Functions",
         "" // @TODO Missing documentation
     };
-
 } // namespace
 
 namespace openspace {

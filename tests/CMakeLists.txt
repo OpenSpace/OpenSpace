@@ -53,13 +53,8 @@ add_executable(
 
 set_openspace_compile_settings(OpenSpaceTest)
 
-target_include_directories(OpenSpaceTest
-  PUBLIC
-    "${GHOUL_BASE_DIR}/ext/catch2/single_include"
-    "${OPENSPACE_BASE_DIR}"
-)
 target_compile_definitions(OpenSpaceTest PUBLIC "GHL_THROW_ON_ASSERT")
-target_link_libraries(OpenSpaceTest PUBLIC openspace-core)
+target_link_libraries(OpenSpaceTest PUBLIC Catch2 openspace-core)
 
 foreach (library_name ${all_enabled_modules})
   get_target_property(library_type ${library_name} TYPE)

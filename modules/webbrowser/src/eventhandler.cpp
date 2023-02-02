@@ -230,11 +230,11 @@ void EventHandler::initialize() {
                     BrowserInstance::SingleClick
                 );
 #endif
-                _validTouchStates.emplace_back(input);
             }
-            else {
-                _validTouchStates.emplace_back(input);
-            }
+
+            _validTouchStates.emplace_back(input);
+
+            global::interactionMonitor->markInteraction();
             return true;
         }
     );
@@ -269,6 +269,7 @@ void EventHandler::initialize() {
                 _leftButton.down = true;
                 _browserInstance->sendMouseMoveEvent(mouseEvent());
 #endif // WIN32
+                global::interactionMonitor->markInteraction();
                 return true;
             }
             else if (it != _validTouchStates.cend()) {

@@ -93,9 +93,9 @@ glm::dmat3 TransformationManager::kameleonTransformationMatrix(
                                               [[maybe_unused]] double ephemerisTime) const
 {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-    ccmc::Position in0 = {1.f, 0.f, 0.f};
-    ccmc::Position in1 = {0.f, 1.f, 0.f};
-    ccmc::Position in2 = {0.f, 0.f, 1.f};
+    ccmc::Position in0 = ccmc::Position(1.f, 0.f, 0.f);
+    ccmc::Position in1 = ccmc::Position(0.f, 1.f, 0.f);
+    ccmc::Position in2 = ccmc::Position(0.f, 0.f, 1.f);
 
     ccmc::Position out0;
     ccmc::Position out1;

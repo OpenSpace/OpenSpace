@@ -162,21 +162,61 @@ local otherGroups = {
   }
 }
 
+-- Generate labels for each moon
+local moon_labels = {}
+
+for i, moon in ipairs(otherGroups) do
+  local moonName = moon.GUI.Name or moon.Identifier
+  moon_labels[i] = {
+    Identifier = moon.Identifier .. "Label",
+    Parent = moon.Identifier,
+    Renderable = {
+      Enabled = false,
+      Type = "RenderableLabel",
+      Text = moonName,
+      FontSize = 70.0,
+      Size = 7.1,
+      MinMaxSize = { 1, 25 },
+      OrientationOption = "Camera View Direction",
+      BlendMode = "Additive",
+      EnableFading = true,
+      FadeUnit = "Gm",
+      FadeDistances = { 1.0, 150.0 },
+      FadeWidths = { 1.0, 50.0 }
+    },
+    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+    GUI = {
+      Name = moonName .. " Label",
+      Path = "/Solar System/Planets/Jupiter/Moons",
+      Description = "Label for Jupiter's moon " .. moonName .. " (other groups)"
+    }
+  }
+end
+
+
 local nodes = proceduralGlobes.createGlobes(otherGroups)
 
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
+  for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
+  end
+
+  for _, moonlabel in ipairs(moon_labels) do
+    openspace.addSceneGraphNode(moonlabel)
   end
 end)
 
 asset.onDeinitialize(function()
+  for i = #moon_labels, 1, -1 do
+    openspace.removeSceneGraphNode(moon_labels[i])
+  end
+
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end
 end)
 
-for i, node in ipairs(nodes) do
+for _, node in ipairs(nodes) do
   asset.export(node)
 end
 

@@ -59,7 +59,7 @@ const std::vector<OptionProperty::Option>& OptionProperty::options() const {
 }
 
 void OptionProperty::addOption(int value, std::string desc) {
-    Option option = { std::move(value), std::move(desc) };
+    Option option = { .value = std::move(value), .description = std::move(desc) };
 
     for (const Option& o : _options) {
         if (o.value == option.value) {
