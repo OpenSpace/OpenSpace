@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -126,6 +126,10 @@ void ScreenSpaceImageOnline::update() {
                     // Images don't need to start on 4-byte boundaries, for example if the
                     // image is only RGB
                     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+                    if (texture->format() == ghoul::opengl::Texture::Format::Red) {
+                        texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
+                    }
 
                     texture->uploadTexture();
                     texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);

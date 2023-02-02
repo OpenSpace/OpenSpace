@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -174,10 +174,10 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::filesystem::p
 
             // Create TableData object of table contents.
             TableData<T> loadedTable = {
-                std::move(contents),
-                static_cast<int>(table.rows()),
-                table.getRowsize(),
-                table.name()
+                .contents = std::move(contents),
+                .readRows = static_cast<int>(table.rows()),
+                .optimalRowsize = table.getRowsize(),
+                .name = table.name()
             };
 
             return std::make_shared<TableData<T>>(loadedTable);
@@ -660,7 +660,11 @@ const std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(ExtHDU& im
    try {
         std::valarray<T> contents;
         image.read(contents);
-        ImageData<T> im = { std::move(contents), image.axis(0), image.axis(1) };
+        ImageData<T> im = {
+            .contents = std::move(contents),
+            .width = image.axis(0),
+            .height = image.axis(1)
+        };
         return std::make_shared<ImageData<T>>(im);
     } catch (const FitsException& e){
         LERROR("Could not read FITS image EXTHDU. " + e.message());
@@ -673,7 +677,11 @@ const std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(PHDU& imag
     try {
         std::valarray<T> contents;
         image.read(contents);
-        ImageData<T> im = { std::move(contents), image.axis(0), image.axis(1) };
+        ImageData<T> im = {
+            .contents = std::move(contents),
+            .width = image.axis(0),
+            .height = image.axis(1)
+        };
         return std::make_shared<ImageData<T>>(im);
     } catch (const FitsException& e){
         LERROR("Could not read FITS image PHDU. " + e.message());

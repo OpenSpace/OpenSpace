@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -237,7 +237,7 @@ SkyBrowserModule::SkyBrowserModule()
 void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
-    _enabled = p.enabled.value_or(true);
+    _enabled = p.enabled.value_or(_enabled);
     _allowCameraRotation = p.allowCameraRotation.value_or(_allowCameraRotation);
     _cameraRotationSpeed = p.cameraRotSpeed.value_or(_cameraRotationSpeed);
     _targetAnimationSpeed = p.targetSpeed.value_or(_targetAnimationSpeed);

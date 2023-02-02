@@ -65,12 +65,36 @@ local updatePositionAction = {
   IsLocal = false
 }
 
+local resetPositionAction = {
+  Identifier = "os.reset_eiffel_tower",
+  Name = "Reset Eiffel Tower position",
+  Command = [[
+    -- same position as above
+    local lat = 48.85824
+    local lon = 2.29448
+    local globe = ']] .. earthAsset.Earth.Identifier .. [['
+    openspace.setParent('eiffelTower', globe)
+    openspace.setPropertyValueSingle('Scene.eiffelTower.Translation.Globe', globe);
+    openspace.setPropertyValueSingle('Scene.eiffelTower.Translation.Latitude', lat);
+    openspace.setPropertyValueSingle('Scene.eiffelTower.Translation.Longitude', lon);
+    openspace.setPropertyValueSingle('Scene.eiffelTower.Rotation.Globe', globe);
+    openspace.setPropertyValueSingle('Scene.eiffelTower.Rotation.Latitude', lat);
+    openspace.setPropertyValueSingle('Scene.eiffelTower.Rotation.Longitude', lon);
+  ]],
+  Documentation = "Updates the Eiffel Tower position based on the globe location of the camera",
+  GuiPath = "/Scale Objects",
+  IsLocal = false
+}
+
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(eiffelTower)
   openspace.action.registerAction(updatePositionAction)
+  openspace.action.registerAction(resetPositionAction)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(resetPositionAction)
   openspace.action.removeAction(updatePositionAction)
   openspace.removeSceneGraphNode(eiffelTower)
 end)
