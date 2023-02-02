@@ -40,10 +40,6 @@ namespace openspace::globebrowsing {
 
 class VideoTileProvider : public TileProvider {
 public:
-    static constexpr glm::ivec2 TileSize = { 512, 512 };
-    //static constexpr glm::ivec2 FinalResolution = { 2048, 1024 };
-    static constexpr int NumTilePixels = 262144;
-
     VideoTileProvider(const ghoul::Dictionary& dictionary);
     ~VideoTileProvider();
 
@@ -99,12 +95,10 @@ private:
     double _endJ200Time = 0.0;
     double _videoDuration = -1.0;
     double _currentVideoTime = 0.0;
-    double _prevVideoTime = 0.0;
     double _frameTime = 1.0 / 24.0;
     bool _hasReachedEnd = false;
     bool _tileIsReady = false;
     bool _isInitialized = false;
-    bool _isWaiting = false;
     glm::ivec2 _resolution = { 2048, 1024 };
 
     // libmpv

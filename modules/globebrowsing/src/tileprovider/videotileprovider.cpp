@@ -801,7 +801,6 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
             LERROR("Could not find playback time property");
             break;
         }
-        _prevVideoTime = _currentVideoTime;
         _currentVideoTime = *time;
         // Time has changed - we don't have a texture yet
         _tileIsReady = false;
