@@ -61,12 +61,11 @@ function (set_openspace_compile_settings target)
   endif ()
 
   set(CLANG_WARNINGS
-    "-stdlib=libc++"
     "-Wall"
     "-Wextra"
     "-Wmost"
     "-Wpedantic"
-    
+
     "-Wabstract-vbase-init"
     "-Walloca"
     "-Wanon-enum-enum-conversion"
@@ -141,7 +140,7 @@ function (set_openspace_compile_settings target)
     "-Wvariadic-macros"
     "-Wvla"
     "-Wzero-as-null-pointer-constant"
-    
+
     "-Wno-attributes"
     "-Wno-missing-braces"
     "-Wno-unknown-attributes"
@@ -177,7 +176,7 @@ function (set_openspace_compile_settings target)
     "-Wuninitialized"
     "-Wvla"
     "-Wzero-as-null-pointer-constant"
-    
+
     "-Wno-attributes"
     "-Wno-deprecated-copy"
     "-Wno-float-equal"
@@ -206,8 +205,7 @@ function (set_openspace_compile_settings target)
 
     target_compile_options(${target} PRIVATE ${CLANG_WARNINGS})
   elseif (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    target_compile_options(${target} PRIVATE ${CLANG_WARNINGS} "-std=c++17")
-    target_link_libraries(${target} PRIVATE "c++" "c++abi")
+    target_compile_options(${target} PRIVATE ${CLANG_WARNINGS})
   elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     target_compile_options(${target} PRIVATE ${GCC_WARNINGS})
   else ()
