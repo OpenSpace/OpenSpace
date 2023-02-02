@@ -25,16 +25,16 @@
 */
 
 /*
-	The text above constitutes the entire oscpack license; however, 
+	The text above constitutes the entire oscpack license; however,
 	the oscpack developer(s) also make the following non-binding requests:
 
 	Any person wishing to distribute modifications to the Software is
 	requested to send the modifications to the original developer so that
-	they can be incorporated into the canonical version. It is also 
+	they can be incorporated into the canonical version. It is also
 	requested that these non-binding requests be included whenever the
 	above license is reproduced.
 */
-#include "modules/sonification/ext/osc/ip/NetworkingUtils.h"
+#include "modules/osc/ext/osc/ip/NetworkingUtils.h"
 
 #include <winsock2.h>   // this must come first to prevent errors with MSVC7
 #include <windows.h>
@@ -49,10 +49,10 @@ NetworkInitializer::NetworkInitializer()
 {
     if( InterlockedIncrement( &initCount_ ) == 1 ){
         // there is a race condition here if one thread tries to access
-        // the library while another is still initializing it. 
+        // the library while another is still initializing it.
         // i can't think of an easy way to fix it so i'm telling you here
         // incase you need to init the library from two threads at once.
-        // this is why the header file advises to instantiate one of these 
+        // this is why the header file advises to instantiate one of these
         // in main() so that the initialization happens globally
 
         // initialize winsock

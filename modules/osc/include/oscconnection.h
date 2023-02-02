@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                              *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,58 +21,33 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#ifndef __OPENSPACE_MODULE_OSC___OSCCONNECTION___H__
+#define __OPENSPACE_MODULE_OSC___OSCCONNECTION___H__
 
-#include <modules/sonification/sonificationmodule.h>
-
-#include <modules/sonification/include/planetssonification.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
-
-namespace {
-    //Output to SuperCollider
-    constexpr std::string_view SuperColliderIp = "127.0.0.1";
-    constexpr int SuperColliderPort = 57120;
-} // namespace
+#include <modules/osc/ext/osc/ip/UdpSocket.h>
+#include <modules/osc/ext/osc/osc/OscOutboundPacketStream.h>
+#include <string>
+#include <variant>
+#include <vector>
 
 namespace openspace {
 
-SonificationModule::SonificationModule()
-    : OpenSpaceModule("Sonification")
-{
-    // Only the master runs the SonificationModule
-    if (global::windowDelegate->isMaster()) {
-        _isRunning = true;
-        _updateThread = std::thread([this]() { update(std::ref(_isRunning)); });
-    }
+    using OscDataType = std::variant<osc::Blob, double, int, std::string>;
 
-    // Fill sonification list
-    _sonifications.push_back(new PlanetsSonification(SuperColliderIp.data(), SuperColliderPort));
-    addPropertySubOwner(_sonifications.back());
-}
+class OscConnection {
+public:
 
-SonificationModule::~SonificationModule() {
-    // Join the thread
-    _isRunning = false;
-    if (_updateThread.joinable()) {
-        _updateThread.join();
-    }
+    OscConnection(const std::string& ip, int port);
+    ~OscConnection();
 
-    // Clear the sonifications list
-    for (SonificationBase* sonification : _sonifications) {
-        delete sonification;
-    }
-}
-
-void SonificationModule::update(std::atomic<bool>& isRunning) {
-    while (isRunning) {
-        for (SonificationBase* sonification : _sonifications) {
-            if (!sonification) {
-                continue;
-            }
-
-            sonification->update();
-        }
-    }
-}
+    void send(const std::string& label,
+        const std::vector<OscDataType>& data);
+private:
+    UdpTransmitSocket _socket;
+    osc::OutboundPacketStream _stream;
+    char* _buffer;
+};
 
 } // namespace openspace
+
+#endif __OPENSPACE_MODULE_OSC___OSCCONNECTION___H__

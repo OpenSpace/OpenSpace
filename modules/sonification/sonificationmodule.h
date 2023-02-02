@@ -27,7 +27,6 @@
 
 #include "openspace/util/openspacemodule.h"
 
-#include <modules/sonification/include/oscengine.h>
 #include <modules/sonification/include/sonificationbase.h>
 #include <atomic>
 
@@ -42,14 +41,11 @@ public:
     SonificationModule();
     ~SonificationModule();
 
-    OscEngine* engine();
-
 private:
     void update(std::atomic<bool>& isRunning);
 
     std::thread _updateThread;
     std::atomic<bool> _isRunning = false;
-    OscEngine* _oscEngine = nullptr;
     std::vector<SonificationBase*> _sonifications;
 };
 

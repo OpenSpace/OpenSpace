@@ -27,9 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/sonification/sonificationmodule.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
+#include <modules/osc/include/oscconnection.h>
 
 namespace openspace {
 
@@ -37,13 +35,14 @@ class SonificationModule;
 
 class SonificationBase : public properties::PropertyOwner {
 public:
-    SonificationBase(properties::PropertyOwner::PropertyOwnerInfo info);
+    SonificationBase(properties::PropertyOwner::PropertyOwnerInfo info,
+        const std::string& ip, int port);
     virtual ~SonificationBase();
 
     virtual void update() = 0;
 
-    SonificationModule* _sonificationModule =
-        global::moduleEngine->module<SonificationModule>();
+protected:
+    OscConnection* _connection = nullptr;
 };
 
 } // namespace openspace

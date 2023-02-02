@@ -22,57 +22,65 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/sonification/sonificationmodule.h>
+#include <modules/osc/include/oscconnection.h>
 
-#include <modules/sonification/include/planetssonification.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
-    //Output to SuperCollider
-    constexpr std::string_view SuperColliderIp = "127.0.0.1";
-    constexpr int SuperColliderPort = 57120;
+    constexpr std::string_view _loggerCat = "OscConnection";
+    constexpr int BufferSize = 1024;
+
+    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
 } // namespace
 
 namespace openspace {
 
-SonificationModule::SonificationModule()
-    : OpenSpaceModule("Sonification")
+OscConnection::OscConnection(const std::string& ip, int port)
+    : _socket(IpEndpointName(ip.c_str(), port))
 {
-    // Only the master runs the SonificationModule
-    if (global::windowDelegate->isMaster()) {
-        _isRunning = true;
-        _updateThread = std::thread([this]() { update(std::ref(_isRunning)); });
-    }
-
-    // Fill sonification list
-    _sonifications.push_back(new PlanetsSonification(SuperColliderIp.data(), SuperColliderPort));
-    addPropertySubOwner(_sonifications.back());
+    // Create buffer and stream that will be used to send messages
+    _buffer = new char[BufferSize];
+    _stream = osc::OutboundPacketStream(_buffer, BufferSize);
 }
 
-SonificationModule::~SonificationModule() {
-    // Join the thread
-    _isRunning = false;
-    if (_updateThread.joinable()) {
-        _updateThread.join();
-    }
-
-    // Clear the sonifications list
-    for (SonificationBase* sonification : _sonifications) {
-        delete sonification;
-    }
+OscConnection::~OscConnection() {
+    delete[] _buffer;
 }
 
-void SonificationModule::update(std::atomic<bool>& isRunning) {
-    while (isRunning) {
-        for (SonificationBase* sonification : _sonifications) {
-            if (!sonification) {
-                continue;
-            }
-
-            sonification->update();
-        }
+void OscConnection::send(const std::string& label, const std::vector<OscDataType>& data)
+{
+    if (label.empty()) {
+        LERROR("Cannot send osc message without label");
+        return;
     }
+
+    _stream.Clear();
+    _stream << osc::BeginMessage(label.c_str());
+
+    for (const OscDataType& item : data) {
+        std::visit(overloaded {
+            [this](const osc::Blob& value) {
+                _stream << value;
+            },
+            [this](double value) {
+                _stream << value;
+            },
+            [this](int value) {
+                _stream << value;
+            },
+            [this](const std::string& value) {
+                _stream << value.c_str();
+            },
+            [this](auto v) {
+                _stream << osc::EndMessage;
+                throw ghoul::MissingCaseException();
+            },
+        }, item);
+    }
+
+    _stream << osc::EndMessage;
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 } // namespace openspace

@@ -22,43 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SONIFICATION___OSCENGINE___H__
-#define __OPENSPACE_MODULE_SONIFICATION___OSCENGINE___H__
+#ifndef __OPENSPACE_MODULE_OSC___OSCMODULE___H__
+#define __OPENSPACE_MODULE_OSC___OSCMODULE___H__
 
-#include <modules/sonification/ext/osc/ip/UdpSocket.h>
-#include <modules/sonification/ext/osc/osc/OscOutboundPacketStream.h>
+#include "openspace/util/openspacemodule.h"
 
 namespace openspace {
 
-class OscEngine {
+class OscModule : public OpenSpaceModule {
 public:
-    enum class OscDataType {
-        Blob = 0,
-        Double,
-        Int,
-        String
-    };
+    constexpr static const char* Name = "OscModule";
 
-    struct OscDataEntry {
-        osc::Blob blobValue;
-        int intValue;
-        double doubleValue;
-        std::string stringValue;
-
-        OscDataType type;
-    };
-
-    OscEngine(const std::string& ip, int port);
-    ~OscEngine();
-
-    void send(const std::string& label, const std::vector<OscDataEntry>& data);
-
+    OscModule();
+    ~OscModule();
 private:
-    UdpTransmitSocket _socket;
-    osc::OutboundPacketStream _stream;
-    char* _buffer;
 };
 
-} // openspace namespace
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SONIFICATION___OSCENGINE___H__
+#endif __OPENSPACE_MODULE_OSC___OSCMODULE___H__

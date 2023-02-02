@@ -45,7 +45,7 @@ public:
         Compare
     };
 
-    PlanetsSonification();
+    PlanetsSonification(const std::string& ip, int port);
     virtual ~PlanetsSonification() override;
 
     virtual void update() override;

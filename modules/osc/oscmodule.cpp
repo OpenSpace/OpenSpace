@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                              *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,53 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/sonification/include/oscengine.h>
+#include <modules/osc/oscmodule.h>
 
 namespace {
-    constexpr int BufferSize = 1024;
-
 } // namespace
 
 namespace openspace {
 
-OscEngine::OscEngine(const std::string& ip, int port)
-    : _socket(IpEndpointName(ip.c_str(), port))
+OscModule::OscModule()
+    : OpenSpaceModule("Osc")
 {
-    // Create buffer and stream that will be used to send messages to SuperCollider
-    _buffer = new char[BufferSize];
-    _stream = osc::OutboundPacketStream(_buffer, BufferSize);
+
 }
 
-OscEngine::~OscEngine() {
-    delete[] _buffer;
+OscModule::~OscModule() {
+
 }
 
-void OscEngine::send(const std::string& label, const std::vector<OscDataEntry>& data)
-{
-    _stream.Clear();
-    _stream << osc::BeginMessage(label.c_str());
-
-    for (size_t i = 0; i < data.size(); ++i) {
-        switch (data[i].type) {
-            case OscEngine::OscDataType::Blob:
-                _stream << data[i].blobValue;
-                break;
-            case OscEngine::OscDataType::Double:
-                _stream << data[i].doubleValue;
-                break;
-            case OscEngine::OscDataType::Int:
-                _stream << data[i].intValue;
-                break;
-            case OscEngine::OscDataType::String:
-                _stream << data[i].stringValue.c_str();
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
-    }
-
-    _stream  << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
-}
-
-} // openspace namespace
+} // namespace openspace

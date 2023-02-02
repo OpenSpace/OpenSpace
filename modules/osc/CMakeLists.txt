@@ -25,20 +25,20 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/include/planetssonification.h
-	${CMAKE_CURRENT_SOURCE_DIR}/include/sonificationbase.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/oscconnection.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/sonificationbase.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/oscconnection.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
-	"Sonification"
-	sonification_module
+	"Osc"
+	osc_module
 	STATIC
 	${HEADER_FILES} ${SOURCE_FILES}
 )
+
+include_external_library(${osc_module} PUBLIC oscpack ${CMAKE_CURRENT_SOURCE_DIR}/ext/osc)

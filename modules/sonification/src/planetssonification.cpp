@@ -30,6 +30,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/query/query.h>
 #include <glm/gtx/projection.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
@@ -234,8 +235,8 @@ namespace {
 
 namespace openspace {
 
-PlanetsSonification::PlanetsSonification()
-    : SonificationBase(PlanetsSonificationInfo)
+PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
+    : SonificationBase(PlanetsSonificationInfo, ip, port)
 {
     _scene = global::renderEngine->scene();
     _camera = _scene? _scene->camera() : nullptr;
@@ -504,13 +505,12 @@ void PlanetsSonification::onEverythingChanged(bool value) {
 //Solar View
 void PlanetsSonification::sendSolarSettings() {
     std::string label = "/Sun";
-    std::vector<OscEngine::OscDataEntry> data(1);
+    std::vector<OscDataType> data(1);
 
     osc::Blob settingsBlob = osc::Blob(_solarSettings, NumPlanets);
-    data[0].type = OscEngine::OscDataType::Blob;
-    data[0].blobValue = settingsBlob;
+    data[0] = settingsBlob;
 
-    _sonificationModule->engine()->send(label, data);
+    _connection->send(label, data);
 }
 
 void PlanetsSonification::onSolarAllEnabledChanged(bool value) {
@@ -721,19 +721,16 @@ void PlanetsSonification::onSolarNeptuneEnabledChanged(bool value) {
 //Compare
 void PlanetsSonification::sendCompareSettings() {
     std::string label = "/Compare";
-    std::vector<OscEngine::OscDataEntry> data(3);
+    std::vector<OscDataType> data(3);
 
-    data[0].type = OscEngine::OscDataType::Int;
-    data[0].intValue = _compareProperty.firstPlanet.value();
+    data[0] = _compareProperty.firstPlanet.value();
 
-    data[1].type = OscEngine::OscDataType::Int;
-    data[1].intValue = _compareProperty.secondPlanet.value();
+    data[1] = _compareProperty.secondPlanet.value();
 
     osc::Blob settingsBlob = osc::Blob(_compareSettings, NumPlanetarySettings);
-    data[2].type = OscEngine::OscDataType::Blob;
-    data[2].blobValue = settingsBlob;
+    data[2] = settingsBlob;
 
-    _sonificationModule->engine()->send(label, data);
+    _connection->send(label, data);
 }
 
 void PlanetsSonification::onFirstCompareChanged(properties::OptionProperty::Option value)
@@ -963,38 +960,26 @@ void PlanetsSonification::onCompareRingsChanged(bool value) {
 //Planetary View
 void PlanetsSonification::sendPlanetarySettings(const int planetIndex) {
     std::string label = "/" + _planets[planetIndex].identifier;
-    std::vector<OscEngine::OscDataEntry> data;
+    std::vector<OscDataType> data;
 
     // Distance
-    OscEngine::OscDataEntry distanceData;
-    distanceData.type = OscEngine::OscDataType::Double;
-    distanceData.doubleValue = _planets[planetIndex].distance;
-    data.push_back(distanceData);
+    data.push_back(_planets[planetIndex].distance);
 
     // Angle
-    OscEngine::OscDataEntry angleData;
-    angleData.type = OscEngine::OscDataType::Double;
-    angleData.doubleValue = _planets[planetIndex].angle;
-    data.push_back(angleData);
+    data.push_back(_planets[planetIndex].angle);
 
     // Settings
-    OscEngine::OscDataEntry SettingsData;
     osc::Blob settingsBlob =
         osc::Blob(_planets[planetIndex].settings, NumPlanetarySettings);
-    SettingsData.type = OscEngine::OscDataType::Blob;
-    SettingsData.blobValue = settingsBlob;
-    data.push_back(SettingsData);
+    data.push_back(settingsBlob);
 
     // Moons
     for (size_t m = 0; m < _planets[planetIndex].moons.size(); ++m) {
-        OscEngine::OscDataEntry moonData;
-        moonData.type = OscEngine::OscDataType::Double;
-        moonData.doubleValue = _planets[planetIndex].moons[m].second;
-        data.push_back(moonData);
+        data.push_back(_planets[planetIndex].moons[m].second);
     }
 
     data.shrink_to_fit();
-    _sonificationModule->engine()->send(label, data);
+    _connection->send(label, data);
 }
 
 void PlanetsSonification::onAllEnabledChanged(bool value) {
@@ -1721,12 +1706,10 @@ void PlanetsSonification::checkTimeSpeed(double& ts) {
         ts = timeSpeed;
 
         std::string label = "/Time";
-        std::vector<OscEngine::OscDataEntry> data(1);
+        std::vector<OscDataType> data(1);
+        data[0] = ts;
 
-        data[0].type = OscEngine::OscDataType::Double;
-        data[0].doubleValue = ts;
-
-        _sonificationModule->engine()->send(label, data);
+        _connection->send(label, data);
     }
 }
 
@@ -1735,11 +1718,11 @@ void PlanetsSonification::checkTimeSpeed(double& ts) {
 //otherwise no match will be found
 void PlanetsSonification::extractData(const std::string& identifier, int i)
 {
-    if (!_scene || !_camera) {
+    if (!_scene || !_camera || _scene->isInitializing()) {
         return;
     }
 
-    SceneGraphNode* node = _scene->sceneGraphNode(identifier);
+    SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
         return;
     }
@@ -1779,7 +1762,7 @@ void PlanetsSonification::extractData(const std::string& identifier, int i)
         for (int m = 0; m < _planets[i].moons.size(); ++m) {
             // TODO: This throws an exception sometimes for Io
             SceneGraphNode* moon =
-                _scene->sceneGraphNode(_planets[i].moons[m].first);
+                sceneGraphNode(_planets[i].moons[m].first);
             if (moon) {
                 glm::dvec3 planetToMoon = moon->worldPosition() - nodePosition;
                 glm::dvec3 planetToProjectedMoon = planetToMoon -

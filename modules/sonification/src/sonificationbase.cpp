@@ -26,11 +26,16 @@
 
 namespace openspace {
 
-SonificationBase::SonificationBase(properties::PropertyOwner::PropertyOwnerInfo info)
+SonificationBase::SonificationBase(properties::PropertyOwner::PropertyOwnerInfo info,
+                                   const std::string& ip, int port)
     : properties::PropertyOwner(info)
-{}
+{
+    _connection = new OscConnection(ip, port);
+}
 
-SonificationBase::~SonificationBase() {}
+SonificationBase::~SonificationBase() {
+    delete _connection;
+}
 
 } // namespace openspace
 
