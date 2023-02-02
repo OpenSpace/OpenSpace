@@ -185,19 +185,10 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
 
         if (_useRelativeOffsets) {
             // Recompute previous offsets to relative values
-            if (startNode->boundingSphere() > 0.0) {
-                _startOffset = _startOffset / startNode->boundingSphere();
-            }
-            else {
-                _startOffset = 0.0;
-            }
-
-            if (endNode->boundingSphere() > 0.0) {
-                _endOffset = _endOffset / endNode->boundingSphere();
-            }
-            else {
-                _endOffset = 0.0;
-            }
+            double startBs = startNode->boundingSphere();
+            double endBs = endNode->boundingSphere();
+            _startOffset = startBs > 0.0 ? _startOffset / startBs : 0.0;
+            _endOffset = endBs > 0.0 ? _endOffset / startBs : 0.0;
         }
         else {
             // Recompute relative values to meters
