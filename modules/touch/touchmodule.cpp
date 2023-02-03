@@ -204,6 +204,8 @@ bool TouchModule::processNewInput() {
     if (_touchPoints.size() == _lastTouchInputs.size() &&
         !_touchPoints.empty())
     {
+        // @TODO (emmbr26, 2023-02-03) Looks to me like this code will always return
+        // true? That's a bit weird and should probably be investigated
         bool newInput = true;
         // Go through list and check if the last registrered time is newer than the
         // last processed touch inputs (last frame)
@@ -221,7 +223,8 @@ bool TouchModule::processNewInput() {
                 if (!holder->isMoving()) {
                     newInput = true;
                 }
-            });
+            }
+        );
         return newInput;
     }
     else {

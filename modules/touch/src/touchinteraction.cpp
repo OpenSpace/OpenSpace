@@ -503,6 +503,8 @@ TouchInteraction::InteractionType
 TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list,
                                            const std::vector<TouchInput>& lastProcessed)
 {
+    ghoul_assert(list.empty(), "Cannot interpret interaction of no input");
+
     glm::fvec2 lastCentroid = _centroid;
     _centroid = glm::vec2(0.f, 0.f);
     for (const TouchInputHolder& inputHolder : list) {
@@ -666,8 +668,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
         if (pinchConsecCt > 3) {
             LDEBUG(fmt::format(
                 "PINCH gesture ended with {} drag distance and {} counts",
-                pinchConsecZoomFactor,
-                pinchConsecCt
+                pinchConsecZoomFactor, pinchConsecCt
             ));
         }
         pinchConsecCt = 0;
@@ -1040,6 +1041,9 @@ void TouchInteraction::resetAfterInput() {
     _debugProperties.nFingers = 0;
     _debugProperties.interactionMode = "None";
 #endif
+    // @TODO (emmbr 2023-02-03) We should try to reimplement this but using the friction
+    // parameters in the orbitalnavigator somehow. Maybe the velocities affected by
+    // the touch should actually be the orbitalnavigator's?
     if (_directTouchMode && !_selectedNodeSurfacePoints.empty() && _lmSuccess) {
         double spinDelta = _spinSensitivity / global::windowDelegate->averageDeltaTime();
         if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) {
