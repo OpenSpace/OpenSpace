@@ -22,19 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/src/basictypes.h>
-#include <modules/globebrowsing/src/renderableglobe.h>
-#endif
-
 #include <modules/touch/include/touchinteraction.h>
+
 #include <modules/touch/include/directinputsolver.h>
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
@@ -336,14 +329,14 @@ TouchInteraction::TouchInteraction()
 void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>& list,
                                             std::vector<TouchInput>& lastProcessed)
 {
+    size_t numFingers = list.size();
+
 #ifdef TOUCH_DEBUG_PROPERTIES
-    _debugProperties.nFingers = list.size();
+    _debugProperties.nFingers = numFingers;
 #endif
 
-    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
-    if (mode == OpenSpaceEngine::Mode::CameraPath ||
-        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
-    {
+    if (numFingers == 0) {
+        // No fingers, no input (note that this function should not even be called then)
         return;
     }
 
@@ -392,8 +385,6 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
         resetAfterInput();
     }
 
-    size_t numFingers = list.size();
-
     if (_directTouchMode && !_selectedNodeSurfacePoints.empty() &&
         numFingers == _selectedNodeSurfacePoints.size())
     {
@@ -423,13 +414,6 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
 void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) {
     // Reset old velocities upon new interaction
     resetVelocities();
-
-    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
-    if (mode == OpenSpaceEngine::Mode::CameraPath ||
-        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
-    {
-        return;
-    }
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     LINFO("DirectControl");
@@ -834,13 +818,6 @@ double TouchInteraction::computeTapZoomDistance(double zoomGain) {
 // Main update call, calculates the new orientation and position for the camera depending
 // on _vel and dt. Called every frame
 void TouchInteraction::step(double dt, bool directTouch) {
-    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
-    if (mode == OpenSpaceEngine::Mode::CameraPath ||
-        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
-    {
-        return;
-    }
-
     using namespace glm;
 
     const SceneGraphNode* anchor =
@@ -929,8 +906,10 @@ void TouchInteraction::step(double dt, bool directTouch) {
                 // Because of heightmaps we need to ensure we don't go through the surface
                 if (_zoomInLimit.value() < nodeRadius) {
 #ifdef TOUCH_DEBUG_PROPERTIES
-                    LINFO(fmt::format("{}: Zoom In limit should be larger than anchor "
-                        "center to surface, setting it to {}", _loggerCat, zoomInBounds));
+                    LINFO(fmt::format(
+                        "Zoom In limit should be larger than anchor "
+                        "center to surface, setting it to {}", zoomInBounds
+                    ));
 #endif
                     zoomInBounds = _zoomInLimit.value();
                 }
@@ -988,8 +967,8 @@ void TouchInteraction::step(double dt, bool directTouch) {
 #ifdef TOUCH_DEBUG_PROPERTIES
                 LINFO(fmt::format(
                     "You are outside zoom out {} limit, only zoom in allowed",
-                    _zoomOutLimit.value())
-                );
+                    _zoomOutLimit.value()
+                ));
 #endif
                 // Only allow zooming in if you are outside the zoom out limit
                 if (newPosDistance < currentPosDistance) {
@@ -1048,13 +1027,6 @@ void TouchInteraction::decelerate(double dt) {
 
     //Ensure the number of times to apply the decay coefficient is valid
     times = std::min(times, 1);
-
-    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
-    if (mode == OpenSpaceEngine::Mode::CameraPath ||
-        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
-    {
-        return;
-    }
 
     _vel.orbit *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.orbit, times);
     _vel.roll  *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.roll,  times);

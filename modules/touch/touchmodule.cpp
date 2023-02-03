@@ -28,6 +28,7 @@
 #include <modules/touch/include/win32_touch.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -119,9 +120,21 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&){
             return;
         }
 
+        OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+        if (mode == OpenSpaceEngine::Mode::CameraPath ||
+            mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+        {
+            // Reset everything, to avoid problems once we process inputs again
+            _lastTouchInputs.clear();
+            _touch.resetAfterInput();
+            clearInputs();
+            return;
+        }
+
         _touch.setCamera(global::navigationHandler->camera());
 
-        if (processNewInput() && global::windowDelegate->isMaster()) {
+        bool gotNewInput = processNewInput();
+        if (gotNewInput && global::windowDelegate->isMaster()) {
             _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
         }
         else if (_touchPoints.empty()) {
