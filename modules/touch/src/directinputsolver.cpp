@@ -212,6 +212,11 @@ bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
                               const std::vector<SelectedBody>& selectedBodies,
                               std::vector<double>* parameters, const Camera& camera)
 {
+    ghoul_assert(
+        selectedBodies.size() >= list.size(),
+        "Number of touch inputs must match the number of 'selected bodies'"
+    );
+
     int nFingers = std::min(static_cast<int>(list.size()), 3);
     _nDof = std::min(nFingers * 2, 6);
 

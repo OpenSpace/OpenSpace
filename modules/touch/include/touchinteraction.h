@@ -151,6 +151,9 @@ private:
     // Resets all properties that can be changed in the GUI to default
     void resetPropertiesToDefault();
 
+    // Set all velocities to zero
+    void resetVelocities();
+
     Camera* _camera = nullptr;
 
     // Property variables

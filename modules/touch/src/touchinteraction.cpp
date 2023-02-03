@@ -386,15 +386,13 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
         }
     }
 
-    size_t numFingers = list.size();
     bool isTransitionBetweenModes = (_wasPrevModeDirectTouch != _directTouchMode);
     if (isTransitionBetweenModes) {
-        _vel.orbit = glm::dvec2(0.0);
-        _vel.zoom = 0.0;
-        _vel.roll = 0.0;
-        _vel.pan = glm::dvec2(0.0);
+        resetVelocities();
         resetAfterInput();
     }
+
+    size_t numFingers = list.size();
 
     if (_directTouchMode && !_selectedNodeSurfacePoints.empty() &&
         numFingers == _selectedNodeSurfacePoints.size())
@@ -404,15 +402,15 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
 #endif
         directControl(list);
     }
-    if (_lmSuccess) {
-        updateNodeSurfacePoints(list);
-    }
-
-    if (!_directTouchMode) {
+    else {
 #ifdef TOUCH_DEBUG_PROPERTIES
         _debugProperties.interactionMode = "Velocities";
 #endif
         computeVelocities(list, lastProcessed);
+    }
+
+    if (_lmSuccess) {
+        updateNodeSurfacePoints(list);
     }
 
     _wasPrevModeDirectTouch = _directTouchMode;
@@ -424,10 +422,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
 
 void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) {
     // Reset old velocities upon new interaction
-    _vel.orbit = glm::dvec2(0.0);
-    _vel.zoom = 0.0;
-    _vel.roll = 0.0;
-    _vel.pan = glm::dvec2(0.0);
+    resetVelocities();
 
     OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
     if (mode == OpenSpaceEngine::Mode::CameraPath ||
@@ -466,13 +461,10 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
 
         // Reset velocities after setting new camera state
         _lastVel = _vel;
-        _vel.orbit = glm::dvec2(0.0);
-        _vel.zoom = 0.0;
-        _vel.roll = 0.0;
-        _vel.pan = glm::dvec2(0.0);
+        resetVelocities();
     }
     else {
-        // prevents touch to infinitely be active (due to windows bridge case where event
+        // Prevents touch to infinitely be active (due to windows bridge case where event
         // doesn't get consumed sometimes when LMA fails to converge)
         resetAfterInput();
     }
@@ -484,7 +476,7 @@ void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolde
     std::vector<DirectInputSolver::SelectedBody> surfacePoints;
 
     for (const TouchInputHolder& inputHolder : list) {
-        // normalized -1 to 1 coordinates on screen
+        // Normalized -1 to 1 coordinates on screen
         double xCo = 2 * (inputHolder.latestInput().x - 0.5);
         double yCo = -2 * (inputHolder.latestInput().y - 0.5);
         glm::dvec3 cursorInWorldSpace = camToWorldSpace *
@@ -907,9 +899,10 @@ void TouchInteraction::step(double dt, bool directTouch) {
                                            dvec3(_camera->lookUpVectorCameraSpace());
 
             const dmat4 lookAtMatrix = lookAt(
-                dvec3(0.0, 0.0, 0.0),
+                dvec3(0.0),
                 directionToCenter,
-                lookUpWhenFacingCenter);
+                lookUpWhenFacingCenter
+            );
             globalCamRot = normalize(quat_cast(inverse(lookAtMatrix)));
         }
         {
@@ -1026,8 +1019,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
             stepVelUpdate = 0;
             LINFO(fmt::format(
                 "DistToFocusNode {} stepZoomVelUpdate {}",
-                length(centerToCamera),
-                _vel.zoom
+                length(centerToCamera), _vel.zoom
             ));
         }
 #endif
@@ -1118,6 +1110,13 @@ void TouchInteraction::resetPropertiesToDefault() {
     _centroidStillThreshold.set(0.0018f);
     _interpretPan.set(0.015f);
     _friction.set(glm::vec4(0.025f, 0.025f, 0.02f, 0.02f));
+}
+
+void TouchInteraction::resetVelocities() {
+    _vel.orbit = glm::dvec2(0.0);
+    _vel.zoom = 0.0;
+    _vel.roll = 0.0;
+    _vel.pan = glm::dvec2(0.0);
 }
 
 void TouchInteraction::tap() {
