@@ -59,7 +59,7 @@ TouchModule::TouchModule()
     addPropertySubOwner(_touch);
     addPropertySubOwner(_markers);
     addProperty(_touchIsEnabled);
-    _touchIsEnabled.onChange([&] {
+    _touchIsEnabled.onChange([&]() {
         _touch.resetAfterInput();
         _lastTouchInputs.clear();
     });
@@ -72,7 +72,7 @@ TouchModule::~TouchModule() {
     // intentionally left empty
 }
 
-void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
+void TouchModule::internalInitialize(const ghoul::Dictionary&){
     _ear.reset(new TuioEar());
 
     global::callback::initializeGL->push_back([&]() {

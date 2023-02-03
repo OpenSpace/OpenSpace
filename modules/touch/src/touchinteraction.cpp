@@ -396,7 +396,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
         resetAfterInput();
     }
 
-    if (_directTouchMode && _selectedNodeSurfacePoints.size() > 0 &&
+    if (_directTouchMode && !_selectedNodeSurfacePoints.empty() &&
         numFingers == _selectedNodeSurfacePoints.size())
     {
 #ifdef TOUCH_DEBUG_PROPERTIES
@@ -632,12 +632,6 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
     if (_zoomOutTap) {
         return ZOOM_OUT;
     }
-    //else if (_doubleTap) {
-    //    // This used to do picking of objects to change focus nodes, but did
-    //    // not quite work and was at the time considered an undesired feature.
-    //    // @TODO (2023-02-01, emmbr) Maybe bring picking back in the future, but then
-    //    // double tap needs to work more reliably
-    //}
     else if (list.size() == 1) {
         return ROTATION;
     }
@@ -952,8 +946,8 @@ void TouchInteraction::step(double dt, bool directTouch) {
             // Make sure zoom in limit is not larger than zoom out limit
             if (zoomInBounds > _zoomOutLimit.value()) {
                LWARNING(fmt::format(
-                   "{}: Zoom In Limit should be smaller than Zoom Out Limit",
-                    _loggerCat, _zoomOutLimit.value()
+                   "Zoom In Limit should be smaller than Zoom Out Limit",
+                    _zoomOutLimit.value()
                ));
             }
             const double currentPosDistance = length(centerToCamera);
@@ -999,9 +993,10 @@ void TouchInteraction::step(double dt, bool directTouch) {
             }
             else if (currentPosViolatingZoomOutLimit) {
 #ifdef TOUCH_DEBUG_PROPERTIES
-                LINFOC("", fmt::format(
-                    "{}: You are outside zoom out {} limit, only zoom in allowed",
-                    _loggerCat, _zoomOutLimit.value()));
+                LINFO(fmt::format(
+                    "You are outside zoom out {} limit, only zoom in allowed",
+                    _zoomOutLimit.value())
+                );
 #endif
                 // Only allow zooming in if you are outside the zoom out limit
                 if (newPosDistance < currentPosDistance) {
