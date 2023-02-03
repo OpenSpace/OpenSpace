@@ -29,7 +29,6 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <modules/fieldlinessequence/util/dynamicdownloadermanager.h>
-#include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -76,6 +75,7 @@ public:
     void updateStaticLoading(const double currentTime, const double deltaTime);
     void updateDynamicLoading(const double currentTime, const double deltaTime);
     void updateDynamicDownloading(const double currentTime, const double deltaTime);
+    void firstUpdate();
     void computeSequenceEndTime();
 
     static documentation::Documentation Documentation();
@@ -124,7 +124,7 @@ private:
     std::vector<File> _files;
     std::vector<RenderableFieldlinesSequenceNew::File>::iterator
         insertToFilesInOrder(File file);
-    void loadFile(File& file);
+    std::thread loadFile(File& file);
 
     // Static Loading on default / if not specified
     LoadingType _loadingType;
@@ -135,10 +135,10 @@ private:
     // Extra variables such as rho, p or t
     std::vector<std::string> _extraVars;
     // Manual time offset
-    double _manualTimeOffset = 0.0;
+    float _manualTimeOffset = 0.0;
     // Estimated end of sequence.
     // If there's just one state it should never disappear
-    double _sequenceEndTime;
+    float _sequenceEndTime = 0.0;
 
     // dataID that corresponds to what dataset to use if using DynamicDownloading
     int _dataID;
@@ -190,8 +190,12 @@ private:
     // Index of the extra quantity to color lines by.
     //TODO: Change to options instead of index
     properties::OptionProperty _colorQuantity;
-    // Color table/transfer function min and max range
-    properties::Vec2Property _colorQuantityMinMax;
+    // Used to save property for later initialization
+    int _colorQuantityTemp = 0;
+    // Color table/transfer function selected min and max range
+    properties::Vec2Property _selectedColorRange;
+    // Color table/transfer function for "By Quantity" coloring
+    properties::StringProperty _colorTablePath;
     // Uniform Field Line Color
     properties::Vec4Property _colorUniform;
     // Whether or not to use additive blending
@@ -216,10 +220,12 @@ private:
     properties::BoolProperty _maskingEnabled;
     // Group to hold the masking properties
     properties::PropertyOwner _maskingGroup;
-    // Lower and upper range limit for allowed values
-    properties::Vec2Property _maskingMinMax;
+    // Selected lower and upper range limits for masking
+    properties::Vec2Property _selectedMaskingRange;
     // Index of the extra quantity to use for masking
     properties::OptionProperty _maskingQuantity;
+    // used to save property for later initialization
+    int _maskingQuantityTemp = 0;
 
     // Whether or not to use Domain limits
     properties::BoolProperty _domainEnabled;
@@ -240,13 +246,8 @@ private:
     ///////////////other.//////////////////////////
 
     // Paths to color tables. One for each 'extraQuantity'
-    std::vector<std::string> _colorTablePaths;
-    // Values represents min & max values represented in the color table
-    std::vector<glm::vec2> _colorTableRanges;
-    // Values represents min & max limits for valid masking range
-    std::vector<glm::vec2> _maskingRanges;
-    // Selected range for the active quantity to be masked out
-    glm::vec2 _selectedMaskingRanges;
+    //std::string _colorTablePath;
+
     // At least one file in data set needs to be loaded to read extra variable
     bool _firstLoad = true;
 

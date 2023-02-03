@@ -39,8 +39,8 @@ uniform mat4 modelViewProjection;
 
 // Uniforms needed to color by quantity
 uniform int colorMethod;
-uniform sampler1D colorTable;
-uniform vec2 colorTableRange;
+uniform sampler1D colorTable; //transferfunction
+uniform vec2 colorTableRange; //selectedRange
 
 // Uniforms needed for Particle Flow
 uniform vec4 flowColor;

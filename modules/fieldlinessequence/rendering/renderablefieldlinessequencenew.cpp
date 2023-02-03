@@ -24,6 +24,9 @@
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequencenew.h>
 
+#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
+#include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
+
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/documentation/documentation.h>
@@ -168,10 +171,12 @@ namespace {
         std::optional<glm::vec4> color [[codegen::color()]];
         // A list of paths to transferfunction .txt files containing color tables
         // used for colorizing the fieldlines according to different parameters
-        std::optional<std::vector<std::string>> colorTablePaths;
-        // List of ranges for which their corresponding parameters values will be
-        // colorized by. Should be entered as {min value, max value} per range
-        std::optional<std::vector<glm::vec2>> colorTableRanges;
+        std::optional<std::string> colorTablePath;
+        // Ranges for which their corresponding parameters values will be
+        // colorized by. Should be entered as min value, max value
+        std::optional<glm::vec2> colorTableRange;
+        // Specifies the total range
+        std::optional<glm::vec2> colorMinMaxRange;
 
         // [[codegen::verbatim(FlowEnabledInfo.description)]]
         std::optional<bool> flowEnabled;
@@ -192,7 +197,10 @@ namespace {
         std::optional<int> maskingQuantity;
         // Rrange for which their corresponding quantity parameter value will be
         // masked by. Should be entered as {min value, max value}
-        std::optional<glm::vec2> maskingRanges;
+        std::optional<glm::vec2> maskingRange;
+        // Ranges for which their corresponding parameters values will be
+        // masked by. Should be entered as min value, max value
+        std::optional<glm::vec2> maskingMinMaxRange;
 
         // [[codegen::verbatim(DomainEnabledInfo.description)]]
         std::optional<bool> domainEnabled;
@@ -277,12 +285,13 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     , _colorGroup({ "Color" })
     , _colorMethod(ColorMethodInfo, properties::OptionProperty::DisplayType::Radio)
     , _colorQuantity(ColorQuantityInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _colorQuantityMinMax(
+    , _selectedColorRange(
         ColorMinMaxInfo,
-        glm::vec2(-0.f, 100.f),
+        glm::vec2(0.f, 100.f),
         glm::vec2(-5000.f),
         glm::vec2(5000.f)
     )
+    , _colorTablePath(ColorTablePathInfo)
     , _colorUniform(
         ColorUniformInfo,
         glm::vec4(0.3f, 0.57f, 0.75f, 0.5f),
@@ -313,7 +322,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
 
     , _maskingEnabled(MaskingEnabledInfo, false)
     , _maskingGroup({ "Masking" })
-    , _maskingMinMax(
+    , _selectedMaskingRange(
         MaskingMinMaxInfo,
         glm::vec2(0.f, 100.f),
         glm::vec2(-5000.f),
@@ -406,14 +415,17 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     _flowParticleSpacing = p.particleSpacing.value_or(_flowParticleSpacing);
     _flowSpeed = p.flowSpeed.value_or(_flowSpeed);
     _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
-    _maskingQuantity = p.maskingQuantity.value_or(_maskingQuantity);
+    _maskingQuantityTemp = p.maskingQuantity.value_or(_maskingQuantityTemp);
     _domainEnabled = p.domainEnabled.value_or(_domainEnabled);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
 
     // Color group
-    if (p.colorTablePaths.has_value()) {
-        _colorTablePaths = p.colorTablePaths.value();
+    if (p.colorTablePath.has_value()) {
+        _colorTablePath = *p.colorTablePath;
+    }
+    else {
+        _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile;
     }
     _colorUniform = p.color.value_or(_colorUniform);
     _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
@@ -428,28 +440,22 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     else {
         _colorMethod = static_cast<int>(ColorMethod::Uniform);
     }
-
-    if (p.colorQuantity.has_value()) {
-        _colorMethod = static_cast<int>(ColorMethod::ByQuantity);
+    _colorQuantityTemp = p.colorQuantity.value_or(_colorQuantityTemp);
+    _selectedColorRange = p.colorTableRange.value_or(_selectedColorRange);
+    if (p.colorMinMaxRange.has_value()) {
+        _selectedColorRange.setMinValue(glm::vec2(p.colorMinMaxRange->x));
+        _selectedColorRange.setMaxValue(glm::vec2(p.colorMinMaxRange->y));
     }
 
-    if (p.colorTableRanges.has_value()) {
-        _colorTableRanges = *p.colorTableRanges;
-    }
-    else {
-        _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
+    // To not change peoples masking settings i kept the parameter for the assets
+    // to be "MaskingRanges", but a single vec2-value instead of a vector.
+    // What is given from the asset, is stored as the selected range.
+    _selectedMaskingRange = p.maskingRange.value_or(_selectedMaskingRange);
+    if (p.maskingMinMaxRange.has_value()) {
+        _selectedMaskingRange.setMinValue(glm::vec2(p.maskingMinMaxRange->x));
+        _selectedMaskingRange.setMaxValue(glm::vec2(p.maskingMinMaxRange->y));
     }
 
-    // Sorry about the confusion here with the masking. To not change peoples masking
-    // settings i kept the parameter for the assets to be "MaskingRanges", but a single
-    // vec2-value instead of a vector. What is given from the asset, is stored as the
-    // selected range.
-    if (p.maskingRanges.has_value()) {
-        _selectedMaskingRanges = *p.maskingRanges;
-    }
-    else {
-        _maskingRanges.push_back(glm::vec2(-100000.f, 100000.f)); // some default values
-    }
 }
 
 void RenderableFieldlinesSequenceNew::setupDynamicDownloading(
@@ -491,6 +497,7 @@ void RenderableFieldlinesSequenceNew::staticallyLoadFiles(
         }
     }
 
+    std::vector<std::thread> openThreads;
     for (File& file : _files) {
         bool loadSuccess = false;
         switch (_inputFileType) {
@@ -512,9 +519,12 @@ void RenderableFieldlinesSequenceNew::staticallyLoadFiles(
                     );
                 file.timestamp = extractTriggerTimeFromFilename(file.path);
                 break;
-            case SourceFileType::Osfls:
-                loadFile(file);
+            case SourceFileType::Osfls: {
+                std::thread thread = loadFile(file);
+                openThreads.push_back(std::move(thread));
+                loadSuccess = true;
                 break;
+            }
             default:
                 break;
         }
@@ -528,6 +538,10 @@ void RenderableFieldlinesSequenceNew::staticallyLoadFiles(
     std::sort(_files.begin(), _files.end());
     if (!_files.empty()) {
         _atLeastOneFileLoaded = true;
+    }
+
+    for (std::thread& thread : openThreads) {
+        thread.join();
     }
 }
 
@@ -632,14 +646,9 @@ extractSeedPointsFromFiles(std::filesystem::path filePath)
 }
 
 void RenderableFieldlinesSequenceNew::initialize() {
-    if (_colorTablePaths.empty()) {
-        _colorMethod = static_cast<int>(ColorMethod::Uniform);
-    }
-    else {
-        _transferFunction = std::make_unique<TransferFunction>(
-            absPath(_colorTablePaths[0]).string()
-        );
-    }
+    _transferFunction = std::make_unique<TransferFunction>(
+        absPath(_colorTablePath).string()
+    );
 }
 
 void RenderableFieldlinesSequenceNew::initializeGL() {
@@ -650,6 +659,7 @@ void RenderableFieldlinesSequenceNew::initializeGL() {
     );
 
     setupProperties();
+    definePropertyCallbackFunctions();
 
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);
@@ -677,11 +687,11 @@ void RenderableFieldlinesSequenceNew::setupProperties() {
     _colorGroup.addProperty(_colorUniform);
     _colorGroup.addProperty(_colorMethod);
     _colorGroup.addProperty(_colorQuantity);// hasExtra
-    _colorQuantityMinMax.setViewOption(
+    _selectedColorRange.setViewOption(
         properties::Property::ViewOptions::MinMaxRange
     );
-    _colorGroup.addProperty(_colorQuantityMinMax);
-    //_colorGroup.addProperty(_colorTablePaths[0].c_str());
+    _colorGroup.addProperty(_selectedColorRange);
+    _colorGroup.addProperty(_colorTablePath);
 
     _domainGroup.addProperty(_domainX);
     _domainGroup.addProperty(_domainY);
@@ -696,28 +706,23 @@ void RenderableFieldlinesSequenceNew::setupProperties() {
     _flowGroup.addProperty(_flowSpeed);
 
     _maskingGroup.addProperty(_maskingQuantity);
-    _maskingMinMax.setViewOption(properties::Property::ViewOptions::MinMaxRange);// hasExtra
-    _maskingGroup.addProperty(_maskingMinMax);// hasExtra
-
-    //if (!_maskingRanges.empty()) {
-        _maskingMinMax = _maskingRanges[_maskingQuantity];// hasExtra
-    //}
-
+    _selectedMaskingRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _maskingGroup.addProperty(_selectedMaskingRange);
 }
 
 void RenderableFieldlinesSequenceNew::definePropertyCallbackFunctions() {
 
     _colorQuantity.onChange([this]() {
-        _transferFunction->setPath(_colorTablePaths[_colorQuantity]);
+        _transferFunction->setPath(_colorTablePath);
+        _shouldUpdateColorBuffer = true;
     });
 
     _maskingQuantity.onChange([this]() {
         _shouldUpdateMaskingBuffer = true;
-        _maskingMinMax = _maskingRanges[_maskingQuantity];
     });
 
-    _maskingMinMax.onChange([this]() {
-        _maskingRanges[_maskingQuantity] = _maskingMinMax;
+    _colorTablePath.onChange([this]() {
+        _transferFunction->setPath(_colorTablePath);
     });
 }
 
@@ -808,7 +813,13 @@ void RenderableFieldlinesSequenceNew::deinitializeGL() {
 }
 
 void RenderableFieldlinesSequenceNew::computeSequenceEndTime() {
-    if (_files.size() > 1) {
+    if (_files.size() == 0) {
+        _sequenceEndTime = 0.f;
+    }
+    else if (_files.size() == 1) {
+        _sequenceEndTime = _files[0].timestamp + 3600.f;
+    }
+    else if (_files.size() > 1) {
         const double lastTriggerTime = _files.back().timestamp;
         const double sequenceDuration = lastTriggerTime - _files[0].timestamp;
         const double averageStateDuration = sequenceDuration / (_files.size() - 1);
@@ -816,7 +827,7 @@ void RenderableFieldlinesSequenceNew::computeSequenceEndTime() {
     }
 }
 
-void RenderableFieldlinesSequenceNew::loadFile(File& file) {
+std::thread RenderableFieldlinesSequenceNew::loadFile(File& file) {
     _isLoadingStateFromDisk = true;
     if (_inputFileType == SourceFileType::Osfls) {
         std::thread readFileThread([this, &file]() {
@@ -832,6 +843,7 @@ void RenderableFieldlinesSequenceNew::loadFile(File& file) {
                 LERROR(e.what());
             }
         });
+        return std::move(readFileThread);
     }
 
     // So far uncleare why model is needed and if scalingFactor can be changed afterwards.
@@ -918,6 +930,44 @@ void RenderableFieldlinesSequenceNew::updateDynamicDownloading(const double curr
     _dynamicdownloaderManager->clearDownloaded();
 }
 
+void RenderableFieldlinesSequenceNew::firstUpdate() {
+    // loop just to find the first one that is loaded, then it will break out
+    std::vector<File>::iterator file =
+        std::find_if( _files.begin(), _files.end(), [](File& f) {
+                return f.status == File::FileStatus::Loaded;
+        });
+    if (file == _files.end()) return;
+    const std::vector<std::vector<float>>& quantities = file->state.extraQuantities();
+    const std::vector<std::string>& extraNamesVec =
+        file->state.extraQuantityNames();
+    for (int i = 0; i < quantities.size(); ++i) {
+        _colorQuantity.addOption(i, extraNamesVec[i]);
+        _maskingQuantity.addOption(i, extraNamesVec[i]);
+    }
+    _firstLoad = false;
+    _colorQuantity = _colorQuantityTemp;
+    _maskingQuantity = _maskingQuantityTemp;
+    _transferFunction = std::make_unique<TransferFunction>(
+        absPath(_colorTablePath).string()
+    );
+
+    /////////////////////////
+    for (auto toMask : quantities) {
+        float fmin = *std::min_element(toMask.begin(), toMask.end());
+        std::string smin = std::to_string(fmin);
+        float fmax = *std::max_element(toMask.begin(), toMask.end());
+        std::string smax = std::to_string(fmax);
+        LWARNING(fmt::format("min :{}", smin));
+        LWARNING(fmt::format("max :{}", smax));
+
+    }
+    ////////////////////////
+
+    //_maskingRanges.resize(nExtraQuantities, _maskingRanges.back());
+    _shouldUpdateColorBuffer = true;
+    _shouldUpdateMaskingBuffer = true;
+}
+
 void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
@@ -938,52 +988,15 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
         default:
             break;
     }
-    computeSequenceEndTime();
 
     if (_firstLoad && _atLeastOneFileLoaded) {
-        size_t nExtraQuantities;
-            // loop just to find the first one that is loaded, then it will break out
-        std::vector<File>::iterator f;
-        for (f = _files.begin(); f != _files.end(); f++) {
-            if (f->status != File::FileStatus::Loaded) {
-                continue;
-            }
-            nExtraQuantities = f->state.nExtraQuantities();
-            const std::vector<std::string>& extraNamesVec =
-                f->state.extraQuantityNames();
-            for (int i = 0; i < static_cast<int>(nExtraQuantities); ++i) {
-                _colorQuantity.addOption(i, extraNamesVec[i]);
-                _maskingQuantity.addOption(i, extraNamesVec[i]);
-            }
-            break;
-        }
-        _firstLoad = false;
-
-        _transferFunction = std::make_unique<TransferFunction>(
-            absPath(_colorTablePaths[0]).string()
-        );
-
-        /////////////////////////
-        bool success;
-        const std::vector<std::vector<float>>& quantities = f->state.extraQuantities();
-        for (auto toMask : quantities) {
-            float fmin = *std::min_element(toMask.begin(), toMask.end());
-            std::string smin = std::to_string(fmin);
-            float fmax = *std::max_element(toMask.begin(), toMask.end());
-            std::string smax = std::to_string(fmax);
-            LWARNING(fmt::format("min :{}", smin));
-            LWARNING(fmt::format("max :{}", smax));
-            ////////////////////////
-            _maskingRanges.push_back({ fmin, fmax });
-        }
-
-        _colorTableRanges.resize(nExtraQuantities, _colorTableRanges.back());
-        _maskingRanges.resize(nExtraQuantities, _maskingRanges.back());
+        firstUpdate();
     }
 
     bool isInInterval = _files.size() > 0 &&
         currentTime >= _files[0].timestamp &&
         currentTime < _sequenceEndTime;
+    // TODO Change _files.size() == 1 to variable specifying to show at all times
     if (_files.size() == 1 && _loadingType == LoadingType::StaticLoading) {
         isInInterval = true;
     }
@@ -1006,24 +1019,27 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
         (nextIndex < _files.size() && currentTime >= _files[nextIndex].timestamp))
     {
         _activeIndex = updateActiveIndex(currentTime);
-        // check again after updating
+        // check index again after updating
         if (_activeIndex == -1) return;
+        // here, for DynamicLoading, the dataset is known, but files not loaded yet
         if (_files[_activeIndex].status == File::FileStatus::Downloaded) {
             // if LoadingType is StaticLoading all files will be Loaded
-            loadFile(_files[_activeIndex]);
+            // would be optimal if loading of next file would happen in the background
+            std::thread t = loadFile(_files[_activeIndex]);
+            t.join();
             computeSequenceEndTime();
         }
 
+        updateVertexPositionBuffer();
     }
 
-//    if (_shouldUpdateColorBuffer) {
+    if (_shouldUpdateColorBuffer) {
         updateVertexColorBuffer();
-//    }
+    }
 
-//    if (_shouldUpdateMaskingBuffer) {
+    if (_shouldUpdateMaskingBuffer) {
         updateVertexMaskingBuffer();
-//    }
-        updateVertexPositionBuffer();
+    }
 }
 
 void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTasks&) {
@@ -1053,11 +1069,11 @@ void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTas
         textureUnit.activate();
         _transferFunction->bind();
         _shaderProgram->setUniform("colorTable", textureUnit);
-        _shaderProgram->setUniform("colorTableRange", _colorTableRanges[_colorQuantity]);
+        _shaderProgram->setUniform("colorTableRange", _selectedColorRange);
     }
 
     if (_maskingEnabled) {
-        _shaderProgram->setUniform("maskingRange", _maskingRanges[_maskingQuantity]);
+        _shaderProgram->setUniform("maskingRange", _selectedMaskingRange);
     }
 
     _shaderProgram->setUniform("domainLimR", _domainR.value() * _scalingFactor);
@@ -1172,6 +1188,7 @@ void RenderableFieldlinesSequenceNew::updateVertexColorBuffer() {
 
         unbindGL();
     }
+    _shouldUpdateColorBuffer = false;
 }
 
 void RenderableFieldlinesSequenceNew::updateVertexMaskingBuffer() {
@@ -1207,6 +1224,7 @@ void RenderableFieldlinesSequenceNew::updateVertexMaskingBuffer() {
         glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
     }
     unbindGL();
+    _shouldUpdateMaskingBuffer = false;
 }
 
 } // namespace openspace
