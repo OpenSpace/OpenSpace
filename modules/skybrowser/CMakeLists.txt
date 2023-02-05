@@ -33,7 +33,6 @@ set(HEADER_FILES
   include/wwtcommunicator.h
   include/browser.h
   include/screenspaceskybrowser.h
-  ext/tinyxml2/tinyxml2.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -47,7 +46,6 @@ set(SOURCE_FILES
   src/wwtcommunicator.cpp
   src/browser.cpp
   src/screenspaceskybrowser.cpp
-  ext/tinyxml2/tinyxml2.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
