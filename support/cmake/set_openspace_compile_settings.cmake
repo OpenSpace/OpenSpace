@@ -174,6 +174,7 @@ function (set_openspace_compile_settings target)
     "-Wno-deprecated-copy"
     "-Wno-float-equal"
     "-Wno-long-long"
+    "-Wno-missing-field-initializers"
     "-Wno-unknown-attributes"
     "-Wno-write-strings"
   )
