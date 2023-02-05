@@ -22,8 +22,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
-
 # System libraries
 if (APPLE)
   begin_dependency("Core Libraries")
@@ -48,14 +46,12 @@ endif ()
 
 # Ghoul
 add_subdirectory(ghoul)
-set_target_properties(Lua PROPERTIES FOLDER "External")
-set_target_properties(lz4 PROPERTIES FOLDER "External")
 set_target_properties(GhoulTest PROPERTIES FOLDER "Unit Tests")
 
 # Spice
 begin_dependency("Spice")
 set(SPICE_BUILD_SHARED_LIBRARY OFF CACHE BOOL "" FORCE)
-add_subdirectory(spice)
+add_subdirectory(spice SYSTEM)
 target_compile_features(spice PUBLIC cxx_std_20)
 set_target_properties(spice PROPERTIES FOLDER "External")
 end_dependency()

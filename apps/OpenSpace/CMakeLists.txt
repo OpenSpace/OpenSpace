@@ -22,8 +22,8 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 
 # We are getting all_enabled_modules from the handle_applications.cmake file which gets
 # it from the main CMakeLists file
@@ -42,14 +42,14 @@ if (OPENSPACE_OPENVR_SUPPORT)
     if (WIN32)
       find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
         NAMES SGCTOpenVR.h
-        PATHS ${OPENSPACE_BASE_DIR}/ext/sgct/additional_includes/openvr NO_DEFAULT_PATH
+        PATHS ${PROJECT_SOURCE_DIR}/ext/sgct/additional_includes/openvr NO_DEFAULT_PATH
         REQUIRED
       )
     else ()
       find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
         NAMES SGCTOpenVR.h
         PATH_SUFFIXES SGCTOpenVR
-        PATHS ${OPENSPACE_BASE_DIR}/ext/sgct/additional_includes/openvr
+        PATHS ${PROJECT_SOURCE_DIR}/ext/sgct/additional_includes/openvr
         REQUIRED
       )
     endif ()
@@ -155,7 +155,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   set(PROJECT_ARCH "x86_64")
 
   if (WIN32)
-    set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
+    set(RESOURCE_FILE openspace.rc)
   endif ()
 
   # Add the CEF binary distribution's cmake/ directory to the module path and

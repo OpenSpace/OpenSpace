@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   fitsfilereadermodule.h
@@ -43,22 +43,28 @@ create_new_module(
   ${SOURCE_FILES}
 )
 
-# Set root directories for external libraries.
-set(CFITSIO_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/cfitsio/")
-set(CCFITS_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/CCfits/")
-set(INCLUDES_FOR_TARGET ${CCFITS_ROOT_DIR} "${CCFITS_ROOT_DIR}/../" ${CFITSIO_ROOT_DIR})
-set(MODULE_NAME openspace-module-fitsfilereader)
-
 # CCfits is dependent on cfitsio, let it handle the internal linking
-add_subdirectory(${CFITSIO_ROOT_DIR} SYSTEM)
+add_subdirectory(ext/cfitsio SYSTEM)
 set_target_properties(cfitsio PROPERTIES FOLDER "External")
 set(cfitsio_BUILD_SHARED_LIBS OFF)
 
-add_subdirectory(${CCFITS_ROOT_DIR} SYSTEM)
+add_subdirectory(ext/CCfits SYSTEM)
 set_target_properties(CCfits PROPERTIES FOLDER "External")
 set(CCfits_BUILD_SHARED_LIBS OFF)
 
-target_include_directories(openspace-module-fitsfilereader SYSTEM PRIVATE ${INCLUDES_FOR_TARGET})
+if (MSVC)
+  target_compile_options(cfitsio PRIVATE "/W0")
+  target_compile_definitions(cfitsio PRIVATE "_SCL_SECURE_NO_WARNINGS")
+
+  target_compile_options(CCfits PRIVATE "/W0")
+  target_compile_definitions(CCfits PRIVATE "_SCL_SECURE_NO_WARNINGS")
+else ()
+  target_compile_options(cfitsio PRIVATE "-w")
+  target_compile_options(CCfits PRIVATE "-w")
+endif ()
+
+
+target_include_directories(openspace-module-fitsfilereader SYSTEM PRIVATE ext ext/CCfits ext/cfitsio)
 target_link_libraries(openspace-module-fitsfilereader PRIVATE cfitsio CCfits)
 
 target_precompile_headers(CCfits PRIVATE

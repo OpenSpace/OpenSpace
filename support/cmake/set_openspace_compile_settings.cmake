@@ -34,9 +34,6 @@ function (set_openspace_compile_settings target)
     "/permissive-"
     "/Zc:__cplusplus" # Correctly set the __cplusplus macro
   )
-  if (OPENSPACE_WARNINGS_AS_ERRORS)
-    set(MSVC_WARNINGS ${MSVC_WARNINGS} "/WX")
-  endif ()
   if (OPENSPACE_OPTIMIZATION_ENABLE_AVX)
     set(MSVC_WARNINGS ${MSVC_WARNINGS} "/arch:AVX")
   endif ()
@@ -144,9 +141,6 @@ function (set_openspace_compile_settings target)
     "-Wno-missing-braces"
     "-Wno-unknown-attributes"
   )
-  if (OPENSPACE_WARNINGS_AS_ERRORS)
-    set(CLANG_WARNINGS ${CLANG_WARNINGS} "-Werror")
-  endif ()
 
 
   set(GCC_WARNINGS
@@ -183,9 +177,6 @@ function (set_openspace_compile_settings target)
     "-Wno-unknown-attributes"
     "-Wno-write-strings"
   )
-  if (OPENSPACE_WARNINGS_AS_ERRORS)
-    set(GCC_WARNINGS ${CLANG_WARNINGS} "-Werror")
-  endif ()
 
   if (MSVC)
     target_compile_options(${target} PRIVATE ${MSVC_WARNINGS})
@@ -196,10 +187,7 @@ function (set_openspace_compile_settings target)
     target_compile_definitions(${target} PRIVATE "WIN32_LEAN_AND_MEAN")
     target_compile_definitions(${target} PRIVATE "VC_EXTRALEAN")
   elseif (NOT LINUX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    if (OPENSPACE_WARNINGS_AS_ERRORS)
-      target_compile_options(${target} PRIVATE "-Werror")
-    endif ()
-    # Apple has "deprecated" OpenGL and offers nothing by warnings instead
+    # Apple has "deprecated" OpenGL and offers nothing but warnings instead
     target_compile_definitions(${target} PRIVATE "GL_SILENCE_DEPRECATION")
 
     target_compile_options(${target} PRIVATE ${CLANG_WARNINGS})

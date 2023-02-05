@@ -22,9 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
-
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 include(cmake/webbrowser_helpers.cmake)
 
 set(WEBBROWSER_MODULE_NAME WebBrowser)

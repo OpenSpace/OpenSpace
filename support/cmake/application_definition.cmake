@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/global_variables.cmake)
 
 function (copy_files target)
   # Add the copy command

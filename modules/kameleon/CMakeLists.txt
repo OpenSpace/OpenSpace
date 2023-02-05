@@ -22,11 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
-
-# Use <PackageName>_ROOT variables
-# https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
-cmake_policy(SET CMP0074 NEW)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   include/kameleonwrapper.h
@@ -65,6 +61,13 @@ mark_as_advanced(CDF_BUILD_ZLIB CDF_INCLUDES CDF_LIBRARY CDF_USE_STATIC_LIBS
 )
 set_target_properties(ccmc PROPERTIES FOLDER "External")
 if (TARGET cdf)
+  if (MSVC)
+    target_compile_options(cdf PRIVATE "/W0")
+    target_compile_definitions(cdf PRIVATE "_SCL_SECURE_NO_WARNINGS")
+  else ()
+    target_compile_options(cdf PRIVATE "-w")
+  endif ()
+
   set_target_properties(cdf PROPERTIES FOLDER "External")
 endif ()
 
@@ -81,10 +84,3 @@ target_precompile_headers(ccmc PRIVATE
   "$<$<COMPILE_LANGUAGE:CXX>:vector>"
   "$<$<COMPILE_LANGUAGE:CXX>:boost/unordered_map.hpp>"
 )
-
-if (WIN32)
-  target_compile_options(ccmc PRIVATE /MP)
-  if (TARGET cdf)
-    target_compile_options(cdf PRIVATE /MP)
-  endif ()
-endif ()
