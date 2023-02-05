@@ -37,8 +37,6 @@ set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
 set(GHOUL_BASE_DIR "${OPENSPACE_BASE_DIR}/ext/ghoul")
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
 
 begin_header("Configuring OpenSpace project")
@@ -179,9 +177,9 @@ add_custom_command(
   COMMAND codegen ARGS "${OPENSPACE_BASE_DIR}/modules" "${OPENSPACE_BASE_DIR}/src"
   VERBATIM
 )
-set_folder_location(codegen-lib "support")
-set_folder_location(codegen "support")
-set_folder_location(run_codegen "support")
+set_target_properties(codegen-lib PROPERTIES FOLDER "support")
+set_target_properties(codegen PROPERTIES FOLDER "support")
+set_target_properties(run_codegen PROPERTIES FOLDER "support")
 
 
 # Qt
@@ -218,8 +216,8 @@ end_header("End: Configuring Modules")
 
 
 add_subdirectory(support/coding/codegen/tests)
-set_folder_location(run_test_codegen "Unit Tests/support")
-set_folder_location(codegentest "Unit Tests")
+set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")
+set_target_properties(codegentest PROPERTIES FOLDER "Unit Tests")
 
 
 begin_header("Configuring Applications")

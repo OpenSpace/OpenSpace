@@ -57,5 +57,6 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-include_external_library(${touch_module} PRIVATE libTUIO11 ${CMAKE_CURRENT_SOURCE_DIR}/ext)
-disable_external_warnings_for_file(${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.cpp)
+add_subdirectory(ext SYSTEM)
+target_link_libraries(${touch_module} PRIVATE libTUIO11)
+set_target_properties(libTUIO11 PROPERTIES FOLDER "External")

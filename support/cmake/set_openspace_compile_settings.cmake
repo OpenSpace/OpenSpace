@@ -31,7 +31,6 @@ function (set_openspace_compile_settings target)
     "/wd4127"   # conditional expression is constant [raised by: websocketpp]
     "/wd4201"   # nonstandard extension used : nameless struct/union  [raised by: GLM]
     "/wd5030"   # attribute 'attribute' is not recognized  [raised by: codegen]
-    "/std:c++latest"
     "/permissive-"
     "/Zc:__cplusplus" # Correctly set the __cplusplus macro
   )

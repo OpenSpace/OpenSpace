@@ -73,4 +73,4 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
 endif ()
 
-set_folder_location(OpenSpaceTest "Unit Tests")
+set_target_properties(OpenSpaceTest PROPERTIES FOLDER "Unit Tests")

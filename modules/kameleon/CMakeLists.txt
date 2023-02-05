@@ -23,7 +23,6 @@
 ##########################################################################################
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
 # Use <PackageName>_ROOT variables
 # https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
@@ -58,17 +57,15 @@ mark_as_advanced(BUILD_SHARED_LIBS) # Change to set instead of option
 option(KAMELEON_USE_HDF5 "Kameleon use HDF5" OFF)
 set(KAMELEON_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/kameleon)
 set(KAMELEON_INCLUDES ${KAMELEON_ROOT_DIR}/src)
-add_subdirectory(${KAMELEON_ROOT_DIR})
+add_subdirectory(${KAMELEON_ROOT_DIR} SYSTEM)
 target_include_directories(${kameleon_module} SYSTEM PUBLIC ${KAMELEON_INCLUDES})
 target_link_libraries(${kameleon_module} PRIVATE ccmc)
 mark_as_advanced(CDF_BUILD_ZLIB CDF_INCLUDES CDF_LIBRARY CDF_USE_STATIC_LIBS
   CDF_USE_ZLIB HDF5_DIR HDF5_USE_STATIC_LIBRARIES KAMELEON_LIBRARY_ONLY KAMELEON_USE_HDF5
 )
-disable_external_warnings(ccmc)
-set_folder_location(ccmc "External")
+set_target_properties(ccmc PROPERTIES FOLDER "External")
 if (TARGET cdf)
-  disable_external_warnings(cdf)
-  set_folder_location(cdf "External")
+  set_target_properties(cdf PROPERTIES FOLDER "External")
 endif ()
 
 target_precompile_headers(cdf PRIVATE

@@ -22,7 +22,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
 
@@ -120,15 +119,9 @@ set(SGCT_DEP_INCLUDE_CATCH2 OFF CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
 target_link_libraries(OpenSpace PRIVATE sgct)
 
-set_folder_location(sgct "External")
-set_folder_location(glfw "External")
-set_folder_location(miniziplibstatic "External")
-set_folder_location(png16_static "External")
-set_folder_location(quat "External")
-set_folder_location(tinyxml2static "External")
-set_folder_location(vrpn "External")
-set_folder_location(zlibstatic "External")
-set_folder_location(SGCTTest "Unit Tests")
+set_target_properties(sgct PROPERTIES FOLDER "External")
+set_target_properties(glfw PROPERTIES FOLDER "External")
+set_target_properties(SGCTTest PROPERTIES FOLDER "External")
 
 if (UNIX AND (NOT APPLE))
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)

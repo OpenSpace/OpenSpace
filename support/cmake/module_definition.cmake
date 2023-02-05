@@ -24,7 +24,6 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
 include(GenerateExportHeader)
 

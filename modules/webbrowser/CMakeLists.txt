@@ -25,7 +25,6 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 include(cmake/webbrowser_helpers.cmake)
 
 set(WEBBROWSER_MODULE_NAME WebBrowser)
@@ -266,8 +265,7 @@ target_precompile_headers(${webbrowser_module} PRIVATE
   <include/wrapper/cef_helpers.h>
 )
 
-set_folder_location(libcef_dll_wrapper "Helper")
-set_folder_location(openspace_web_helper "Helper")
+set_target_properties(libcef_dll_wrapper PROPERTIES FOLDER "Helper")
 
 # Display CEF configuration settings.
 # PRINT_CEF_CONFIG()

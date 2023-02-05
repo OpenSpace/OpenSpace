@@ -23,7 +23,6 @@
 ##########################################################################################
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
 set(HEADER_FILES
   fitsfilereadermodule.h
@@ -31,7 +30,7 @@ set(HEADER_FILES
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
-set(SOURCE_FILES 
+set(SOURCE_FILES
   fitsfilereadermodule.cpp
   src/fitsfilereader.cpp
 )
@@ -51,16 +50,13 @@ set(INCLUDES_FOR_TARGET ${CCFITS_ROOT_DIR} "${CCFITS_ROOT_DIR}/../" ${CFITSIO_RO
 set(MODULE_NAME openspace-module-fitsfilereader)
 
 # CCfits is dependent on cfitsio, let it handle the internal linking
-add_subdirectory(${CFITSIO_ROOT_DIR})
-set_folder_location(cfitsio "External")
+add_subdirectory(${CFITSIO_ROOT_DIR} SYSTEM)
+set_target_properties(cfitsio PROPERTIES FOLDER "External")
 set(cfitsio_BUILD_SHARED_LIBS OFF)
 
-add_subdirectory(${CCFITS_ROOT_DIR})
-set_folder_location(CCfits "External")
+add_subdirectory(${CCFITS_ROOT_DIR} SYSTEM)
+set_target_properties(CCfits PROPERTIES FOLDER "External")
 set(CCfits_BUILD_SHARED_LIBS OFF)
-
-disable_external_warnings(cfitsio)
-disable_external_warnings(CCfits)
 
 target_include_directories(openspace-module-fitsfilereader SYSTEM PRIVATE ${INCLUDES_FOR_TARGET})
 target_link_libraries(openspace-module-fitsfilereader PRIVATE cfitsio CCfits)

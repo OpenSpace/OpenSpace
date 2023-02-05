@@ -48,16 +48,16 @@ endif ()
 
 # Ghoul
 add_subdirectory(ghoul)
-set_folder_location(Lua "External")
-set_folder_location(lz4 "External")
-set_folder_location(GhoulTest "Unit Tests")
+set_target_properties(Lua PROPERTIES FOLDER "External")
+set_target_properties(lz4 PROPERTIES FOLDER "External")
+set_target_properties(GhoulTest PROPERTIES FOLDER "Unit Tests")
 
 # Spice
 begin_dependency("Spice")
 set(SPICE_BUILD_SHARED_LIBRARY OFF CACHE BOOL "" FORCE)
 add_subdirectory(spice)
 target_compile_features(spice PUBLIC cxx_std_20)
-set_folder_location(spice "External")
+set_target_properties(spice PROPERTIES FOLDER "External")
 end_dependency()
 
 # Curl
