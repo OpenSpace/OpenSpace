@@ -66,6 +66,7 @@ target_precompile_headers(${skybrowser_module} PRIVATE
   [["include/cef_render_handler.h"]]
 )
 
-add_subdirectory(ext/tinyxml2 SYSTEM)
-set_target_properties(tinyxml2-skybrowser PROPERTIES FOLDER "External")
-target_link_libraries(${skybrowser_module} PRIVATE tinyxml2-skybrowser)
+# This introduces a dependency into SGCT, but the way it is handled is not great right now
+# This will break when we remove tinyxml2 from SGCT and then we can move the submodule
+# over into this ext folder and fix it well
+target_link_libraries(${skybrowser_module} PRIVATE tinyxml2)
