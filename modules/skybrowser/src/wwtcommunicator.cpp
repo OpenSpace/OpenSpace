@@ -290,11 +290,10 @@ glm::dvec2 WwtCommunicator::equatorialAim() const {
     return _equatorialAim;
 }
 
-void WwtCommunicator::setImageOrder(int i, int order) {
+void WwtCommunicator::setImageOrder(int image, int order) {
     // Find in selected images list
-    auto current = findSelectedImage(i);
-    int currentIndex = std::distance(_selectedImages.begin(), current);
-    int difference = order - currentIndex;
+    auto current = findSelectedImage(image);
+    int currentIndex = static_cast<int>(std::distance(_selectedImages.begin(), current));
 
     std::deque<std::pair<int, double>> newDeque;
 
@@ -319,7 +318,7 @@ void WwtCommunicator::setImageOrder(int i, int order) {
 
     _selectedImages = newDeque;
     int reverseOrder = static_cast<int>(_selectedImages.size()) - order - 1;
-    ghoul::Dictionary message = setLayerOrderMessage(std::to_string(i), reverseOrder);
+    ghoul::Dictionary message = setLayerOrderMessage(std::to_string(image), reverseOrder);
     sendMessageToWwt(message);
 }
 

@@ -319,7 +319,7 @@ void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd)
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     double fovSpeed = module->browserAnimationSpeed();
     // The speed is given degrees /sec
-    double fovTime = abs(_browser->verticalFov() - fovEnd) / fovSpeed;
+    double fovTime = std::abs(_browser->verticalFov() - fovEnd) / fovSpeed;
     // Fov animation
     _fovAnimation = skybrowser::Animation(_browser->verticalFov(), fovEnd, fovTime);
 

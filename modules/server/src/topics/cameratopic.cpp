@@ -37,7 +37,6 @@
 
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
-    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
 } // namespace
 
 using nlohmann::json;
