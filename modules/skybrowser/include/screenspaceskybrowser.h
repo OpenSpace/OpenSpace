@@ -75,7 +75,6 @@ private:
     void bindTexture() override;
 
     // Flags
-    bool _isSyncedWithWwt = false;
     bool _isInitialized = false;
     bool _radiusIsDirty = false;
     int _borderRadiusTimer = -1;

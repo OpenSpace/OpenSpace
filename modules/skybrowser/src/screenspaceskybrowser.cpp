@@ -187,7 +187,7 @@ void ScreenSpaceSkyBrowser::setIsInitialized(bool isInitialized) {
 
 void ScreenSpaceSkyBrowser::updateTextureResolution() {
     // Check if texture quality has changed. If it has, adjust accordingly
-    if (abs(_textureQuality.value() - _lastTextureQuality) > glm::epsilon<float>()) {
+    if (std::abs(_textureQuality.value() - _lastTextureQuality) > glm::epsilon<float>()) {
         float diffTextureQuality = _textureQuality / _lastTextureQuality;
         glm::vec2 newRes = glm::vec2(_browserDimensions.value()) * diffTextureQuality;
         _browserDimensions = glm::ivec2(newRes);

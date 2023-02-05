@@ -373,8 +373,8 @@ bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
 
     // check position
     const float maxDist = maxDoubleClickDistance() / 2.f;
-    const bool x = abs(_mousePosition.x - button.lastClickPosition.x) < maxDist;
-    const bool y = abs(_mousePosition.y - button.lastClickPosition.y) < maxDist;
+    const bool x = std::abs(_mousePosition.x - button.lastClickPosition.x) < maxDist;
+    const bool y = std::abs(_mousePosition.y - button.lastClickPosition.y) < maxDist;
 
     return x && y;
 }

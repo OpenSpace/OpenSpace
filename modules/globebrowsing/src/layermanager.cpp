@@ -145,7 +145,7 @@ std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups(
     ZoneScoped
 
     std::array<LayerGroup*, NumLayerGroups> res = {};
-    for (int i = 0; i < NumLayerGroups; ++i) {
+    for (size_t i = 0; i < NumLayerGroups; ++i) {
         res[i] = _layerGroups[i].get();
     }
     return res;

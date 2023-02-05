@@ -43,7 +43,7 @@ public:
     void selectImage(const std::string& url, int i);
     void addImageLayerToWwt(const std::string& url, int i);
     void removeSelectedImage(int i);
-    void setImageOrder(int i, int order);
+    void setImageOrder(int image, int order);
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(int i, float opacity);
     void hideChromeInterface() const;

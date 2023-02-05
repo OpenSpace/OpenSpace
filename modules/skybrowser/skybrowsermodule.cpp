@@ -182,7 +182,7 @@ SkyBrowserModule::SkyBrowserModule()
     // Set callback functions
     global::callback::mouseButton->emplace(
         global::callback::mouseButton->begin(),
-        [&](MouseButton button, MouseAction action, KeyModifier, IsGuiWindow) -> bool {
+        [&](MouseButton, MouseAction action, KeyModifier, IsGuiWindow) -> bool {
             if (action == MouseAction::Press) {
                 _cameraRotation.stop();
             }

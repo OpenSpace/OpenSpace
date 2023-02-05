@@ -103,8 +103,8 @@ documentation::Documentation RenderableConstellationLines::Documentation() {
 RenderableConstellationLines::RenderableConstellationLines(
                                                       const ghoul::Dictionary& dictionary)
     : RenderableConstellationsBase(dictionary)
-    , _speckFile(SpeckInfo)
     , _drawElements(DrawElementsInfo, true)
+    , _speckFile(SpeckInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
