@@ -50,7 +50,6 @@ namespace {
         "boresight", "radius", "segments"
     };
 
-    constexpr std::string_view KeyRadius = "Geometry.Radius";
     constexpr std::string_view NoImageText = "No Image";
 
     constexpr openspace::properties::Property::PropertyInfo ColorTexturePathsInfo = {

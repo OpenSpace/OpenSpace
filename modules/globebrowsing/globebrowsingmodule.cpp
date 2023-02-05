@@ -146,7 +146,7 @@ namespace {
             std::fill(IdentifierBuffer.begin(), IdentifierBuffer.end(), '\0');
             int ret = sscanf(
                 subDatasets[i],
-                "SUBDATASET_%i_%256[^=]",
+                "SUBDATASET_%i_%255[^=]",
                 &iDataset,
                 IdentifierBuffer.data()
             );

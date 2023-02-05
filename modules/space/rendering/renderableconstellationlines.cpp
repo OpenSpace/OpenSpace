@@ -382,7 +382,6 @@ bool RenderableConstellationLines::readSpeckFile() {
 
                 // Try to read three values for the position
                 glm::vec3 pos;
-                bool success = true;
                 auto reading = scn::scan(line, "{} {} {}", pos.x, pos.y, pos.z);
                 if (reading) {
                     pos *= scale;
@@ -391,7 +390,6 @@ bool RenderableConstellationLines::readSpeckFile() {
                     constellationLine.vertices.push_back(pos.z);
                 }
                 else {
-                    success = false;
                     LERROR(fmt::format(
                         "Failed reading position on line {} of mesh {} in file: '{}'. "
                         "Stopped reading constellation data", l, lineIndex, fileName

@@ -67,3 +67,7 @@ target_precompile_headers(${skybrowser_module} PRIVATE
   [["include/cef_accessibility_handler.h"]]
   [["include/cef_render_handler.h"]]
 )
+
+add_subdirectory(ext/tinyxml2 SYSTEM)
+set_target_properties(tinyxml2-skybrowser PROPERTIES FOLDER "External")
+target_link_libraries(${skybrowser_module} PRIVATE tinyxml2-skybrowser)
