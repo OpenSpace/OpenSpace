@@ -36,16 +36,17 @@
 DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
                                        int nMaxWindows,
                                        const std::array<QColor, 4>& windowColors,
-                                       QWidget* parent)
+                                       bool resetToDefault, QWidget* parent)
     : QWidget(parent)
 {
-    createWidgets(nMaxWindows, monitorSizeList, windowColors);
+    createWidgets(nMaxWindows, monitorSizeList, windowColors, resetToDefault);
     showWindows();
 }
 
 void DisplayWindowUnion::createWidgets(int nMaxWindows,
                                        std::vector<QRect> monitorResolutions,
-                                       std::array<QColor, 4> windowColors)
+                                       std::array<QColor, 4> windowColors,
+                                       bool resetToDefault)
 {
     // Add all window controls (some will be hidden from GUI initially)
     for (int i = 0; i < nMaxWindows; ++i) {
@@ -56,6 +57,7 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
             i,
             monitorResolutions,
             windowColors[i],
+            resetToDefault,
             this
         );
         _windowControl.push_back(ctrl);
@@ -119,13 +121,17 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
     layout->addStretch();
 }
 
-std::vector<WindowControl*> DisplayWindowUnion::windowControls() const {
+std::vector<WindowControl*> DisplayWindowUnion::activeWindowControls() {
     std::vector<WindowControl*> res;
     res.reserve(_nWindowsDisplayed);
     for (unsigned int i = 0; i < _nWindowsDisplayed; ++i) {
         res.push_back(_windowControl[i]);
     }
     return res;
+}
+
+std::vector<WindowControl*>& DisplayWindowUnion::windowControls() {
+    return _windowControl;
 }
 
 void DisplayWindowUnion::addWindow() {

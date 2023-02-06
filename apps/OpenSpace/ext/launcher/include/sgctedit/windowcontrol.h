@@ -52,7 +52,8 @@ public:
      * \param winColor A QColor object for this window's unique color
      */
     WindowControl(int monitorIndex, int windowIndex,
-        const std::vector<QRect>& monitorDims, const QColor& winColor, QWidget* parent);
+        const std::vector<QRect>& monitorDims, const QColor& winColor,
+        bool resetToDefault, QWidget* parent);
     
     /**
      * Makes the window label at top of a window control column visible
@@ -65,6 +66,13 @@ public:
      * Resets all controls for this window to default settings
      */
     void resetToDefaults();
+
+    /**
+     * Sets the window dimensions
+     *
+     * \param newDims The x, y dimensions to set the window to
+     */
+    void setDimensions(QRectF newDims);
 
     sgct::config::Window generateWindowInformation() const;
 

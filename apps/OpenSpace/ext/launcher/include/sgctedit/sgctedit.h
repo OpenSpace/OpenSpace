@@ -84,7 +84,8 @@ public:
     sgct::config::Cluster cluster() const;
 
 private:
-    void createWidgets(const std::vector<QRect>& monitorSizes);
+    std::vector<QRect> createMonitorInfoSet();
+    void createWidgets(const std::vector<QRect>& monitorSizes, bool setToDefaults);
     sgct::config::Cluster generateConfiguration() const;
 
     void save();

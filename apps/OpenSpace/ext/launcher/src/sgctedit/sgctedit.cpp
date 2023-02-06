@@ -71,9 +71,47 @@ SgctEdit::SgctEdit(QWidget* parent, const std::string& userConfigPath)
     : QDialog(parent)
     , _userConfigPath(userConfigPath)
 {
-    QList<QScreen*> screens = qApp->screens();
     setWindowTitle("Window Configuration Editor");
+    createWidgets(createMonitorInfoSet(), true);
+}
 
+SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
+                   std::string configBasePath,
+                   const std::vector<std::string>& configsReadOnly, QWidget* parent)
+    : QDialog(parent)
+    , _cluster(cluster)
+    , _userConfigPath(configBasePath)
+    , _configurationFilename(configName)
+    , _readOnlyConfigs(configsReadOnly)
+{
+    setWindowTitle("Window Configuration Editor");
+    createWidgets(createMonitorInfoSet(), false);
+    unsigned int existingWindowsControlSize = _displayWidget->windowControls().size();
+    unsigned int nWindows = _cluster.nodes.front().windows.size();
+    for (unsigned int i = 0; i < nWindows; ++i) {
+        sgct::config::Window w = _cluster.nodes.front().windows[i];
+        if (i < existingWindowsControlSize) {
+            unsigned int posX = 0;
+            unsigned int posY = 0;
+            if (w.pos.has_value()) {
+                posX = w.pos.value().x;
+                posY = w.pos.value().y;
+            }
+            if (w.resolution.has_value()) {
+                QRectF newDims(
+                        posX,
+                        posY,
+                        w.resolution.value().x,
+                        w.resolution.value().y
+                );
+                _displayWidget->windowControls()[i]->setDimensions(newDims);
+            }
+        }
+    }
+}
+
+std::vector<QRect> SgctEdit::createMonitorInfoSet() {
+    QList<QScreen*> screens = qApp->screens();
     int nScreensManaged = std::min(static_cast<int>(screens.length()), 4);
     std::vector<QRect> monitorSizes;
     for (int s = 0; s < nScreensManaged; ++s) {
@@ -88,22 +126,10 @@ SgctEdit::SgctEdit(QWidget* parent, const std::string& userConfigPath)
             static_cast<int>(actualHeight * screens[s]->devicePixelRatio())
         );
     }
-    createWidgets(monitorSizes);
+    return monitorSizes;
 }
 
-SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
-                   std::string configBasePath,
-                   const std::vector<std::string>& configsReadOnly, QWidget* parent)
-    : QDialog(parent)
-    , _cluster(cluster)
-    , _userConfigPath(configBasePath)
-    , _configurationFilename(configName)
-    , _readOnlyConfigs(configsReadOnly)
-{
-
-}
-
-void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes) {
+void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes, bool setToDefaults) {
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setSizeConstraint(QLayout::SetFixedSize);
 
@@ -129,6 +155,7 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes) {
             monitorSizes,
             MaxNumberWindows,
             _colorsForWindows,
+            setToDefaults,
             this
         );
         connect(
@@ -275,7 +302,7 @@ sgct::config::Cluster SgctEdit::generateConfiguration() const {
 
     // Save Windows
     unsigned int windowIndex = 0;
-    for (WindowControl* wCtrl : _displayWidget->windowControls()) {
+    for (WindowControl* wCtrl : _displayWidget->activeWindowControls()) {
         sgct::config::Window window = wCtrl->generateWindowInformation();
 
         window.id = windowIndex++;
