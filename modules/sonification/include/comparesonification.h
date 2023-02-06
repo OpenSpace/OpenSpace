@@ -28,32 +28,20 @@
 #include <modules/sonification/include/sonificationbase.h>
 
 #include <openspace/properties/optionproperty.h>
-#include <openspace/scene/scene.h>
 
 namespace openspace {
 
 class CompareSonification : public SonificationBase {
 public:
-
     CompareSonification(const std::string& ip, int port);
     virtual ~CompareSonification() override;
 
-    virtual void update() override;
+    virtual void update(const Scene* scene, const Camera* camera) override;
 
 private:
-    Scene* _scene = nullptr;
-    Camera* _camera = nullptr;
+    // Extract the data from the given identifier
+    bool extractData(const Camera* camera, const std::string& identifier, int i);
 
-    //Extract the data from the given identifier
-    bool extractData(const std::string& identifier, int i);
-
-    //Property functions
-    void setAllPlanetaryProperties(bool value);
-
-    //Check the speed of the simulated time
-    void checkTimeSpeed(double& ts);
-
-    //Compare
     osc::Blob createSettingsBlob() const;
     void sendSettings();
     void onFirstChanged();
@@ -61,7 +49,7 @@ private:
     void onAllChanged();
     void onSettingChanged();
 
-    //Struct to hold data for all the planets
+    // Struct to hold data for all the planets
     struct Planet {
         Planet(std::string id = "") {
             identifier = id;
@@ -70,20 +58,19 @@ private:
         std::string identifier;
         double distance = 0.0;
         double angle = 0.0;
+
+        // std::pair<name of moon, latset calculated angle to it>
         std::vector<std::pair<std::string, double>> moons;
     };
 
+    double _focusScale = 2000;
     double _anglePrecision;
     double _distancePrecision;
-    double _timeSpeed;
-    double _timePrecision;
-    Planet _planets[8];
+    std::vector<Planet> _planets;
     std::string _oldFirst;
     std::string _oldSecond;
 
-    //Properties
-
-    //Compare View
+    // Properties
     properties::OptionProperty _firstPlanet;
     properties::OptionProperty _secondPlanet;
 

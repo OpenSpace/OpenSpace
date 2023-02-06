@@ -28,7 +28,6 @@
 #include <modules/sonification/include/sonificationbase.h>
 
 #include <openspace/properties/optionproperty.h>
-#include <openspace/scene/scene.h>
 
 namespace openspace {
 
@@ -37,22 +36,13 @@ public:
     PlanetsSonification(const std::string& ip, int port);
     virtual ~PlanetsSonification() override;
 
-    virtual void update() override;
+    virtual void update(const Scene* scene, const Camera* camera) override;
 
 private:
-    Scene* _scene = nullptr;
-    Camera* _camera = nullptr;
-
     //Extract the data from the given identifier
-    void extractData(const std::string& identifier, int i);
+    bool extractData(const Camera* camera, const std::string& identifier, int i);
 
     //Property functions
-    void setAllProperties(bool value);
-
-    //Check the speed of the simulated time
-    void checkTimeSpeed(double& ts);
-
-    //Planetary
     osc::Blob createSettingsBlob(int planetIndex) const;
     void sendSettings(const int planetIndex);
     void onAllEnabledChanged();
@@ -89,7 +79,7 @@ private:
     void onNeptuneEnabledChanged();
     void onNeptuneSettingChanged();
 
-    //Struct to hold data for all the planets
+    //Struct to hold data for all the planets and moons
     struct Planet {
         Planet(std::string id = "") {
             identifier = id;
@@ -98,14 +88,14 @@ private:
         std::string identifier;
         double distance = 0.0;
         double angle = 0.0;
+
+        // std::pair<name of moon, latset calculated angle to it>
         std::vector<std::pair<std::string, double>> moons;
     };
 
     double _anglePrecision;
     double _distancePrecision;
-    double _timeSpeed;
-    double _timePrecision;
-    Planet _planets[8];
+    std::vector<Planet> _planets;
 
     //Properties
     struct PlanetProperty : properties::PropertyOwner {

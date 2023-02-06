@@ -27,8 +27,11 @@
 #include <modules/sonification/include/comparesonification.h>
 #include <modules/sonification/include/planetssonification.h>
 #include <modules/sonification/include/solarsonification.h>
+#include <modules/sonification/include/timesonification.h>
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/renderengine.h>
 
 namespace {
     //Output to SuperCollider
@@ -51,13 +54,24 @@ SonificationModule::~SonificationModule() {
 
 void SonificationModule::internalInitialize(const ghoul::Dictionary&) {
     // Fill sonification list
-    _sonifications.push_back(new CompareSonification(SuperColliderIp.data(), SuperColliderPort));
+    _sonifications.push_back(
+        new CompareSonification(SuperColliderIp.data(), SuperColliderPort)
+    );
     addPropertySubOwner(_sonifications.back());
 
-    _sonifications.push_back(new PlanetsSonification(SuperColliderIp.data(), SuperColliderPort));
+    _sonifications.push_back(
+        new PlanetsSonification(SuperColliderIp.data(), SuperColliderPort)
+    );
     addPropertySubOwner(_sonifications.back());
 
-    _sonifications.push_back(new SolarSonification(SuperColliderIp.data(), SuperColliderPort));
+    _sonifications.push_back(
+        new SolarSonification(SuperColliderIp.data(), SuperColliderPort)
+    );
+    addPropertySubOwner(_sonifications.back());
+
+    _sonifications.push_back(
+        new TimeSonification(SuperColliderIp.data(), SuperColliderPort)
+    );
     addPropertySubOwner(_sonifications.back());
 
     // Only the master runs the SonificationModule
@@ -76,13 +90,36 @@ void SonificationModule::internalDeinitialize() {
 }
 
 void SonificationModule::update(std::atomic<bool>& isRunning) {
+    Scene* scene = nullptr;
+    Camera* camera = nullptr;
+    bool isInitialized = false;
+
     while (isRunning) {
+        if (!isInitialized) {
+            // Find scene
+            if (!scene || scene->root()->children().size() == 0) {
+                scene = global::renderEngine->scene();
+            }
+
+            // Find camera
+            if (!camera) {
+                camera = scene ? scene->camera() : nullptr;
+            }
+
+            // Check status
+            if (!scene || scene->isInitializing() || !camera ||
+                camera->positionVec3().length < std::numeric_limits<glm::length_t>::epsilon)
+            {
+                continue;
+            }
+        }
+
         for (SonificationBase* sonification : _sonifications) {
             if (!sonification) {
                 continue;
             }
 
-            sonification->update();
+            sonification->update(scene, camera);
         }
     }
 }

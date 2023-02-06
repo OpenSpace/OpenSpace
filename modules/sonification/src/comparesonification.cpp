@@ -24,15 +24,10 @@
 
 #include <modules/sonification/include/comparesonification.h>
 
-#include <openspace/camera/camera.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/query/query.h>
-#include <glm/gtx/projection.hpp>
-#include <glm/gtx/vector_angle.hpp>
+#include <ghoul/fmt.h>
 
 namespace {
     constexpr int NumSecPerDay = 86400;
@@ -58,7 +53,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableAllInfo = {
-        "EnableAll",
+        "Enabled",
         "All",
         "Enable or disable all comparing sonifications for both selected planets"
     };
@@ -98,7 +93,6 @@ namespace {
         "Rings",
         "Enable or disable rings sonification for both selected planets"
     };
-
 } // namespace
 
 namespace openspace {
@@ -115,57 +109,54 @@ CompareSonification::CompareSonification(const std::string& ip, int port)
     , _moonsEnabled(CompareMoonsInfo, false)
     , _ringsEnabled(CompareRingsInfo, false)
 {
-    _scene = global::renderEngine->scene();
-    _camera = _scene? _scene->camera() : nullptr;
+    _anglePrecision = 0.1;
+    _distancePrecision = 10000.0;
 
-    _timeSpeed = 0.0;
-    _timePrecision = 0.0001;
+    // Fill the _planets list
+    _planets.reserve(8);
+    _planets.push_back(Planet("Mercury"));
+    _planets.push_back(Planet("Venus"));
 
-    //Fill the _planets array
-    {
-        _planets[0] = Planet("Mercury");
-        _planets[1] = Planet("Venus");
+    _planets.push_back(Planet("Earth"));
+    _planets.back().moons.reserve(1);
+    _planets.back().moons.push_back({ "Moon", 0.0 });
 
-        _planets[2] = Planet("Earth");
-        _planets[2].moons.reserve(1);
-        _planets[2].moons.push_back({ "Moon", 0.0 });
+    _planets.push_back(Planet("Mars"));
+    _planets.back().moons.reserve(2);
+    _planets.back().moons.push_back({ "Phobos", 0.0 });
+    _planets.back().moons.push_back({ "Deimos", 0.0 });
 
-        _planets[3] = Planet("Mars");
-        _planets[3].moons.reserve(2);
-        _planets[3].moons.push_back({ "Phobos", 0.0 });
-        _planets[3].moons.push_back({ "Deimos", 0.0 });
+    _planets.push_back(Planet("Jupiter"));
+    _planets.back().moons.reserve(4);
+    _planets.back().moons.push_back({ "Io", 0.0 });
+    _planets.back().moons.push_back({ "Europa", 0.0 });
+    _planets.back().moons.push_back({ "Ganymede", 0.0 });
+    _planets.back().moons.push_back({ "Callisto", 0.0 });
 
-        _planets[4] = Planet("Jupiter");
-        _planets[4].moons.reserve(4);
-        _planets[4].moons.push_back({ "Io", 0.0 });
-        _planets[4].moons.push_back({ "Europa", 0.0 });
-        _planets[4].moons.push_back({ "Ganymede", 0.0 });
-        _planets[4].moons.push_back({ "Callisto", 0.0 });
+    _planets.push_back(Planet("Saturn"));
+    _planets.back().moons.reserve(8);
+    _planets.back().moons.push_back({ "Dione", 0.0 });
+    _planets.back().moons.push_back({ "Enceladus", 0.0 });
+    _planets.back().moons.push_back({ "Hyperion", 0.0 });
+    _planets.back().moons.push_back({ "Iapetus", 0.0 });
+    _planets.back().moons.push_back({ "Mimas", 0.0 });
+    _planets.back().moons.push_back({ "Rhea", 0.0 });
+    _planets.back().moons.push_back({ "Tethys", 0.0 });
+    _planets.back().moons.push_back({ "Titan", 0.0 });
 
-        _planets[5] = Planet("Saturn");
-        _planets[5].moons.reserve(8);
-        _planets[5].moons.push_back({ "Dione", 0.0 });
-        _planets[5].moons.push_back({ "Enceladus", 0.0 });
-        _planets[5].moons.push_back({ "Hyperion", 0.0 });
-        _planets[5].moons.push_back({ "Iapetus", 0.0 });
-        _planets[5].moons.push_back({ "Mimas", 0.0 });
-        _planets[5].moons.push_back({ "Rhea", 0.0 });
-        _planets[5].moons.push_back({ "Tethys", 0.0 });
-        _planets[5].moons.push_back({ "Titan", 0.0 });
+    _planets.push_back(Planet("Uranus"));
+    _planets.back().moons.reserve(5);
+    _planets.back().moons.push_back({ "Ariel", 0.0 });
+    _planets.back().moons.push_back({ "Miranda", 0.0 });
+    _planets.back().moons.push_back({ "Oberon", 0.0 });
+    _planets.back().moons.push_back({ "Titania", 0.0 });
+    _planets.back().moons.push_back({ "Umbriel", 0.0 });
 
-        _planets[6] = Planet("Uranus");
-        _planets[6].moons.reserve(5);
-        _planets[6].moons.push_back({ "Ariel", 0.0 });
-        _planets[6].moons.push_back({ "Miranda", 0.0 });
-        _planets[6].moons.push_back({ "Oberon", 0.0 });
-        _planets[6].moons.push_back({ "Titania", 0.0 });
-        _planets[6].moons.push_back({ "Umbriel", 0.0 });
+    _planets.push_back(Planet("Neptune"));
+    _planets.back().moons.reserve(1);
+    _planets.back().moons.push_back({ "Triton", 0.0 });
 
-        _planets[7] = Planet("Neptune");
-        _planets[7].moons.reserve(1);
-        _planets[7].moons.push_back({ "Triton", 0.0 });
-    }
-
+    // Add options to the drop down menues
     _firstPlanet.addOptions({
         { 0, "Choose Planet" },
         { 1, "Mercury" },
@@ -190,7 +181,7 @@ CompareSonification::CompareSonification(const std::string& ip, int port)
         { 8, "Neptune" }
     });
 
-    //Add onChange for the properties
+    // Add onChange for the properties
     _firstPlanet.onChange([this]() { onFirstChanged(); });
     _secondPlanet.onChange([this]() { onSecondChanged(); });
     _enableAll.onChange([this]() { onAllChanged(); });
@@ -201,7 +192,7 @@ CompareSonification::CompareSonification(const std::string& ip, int port)
     _moonsEnabled.onChange([this]() { onSettingChanged(); });
     _ringsEnabled.onChange([this]() { onSettingChanged(); });
 
-    //Add the properties
+    // Add the properties
     addProperty(_firstPlanet);
     addProperty(_secondPlanet);
 
@@ -217,8 +208,8 @@ CompareSonification::CompareSonification(const std::string& ip, int port)
 CompareSonification::~CompareSonification() {
     _enableAll = false;
 
-    _firstPlanet.setValue(0);
-    _secondPlanet.setValue(0);
+    _firstPlanet = 0;
+    _secondPlanet = 0;
 }
 
 osc::Blob CompareSonification::createSettingsBlob() const {
@@ -232,45 +223,48 @@ osc::Blob CompareSonification::createSettingsBlob() const {
     settings[5] = _moonsEnabled;
     settings[6] = _ringsEnabled;
 
-    return osc::Blob(settings, 8);
+    return osc::Blob(settings, _planets.size());
 }
 
-//Compare
 void CompareSonification::sendSettings() {
     std::string label = "/Compare";
     std::vector<OscDataType> data(3);
 
-    data[0] = _firstPlanet.value();
-
-    data[1] = _secondPlanet.value();
-
+    data[0] = _firstPlanet;
+    data[1] = _secondPlanet;
     data[2] = createSettingsBlob();
 
     _connection->send(label, data);
 }
 
-void CompareSonification::onFirstChanged()
-{
-    if (_firstPlanet.value() != 0 && _firstPlanet == _secondPlanet)
+void CompareSonification::onFirstChanged() {
+    if (_firstPlanet != 0 && _firstPlanet == _secondPlanet)
     {
         _firstPlanet = 0;
         return;
     }
 
     if (_oldFirst != "") {
+        std::string script = fmt::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Scale.Scale', {});",
+            _oldFirst, 1
+        );
         global::scriptEngine->queueScript(
-            "openspace.setPropertyValue('Scene." +
-            _oldFirst + ".Scale.Scale', 1);",
+            script,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 
-    if (_firstPlanet.value() != 0) {
+    if (_firstPlanet != 0) {
+        std::string script = fmt::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Scale.Scale', {});",
+            _firstPlanet.description(), _focusScale
+        );
         global::scriptEngine->queueScript(
-            "openspace.setPropertyValue('Scene." +
-            _firstPlanet.description() + ".Scale.Scale', 2000);",
+            script,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
+
         _oldFirst = _firstPlanet.description();
     }
     else {
@@ -280,25 +274,30 @@ void CompareSonification::onFirstChanged()
     sendSettings();
 }
 
-void CompareSonification::onSecondChanged()
-{
-    if (_secondPlanet.value() != 0 && _firstPlanet == _secondPlanet) {
+void CompareSonification::onSecondChanged() {
+    if (_secondPlanet != 0 && _firstPlanet == _secondPlanet) {
         _secondPlanet = 0;
         return;
     }
 
     if (_oldSecond != "") {
+        std::string script = fmt::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Scale.Scale', {});",
+            _oldFirst, 1
+        );
         global::scriptEngine->queueScript(
-            "openspace.setPropertyValue('Scene." +
-            _oldSecond + ".Scale.Scale', 1);",
+            script,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 
-    if (_secondPlanet.value() != 0) {
+    if (_secondPlanet != 0) {
+        std::string script = fmt::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Scale.Scale', {});",
+            _secondPlanet.description(), _focusScale
+        );
         global::scriptEngine->queueScript(
-            "openspace.setPropertyValue('Scene." +
-            _secondPlanet.description() + ".Scale.Scale', 2000);",
+            script,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
         _oldSecond = _secondPlanet.description();
@@ -323,57 +322,36 @@ void CompareSonification::onSettingChanged() {
     sendSettings();
 }
 
-void CompareSonification::checkTimeSpeed(double& ts) {
-    double timeSpeed = global::timeManager->deltaTime() / NumSecPerDay;
-    if (abs(ts - timeSpeed) > _timePrecision) {
-        ts = timeSpeed;
-
-        std::string label = "/Time";
-        std::vector<OscDataType> data(1);
-        data[0] = ts;
-
-        _connection->send(label, data);
-    }
-}
-
-//Extract the data from the given identifier
-//NOTE: The identifier must start with capital letter,
-//otherwise no match will be found
-bool CompareSonification::extractData(const std::string& identifier, int i)
+// Extract the data from the given identifier
+bool CompareSonification::extractData(const Camera* camera, const std::string& identifier,
+                                      int i)
 {
-    if (_scene->isInitializing()) {
-        return false;
-    }
-
-    SceneGraphNode* node = sceneGraphNode(identifier);
-    if (!node) {
-        return false;
-    }
-
-    glm::dvec3 nodePosition = node->worldPosition();
-    if (nodePosition.length < std::numeric_limits<glm::length_t>::epsilon) {
-        return false;
-    }
-
-    glm::dvec3 cameraDirection = _camera->viewDirectionWorldSpace();
-    glm::dvec3 cameraUpVector = _camera->lookUpVectorWorldSpace();
-
-    //Check the time speed in OpenSpace
-    checkTimeSpeed(_timeSpeed);
-
-    //Calculate distance to the planet from the camera, convert to km
-    glm::dvec3 cameraToNode = nodePosition - _camera->positionVec3();
-    double distance = glm::length(cameraToNode) / 1000.0;
-    bool updateMoons = false;
-
-    // Calculate angle from the Sun (origin) to node,
-    // with camera forward vector as forward axis and camera up vector as upward axis
-    // angle from Sun with respect to the camera
-    double angle = glm::orientedAngle(
-        glm::normalize(cameraDirection),
-        glm::normalize(nodePosition - glm::proj(nodePosition, cameraUpVector)),
-        glm::normalize(cameraUpVector)
+    double distance = SonificationBase::calculateDistanceTo(
+        camera,
+        identifier,
+        DistanceUnit::Kilometer
     );
+    double angle = SonificationBase::calculateAngleTo(camera, identifier);
+
+    if (abs(distance) < std::numeric_limits<double>::epsilon())
+    {
+        return false;
+    }
+
+    // Also calculate angle to moons if this planet is in focus
+    bool updateMoons = false;
+    for (int m = 0; m < _planets[i].moons.size(); ++m) {
+        double moonAngle = SonificationBase::calculateAngleFromAToB(
+            camera,
+            identifier,
+            _planets[i].moons[m].first
+        );
+
+        if (abs(_planets[i].moons[m].second - moonAngle) > _anglePrecision) {
+            updateMoons = true;
+            _planets[i].moons[m].second = moonAngle;
+        }
+    }
 
     // Check if this data is new, otherwise don't send it
     bool shouldSendData = false;
@@ -390,39 +368,21 @@ bool CompareSonification::extractData(const std::string& identifier, int i)
     return shouldSendData;
 }
 
-void CompareSonification::update() {
+void CompareSonification::update(const Scene* scene, const Camera* camera) {
     const SceneGraphNode* focusNode = nullptr;
     const SceneGraphNode* previousFocusNode = nullptr;
 
-    // If no scene, try to find it
-    if (!_scene || _scene->isInitializing() || _scene->root()->children().size() == 0) {
-        _scene = global::renderEngine->scene();
-    }
-
-    // If no camera, try to find it
-    if (!_camera) {
-        _camera = _scene ? _scene->camera() : nullptr;
-    }
-
-    if (!_scene || !_camera ||
-        _camera->positionVec3().length < std::numeric_limits<glm::length_t>::epsilon)
-    {
-        return;
-    }
-
-    // Scne and camera is initialized
-
-    //Which node is in focus?
+    // Which node is in focus?
     focusNode = global::navigationHandler->orbitalNavigator().anchorNode();
     if (!focusNode) {
         return;
     }
 
-    //Extract data from all the planets
-    for (int i = 0; i < 8; ++i) {
+    // Extract data from all the planets
+    for (int i = 0; i < _planets.size(); ++i) {
 
-        //Only send data if something new has happened
-        //If the node is in focus, increase sensitivity
+        // Only send data if something new has happened
+        // If the node is in focus, increase sensitivity
         if (focusNode->identifier().compare(_planets[i].identifier) == 0)
         {
             _anglePrecision = 0.05;
@@ -433,7 +393,7 @@ void CompareSonification::update() {
             _distancePrecision = 10000.0;
         }
 
-        bool hasDataUpdated = extractData(_planets[i].identifier, i);
+        bool hasDataUpdated = extractData(camera, _planets[i].identifier, i);
 
         if (hasDataUpdated) {
             // Send the data to SuperCollider

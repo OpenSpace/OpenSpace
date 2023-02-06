@@ -28,6 +28,9 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/osc/include/oscconnection.h>
+#include <openspace/camera/camera.h>
+#include <openspace/scene/scene.h>
+#include <openspace/util/distanceconversion.h>
 
 namespace openspace {
 
@@ -39,7 +42,14 @@ public:
         const std::string& ip, int port);
     virtual ~SonificationBase();
 
-    virtual void update() = 0;
+    virtual void update(const Scene* scene, const Camera* camera) = 0;
+
+    static double calculateDistanceTo(const Camera* camera, const std::string& identifier,
+       DistanceUnit unit = DistanceUnit::Meter);
+
+    static double calculateAngleTo(const Camera* camera, const std::string& identifier);
+    static double calculateAngleFromAToB(const Camera* camera, const std::string& idA,
+        const std::string& idB);
 
 protected:
     OscConnection* _connection = nullptr;

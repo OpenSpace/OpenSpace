@@ -22,62 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SONIFICATION___SOLARSONIFICATION___H__
-#define __OPENSPACE_MODULE_SONIFICATION___SOLARSONIFICATION___H__
+#ifndef __OPENSPACE_MODULE_SONIFICATION___TIMESONIFICATION___H__
+#define __OPENSPACE_MODULE_SONIFICATION___TIMERSONIFICATION___H__
 
 #include <modules/sonification/include/sonificationbase.h>
 
 namespace openspace {
 
-class SolarSonification : public SonificationBase {
+class TimeSonification : public SonificationBase {
 public:
-    SolarSonification(const std::string& ip, int port);
-    virtual ~SolarSonification() override;
+    TimeSonification(const std::string& ip, int port);
+    virtual ~TimeSonification() override = default;
 
-    virtual void update(const Scene* scene, const Camera* camera) override;
+    virtual void update(const Scene*, const Camera*) override;
 
 private:
-    /**
-     * Extracts data from the given identifier
-     * \param identifier of the scene graph node to extract data from
-     * \param i index in internal list of planets that corresponds to the identifier
-     *
-     * \return boolean if the data extracted is new or not
-     */
-    bool extractData(const Camera* camera, const std::string& identifier, int i);
-
-    osc::Blob createSettingsBlob() const;
-    void sendSettings();
-    void onAllEnabledChanged();
-    void onSettingChanged();
-
-    // Struct to hold data for all the planets
-    struct Planet {
-        Planet(std::string id = "") {
-            identifier = id;
-        }
-
-        std::string identifier;
-        double distance = 0.0;
-        double angle = 0.0;
-    };
-
-    double _anglePrecision;
-    double _distancePrecision;
-    std::vector<Planet> _planets;
-
-    // Properties
-    properties::BoolProperty _enableAll;
-    properties::BoolProperty _mercuryEnabled;
-    properties::BoolProperty _venusEnabled;
-    properties::BoolProperty _earthEnabled;
-    properties::BoolProperty _marsEnabled;
-    properties::BoolProperty _jupiterEnabled;
-    properties::BoolProperty _saturnEnabled;
-    properties::BoolProperty _uranusEnabled;
-    properties::BoolProperty _neptuneEnabled;
+    double _timeSpeed;
+    double _timePrecision;
 };
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_SONIFICATION___SOLARSONIFICATION___H__
+#endif __OPENSPACE_MODULE_SONIFICATION___TIMESONIFICATION___H__
