@@ -22,20 +22,80 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_MODULE_SONIFICATION___COMPARESONIFICATION___H__
+#define __OPENSPACE_MODULE_SONIFICATION___COMPARESONIFICATION___H__
+
 #include <modules/sonification/include/sonificationbase.h>
+
+#include <openspace/properties/optionproperty.h>
+#include <openspace/scene/scene.h>
 
 namespace openspace {
 
-SonificationBase::SonificationBase(properties::PropertyOwner::PropertyOwnerInfo info,
-                                   const std::string& ip, int port)
-    : properties::PropertyOwner(info)
-{
-    _connection = new OscConnection(ip, port);
-}
+class CompareSonification : public SonificationBase {
+public:
 
-SonificationBase::~SonificationBase() {
-    delete _connection;
-}
+    CompareSonification(const std::string& ip, int port);
+    virtual ~CompareSonification() override;
+
+    virtual void update() override;
+
+private:
+    Scene* _scene = nullptr;
+    Camera* _camera = nullptr;
+
+    //Extract the data from the given identifier
+    bool extractData(const std::string& identifier, int i);
+
+    //Property functions
+    void setAllPlanetaryProperties(bool value);
+
+    //Check the speed of the simulated time
+    void checkTimeSpeed(double& ts);
+
+    //Compare
+    osc::Blob createSettingsBlob() const;
+    void sendSettings();
+    void onFirstChanged();
+    void onSecondChanged();
+    void onAllChanged();
+    void onSettingChanged();
+
+    //Struct to hold data for all the planets
+    struct Planet {
+        Planet(std::string id = "") {
+            identifier = id;
+        }
+
+        std::string identifier;
+        double distance = 0.0;
+        double angle = 0.0;
+        std::vector<std::pair<std::string, double>> moons;
+    };
+
+    double _anglePrecision;
+    double _distancePrecision;
+    double _timeSpeed;
+    double _timePrecision;
+    Planet _planets[8];
+    std::string _oldFirst;
+    std::string _oldSecond;
+
+    //Properties
+
+    //Compare View
+    properties::OptionProperty _firstPlanet;
+    properties::OptionProperty _secondPlanet;
+
+    properties::BoolProperty _enableAll;
+    properties::BoolProperty _sizeDayEnabled;
+    properties::BoolProperty _gravityEnabled;
+    properties::BoolProperty _temperatureEnabled;
+    properties::BoolProperty _atmosphereEnabled;
+    properties::BoolProperty _moonsEnabled;
+    properties::BoolProperty _ringsEnabled;
+};
 
 } // namespace openspace
 
+#endif __OPENSPACE_MODULE_SONIFICATION___COMPARESONIFICATION___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                              *
+ * Copyright (c) 2014-2023                                                              *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,9 @@
 
 #include <modules/sonification/sonificationmodule.h>
 
+#include <modules/sonification/include/comparesonification.h>
 #include <modules/sonification/include/planetssonification.h>
+#include <modules/sonification/include/solarsonification.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 
@@ -38,28 +40,38 @@ namespace openspace {
 
 SonificationModule::SonificationModule()
     : OpenSpaceModule("Sonification")
-{
+{}
+
+SonificationModule::~SonificationModule() {
+    // Clear the sonifications list
+    for (SonificationBase* sonification : _sonifications) {
+        delete sonification;
+    }
+}
+
+void SonificationModule::internalInitialize(const ghoul::Dictionary&) {
+    // Fill sonification list
+    _sonifications.push_back(new CompareSonification(SuperColliderIp.data(), SuperColliderPort));
+    addPropertySubOwner(_sonifications.back());
+
+    _sonifications.push_back(new PlanetsSonification(SuperColliderIp.data(), SuperColliderPort));
+    addPropertySubOwner(_sonifications.back());
+
+    _sonifications.push_back(new SolarSonification(SuperColliderIp.data(), SuperColliderPort));
+    addPropertySubOwner(_sonifications.back());
+
     // Only the master runs the SonificationModule
     if (global::windowDelegate->isMaster()) {
         _isRunning = true;
         _updateThread = std::thread([this]() { update(std::ref(_isRunning)); });
     }
-
-    // Fill sonification list
-    _sonifications.push_back(new PlanetsSonification(SuperColliderIp.data(), SuperColliderPort));
-    addPropertySubOwner(_sonifications.back());
 }
 
-SonificationModule::~SonificationModule() {
+void SonificationModule::internalDeinitialize() {
     // Join the thread
     _isRunning = false;
     if (_updateThread.joinable()) {
         _updateThread.join();
-    }
-
-    // Clear the sonifications list
-    for (SonificationBase* sonification : _sonifications) {
-        delete sonification;
     }
 }
 

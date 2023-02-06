@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                              *
+ * Copyright (c) 2014-2023                                                              *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <modules/osc/include/oscconnection.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/fmt.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "OscConnection";
@@ -58,6 +59,8 @@ void OscConnection::send(const std::string& label, const std::vector<OscDataType
     _stream.Clear();
     _stream << osc::BeginMessage(label.c_str());
 
+    LINFO(fmt::format("Sending: /{}", label));
+
     for (const OscDataType& item : data) {
         std::visit(overloaded {
             [this](const osc::Blob& value) {
@@ -81,6 +84,7 @@ void OscConnection::send(const std::string& label, const std::vector<OscDataType
 
     _stream << osc::EndMessage;
     _socket.Send(_stream.Data(), _stream.Size());
+
 }
 
 } // namespace openspace

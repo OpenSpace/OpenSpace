@@ -25,13 +25,17 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/include/comparesonification.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/planetssonification.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/solarsonification.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/sonificationbase.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/comparesonification.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/solarsonification.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/sonificationbase.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
