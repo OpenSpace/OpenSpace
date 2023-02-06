@@ -2037,16 +2037,25 @@ void DataViewer::handleDoubleClickHoveredPlanet(int index) {
     }
 }
 
-void DataViewer::updateFilteredRowsProperty() {
+void DataViewer::updateFilteredRowsProperty(std::optional<std::vector<size_t>> customIndices) {
     auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
     properties::Property* filteredRowsProperty = mod->property("FilteredDataRows");
     if (filteredRowsProperty) {
         std::vector<int> indices;
-        indices.reserve(_filteredData.size());
-        std::transform(
-            _filteredData.begin(), _filteredData.end(), std::back_inserter(indices),
-            [](size_t i) { return static_cast<int>(i); }
-        );
+
+        if (customIndices.has_value()) {
+            std::transform(
+                customIndices.value().begin(), customIndices.value().end(), std::back_inserter(indices),
+                [](size_t i) { return static_cast<int>(i); }
+            );
+        }
+        else {
+            indices.reserve(_filteredData.size());
+            std::transform(
+                _filteredData.begin(), _filteredData.end(), std::back_inserter(indices),
+                [](size_t i) { return static_cast<int>(i); }
+            );
+        }
 
         // TODO: should set this over Lua script API instead
         filteredRowsProperty->set(indices);
@@ -2306,7 +2315,7 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
     const std::string hostIdentifier = createIdentifier(host);
     bool systemIsAdded = !systemCanBeAdded(host);
 
-    std::vector<size_t>& planetIndexes = _hostIdToPlanetsMap[createIdentifier(host)];
+    std::vector<size_t>& planetIndices = _hostIdToPlanetsMap[createIdentifier(host)];
 
     ImGui::BeginGroup();
     {
@@ -2394,10 +2403,10 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                 }
             }
 
-            if (planetIndexes.size() > 0) {
+            if (planetIndices.size() > 0) {
                 // Assume that if first one we find is enabled/disabled, all are
                 std::string planetDiscId;
-                for (size_t i : planetIndexes) {
+                for (size_t i : planetIndices) {
                     const std::string discId = planetIdentifier(_data[i]) + "_Disc";
                     if (renderable(discId)) {
                         planetDiscId = discId;
@@ -2410,7 +2419,7 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                     bool enabled = planetOrbitDisc->isEnabled();
 
                     if (ImGui::Checkbox("Show orbit uncertainty", &enabled)) {
-                        for (size_t i : planetIndexes) {
+                        for (size_t i : planetIndices) {
                             const ExoplanetItem& p = _data[i];
                             const std::string discId = planetIdentifier(p) + "_Disc";
                             if (renderable(discId)) {
@@ -2425,9 +2434,6 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                     );
                 }
             }
-
-
-
         }
 
         ImGui::EndGroup();
@@ -2497,7 +2503,7 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                 static ColorMappedVariable variable;
                 bool colorEditChanged = renderColormapEdit(variable, host);
                 if (colorOptionChanged || colorEditChanged) {
-                    for (size_t planetIndex : planetIndexes) {
+                    for (size_t planetIndex : planetIndices) {
                         const ExoplanetItem& p = _data[planetIndex];
                         if (colorOptionChanged) {
                             // First time we change color
@@ -2511,7 +2517,7 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
             }
             else if (colorOptionChanged) {
                 // Reset rendering
-                for (size_t planetIndex : planetIndexes) {
+                for (size_t planetIndex : planetIndices) {
                     const ExoplanetItem& p = _data[planetIndex];
                     colorTrail(p, glm::vec3(1.f, 1.f, 1.f));
                     resetTrailWidth(p);
@@ -2528,8 +2534,23 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
     // windows. This is not possible just using the same id in the BeginTable call,
     // since the id is connected to the ImGuiwindow instance
     ImGui::PushOverrideID(ImHashStr("systemTable"));
-    renderTable("systemTable", planetIndexes, true);
+    renderTable("systemTable", planetIndices, true);
     ImGui::PopID();
+
+    // Quickly set external selection to webpage
+    if (ImGui::Button("Send planets to external webpage")) {
+        updateFilteredRowsProperty(planetIndices);
+    }
+    ImGui::SameLine();
+    renderHelpMarker(
+        "Send just the planets in this planet system to the ExoplanetExplorer analysis "
+        "webpage. Note that this overrides any other filtering. To bring back the filter "
+        "selection, update the filtering in any way or press the next button."
+    );
+    ImGui::SameLine();
+    if (ImGui::Button("Reset webpage to filtered")) {
+        updateFilteredRowsProperty();
+    }
 }
 
 void DataViewer::renderColumnValue(int columnIndex, std::optional<const char*> format,
@@ -2854,7 +2875,6 @@ bool DataViewer::systemCanBeAdded(const std::string& host) const {
 
     // TODO: also check against exoplanet list
 }
-
 
 void DataViewer::addExoplanetSystem(const std::string& host) const {
     openspace::global::scriptEngine->queueScript(
