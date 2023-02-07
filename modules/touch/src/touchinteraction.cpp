@@ -1041,16 +1041,17 @@ void TouchInteraction::resetAfterInput() {
     _debugProperties.nFingers = 0;
     _debugProperties.interactionMode = "None";
 #endif
-    // @TODO (emmbr 2023-02-03) We should try to reimplement this but using the friction
+    // @TODO (emmbr 2023-02-03) This also seems to not quite work, and only trigger in
+    // unexpected situations. We should try to reimplement this but using the friction
     // parameters in the orbitalnavigator somehow. Maybe the velocities affected by
     // the touch should actually be the orbitalnavigator's?
-    if (_directTouchMode && !_selectedNodeSurfacePoints.empty() && _lmSuccess) {
-        double spinDelta = _spinSensitivity / global::windowDelegate->averageDeltaTime();
-        if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) {
-             // allow node to start "spinning" after direct-manipulation finger is let go
-            _vel.orbit = _lastVel.orbit * spinDelta;
-        }
-    }
+    //if (_directTouchMode && !_selectedNodeSurfacePoints.empty() && _lmSuccess) {
+    //    double spinDelta = _spinSensitivity / global::windowDelegate->averageDeltaTime();
+    //    if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) {
+    //         // allow node to start "spinning" after direct-manipulation finger is let go
+    //        _vel.orbit = _lastVel.orbit * spinDelta;
+    //    }
+    //}
 
     _lmSuccess = true;
 
