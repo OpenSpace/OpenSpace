@@ -106,7 +106,7 @@ private:
     void handleMpvProperties(mpv_event* event);
     void swapBuffersMpv(); // Called in postDraw
     void cleanUpMpv(); // Called in internalDeinitialze
-    static void on_mpv_render_update(void*);
+    static void on_mpv_render_update(void*); // Has to be static because of C api
     void observePropertyMpv(std::string name, mpv_format format, LibmpvPropertyKey key);
     void setPropertyStringMpv(std::string name, std::string value);
     void seekToTime(double time);
@@ -129,7 +129,7 @@ private:
     std::unique_ptr<ghoul::opengl::Texture>_frameTexture = nullptr;
     mpv_opengl_fbo _mpvFbo;
     GLuint _fbo = 0;
-    static int _wakeup;
+    int _wakeup = 0;
     bool _didRender = false;
     bool _isPaused = false;
 

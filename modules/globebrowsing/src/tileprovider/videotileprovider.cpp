@@ -127,8 +127,6 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-int VideoTileProvider::_wakeup = 0;
-
 bool checkMpvError(int status) {
     if (status < 0) {
         LERROR(fmt::format("Libmpv API error: {}", mpv_error_string(status)));
@@ -143,10 +141,10 @@ void* getOpenGLProcAddress(void*, const char* name) {
     );
 }
 
-void VideoTileProvider::on_mpv_render_update(void*) {
+void VideoTileProvider::on_mpv_render_update(void* ctx) {
     // The wakeup flag is set here to enable the mpv_render_context_render 
     // path in the main loop.
-    _wakeup = 1;
+    static_cast<VideoTileProvider*>(ctx)->_wakeup = 1;
 }
 
 void VideoTileProvider::observePropertyMpv(std::string name, mpv_format format, 
@@ -407,7 +405,7 @@ void VideoTileProvider::initializeMpv() {
     mpv_render_context_set_update_callback(
         _mpvRenderContext, 
         on_mpv_render_update, 
-        nullptr
+        this
     );
 
     // Load file
