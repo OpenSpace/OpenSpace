@@ -1,5 +1,5 @@
 -- Your personal path --
-local path = "C:/MasterThesis_cosmicView"
+local path = asset.require("./_data_path").Path
 
 -- Speck files --
 local mutations_file = asset.localResource(path .. "/data/mutations/speck/primates_mutations_file.speck")
@@ -20,139 +20,139 @@ local mutations_texture = asset.localResource(path .. "/data/texture/point3A.png
 
 
 local mutations = {
-    Identifier = "mutations",
-    Renderable = {
-     Type = "RenderableBillboardsCloud",
-      Color = { 0.4,1.0,1.0 },
-      Opacity = 1.0,
-      ScaleFactor = 12,
-      File = mutations_file,
-      ColorMap = color_map,
-      ColorOption = { "Syn_div_nonsyn" , "NonSynonymousDiff", "synonymousDiff"},
-      ColorRange = {  {0,66} , { 0, 20}, { 0, 140} },
-      DrawLabels = false,
-      LabelFile = mutations_label,
-      TextColor = { 1.0, 1.0, 1.0 },
-      TextSize = 1.0,
-      TextMinMaxSize = { 0, 17 },
-      FadeLabelDistances = { 0.0, 0.5 },
-      FadeLabelWidths = { 0.001, 10.0 },
-      Unit = "Km",
-      Texture = mutations_texture,
-      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
-      EnablePixelSizeControl = true,
-      Enabled = false
-    },
-    GUI = {
-      Name = "Mutations points",
-      Path = "/Cosmic/Mutations"
-    }
+  Identifier = "mutations",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Color = { 0.4,1.0,1.0 },
+    Opacity = 1.0,
+    ScaleFactor = 12,
+    File = mutations_file,
+    ColorMap = color_map,
+    ColorOption = { "Syn_div_nonsyn" , "NonSynonymousDiff", "synonymousDiff"},
+    ColorRange = {  {0,66} , { 0, 20}, { 0, 140} },
+    DrawLabels = false,
+    LabelFile = mutations_label,
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 17 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 10.0 },
+    Unit = "Km",
+    Texture = mutations_texture,
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "Mutations points",
+    Path = "/Cosmic/Mutations"
   }
+}
 
-  local mutations_colormap1 = {
-    Identifier = "mutations_colormap1",
-    Renderable = {
-      Type = "RenderableCosmicPoints",
-      Color = { 0.4,1.0,1.0 },
-      Opacity = 1.0,
-      ScaleFactor = 30,
-      File = mutations_file,
-      ColorMap = color_map1,
-      ColorOption = { "Syn_div_nonsyn" , "NonSynonymousDiff", "synonymousDiff"},
-      ColorRange = {  {0,66} , { 0, 20}, { 0, 140} },
-      DrawLabels = false,
-      LabelFile = mutations_label,
-      TextColor = { 1.0, 1.0, 1.0 },
-      TextSize = 1.0,
-      TextMinMaxSize = { 0, 17 },
-      FadeLabelDistances = { 0.0, 0.5 },
-      FadeLabelWidths = { 0.001, 0.5 },
-      Unit = "Km",
-      Texture = mutations_texture,
-      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
-      EnablePixelSizeControl = true,
-      Enabled = false
-    },
-    GUI = {
-      Name = "Redblue points",
-      Path = "/Cosmic/Mutations"
-    }
+local mutations_colormap1 = {
+  Identifier = "mutations_colormap1",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 0.4,1.0,1.0 },
+    Opacity = 1.0,
+    ScaleFactor = 30,
+    File = mutations_file,
+    ColorMap = color_map1,
+    ColorOption = { "Syn_div_nonsyn" , "NonSynonymousDiff", "synonymousDiff"},
+    ColorRange = {  {0,66} , { 0, 20}, { 0, 140} },
+    DrawLabels = false,
+    LabelFile = mutations_label,
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 17 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 0.5 },
+    Unit = "Km",
+    Texture = mutations_texture,
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "Redblue points",
+    Path = "/Cosmic/Mutations"
   }
+}
 
-  local mutations_colormap2 = {
-    Identifier = "mutations_colormap2",
-    Renderable = {
-      Type = "RenderableCosmicPoints",
-      Color = { 0.4,1.0,1.0 },
-      Opacity = 1.0,
-      ScaleFactor = 30,
-      File = mutations_file,
-      ColorMap = color_map2,
-      ColorOption = { "Syn_div_nonsyn" , "NonSynonymousDiff", "synonymousDiff"},
-      ColorRange = {  {0,66} , { 0, 20}, { 0, 140} },
-      DrawLabels = false,
-      LabelFile = mutations_label,
-      TextColor = { 1.0, 1.0, 1.0 },
-      TextSize = 1.0,
-      TextMinMaxSize = { 0, 17 },
-      FadeLabelDistances = { 0.0, 0.5 },
-      FadeLabelWidths = { 0.001, 0.5 },
-      Unit = "Km",
-      Texture = mutations_texture,
-      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
-      EnablePixelSizeControl = true,
-      Enabled = false
-    },
-    GUI = {
-      Name = "Inferno points",
-      Path = "/Cosmic/Mutations"
-    }
+local mutations_colormap2 = {
+  Identifier = "mutations_colormap2",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 0.4,1.0,1.0 },
+    Opacity = 1.0,
+    ScaleFactor = 30,
+    File = mutations_file,
+    ColorMap = color_map2,
+    ColorOption = { "Syn_div_nonsyn" , "NonSynonymousDiff", "synonymousDiff"},
+    ColorRange = {  {0,66} , { 0, 20}, { 0, 140} },
+    DrawLabels = false,
+    LabelFile = mutations_label,
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 17 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 0.5 },
+    Unit = "Km",
+    Texture = mutations_texture,
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "Inferno points",
+    Path = "/Cosmic/Mutations"
   }
+}
 
-  local mutations_colormap3 = {
-    Identifier = "mutations_colormap3",
-    Renderable = {
-      Type = "RenderableCosmicPoints",
-      Color = { 0.4,1.0,1.0 },
-      Opacity = 1.0,
-      ScaleFactor = 30,
-      File = mutations_file,
-      ColorMap = color_map3,
-      ColorOption = { "Syn_div_nonsyn" , "NonSynonymousDiff", "synonymousDiff"},
-      ColorRange = {  {0,66} , { 0, 20}, { 0, 140} },
-      DrawLabels = false,
-      LabelFile = mutations_label,
-      TextColor = { 1.0, 1.0, 1.0 },
-      TextSize = 1.0,
-      TextMinMaxSize = { 0, 17 },
-      FadeLabelDistances = { 0.0, 0.5 },
-      FadeLabelWidths = { 0.001, 0.5 },
-      Unit = "Km",
-      Texture = mutations_texture,
-      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
-      EnablePixelSizeControl = true,
-      Enabled = false
-    },
-    GUI = {
-      Name = "Plasma points",
-      Path = "/Cosmic/Mutations"
-    }
+local mutations_colormap3 = {
+  Identifier = "mutations_colormap3",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 0.4,1.0,1.0 },
+    Opacity = 1.0,
+    ScaleFactor = 30,
+    File = mutations_file,
+    ColorMap = color_map3,
+    ColorOption = { "Syn_div_nonsyn" , "NonSynonymousDiff", "synonymousDiff"},
+    ColorRange = {  {0,66} , { 0, 20}, { 0, 140} },
+    DrawLabels = false,
+    LabelFile = mutations_label,
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 17 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 0.5 },
+    Unit = "Km",
+    Texture = mutations_texture,
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "Plasma points",
+    Path = "/Cosmic/Mutations"
   }
+}
 
 
 
 asset.onInitialize(function()
-openspace.addSceneGraphNode(mutations)
---openspace.addSceneGraphNode(mutations_colormap1)
---openspace.addSceneGraphNode(mutations_colormap2)
---openspace.addSceneGraphNode(mutations_colormap3)
+  openspace.addSceneGraphNode(mutations)
+  --openspace.addSceneGraphNode(mutations_colormap1)
+  --openspace.addSceneGraphNode(mutations_colormap2)
+  --openspace.addSceneGraphNode(mutations_colormap3)
 end)
 
 asset.onDeinitialize(function()
-openspace.removeSceneGraphNode(mutations)
---openspace.removeSceneGraphNode(mutations_colormap1)
---openspace.removeSceneGraphNode(mutations_colormap2)
---openspace.removeSceneGraphNode(mutations_colormap3)
+  openspace.removeSceneGraphNode(mutations)
+  --openspace.removeSceneGraphNode(mutations_colormap1)
+  --openspace.removeSceneGraphNode(mutations_colormap2)
+  --openspace.removeSceneGraphNode(mutations_colormap3)
 end)
 
 asset.export(mutations)

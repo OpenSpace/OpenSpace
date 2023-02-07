@@ -1,5 +1,5 @@
 -- Your personal path --
-local path = "C:/MasterThesis_cosmicView"
+local path = asset.require("./_data_path").Path
 
 -- Texture path --
 local endangered =  asset.localResource(path .. "/data/endangered/images/critically_endangered.png")
@@ -13,39 +13,39 @@ local superfamily =  asset.localResource(path .. "/data/superfamily/images/super
 local volumeorder =  asset.localResource(path .. "/data/superfamily/images/volumeorder.png")
 
 local status_image = {
-    Identifier = "endangered",
-    Name = "status image",
-    Type = "ScreenSpaceImageLocal",
-    TexturePath = endangered,
-    FaceCamera = false,
-    Scale = 0.3,
-    CartesianPosition = { 1.23, -0.59, -2.0 },
-    Enabled = false
-  }
+  Identifier = "endangered",
+  Name = "status image",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = endangered,
+  FaceCamera = false,
+  Scale = 0.3,
+  CartesianPosition = { 1.23, -0.59, -2.0 },
+  Enabled = false
+}
 
 
 --colorbar to understand the colors for synonynmous mutations
 local syn = {
-    Identifier = "synonymous",
-    Name = "Synonymous Mutations",
-    Type = "ScreenSpaceImageLocal",
-    TexturePath = synonymous,
-    FaceCamera = false,
-    Scale = 0.45,
-    CartesianPosition = { 1.24, -0.6, -2.0 },
-    Enabled = false
+  Identifier = "synonymous",
+  Name = "Synonymous Mutations",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = synonymous,
+  FaceCamera = false,
+  Scale = 0.45,
+  CartesianPosition = { 1.24, -0.6, -2.0 },
+  Enabled = false
 }
 
 local nonsyn = {
-    Identifier = "nonsynonymous",
-    Name = "Nonsynonymous Mutations",
-    Type = "ScreenSpaceImageLocal",
-    TexturePath = nonsynonymous,
-    FaceCamera = false,
-    Scale = 0.45,
-    CartesianPosition = { 1.24, -0.6, -2.0 },
-    Enabled = false
-  }
+  Identifier = "nonsynonymous",
+  Name = "Nonsynonymous Mutations",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = nonsynonymous,
+  FaceCamera = false,
+  Scale = 0.45,
+  CartesianPosition = { 1.24, -0.6, -2.0 },
+  Enabled = false
+}
 
 
 local synredyellowcolor = {
@@ -83,73 +83,72 @@ local redbluecolor = {
 }
 
 
-  local world_map_image = {
-    Identifier = "humans",
-    Name = "world map",
-    Type = "ScreenSpaceImageLocal",
-    TexturePath = world_continents,
-    FaceCamera = false,
-    Scale = 0.4,
-    CartesianPosition = { 1.2, -0.6, -2.0 },
-    Enabled = false
-  }
+local world_map_image = {
+  Identifier = "humans",
+  Name = "world map",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = world_continents,
+  FaceCamera = false,
+  Scale = 0.4,
+  CartesianPosition = { 1.2, -0.6, -2.0 },
+  Enabled = false
+}
 
-  local superfamily = {
-    Identifier = "superfamily",
-    Name = "Superfamily",
-    Type = "ScreenSpaceImageLocal",
-    TexturePath = superfamily,
-    FaceCamera = false,
-    Scale = 1.0,
-    CartesianPosition = { 0.76, -0.47, -2.0 },
-    Enabled = false
-  }
+local superfamily = {
+  Identifier = "superfamily",
+  Name = "Superfamily",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = superfamily,
+  FaceCamera = false,
+  Scale = 1.0,
+  CartesianPosition = { 0.76, -0.47, -2.0 },
+  Enabled = false
+}
 
-  local volumeorder = {
-    Identifier = "volumeorder",
-    Name = "Volume",
-    Type = "ScreenSpaceImageLocal",
-    TexturePath = volumeorder,
-    FaceCamera = false,
-    Scale = 0.65,
-    CartesianPosition = { 1.15, -0.44, -2.0 },
-    Enabled = false
-  }
+local volumeorder = {
+  Identifier = "volumeorder",
+  Name = "Volume",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = volumeorder,
+  FaceCamera = false,
+  Scale = 0.65,
+  CartesianPosition = { 1.15, -0.44, -2.0 },
+  Enabled = false
+}
 
 
 
-  asset.onInitialize(function()
-    openspace.addScreenSpaceRenderable(world_map_image) 
-    openspace.addScreenSpaceRenderable(status_image) 
-   -- openspace.addScreenSpaceRenderable(syn) 
-   -- openspace.addScreenSpaceRenderable(nonsyn) 
-    openspace.addScreenSpaceRenderable(synredyellowcolor) 
-    openspace.addScreenSpaceRenderable(nonsynredyellowcolor) 
-    openspace.addScreenSpaceRenderable(redbluecolor) 
-    openspace.addScreenSpaceRenderable(superfamily)
-    openspace.addScreenSpaceRenderable(volumeorder)
-
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(world_map_image)
+  openspace.addScreenSpaceRenderable(status_image)
+  -- openspace.addScreenSpaceRenderable(syn)
+  -- openspace.addScreenSpaceRenderable(nonsyn)
+  openspace.addScreenSpaceRenderable(synredyellowcolor)
+  openspace.addScreenSpaceRenderable(nonsynredyellowcolor)
+  openspace.addScreenSpaceRenderable(redbluecolor)
+  openspace.addScreenSpaceRenderable(superfamily)
+  openspace.addScreenSpaceRenderable(volumeorder)
 end)
 
 
 asset.onDeinitialize(function()
-    openspace.removeScreenSpaceRenderable(world_map_image)
-    openspace.removeScreenSpaceRenderable(status_image)
-  --  openspace.removeScreenSpaceRenderable(syn)
-  --  openspace.removeScreenSpaceRenderable(nonsyn)
-    openspace.removeScreenSpaceRenderable(synredyellowcolor)
-    openspace.removeScreenSpaceRenderable(nonsynredyellowcolor)
-    openspace.removeScreenSpaceRenderable(redbluecolor)
-    openspace.addScreenSpaceRenderable(superfamily)
-    openspace.addScreenSpaceRenderable(volumeorder)
-    end)
+  openspace.removeScreenSpaceRenderable(world_map_image)
+  openspace.removeScreenSpaceRenderable(status_image)
+--  openspace.removeScreenSpaceRenderable(syn)
+--  openspace.removeScreenSpaceRenderable(nonsyn)
+  openspace.removeScreenSpaceRenderable(synredyellowcolor)
+  openspace.removeScreenSpaceRenderable(nonsynredyellowcolor)
+  openspace.removeScreenSpaceRenderable(redbluecolor)
+  openspace.addScreenSpaceRenderable(superfamily)
+  openspace.addScreenSpaceRenderable(volumeorder)
+end)
 
-    asset.export(world_map_image)
-    asset.export(status_image)
- --   asset.export(syn)
- --  asset.export(nonsyn)
-    asset.export(synredyellowcolor)
-    asset.export(nonsynredyellowcolor)
-    asset.export(redbluecolor)
-    asset.export(superfamily)
-    asset.export(volumeorder)
+asset.export(world_map_image)
+asset.export(status_image)
+-- asset.export(syn)
+-- asset.export(nonsyn)
+asset.export(synredyellowcolor)
+asset.export(nonsynredyellowcolor)
+asset.export(redbluecolor)
+asset.export(superfamily)
+asset.export(volumeorder)

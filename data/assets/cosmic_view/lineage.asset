@@ -1,5 +1,5 @@
 -- Your personal path --
-local path = "C:/MasterThesis_cosmicView"
+local path = asset.require("./_data_path").Path
 
 -- Speck files --
 local lineage_file = asset.localResource(path .. "/data/lineage/speck/lineage_file.speck")
@@ -15,7 +15,7 @@ local label_23 = asset.localResource(path .. "/data/lineage/label/label_23.speck
 local label_genus = asset.localResource(path .. "/data/lineage/label/label_genus.speck")
 local label_species = asset.localResource(path .. "/data/lineage/label/label_species.speck")
 
--- Color maps -- 
+-- Color maps --
 local color_17 = asset.localResource(path .. "/data/lineage/cmap/color_17.cmap")
 local color_18 = asset.localResource(path .. "/data/lineage/cmap/color_18.cmap")
 local color_19 = asset.localResource(path .. "/data/lineage/cmap/color_19.cmap")
@@ -25,7 +25,7 @@ local color_22 = asset.localResource(path .. "/data/lineage/cmap/color_22.cmap")
 local color_23 = asset.localResource(path .. "/data/lineage/cmap/color_23.cmap")
 local color_genus = asset.localResource(path .. "/data/lineage/cmap/color_genus.cmap")
 
--- Texture files -- 
+-- Texture files --
 local lineage_texture = asset.localResource(path .. "/data/texture/point3A.png")
 
 -- Scale factor --
@@ -309,28 +309,28 @@ local lineage = {
 
 
 asset.onInitialize(function()
-    --openspace.addSceneGraphNode(lineage)
-    openspace.addSceneGraphNode(lineage_17)
-    openspace.addSceneGraphNode(lineage_18)
-    openspace.addSceneGraphNode(lineage_19)
-    openspace.addSceneGraphNode(lineage_20)
-    openspace.addSceneGraphNode(lineage_21)
-    openspace.addSceneGraphNode(lineage_22)
-    openspace.addSceneGraphNode(lineage_23)
-    openspace.addSceneGraphNode(lineage_genus)
-    end)
+  --openspace.addSceneGraphNode(lineage)
+  openspace.addSceneGraphNode(lineage_17)
+  openspace.addSceneGraphNode(lineage_18)
+  openspace.addSceneGraphNode(lineage_19)
+  openspace.addSceneGraphNode(lineage_20)
+  openspace.addSceneGraphNode(lineage_21)
+  openspace.addSceneGraphNode(lineage_22)
+  openspace.addSceneGraphNode(lineage_23)
+  openspace.addSceneGraphNode(lineage_genus)
+end)
 
 asset.onDeinitialize(function()
-    --openspace.removeSceneGraphNode(lineage)
-    openspace.removeSceneGraphNode(lineage_17)
-    openspace.removeSceneGraphNode(lineage_18)
-    openspace.removeSceneGraphNode(lineage_19)
-    openspace.removeSceneGraphNode(lineage_20)
-    openspace.removeSceneGraphNode(lineage_21)
-    openspace.removeSceneGraphNode(lineage_22)
-    openspace.removeSceneGraphNode(lineage_23)
-    openspace.removeSceneGraphNode(lineage_genus)
-    end)
+  --openspace.removeSceneGraphNode(lineage)
+  openspace.removeSceneGraphNode(lineage_17)
+  openspace.removeSceneGraphNode(lineage_18)
+  openspace.removeSceneGraphNode(lineage_19)
+  openspace.removeSceneGraphNode(lineage_20)
+  openspace.removeSceneGraphNode(lineage_21)
+  openspace.removeSceneGraphNode(lineage_22)
+  openspace.removeSceneGraphNode(lineage_23)
+  openspace.removeSceneGraphNode(lineage_genus)
+end)
 
 
 --asset.export(lineage)

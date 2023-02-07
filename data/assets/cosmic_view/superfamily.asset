@@ -1,27 +1,28 @@
 
 -- Your personal path --
-local path = "C:/MasterThesis_cosmicView"
+local path = asset.require("./_data_path").Path
+local superFamilyPath = path .. "/data/superfamily"
 
 -- Speck files --
-local homosapiens = asset.localResource(path .. "/data/superfamily/speck/humans.speck")
-local neander = asset.localResource(path .. "/data/superfamily/speck/neander.speck")
-local denisova = asset.localResource(path .. "/data/superfamily/speck/denisova.speck")
-local homininae = asset.localResource(path .. "/data/superfamily/speck/homininae.speck")
-local homininae_genus = asset.localResource(path .. "/data/superfamily/speck/homininae_genus.speck")
-local hominioidae = asset.localResource(path .. "/data/superfamily/speck/hominioidae.speck")
+local homosapiens = asset.localResource(superFamilyPath .. "/speck/humans.speck")
+local neander = asset.localResource(superFamilyPath .. "/speck/neander.speck")
+local denisova = asset.localResource(superFamilyPath .. "/speck/denisova.speck")
+local homininae = asset.localResource(superFamilyPath .. "/speck/homininae.speck")
+local homininae_genus = asset.localResource(superFamilyPath .. "/speck/homininae_genus.speck")
+local hominioidae = asset.localResource(superFamilyPath .. "/speck/hominioidae.speck")
 
 -- Label files --
-local homo_label = asset.localResource(path .. "/data/superfamily/label/homo_label.speck") 
-local homininae_label = asset.localResource(path .. "/data/superfamily/label/homininae_label.speck")
-local homininae_genus_label = asset.localResource(path .. "/data/superfamily/label/homininae_genus_label.speck")
-local hominioidae_label = asset.localResource(path .. "/data/superfamily/label/hominioidae_label.speck")
+local homo_label = asset.localResource(superFamilyPath .. "/label/homo_label.speck")
+local homininae_label = asset.localResource(superFamilyPath .. "/label/homininae_label.speck")
+local homininae_genus_label = asset.localResource(superFamilyPath .. "/label/homininae_genus_label.speck")
+local hominioidae_label = asset.localResource(superFamilyPath .. "/label/hominioidae_label.speck")
 
--- Color maps -- 
-local homininae_color =  asset.localResource(path .. "/data/superfamily/cmap/homininae.cmap") 
-local homininae_genus_color =  asset.localResource(path .. "/data/superfamily/cmap/homininae_genus.cmap") 
-local hominioidae_color =  asset.localResource(path .. "/data/superfamily/cmap/hominioidae.cmap") 
+-- Color maps --
+local homininae_color =  asset.localResource(superFamilyPath .. "/cmap/homininae.cmap")
+local homininae_genus_color =  asset.localResource(superFamilyPath .. "/cmap/homininae_genus.cmap")
+local hominioidae_color =  asset.localResource(superFamilyPath .. "/cmap/hominioidae.cmap")
 
--- Texture files -- 
+-- Texture files --
 local texture = asset.localResource(path .. "/data/texture/point3A.png")
 
 -- Scale factor --
@@ -56,153 +57,153 @@ local homosapiens = {
 }
 
 local neander = {
-    Identifier = "neander",
-    Renderable = {
-      Type = "RenderableCosmicPoints",
-      Color = {0.992,0.317,0.031},
-      Opacity = 1.0,
-      ScaleFactor = scale_factor,
-      File = neander,
-      Unit = "Km",
-      Texture = texture,
-      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
-      EnablePixelSizeControl = true,
-      Enabled = false
-    },
-    GUI = {
-      Name = "Neanderthal",
-      Path = "/Cosmic/Superfamily/Homo"
-    }
+  Identifier = "neander",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = {0.992,0.317,0.031},
+    Opacity = 1.0,
+    ScaleFactor = scale_factor,
+    File = neander,
+    Unit = "Km",
+    Texture = texture,
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "Neanderthal",
+    Path = "/Cosmic/Superfamily/Homo"
   }
+}
 
-  local denisovan = {
-    Identifier = "denisovan",
-    Renderable = {
-      Type = "RenderableCosmicPoints",
-      Color = {1.0,0.729,0.0},
-      Opacity = 1.0,
-      ScaleFactor = scale_factor,
-      File = denisova,
-      Unit = "Km",
-      Texture = texture,
-      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
-      EnablePixelSizeControl = true,
-      Enabled = false
-    },
-    GUI = {
-      Name = "Denisovan",
-      Path = "/Cosmic/Superfamily/Homo"
-    }
+local denisovan = {
+  Identifier = "denisovan",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = {1.0,0.729,0.0},
+    Opacity = 1.0,
+    ScaleFactor = scale_factor,
+    File = denisova,
+    Unit = "Km",
+    Texture = texture,
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "Denisovan",
+    Path = "/Cosmic/Superfamily/Homo"
   }
+}
 
-  local homininae = {
-    Identifier = "homininae",
-    Renderable = {
-      Type = "RenderableCosmicPoints",
-      Color = {0.125,0.698,0.6667},
-      Opacity = 1.0,
-      ScaleFactor = scale_factor,
-      File = homininae,
-      ColorMap = homininae_color,
-      ColorOption = { "Genus" },
-      ColorRange = { { 2.0, 4.0}},
-      DrawLabels = false,
-      LabelFile = homininae_label,
-      TextColor = { 1.0, 1.0, 1.0 },
-      TextSize = 1.0,
-      TextMinMaxSize = { 0, 18 },
-      FadeLabelDistances = { 0.0, 0.5 },
-      FadeLabelWidths = { 0.001, 10 },
-      Unit = "Km",
-      Texture = texture,
-      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
-      EnablePixelSizeControl = true,
-      Enabled = false
-    },
-    GUI = {
-      Name = "Homininae",
-      Path = "/Cosmic/Superfamily/Homininae"
-    }
+local homininae = {
+  Identifier = "homininae",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = {0.125,0.698,0.6667},
+    Opacity = 1.0,
+    ScaleFactor = scale_factor,
+    File = homininae,
+    ColorMap = homininae_color,
+    ColorOption = { "Genus" },
+    ColorRange = { { 2.0, 4.0}},
+    DrawLabels = false,
+    LabelFile = homininae_label,
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 18 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 10 },
+    Unit = "Km",
+    Texture = texture,
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "Homininae",
+    Path = "/Cosmic/Superfamily/Homininae"
   }
+}
 
-  local homininae_genus = {
-    Identifier = "homininae_genus",
-    Renderable = {
-      Type = "RenderableCosmicPoints",
-      Color = {0.125,0.698,0.6667},
-      Opacity = 1.0,
-      ScaleFactor = scale_factor,
-      File = homininae_genus,
-      ColorMap = homininae_genus_color,
-      ColorOption = { "Genus" },
-      ColorRange = { { 2.0, 4.0}},
-      DrawLabels = false,
-      LabelFile = homininae_genus_label,
-      TextColor = { 1.0, 1.0, 1.0 },
-      TextSize = 1.0,
-      TextMinMaxSize = { 0, 18 },
-      FadeLabelDistances = { 0.0, 0.5 },
-      FadeLabelWidths = { 0.001, 10 },
-      Unit = "Km",
-      Texture = texture,
-      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
-      EnablePixelSizeControl = true,
-      Enabled = false
-    },
-    GUI = {
-      Name = "Homininae Genus",
-      Path = "/Cosmic/Superfamily/Homininae"
-    }
+local homininae_genus = {
+  Identifier = "homininae_genus",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = {0.125,0.698,0.6667},
+    Opacity = 1.0,
+    ScaleFactor = scale_factor,
+    File = homininae_genus,
+    ColorMap = homininae_genus_color,
+    ColorOption = { "Genus" },
+    ColorRange = { { 2.0, 4.0}},
+    DrawLabels = false,
+    LabelFile = homininae_genus_label,
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 18 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 10 },
+    Unit = "Km",
+    Texture = texture,
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "Homininae Genus",
+    Path = "/Cosmic/Superfamily/Homininae"
   }
+}
 
-  local hominioidae = {
-    Identifier = "hominioidae",
-    Renderable = {
-      Type = "RenderableCosmicPoints",
-      Color = {0.125,0.698,0.6667},
-      Opacity = 1.0,
-      ScaleFactor = scale_factor,
-      File = hominioidae,
-      ColorMap = hominioidae_color,
-      ColorOption = { "Genus" },
-      ColorRange = { { 5.0, 9.0}},
-      DrawLabels = false,
-      LabelFile = hominioidae_label,
-      TextColor = { 1.0, 1.0, 1.0 },
-      TextSize = 1.0,
-      TextMinMaxSize = { 0, 18 },
-      FadeLabelDistances = { 0.0, 0.5 },
-      FadeLabelWidths = { 0.001, 10 },
-      Unit = "Km",
-      Texture = texture,
-      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
-      EnablePixelSizeControl = true,
-      Enabled = false
-    },
-    GUI = {
-      Name = "Hominioidae",
-      Path = "/Cosmic/Superfamily/Hominioidae"
-    }
+local hominioidae = {
+  Identifier = "hominioidae",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = {0.125,0.698,0.6667},
+    Opacity = 1.0,
+    ScaleFactor = scale_factor,
+    File = hominioidae,
+    ColorMap = hominioidae_color,
+    ColorOption = { "Genus" },
+    ColorRange = { { 5.0, 9.0}},
+    DrawLabels = false,
+    LabelFile = hominioidae_label,
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 18 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 10 },
+    Unit = "Km",
+    Texture = texture,
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "Hominioidae",
+    Path = "/Cosmic/Superfamily/Hominioidae"
   }
+}
 
 
 
 asset.onInitialize(function()
-    openspace.addSceneGraphNode(homosapiens)
-    openspace.addSceneGraphNode(neander)
-    openspace.addSceneGraphNode(denisovan)
-    openspace.addSceneGraphNode(homininae)
-    openspace.addSceneGraphNode(homininae_genus)
-    openspace.addSceneGraphNode(hominioidae)
-    end)
+  openspace.addSceneGraphNode(homosapiens)
+  openspace.addSceneGraphNode(neander)
+  openspace.addSceneGraphNode(denisovan)
+  openspace.addSceneGraphNode(homininae)
+  openspace.addSceneGraphNode(homininae_genus)
+  openspace.addSceneGraphNode(hominioidae)
+end)
 
 asset.onDeinitialize(function()
-    openspace.removeSceneGraphNode(homosapiens)
-    openspace.removeSceneGraphNode(neander)
-    openspace.removeSceneGraphNode(denisovan)
-    openspace.removeSceneGraphNode(homininae)
-    openspace.removeSceneGraphNode(homininae_genus)
-    openspace.removeSceneGraphNode(hominioidae)
+  openspace.removeSceneGraphNode(homosapiens)
+  openspace.removeSceneGraphNode(neander)
+  openspace.removeSceneGraphNode(denisovan)
+  openspace.removeSceneGraphNode(homininae)
+  openspace.removeSceneGraphNode(homininae_genus)
+  openspace.removeSceneGraphNode(hominioidae)
 end)
 
 asset.export(homosapiens)
