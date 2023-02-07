@@ -165,6 +165,9 @@
               "id": {
                 "$ref": "sgct.schema.json#/$defs/id"
               },
+              "name": {
+                "$ref": "sgct.schema.json#/$defs/windowname"
+              },
               "pos": {
                 "$ref": "sgct.schema.json#/$defs/windowpos"
               },

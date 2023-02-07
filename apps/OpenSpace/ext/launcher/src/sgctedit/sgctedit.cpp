@@ -97,15 +97,13 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
                 posX = w.pos.value().x;
                 posY = w.pos.value().y;
             }
-            if (w.resolution.has_value()) {
-                QRectF newDims(
-                        posX,
-                        posY,
-                        w.resolution.value().x,
-                        w.resolution.value().y
-                );
-                _displayWidget->windowControls()[i]->setDimensions(newDims);
-            }
+            QRectF newDims(
+                posX,
+                posY,
+                w.size.x,
+                w.size.y
+            );
+            _displayWidget->windowControls()[i]->setDimensions(newDims);
         }
     }
 }

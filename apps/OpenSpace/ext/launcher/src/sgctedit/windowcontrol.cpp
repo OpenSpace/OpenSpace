@@ -628,6 +628,10 @@ void WindowControl::resetToDefaults() {
 
 void WindowControl::setDimensions(QRectF newDims) {
     _windowDimensions = newDims;
+    _sizeX->setValue(_windowDimensions.width());
+    _sizeY->setValue(_windowDimensions.height());
+    _offsetX->setValue(_windowDimensions.x());
+    _offsetY->setValue(_windowDimensions.y());
 }
 
 void WindowControl::showWindowLabel(bool show) {
