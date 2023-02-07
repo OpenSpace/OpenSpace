@@ -301,7 +301,7 @@ std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) 
 
     // Calculate Dec
     int decDegrees = static_cast<int>(std::trunc(decDeg));
-    double decMinutesFull = (abs(decDeg) - abs(decDegrees)) * 60.0;
+    double decMinutesFull = (std::abs(decDeg) - std::abs(decDegrees)) * 60.0;
     int decMinutes = static_cast<int>(std::trunc(decMinutesFull));
     double decSeconds = (decMinutesFull - decMinutes) * 60.0;
 

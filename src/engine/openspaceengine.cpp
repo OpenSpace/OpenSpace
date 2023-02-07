@@ -1371,6 +1371,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         global::eventEngine->publishEvent<events::EventApplicationShutdown>(
             events::EventApplicationShutdown::State::Aborted
         );
+        return;
     }
 
     using F = global::callback::KeyboardCallback;

@@ -283,10 +283,17 @@ void TargetBrowserPair::incrementallyAnimateToCoordinate() {
         aimTargetGalactic(_targetNode->identifier(), _targetAnimation.newValue());
         _fovAnimation.start();
         _targetIsAnimating = false;
+        _fovIsAnimating = true;
     }
+    // After the target has animated to its position, animate the field of view 
     if (_fovAnimation.isAnimating()) {
         _browser->setVerticalFov(_fovAnimation.newValue());
         _targetRenderable->setVerticalFov(_browser->verticalFov());
+    }
+    else if (!_fovAnimation.isAnimating() && _fovIsAnimating) {
+        // Set the finished field of view
+        setVerticalFov(_fovAnimation.newValue());
+        _fovIsAnimating = false;
     }
 }
 
@@ -312,7 +319,7 @@ void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd)
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     double fovSpeed = module->browserAnimationSpeed();
     // The speed is given degrees /sec
-    double fovTime = abs(_browser->verticalFov() - fovEnd) / fovSpeed;
+    double fovTime = std::abs(_browser->verticalFov() - fovEnd) / fovSpeed;
     // Fov animation
     _fovAnimation = skybrowser::Animation(_browser->verticalFov(), fovEnd, fovTime);
 

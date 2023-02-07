@@ -39,8 +39,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "RenderablePlanetProjection";
-
     constexpr std::array<const char*, 12> MainUniformNames = {
         "sun_pos", "modelTransform", "modelViewProjectionTransform", "hasBaseMap",
         "hasHeightMap", "heightExaggeration", "meridianShift", "ambientBrightness",
@@ -52,7 +50,6 @@ namespace {
         "boresight", "radius", "segments"
     };
 
-    constexpr std::string_view KeyRadius = "Geometry.Radius";
     constexpr std::string_view NoImageText = "No Image";
 
     constexpr openspace::properties::Property::PropertyInfo ColorTexturePathsInfo = {
