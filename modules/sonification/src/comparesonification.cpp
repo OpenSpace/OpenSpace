@@ -238,8 +238,7 @@ void CompareSonification::sendSettings() {
 }
 
 void CompareSonification::onFirstChanged() {
-    if (_firstPlanet != 0 && _firstPlanet == _secondPlanet)
-    {
+    if (_firstPlanet != 0 && _firstPlanet == _secondPlanet) {
         _firstPlanet = 0;
         return;
     }
@@ -333,8 +332,7 @@ bool CompareSonification::extractData(const Camera* camera, const std::string& i
     );
     double angle = SonificationBase::calculateAngleTo(camera, identifier);
 
-    if (abs(distance) < std::numeric_limits<double>::epsilon())
-    {
+    if (abs(distance) < std::numeric_limits<double>::epsilon()) {
         return false;
     }
 
@@ -383,8 +381,7 @@ void CompareSonification::update(const Scene* scene, const Camera* camera) {
 
         // Only send data if something new has happened
         // If the node is in focus, increase sensitivity
-        if (focusNode->identifier().compare(_planets[i].identifier) == 0)
-        {
+        if (focusNode->identifier() == _planets[i].identifier) {
             _anglePrecision = 0.05;
             _distancePrecision = 1000.0;
         }

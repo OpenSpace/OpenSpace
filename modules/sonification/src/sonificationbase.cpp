@@ -55,7 +55,11 @@ double SonificationBase::calculateDistanceTo(const Camera* camera,
     if (!node) {
         return 0.0;
     }
+
     glm::dvec3 nodePosition = node->worldPosition();
+    if (glm::length(nodePosition) < std::numeric_limits<glm::f64>::epsilon()) {
+        return 0.0;
+    }
 
     // Calculate distance to the node from the camera
     glm::dvec3 cameraToNode = nodePosition - camera->positionVec3();
@@ -77,7 +81,11 @@ double SonificationBase::calculateAngleTo(const Camera* camera,
     if (!node) {
         return 0.0;
     }
+
     glm::dvec3 nodePosition = node->worldPosition();
+    if (glm::length(nodePosition) < std::numeric_limits<glm::f64>::epsilon()) {
+        return 0.0;
+    }
 
     // Calculate angle from camera to the node in the camera plane.
     // Pplane(v) is v projected down to the camera plane,
@@ -109,8 +117,14 @@ double SonificationBase::calculateAngleFromAToB(const Camera* camera,
     if (!nodeA || !nodeB) {
         return 0.0;
     }
+
     glm::dvec3 nodeAPos = nodeA->worldPosition();
     glm::dvec3 nodeBPos = nodeB->worldPosition();
+    if (glm::length(nodeAPos) < std::numeric_limits<glm::f64>::epsilon() ||
+        glm::length(nodeBPos) < std::numeric_limits<glm::f64>::epsilon())
+    {
+        return 0.0;
+    }
 
     // Calculate vector from A to the B in the camera plane.
     // Pplane(v) is v projected down to the camera plane,

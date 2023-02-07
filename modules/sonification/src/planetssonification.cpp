@@ -486,8 +486,7 @@ bool PlanetsSonification::extractData(const Camera* camera, const std::string& i
     );
     double angle = SonificationBase::calculateAngleTo(camera, identifier);
 
-    if (abs(distance) < std::numeric_limits<double>::epsilon())
-    {
+    if (abs(distance) < std::numeric_limits<double>::epsilon()) {
         return false;
     }
 

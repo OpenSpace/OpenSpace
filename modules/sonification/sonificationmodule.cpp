@@ -97,7 +97,7 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
     while (isRunning) {
         if (!isInitialized) {
             // Find scene
-            if (!scene || scene->root()->children().size() == 0) {
+            if (!scene) {
                 scene = global::renderEngine->scene();
             }
 
@@ -107,11 +107,14 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
             }
 
             // Check status
-            if (!scene || scene->isInitializing() || !camera ||
-                camera->positionVec3().length < std::numeric_limits<glm::length_t>::epsilon)
+            if (!scene || scene->isInitializing() || scene->root()->children().empty() ||
+                !camera || glm::length(camera->positionVec3()) <
+                std::numeric_limits<glm::f64>::epsilon())
             {
                 continue;
             }
+
+            isInitialized = true;
         }
 
         for (SonificationBase* sonification : _sonifications) {
