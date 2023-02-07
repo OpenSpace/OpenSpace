@@ -125,6 +125,9 @@ struct ExoplanetItem {
 
     // Any other kind of data that might be interesting. can be numeric or string
     std::map<std::string, std::variant<std::string, float>> otherColumns;
+
+    // The planet's internal index within its system, from the inside out
+    int indexInSystem = -1;
 };
 
 } // namespace openspace

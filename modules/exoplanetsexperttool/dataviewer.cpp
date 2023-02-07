@@ -88,7 +88,7 @@ namespace {
         return res < 0;
     }
 
-    bool compareValues(double lhs, double rhs) {
+    bool compareValues(float lhs, float rhs) {
         if (std::isnan(lhs)) {
             // also includes rhs is nan, in which case the order does not matter
             return true;
@@ -220,14 +220,34 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
         _externalSelectionChanged = true;
     });
 
+    // Load the dataset
     _data = _dataLoader.loadData();
 
+    // Initialize filtered data index list and map of host star to planet indices
     _filteredData.reserve(_data.size());
     for (size_t i = 0; i < _data.size(); i++) {
         _filteredData.push_back(i);
         _hostIdToPlanetsMap[createIdentifier(_data[i].hostName)].push_back(i);
     }
     _filteredDataWithoutExternalSelection = _filteredData;
+
+    // Fill planets internal indices in system (based on semimajor axis)
+    std::map<std::string, std::vector<size_t>>::iterator it;
+    for (it = _hostIdToPlanetsMap.begin(); it != _hostIdToPlanetsMap.end(); it++) {
+        std::vector<size_t> planetIds = it->second;
+        std::sort(
+            planetIds.begin(),
+            planetIds.end(),
+            [&data = _data](const size_t a, const size_t b) -> bool {
+                float v1 = data[a].semiMajorAxis.value;
+                float v2 = data[b].semiMajorAxis.value;
+                return compareValues(v1, v2);
+            }
+        );
+        for (int i = 0; i < static_cast<int>(planetIds.size()); ++i) {
+            _data[planetIds[i]].indexInSystem = i;
+        }
+    }
 
     _defaultColumns = {
         { "Name", ColumnID::Name },
@@ -2808,9 +2828,8 @@ void DataViewer::writeRenderDataToFile() {
 
         // Other data used for rendering
         if (_useGlyphRendering) {
-            // Get a number for the planetary component
-            int component = item.component - 'a';
-            file.write(reinterpret_cast<const char*>(&component), sizeof(int));
+            // Get a number for the planet's index in system
+            file.write(reinterpret_cast<const char*>(&item.indexInSystem), sizeof(int));
         }
 
         // Write label to file

@@ -674,9 +674,9 @@ void RenderableExoplanetGlyphCloud::updateDataFromFile() {
             d.colors[j] = color;
         }
 
-        int component;
-        file.read(reinterpret_cast<char*>(&component), sizeof(int));
-        d.component = static_cast<float>(component);
+        int indexInSystem;
+        file.read(reinterpret_cast<char*>(&indexInSystem), sizeof(int));
+        d.component = static_cast<float>(indexInSystem + 1);
 
         d.index = static_cast<int>(index) + 1;
 
