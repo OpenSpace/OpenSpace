@@ -504,7 +504,7 @@ end
 
 local function createActions()
   local playForwards = {
-    Identifier = "jwst.play.forwards",
+    Identifier = "os.missions.jwst.play.forwards",
     Name = "Play JWST from start",
     Command = [[
       openspace.scriptScheduler.clear(0)
@@ -520,7 +520,7 @@ local function createActions()
   }
 
   local playFromDetach = {
-    Identifier = "jwst.play.detach",
+    Identifier = "os.missions.jwst.play.detach",
     Name = "Play JWST from detach",
     Command = [[
       openspace.scriptScheduler.clear(0)
@@ -538,7 +538,7 @@ local function createActions()
   }
 
   local playBackwards = {
-    Identifier = "jwst.play.backwards",
+    Identifier = "os.missions.jwst.play.backwards",
     Name = "Play JWST from end",
     Command = [[
       openspace.scriptScheduler.clear(0)
@@ -554,7 +554,7 @@ local function createActions()
   }
 
   local clearPlay = {
-    Identifier = "jwst.play.clear",
+    Identifier = "os.missions.jwst.play.clear",
     Name = "Clear JWST timelapse",
     Command = [[
       openspace.scriptScheduler.clear(0)
@@ -574,7 +574,7 @@ local function createActions()
   }
 
   local togglePlayDirection = {
-    Identifier = "jwst.toggle.direction",
+    Identifier = "os.missions.jwst.toggledirection",
     Name = "Toggle forwards / backwards",
     Command = [[
       -- Flip deltatime
@@ -642,7 +642,7 @@ end)
 
 asset.meta = {
   Name = "James Webb Space Telescope Timelapse",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[
     Scripts that are scheduled to alter the speed of the simulation time so the deployment
     of the James Webb Space Telescope looks smoother.

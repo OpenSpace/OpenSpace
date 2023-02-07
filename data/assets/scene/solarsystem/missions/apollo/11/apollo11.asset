@@ -7,6 +7,9 @@ local descentRotationKeyframes = asset.require("./lem_descent_rotation.asset")
 local kernels = asset.require("./kernels").kernels
 asset.require("spice/base")
 
+asset.require("./actions")
+asset.require("../actions")
+
 local models = asset.syncedResource({
   Name = "Apollo Models",
   Type = "HttpSynchronization",
