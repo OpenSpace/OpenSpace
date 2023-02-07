@@ -1,0 +1,57 @@
+local toggle_moon_shading = {
+  Identifier = "os.missions.apollo.moon.toggleshading",
+  Name = "Toggle Moon shading",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.PerformShading', not openspace.getPropertyValue('Scene.Moon.Renderable.PerformShading'));
+  ]],
+  Documentation = "Toggles the shading of the Moon",
+  GuiPath = "/Missions/Apollo",
+  isLocal = false
+}
+
+local focus_moon = {
+  Identifier = "os.missions.apollo.moon.focus",
+  Name = "Focus on Moon",
+  Command = [[
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon'); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+  ]],
+  Documentation = "Set camera focus on the Moon",
+  GuiPath = "/Missions/Apollo",
+  isLocal = false
+}
+
+local focus_earth = {
+  Identifier = "os.missions.apollo.earth.focus",
+  Name = "Focus on Earth",
+  Command = [[
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth'); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+  ]],
+  Documentation = "Set camera focus on the Earth",
+  GuiPath = "/Missions/Apollo",
+  isLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(toggle_moon_shading)
+  openspace.action.registerAction(focus_moon)
+  openspace.action.registerAction(focus_earth)  
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.registerAction(focus_earth)
+  openspace.action.registerAction(focus_moon)
+  openspace.action.removeAction(toggle_moon_shading)
+end)
+
+asset.meta = {
+  Name = "Actions - Apollo missions",
+  Version = "1.0",
+  Description = "Actions related to the Apollo missions",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
