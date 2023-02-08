@@ -211,8 +211,8 @@ local VoyagerTrailCruiseSaturnInf = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1980 NOV 16",
-    EndTime = "2021 JAN 01",
-    SampleInterval = 14656 * 2  -- 14656 is the number of days between the Start and End time
+    EndTime = "2300 JAN 01",
+    SampleInterval = 116558 * 2  -- 116558 is the number of days between the Start and End time
   },
   GUI = {
     Name = "Voyager 1 Trail Cruise Saturn-Inf",
