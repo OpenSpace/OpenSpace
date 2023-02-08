@@ -681,112 +681,119 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     constexpr int res = 2880;
     const double maxDistance = res * boundingSphere() / tfov;
 
-    if (distanceToCamera < maxDistance) {
-        _program->activate();
+    // Don't render if model is too far away
+    if (distanceToCamera >= maxDistance) {
+        return;
+    }
 
-        // Model transform and view transform needs to be in double precision
-        const glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            glm::dmat4(data.modelTransform.rotation) *
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-            glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
-        const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-            modelTransform;
+    _program->activate();
 
-        int nLightSources = 0;
-        _lightIntensitiesBuffer.resize(_lightSources.size());
-        _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
-        for (const std::unique_ptr<LightSource>& lightSource : _lightSources) {
-            if (!lightSource->isEnabled()) {
-                continue;
-            }
-            _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
-            _lightDirectionsViewSpaceBuffer[nLightSources] =
-                lightSource->directionViewSpace(data);
+    // Model transform and view transform needs to be in double precision
+    const glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
+        glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
+    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
+        modelTransform;
 
-            ++nLightSources;
+    int nLightSources = 0;
+    _lightIntensitiesBuffer.resize(_lightSources.size());
+    _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
+    for (const std::unique_ptr<LightSource>& lightSource : _lightSources) {
+        if (!lightSource->isEnabled()) {
+            continue;
         }
+        _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
+        _lightDirectionsViewSpaceBuffer[nLightSources] =
+            lightSource->directionViewSpace(data);
 
-        _program->setUniform(
-            _uniformCache.nLightSources,
-            nLightSources
-        );
-        _program->setUniform(
-            _uniformCache.lightIntensities,
-            _lightIntensitiesBuffer
-        );
-        _program->setUniform(
-            _uniformCache.lightDirectionsViewSpace,
-            _lightDirectionsViewSpaceBuffer
-        );
-        _program->setUniform(
-            _uniformCache.modelViewTransform,
-            glm::mat4(modelViewTransform)
-        );
+        ++nLightSources;
+    }
 
-        glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
+    _program->setUniform(
+        _uniformCache.nLightSources,
+        nLightSources
+    );
+    _program->setUniform(
+        _uniformCache.lightIntensities,
+        _lightIntensitiesBuffer
+    );
+    _program->setUniform(
+        _uniformCache.lightDirectionsViewSpace,
+        _lightDirectionsViewSpaceBuffer
+    );
+    _program->setUniform(
+        _uniformCache.modelViewTransform,
+        glm::mat4(modelViewTransform)
+    );
 
-        _program->setUniform(
-            _uniformCache.normalTransform,
-            glm::mat4(normalTransform)
-        );
+    glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
 
-        _program->setUniform(
-            _uniformCache.projectionTransform,
-            data.camera.projectionMatrix()
-        );
-        _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
-        _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
-        _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
-        _program->setUniform(_uniformCache.performShading, _performShading);
+    _program->setUniform(
+        _uniformCache.normalTransform,
+        glm::mat4(normalTransform)
+    );
 
-        // Configure blending
-        glEnablei(GL_BLEND, 0);
-        switch (_blendingFuncOption) {
-            case DefaultBlending:
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                break;
-            case AdditiveBlending:
-                glBlendFunc(GL_ONE, GL_ONE);
-                break;
-            case PolygonBlending:
-                glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
-                break;
-            case ColorAddingBlending:
-                glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
-                break;
-        };
+    _program->setUniform(
+        _uniformCache.projectionTransform,
+        data.camera.projectionMatrix()
+    );
+    _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
+    _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
+    _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
+    _program->setUniform(_uniformCache.performShading, _performShading);
 
-        if (!_enableDepthTest) {
-            glDisable(GL_DEPTH_TEST);
-        }
+    if (!_enableFaceCulling) {
+        glDisable(GL_CULL_FACE);
+    }
 
-        if (!_enableFaceCulling) {
-            glDisable(GL_CULL_FACE);
-        }
+    // Configure blending
+    glEnablei(GL_BLEND, 0);
+    switch (_blendingFuncOption) {
+        case DefaultBlending:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case AdditiveBlending:
+            glBlendFunc(GL_ONE, GL_ONE);
+            break;
+        case PolygonBlending:
+            glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
+            break;
+        case ColorAddingBlending:
+            glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
+            break;
+    };
 
+    if (!_enableDepthTest) {
+        glDisable(GL_DEPTH_TEST);
+    }
+
+    // Only render two pass if the model is in any way transparent
+    bool shouldRenderTwise = false;
+    const float o = opacity();
+    if ((o >= 0.f && o < 1.f) || _geometry->isTransparent()) {
+        setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
+        shouldRenderTwise = true;
+    }
+    else {
+        setRenderBin(_originalRenderBin);
+    }
+
+    if (!shouldRenderTwise) {
+        _geometry->render(*_program);
+    }
+    else {
         // Prepare framebuffer
         GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
         glDrawBuffers(3, ColorAttachmentArray);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearBufferfv(GL_COLOR, 1, glm::value_ptr(glm::vec4(0.f, 0.f, 0.f, 0.f)));
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Render Pass 1
         // Render all parts of the model into the new framebuffer without opacity
-        const float o = opacity();
-        if ((o >= 0.f && o < 1.f) || !_enableDepthTest || _geometry->isTransparent()) {
-            setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-        }
-        else {
-            setRenderBin(_originalRenderBin);
-        }
-
         _geometry->render(*_program);
-
-        if (!_enableFaceCulling) {
-            glEnable(GL_CULL_FACE);
-        }
         _program->deactivate();
 
         // Render pass 2
@@ -818,7 +825,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             global::renderEngine->renderer()->additionalColorTexture2()
         );
         _quadProgram->setUniform(
-           _uniformOpacityCache.positionTexture,
+            _uniformOpacityCache.positionTexture,
             positionTextureUnit
         );
 
@@ -842,12 +849,20 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glBindVertexArray(_quadVao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         _quadProgram->deactivate();
-
-        // Reset
-        global::renderEngine->openglStateCache().resetBlendState();
-        global::renderEngine->openglStateCache().resetDepthState();
-        glActiveTexture(GL_TEXTURE0);
     }
+
+    // Reset
+    if (!_enableFaceCulling) {
+        glEnable(GL_CULL_FACE);
+    }
+
+    if (!_enableDepthTest) {
+        glEnable(GL_DEPTH_TEST);
+    }
+
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void RenderableModel::update(const UpdateData& data) {

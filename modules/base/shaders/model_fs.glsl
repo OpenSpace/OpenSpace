@@ -49,9 +49,12 @@ uniform int nLightSources;
 uniform vec3 lightDirectionsViewSpace[8];
 uniform float lightIntensities[8];
 
-
 Fragment getFragment() {
   Fragment frag;
+  frag.depth = vs_screenSpaceDepth;
+  frag.gPosition = vs_positionCameraSpace;
+  frag.gNormal = vec4(vs_normalViewSpace, 0.0);
+  frag.disableLDR2HDR = true;
 
   // Render invisible mesh with flashy procedural material
   if (use_forced_color) {
@@ -59,15 +62,10 @@ Fragment getFragment() {
     float chessboard  = adjustedPos.x + adjustedPos.y + adjustedPos.z;
     chessboard = fract(chessboard * 0.5);
     chessboard *= 2;
+
     // Pink and complementary green in a chessboard pattern
     frag.color.rgb = mix(vec3(1.0, 0.0, 0.8), vec3(0.0, 1.0, 0.2), chessboard);
-
     frag.color.a = 1.0;
-    frag.depth = vs_screenSpaceDepth;
-    frag.gPosition = vs_positionCameraSpace;
-    frag.gNormal = vec4(vs_normalViewSpace, 0.0);
-    frag.disableLDR2HDR = true;
-
     return frag;
   }
 
@@ -120,11 +118,11 @@ Fragment getFragment() {
       const float specularPower = 100.0;
 
       vec3 diffuseColor =
-            diffuseIntensity * lightColor * diffuseAlbedo.rgb * max(diffuseCosineFactor, 0);
+        diffuseIntensity * lightColor * diffuseAlbedo.rgb * max(diffuseCosineFactor, 0);
 
       vec3 specularColor =
-            specularIntensity * lightColor * specularAlbedo *
-              pow(max(specularCosineFactor, 0), specularPower);
+        specularIntensity * lightColor * specularAlbedo *
+          pow(max(specularCosineFactor, 0), specularPower);
 
       color += lightIntensities[i] * (diffuseColor + specularColor);
     }
@@ -135,10 +133,5 @@ Fragment getFragment() {
   }
 
   frag.color.a = diffuseAlbedo.a;
-  frag.depth = vs_screenSpaceDepth;
-  frag.gPosition = vs_positionCameraSpace;
-  frag.gNormal = vec4(vs_normalViewSpace, 0.0);
-  frag.disableLDR2HDR = true;
-
   return frag;
 }
