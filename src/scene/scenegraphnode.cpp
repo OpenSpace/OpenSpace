@@ -161,24 +161,24 @@ namespace {
     };
 
     struct [[codegen::Dictionary(SceneGraphNode)]] Parameters {
-        // The identifier of this scenegraph node. This name must be unique among all
+        // The identifier of this scene graph node. This name must be unique among all
         // scene graph nodes that are loaded in a specific scene. If a duplicate is
         // detected the loading of the node will fail, as will all childing that depend on
         // the node. The identifier must not contain any whitespaces or '.'
         std::string identifier;
 
-        // This names the parent of the currently specified scenegraph node. The parent
+        // This names the parent of the currently specified scene graph node. The parent
         // must already exist in the scene graph. If not specified, the node will be
-        // attached to the root of the scenegraph
+        // attached to the root of the scene graph
         std::optional<std::string> parent
             [[codegen::annotation(
-                "If specified, this must be a name for another scenegraph node"
+                "If specified, this must be a name for another scene graph node"
             )]];
 
-        // The renderable that is to be created for this scenegraph node. A renderable is
-        // a component of a scenegraph node that will lead to some visual result on the
+        // The renderable that is to be created for this scene graph node. A renderable is
+        // a component of a scene graph node that will lead to some visual result on the
         // screen. The specifics heavily depend on the 'Type' of the renderable. If no
-        // Renderable is specified, this scenegraph node is an internal node and can be
+        // Renderable is specified, this scene graph node is an internal node and can be
         // used for either group children, or apply common transformations to a group of
         // children
         std::optional<ghoul::Dictionary> renderable [[codegen::reference("renderable")]];
@@ -190,26 +190,26 @@ namespace {
         std::optional<double> interactionSphere;
 
         struct Transform {
-            // This node describes a translation that is applied to the scenegraph node
+            // This node describes a translation that is applied to the scene graph node
             // and all its children. Depending on the 'Type' of the translation, this can
             // either be a static translation or a time-varying one
             std::optional<ghoul::Dictionary> translation
                 [[codegen::reference("core_transform_translation")]];
 
-            // This nodes describes a rotation that is applied to the scenegraph node and
+            // This nodes describes a rotation that is applied to the scene graph node and
             // all its children. Depending on the 'Type' of the rotation, this can either
             // be a static rotation or a time-varying one
             std::optional<ghoul::Dictionary> rotation
                 [[codegen::reference("core_transform_rotation")]];
 
-            // This node describes a scaling that is applied to the scenegraph node and
+            // This node describes a scaling that is applied to the scene graph node and
             // all its children. Depending on the 'Type' of the scaling, this can either
             // be a static scaling or a time-varying one
             std::optional<ghoul::Dictionary> scale
                 [[codegen::reference("core_transform_scaling")]];
         };
 
-        // This describes a set of transformations that are applied to this scenegraph
+        // This describes a set of transformations that are applied to this scene graph
         // node and all of its children. There are only three possible values
         // corresponding to a 'Translation', a 'Rotation', and a 'Scale'
         std::optional<Transform> transform;
@@ -248,7 +248,7 @@ namespace {
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];
 
-        // A tag or list of tags that can be used to reference to a group of scenegraph
+        // A tag or list of tags that can be used to reference to a group of scene graph
         // nodes.
         std::optional<std::variant<std::string, std::vector<std::string>>> tag;
 
@@ -258,7 +258,7 @@ namespace {
             std::optional<std::string> name;
 
             // If this value is specified, this '/' separated URI specifies the location
-            // of this scenegraph node in a GUI representation, for instance
+            // of this scene graph node in a GUI representation, for instance
             // '/SolarSystem/Earth/Moon'
             std::optional<std::string> path;
 
@@ -266,12 +266,12 @@ namespace {
             std::optional<std::string> description;
 
             // If this value is specified, GUI applications are incouraged to ignore this
-            // scenegraph node. This is most useful to trim collective lists of nodes and
+            // scene graph node. This is most useful to trim collective lists of nodes and
             // not display, for example, barycenters
             std::optional<bool> hidden;
         };
         // Additional information that is passed to GUI applications. These are all hints
-        // and do not have any impact on the actual function of the scenegraph node
+        // and do not have any impact on the actual function of the scene graph node
         std::optional<Gui> gui [[codegen::key("GUI")]];
     };
 #include "scenegraphnode_codegen.cpp"
