@@ -25,6 +25,7 @@
 #include <modules/touch/include/touchinteraction.h>
 
 #include <modules/touch/include/directinputsolver.h>
+#include <modules/touch/touchmodule.h>
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
@@ -459,6 +460,23 @@ void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolde
     glm::dvec3 camPos = _camera->positionVec3();
     std::vector<DirectInputSolver::SelectedBody> surfacePoints;
 
+    _selectedNodeSurfacePoints.clear();
+
+    const SceneGraphNode* anchor =
+        global::navigationHandler->orbitalNavigator().anchorNode();
+    SceneGraphNode* node = sceneGraphNode(anchor->identifier());
+
+    // Check if current anchor is valid for direct touch
+    TouchModule* module = global::moduleEngine->module<TouchModule>();
+
+    // TODO: Group all direct touch properties into a propertyowner
+    // and make sure to also check SGN property first
+    if (!node->renderable() ||
+        !module->isDefaultDirectTouchType(node->renderable()->typeAsString()))
+    {
+        return;
+    }
+
     for (const TouchInputHolder& inputHolder : list) {
         // Normalized -1 to 1 coordinates on screen
         double xCo = 2 * (inputHolder.latestInput().x - 0.5);
@@ -472,10 +490,6 @@ void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolde
 
         // Compute positions on anchor node, by checking if touch input
         // intersect interaction sphere
-        const SceneGraphNode* anchor =
-            global::navigationHandler->orbitalNavigator().anchorNode();
-        SceneGraphNode* node = sceneGraphNode(anchor->identifier());
-
         double intersectionDist = 0.0;
         const bool intersected = glm::intersectRaySphere(
             camPos,

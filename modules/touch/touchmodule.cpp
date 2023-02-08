@@ -32,6 +32,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <algorithm>
 
 using namespace TUIO;
 
@@ -49,6 +50,18 @@ namespace {
         "True when there is an active touch event",
         openspace::properties::Property::Visibility::Hidden
     };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        DefaultDirectTouchRenderableTypesInfo =
+    {
+        "DefaultDirectTouchRenderableTypes",
+        "Default Direct Touch Renderable Types",
+        "A list of renderable types that will automatically use the 'direct "
+        "manipulation' scheme when interacted with, keeping the finger on a static "
+        "position on the interaction sphere of the object when touching. Good for "
+        "relatively spherical objects.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
 }
 namespace openspace {
 
@@ -56,6 +69,7 @@ TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
     , _touchIsEnabled(EnableTouchInfo, true)
     , _hasActiveTouchEvent(EventsInfo, false)
+    , _defaultDirectTouchRenderableTypes(DefaultDirectTouchRenderableTypesInfo)
 {
     addPropertySubOwner(_touch);
     addPropertySubOwner(_markers);
@@ -67,10 +81,23 @@ TouchModule::TouchModule()
 
     _hasActiveTouchEvent.setReadOnly(true);
     addProperty(_hasActiveTouchEvent);
+
+    _defaultDirectTouchRenderableTypes.onChange([&]() {
+        _sortedDefaultRenderableTypes.clear();
+        for (const std::string& s : _defaultDirectTouchRenderableTypes.value()) {
+            _sortedDefaultRenderableTypes.insert(s);
+        }
+    });
+    addProperty(_defaultDirectTouchRenderableTypes);
 }
 
 TouchModule::~TouchModule() {
     // intentionally left empty
+}
+
+bool TouchModule::isDefaultDirectTouchType(const std::string& renderableType) {
+    return _sortedDefaultRenderableTypes.find(renderableType) !=
+        _sortedDefaultRenderableTypes.end();
 }
 
 void TouchModule::internalInitialize(const ghoul::Dictionary&){

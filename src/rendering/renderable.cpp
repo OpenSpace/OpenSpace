@@ -240,6 +240,10 @@ double Renderable::interactionSphere() const {
     return _interactionSphere;
 }
 
+std::string Renderable::typeAsString() const {
+    return _renderableType;
+}
+
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
                                                  const glm::dvec3& targetModelSpace) const
 {

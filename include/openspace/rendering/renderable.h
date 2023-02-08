@@ -79,6 +79,8 @@ public:
     double boundingSphere() const;
     double interactionSphere() const;
 
+    std::string typeAsString() const;
+
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
 

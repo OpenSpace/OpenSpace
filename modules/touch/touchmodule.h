@@ -27,6 +27,8 @@
 
 #include <modules/touch/include/touchmarker.h>
 #include <modules/touch/include/touchinteraction.h>
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/openspacemodule.h>
 #include <openspace/util/touch.h>
 #include <memory>
@@ -41,8 +43,14 @@ class Win32TouchHook;
 
 class TouchModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "Touch";
+
     TouchModule();
     ~TouchModule();
+
+    // Function to check if the given renderable type is one that should
+    // use direct maniuplation
+    bool isDefaultDirectTouchType(const std::string& renderableType);
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
@@ -66,6 +74,10 @@ private:
 
     properties::BoolProperty _touchIsEnabled;
     properties::BoolProperty _hasActiveTouchEvent;
+    properties::StringListProperty _defaultDirectTouchRenderableTypes;
+
+    // A sorted version of the list in the property
+    std::set<std::string> _sortedDefaultRenderableTypes;
 
     // contains an id and the Point that was processed last frame
     glm::ivec2 _webPositionCallback = glm::ivec2(0);
