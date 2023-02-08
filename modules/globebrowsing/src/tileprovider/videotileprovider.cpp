@@ -612,10 +612,7 @@ void VideoTileProvider::handleMpvEvents() {
                         LWARNING("Could not find video parameters");
                         return;
                     }
-                    else {
-                        LERROR("Invalid video-params");
-                        return;
-                    }
+                    
                 }
                 if (strcmp(prop->name, "time-pos") == 0 &&
                     prop->format == MPV_FORMAT_DOUBLE)
@@ -634,9 +631,10 @@ void VideoTileProvider::handleMpvEvents() {
                 if (strcmp(prop->name, "duration") == 0 &&
                     prop->format == MPV_FORMAT_DOUBLE)
                 {
+                    LINFO("Get video duration");
                     int result = mpv_get_property_async(
                         _mpvHandle,
-                        static_cast<uint64_t>(LibmpvPropertyKey::Time),
+                        static_cast<uint64_t>(LibmpvPropertyKey::Duration),
                         "duration",
                         MPV_FORMAT_DOUBLE
                     );
