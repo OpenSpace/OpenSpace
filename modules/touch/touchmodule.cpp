@@ -32,11 +32,15 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
 #include <algorithm>
 
 using namespace TUIO;
 
 namespace {
+    constexpr std::string_view _loggerCat = "TouchModule";
+
     constexpr openspace::properties::Property::PropertyInfo EnableTouchInfo = {
         "EnableTouchInteraction",
         "Enable Touch Interaction",
@@ -85,6 +89,17 @@ TouchModule::TouchModule()
     _defaultDirectTouchRenderableTypes.onChange([&]() {
         _sortedDefaultRenderableTypes.clear();
         for (const std::string& s : _defaultDirectTouchRenderableTypes.value()) {
+            ghoul::TemplateFactory<Renderable>* fRenderable =
+                FactoryManager::ref().factory<Renderable>();
+
+            if (!fRenderable->hasClass(s)) {
+                LWARNING(fmt::format(
+                    "In property 'DefaultDirectTouchRenderableTypes': '{}' is not a "
+                    "registered renderable type. Ignoring", s
+                ));
+                continue;
+            }
+
             _sortedDefaultRenderableTypes.insert(s);
         }
     });
@@ -104,7 +119,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&){
     _ear.reset(new TuioEar());
 
     global::callback::initializeGL->push_back([&]() {
-        LDEBUGC("TouchModule", "Initializing TouchMarker OpenGL");
+        LDEBUG("Initializing TouchMarker OpenGL");
         _markers.initialize();
 #ifdef WIN32
         // We currently only support one window of touch input internally
@@ -117,7 +132,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&){
     });
 
     global::callback::deinitializeGL->push_back([&]() {
-        LDEBUGC("TouchModule", "Deinitialize TouchMarker OpenGL");
+        LDEBUG("Deinitialize TouchMarker OpenGL");
         _markers.deinitialize();
     });
 
