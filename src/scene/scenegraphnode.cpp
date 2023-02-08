@@ -160,6 +160,19 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
+    constexpr openspace::properties::Property::PropertyInfo IsDirectlyTouchableInfo = {
+        "IsDirectlyTouchable",
+        "Is Directly Touchable",
+        "Only relevant when using touch interaction. If true, the \'direct "
+        "manipulation\' scheme will be used when interacting with this scene graph "
+        "node, meaning that the positions on the interaction sphere that intersects "
+        "with the touch points will directly follow the motion of the touch points. "
+        "Works best for objects that have an interaction sphere of about the same size "
+        "as the bounding sphere, and that are somewhat spherical. Note that using this "
+        "feature might significalty reduce the performance.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(SceneGraphNode)]] Parameters {
         // The identifier of this scene graph node. This name must be unique among all
         // scene graph nodes that are loaded in a specific scene. If a duplicate is
@@ -188,6 +201,9 @@ namespace {
 
         // [[codegen::verbatim(InteractionSphereInfo.description)]]
         std::optional<double> interactionSphere;
+
+        // [[codegen::verbatim(IsDirectlyTouchableInfo.description)]]
+        std::optional<bool> isDirectlyTouchable;
 
         struct Transform {
             // This node describes a translation that is applied to the scene graph node
@@ -513,6 +529,7 @@ SceneGraphNode::SceneGraphNode()
     , _screenSizeRadius(ScreenSizeRadiusInfo, 0)
     , _visibilityDistance(VisibilityDistanceInfo, 6e10f)
     , _showDebugSphere(ShowDebugSphereInfo, false)
+    , _isDirectlyTouchable(IsDirectlyTouchableInfo, false)
 {
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
@@ -552,6 +569,8 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_approachFactor);
 
     addProperty(_showDebugSphere);
+
+    addProperty(_isDirectlyTouchable);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
@@ -1205,6 +1224,10 @@ double SceneGraphNode::reachFactor() const {
 
 double SceneGraphNode::approachFactor() const {
     return _approachFactor;
+}
+
+bool SceneGraphNode::isDirectlyTouchable() const {
+    return _isDirectlyTouchable;
 }
 
 const Renderable* SceneGraphNode::renderable() const {

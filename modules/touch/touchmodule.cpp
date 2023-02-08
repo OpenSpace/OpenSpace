@@ -56,8 +56,8 @@ namespace {
     {
         "DefaultDirectTouchRenderableTypes",
         "Default Direct Touch Renderable Types",
-        "A list of renderable types that will automatically use the 'direct "
-        "manipulation' scheme when interacted with, keeping the finger on a static "
+        "A list of renderable types that will automatically use the \'direct "
+        "manipulation\' scheme when interacted with, keeping the finger on a static "
         "position on the interaction sphere of the object when touching. Good for "
         "relatively spherical objects.",
         openspace::properties::Property::Visibility::AdvancedUser

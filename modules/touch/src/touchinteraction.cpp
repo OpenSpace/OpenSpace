@@ -471,9 +471,10 @@ void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolde
 
     // TODO: Group all direct touch properties into a propertyowner
     // and make sure to also check SGN property first
-    if (!node->renderable() ||
-        !module->isDefaultDirectTouchType(node->renderable()->typeAsString()))
-    {
+    bool isDirectTouchRenderable = node->renderable() &&
+        module->isDefaultDirectTouchType(node->renderable()->typeAsString());
+
+    if (!(node->isDirectlyTouchable() || isDirectTouchRenderable)) {
         return;
     }
 
