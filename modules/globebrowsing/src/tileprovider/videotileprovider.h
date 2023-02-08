@@ -82,7 +82,8 @@ private:
         Command,
         Width,
         FrameCount,
-        Pause
+        Pause,
+        Speed
     };
 
     enum class AnimationMode {

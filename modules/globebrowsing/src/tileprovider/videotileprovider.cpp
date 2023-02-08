@@ -499,8 +499,19 @@ void VideoTileProvider::updateStretchingOfTime() {
     }
     else {
         double stretchedTime = (_endJ200Time - _startJ200Time) / deltaTime; // seconds
-        std::string stringStretch = std::to_string(_videoDuration / stretchedTime);
-        setPropertyStringMpv("speed", stringStretch.c_str()); // TODO: Make async
+        if (stretchedTime > 0.0) {
+            int result = mpv_set_property_async(
+                _mpvHandle,
+                static_cast<uint64_t>(LibmpvPropertyKey::Speed),
+                "speed",
+                MPV_FORMAT_DOUBLE,
+                &stretchedTime
+            );
+            if (!checkMpvError(result)) {
+                LWARNING("Error when pausing video");
+            }
+        }
+        
     }
 }
 
