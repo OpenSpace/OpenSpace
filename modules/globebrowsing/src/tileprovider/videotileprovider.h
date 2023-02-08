@@ -58,6 +58,8 @@ public:
     void pause();
     void play();
     void goToStart();
+    void stepFrameForward();
+    void stepFrameBackward();
 
     static documentation::Documentation Documentation();
 
@@ -80,10 +82,11 @@ private:
         Params,
         Time,
         Command,
+        Seek,
         Width,
-        FrameCount,
-        Pause,
-        Speed
+        Speed,
+        Fps,
+        Pause
     };
 
     enum class AnimationMode {
@@ -110,6 +113,9 @@ private:
     static void on_mpv_render_update(void*); // Has to be static because of C api
     void observePropertyMpv(std::string name, mpv_format format, LibmpvPropertyKey key);
     void setPropertyStringMpv(std::string name, std::string value);
+    void getPropertyAsyncMpv(std::string name, mpv_format format, LibmpvPropertyKey key);
+    void commandAsyncMpv(const char* cmd[], 
+        LibmpvPropertyKey key = LibmpvPropertyKey::Command);
     void seekToTime(double time);
 
     void internalInitialize() override final;
@@ -120,9 +126,12 @@ private:
     double _startJ200Time = 0.0;
     double _endJ200Time = 0.0;
     double _currentVideoTime = 0.0;
+    double _frameDuration = 0.0;
+    double _fps = 0.04166666667; //1/24
     bool _hasReachedEnd = false;
     bool _tileIsReady = false;
     bool _isInitialized = false;
+    bool _isSeeking = false;
 
     // libmpv
     mpv_handle* _mpvHandle = nullptr;

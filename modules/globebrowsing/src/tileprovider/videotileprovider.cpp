@@ -164,6 +164,32 @@ void VideoTileProvider::setPropertyStringMpv(std::string name, std::string value
     }
 }
 
+void VideoTileProvider::getPropertyAsyncMpv(std::string name, mpv_format format, 
+                                            LibmpvPropertyKey key) {
+    int result = mpv_get_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(key),
+        name.c_str(),
+        format
+    );
+    if (!checkMpvError(result)) {
+        LWARNING("Could not find property " + name);
+        return;
+    }
+}
+
+void VideoTileProvider::commandAsyncMpv(const char* cmd[], LibmpvPropertyKey key) {
+    int result = mpv_command_async(
+        _mpvHandle,
+        static_cast<uint64_t>(key),
+        cmd
+    );
+    if (!checkMpvError(result)) {
+        LERROR(fmt::format("Could not execute command {}", cmd[0]));
+        return;
+    }
+}
+
 documentation::Documentation VideoTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_videotileprovider");
 }
@@ -330,6 +356,16 @@ void VideoTileProvider::goToStart() {
     seekToTime(0.0);
 }
 
+void VideoTileProvider::stepFrameForward() {
+    const char* cmd[] = { "frame-step", nullptr };
+    commandAsyncMpv(cmd);
+}
+
+void VideoTileProvider::stepFrameBackward() {
+    const char* cmd[] = { "frame-back-step", nullptr };
+    commandAsyncMpv(cmd);
+}
+
 
 void VideoTileProvider::initializeMpv() {
     _mpvHandle = mpv_create();
@@ -427,6 +463,7 @@ void VideoTileProvider::initializeMpv() {
     observePropertyMpv("height", MPV_FORMAT_INT64, LibmpvPropertyKey::Height);
     observePropertyMpv("width", MPV_FORMAT_INT64, LibmpvPropertyKey::Width);
     observePropertyMpv("metadata", MPV_FORMAT_NODE, LibmpvPropertyKey::Meta);
+    observePropertyMpv("fps", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Fps);
 
     if (_animationMode == AnimationMode::MapToSimulationTime) {
         updateStretchingOfTime();
@@ -576,25 +613,8 @@ void VideoTileProvider::handleMpvEvents() {
             case MPV_EVENT_VIDEO_RECONFIG: {
                 // Retrieve the new video size
                 // Get width
-                int result1 = mpv_get_property_async(
-                    _mpvHandle,
-                    static_cast<uint64_t>(LibmpvPropertyKey::Width),
-                    "dwidth", MPV_FORMAT_INT64
-                );
-                if (!checkMpvError(result1)) {
-                    LWARNING("Could not find new width of video");
-                }
-
-                // Get Height
-                int result2 = mpv_get_property_async(
-                    _mpvHandle,
-                    static_cast<uint64_t>(LibmpvPropertyKey::Height),
-                    "dheight",
-                    MPV_FORMAT_INT64
-                );
-                if (!checkMpvError(result2)) {
-                    LWARNING("Could not find new height of video");
-                }
+                getPropertyAsyncMpv("width", MPV_FORMAT_INT64, LibmpvPropertyKey::Width);
+                getPropertyAsyncMpv("height", MPV_FORMAT_INT64, LibmpvPropertyKey::Height);
                 break;
             }
             case MPV_EVENT_PROPERTY_CHANGE: {
@@ -602,46 +622,42 @@ void VideoTileProvider::handleMpvEvents() {
                 if (strcmp(prop->name, "video-params") == 0 &&
                     prop->format == MPV_FORMAT_NODE)
                 {
-                    int result = mpv_get_property_async(
-                        _mpvHandle,
-                        static_cast<uint64_t>(LibmpvPropertyKey::Params),
-                        "video-params",
-                        MPV_FORMAT_NODE
-                    );
-                    if (!checkMpvError(result)) {
-                        LWARNING("Could not find video parameters");
-                        return;
-                    }
-                    
+                    getPropertyAsyncMpv("video-params", MPV_FORMAT_NODE, LibmpvPropertyKey::Params);
                 }
                 if (strcmp(prop->name, "time-pos") == 0 &&
                     prop->format == MPV_FORMAT_DOUBLE)
                 {
-                    int result = mpv_get_property_async(
-                        _mpvHandle,
-                        static_cast<uint64_t>(LibmpvPropertyKey::Time),
-                        "time-pos",
-                        MPV_FORMAT_DOUBLE
-                    );
-                    if (!checkMpvError(result)) {
-                        LWARNING("Could not find time property");
-                        return;
-                    }
+                    getPropertyAsyncMpv("time-pos", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Time);
                 }
                 if (strcmp(prop->name, "duration") == 0 &&
                     prop->format == MPV_FORMAT_DOUBLE)
                 {
-                    LINFO("Get video duration");
-                    int result = mpv_get_property_async(
-                        _mpvHandle,
-                        static_cast<uint64_t>(LibmpvPropertyKey::Duration),
-                        "duration",
-                        MPV_FORMAT_DOUBLE
-                    );
-                    if (!checkMpvError(result)) {
-                        LWARNING("Could not find time property");
-                        return;
-                    }
+                    getPropertyAsyncMpv("duration", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Duration);
+                }
+                if (strcmp(prop->name, "fps") == 0 &&
+                    prop->format == MPV_FORMAT_DOUBLE)
+                {
+                    getPropertyAsyncMpv("fps", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Fps);
+                }
+                if (strcmp(prop->name, "pause") == 0 &&
+                    prop->format == MPV_FORMAT_FLAG)
+                {
+                    getPropertyAsyncMpv("pause", MPV_FORMAT_FLAG, LibmpvPropertyKey::Pause);
+                }
+                if (strcmp(prop->name, "height") == 0 &&
+                    prop->format == MPV_FORMAT_INT64)
+                {
+                    getPropertyAsyncMpv("height", MPV_FORMAT_INT64, LibmpvPropertyKey::Height);
+                }
+                if (strcmp(prop->name, "width") == 0 &&
+                    prop->format == MPV_FORMAT_INT64)
+                {
+                    getPropertyAsyncMpv("width", MPV_FORMAT_INT64, LibmpvPropertyKey::Width);
+                }
+                if (strcmp(prop->name, "metadata") == 0 &&
+                    prop->format == MPV_FORMAT_NODE)
+                {
+                    getPropertyAsyncMpv("metadata", MPV_FORMAT_NODE, LibmpvPropertyKey::Meta);
                 }
                 break;
             }
@@ -654,9 +670,25 @@ void VideoTileProvider::handleMpvEvents() {
                 break;
             }
             case MPV_EVENT_COMMAND_REPLY: {
-                int result = event->error;
-                if (!checkMpvError) {
-                    LINFO("Command Error");
+                switch (event->reply_userdata) {
+                    case static_cast<uint64_t>(LibmpvPropertyKey::Command): {
+                        int result = event->error;
+                        if (!checkMpvError) {
+                            LINFO("Command Error");
+                        }
+                        break;
+                    }
+                    case static_cast<uint64_t>(LibmpvPropertyKey::Seek): {
+                        int result = event->error;
+                        if (!checkMpvError) {
+                            LINFO("Seek Error");
+                        }
+                        _isSeeking = false;
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
                 }
                 break;
             }
@@ -752,6 +784,41 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
         }
         else {
             LERROR("Could not find height of video");
+        }
+        break;
+    }
+    case LibmpvPropertyKey::Width: {
+        if (!event->data) {
+            LERROR("Could not find height property");
+            break;
+        }
+
+        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+        int* width = static_cast<int*>(property->data);
+
+        if (!width) {
+            LERROR("Could not find width property");
+            break;
+        }
+
+        if (*width == _videoResolution.value().y) {
+            break;
+        }
+
+        LINFO(fmt::format("New width: {}", *width));
+
+        if (*width > 0) {
+            if (_videoResolution.value().y > 0 && _fbo > 0) {
+                resizeFBO(*width, _videoResolution.value().y);
+            }
+            else {
+                glm::ivec2 newValue = _videoResolution.value();
+                newValue.x = *width;
+                _videoResolution = newValue;
+            }
+        }
+        else {
+            LERROR("Could not find width of video");
         }
         break;
     }
@@ -855,57 +922,33 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
         _tileIsReady = false;
         break;
     }
-    case LibmpvPropertyKey::Width: {
+    case LibmpvPropertyKey::Fps: {
         if (!event->data) {
-            LERROR("Could not find height property");
+            LERROR("Could not find fps property");
             break;
         }
 
         struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-        int* width = static_cast<int*>(property->data);
-
-        if (!width) {
-            LERROR("Could not find width property");
+        double* fps = static_cast<double*>(property->data);
+        if (*fps < glm::epsilon<double>()) {
+            LWARNING("Detected fps was 0. Falling back on 24 fps");
             break;
         }
-
-        if (*width == _videoResolution.value().y) {
+        if (!fps) {
+            LERROR("Could not find fps property");
             break;
         }
+        _fps = *fps;
 
-        LINFO(fmt::format("New width: {}", *width));
-
-        if (*width > 0) {
-            if (_videoResolution.value().y > 0 && _fbo > 0) {
-                resizeFBO(*width, _videoResolution.value().y);
-            }
-            else {
-                glm::ivec2 newValue = _videoResolution.value();
-                newValue.x = *width;
-                _videoResolution = newValue;
-            }
-        }
-        else {
-            LERROR("Could not find width of video");
-        }
+        LINFO(fmt::format("Frame count: {}", *fps));
+        _frameDuration = _fps * ((_endJ200Time - _startJ200Time) / _videoDuration);
         break;
     }
-    case LibmpvPropertyKey::FrameCount: {
+    case LibmpvPropertyKey::Pause: {
         if (!event->data) {
-            LERROR("Could not find height property");
+            LERROR("Could not find pause property");
             break;
         }
-
-        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-        int* count = static_cast<int*>(property->data);
-
-        if (!count) {
-            LERROR("Could not find width property");
-            break;
-        }
-
-        // LINFO(fmt::format("Frame count: {}", *count));
-
         break;
     }
     default: {
