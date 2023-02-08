@@ -673,6 +673,10 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
         _videoDuration = *duration;
         _frameDuration = _fps * ((_endJ200Time - _startJ200Time) /_videoDuration);
 
+        if (_animationMode == AnimationMode::MapToSimulationTime) {
+            seekToTime(correctVideoPlaybackTime());
+        }
+
         LINFO(fmt::format("Duration: {}", *duration));
         break;
     }
