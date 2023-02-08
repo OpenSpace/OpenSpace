@@ -1023,6 +1023,14 @@ void TouchInteraction::step(double dt, bool directTouch) {
 
         decelerate(dt);
 
+        // @TODO (emmbr, 2023-02-08) This is ugly, but for now prevents jittering
+        // when zooming in closer than the orbital navigator allows. Long term, we
+        // should make the touch interaction tap into the orbitalnavigator and let that
+        // do the updating of the camera, instead of handling them separately. Then we
+        // would keep them in sync and avoid duplicated camera updating code.
+        camPos =
+            global::navigationHandler->orbitalNavigator().pushToSurfaceOfAnchor(camPos);
+
         // Update the camera state
         _camera->setPositionVec3(camPos);
         _camera->setRotation(globalCamRot * localCamRot);
