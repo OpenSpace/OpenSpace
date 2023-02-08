@@ -120,27 +120,9 @@ namespace {
         "sensitivity that will alter the pinch-zoom speed"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DirectManipulationInfo = {
-        "DirectManipulationRadius",
-        "Radius a planet has to have to activate direct-manipulation",
-        "" // @TODO Missing documentation
-    };
-
     constexpr openspace::properties::Property::PropertyInfo RollThresholdInfo = {
         "RollThreshold",
         "Threshold for min angle for roll interpret",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo OrbitSpinningThreshold = {
-        "OrbitThreshold",
-        "Threshold to activate orbit spinning in direct-manipulation",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SpinningSensitivityInfo = {
-        "SpinningSensitivity",
-        "Sensitivity of spinning in direct-manipulation",
         "" // @TODO Missing documentation
     };
 
@@ -224,6 +206,36 @@ namespace {
         "defaults to the surface of the current anchor."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo
+        EnableDirectManipulationInfo =
+    {
+        "EnableDirectManipulation",
+        "Enable direct manipulation",
+        "Decides whether the direct manipulation mode should be enabled or not. "
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        DirectManipulationThresholdInfo =
+    {
+        "DirectManipulationThreshold",
+        "Direct manipulation threshold",
+        "This threshold affects the distance from the interaction sphere at which the "
+        "direct manipulation interaction mode starts being active. The value is given "
+        "as a factor times the interaction sphere"
+    };
+
+    //constexpr openspace::properties::Property::PropertyInfo OrbitSpinningThreshold = {
+    //    "OrbitThreshold",
+    //    "Threshold to activate orbit spinning in direct-manipulation",
+    //    "" // @TODO Missing documentation
+    //};
+
+    //constexpr openspace::properties::Property::PropertyInfo SpinningSensitivityInfo = {
+    //    "SpinningSensitivity",
+    //    "Sensitivity of spinning in direct-manipulation",
+    //    "" // @TODO Missing documentation
+    //};
+
     // Compute coefficient of decay based on current frametime; if frametime has been
     // longer than usual then multiple decay steps may be applied to keep the decay
     // relative to user time
@@ -247,14 +259,11 @@ TouchInteraction::TouchInteraction()
     , _reset(SetDefaultInfo)
     , _maxTapTime(MaxTapTimeInfo, 300, 10, 1000)
     , _deceleratesPerSecond(DecelatesPerSecondInfo, 240, 60, 300)
-    , _touchScreenSize(TouchScreenSizeInfo, 55.0f, 5.5f, 150.0f)
+    , _touchScreenSize(TouchScreenSizeInfo, 55.f, 5.5f, 150.f)
     , _tapZoomFactor(TapZoomFactorInfo, 0.2f, 0.f, 0.5f, 0.01f)
     , _pinchZoomFactor(PinchZoomFactorInfo, 0.01f, 0.f, 0.2f)
-    , _nodeRadiusThreshold(DirectManipulationInfo, 0.2f, 0.0f, 1.0f)
     , _rollAngleThreshold(RollThresholdInfo, 0.025f, 0.f, 0.05f, 0.001f)
-    , _orbitSpeedThreshold(OrbitSpinningThreshold, 0.005f, 0.f, 0.01f, 0.0001f)
-    , _spinSensitivity(SpinningSensitivityInfo, 0.25f, 0.f, 2.f, 0.01f)
-    , _zoomSensitivityExponential(ZoomSensitivityExpInfo, 1.03f, 1.0f, 1.1f)
+    , _zoomSensitivityExponential(ZoomSensitivityExpInfo, 1.03f, 1.f, 1.1f)
     , _zoomSensitivityProportionalDist(ZoomSensitivityPropInfo, 11.f, 5.f, 50.f)
     , _zoomSensitivityDistanceThreshold(
         ZoomSensitivityDistanceThresholdInfo,
@@ -262,7 +271,7 @@ TouchInteraction::TouchInteraction()
         0.01f,
         0.25f
     )
-    , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 0.01f, 10000.0f)
+    , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 0.01f, 10000.f)
     , _zoomInLimit(ZoomInLimitInfo, -1.0, 0.0, std::numeric_limits<double>::max())
     , _zoomOutLimit(
         ZoomOutLimitInfo,
@@ -281,12 +290,17 @@ TouchInteraction::TouchInteraction()
         glm::vec4(0.f),
         glm::vec4(0.2f)
     )
-    , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.0f)
+    , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.f)
     , _pinchInputs({ TouchInput(0, 0, 0.0, 0.0, 0.0), TouchInput(0, 0, 0.0, 0.0, 0.0) })
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0, 2.75, glm::dvec2(0.08, 0.045) }
     // Calculated with two vectors with known diff in length, then
     // projDiffLength/diffLength.
+    , _enableDirectManipulation(EnableDirectManipulationInfo, true)
+    , _directTouchDistanceThreshold(DirectManipulationThresholdInfo, 5.f, 0.f, 10.f)
+    //, _orbitSpeedThreshold(OrbitSpinningThreshold, 0.005f, 0.f, 0.01f, 0.0001f)
+    //, _spinSensitivity(SpinningSensitivityInfo, 0.25f, 0.f, 2.f, 0.01f)
+
 {
     addProperty(_disableZoom);
     addProperty(_disableRoll);
@@ -297,10 +311,7 @@ TouchInteraction::TouchInteraction()
     addProperty(_touchScreenSize);
     addProperty(_tapZoomFactor);
     addProperty(_pinchZoomFactor);
-    addProperty(_nodeRadiusThreshold);
     addProperty(_rollAngleThreshold);
-    addProperty(_orbitSpeedThreshold);
-    addProperty(_spinSensitivity);
     addProperty(_zoomSensitivityExponential);
     addProperty(_zoomSensitivityProportionalDist);
     addProperty(_zoomSensitivityDistanceThreshold);
@@ -313,6 +324,11 @@ TouchInteraction::TouchInteraction()
     addProperty(_panEnabled);
     addProperty(_interpretPan);
     addProperty(_friction);
+
+    addProperty(_enableDirectManipulation);
+    addProperty(_directTouchDistanceThreshold);
+    //addProperty(_orbitSpeedThreshold);
+    //addProperty(_spinSensitivity);
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     addPropertySubOwner(_debugProperties);
@@ -408,7 +424,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
     _wasPrevModeDirectTouch = _directTouchMode;
 
     // Evaluates if current frame is in directTouchMode (will be used next frame)
-    _directTouchMode = _currentRadius > _nodeRadiusThreshold &&
+    _directTouchMode = _isWithinDirectTouchDistance &&
         _selectedNodeSurfacePoints.size() == numFingers;
 }
 
@@ -456,10 +472,6 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
 }
 
 void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolder>& list) {
-    glm::dquat camToWorldSpace = _camera->rotationQuaternion();
-    glm::dvec3 camPos = _camera->positionVec3();
-    std::vector<DirectInputSolver::SelectedBody> surfacePoints;
-
     _selectedNodeSurfacePoints.clear();
 
     const SceneGraphNode* anchor =
@@ -469,14 +481,16 @@ void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolde
     // Check if current anchor is valid for direct touch
     TouchModule* module = global::moduleEngine->module<TouchModule>();
 
-    // TODO: Group all direct touch properties into a propertyowner
-    // and make sure to also check SGN property first
     bool isDirectTouchRenderable = node->renderable() &&
         module->isDefaultDirectTouchType(node->renderable()->typeAsString());
 
     if (!(node->isDirectlyTouchable() || isDirectTouchRenderable)) {
         return;
     }
+
+    glm::dquat camToWorldSpace = _camera->rotationQuaternion();
+    glm::dvec3 camPos = _camera->positionVec3();
+    std::vector<DirectInputSolver::SelectedBody> surfacePoints;
 
     for (const TouchInputHolder& inputHolder : list) {
         // Normalized -1 to 1 coordinates on screen
@@ -518,7 +532,7 @@ TouchInteraction::InteractionType
 TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list,
                                            const std::vector<TouchInput>& lastProcessed)
 {
-    ghoul_assert(list.empty(), "Cannot interpret interaction of no input");
+    ghoul_assert(!list.empty(), "Cannot interpret interaction of no input");
 
     glm::fvec2 lastCentroid = _centroid;
     _centroid = glm::vec2(0.f, 0.f);
@@ -662,13 +676,14 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
 void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& list,
                                          const std::vector<TouchInput>& lastProcessed)
 {
-    const InteractionType action = interpretInteraction(list, lastProcessed);
     const SceneGraphNode* anchor =
         global::navigationHandler->orbitalNavigator().anchorNode();
 
-    if (!anchor) {
+    if (list.empty() || !anchor) {
         return;
     }
+
+    const InteractionType action = interpretInteraction(list, lastProcessed);
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     const std::map<int, std::string> interactionNames = {
@@ -860,9 +875,17 @@ void TouchInteraction::step(double dt, bool directTouch) {
         dquat localCamRot = inverse(globalCamRot) * _camera->rotationQuaternion();
 
         const double interactionSphere = anchor->interactionSphere();
-        const double distance = std::max(length(centerToCamera) - interactionSphere, 0.0);
-        _currentRadius = interactionSphere /
-            std::max(distance * _projectionScaleFactor, 1.0);
+
+        // Check if camera is within distance for direct manipulation to be applicable
+        if (interactionSphere > 0.0 && _enableDirectManipulation) {
+            const double distance =
+                std::max(length(centerToCamera) - interactionSphere, 0.0);
+            const double maxDistance = interactionSphere * _directTouchDistanceThreshold;
+            _isWithinDirectTouchDistance = distance <= maxDistance;
+        }
+        else {
+            _isWithinDirectTouchDistance = false;
+        }
 
         {
             // Roll
@@ -1090,13 +1113,10 @@ void TouchInteraction::resetPropertiesToDefault() {
     _disableRoll.set(false);
     _maxTapTime.set(300);
     _deceleratesPerSecond.set(240);
-    _touchScreenSize.set(55.0f);
+    _touchScreenSize.set(55.f);
     _tapZoomFactor.set(0.2f);
     _pinchZoomFactor.set(0.01f);
-    _nodeRadiusThreshold.set(0.2f);
     _rollAngleThreshold.set(0.025f);
-    _orbitSpeedThreshold.set(0.005f);
-    _spinSensitivity.set(1.0f);
     _zoomSensitivityExponential.set(1.025f);
     _inputStillThreshold.set(0.0005f);
     _centroidStillThreshold.set(0.0018f);

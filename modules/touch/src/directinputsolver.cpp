@@ -212,6 +212,8 @@ bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
                               const std::vector<SelectedBody>& selectedBodies,
                               std::vector<double>* parameters, const Camera& camera)
 {
+    ZoneScopedN("Direct touch input solver")
+
     ghoul_assert(
         selectedBodies.size() >= list.size(),
         "Number of touch inputs must match the number of 'selected bodies'"

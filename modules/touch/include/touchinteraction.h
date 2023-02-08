@@ -166,10 +166,7 @@ private:
     properties::FloatProperty _touchScreenSize;
     properties::FloatProperty _tapZoomFactor;
     properties::FloatProperty _pinchZoomFactor;
-    properties::FloatProperty _nodeRadiusThreshold;
     properties::FloatProperty _rollAngleThreshold;
-    properties::FloatProperty _orbitSpeedThreshold;
-    properties::FloatProperty _spinSensitivity;
     properties::FloatProperty _zoomSensitivityExponential;
     properties::FloatProperty _zoomSensitivityProportionalDist;
     properties::FloatProperty _zoomSensitivityDistanceThreshold;
@@ -182,6 +179,11 @@ private:
     properties::FloatProperty _interpretPan;
     properties::Vec4Property _friction;
     properties::FloatProperty _constTimeDecay_secs;
+
+    properties::BoolProperty _enableDirectManipulation;
+    properties::FloatProperty _directTouchDistanceThreshold;
+    //properties::FloatProperty _orbitSpeedThreshold;
+    //properties::FloatProperty _spinSensitivity;
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     struct DebugProperties : PropertyOwner {
@@ -205,8 +207,7 @@ private:
     VelocityStates _lastVel;
     VelocityStates _sensitivity;
 
-    double _projectionScaleFactor = 1.000004;
-    double _currentRadius = 1.0;
+    bool _isWithinDirectTouchDistance = false;
     double _timeSlack = 0.0;
     std::chrono::milliseconds _time;
     bool _directTouchMode = false;
