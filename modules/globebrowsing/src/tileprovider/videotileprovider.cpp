@@ -471,6 +471,7 @@ double VideoTileProvider::correctVideoPlaybackTime() const {
 }
 
 void VideoTileProvider::seekToTime(double time) {
+    // Prevent from seeking to the same time multiple times in a row
     bool seekIsDifferent = abs(time - _currentVideoTime) > SeekThreshold;
     if (seekIsDifferent && !_isSeeking) {
         // Pause while seeking
@@ -500,7 +501,6 @@ void VideoTileProvider::renderMpv() {
                 _timeAtLastRender = now;
             }
         }
-
         // Make sure we are at the correct time
         double time = correctVideoPlaybackTime();
         bool shouldSeek = abs(time - _currentVideoTime) > SeekThreshold;
