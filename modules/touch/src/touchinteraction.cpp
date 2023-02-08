@@ -1031,6 +1031,10 @@ void TouchInteraction::step(double dt, bool directTouch) {
         camPos =
             global::navigationHandler->orbitalNavigator().pushToSurfaceOfAnchor(camPos);
 
+        // @TODO (emmbr, 2023-02-08) with the line above, the ZoomInLimit might not be
+        // needed anymore. We should make it so that just the limit properties in the
+        // OrbitalNavigator is actually needed, and don't have duplicates
+
         // Update the camera state
         _camera->setPositionVec3(camPos);
         _camera->setRotation(globalCamRot * localCamRot);
