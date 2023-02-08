@@ -64,14 +64,11 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    // Time for 1 frame when 24 fps (1.0 / 24.0). Chose 24 fps as this is the lowest 
-    // probably fps we'll encounter
-    static constexpr double SeekThreshold = 0.0417; 
+    // Threshold where we are officially out of sync
+    static constexpr double SeekThreshold = 1.0; 
     properties::TriggerProperty _play;
     properties::TriggerProperty _pause;
     properties::TriggerProperty _goToStart;
-    properties::DoubleProperty _videoDuration;
-    properties::IVec2Property _videoResolution;
 
     // libmpv property keys
     enum class LibmpvPropertyKey : uint64_t {
@@ -84,7 +81,6 @@ private:
         Command,
         Seek,
         Width,
-        Speed,
         Fps,
         Pause
     };
@@ -100,8 +96,6 @@ private:
     // Map to simulation time functions
     double correctVideoPlaybackTime() const;
     bool isWithingStartEndTime() const;
-    void pauseVideoIfOutsideValidTime();
-    void updateStretchingOfTime();
 
     // Libmpv
     void initializeMpv(); // Called first time in postSyncPreDraw
@@ -128,10 +122,13 @@ private:
     double _currentVideoTime = 0.0;
     double _frameDuration = 0.0;
     double _fps = 0.04166666667; //1/24
+    double _timeAtLastRender = 0.0;
     bool _hasReachedEnd = false;
     bool _tileIsReady = false;
     bool _isInitialized = false;
     bool _isSeeking = false;
+    double _videoDuration = 0.0;
+    glm::ivec2 _videoResolution = glm::ivec2(2048, 1024);
 
     // libmpv
     mpv_handle* _mpvHandle = nullptr;
@@ -141,7 +138,6 @@ private:
     GLuint _fbo = 0;
     int _wakeup = 0;
     bool _didRender = false;
-    bool _isPaused = false;
 
     // Cache for rendering the same frame
     std::map<TileIndex::TileHashKey, Tile> _tileCache;

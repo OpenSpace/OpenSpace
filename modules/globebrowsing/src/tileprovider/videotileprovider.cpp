@@ -84,27 +84,9 @@ namespace {
         "Go to start in video"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DurationInfo = {
-        "Duration",
-        "Duration",
-        "Duration of video, in seconds"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
-        "Resolution",
-        "Resolution",
-        "Resolution of video, in pixels"
-    };
-
     struct [[codegen::Dictionary(VideoTileProvider)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
-
-        // [[codegen::verbatim(ResolutionInfo.description)]]
-        glm::ivec2 resolution;
-
-        // [[codegen::verbatim(DurationInfo.description)]]
-        std::optional<double> duration;
 
         // [[codegen::verbatim(StartTimeInfo.description)]]
         std::optional<std::string> startTime [[codegen::datetime()]];
@@ -198,15 +180,12 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     : _play(PlayInfo)
     , _pause(PauseInfo)
     , _goToStart(GoToStartInfo)
-    , _videoDuration(DurationInfo, 0.0)
-    , _videoResolution(ResolutionInfo, glm::ivec2(0))
 {
     ZoneScoped
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _videoFile = p.file;
-    _videoResolution = p.resolution;
    
     if (p.animationMode.has_value()) {
         switch (*p.animationMode) {
@@ -236,14 +215,14 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
                 " end time");
             return;
         }
-        if (!p.duration.has_value()) {
-            LERROR("Video tile layer tried to map to simulation time but duration");
-            return;
-        }
-        _videoDuration = *p.duration;
+        //_videoDuration = *p.duration;
         _startJ200Time = Time::convertTime(*p.startTime);
         _endJ200Time = Time::convertTime(*p.endTime);
         ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
+
+        global::timeManager->addTimeJumpCallback([this]() {
+            seekToTime(correctVideoPlaybackTime());
+        });
     }
     
     global::callback::postSyncPreDraw->emplace_back([this]() {
@@ -331,7 +310,6 @@ void VideoTileProvider::pause() {
         MPV_FORMAT_FLAG,
         &pause
     );
-    _isPaused = true;
     if (!checkMpvError(result)) {
         LWARNING("Error when pausing video");
     }
@@ -346,7 +324,6 @@ void VideoTileProvider::play() {
         MPV_FORMAT_FLAG,
         &pause
     );
-    _isPaused = false;
     if (!checkMpvError(result)) {
         LWARNING("Error when playing video");
     }
@@ -402,7 +379,7 @@ void VideoTileProvider::initializeMpv() {
     // https://mpv.io/manual/master/#options-video-timing-offset
     setPropertyStringMpv("video-timing-offset", "0");
 
-    setPropertyStringMpv("load-stats-overlay", "");
+    //setPropertyStringMpv("load-stats-overlay", "");
 
     //mpv_set_property_string(_mpvHandle, "script-opts", "autoload-disabled=yes");
     
@@ -453,7 +430,7 @@ void VideoTileProvider::initializeMpv() {
     }
 
     //Create FBO to render video into
-    createFBO(_videoResolution.value().x, _videoResolution.value().y);
+    createFBO(_videoResolution.x, _videoResolution.y);
 
     //Observe video parameters
     observePropertyMpv("video-params", MPV_FORMAT_NODE, LibmpvPropertyKey::Params);
@@ -466,8 +443,7 @@ void VideoTileProvider::initializeMpv() {
     observePropertyMpv("fps", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Fps);
 
     if (_animationMode == AnimationMode::MapToSimulationTime) {
-        updateStretchingOfTime();
-        pauseVideoIfOutsideValidTime();
+        pause();
     }
 
     _isInitialized = true;
@@ -493,80 +469,46 @@ double VideoTileProvider::correctVideoPlaybackTime() const {
     return percentage * _videoDuration;
 }
 
-void VideoTileProvider::pauseVideoIfOutsideValidTime() {
-    if (!isWithingStartEndTime() && !_isPaused) {
-        pause();
-    }
-    else if (isWithingStartEndTime() && _isPaused) {
-        play();
-    }
-}
-
 void VideoTileProvider::seekToTime(double time) {
-    bool isPlaying = !_isPaused;
     bool seekIsDifferent = abs(time - _currentVideoTime) > SeekThreshold;
-    if (seekIsDifferent) {
+    if (seekIsDifferent && !_isSeeking) {
         // Pause while seeking
         pause();
-        // Seek
         std::string timeString = std::to_string(time);
         const char* params = timeString.c_str();
-        const char* args[] = { "seek", params, "absolute", NULL };
-        int result = mpv_command_async(
-            _mpvHandle,
-            static_cast<uint64_t>(LibmpvPropertyKey::Command),
-            args
-        );
-        if (!checkMpvError(result)) {
-            LINFO("Seek resulted in invalid operation");
-        }
-
-        // Play if video was playing before seek
-        if (isPlaying) {
-            play();
-        }
-    }
-}
-
-void VideoTileProvider::updateStretchingOfTime() {
-    double deltaTime = global::timeManager->deltaTime();
-    // If were going backwards in time, we don't need to play the video forwards
-    if (deltaTime < 0) {
-        pause();
-    }
-    else {
-        double stretchedTime = (_endJ200Time - _startJ200Time) / deltaTime; // seconds
-        if (stretchedTime > 0.0) {
-            int result = mpv_set_property_async(
-                _mpvHandle,
-                static_cast<uint64_t>(LibmpvPropertyKey::Speed),
-                "speed",
-                MPV_FORMAT_DOUBLE,
-                &stretchedTime
-            );
-            if (!checkMpvError(result)) {
-                LWARNING("Error when pausing video");
-            }
-        }
-        
+        const char* cmd[] = { "seek", params, "absolute", NULL };
+        commandAsyncMpv(cmd, LibmpvPropertyKey::Seek);
+        _isSeeking = true;
     }
 }
 
 void VideoTileProvider::renderMpv() {
-
     if (_animationMode == AnimationMode::MapToSimulationTime) {
-        pauseVideoIfOutsideValidTime();
+        // If we are in valid times, step frames accordingly
+        if (isWithingStartEndTime()) {
+            double now = global::timeManager->time().j2000Seconds();
+            double deltaTime = now - _timeAtLastRender;
+            if (deltaTime > _frameDuration) {
+                // Stepping forwards
+                stepFrameForward();
+                _timeAtLastRender = now;
+            }
+            else if (deltaTime < -_frameDuration) {
+                // Stepping backwards
+                stepFrameBackward();
+                _timeAtLastRender = now;
+            }
+        }
 
+        // Make sure we are at the correct time
         double time = correctVideoPlaybackTime();
         bool shouldSeek = abs(time - _currentVideoTime) > SeekThreshold;
-
         if (shouldSeek) {
             seekToTime(time);
         }
     }
    
     handleMpvEvents();
-
 
     if (_wakeup) {
         if ((mpv_render_context_update(_mpvRenderContext) & MPV_RENDER_UPDATE_FRAME)) {
@@ -576,8 +518,8 @@ void VideoTileProvider::renderMpv() {
             int fboInt = static_cast<int>(_fbo);
             mpv_opengl_fbo mpfbo{ 
                 fboInt , 
-                _videoResolution.value().x, 
-                _videoResolution.value().y, 0 
+                _videoResolution.x, 
+                _videoResolution.y, 0 
             };
             int flip_y{ 1 };
 
@@ -728,9 +670,7 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
         }
 
         _videoDuration = *duration;
-        if (_animationMode == AnimationMode::MapToSimulationTime) {
-            updateStretchingOfTime();
-        }
+        _frameDuration = _fps * ((_endJ200Time - _startJ200Time) /_videoDuration);
 
         LINFO(fmt::format("Duration: {}", *duration));
         break;
@@ -766,25 +706,16 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
             break;
         }
 
-        if (*height == _videoResolution.value().y) {
+        if (*height == _videoResolution.y) {
             break;
         }
 
         LINFO(fmt::format("New height: {}", *height));
 
-        if (*height > 0) {
-            if (_videoResolution.value().x > 0 && _fbo > 0) {
-                resizeFBO(_videoResolution.value().x, *height);
-            }
-            else {
-                glm::ivec2 newValue = _videoResolution.value();
-                newValue.y = *height;
-                _videoResolution = newValue;
-            }
+        if (*height > 0 && _videoResolution.x > 0 && _fbo > 0) {
+            resizeFBO(_videoResolution.x, *height);
         }
-        else {
-            LERROR("Could not find height of video");
-        }
+
         break;
     }
     case LibmpvPropertyKey::Width: {
@@ -801,25 +732,16 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
             break;
         }
 
-        if (*width == _videoResolution.value().y) {
+        if (*width == _videoResolution.y) {
             break;
         }
 
         LINFO(fmt::format("New width: {}", *width));
 
-        if (*width > 0) {
-            if (_videoResolution.value().y > 0 && _fbo > 0) {
-                resizeFBO(*width, _videoResolution.value().y);
-            }
-            else {
-                glm::ivec2 newValue = _videoResolution.value();
-                newValue.x = *width;
-                _videoResolution = newValue;
-            }
+        if (*width > 0 && _videoResolution.y > 0 && _fbo > 0) {
+            resizeFBO(*width, _videoResolution.y);
         }
-        else {
-            LERROR("Could not find width of video");
-        }
+        
         break;
     }
     case LibmpvPropertyKey::Meta: {
@@ -849,7 +771,7 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
     }
     case LibmpvPropertyKey::Params: {
         if (!event->data) {
-            LERROR("Could not find video parameters");
+            LINFO("Could not find video parameters");
             break;
         }
 
@@ -1045,8 +967,8 @@ void VideoTileProvider::createFBO(int width, int height) {
     // Render video frame to texture
     _mpvFbo = mpv_opengl_fbo{ 
         static_cast<int>(_fbo), 
-        _videoResolution.value().x, 
-        _videoResolution.value().y, 
+        _videoResolution.x, 
+        _videoResolution.y, 
         0 
     };
 }
@@ -1054,7 +976,7 @@ void VideoTileProvider::createFBO(int width, int height) {
 void VideoTileProvider::resizeFBO(int width, int height) {
     LINFO(fmt::format("Resizing FBO with width: {} and height: {}", width, height));
 
-    if (width == _videoResolution.value().x && height == _videoResolution.value().y) {
+    if (width == _videoResolution.x && height == _videoResolution.y) {
         return;
     }
 
