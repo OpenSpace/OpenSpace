@@ -215,7 +215,6 @@ private:
     bool _tap = false;
     bool _doubleTap = false;
     bool _zoomOutTap = false;
-    bool _lmSuccess = true;
     std::vector<DirectInputSolver::SelectedBody> _selectedNodeSurfacePoints;
     DirectInputSolver _directInputSolver;
 

@@ -402,9 +402,12 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
         resetAfterInput();
     }
 
-    if (_directTouchMode && !_selectedNodeSurfacePoints.empty() &&
-        numFingers == _selectedNodeSurfacePoints.size())
-    {
+    _directTouchMode = _enableDirectManipulation &&
+        _isWithinDirectTouchDistance &&
+        !_selectedNodeSurfacePoints.empty() &&
+        numFingers == _selectedNodeSurfacePoints.size();
+
+    if (_directTouchMode) {
 #ifdef TOUCH_DEBUG_PROPERTIES
         _debugProperties.interactionMode = "Direct";
 #endif
@@ -417,15 +420,11 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
         computeVelocities(list, lastProcessed);
     }
 
-    if (_lmSuccess) {
+    if (_enableDirectManipulation && _isWithinDirectTouchDistance) {
         updateNodeSurfacePoints(list);
     }
 
     _wasPrevModeDirectTouch = _directTouchMode;
-
-    // Evaluates if current frame is in directTouchMode (will be used next frame)
-    _directTouchMode = _isWithinDirectTouchDistance &&
-        _selectedNodeSurfacePoints.size() == numFingers;
 }
 
 void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) {
@@ -440,10 +439,10 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     std::vector<double> par(6, 0.0);
     par[0] = _lastVel.orbit.x; // use _lastVel for orbit
     par[1] = _lastVel.orbit.y;
-    _lmSuccess = _directInputSolver.solve(list, _selectedNodeSurfacePoints, &par, *_camera);
+    bool lmSuccess = _directInputSolver.solve(list, _selectedNodeSurfacePoints, &par, *_camera);
     int nDof = _directInputSolver.nDof();
 
-    if (_lmSuccess && !_unitTest) {
+    if (lmSuccess && !_unitTest) {
         // If good values were found set new camera state
         _vel.orbit = glm::dvec2(par.at(0), par.at(1));
         if (nDof > 2) {
@@ -1090,8 +1089,6 @@ void TouchInteraction::resetAfterInput() {
     //        _vel.orbit = _lastVel.orbit * spinDelta;
     //    }
     //}
-
-    _lmSuccess = true;
 
     // Reset variables
     _lastVel.orbit = glm::dvec2(0.0);
