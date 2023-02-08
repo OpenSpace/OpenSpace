@@ -354,10 +354,11 @@ void VideoTileProvider::initializeMpv() {
     // See order at https://github.com/mpv-player/mpv/blob/master/libmpv/client.h#L420
     // Avoiding async calls in uninitialized state
     
-    // Loop video
-    // https://mpv.io/manual/master/#options-loop
-    setPropertyStringMpv("loop", "");
-    
+    if (_animationMode == AnimationMode::RealTimeLoop) {
+        // Loop video
+        // https://mpv.io/manual/master/#options-loop
+        setPropertyStringMpv("loop", "");
+    }
     // Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
     // https://mpv.io/manual/master/#options-gpu-api
     setPropertyStringMpv("gpu-api", "opengl");
