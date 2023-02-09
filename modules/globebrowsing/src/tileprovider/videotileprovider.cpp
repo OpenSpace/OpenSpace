@@ -938,6 +938,8 @@ void VideoTileProvider::resizeFBO(int width, int height) {
     // Delete old FBO and texture
     glDeleteFramebuffers(1, &_fbo);
     _frameTexture.reset(nullptr);
+    _tileCache.clear();
+    _tileIsReady = false;
 
     createFBO(width, height);
 }
