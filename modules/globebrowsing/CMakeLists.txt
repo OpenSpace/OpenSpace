@@ -148,7 +148,7 @@ target_precompile_headers(${globebrowsing_module} PRIVATE
   <map>
 )
 
-# Ffmpeg
+# Libmpv
 if(WIN32)
   add_library(libmpv SHARED IMPORTED)
   set_target_properties(libmpv PROPERTIES
@@ -156,52 +156,14 @@ if(WIN32)
     IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/lib/mpv.lib"
     INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/include"
   )
-
   target_link_libraries(openspace-module-globebrowsing PUBLIC libmpv)
-
-  add_library(avcodec SHARED IMPORTED)
-  set_target_properties(avcodec PROPERTIES
-    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avcodec-59.dll"
-    IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avcodec.lib"
-    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include"
-  )
-
-  target_link_libraries(openspace-module-globebrowsing PUBLIC avcodec)
-
-  add_library(avformat SHARED IMPORTED)
-  set_target_properties(avformat PROPERTIES
-    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avformat-59.dll"
-    IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avformat.lib"
-    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include"
-  )
-
-  target_link_libraries(openspace-module-globebrowsing PUBLIC avformat)
-
-  add_library(avutil SHARED IMPORTED)
-  set_target_properties(avutil PROPERTIES
-    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avutil-57.dll"
-    IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avutil.lib"
-    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include"
-  )
-
-  target_link_libraries(openspace-module-globebrowsing PUBLIC avutil)
-
-  add_library(swscale SHARED IMPORTED)
-  set_target_properties(swscale PROPERTIES
-    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/swscale-6.dll"
-    IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/swscale.lib"
-    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include"
-  )
-
-  target_link_libraries(openspace-module-globebrowsing PUBLIC swscale)
-
 else(WIN32)
-  find_package(FFMPEG REQUIRED)
+  find_package(LIBMPV REQUIRED)
 
-  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${FFMPEG_INCLUDE_DIR})
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${FFMPEG_LIBRARY})
-  mark_as_advanced(FFMPEG_CONFIG FFMPEG_INCLUDE_DIR FFMPEG_LIBRARY)
-endif () # WIN32
+  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${LIBMPV_INCLUDE_DIR})
+  target_link_libraries(openspace-module-globebrowsing PRIVATE ${LIBMPV_LIBRARY})
+  mark_as_advanced(LIBMPV_CONFIG LIBMPV_INCLUDE_DIR LIBMPV_LIBRARY)
+endif() # WIN32
 
 # Gdal
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
