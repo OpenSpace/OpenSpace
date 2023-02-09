@@ -27,8 +27,8 @@ set(CPACK_MONOLITHIC_INSTALL TRUE)
 include(InstallRequiredSystemLibraries)
 
 set(CPACK_PACKAGE_NAME "OpenSpace")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${OPENSPACE_BASE_DIR}/README.md")
-set(CPACK_RESOURCE_FILE_LICENSE "${OPENSPACE_BASE_DIR}/LICENSE.md")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
+set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")
 set(CPACK_PACKAGE_VERSION_MAJOR "${OPENSPACE_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${OPENSPACE_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${OPENSPACE_VERSION_PATCH}")
@@ -42,15 +42,15 @@ set(CPACK_PACKAGE_FILE_NAME
 set(CPACK_STRIP_FILES 1)
 
 install(DIRECTORY
-  ${OPENSPACE_BASE_DIR}/bin/${CMAKE_BUILD_TYPE}/
+  ${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/
   DESTINATION bin
   USE_SOURCE_PERMISSIONS
 )
-install(DIRECTORY ${OPENSPACE_BASE_DIR}/config/ DESTINATION config)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/config/ DESTINATION config)
 
-install(DIRECTORY ${OPENSPACE_BASE_DIR}/data/ DESTINATION data)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/data/ DESTINATION data)
 
-install(DIRECTORY ${OPENSPACE_BASE_DIR}/modules/
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/modules/
   DESTINATION modules
   FILES_MATCHING
   PATTERN "*.glsl"
@@ -59,25 +59,25 @@ install(DIRECTORY ${OPENSPACE_BASE_DIR}/modules/
   PATTERN "*.vs"
   PATTERN "*.lua"
 )
-install(DIRECTORY ${OPENSPACE_BASE_DIR}/scripts/ DESTINATION scripts)
-install(DIRECTORY ${OPENSPACE_BASE_DIR}/shaders/ DESTINATION shaders)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/ DESTINATION scripts)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/shaders/ DESTINATION shaders)
 
 install(FILES
-  ${OPENSPACE_BASE_DIR}/openspace.cfg
-  ${OPENSPACE_BASE_DIR}/CREDITS.md
-  ${OPENSPACE_BASE_DIR}/LICENSE.md
-  ${OPENSPACE_BASE_DIR}/README.md
+  ${PROJECT_SOURCE_DIR}/openspace.cfg
+  ${PROJECT_SOURCE_DIR}/CREDITS.md
+  ${PROJECT_SOURCE_DIR}/LICENSE.md
+  ${PROJECT_SOURCE_DIR}/README.md
   DESTINATION .
 )
 
 if (WIN32)
   set(CPACK_GENERATOR ZIP)
   # Need backslash for correct subdirectory paths
-  set(CPACK_PACKAGE_ICON "${OPENSPACE_BASE_DIR}\\\\apps\\\\OpenSpace\\\\openspace.png")
+  set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}\\\\apps\\\\OpenSpace\\\\openspace.png")
   set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}\\\\${OPENSPACE_VERSION_NUMBER} ${OPENSPACE_VERSION_STRING}")
 else ()
   set(CPACK_GENERATOR TGZ)
-  set(CPACK_PACKAGE_ICON "${OPENSPACE_BASE_DIR}/apps/OpenSpace/openspace.png")
+  set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/apps/OpenSpace/openspace.png")
   set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}/${OPENSPACE_VERSION_NUMBER} ${OPENSPACE_VERSION_STRING}")
 endif ()
 
@@ -97,7 +97,7 @@ if (OPENSPACE_CREATE_INSTALLER)
     # Delete the desktop link
     set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete '$DESKTOP\\\\${CPACK_NSIS_DISPLAY_NAME}.lnk' ")
     # The icon to start the application.
-    set(CPACK_NSIS_MUI_ICON "${OPENSPACE_BASE_DIR}\\\\apps\\\\OpenSpace\\\\openspace.ico")
+    set(CPACK_NSIS_MUI_ICON "${PROJECT_SOURCE_DIR}\\\\apps\\\\OpenSpace\\\\openspace.ico")
     # Add a link to the application website in the startup menu.
     set(CPACK_NSIS_MENU_LINKS "http://openspaceproject.com/" "OpenSpace Homepage")
     # Set the icon for the application in the Add/Remove programs section.

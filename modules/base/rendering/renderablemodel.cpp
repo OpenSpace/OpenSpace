@@ -732,7 +732,7 @@ void RenderableModel::update(const UpdateData& data) {
                 // starts again
                 // s/\/\/\/\ ...
                 relativeTime =
-                    duration - abs(fmod(now - startTime, 2 * duration) - duration);
+                    duration - std::abs(fmod(now - startTime, 2 * duration) - duration);
                 break;
             case AnimationMode::BounceInfinitely: {
                 // Bounce both before and after the start time where the model is
@@ -742,7 +742,7 @@ void RenderableModel::update(const UpdateData& data) {
                 if (modulo < 0.0) {
                     modulo += 2 * duration;
                 }
-                relativeTime = duration - abs(modulo - duration);
+                relativeTime = duration - std::abs(modulo - duration);
                 break;
             }
             case AnimationMode::Once:

@@ -297,8 +297,7 @@ glm::dvec2 WwtCommunicator::equatorialAim() const {
 void WwtCommunicator::setImageOrder(const std::string& imageUrl, int order) {
     // Find in selected images list
     auto current = findSelectedImage(imageUrl);
-    auto target = _selectedImages.begin() + order;
-    int currentIndex = std::distance(_selectedImages.begin(), current);
+    int currentIndex = static_cast<int>(std::distance(_selectedImages.begin(), current));
 
     std::deque<std::pair<std::string, double>> newDeque;
 
