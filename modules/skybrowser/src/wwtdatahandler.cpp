@@ -171,9 +171,8 @@ namespace {
         return true;
     }
 
-    std::optional<openspace::ImageData> loadImageFromNode(
-                                                         const tinyxml2::XMLElement* node,
-                                                                   std::string collection)
+    std::optional<openspace::ImageData> 
+    loadImageFromNode(const tinyxml2::XMLElement* node, const std::string& collection)
     {
         using namespace openspace;
 
@@ -243,7 +242,8 @@ namespace {
             hasCelestialCoords,
             fov,
             equatorialSpherical,
-            equatorialCartesian
+            equatorialCartesian,
+            ""
         };
     }
 } //namespace
@@ -318,13 +318,21 @@ void WwtDataHandler::loadImages(const std::string& root,
             saveImagesFromXml(rootNode, collectionName);
         }
     }
-
-    // Sort images in alphabetical order
-    std::sort(
-        _images.begin(),
-        _images.end(),
-        [](ImageData& a, ImageData& b) { return a.name < b.name; }
+    // Sort images. Copy images to vector
+    std::vector<ImageData> _imageVector;
+    for (const auto& [id, img] : _images) {
+        _imageVector.push_back(img);
+    }
+    // Sort
+    std::sort(_imageVector.begin(), _imageVector.end(),
+        [](const ImageData& lhs, const ImageData& rhs) {
+            return lhs.name < rhs.name;
+        }
     );
+    // Set the identifiers to the correct order
+    for (int i = 0; i < _imageVector.size(); i++) {
+        _images[_imageVector[i].imageUrl].identifier = std::to_string(i);
+    }
 
     LINFO(fmt::format("Loaded {} WorldWide Telescope images", _images.size()));
 }
@@ -333,9 +341,16 @@ int WwtDataHandler::nLoadedImages() const {
     return static_cast<int>(_images.size());
 }
 
-const ImageData& WwtDataHandler::image(int i) const {
-    ghoul_assert(i < static_cast<int>(_images.size()), "Index outside of vector size");
-    return _images[i];
+std::optional<const ImageData> WwtDataHandler::image(const std::string& imageUrl) const {
+     auto it = _images.find(imageUrl);
+     if (it == _images.end()) {
+        return std::nullopt;
+     }
+     return it->second;
+}
+
+const std::map<std::string, ImageData>& WwtDataHandler::images() const {
+    return _images;
 }
 
 void WwtDataHandler::saveImagesFromXml(const tinyxml2::XMLElement* root,
@@ -350,9 +365,11 @@ void WwtDataHandler::saveImagesFromXml(const tinyxml2::XMLElement* root,
         const std::string name = node->Name();
         // If node is an image or place, load it
         if (name == ImageSet || name == Place) {
-            std::optional<ImageData> image = loadImageFromNode(node, collection);
+            std::optional<ImageData> image = loadImageFromNode(
+                node, collection
+            );
             if (image.has_value()) {
-                _images.push_back(std::move(*image));
+                _images.insert({ image.value().imageUrl, std::move(*image) });
             }
 
         }
