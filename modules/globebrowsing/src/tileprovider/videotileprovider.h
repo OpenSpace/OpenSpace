@@ -128,7 +128,7 @@ private:
     bool _isInitialized = false;
     bool _isSeeking = false;
     double _videoDuration = 0.0;
-    glm::ivec2 _videoResolution = glm::ivec2(2048, 1024);
+    glm::ivec2 _videoResolution = glm::ivec2(4096, 2048);
 
     // libmpv
     mpv_handle* _mpvHandle = nullptr;
