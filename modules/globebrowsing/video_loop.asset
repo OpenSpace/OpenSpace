@@ -1,11 +1,7 @@
 local layer = {
   Identifier = "TestVideoLoop",
   File = "C:/Users/ylvaselling/Documents/Work/Testmovies/black_carbon_sulfate.mp4",
-  StartTime = '2023 01 29 20:00:00',
-  EndTime = '2023 01 29 21:00:00',
   Name = "Test Video",
-  AnimationMode = "RealTimeLoop",
-  Resolution = { 2048, 1024 },
   Enabled = asset.enabled,
   Type = "VideoTileLayer",
   Description = [[Testing video]]
