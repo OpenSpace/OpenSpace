@@ -564,45 +564,14 @@ void VideoTileProvider::handleMpvEvents() {
             }
             case MPV_EVENT_PROPERTY_CHANGE: {
                 mpv_event_property* prop = (mpv_event_property*)event->data;
-                if (strcmp(prop->name, "video-params") == 0 &&
-                    prop->format == MPV_FORMAT_NODE)
-                {
-                    getPropertyAsyncMpv("video-params", MPV_FORMAT_NODE, LibmpvPropertyKey::Params);
+                if (!checkMpvError(event->error)) {
+                    LWARNING(fmt::format("Error getting property {}", prop->name));
                 }
-                if (strcmp(prop->name, "time-pos") == 0 &&
-                    prop->format == MPV_FORMAT_DOUBLE)
-                {
-                    getPropertyAsyncMpv("time-pos", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Time);
-                }
-                if (strcmp(prop->name, "duration") == 0 &&
-                    prop->format == MPV_FORMAT_DOUBLE)
-                {
-                    getPropertyAsyncMpv("duration", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Duration);
-                }
-                if (strcmp(prop->name, "container-fps") == 0 &&
-                    prop->format == MPV_FORMAT_DOUBLE)
-                {
-                    getPropertyAsyncMpv("container-fps", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Fps);
-                }
-                if (strcmp(prop->name, "pause") == 0 &&
-                    prop->format == MPV_FORMAT_FLAG)
-                {
-                    getPropertyAsyncMpv("pause", MPV_FORMAT_FLAG, LibmpvPropertyKey::Pause);
-                }
-                if (strcmp(prop->name, "height") == 0 &&
-                    prop->format == MPV_FORMAT_INT64)
-                {
-                    getPropertyAsyncMpv("height", MPV_FORMAT_INT64, LibmpvPropertyKey::Height);
-                }
-                if (strcmp(prop->name, "width") == 0 &&
-                    prop->format == MPV_FORMAT_INT64)
-                {
-                    getPropertyAsyncMpv("width", MPV_FORMAT_INT64, LibmpvPropertyKey::Width);
-                }
-                if (strcmp(prop->name, "metadata") == 0 &&
-                    prop->format == MPV_FORMAT_NODE)
-                {
-                    getPropertyAsyncMpv("metadata", MPV_FORMAT_NODE, LibmpvPropertyKey::Meta);
+                else {
+                    // If the property has changed, request its value
+                    uint64_t i = event->reply_userdata;
+                    LibmpvPropertyKey key = static_cast<LibmpvPropertyKey>(i);
+                    getPropertyAsyncMpv(prop->name, prop->format, key);
                 }
                 break;
             }
