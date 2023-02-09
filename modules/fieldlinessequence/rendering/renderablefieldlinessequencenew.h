@@ -81,8 +81,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    SourceFileType _inputFileType;
     struct File {
+        //explicit File() = default;
+        //explicit File(const File& file) = delete;
         enum class FileStatus {
             Available = 0,
             Downloaded = 1,
@@ -91,12 +92,12 @@ private:
         FileStatus status;
         std::filesystem::path path;
         // assume timestamp is -1 until status is = Loaded
-        double timestamp;
+        double timestamp = -1.0;
         FieldlinesState state;
 
-        bool operator<(const double other) const {
-            return timestamp < other;
-        }
+        //bool operator<(const double other) const {
+        //    return timestamp < other;
+        //}
         bool operator<(const File& other) const {
             return timestamp < other.timestamp;
         }
@@ -109,8 +110,6 @@ private:
                                  const std::optional<int>& numberOfFiles,
                                  const std::optional<std::string>& baseURL,
                                  const std::optional<std::string>& dataURL);
-    // True when new state is loaded or user change which quantity used for masking out
-    // line segments
     //bool shouldUpdateColorBuffer();
     //bool shouldUpdateMaskingBuffer();
     int updateActiveIndex(const double currentTime);
@@ -123,9 +122,14 @@ private:
 
     std::vector<File> _files;
     std::vector<RenderableFieldlinesSequenceNew::File>::iterator
-        insertToFilesInOrder(File file);
+        insertToFilesInOrder(File& file);
+    // mutex ensures file cannot be accessed while thread is operating on it
+    // it does not ensure that multiple instances of this class cannot try to load the
+    // same file at the same time, however.
+    std::mutex _mutex;
     std::thread loadFile(File& file);
 
+    SourceFileType _inputFileType;
     // Static Loading on default / if not specified
     LoadingType _loadingType;
     // path to directory with seed point files

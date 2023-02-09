@@ -40,6 +40,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <thread>
 
+
 namespace {
     constexpr std::string_view _loggerCat = "RenderableFieldlinesSequenceNew";
 
@@ -398,7 +399,12 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
             file.path = e.path();
             file.status = File::FileStatus::Downloaded;
             file.timestamp = -1.0;
-            _files.push_back(file);
+            _files.push_back(std::move(file));
+            if (_files[0].path.empty()) {
+                throw ghoul::RuntimeError(
+                    "path didnt transfer"
+                );
+            }
         }
     }
 
@@ -484,24 +490,20 @@ void RenderableFieldlinesSequenceNew::staticallyLoadFiles(
                            const std::optional<std::filesystem::path>& seedPointDirectory,
                            const std::optional<std::string>& tracingVariable)
 {
-    std::vector<std::string> extraMagVars;
-    std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles;
-
-    if (_inputFileType == SourceFileType::Cdf) {
-        _seedPointDirectory = seedPointDirectory.value_or(_seedPointDirectory);
-        _tracingVariable = tracingVariable.value_or(_tracingVariable);
-        extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
-        seedsPerFiles = extractSeedPointsFromFiles(_seedPointDirectory);
-        if (seedsPerFiles.empty()) {
-            LERROR("No seed files found");
-        }
-    }
-
     std::vector<std::thread> openThreads;
     for (File& file : _files) {
         bool loadSuccess = false;
         switch (_inputFileType) {
-            case SourceFileType::Cdf:
+            case SourceFileType::Cdf: {
+                _seedPointDirectory = seedPointDirectory.value_or(_seedPointDirectory);
+                _tracingVariable = tracingVariable.value_or(_tracingVariable);
+                std::vector<std::string> extraMagVars =
+                    extractMagnitudeVarsFromStrings(_extraVars);
+                std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles =
+                    extractSeedPointsFromFiles(_seedPointDirectory);
+                if (seedsPerFiles.empty()) {
+                    LERROR("No seed files found");
+                }
                 loadSuccess = fls::convertCdfToFieldlinesState(
                     file.state,
                     file.path.string(),
@@ -511,38 +513,48 @@ void RenderableFieldlinesSequenceNew::staticallyLoadFiles(
                     _extraVars,
                     extraMagVars
                 );
+
                 break;
+            }
             case SourceFileType::Json:
                 loadSuccess =
                     file.state.loadStateFromJson(
                         file.path.string(), _model, _scalingFactor
                     );
-                file.timestamp = extractTriggerTimeFromFilename(file.path);
                 break;
             case SourceFileType::Osfls: {
                 std::thread thread = loadFile(file);
                 openThreads.push_back(std::move(thread));
-                loadSuccess = true;
+                // loadSuccess = true;
                 break;
             }
             default:
                 break;
         }
-        if (loadSuccess) {
-            file.status = File::FileStatus::Loaded;
-        }
-        else {
-            LERROR(fmt::format("Failed to load state from: {}", file.path));
-        }
-    }
-    std::sort(_files.begin(), _files.end());
-    if (!_files.empty()) {
-        _atLeastOneFileLoaded = true;
+        //if (loadSuccess) {
+        //    file.status = File::FileStatus::Loaded;
+        //    file.timestamp = extractTriggerTimeFromFilename(file.path);
+        //}
+        //else {
+        //    LERROR(fmt::format("Failed to load state from: {}", file.path));
+        //}
     }
 
     for (std::thread& thread : openThreads) {
         thread.join();
     }
+
+    //std::make_heap(_files.begin(), _files.end());
+    //std::sort_heap(_files.begin(), _files.end());
+
+    for (auto& file : _files) {
+        if (!file.path.empty() && file.status != File::FileStatus::Loaded) {
+            file.status = File::FileStatus::Loaded;
+            file.timestamp = extractTriggerTimeFromFilename(file.path);
+            _atLeastOneFileLoaded = true;
+        }
+    }
+    std::sort(_files.begin(), _files.end());
 }
 
 std::vector<std::string>
@@ -832,10 +844,10 @@ std::thread RenderableFieldlinesSequenceNew::loadFile(File& file) {
     if (_inputFileType == SourceFileType::Osfls) {
         std::thread readFileThread([this, &file]() {
             try {
+                //std::lock_guard<std::mutex> lock(_mutex);
                 file.state = FieldlinesState::createStateFromOsfls(file.path.string());
                 //const bool success = file.state.loadStateFromOsfls(file.path.string());
-                file.status = File::FileStatus::Loaded;
-                file.timestamp = extractTriggerTimeFromFilename(file.path);
+                //file.status = File::FileStatus::Loaded;
                 _atLeastOneFileLoaded = true;
                 _isLoadingStateFromDisk = false;
             }
@@ -843,7 +855,7 @@ std::thread RenderableFieldlinesSequenceNew::loadFile(File& file) {
                 LERROR(e.what());
             }
         });
-        return std::move(readFileThread);
+        return readFileThread;
     }
 
     // So far uncleare why model is needed and if scalingFactor can be changed afterwards.
@@ -866,9 +878,14 @@ std::thread RenderableFieldlinesSequenceNew::loadFile(File& file) {
     //}
 
 }
+
 std::vector<RenderableFieldlinesSequenceNew::File>::iterator
-RenderableFieldlinesSequenceNew::insertToFilesInOrder(File file) {
-    auto iter = std::upper_bound(_files.begin(), _files.end(), file);
+RenderableFieldlinesSequenceNew::insertToFilesInOrder(File& file) {
+    auto iter = std::upper_bound(
+        _files.begin(), _files.end(), file.timestamp, [](double t, File& f) {
+            return f.timestamp < t;
+        }
+    );
     auto iterToInserted = _files.insert(iter, std::move(file));
     return iterToInserted;
 }
@@ -881,11 +898,12 @@ int RenderableFieldlinesSequenceNew::updateActiveIndex(const double nowTime) {
     if (_files.begin()->timestamp == nowTime || _files.size() == 1) return 0;
     int index = 0;
 
-    auto iter = std::upper_bound(
-        _files.begin(), _files.end(), nowTime, [](double t, const File& f) {
-            return f.timestamp < t;
+    std::vector<File>::iterator iter = std::upper_bound(
+        _files.begin(), _files.end(), nowTime, [](double timeRef, const File& fileRef) {
+            return timeRef < fileRef.timestamp;
         }
     );
+
     if (iter != _files.end()) {
         index = static_cast<int>(std::distance(_files.begin(), iter)) -1;
     }
@@ -922,7 +940,7 @@ void RenderableFieldlinesSequenceNew::updateDynamicDownloading(const double curr
         const double time = extractTriggerTimeFromFilename(filePath.filename());
         newFile.timestamp = time;
 
-        auto inserted = insertToFilesInOrder(std::move(newFile));
+        auto inserted = insertToFilesInOrder(newFile);
     }
 
     // if all files are moved into _sourceFiles then we can
@@ -931,7 +949,6 @@ void RenderableFieldlinesSequenceNew::updateDynamicDownloading(const double curr
 }
 
 void RenderableFieldlinesSequenceNew::firstUpdate() {
-    // loop just to find the first one that is loaded, then it will break out
     std::vector<File>::iterator file =
         std::find_if( _files.begin(), _files.end(), [](File& f) {
                 return f.status == File::FileStatus::Loaded;
@@ -951,19 +968,6 @@ void RenderableFieldlinesSequenceNew::firstUpdate() {
         absPath(_colorTablePath).string()
     );
 
-    /////////////////////////
-    for (auto toMask : quantities) {
-        float fmin = *std::min_element(toMask.begin(), toMask.end());
-        std::string smin = std::to_string(fmin);
-        float fmax = *std::max_element(toMask.begin(), toMask.end());
-        std::string smax = std::to_string(fmax);
-        LWARNING(fmt::format("min :{}", smin));
-        LWARNING(fmt::format("max :{}", smax));
-
-    }
-    ////////////////////////
-
-    //_maskingRanges.resize(nExtraQuantities, _maskingRanges.back());
     _shouldUpdateColorBuffer = true;
     _shouldUpdateMaskingBuffer = true;
 }
