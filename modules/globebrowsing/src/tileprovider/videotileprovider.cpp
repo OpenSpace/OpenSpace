@@ -441,7 +441,7 @@ void VideoTileProvider::initializeMpv() {
     observePropertyMpv("height", MPV_FORMAT_INT64, LibmpvPropertyKey::Height);
     observePropertyMpv("width", MPV_FORMAT_INT64, LibmpvPropertyKey::Width);
     observePropertyMpv("metadata", MPV_FORMAT_NODE, LibmpvPropertyKey::Meta);
-    observePropertyMpv("fps", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Fps);
+    observePropertyMpv("container-fps", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Fps);
 
     if (_animationMode == AnimationMode::MapToSimulationTime) {
         pause();
@@ -472,7 +472,7 @@ double VideoTileProvider::correctVideoPlaybackTime() const {
 
 void VideoTileProvider::seekToTime(double time) {
     // Prevent from seeking to the same time multiple times in a row
-    bool seekIsDifferent = abs(time - _currentVideoTime) > SeekThreshold;
+    bool seekIsDifferent = abs(time - _currentVideoTime) > _seekThreshold;
     if (seekIsDifferent && !_isSeeking) {
         // Pause while seeking
         pause();
@@ -503,7 +503,7 @@ void VideoTileProvider::renderMpv() {
         }
         // Make sure we are at the correct time
         double time = correctVideoPlaybackTime();
-        bool shouldSeek = abs(time - _currentVideoTime) > SeekThreshold;
+        bool shouldSeek = abs(time - _currentVideoTime) > _seekThreshold;
         if (shouldSeek) {
             seekToTime(time);
         }
@@ -577,10 +577,10 @@ void VideoTileProvider::handleMpvEvents() {
                 {
                     getPropertyAsyncMpv("duration", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Duration);
                 }
-                if (strcmp(prop->name, "fps") == 0 &&
+                if (strcmp(prop->name, "container-fps") == 0 &&
                     prop->format == MPV_FORMAT_DOUBLE)
                 {
-                    getPropertyAsyncMpv("fps", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Fps);
+                    getPropertyAsyncMpv("container-fps", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Fps);
                 }
                 if (strcmp(prop->name, "pause") == 0 &&
                     prop->format == MPV_FORMAT_FLAG)
@@ -671,7 +671,7 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
         }
 
         _videoDuration = *duration;
-        _frameDuration = _fps * ((_endJ200Time - _startJ200Time) /_videoDuration);
+        _frameDuration = ( 1.0 / _fps) * ((_endJ200Time - _startJ200Time) / _videoDuration);
 
         if (_animationMode == AnimationMode::MapToSimulationTime) {
             seekToTime(correctVideoPlaybackTime());
@@ -867,8 +867,9 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
         }
         _fps = *fps;
 
-        LINFO(fmt::format("Frame count: {}", *fps));
-        _frameDuration = _fps * ((_endJ200Time - _startJ200Time) / _videoDuration);
+        LINFO(fmt::format("Detected fps: {}", *fps));
+        _frameDuration = (1.0 / _fps) * ((_endJ200Time - _startJ200Time) / _videoDuration);
+        _seekThreshold = 2.0 * (1.0 / _fps);
         break;
     }
     case LibmpvPropertyKey::Pause: {

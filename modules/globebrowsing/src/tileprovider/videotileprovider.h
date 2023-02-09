@@ -64,8 +64,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    // Threshold where we are officially out of sync
-    static constexpr double SeekThreshold = 1.0; 
+  
     properties::TriggerProperty _play;
     properties::TriggerProperty _pause;
     properties::TriggerProperty _goToStart;
@@ -121,12 +120,14 @@ private:
     double _endJ200Time = 0.0;
     double _currentVideoTime = 0.0;
     double _frameDuration = 0.0;
-    double _fps = 0.04166666667; //1/24
+    double _fps = 0.04166666667; // This values equals 1/24. Fall back to 24 fps 
     double _timeAtLastRender = 0.0;
     bool _hasReachedEnd = false;
     bool _tileIsReady = false;
     bool _isInitialized = false;
     bool _isSeeking = false;
+    // Threshold where we are officially out of sync
+    double _seekThreshold = 1.0;
     double _videoDuration = 0.0;
     glm::ivec2 _videoResolution = glm::ivec2(4096, 2048);
 
