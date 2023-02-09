@@ -59,9 +59,9 @@ namespace {
         "'YYYY MM DD hh:mm:ss'."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AnimationModeInfo = {
-        "AnimationMode",
-        "Animation Mode",
+    constexpr openspace::properties::Property::PropertyInfo PlaybackModeInfo = {
+        "PlaybackMode",
+        "Playback Mode",
         "Determines the way the video should be played. The start and end time of the "
         "video can be set, or the video can be played as a loop in real time."
     };
@@ -94,14 +94,14 @@ namespace {
         // [[codegen::verbatim(EndTimeInfo.description)]]
         std::optional<std::string> endTime [[codegen::datetime()]];
 
-        enum class AnimationMode {
+        enum class PlaybackMode {
             MapToSimulationTime = 0,
             RealTimeLoop
         };
 
-        // The mode of how the animation should be played back.
+        // The mode of how the video should be played back.
         // Default is video is played back according to the set start and end times.
-        std::optional<AnimationMode> animationMode;
+        std::optional<PlaybackMode> playbackMode;
 
     };
 #include "videotileprovider_codegen.cpp"
@@ -126,6 +126,8 @@ void* getOpenGLProcAddress(void*, const char* name) {
 void VideoTileProvider::on_mpv_render_update(void* ctx) {
     // The wakeup flag is set here to enable the mpv_render_context_render 
     // path in the main loop.
+    // The pattern here with a static function and a void pointer to the the class
+    // instance is a common pattern where C++ integrates a C library
     static_cast<VideoTileProvider*>(ctx)->_wakeup = 1;
 }
 
@@ -187,20 +189,20 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
 
     _videoFile = p.file;
    
-    if (p.animationMode.has_value()) {
-        switch (*p.animationMode) {
-        case Parameters::AnimationMode::RealTimeLoop:
-            _animationMode = AnimationMode::RealTimeLoop;
+    if (p.playbackMode.has_value()) {
+        switch (*p.playbackMode) {
+        case Parameters::PlaybackMode::RealTimeLoop:
+            _playbackMode = PlaybackMode::RealTimeLoop;
             break;
-        case Parameters::AnimationMode::MapToSimulationTime:
-            _animationMode = AnimationMode::MapToSimulationTime;
+        case Parameters::PlaybackMode::MapToSimulationTime:
+            _playbackMode = PlaybackMode::MapToSimulationTime;
             break;
         default:
             throw ghoul::MissingCaseException();
         }
     }
 
-    if (_animationMode == AnimationMode::RealTimeLoop) {
+    if (_playbackMode == PlaybackMode::RealTimeLoop) {
         // Video interaction. Only valid for real time looping
         _play.onChange([this]() { play(); });
         addProperty(_play);
@@ -209,7 +211,7 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
         _goToStart.onChange([this]() { goToStart(); });
         addProperty(_goToStart);
     }
-    else if (_animationMode == AnimationMode::MapToSimulationTime) {
+    else if (_playbackMode == PlaybackMode::MapToSimulationTime) {
         if (!p.startTime.has_value() || !p.endTime.has_value()) {
             LERROR("Video tile layer tried to map to simulation time but lacked start or"
                 " end time");
@@ -354,7 +356,7 @@ void VideoTileProvider::initializeMpv() {
     // See order at https://github.com/mpv-player/mpv/blob/master/libmpv/client.h#L420
     // Avoiding async calls in uninitialized state
     
-    if (_animationMode == AnimationMode::RealTimeLoop) {
+    if (_playbackMode == PlaybackMode::RealTimeLoop) {
         // Loop video
         // https://mpv.io/manual/master/#options-loop
         setPropertyStringMpv("loop", "");
@@ -443,7 +445,7 @@ void VideoTileProvider::initializeMpv() {
     observePropertyMpv("metadata", MPV_FORMAT_NODE, LibmpvPropertyKey::Meta);
     observePropertyMpv("container-fps", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Fps);
 
-    if (_animationMode == AnimationMode::MapToSimulationTime) {
+    if (_playbackMode == PlaybackMode::MapToSimulationTime) {
         pause();
     }
 
@@ -485,7 +487,7 @@ void VideoTileProvider::seekToTime(double time) {
 }
 
 void VideoTileProvider::renderMpv() {
-    if (_animationMode == AnimationMode::MapToSimulationTime) {
+    if (_playbackMode == PlaybackMode::MapToSimulationTime) {
         // If we are in valid times, step frames accordingly
         if (isWithingStartEndTime()) {
             double now = global::timeManager->time().j2000Seconds();
@@ -673,28 +675,11 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
         _videoDuration = *duration;
         _frameDuration = ( 1.0 / _fps) * ((_endJ200Time - _startJ200Time) / _videoDuration);
 
-        if (_animationMode == AnimationMode::MapToSimulationTime) {
+        if (_playbackMode == PlaybackMode::MapToSimulationTime) {
             seekToTime(correctVideoPlaybackTime());
         }
 
         LINFO(fmt::format("Duration: {}", *duration));
-        break;
-    }
-    case LibmpvPropertyKey::Eof: {
-        if (!event->data) {
-            LERROR("Could not find eof property");
-            break;
-        }
-
-        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-        int* eof = static_cast<int*>(property->data);
-
-        if (!eof) {
-            LERROR("Could not find eof property");
-            break;
-        }
-
-        _hasReachedEnd = *eof > 0;
         break;
     }
     case LibmpvPropertyKey::Height: {
@@ -969,14 +954,6 @@ void VideoTileProvider::createFBO(int width, int height) {
 
     // Unbind FBO
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    // Render video frame to texture
-    _mpvFbo = mpv_opengl_fbo{ 
-        static_cast<int>(_fbo), 
-        _videoResolution.x, 
-        _videoResolution.y, 
-        0 
-    };
 }
 
 void VideoTileProvider::resizeFBO(int width, int height) {
