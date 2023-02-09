@@ -507,7 +507,7 @@ void VideoTileProvider::renderMpv() {
         double time = correctVideoPlaybackTime();
         bool shouldSeek = abs(time - _currentVideoTime) > _seekThreshold;
         if (shouldSeek) {
-            seekToTime(time);
+            seekToTime(time - (2.0/_fps)); // We end up two frames too late
         }
     }
    
