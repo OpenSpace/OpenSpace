@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/webbrowsermodule.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
+#include <deque>
 
 namespace {
     constexpr std::string_view _loggerCat = "WwtCommunicator";
@@ -289,19 +290,35 @@ glm::dvec2 WwtCommunicator::equatorialAim() const {
     return _equatorialAim;
 }
 
-void WwtCommunicator::setImageOrder(int i, int order) {
+void WwtCommunicator::setImageOrder(int image, int order) {
     // Find in selected images list
-    auto current = findSelectedImage(i);
-    auto target = _selectedImages.begin() + order;
+    auto current = findSelectedImage(image);
+    int currentIndex = static_cast<int>(std::distance(_selectedImages.begin(), current));
 
-    // Make sure the image was found in the list
-    if (current != _selectedImages.end() && target != _selectedImages.end()) {
-        // Swap the two images
-        std::iter_swap(current, target);
+    std::deque<std::pair<int, double>> newDeque;
+
+    for (int i = 0; i < static_cast<int>(_selectedImages.size()); i++) {
+        if (i == currentIndex) {
+            continue;
+        }
+        else if (i == order) {
+            if (order < currentIndex) {
+                newDeque.push_back(*current);
+                newDeque.push_back(_selectedImages[i]);
+            }
+            else {
+                newDeque.push_back(_selectedImages[i]);
+                newDeque.push_back(*current);
+            }
+        }
+        else {
+            newDeque.push_back(_selectedImages[i]);
+        }
     }
 
+    _selectedImages = newDeque;
     int reverseOrder = static_cast<int>(_selectedImages.size()) - order - 1;
-    ghoul::Dictionary message = setLayerOrderMessage(std::to_string(i), reverseOrder);
+    ghoul::Dictionary message = setLayerOrderMessage(std::to_string(image), reverseOrder);
     sendMessageToWwt(message);
 }
 

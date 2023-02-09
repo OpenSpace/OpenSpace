@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -98,7 +98,7 @@ private:
 
     const TileTextureInitData _initData;
     const PerformPreprocessing _preprocess;
-    TileDepthTransform _depthTransform = { 0.f, 0.f };
+    TileDepthTransform _depthTransform = { .scale = 0.f, .offset = 0.f };
 
     mutable std::mutex _datasetLock;
 };

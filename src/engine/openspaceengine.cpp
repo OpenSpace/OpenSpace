@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -133,6 +133,13 @@ namespace {
         "Show Hidden Scene Graph Nodes",
         "If checked, hidden scene graph nodes are visible in the UI"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
+        "DisableMouseInputs",
+        "Disable All Mouse Inputs",
+        "Disables all mouse inputs. Useful when using touch interaction, to prevent "
+        "double inputs on touch (from both touch input and inserted mouse inputs)"
+    };
 } // namespace
 
 namespace openspace {
@@ -144,6 +151,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     , _printEvents(PrintEventsInfo, false)
     , _visibility(VisibilityInfo)
     , _showHiddenSceneGraphNodes(ShowHiddenSceneInfo, false)
+    , _disableAllMouseInputs(DisableMouseInputInfo, false)
 {
     FactoryManager::initialize();
     SpiceManager::initialize();
@@ -152,6 +160,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     addProperty(_printEvents);
     addProperty(_visibility);
     addProperty(_showHiddenSceneGraphNodes);
+    addProperty(_disableAllMouseInputs);
 
     using Visibility = openspace::properties::Property::Visibility;
     _visibility.addOptions({
@@ -477,7 +486,11 @@ void OpenSpaceEngine::initializeGL() {
     bool debugActive = global::configuration->openGLDebugContext.isActive;
 
     // Debug output is not available before 4.3
-    const ghoul::systemcapabilities::Version minVersion = { 4, 3, 0 };
+    const ghoul::systemcapabilities::Version minVersion = {
+        .major = 4,
+        .minor = 3,
+        .release = 0
+    };
     if (debugActive && OpenGLCap.openGLVersion() < minVersion) {
         LINFO("OpenGL Debug context requested, but insufficient version available");
         debugActive = false;
@@ -675,20 +688,6 @@ void OpenSpaceEngine::loadAssets() {
         global::windowDelegate->setSynchronization(true);
         global::windowDelegate->setBarrier(true);
     };
-
-    if (_scene) {
-        ZoneScopedN("Reset scene")
-
-        global::syncEngine->removeSyncables(global::timeManager->syncables());
-        if (_scene && _scene->camera()) {
-            global::syncEngine->removeSyncables(_scene->camera()->syncables());
-        }
-        global::renderEngine->setScene(nullptr);
-        global::renderEngine->setCamera(nullptr);
-        global::navigationHandler->setCamera(nullptr);
-        _scene->clear();
-        global::rootPropertyOwner->removePropertySubOwner(_scene.get());
-    }
 
     std::unique_ptr<SceneInitializer> sceneInitializer;
     if (global::configuration->useMultithreadedInitialization) {
@@ -1363,6 +1362,18 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         return;
     }
 
+    // We need to do this check before the callback functions as we would otherwise
+    // immediately cancel a shutdown if someone pressed the ESC key. Similar argument for
+    // only checking for the Press action.  Since the 'Press' of ESC will trigger the
+    // shutdown, the 'Release' in some frame later would cancel it immediately again
+    if (action == KeyAction::Press && _shutdown.inShutdown) {
+        _shutdown.inShutdown = false;
+        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+            events::EventApplicationShutdown::State::Aborted
+        );
+        return;
+    }
+
     using F = global::callback::KeyboardCallback;
     for (const F& func : *global::callback::keyboard) {
         const bool isConsumed = func(key, mod, action, isGuiWindow);
@@ -1402,12 +1413,23 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier,
 
     global::luaConsole->charCallback(codepoint, modifier);
     global::interactionMonitor->markInteraction();
+
+    if (_shutdown.inShutdown) {
+        _shutdown.inShutdown = false;
+        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+            events::EventApplicationShutdown::State::Aborted
+        );
+    }
 }
 
 void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action,
                                           KeyModifier mods, IsGuiWindow isGuiWindow)
 {
     ZoneScoped
+
+    if (_disableAllMouseInputs) {
+        return;
+    }
 
     using F = global::callback::MouseButtonCallback;
     for (const F& func : *global::callback::mouseButton) {
@@ -1438,10 +1460,21 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
 
     global::navigationHandler->mouseButtonCallback(button, action);
     global::interactionMonitor->markInteraction();
+
+    if (_shutdown.inShutdown) {
+        _shutdown.inShutdown = false;
+        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+            events::EventApplicationShutdown::State::Aborted
+            );
+    }
 }
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y, IsGuiWindow isGuiWindow) {
     ZoneScoped
+
+    if (_disableAllMouseInputs) {
+        return;
+    }
 
     using F = global::callback::MousePositionCallback;
     for (const F& func : *global::callback::mousePosition) {
@@ -1458,6 +1491,10 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY,
                                                IsGuiWindow isGuiWindow)
 {
     ZoneScoped
+
+    if (_disableAllMouseInputs) {
+        return;
+    }
 
     using F = global::callback::MouseScrollWheelCallback;
     for (const F& func : *global::callback::mouseScrollWheel) {

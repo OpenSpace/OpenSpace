@@ -1,4 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("scene/solarsystem/sun/sun")
 asset.require("spice/base")
 
 local circle = asset.syncedResource({

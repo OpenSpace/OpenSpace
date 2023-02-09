@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -111,6 +111,7 @@ private:
     skybrowser::Animation<glm::dvec3> _targetAnimation =
         skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
     bool _targetIsAnimating = false;
+    bool _fovIsAnimating = false;
 
     // Dragging
     glm::dvec3 _startTargetPosition = glm::dvec3(0.0);

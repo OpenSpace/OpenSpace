@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/properties/propertyowner.h>
@@ -1036,7 +1038,7 @@ TEST_CASE("(Error) Version: Missing value 'major'", "[profile]") {
         "${TESTDIR}/profile/error/version/missing_major.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'version.major' field is missing")
+        Catch::Matchers::Equals("(profile) 'version.major' field is missing")
     );
 }
 
@@ -1045,7 +1047,7 @@ TEST_CASE("(Error) Version: Missing value 'minor'", "[profile]") {
         "${TESTDIR}/profile/error/version/missing_minor.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'version.minor' field is missing")
+        Catch::Matchers::Equals("(profile) 'version.minor' field is missing")
     );
 }
 
@@ -1054,7 +1056,7 @@ TEST_CASE("(Error) Version: Wrong type 'major'", "[profile]") {
         "${TESTDIR}/profile/error/version/wrongtype_major.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'version.major' must be a number")
+        Catch::Matchers::Equals("(profile) 'version.major' must be a number")
     );
 }
 
@@ -1063,7 +1065,7 @@ TEST_CASE("(Error) Version: Wrong type 'minor'", "[profile]") {
         "${TESTDIR}/profile/error/version/wrongtype_minor.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'version.minor' must be a number")
+        Catch::Matchers::Equals("(profile) 'version.minor' must be a number")
     );
 }
 
@@ -1072,7 +1074,7 @@ TEST_CASE("(Error) Version: Wrong type 'major' and 'minor'", "[profile]") {
         "${TESTDIR}/profile/error/version/wrongtype_major_minor.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'version.major' must be a number")
+        Catch::Matchers::Equals("(profile) 'version.major' must be a number")
     );
 }
 
@@ -1086,7 +1088,7 @@ TEST_CASE("(Error) Module: Missing value 'name'", "[profile]") {
         "${TESTDIR}/profile/error/module/missing_name.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'module.name' field is missing")
+        Catch::Matchers::Equals("(profile) 'module.name' field is missing")
     );
 }
 
@@ -1095,7 +1097,7 @@ TEST_CASE("(Error) Module: Wrong type 'name'", "[profile]") {
         "${TESTDIR}/profile/error/module/wrongtype_name.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'module.name' must be a string")
+        Catch::Matchers::Equals("(profile) 'module.name' must be a string")
     );
 }
 
@@ -1104,7 +1106,7 @@ TEST_CASE("(Error) Module: Wrong type 'loadedInstruction'", "[profile]") {
         "${TESTDIR}/profile/error/module/wrongtype_loadedInstruction.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'module.loadedInstruction' must be a string")
+        Catch::Matchers::Equals("(profile) 'module.loadedInstruction' must be a string")
     );
 }
 
@@ -1113,7 +1115,7 @@ TEST_CASE("(Error) Module: Wrong type 'notLoadedInstruction'", "[profile]") {
         "${TESTDIR}/profile/error/module/wrongtype_notLoadedInstruction.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'module.notLoadedInstruction' must be a string")
+        Catch::Matchers::Equals("(profile) 'module.notLoadedInstruction' must be a string")
     );
 }
 
@@ -1126,7 +1128,7 @@ TEST_CASE("(Error) Property: Missing value 'name'", "[profile]") {
         "${TESTDIR}/profile/error/property/missing_name.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'property.name' field is missing")
+        Catch::Matchers::Equals("(profile) 'property.name' field is missing")
     );
 }
 
@@ -1135,7 +1137,7 @@ TEST_CASE("(Error) Property: Missing value 'value'", "[profile]") {
         "${TESTDIR}/profile/error/property/missing_value.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'property.value' field is missing")
+        Catch::Matchers::Equals("(profile) 'property.value' field is missing")
     );
 }
 
@@ -1144,7 +1146,7 @@ TEST_CASE("(Error) Property: Missing value 'name' and 'value'", "[profile]") {
         "${TESTDIR}/profile/error/property/missing_name_value.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'property.name' field is missing")
+        Catch::Matchers::Equals("(profile) 'property.name' field is missing")
     );
 }
 
@@ -1153,7 +1155,7 @@ TEST_CASE("(Error) Property: Wrong value 'type'", "[profile]") {
         "${TESTDIR}/profile/error/property/wrongvalue_type.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("Unknown property set type")
+        Catch::Matchers::Equals("(profile) Unknown property set type")
     );
 }
 
@@ -1162,7 +1164,7 @@ TEST_CASE("(Error) Property: Wrong type 'name'", "[profile]") {
         "${TESTDIR}/profile/error/property/wrongtype_name.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'property.name' must be a string")
+        Catch::Matchers::Equals("(profile) 'property.name' must be a string")
     );
 }
 
@@ -1171,7 +1173,7 @@ TEST_CASE("(Error) Property: Wrong type 'value'", "[profile]") {
         "${TESTDIR}/profile/error/property/wrongtype_value.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'property.value' must be a string")
+        Catch::Matchers::Equals("(profile) 'property.value' must be a string")
     );
 }
 
@@ -1184,7 +1186,7 @@ TEST_CASE("(Error) Keybinding: Missing value 'key'", "[profile]") {
         "${TESTDIR}/profile/error/keybinding/missing_key.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'keybinding.key' field is missing")
+        Catch::Matchers::Equals("(profile) 'keybinding.key' field is missing")
     );
 }
 
@@ -1193,7 +1195,7 @@ TEST_CASE("(Error) Keybinding: Missing value 'documentation'", "[profile]") {
         "${TESTDIR}/profile/error/keybinding/missing_documentation.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'keybinding.documentation' field is missing")
+        Catch::Matchers::Equals("(profile) 'keybinding.documentation' field is missing")
     );
 }
 
@@ -1202,7 +1204,7 @@ TEST_CASE("(Error) Keybinding: Missing value 'name'", "[profile]") {
         "${TESTDIR}/profile/error/keybinding/missing_name.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'keybinding.name' field is missing")
+        Catch::Matchers::Equals("(profile) 'keybinding.name' field is missing")
     );
 }
 
@@ -1211,7 +1213,7 @@ TEST_CASE("(Error) Keybinding: Missing value 'gui_path'", "[profile]") {
         "${TESTDIR}/profile/error/keybinding/missing_guipath.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'keybinding.gui_path' field is missing")
+        Catch::Matchers::Equals("(profile) 'keybinding.gui_path' field is missing")
     );
 }
 
@@ -1220,7 +1222,7 @@ TEST_CASE("(Error) Keybinding: Missing value 'is_local'", "[profile]") {
         "${TESTDIR}/profile/error/keybinding/missing_islocal.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'keybinding.is_local' field is missing")
+        Catch::Matchers::Equals("(profile) 'keybinding.is_local' field is missing")
     );
 }
 
@@ -1229,7 +1231,7 @@ TEST_CASE("(Error) Keybinding: Wrong value 'key'", "[profile]") {
         "${TESTDIR}/profile/error/keybinding/wrongvalue_key.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("Could not find key for 'F50'")
+        Catch::Matchers::Equals("Could not find key for 'F50'")
     );
 }
 
@@ -1238,7 +1240,7 @@ TEST_CASE("(Error) Keybinding: Wrong value 'key, modifier'", "[profile]") {
         "${TESTDIR}/profile/error/keybinding/wrongvalue_modifier.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("Unknown modifier key 'KEYKEY'")
+        Catch::Matchers::Equals("Unknown modifier key 'KEYKEY'")
     );
 }
 
@@ -1247,7 +1249,7 @@ TEST_CASE("(Error) Keybinding: Wrong type 'documentation'", "[profile]") {
         "${TESTDIR}/profile/error/keybinding/wrongtype_documentation.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'keybinding.documentation' must be a string")
+        Catch::Matchers::Equals("(profile) 'keybinding.documentation' must be a string")
     );
 }
 
@@ -1256,7 +1258,7 @@ TEST_CASE("(Error) Keybinding: Wrong type 'gui_path'", "[profile]") {
         "${TESTDIR}/profile/error/keybinding/wrongtype_guipath.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'keybinding.gui_path' must be a string")
+        Catch::Matchers::Equals("(profile) 'keybinding.gui_path' must be a string")
     );
 }
 
@@ -1265,7 +1267,7 @@ TEST_CASE("(Error) Keybinding: Wrong type 'is_local'", "[profile]") {
         "${TESTDIR}/profile/error/keybinding/wrongtype_islocal.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'keybinding.is_local' must be a boolean")
+        Catch::Matchers::Equals("(profile) 'keybinding.is_local' must be a boolean")
     );
 }
 
@@ -1274,7 +1276,7 @@ TEST_CASE("(Error) Keybinding: Wrong type 'name'", "[profile]") {
         "${TESTDIR}/profile/error/keybinding/wrongtype_name.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'keybinding.name' must be a string")
+        Catch::Matchers::Equals("(profile) 'keybinding.name' must be a string")
     );
 }
 
@@ -1283,7 +1285,7 @@ TEST_CASE("(Error) Keybinding: Wrong type 'script'", "[profile]") {
         "${TESTDIR}/profile/error/keybinding/wrongtype_script.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'keybinding.script' must be a string")
+        Catch::Matchers::Equals("(profile) 'keybinding.script' must be a string")
     );
 }
 
@@ -1296,7 +1298,7 @@ TEST_CASE("(Error) Time: Wrong value 'type'", "[profile]") {
         "${TESTDIR}/profile/error/time/wrongvalue_type.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("Unknown time type")
+        Catch::Matchers::Equals("(profile) Unknown time type")
     );
 }
 
@@ -1305,7 +1307,7 @@ TEST_CASE("(Error) Time (absolute): Missing value 'type'", "[profile]") {
         "${TESTDIR}/profile/error/time/missing_type.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'time.type' field is missing")
+        Catch::Matchers::Equals("(profile) 'time.type' field is missing")
     );
 }
 
@@ -1314,7 +1316,7 @@ TEST_CASE("(Error) Time (relative): Missing value 'value'", "[profile]") {
         "${TESTDIR}/profile/error/time/relative_missing_value.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'time.value' field is missing")
+        Catch::Matchers::Equals("(profile) 'time.value' field is missing")
     );
 }
 
@@ -1326,7 +1328,7 @@ TEST_CASE("(Error) Deltatimes: Wrong type", "[profile]") {
         "${TESTDIR}/profile/error/deltatimes/wrongtype_value.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("type must be number, but is string")
+        Catch::Matchers::ContainsSubstring("type must be number, but is string")
     );
 }
 
@@ -1338,7 +1340,7 @@ TEST_CASE("(Error) Camera: Wrong value 'type'", "[profile]") {
         "${TESTDIR}/profile/error/camera/wrongvalue_type.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("Unknown camera type")
+        Catch::Matchers::Equals("(profile) Unknown camera type")
     );
 }
 
@@ -1347,7 +1349,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'anchor'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_missing_anchor.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.anchor' field is missing")
+        Catch::Matchers::Equals("(profile) 'camera.anchor' field is missing")
     );
 }
 
@@ -1356,7 +1358,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'frame'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_missing_frame.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.frame' field is missing")
+        Catch::Matchers::Equals("(profile) 'camera.frame' field is missing")
     );
 }
 
@@ -1365,7 +1367,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'position'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_missing_position.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.position' field is missing")
+        Catch::Matchers::Equals("(profile) 'camera.position' field is missing")
     );
 }
 
@@ -1374,7 +1376,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'anchor'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_anchor.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.anchor' must be a string")
+        Catch::Matchers::Equals("(profile) 'camera.anchor' must be a string")
     );
 }
 
@@ -1383,7 +1385,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'aim'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_aim.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.aim' must be a string")
+        Catch::Matchers::Equals("(profile) 'camera.aim' must be a string")
     );
 }
 
@@ -1392,7 +1394,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'frame'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_frame.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.frame' must be a string")
+        Catch::Matchers::Equals("(profile) 'camera.frame' must be a string")
     );
 }
 
@@ -1401,7 +1403,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'position'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_position.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.position' must be an object")
+        Catch::Matchers::Equals("(profile) 'camera.position' must be an object")
     );
 }
 
@@ -1410,7 +1412,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'position.x'", "[profile]") 
         "${TESTDIR}/profile/error/camera/navstate_missing_position_x.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.position.x' field is missing")
+        Catch::Matchers::Equals("(profile) 'camera.position.x' field is missing")
     );
 }
 
@@ -1419,7 +1421,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'position.x'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_position_x.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.position.x' must be a number")
+        Catch::Matchers::Equals("(profile) 'camera.position.x' must be a number")
     );
 }
 
@@ -1428,7 +1430,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'position.y'", "[profile]") 
         "${TESTDIR}/profile/error/camera/navstate_missing_position_y.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.position.y' field is missing")
+        Catch::Matchers::Equals("(profile) 'camera.position.y' field is missing")
     );
 }
 
@@ -1437,7 +1439,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'position.y'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_position_y.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.position.y' must be a number")
+        Catch::Matchers::Equals("(profile) 'camera.position.y' must be a number")
     );
 }
 
@@ -1446,7 +1448,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'position.z'", "[profile]") 
         "${TESTDIR}/profile/error/camera/navstate_missing_position_z.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.position.z' field is missing")
+        Catch::Matchers::Equals("(profile) 'camera.position.z' field is missing")
     );
 }
 
@@ -1455,7 +1457,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'position.z'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_position_z.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.position.z' must be a number")
+        Catch::Matchers::Equals("(profile) 'camera.position.z' must be a number")
     );
 }
 
@@ -1464,7 +1466,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'up'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_up.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.up' must be an object")
+        Catch::Matchers::Equals("(profile) 'camera.up' must be an object")
     );
 }
 
@@ -1473,7 +1475,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'up.x'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_missing_up_x.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.up.x' field is missing")
+        Catch::Matchers::Equals("(profile) 'camera.up.x' field is missing")
     );
 }
 
@@ -1482,7 +1484,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'up.x'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_up_x.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.up.x' must be a number")
+        Catch::Matchers::Equals("(profile) 'camera.up.x' must be a number")
     );
 }
 
@@ -1491,7 +1493,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'up.y'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_missing_up_y.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.up.y' field is missing")
+        Catch::Matchers::Equals("(profile) 'camera.up.y' field is missing")
     );
 }
 
@@ -1500,7 +1502,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'up.y'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_up_y.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.up.y' must be a number")
+        Catch::Matchers::Equals("(profile) 'camera.up.y' must be a number")
     );
 }
 
@@ -1509,7 +1511,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'up.z'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_missing_up_z.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.up.z' field is missing")
+        Catch::Matchers::Equals("(profile) 'camera.up.z' field is missing")
     );
 }
 
@@ -1518,7 +1520,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'up.z'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_up_z.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.up.z' must be a number")
+        Catch::Matchers::Equals("(profile) 'camera.up.z' must be a number")
     );
 }
 
@@ -1527,7 +1529,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'yaw'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_yaw.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.yaw' must be a number")
+        Catch::Matchers::Equals("(profile) 'camera.yaw' must be a number")
     );
 }
 
@@ -1536,7 +1538,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'pitch'", "[profile]") {
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_pitch.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("camera.pitch' must be a number")
+        Catch::Matchers::Equals("(profile) 'camera.pitch' must be a number")
     );
 }
 
@@ -1545,7 +1547,7 @@ TEST_CASE("(Error) Camera (GoToGeo): Missing value 'anchor'", "[profile]") {
         "${TESTDIR}/profile/error/camera/gotogeo_missing_anchor.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.anchor' field is missing")
+        Catch::Matchers::Equals("(profile) 'camera.anchor' field is missing")
     );
 }
 
@@ -1554,7 +1556,7 @@ TEST_CASE("(Error) Camera (GoToGeo): Missing value 'latitude'", "[profile]") {
         "${TESTDIR}/profile/error/camera/gotogeo_missing_latitude.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.latitude' field is missing")
+        Catch::Matchers::Equals("(profile) 'camera.latitude' field is missing")
     );
 }
 
@@ -1563,7 +1565,7 @@ TEST_CASE("(Error) Camera (GoToGeo): Missing value 'longitude'", "[profile]") {
         "${TESTDIR}/profile/error/camera/gotogeo_missing_longitude.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.longitude' field is missing")
+        Catch::Matchers::Equals("(profile) 'camera.longitude' field is missing")
     );
 }
 
@@ -1572,7 +1574,7 @@ TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'anchor'", "[profile]") {
         "${TESTDIR}/profile/error/camera/gotogeo_wrongtype_anchor.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.anchor' must be a string")
+        Catch::Matchers::Equals("(profile) 'camera.anchor' must be a string")
     );
 }
 
@@ -1581,7 +1583,7 @@ TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'latitude'", "[profile]") {
         "${TESTDIR}/profile/error/camera/gotogeo_wrongtype_latitude.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.latitude' must be a number")
+        Catch::Matchers::Equals("(profile) 'camera.latitude' must be a number")
     );
 }
 
@@ -1590,7 +1592,7 @@ TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'longitude'", "[profile]") {
         "${TESTDIR}/profile/error/camera/gotogeo_wrongtype_longitude.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.longitude' must be a number")
+        Catch::Matchers::Equals("(profile) 'camera.longitude' must be a number")
     );
 }
 
@@ -1599,6 +1601,6 @@ TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'altitude'", "[profile]") {
         "${TESTDIR}/profile/error/camera/gotogeo_wrongtype_altitude.profile";
     CHECK_THROWS_WITH(
         loadProfile(absPath(TestFile)),
-        Catch::Matchers::Contains("'camera.altitude' must be a number")
+        Catch::Matchers::Equals("(profile) 'camera.altitude' must be a number")
     );
 }

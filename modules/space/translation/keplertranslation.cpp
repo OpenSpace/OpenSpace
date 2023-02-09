@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -258,11 +258,11 @@ glm::dvec3 KeplerTranslation::position(const UpdateData& data) const {
     const double e = eccentricAnomaly(meanAnomaly);
 
     // Use the eccentric anomaly to compute the actual location
-    const glm::dvec3 p = {
+    const glm::dvec3 p = glm::dvec3(
         _semiMajorAxis * 1000.0 * (cos(e) - _eccentricity),
         _semiMajorAxis * 1000.0 * sin(e) * sqrt(1.0 - _eccentricity * _eccentricity),
         0.0
-    };
+    );
     return _orbitPlaneRotation * p;
 }
 
@@ -278,9 +278,9 @@ void KeplerTranslation::computeOrbitPlane() const {
     // inclination
     // 3. Around the new z axis to place the closest approach to the correct location
 
-    const glm::vec3 ascendingNodeAxisRot = { 0.f, 0.f, 1.f };
-    const glm::vec3 inclinationAxisRot = { 1.f, 0.f, 0.f };
-    const glm::vec3 argPeriapsisAxisRot = { 0.f, 0.f, 1.f };
+    const glm::vec3 ascendingNodeAxisRot = glm::vec3(0.f, 0.f, 1.f);
+    const glm::vec3 inclinationAxisRot = glm::vec3(1.f, 0.f, 0.f);
+    const glm::vec3 argPeriapsisAxisRot = glm::vec3(0.f, 0.f, 1.f);
 
     const double asc = glm::radians(_ascendingNode.value());
     const double inc = glm::radians(_inclination.value());

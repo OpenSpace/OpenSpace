@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,8 +22,8 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/global_variables.cmake)
+include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
 
 
 # This function takes a list of module paths and returns the list of include paths that
@@ -164,7 +164,7 @@ endfunction ()
 
 
 set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")
-set(internal_module_path "${OPENSPACE_BASE_DIR}/modules")
+set(internal_module_path "${PROJECT_SOURCE_DIR}/modules")
 set(all_enabled_modules "")
 
 
@@ -378,12 +378,12 @@ if (NOT "${MODULE_PATHS}" STREQUAL "")
 endif ()
 
 configure_file(
-  ${OPENSPACE_CMAKE_EXT_DIR}/module_registration.template
+  ${PROJECT_SOURCE_DIR}/support/cmake/module_registration.template
   ${CMAKE_BINARY_DIR}/_generated/include/openspace/moduleregistration.h
 )
 
 configure_file(
-  ${OPENSPACE_CMAKE_EXT_DIR}/module_path.template
+  ${PROJECT_SOURCE_DIR}/support/cmake/module_path.template
   ${CMAKE_BINARY_DIR}/_generated/include/openspace/modulepath.h
 )
 

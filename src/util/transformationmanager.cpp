@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -93,9 +93,9 @@ glm::dmat3 TransformationManager::kameleonTransformationMatrix(
                                               [[maybe_unused]] double ephemerisTime) const
 {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-    ccmc::Position in0 = {1.f, 0.f, 0.f};
-    ccmc::Position in1 = {0.f, 1.f, 0.f};
-    ccmc::Position in2 = {0.f, 0.f, 1.f};
+    ccmc::Position in0 = ccmc::Position(1.f, 0.f, 0.f);
+    ccmc::Position in1 = ccmc::Position(0.f, 1.f, 0.f);
+    ccmc::Position in2 = ccmc::Position(0.f, 0.f, 1.f);
 
     ccmc::Position out0;
     ccmc::Position out1;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@ public:
     void selectImage(const std::string& url, int i);
     void addImageLayerToWwt(const std::string& url, int i);
     void removeSelectedImage(int i);
-    void setImageOrder(int i, int order);
+    void setImageOrder(int image, int order);
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(int i, float opacity);
     void hideChromeInterface() const;

@@ -1,8 +1,8 @@
 [ 
     { "type": "pause", 
       "value": "true"},
-    { "type": "keys", 
-      "value": "e"},
+    { "type": "action", 
+      "value": "profile.setup.earthrise"},
     { "type": "wait", 
       "value": "60"}, 
     { "type": "screenshot", 

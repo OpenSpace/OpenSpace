@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,12 +45,6 @@ namespace {
         "The speck label file with the data for the labels"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UnitInfo = {
-        "Unit",
-        "Unit",
-        "Distance unit for the label data"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
@@ -85,9 +79,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
         "FaceCamera",
         "Face Camera",
-        "If enabled, the labels will be rotated to face the camera. "
-        "For non-linear display rendering (for example fisheye) this should be set to "
-        "false."
+        "If enabled, the labels will be rotated to face the camera. For non-linear "
+        "display rendering (for example fisheye) this should be set to false."
     };
 
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -184,9 +184,8 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QGridLayout* container = new QGridLayout;
         container->setColumnStretch(1, 1);
 
-        _keybindingsLabel = new QLabel("Keybindings");
+        _keybindingsLabel = new QLabel("Actions & Keybindings");
         _keybindingsLabel->setObjectName("heading");
-        _keybindingsLabel->setWordWrap(true);
         container->addWidget(_keybindingsLabel, 0, 0);
 
         QPushButton* keybindingsProperties = new QPushButton("Edit");
@@ -345,7 +344,9 @@ void ProfileEdit::initSummaryTextForEachCategory() {
         QString::fromStdString(summarizeProperties(_profile.properties))
     );
 
-    _keybindingsLabel->setText(labelText(_profile.keybindings.size(), "Keybindings"));
+    _keybindingsLabel->setText(
+        labelText(_profile.keybindings.size(), "Actions & Keybindings")
+    );
     _keybindingsEdit->setText(QString::fromStdString(
         summarizeKeybindings(_profile.keybindings, _profile.actions)
     ));

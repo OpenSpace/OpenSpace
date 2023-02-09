@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,20 +64,20 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AllowAddressesInfo = {
         "AllowAddresses",
         "Allow Addresses",
-        "Ip addresses or domains that should always be allowed access to this interface"
+        "IP addresses or domains that should always be allowed access to this interface"
     };
 
     constexpr openspace::properties::Property::PropertyInfo
         RequirePasswordAddressesInfo = {
         "RequirePasswordAddresses",
         "Require Password Addresses",
-        "Ip addresses or domains that should be allowed access if they provide a password"
+        "IP addresses or domains that should be allowed access if they provide a password"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DenyAddressesInfo = {
         "DenyAddresses",
         "Deny Addresses",
-        "Ip addresses or domains that should never be allowed access to this interface"
+        "IP addresses or domains that should never be allowed access to this interface"
     };
 
     constexpr openspace::properties::Property::PropertyInfo PasswordInfo = {
@@ -85,7 +85,7 @@ namespace {
         "Password",
         "Password for connecting to this interface"
     };
-}
+} // namespace
 
 namespace openspace {
 

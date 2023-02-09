@@ -180,7 +180,7 @@ asset.onInitialize(function()
     name,
     controller.X,
     [[
-      -- <-- Copy paste your custum script here
+      -- <-- Copy paste your custom script here
     ]],
     ""  -- <-- Description of your custom script here (optional)
   )
@@ -190,7 +190,7 @@ asset.onInitialize(function()
     name,
     controller.LeftStickButton,
     [[
-      -- <-- Copy paste your custum script here
+      -- <-- Copy paste your custom script here
     ]],
     ""  -- <-- Description of your custom script here (optional)
   )
