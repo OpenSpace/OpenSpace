@@ -1,7 +1,7 @@
 local layer = {
-  Identifier = "TestVideoLoop",
-  File = "C:/Users/ylvaselling/Documents/Work/Testmovies/black_carbon_sulfate.mp4",
-  Name = "Test Video Loop",
+  Identifier = "SosLoop",
+  File = "C:/Users/ylvaselling/Documents/Work/Testmovies/4096-4.mp4",
+  Name = "Science On A Sphere Loop Video",
   Enabled = asset.enabled,
   Type = "VideoTileLayer",
   Description = [[Testing video]]
