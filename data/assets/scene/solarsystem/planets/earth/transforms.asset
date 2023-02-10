@@ -77,14 +77,36 @@ local EarthIAU = {
   }
 }
 
+local EarthECLIPJ2000 = {
+  Identifier = "EarthECLIPJ2000",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "EARTH",
+      Observer = "SSB"
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "ECLIPJ2000",
+      DestinationFrame = "GALACTIC",
+    }
+  },
+  GUI = {
+    Name = "Earth Ecliptic",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
+}
+
 local EarthMoonCoRevFrame = {
   Identifier = "EarthMoonCoRevFrame",
-  Parent = EarthCenter.Identifier,
+  Parent = EarthECLIPJ2000.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "EARTH_MOON_COREV",
-      DestinationFrame = 'GALACTIC',
+      DestinationFrame = 'ECLIPJ2000',
       Kernels = { kernels .. "earth_moon_corev.tf" }
     }
   },
@@ -100,11 +122,13 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthCenter)
   openspace.addSceneGraphNode(EarthInertial)
   openspace.addSceneGraphNode(EarthIAU)
+  openspace.addSceneGraphNode(EarthECLIPJ2000)
   openspace.addSceneGraphNode(EarthMoonCoRevFrame)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthMoonCoRevFrame)
+  openspace.removeSceneGraphNode(EarthECLIPJ2000)
   openspace.removeSceneGraphNode(EarthIAU)
   openspace.removeSceneGraphNode(EarthInertial)
   openspace.removeSceneGraphNode(EarthCenter)
@@ -115,6 +139,7 @@ asset.export(EarthBarycenter)
 asset.export(EarthCenter)
 asset.export(EarthInertial)
 asset.export(EarthIAU)
+asset.export(EarthECLIPJ2000)
 asset.export(EarthMoonCoRevFrame)
 
 asset.meta = {
