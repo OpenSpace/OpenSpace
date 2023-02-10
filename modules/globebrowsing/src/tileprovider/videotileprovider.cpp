@@ -304,13 +304,13 @@ ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int max
 }
 
 void VideoTileProvider::pause() {
-    _isPaused = true;
+    bool isPaused = true;
     int result = mpv_set_property_async(
         _mpvHandle,
         static_cast<uint64_t>(LibmpvPropertyKey::Pause),
         "pause",
         MPV_FORMAT_FLAG,
-        &_isPaused
+        &isPaused
     );
     if (!checkMpvError(result)) {
         LWARNING("Error when pausing video");
@@ -318,13 +318,12 @@ void VideoTileProvider::pause() {
 }
 
 void VideoTileProvider::play() {
-    _isPaused = false;
     int result = mpv_set_property_async(
         _mpvHandle,
         static_cast<uint64_t>(LibmpvPropertyKey::Pause),
         "pause",
         MPV_FORMAT_FLAG,
-        &_isPaused
+        nullptr
     );
     if (!checkMpvError(result)) {
         LWARNING("Error when playing video");
