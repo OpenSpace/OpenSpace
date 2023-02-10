@@ -1,6 +1,13 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
+local kernels = asset.syncedResource({
+  Name = "Earth Moon Co-revolving Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "earth_moon_corev_kernels",
+  Version = 1
+})
+
 local EarthBarycenter = {
   Identifier = "EarthBarycenter",
   Parent = transforms.SolarSystemBarycenter.Identifier,
@@ -70,14 +77,34 @@ local EarthIAU = {
   }
 }
 
+local EarthMoonCoRevFrame = {
+  Identifier = "EarthMoonCoRevFrame",
+  Parent = EarthCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "EARTH_MOON_COREV",
+      DestinationFrame = 'GALACTIC',
+      Kernels = { kernels .. "earth_moon_corev.tf" }
+    }
+  },
+  GUI = {
+    Name = "Earth Moon Co-revolving Reference Frame",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
+}
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthBarycenter)
   openspace.addSceneGraphNode(EarthCenter)
   openspace.addSceneGraphNode(EarthInertial)
   openspace.addSceneGraphNode(EarthIAU)
+  openspace.addSceneGraphNode(EarthMoonCoRevFrame)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthMoonCoRevFrame)
   openspace.removeSceneGraphNode(EarthIAU)
   openspace.removeSceneGraphNode(EarthInertial)
   openspace.removeSceneGraphNode(EarthCenter)
@@ -88,6 +115,7 @@ asset.export(EarthBarycenter)
 asset.export(EarthCenter)
 asset.export(EarthInertial)
 asset.export(EarthIAU)
+asset.export(EarthMoonCoRevFrame)
 
 asset.meta = {
   Name = "Earth Transforms",
