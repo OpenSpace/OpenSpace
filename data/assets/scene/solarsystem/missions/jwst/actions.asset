@@ -123,34 +123,34 @@ local toggle_jwst_trail = {
   isLocal = false
 }
 
-local actionlist = { 
-  toggle_lagrangian_points, 
-  toggle_hudf, 
-  toggle_l2, 
-  toggle_fov, 
-  setup_launch, 
-  setup_detach, 
-  toggle_sun_trail, 
-  toggle_trails_except_moon, 
-  toggle_jwst_trail  
-}
-
 asset.onInitialize(function()
-  for _, action in ipairs(actionlist) do
-    openspace.action.registerAction(action)
-  end
+  openspace.action.registerAction(toggle_lagrangian_points)
+  openspace.action.registerAction(toggle_hudf)
+  openspace.action.registerAction(toggle_l2)
+  openspace.action.registerAction(toggle_fov)
+  openspace.action.registerAction(setup_launch)
+  openspace.action.registerAction(setup_detach)
+  openspace.action.registerAction(toggle_sun_trail)
+  openspace.action.registerAction(toggle_trails_except_moon)
+  openspace.action.registerAction(toggle_jwst_trail)
 end)
 
 asset.onDeinitialize(function()
-  for i = #actionlist, 1, -1 do
-    openspace.action.removeAction(actionlist[i])
-  end
+  openspace.action.removeAction(toggle_jwst_trail)
+  openspace.action.removeAction(toggle_trails_except_moon)
+  openspace.action.removeAction(toggle_sun_trail)
+  openspace.action.removeAction(setup_detach)
+  openspace.action.removeAction(setup_launch)
+  openspace.action.removeAction(toggle_fov)
+  openspace.action.removeAction(toggle_l2)
+  openspace.action.removeAction(toggle_hudf)
+  openspace.action.removeAction(toggle_lagrangian_points)
 end)
 
 asset.meta = {
-  Name = "",
+  Name = "Actions - JWST",
   Version = "1.0",
-  Description = "",
+  Description = "Actions related to the JWST mission",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

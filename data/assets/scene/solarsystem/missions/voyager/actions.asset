@@ -60,18 +60,22 @@ local toggle_minormoon_trails = {
   isLocal = false
 }
 
-local actionlist = { jupiter_approach, saturn_approach, focus_jupiter, focus_saturn, toggle_minormoon_trails }
+local actionlist = { , , , ,  }
 
 asset.onInitialize(function()
-  for _, action in ipairs(actionlist) do
-    openspace.action.registerAction(action)
-  end
+  openspace.action.registerAction(jupiter_approach)
+  openspace.action.registerAction(saturn_approach)
+  openspace.action.registerAction(focus_jupiter)
+  openspace.action.registerAction(focus_saturn)
+  openspace.action.registerAction(toggle_minormoon_trails)
 end)
 
 asset.onDeinitialize(function()
-  for i = #actionlist, 1, -1 do
-    openspace.action.removeAction(actionlist[i])
-  end
+  openspace.action.removeAction(toggle_minormoon_trails)
+  openspace.action.removeAction(focus_saturn)
+  openspace.action.removeAction(focus_jupiter)
+  openspace.action.removeAction(saturn_approach)
+  openspace.action.removeAction(jupiter_approach)
 end)
 
 asset.meta = {

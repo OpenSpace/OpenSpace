@@ -92,7 +92,7 @@ local increase_hightmap_pluto = {
   Identifier = "os.missions.newhorizons.pluto.increasehightmap",
   Name = "Pluto HeightExaggeration +",
   Command = [[
-    openspace.setPropertyValueSingle(\"Scene.PlutoProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.PlutoProjection.Renderable.HeightExaggeration\") + 5000);
+    openspace.setPropertyValueSingle("Scene.PlutoProjection.Renderable.HeightExaggeration", openspace.getPropertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") + 5000);
   ]],
   Documentation = "Increases the height map exaggeration on Pluto",
   GuiPath = "/Missions/New Horizons",
@@ -103,7 +103,7 @@ local decrease_hightmap_pluto = {
   Identifier = "os.missions.newhorizons.pluto.decreasehightmap",
   Name = "Pluto HeightExaggeration -",
   Command = [[
-    openspace.setPropertyValueSingle(\"Scene.PlutoProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.PlutoProjection.Renderable.HeightExaggeration\") - 5000);
+    openspace.setPropertyValueSingle("Scene.PlutoProjection.Renderable.HeightExaggeration", openspace.getPropertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") - 5000);
   ]],
   Documentation = "Decreases the height map exaggeration on Pluto",
   GuiPath = "/Missions/New Horizons",
@@ -114,7 +114,7 @@ local increase_hightmap_charon = {
   Identifier = "os.missions.newhorizons.charon.increasehightmap",
   Name = "Charon HeightExaggeration +",
   Command = [[
-    openspace.setPropertyValueSingle(\"Scene.CharonProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.CharonProjection.Renderable.HeightExaggeration\") + 5000);
+    openspace.setPropertyValueSingle("Scene.CharonProjection.Renderable.HeightExaggeration", openspace.getPropertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") + 5000);
   ]],
   Documentation = "Increases the height map exaggeration on Charon",
   GuiPath = "/Missions/New Horizons",
@@ -125,7 +125,7 @@ local decrease_hightmap_charon = {
   Identifier = "os.missions.newhorizons.charon.decreasehightmap",
   Name = "Charon HeightExaggeration -",
   Command = [[
-    openspace.setPropertyValueSingle(\"Scene.CharonProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.CharonProjection.Renderable.HeightExaggeration\") - 5000);
+    openspace.setPropertyValueSingle("Scene.CharonProjection.Renderable.HeightExaggeration", openspace.getPropertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") - 5000);
   ]],
   Documentation = "Decreases the height map exaggeration on Charon",
   GuiPath = "/Missions/New Horizons",
@@ -147,7 +147,7 @@ local toggle_pluto_labels = {
   Identifier = "os.missions.newhorizons.pluto.togglelabels",
   Name = "Toggle Pluto Labels",
   Command = [[
-    local list = {\"Scene.PlutoText.Renderable.Enabled\", \"Scene.CharonText.Renderable.Enabled\", \"Scene.HydraText.Renderable.Enabled\", \"Scene.NixText.Renderable.Enabled\", \"Scene.KerberosText.Renderable.Enabled\", \"Scene.StyxText.Renderable.Enabled\"}; 
+    local list = {"Scene.PlutoText.Renderable.Enabled", "Scene.CharonText.Renderable.Enabled", "Scene.HydraText.Renderable.Enabled", "Scene.NixText.Renderable.Enabled", "Scene.KerberosText.Renderable.Enabled", "Scene.StyxText.Renderable.Enabled"}; 
     for _,v in pairs(list) do 
       openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
     end
@@ -161,11 +161,11 @@ local toggle_nh_labels = {
   Identifier = "os.missions.newhorizons.togglelabels",
   Name = "Toggle New Horizons Labels",
   Command = [[
-    local v = openspace.getPropertyValue(\"Scene.Labels.Renderable.Opacity\"); 
+    local v = openspace.getPropertyValue("Scene.Labels.Renderable.Opacity"); 
     if v <= 0.5 then 
-      openspace.setPropertyValueSingle(\"Scene.Labels.Renderable.Opacity\",1.0,2.0) 
+      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity",1.0,2.0) 
     else 
-      openspace.setPropertyValueSingle(\"Scene.Labels.Renderable.Opacity\",0.0,2.0) 
+      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity",0.0,2.0) 
     end
   ]],
   Documentation = "Toggles the visibility of the labels for the New Horizons instruments",
@@ -196,27 +196,42 @@ local toggle_nh_trail = {
   isLocal = false
 }
 
-local actionlist = { 
-  focus_newhorizons, anchor_nh_aim_pluto,
-  focus_pluto, focus_charon, toggle_nh_imageprojection,
-  toggle_nh_imageprojection, clear_image_projections,
-  approach_time_and_projections, increase_hightmap_pluto,
-  decrease_hightmap_pluto, increase_hightmap_charon,
-  decrease_hightmap_charon, toggle_pluto_trail,
-  toggle_pluto_labels, toggle_nh_labels, toggle_shadows,
-  toggle_nh_trail, 
-}
-
 asset.onInitialize(function()
-  for _, action in ipairs(actionlist) do
-    openspace.action.registerAction(action)
-  end
+  openspace.action.registerAction(focus_newhorizons)
+  openspace.action.registerAction(anchor_nh_aim_pluto)
+  openspace.action.registerAction(focus_pluto)
+  openspace.action.registerAction(focus_charon)
+  openspace.action.registerAction(toggle_nh_imageprojection)
+  openspace.action.registerAction(clear_image_projections)
+  openspace.action.registerAction(approach_time_and_projections)
+  openspace.action.registerAction(decrease_hightmap_pluto)
+  openspace.action.registerAction(increase_hightmap_charon)
+  openspace.action.registerAction(decrease_hightmap_charon)
+  openspace.action.registerAction(toggle_pluto_trail)
+  openspace.action.registerAction(toggle_pluto_labels)
+  openspace.action.registerAction(toggle_nh_labels)
+  openspace.action.registerAction(toggle_shadows)
+  openspace.action.registerAction(toggle_nh_trail)
+  openspace.action.registerAction(increase_hightmap_pluto)
 end)
 
 asset.onDeinitialize(function()
-  for i = #actionlist, 1, -1 do
-    openspace.action.removeAction(actionlist[i])
-    end
+  openspace.action.removeAction(increase_hightmap_pluto)
+  openspace.action.removeAction(toggle_nh_trail)
+  openspace.action.removeAction(toggle_shadows)
+  openspace.action.removeAction(toggle_nh_labels)
+  openspace.action.removeAction(toggle_pluto_labels)
+  openspace.action.removeAction(toggle_pluto_trail)
+  openspace.action.removeAction(decrease_hightmap_charon)
+  openspace.action.removeAction(increase_hightmap_charon)
+  openspace.action.removeAction(decrease_hightmap_pluto)
+  openspace.action.removeAction(approach_time_and_projections)
+  openspace.action.removeAction(clear_image_projections)
+  openspace.action.removeAction(toggle_nh_imageprojection)
+  openspace.action.removeAction(focus_charon)
+  openspace.action.removeAction(focus_pluto)
+  openspace.action.removeAction(anchor_nh_aim_pluto)
+  openspace.action.removeAction(focus_newhorizons)
 end)
 
 asset.meta = {

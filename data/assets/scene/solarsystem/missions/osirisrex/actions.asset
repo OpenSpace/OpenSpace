@@ -83,18 +83,26 @@ local toggle_sun_marker = {
   isLocal = false
 }
 
-local actionlist = { focus_osirisrex, focus_bennu, bennu_approach_time, bennu_survey_time, bennu_event_b, bennu_recon_event, toggle_sun_marker }
+local actionlist = { , , , , , ,  }
 
 asset.onInitialize(function()
-  for _, action in ipairs(actionlist) do
-    openspace.action.registerAction(action)
-  end
+  openspace.action.registerAction(focus_osirisrex)
+  openspace.action.registerAction(focus_bennu)
+  openspace.action.registerAction(bennu_approach_time)
+  openspace.action.registerAction(bennu_survey_time)
+  openspace.action.registerAction(bennu_event_b)
+  openspace.action.registerAction(bennu_recon_event)
+  openspace.action.registerAction(toggle_sun_marker)
 end)
 
 asset.onDeinitialize(function()
-  for i = #actionlist, 1, -1 do
-    openspace.action.removeAction(actionlist[i])
-  end
+  openspace.action.removeAction(toggle_sun_marker)
+  openspace.action.removeAction(bennu_recon_event)
+  openspace.action.removeAction(bennu_event_b)
+  openspace.action.removeAction(bennu_survey_time)
+  openspace.action.removeAction(bennu_approach_time)
+  openspace.action.removeAction(focus_bennu)
+  openspace.action.removeAction(focus_osirisrex)
 end)
 
 asset.meta = {

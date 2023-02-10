@@ -602,24 +602,26 @@ local toggle_philae_trail = {
   isLocal = false
 }
 
-local actionlist = { focus_rosetta, setup_lander_release_time, toggle_image_plane, toggle_philae_trail }
+local actionlist = { , , ,  }
 
 -- initilize asset
 
 asset.onInitialize(function ()
-  for i, node in ipairs(nodes) do
+  for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
 
-  for _, action in ipairs(actionlist) do 
-    openspace.action.registerAction(action)
-  end
+  openspace.action.registerAction(focus_rosetta)
+  openspace.action.registerAction(setup_lander_release_time)
+  openspace.action.registerAction(toggle_image_plane)
+  openspace.action.registerAction(toggle_philae_trail)
 end)
 
 asset.onDeinitialize(function ()
-  for i = #actionlist, 1, -1 do
-    openspace.action.removeAction(actionlist[i])
-  end
+  openspace.action.removeAction(toggle_philae_trail)
+  openspace.action.removeAction(toggle_image_plane)
+  openspace.action.removeAction(setup_lander_release_time)
+  openspace.action.removeAction(focus_rosetta)
 
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])

@@ -1,10 +1,11 @@
+asset.require("spice/base")
+asset.require("./actions")
+asset.require("scene/solarsystem/planets/earth/layers/colorlayers/terra_modis_temporal")
+asset.require("scene/solarsystem/planets/earth/layers/colorlayers/esri_viirs_combo")
+
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
-asset.require("spice/base")
-asset.require("scene/solarsystem/planets/earth/layers/colorlayers/terra_modis_temporal")
-asset.require("scene/solarsystem/planets/earth/layers/colorlayers/esri_viirs_combo")
-asset.require("./actions")
 
 local models = asset.syncedResource({
   Name = "JWST Model",

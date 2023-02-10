@@ -12,18 +12,14 @@ local toggle_outer_planetary_trails = {
   isLocal = false
 }
 
-local actionlist = {  toggle_outer_planetary_trails }
+local actionlist = {   }
 
 asset.onInitialize(function()
-  for _, action in ipairs(actionlist) do
-    openspace.action.registerAction(action)
-  end
+  openspace.action.registerAction(toggle_outer_planetary_trails)
 end)
 
 asset.onDeinitialize(function()
-  for i = #actionlist, 1, -1 do
-    openspace.action.removeAction(actionlist[i])
-  end
+  openspace.action.removeAction(toggle_outer_planetary_trails)
 end)
 
 asset.meta = {

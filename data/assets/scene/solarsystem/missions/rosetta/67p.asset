@@ -167,22 +167,21 @@ local toggle_67p_projection = {
   isLocal = false
 }
 
-local actionlist = { focus_67p, clear_image_projections_67p, toggle_67p_projection }
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Barycenter)
   openspace.addSceneGraphNode(Comet67P)
   openspace.addSceneGraphNode(Trail67P)
 
-  for _, action in ipairs(actionlist) do 
-    openspace.action.registerAction(action)
-  end
+  openspace.action.registerAction(focus_67p)
+  openspace.action.registerAction(clear_image_projections_67p)
+  openspace.action.registerAction(toggle_67p_projection)
 end)
 
 asset.onDeinitialize(function()
-  for i = #actionlist, 1, -1 do
-    openspace.action.removeAction(actionlist[i])
-  end
+  openspace.action.removeAction(toggle_67p_projection)
+  openspace.action.removeAction(clear_image_projections_67p)
+  openspace.action.removeAction(focus_67p)
 
   openspace.removeSceneGraphNode(Trail67P)
   openspace.removeSceneGraphNode(Comet67P)
