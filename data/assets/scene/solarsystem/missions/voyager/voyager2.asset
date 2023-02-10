@@ -331,16 +331,38 @@ local nodes = {
   VoyagerTrailCruiseNeptuneInf
 }
 
+
+-- Actions
+
+local focus_voyager2 = {
+  Identifier = "os.missions.voyager.v2.focus",
+  Name = "Focus on Voyager 2",
+  Command = [[
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Voyager_2');
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')
+  ]],
+  Documentation = "Set camera focus to Voyager 2",
+  GuiPath = "/Missions/Voyager",
+  isLocal = false
+}
+
+-- Initialize
+
 asset.onInitialize(function()
   for i, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
+
+  openspace.action.registerAction(focus_voyager2)
 end)
 
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end
+
+  openspace.action.removeAction(focus_voyager2)
 end)
 
 for i, node in ipairs(nodes) do
