@@ -6,13 +6,14 @@ local kernel = asset.require("../kernels").jup341
 
 local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_himalia", "moon_minor" }
+local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_himalia", "moon_minor", "moon_minor_jupiter" }
 local trailColor = { 0.4, 0.3, 0.01 }
 local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_jupiter",
-  "moonTrail_minor"
+  "moonTrail_minor",
+  "moonTrail_minor_jupiter"
 }
 
 local himaliaGroup = {
