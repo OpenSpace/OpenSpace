@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -81,10 +81,10 @@ private:
 
     std::vector<QRectF> _monitorDimensionsScaled;
     std::array<QRectF, 4> _windowRendering = {
-        QRectF{ 0.f, 0.f, 0.f, 0.f },
-        QRectF{ 0.f, 0.f, 0.f, 0.f },
-        QRectF{ 0.f, 0.f, 0.f, 0.f },
-        QRectF{ 0.f, 0.f, 0.f, 0.f }
+        QRectF(0.f, 0.f, 0.f, 0.f),
+        QRectF(0.f, 0.f, 0.f, 0.f),
+        QRectF(0.f, 0.f, 0.f, 0.f),
+        QRectF(0.f, 0.f, 0.f, 0.f)
     };
     int _nWindows = 1;
     const std::array<QColor, 4> _colorsForWindows;

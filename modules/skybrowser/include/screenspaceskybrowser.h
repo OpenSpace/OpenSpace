@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,7 +52,6 @@ public:
 
     double setVerticalFovWithScroll(float scroll);
     void setOpacity(float opacity);
-    void setRatio(float ratio);
     void setIdInBrowser() const;
     void setIsInitialized(bool isInitialized);
 
@@ -76,14 +75,11 @@ private:
     void bindTexture() override;
 
     // Flags
-    bool _isSyncedWithWwt = false;
-    bool _textureDimensionsIsDirty = false;
-    bool _ratioIsDirty = false;
-    bool _radiusIsDirty = false;
     bool _isInitialized = false;
+    bool _radiusIsDirty = false;
     int _borderRadiusTimer = -1;
 
-    float _ratio = 1.f;
+    float _lastTextureQuality = 1.f;
 };
 
 } // namespace openspace

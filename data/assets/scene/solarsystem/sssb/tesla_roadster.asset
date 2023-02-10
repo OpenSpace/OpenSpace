@@ -52,12 +52,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(TeslaPosition)
   openspace.addSceneGraphNode(TeslaRoadsterTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TeslaRoadsterTrail)
   openspace.removeSceneGraphNode(TeslaPosition)
 end)
-    
+
 asset.export(TeslaPosition)
 asset.export(TeslaRoadsterTrail)
 

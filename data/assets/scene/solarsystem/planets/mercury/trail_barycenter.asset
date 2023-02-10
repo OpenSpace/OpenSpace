@@ -29,11 +29,11 @@ local MercuryBarycenterTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MercuryBarycenterTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MercuryBarycenterTrail)
 end)
-  
+
 asset.export(MercuryBarycenterTrail)
 
 

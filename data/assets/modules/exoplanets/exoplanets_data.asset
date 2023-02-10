@@ -12,7 +12,7 @@ local colormaps = asset.syncedResource({
   Version = 3
 })
 
-asset.onInitialize(function () 
+asset.onInitialize(function ()
   -- Set the default data files used for the exoplanet system creation
   -- (Check if already set, to not override value set in another file)
   local p = "Modules.Exoplanets.DataFolder";
@@ -31,9 +31,9 @@ asset.export("DataPath", DataPath)
 asset.meta = {
   Name = "Exoplanet Data",
   Version = "3.0",
-  Description = [[The data that is used for the exoplanet systems. The data has been 
-  derived from the 'Planetary Systems Composite Data' dataset from the NASA Exoplanet 
-  Archive]],
+  Description = [[The data that is used for the exoplanet systems. The data has been
+    derived from the 'Planetary Systems Composite Data' dataset from the NASA Exoplanet
+    Archive]],
   Author = "OpenSpace Team",
   URL = "https://exoplanetarchive.ipac.caltech.edu/docs/data.html",
   License = "MIT license"

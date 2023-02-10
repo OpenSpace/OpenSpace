@@ -34,11 +34,11 @@ local GaiaPosition = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GaiaPosition)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GaiaPosition)
 end)
-  
+
 asset.export(GaiaPosition)
 
 

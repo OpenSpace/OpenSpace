@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,7 +76,7 @@ public:
     void addTargetBrowserPair(const std::string& targetId, const std::string& browserId);
 
     // Hover circle
-    void moveHoverCircle(int i, bool useScript = true);
+    void moveHoverCircle(const std::string& imageUrl, bool useScript = true);
     void disableHoverCircle(bool useScript = true);
 
     // Image collection handling

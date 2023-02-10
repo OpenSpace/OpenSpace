@@ -24,7 +24,7 @@ local layer = {
     pixel-for-pixel spatial documentation of image seams, to prevent misinterpretation
     of seams as possible landforms and to provide instant access to original data. A
     completely seamless CTX mosaic is currently infeasible, so seam-maps are required
-    to prevent misinterpretation. (Description from URL)]],
+    to prevent misinterpretation. (Description from URL)]]
 }
 
 asset.onInitialize(function()

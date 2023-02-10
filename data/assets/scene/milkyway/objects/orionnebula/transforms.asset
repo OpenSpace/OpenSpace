@@ -26,11 +26,11 @@ local NebulaPosition = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NebulaPosition)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NebulaPosition)
 end)
-  
+
 asset.export(NebulaPosition)
 
 

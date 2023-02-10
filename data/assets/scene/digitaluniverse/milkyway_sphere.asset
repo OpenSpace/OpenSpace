@@ -38,11 +38,11 @@ local sphere = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(sphere)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(sphere)
 end)
-  
+
 asset.export(sphere)
 
 

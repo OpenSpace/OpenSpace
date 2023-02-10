@@ -32,7 +32,7 @@ function scrollToPosition(selector) {
 }
 
 function getLevel(element) {
-  return levels.findIndex(function (levelString, level) { 
+  return levels.findIndex(function (levelString, level) {
     var className = 'log-level-' + levelString;
     if (element.classList.contains(className)) {
       return true;

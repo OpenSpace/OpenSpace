@@ -125,14 +125,14 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(planck)
   openspace.addSceneGraphNode(Halpha)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Halpha)
   openspace.removeSceneGraphNode(planck)
   openspace.removeSceneGraphNode(cbe)
   openspace.removeSceneGraphNode(wmap)
 end)
-  
+
 asset.export(wmap)
 asset.export(cbe)
 asset.export(planck)

@@ -3,14 +3,14 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Great White Shark Track"
 local Identifier = "noaa-sos-oceans-shark"
-local Description = [[Before satellite tagging technology became feasible, it was 
-thought that great white sharks (Carcharodon carcharias), spent most of their time close 
-to the coasts feeding on seals and sea lions. With the advent of satellite tagging 
-technology, many new behaviors of the great white shark have been discovered. By tagging 
-a shark with a satellite transmitter, scientists are able to track the movement of the 
-shark for extended periods. In 2001, a shark tagged off of the coast of California was 
-tracked all the way to Hawaii, 3,800 km (2,280 miles) away. The shark spent the winter 
-there before returning to waters closer to California. Several other sharks tagged off 
+local Description = [[Before satellite tagging technology became feasible, it was
+thought that great white sharks (Carcharodon carcharias), spent most of their time close
+to the coasts feeding on seals and sea lions. With the advent of satellite tagging
+technology, many new behaviors of the great white shark have been discovered. By tagging
+a shark with a satellite transmitter, scientists are able to track the movement of the
+shark for extended periods. In 2001, a shark tagged off of the coast of California was
+tracked all the way to Hawaii, 3,800 km (2,280 miles) away. The shark spent the winter
+there before returning to waters closer to California. Several other sharks tagged off
 the coast of California also were tracked traveling great distances from California]]
 local URL = "https://sos.noaa.gov/catalog/datasets/great-white-shark-track/"
 
@@ -19,10 +19,9 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
@@ -31,7 +30,7 @@ local layer = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = imagesDestination,
+    Folder = syncedDirectory .. "2048",
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "shark-migration-%y%j-%H%M.jpg"
@@ -40,11 +39,6 @@ local layer = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "2048.zip", imagesDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

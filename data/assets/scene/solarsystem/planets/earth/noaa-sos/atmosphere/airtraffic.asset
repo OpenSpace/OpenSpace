@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Air Traffic"
 local Identifier = "noaa-sos-atmosphere-air_traffic"
-local Description = [["On any given day, more than 87,000 flights are in the skies in 
-the United States. Only one-third are commercial carriers, like American, United or 
-Southwest. On an average day, air traffic controllers handle 28,537 commercial flights 
-(major and regional airlines), 27,178 general aviation flights (private planes), 24,548 
-air taxi flights (planes for hire), 5,260 military flights and 2,148 air cargo flights 
-(Federal Express, UPS, etc.). At any given moment, roughly 5,000 planes are in the skies 
-above the United States. In one year, controllers handle an average of 64 million 
+local Description = [["On any given day, more than 87,000 flights are in the skies in
+the United States. Only one-third are commercial carriers, like American, United or
+Southwest. On an average day, air traffic controllers handle 28,537 commercial flights
+(major and regional airlines), 27,178 general aviation flights (private planes), 24,548
+air taxi flights (planes for hire), 5,260 military flights and 2,148 air cargo flights
+(Federal Express, UPS, etc.). At any given moment, roughly 5,000 planes are in the skies
+above the United States. In one year, controllers handle an average of 64 million
 takeoffs and landings." - From the National Air Traffic Controllers Association webpage]]
 local URL = "https://sos.noaa.gov/catalog/datasets/air-traffic/"
 
@@ -18,28 +18,21 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true,
+  UnzipFilesDestination = "images"
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
   Type = "ImageSequenceTileLayer",
-  FolderPath = imagesDestination,
+  FolderPath = syncedDirectory .. "images",
   Description = Description
 }
 
-asset.onInitialize(function() 
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "4096-1.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-2.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-3.zip", imagesDestination, true)
-  end
-
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

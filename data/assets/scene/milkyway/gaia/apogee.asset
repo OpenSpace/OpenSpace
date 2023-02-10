@@ -34,7 +34,7 @@ local gaia_abundance_apogee = {
     ColorRange = { { -0.8, 0.6 } },
     -- ShapeTexture = textures .. "disc.png",
     ColorMap = colormaps .. "colorbv.cmap",
-    OtherDataColorMap = colormaps .. "RainbowGradient.cmap",
+    OtherDataColorMap = colormaps .. "rainbowgradient.cmap",
     StaticFilter = -9999,
     StaticFilterReplacement = 0.0,
     DataMapping = {
@@ -58,11 +58,11 @@ local gaia_abundance_apogee = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(gaia_abundance_apogee)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(gaia_abundance_apogee)
 end)
-  
+
 asset.export(gaia_abundance_apogee)
 
 

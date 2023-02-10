@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Land Cover: Woody Biomass in Pan-tropics"
 local Identifier = "noaa-sos-land-pantropical_biomass"
-local Description = [[Tropical deforestation and forest degradation account for an 
-estimated 20% of the world's anthropogenic emissions of carbon dioxide, a significant 
-greenhouse gas contributor. Despite the important services that tropical forests provide, 
-there is incomplete data and knowledge of their condition and coverage, and thus no 
+local Description = [[Tropical deforestation and forest degradation account for an
+estimated 20% of the world's anthropogenic emissions of carbon dioxide, a significant
+greenhouse gas contributor. Despite the important services that tropical forests provide,
+there is incomplete data and knowledge of their condition and coverage, and thus no
 accurate baseline for evaluating and monitoring future changes]]
 local URL = "https://sos.noaa.gov/catalog/datasets/land-cover-woody-biomass-in-pan-tropics/"
 
@@ -39,7 +39,7 @@ local legend = {
 
 asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(legend);  
+  openspace.addScreenSpaceRenderable(legend)
 end)
 
 asset.onDeinitialize(function()

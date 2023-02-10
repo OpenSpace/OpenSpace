@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,14 +51,6 @@ namespace {
         "This list determines the order of the first tree layer if it is used. Elements "
         "present in this list will be shown first, with an alphabetical ordering for "
         "elements not listed"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo IgnoreHiddenInfo = {
-        "IgnoreHidden",
-        "Ignore Hidden Hint",
-        "If this value is 'true', all 'Hidden' hints passed into the SceneGraphNodes are "
-        "ignored and thus all SceneGraphNodes are displayed. If this value is 'false', "
-        "the hidden hints are followed"
     };
 
     int nVisibleProperties(const std::vector<openspace::properties::Property*>& props)
@@ -377,8 +369,6 @@ void GuiPropertyComponent::render() {
         if (count == 0) {
             return;
         }
-
-        
 
         auto header = [&]() -> bool {
             if (owners.size() > 1) {

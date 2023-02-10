@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -123,8 +123,8 @@ public:
      * necessary information for this Property. #PropertyInfo::identifier needs to be
      * unique for each PropertyOwner. The #PropertyInfo::guiName will be stored in the
      * metaData to be accessed by the GUI elements using the #PropertyInfo::guiName key.
-     * The default visibility settings is Visibility::Always, whereas the default read-only
-     * state is \c false.
+     * The default visibility settings is Visibility::Always, whereas the default
+     * read-only state is \c false.
      *
      * \param info The PropertyInfo structure that contains all the required static
      *        information for initializing this Property.

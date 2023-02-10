@@ -1,16 +1,14 @@
 -- Color layers
 asset.require("./layers/colorlayers/blue_marble", false)
 asset.require("./layers/colorlayers/esri_viirs_combo", true)
-asset.require("./layers/colorlayers/esri_world_imagery", false) 
-asset.require("./layers/colorlayers/esri_imagery_world_2D", false)
+asset.require("./layers/colorlayers/esri_world_imagery", false)
 asset.require("./layers/colorlayers/viirs_snpp_temporal", false)
 asset.require("./layers/colorlayers/aqua_modis_temporal", false)
 asset.require("./layers/colorlayers/terra_modis_temporal", false)
 asset.require("./layers/colorlayers/bmng_utah", false)
 asset.require("./layers/colorlayers/bmng_sweden", false)
-asset.require("./layers/colorlayers/amsr2_gcom_w1_sea_ice_concentration_temporal", false) 
+asset.require("./layers/colorlayers/amsr2_gcom_w1_sea_ice_concentration_temporal", false)
 asset.require("./layers/colorlayers/modis_terra_chlorophyll_a_temporal", false)
-asset.require("./layers/colorlayers/ghrsst_l4_g1sst_sea_surface_temperature_temporal", false)
 asset.require("./layers/colorlayers/ghrsst_l4_mur_sea_surface_temperature_temporal", false)
 
 -- Height layers

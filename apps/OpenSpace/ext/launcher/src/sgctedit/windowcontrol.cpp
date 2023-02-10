@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,10 +52,10 @@ namespace {
     };
 
     constexpr std::array<QRectF, 4> DefaultWindowSizes = {
-        QRectF{ 50.f, 50.f, 1280.f, 720.f },
-        QRectF{ 150.f, 150.f, 1280.f, 720.f },
-        QRectF{ 50.f, 50.f, 1280.f, 720.f },
-        QRectF{ 150.f, 150.f, 1280.f, 720.f }
+        QRectF(50.f, 50.f, 1280.f, 720.f),
+        QRectF(150.f, 150.f, 1280.f, 720.f),
+        QRectF(50.f, 50.f, 1280.f, 720.f),
+        QRectF(150.f, 150.f, 1280.f, 720.f)
     };
 
     constexpr int LineEditWidthFixedWindowSize = 50;
@@ -707,17 +707,17 @@ sgct::config::Projections WindowControl::generateProjectionInformation() const {
 
 sgct::config::Window WindowControl::generateWindowInformation() const {
     sgct::config::Window window;
-    window.size = { _sizeX->text().toInt(), _sizeY->text().toInt() };
+    window.size = sgct::ivec2(_sizeX->text().toInt(), _sizeY->text().toInt());
     QRect resolution = _monitorResolutions[_monitor->currentIndex()];
-    window.pos = {
+    window.pos = sgct::ivec2(
         resolution.x() + _offsetX->text().toInt(),
         resolution.y() + _offsetY->text().toInt()
-    };
+    );
 
     sgct::config::Viewport vp;
     vp.isTracked = true;
-    vp.position = { 0.f, 0.f };
-    vp.size = { 1.f, 1.f };
+    vp.position = sgct::vec2(0.f, 0.f);
+    vp.size = sgct::vec2(1.f, 1.f);
     vp.projection = generateProjectionInformation();
     window.viewports.push_back(vp);
     

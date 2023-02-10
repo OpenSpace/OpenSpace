@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -87,17 +87,17 @@ public:
     std::string targetNodeId() const;
 
     ScreenSpaceSkyBrowser* browser() const;
-    std::vector<int> selectedImages() const;
+    std::vector<std::string> selectedImages() const;
 
     ghoul::Dictionary dataAsDictionary() const;
 
     // WorldWide Telescope image handling
-    void setImageOrder(int i, int order);
-    void selectImage(const ImageData& image, int i);
-    void addImageLayerToWwt(const std::string& url, int i);
-    void removeSelectedImage(int i);
+    void setImageOrder(const std::string& imageUrl, int order);
+    void selectImage(const ImageData& image);
+    void addImageLayerToWwt(const std::string& imageUrl);
+    void removeSelectedImage(const std::string& imageUrl);
     void loadImageCollection(const std::string& collection);
-    void setImageOpacity(int i, float opacity);
+    void setImageOpacity(const std::string& imageUrl, float opacity);
     void hideChromeInterface();
 
 private:
@@ -111,6 +111,7 @@ private:
     skybrowser::Animation<glm::dvec3> _targetAnimation =
         skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
     bool _targetIsAnimating = false;
+    bool _fovIsAnimating = false;
 
     // Dragging
     glm::dvec3 _startTargetPosition = glm::dvec3(0.0);

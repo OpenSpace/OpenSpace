@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -135,7 +135,7 @@ void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
     ZoneScoped
 
     double delta = global::timeManager->time().j2000Seconds() - _referenceJ2000;
-    
+
     if (_simplifyTime) {
         using namespace std::chrono;
 

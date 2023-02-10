@@ -16,10 +16,10 @@ local CharonTrailBarycentric = {
     Period = 6.38723,
     Resolution = 1000
   },
-  Tag = { 
-    "moonTrail_solarSystem", 
-    "moonTrail_dwarf", 
-    "moonTrail_pluto", 
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_dwarf",
+    "moonTrail_pluto",
     "moonTrail_minor"
   },
   GUI = {
@@ -31,11 +31,11 @@ local CharonTrailBarycentric = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(CharonTrailBarycentric)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CharonTrailBarycentric)
 end)
-  
+
 asset.export(CharonTrailBarycentric)
 
 

@@ -22,11 +22,11 @@ local MarsBarycenter = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MarsBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MarsBarycenter)
 end)
-  
+
 asset.export(MarsBarycenter)
 
 

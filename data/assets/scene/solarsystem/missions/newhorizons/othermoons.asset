@@ -123,14 +123,14 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(NixText)
   openspace.addSceneGraphNode(StyxText)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(StyxText)
   openspace.removeSceneGraphNode(NixText)
   openspace.removeSceneGraphNode(KerberosText)
   openspace.removeSceneGraphNode(HydraText)
 end)
-    
+
 asset.export(HydraText)
 asset.export(KerberosText)
 asset.export(NixText)

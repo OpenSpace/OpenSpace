@@ -307,8 +307,8 @@ local VoyagerTrailCruiseNeptuneInf = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1989 AUG 26",
-    EndTime = "2021 JAN 01",
-    SampleInterval = 11451 * 2  -- 11451 is the number of days between the Start and End time
+    EndTime = "2300 JAN 01",
+    SampleInterval = 113353   * 2  -- 113353 is the number of days between the Start and End time
   },
   GUI = {
     Name = "Voyager 2 Trail Cruise Neptune-Inf",
@@ -331,16 +331,38 @@ local nodes = {
   VoyagerTrailCruiseNeptuneInf
 }
 
+
+-- Actions
+
+local focus_voyager2 = {
+  Identifier = "os.missions.voyager.v2.focus",
+  Name = "Focus on Voyager 2",
+  Command = [[
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Voyager_2');
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')
+  ]],
+  Documentation = "Set camera focus to Voyager 2",
+  GuiPath = "/Missions/Voyager",
+  isLocal = false
+}
+
+-- Initialize
+
 asset.onInitialize(function()
   for i, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
+
+  openspace.action.registerAction(focus_voyager2)
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end
+
+  openspace.action.removeAction(focus_voyager2)
 end)
 
 for i, node in ipairs(nodes) do

@@ -3,8 +3,8 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Hurricane Sandy: Linear IR - Oct. 2012"
 local Identifier = "noaa-sos-atmosphere-sandy"
-local Description = [[Hurricane Sandy was a memorable and disastrous storm that hit the 
-  Caribbean islands and the Mid-Atlantic States in October of 2012.It was the second 
+local Description = [[Hurricane Sandy was a memorable and disastrous storm that hit the
+  Caribbean islands and the Mid-Atlantic States in October of 2012.It was the second
   costliest storm in U.S. history, after Hurricane Katrina]]
 local URL = "https://sos.noaa.gov/catalog/datasets/precipitable-water-galveston-hurricane-1900/"
 
@@ -13,10 +13,9 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
@@ -25,7 +24,7 @@ local layer = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = imagesDestination,
+    Folder = syncedDirectory .. "4096",
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "linear_rgb_cyl_%Y%m%d_%H%M.jpg"
@@ -34,11 +33,6 @@ local layer = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "4096.zip", imagesDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

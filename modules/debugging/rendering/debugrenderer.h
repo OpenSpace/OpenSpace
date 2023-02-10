@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,7 +68,7 @@ public:
      *  Render the vector of clipping space points in the specified mode and color.
      */
     void renderVertices(const Vertices& clippingSpacePoints, GLenum mode,
-        const glm::vec4& color = { 1.f, 0.f, 0.f, 1.f }) const;
+        const glm::vec4& color = glm::vec4(1.f, 0.f, 0.f, 1.f)) const;
 
     /**
      *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
@@ -84,7 +84,7 @@ public:
      *
      */
     void renderBoxFaces(const Vertices& clippingSpaceBoxCorners,
-        const glm::vec4& rgba = { 1.f, 0.f, 0.f, 1.f }) const;
+        const glm::vec4& rgba = glm::vec4(1.f, 0.f, 0.f, 1.f)) const;
 
     /**
      *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
@@ -100,7 +100,7 @@ public:
      *
      */
     void renderBoxEdges(const Vertices& clippingSpaceBoxCorners,
-        const glm::vec4& rgba = { 1.f, 0.f, 0.f, 1.f }) const;
+        const glm::vec4& rgba = glm::vec4(1.f, 0.f, 0.f, 1.f)) const;
 
     /**
       *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
@@ -116,7 +116,7 @@ public:
       *
       */
     void renderNiceBox(const Vertices& clippingSpaceBoxCorners,
-        const glm::vec4& rgba = { 1.f, 0.f, 0.f, 0.3f }) const;
+        const glm::vec4& rgba = glm::vec4(1.f, 0.f, 0.f, 0.3f)) const;
 
     /**
      *  Input arguments:
@@ -126,7 +126,7 @@ public:
      *  3. RGBA rgba                   Color to draw the view frustum with
      */
     void renderCameraFrustum(const RenderData& data, const Camera& otherCamera,
-        const glm::vec4& rgba = { 1.f, 1.f, 1.f, 0.3f }) const;
+        const glm::vec4& rgba = glm::vec4(1.f, 1.f, 1.f, 0.3f)) const;
 
 protected:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;

@@ -23,9 +23,9 @@ local BennuBarycenter = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(BennuBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(BennuBarycenter)
 end)
-  
+
 asset.export(BennuBarycenter)

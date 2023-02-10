@@ -29,11 +29,11 @@ local GanymedeTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GanymedeTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GanymedeTrail)
 end)
-  
+
 asset.export(GanymedeTrail)
 
 

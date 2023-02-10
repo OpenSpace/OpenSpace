@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -103,11 +103,11 @@ std::vector<std::pair<double, std::string_view>> splitTime(double seconds,
         }
 
         double pt = std::floor(p.first);
-        
+
         // Add the unit the list
         bool pluralForm = (p.first != 1.0 && !forceSingularForm);
         res.push_back({ pt, nameForTimeUnit(p.second, pluralForm) });
-        
+
         // Adjust the remaining time
         secondsVal -= convertTime(pt, p.second, TimeUnit::Second);
     } while (secondsVal != 0.0);

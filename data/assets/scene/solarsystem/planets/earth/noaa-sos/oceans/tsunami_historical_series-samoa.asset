@@ -3,16 +3,16 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Tsunami Historical Series: Samoa - 2009"
 local Identifier = "noaa-sos-oceans-tsunami_historical_series-samoa"
-local Description = [[At 6:48 on the morning of September 29, 2009 (17:48 UTC), an 8.1 
-moment magnitude earthquake struck near the Samoan Islands in the southwest Pacific 
-Ocean. The Pacific Tsunami Warning Center (PTWC) quickly determined that the large 
-magnitude of this earthquake, its location under the sea floor, its relatively shallow 
-depth within the earth, and a history of tsunami-causing earthquakes in the region meant 
-that it could have moved the seafloor and thus posed a significant tsunami risk. PTWC 
-issued its first tsunami warning several minutes later for Samoa, American Samoa, Tonga, 
-and other nearby island groups. The earthquake did in fact cause a dangerous tsunami, and 
-over the following hours PTWC tracked it through the Pacific Ocean and updated its alerts 
-with measured tsunami wave heights and recommended that additional areas consider coastal 
+local Description = [[At 6:48 on the morning of September 29, 2009 (17:48 UTC), an 8.1
+moment magnitude earthquake struck near the Samoan Islands in the southwest Pacific
+Ocean. The Pacific Tsunami Warning Center (PTWC) quickly determined that the large
+magnitude of this earthquake, its location under the sea floor, its relatively shallow
+depth within the earth, and a history of tsunami-causing earthquakes in the region meant
+that it could have moved the seafloor and thus posed a significant tsunami risk. PTWC
+issued its first tsunami warning several minutes later for Samoa, American Samoa, Tonga,
+and other nearby island groups. The earthquake did in fact cause a dangerous tsunami, and
+over the following hours PTWC tracked it through the Pacific Ocean and updated its alerts
+with measured tsunami wave heights and recommended that additional areas consider coastal
 evacuation. PTWC canceled all tsunami alerts about four hours after the earthquake]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-samoa-2009/"
 
@@ -53,7 +53,7 @@ local layer_null = {
 }
 
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_coastal)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy_coastal)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy)

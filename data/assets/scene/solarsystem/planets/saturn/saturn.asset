@@ -41,7 +41,7 @@ local Saturn = {
       TextureColor = texturesPath .. "color_original_single.png",
       TextureTransparency = texturesPath .. "trans_original_single.png",
       ColorFilter = 0.8,
-      
+
       NightFactor = 1.0,
       Size = 140445000,
       Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
@@ -49,7 +49,7 @@ local Saturn = {
     Shadows = {
       Enabled = true,
       DistanceFraction = 40.0
-    } 
+    }
   },
   Tag = { "planet_solarSystem", "planet_giants" },
   GUI = {
@@ -67,10 +67,14 @@ local SaturnLabel = {
     Type = "RenderableLabel",
     Text = "Saturn",
     FontSize = 70.0,
-    Size = 8.85,
-    MinMaxSize = { 1, 100 },
+    Size = 8.9,
+    MinMaxSize = { 1, 60 },
     BlendMode = "Additive",
-    OrientationOption = "Camera View Direction"
+    OrientationOption = "Camera View Direction",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.5, 80.0 },
+    FadeWidths = { 1.0, 100.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
@@ -84,12 +88,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Saturn)
   openspace.addSceneGraphNode(SaturnLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SaturnLabel)
   openspace.removeSceneGraphNode(Saturn)
 end)
-    
+
 asset.export(Saturn)
 asset.export(SaturnLabel)
 

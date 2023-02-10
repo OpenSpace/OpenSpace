@@ -30,11 +30,11 @@ local JupiterTrailEarth = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JupiterTrailEarth)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JupiterTrailEarth)
 end)
-  
+
 asset.export(JupiterTrailEarth)
 
 

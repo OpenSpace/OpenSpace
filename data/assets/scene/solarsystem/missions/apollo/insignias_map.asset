@@ -101,7 +101,7 @@ local hide_apollo_labels = {
   IsLocal = true
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function ()
   openspace.action.registerAction(show_apollo_labels)
   openspace.action.registerAction(hide_apollo_labels)
   for _, node in ipairs(nodes) do

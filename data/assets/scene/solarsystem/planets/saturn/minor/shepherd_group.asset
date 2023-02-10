@@ -16,13 +16,14 @@ local kernels = {
 local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
 local guiPath = "/Solar System/Planets/Saturn/Moons/Shepherd Moons"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_shepherd", "moon_minor" }
+local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_shepherd", "moon_minor", "moon_minor_saturn" }
 local trailColor = { 0.5, 0.3, 0.3 }
-local trailTags = { 
+local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_saturn",
-  "moonTrail_minor"
+  "moonTrail_minor",
+  "moonTrail_minor_saturn"
 }
 
 local shepherdGroup = {
@@ -147,15 +148,54 @@ local shepherdGroup = {
   }
 }
 
+-- Generate all moon labels
+local moon_labels = {}
+
+for i, moon in ipairs(shepherdGroup) do
+  local moonName = moon.GUI.Name or moon.Identifier
+  moon_labels[i] = {
+    Identifier = moon.Identifier .. "Label",
+    Parent = moon.Identifier,
+    Renderable = {
+      Enabled = false,
+      Type = "RenderableLabel",
+      Text = moonName,
+      FontSize = 70.0,
+      Size = 5.5,
+      MinMaxSize = { 1, 20 },
+      OrientationOption = "Camera View Direction",
+      BlendMode = "Normal",
+      EnableFading = true,
+      FadeUnit = "Mm",
+      FadeDistances = { 75.0, 1000.0 },
+      FadeWidths = { 25.0, 800.0 }
+    },
+    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+    GUI = {
+      Name = moonName .. " Label",
+      Path = "/Solar System/Planets/Saturn/Moons",
+      Description = "Label for Saturn's moon " .. moonName .. " (Shepherd group)"
+    }
+  }
+end
+
 local nodes = proceduralGlobes.createGlobes(shepherdGroup)
 
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
+
+  for _, moon in ipairs(moon_labels) do
+    openspace.addSceneGraphNode(moon)
+  end
 end)
 
 asset.onDeinitialize(function()
+  for i = #moon_labels, 1, -1 do
+    openspace.removeSceneGraphNode(moon_labels[i])
+  end
+
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end

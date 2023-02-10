@@ -2,7 +2,7 @@
     { "type": "time", 
       "value": "2019-01-01T00:00:00.00"}, 
     { "type": "recording", 
-      "value": "RecordingDefaultSolarSystem"}, 
+      "value": "RecordingDefaultSolarSystem.osrec"}, 
     { "type": "wait", 
       "value": "2"}, 
     { "type": "screenshot", 

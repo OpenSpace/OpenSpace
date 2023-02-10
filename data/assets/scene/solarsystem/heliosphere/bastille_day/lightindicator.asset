@@ -32,11 +32,11 @@ local travelSpeedIndicator = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(travelSpeedIndicator)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(travelSpeedIndicator)
 end)
-  
+
 asset.export(travelSpeedIndicator)
 
 

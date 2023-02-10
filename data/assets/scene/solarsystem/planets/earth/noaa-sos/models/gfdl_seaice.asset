@@ -3,18 +3,18 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Climate Model: Sea Ice Change (GFDL a1b) 1861 - 2100"
 local Identifier = "noaa-sos-models-gfdl_seaice"
-local Description = [[In the coming decades, the Arctic region is projected to warm at 
-about twice the rate of the global average according to the scientists at NOAA's 
-Geophysical Fluid Dynamics Laboratory. This is not good news for the Arctic sea ice. In 
-fact, the concentration of sea ice in the northern latitudes has been decreasing over the 
-past 30 years and this trend is expected to continue as the climate changes. The 
-disappearance of sea ice can have a major impact globally. Melting sea ice can disturb 
-the global ocean conveyor belt, impact sea life and the fishing industry, and change the 
-Earth energy budget. Sea ice cools the climate because it is reflective and so returns 
-much of the sun's warming back to space. As the ice melts, more of this energy is 
-absorbed in the darker ocean water. The temperature increases as more sunlight is 
-absorbed rather than reflected. This is a positive feedback loop because as temperature 
-rises, more sea ice melts causing increased absorption which leads to rising 
+local Description = [[In the coming decades, the Arctic region is projected to warm at
+about twice the rate of the global average according to the scientists at NOAA's
+Geophysical Fluid Dynamics Laboratory. This is not good news for the Arctic sea ice. In
+fact, the concentration of sea ice in the northern latitudes has been decreasing over the
+past 30 years and this trend is expected to continue as the climate changes. The
+disappearance of sea ice can have a major impact globally. Melting sea ice can disturb
+the global ocean conveyor belt, impact sea life and the fishing industry, and change the
+Earth energy budget. Sea ice cools the climate because it is reflective and so returns
+much of the sun's warming back to space. As the ice melts, more of this energy is
+absorbed in the darker ocean water. The temperature increases as more sunlight is
+absorbed rather than reflected. This is a positive feedback loop because as temperature
+rises, more sea ice melts causing increased absorption which leads to rising
 temperatures]]
 local URL = "https://sos.noaa.gov/catalog/datasets/climate-model-sea-ice-change-gfdl-a1b-1861-2100/"
 
@@ -23,17 +23,17 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true,
+  UnzipFilesDestination = "images"
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
   Type = "ImageSequenceTileLayer",
-  FolderPath = imagesDestination,
+  FolderPath = syncedDirectory .. "images",
   Description = Description
 }
 
@@ -48,15 +48,8 @@ local colorbar = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "4096-1.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-2.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-3.zip", imagesDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

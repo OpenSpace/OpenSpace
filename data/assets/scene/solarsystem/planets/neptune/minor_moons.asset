@@ -2,11 +2,68 @@ asset.require("./inner_moons")
 asset.require("./irregular_prograde_moons")
 asset.require("./irregular_retrograde_moons")
 
+local minormoons_on = {
+  Identifier = "os.solarsystem.neptune.minormoonson",
+  Name = "Turn ON minor moons and trails",
+  Command = [[
+    local trails = openspace.getProperty('{moonTrail_minor_neptune}.Renderable.Enabled');
+    local trails_fade = openspace.getProperty('{moonTrail_minor_neptune}.Renderable.Fade');
+
+    local moons = openspace.getProperty('{moon_minor_neptune}.Renderable.Enabled');
+    local moons_fade = openspace.getProperty('{moon_minor_neptune}.Renderable.Fade');
+
+    for i, v in pairs(trails_fade) do 
+      openspace.setPropertyValueSingle(trails[i], true)
+      openspace.setPropertyValueSingle(v, 1, 2, 'Linear') 
+    end
+
+    for i, v in pairs(moons_fade) do 
+      openspace.setPropertyValueSingle(moons[i], true)
+      openspace.setPropertyValueSingle(v, 1, 2, 'Linear') 
+    end
+  ]],
+  Documentation = "Turn ON Neptune's minor moons and their trails",
+  GuiPath = "/Solar System/Neptune",
+  IsLocal = true
+}
+
+local minormoons_off = {
+  Identifier = "os.solarsystem.neptune.minormoonsoff",
+  Name = "Turn OFF minors moon and trails",
+  Command = [[
+    local trails = openspace.getProperty('{moonTrail_minor_neptune}.Renderable.Enabled');
+    local trails_fade = openspace.getProperty('{moonTrail_minor_neptune}.Renderable.Fade');
+
+    local moons = openspace.getProperty('{moon_minor_neptune}.Renderable.Enabled');
+    local moons_fade = openspace.getProperty('{moon_minor_neptune}.Renderable.Fade');
+
+    for i, v in pairs(trails_fade) do 
+      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)" ) 
+    end
+
+    for i, v in pairs(moons_fade) do
+      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)" ) 
+    end
+  ]],
+  Documentation = "Turn OFF Neptune's minor moons and their trails",
+  GuiPath = "/Solar System/Neptune",
+  IsLocal = true
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(minormoons_on)
+  openspace.action.registerAction(minormoons_off)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(minormoons_off)
+  openspace.action.removeAction(minormoons_on)
+end)
 
 asset.meta = {
   Name = "Neptune Minor Moons",
-  Version = "1.0",
-  Description = [[Meta asset containing 3 moon groups: inner_moons, 
+  Version = "1.1",
+  Description = [[Meta asset containing 3 moon groups: inner_moons,
     irregular_prograde_moons, and irregular_retrograde_moons]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

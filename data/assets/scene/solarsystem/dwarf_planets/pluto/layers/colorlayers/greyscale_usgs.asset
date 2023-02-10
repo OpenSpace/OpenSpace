@@ -7,7 +7,7 @@ local layer = {
   FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/pluto_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_PLUTO_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90,360,90",
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
@@ -31,7 +31,7 @@ asset.meta = {
     parallax - or the difference in the apparent relative positions - of features on
     the surface obtained at different viewing angles during the encounter. Scientists
     use these parallax displacements of high and low terrain to estimate landform
-    heights.The mosaic is available in Equirectangular projection at an equatorial 
+    heights.The mosaic is available in Equirectangular projection at an equatorial
     pixel scale of 300 meters per pixel (m). (Description from URL)]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Pluto/NewHorizons/" ..

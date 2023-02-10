@@ -3,14 +3,14 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Hurricane Season - 2004"
 local Identifier = "noaa-sos-atmosphere-2004_ir_hurricane"
-local Description = [[The 2004 hurricane season started on July 31 with Hurricane Alex 
-and continued all the way through to December 2 with Tropical Storm Otto. The season 
-featured 15 tropical storms, 9 of which became hurricanes, and 6 of those were classified 
-as major hurricanes. This over-active hurricane season tallied up a bill of $42 billion 
-in damages, which at the time was record high. Florida took the brunt of the damage with 
-4 major hurricanes making landfall in the state. Two of the hurricanes, Frances and 
-Jeanne, landed in almost the same location on the east coast of Florida only 3 weeks 
-apart. It is estimated that one in every five homes in Florida was damaged in the 2004 
+local Description = [[The 2004 hurricane season started on July 31 with Hurricane Alex
+and continued all the way through to December 2 with Tropical Storm Otto. The season
+featured 15 tropical storms, 9 of which became hurricanes, and 6 of those were classified
+as major hurricanes. This over-active hurricane season tallied up a bill of $42 billion
+in damages, which at the time was record high. Florida took the brunt of the damage with
+4 major hurricanes making landfall in the state. Two of the hurricanes, Frances and
+Jeanne, landed in almost the same location on the east coast of Florida only 3 weeks
+apart. It is estimated that one in every five homes in Florida was damaged in the 2004
 hurricane season]]
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-season-2004/"
 
@@ -19,10 +19,9 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
@@ -31,7 +30,7 @@ local layer = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = imagesDestination,
+    Folder = syncedDirectory .. "2048",
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "cylir_%Y%m%d_%H%M.jpg"
@@ -40,11 +39,6 @@ local layer = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "2048.zip", imagesDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

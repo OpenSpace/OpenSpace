@@ -29,11 +29,11 @@ local EnceladusTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EnceladusTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EnceladusTrail)
 end)
-  
+
 asset.export(EnceladusTrail)
 
 

@@ -39,10 +39,14 @@ local UranusLabel = {
     Type = "RenderableLabel",
     Text = "Uranus",
     FontSize = 70.0,
-    Size = 8.86,
-    MinMaxSize = { 1, 100 },
+    Size = 9.0,
+    MinMaxSize = { 1, 80 },
     OrientationOption = "Camera View Direction",
-    BlendMode = "Additive"
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.5, 100.0 },
+    FadeWidths = { 1.0, 120.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
@@ -56,12 +60,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Uranus)
   openspace.addSceneGraphNode(UranusLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(UranusLabel)
   openspace.removeSceneGraphNode(Uranus)
 end)
-    
+
 asset.export(Uranus)
 asset.export(UranusLabel)
 

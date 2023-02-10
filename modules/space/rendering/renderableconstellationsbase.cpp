@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,8 +63,7 @@ namespace {
         "The constellations that are selected are displayed on the celestial sphere"
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
-    {
+    const static openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the constellations"
@@ -96,12 +95,13 @@ documentation::Documentation RenderableConstellationsBase::Documentation() {
     return codegen::doc<Parameters>("space_renderable_constellationsbase");
 }
 
-RenderableConstellationsBase::RenderableConstellationsBase(const ghoul::Dictionary& dictionary)
+RenderableConstellationsBase::RenderableConstellationsBase(
+                                                      const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _drawLabels(DrawLabelInfo, false)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
-    , _namesFilename(NamesFileInfo)
     , _selection(SelectionInfo)
+    , _drawLabels(DrawLabelInfo, false)
+    , _namesFilename(NamesFileInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -188,7 +188,7 @@ void RenderableConstellationsBase::loadConstellationFile() {
 }
 
 void RenderableConstellationsBase::fillSelectionProperty() {
-    for (const std::pair<std::string, std::string>& pair : _namesTranslation) {
+    for (const std::pair<const std::string, std::string>& pair : _namesTranslation) {
         _selection.addOption(pair.second);
     }
 }

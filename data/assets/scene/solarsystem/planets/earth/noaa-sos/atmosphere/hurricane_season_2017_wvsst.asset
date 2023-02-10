@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Hurricane Season: Water Vapor and SST - 2017"
 local Identifier = "noaa-sos-atmosphere-hurricane_season_2017_wvsst"
-local Description = [[After a long lull in major hurricanes striking the U.S. 
-  (2005 - 2017), the 2017 season was an extremely destructive season, featuring 17 named 
-  storms in just the Atlantic Ocean, tying it with 1936 as the fifth-most active season 
-  since records began in 1851. All ten of the Atlantic hurricanes occurred in a row, the 
+local Description = [[After a long lull in major hurricanes striking the U.S.
+  (2005 - 2017), the 2017 season was an extremely destructive season, featuring 17 named
+  storms in just the Atlantic Ocean, tying it with 1936 as the fifth-most active season
+  since records began in 1851. All ten of the Atlantic hurricanes occurred in a row, the
   greatest number of consecutive hurricanes in the satellite era. In addition, it is by
   far the costliest season on record, with a preliminary total of over $368.66 billion
   (USD) in damages, which is more than double the cost of 2005's total, and nearly all of
@@ -20,10 +20,9 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
@@ -32,20 +31,15 @@ local layer = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = imagesDestination,
+    Folder = syncedDirectory .. "2048",
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "wvsst-%y%j-%H.jpg"
-  },    
+  },
   Description = Description
 }
 
-asset.onInitialize(function() 
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "2048.zip", imagesDestination, true)
-  end
-
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -69,8 +69,8 @@ TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
     _targetRenderable = dynamic_cast<RenderableSkyTarget*>(_targetNode->renderable());
 }
 
-void TargetBrowserPair::setImageOrder(int i, int order) {
-    _browser->setImageOrder(i, order);
+void TargetBrowserPair::setImageOrder(const std::string& imageUrl, int order) {
+    _browser->setImageOrder(imageUrl, order);
 }
 
 void TargetBrowserPair::startFinetuningTarget() {
@@ -87,10 +87,7 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation) {
     glm::dvec3 up = _targetRenderable->upVector() * percentage.y;
 
     glm::dvec3 newPosition = _startTargetPosition - (right - up);
-    aimTargetGalactic(
-        _targetNode->identifier(), 
-        newPosition
-    );
+    aimTargetGalactic(_targetNode->identifier(), newPosition);
 }
 
 void TargetBrowserPair::synchronizeAim() {
@@ -154,13 +151,23 @@ double TargetBrowserPair::verticalFov() const {
     return _browser->verticalFov();
 }
 
-std::vector<int> TargetBrowserPair::selectedImages() const {
+std::vector<std::string> TargetBrowserPair::selectedImages() const {
     return _browser->selectedImages();
 }
 
 ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     glm::dvec2 spherical = targetDirectionEquatorial();
     glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    std::vector<std::string> selectedImagesIndices;
+    
+    for (const std::string& imageUrl : selectedImages()) {
+        bool imageExists = module->wwtDataHandler().image(imageUrl).has_value();
+        ghoul_assert(imageExists, "Image doesn't exist in the wwt catalog!");
+        selectedImagesIndices.push_back(
+            module->wwtDataHandler().image(imageUrl)->identifier
+        );
+    }
 
     ghoul::Dictionary res;
     res.setValue("id", browserId());
@@ -175,7 +182,7 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     res.setValue("ratio", static_cast<double>(_browser->browserRatio()));
     res.setValue("isFacingCamera", isFacingCamera());
     res.setValue("isUsingRae", isUsingRadiusAzimuthElevation());
-    res.setValue("selectedImages", selectedImages());
+    res.setValue("selectedImages", selectedImagesIndices);
     res.setValue("scale", static_cast<double>(_browser->scale()));
     res.setValue("opacities", _browser->opacities());
     res.setValue("borderRadius", _browser->borderRadius());
@@ -196,9 +203,9 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     return res;
 }
 
-void TargetBrowserPair::selectImage(const ImageData& image, int i) {
+void TargetBrowserPair::selectImage(const ImageData& image) {
     // Load image into browser
-    _browser->selectImage(image.imageUrl, i);
+    _browser->selectImage(image.imageUrl);
 
     // If the image has coordinates, move the target
     if (image.hasCelestialCoords) {
@@ -208,20 +215,20 @@ void TargetBrowserPair::selectImage(const ImageData& image, int i) {
     }
 }
 
-void TargetBrowserPair::addImageLayerToWwt(const std::string& url, int i) {
-    _browser->addImageLayerToWwt(url, i);
+void TargetBrowserPair::addImageLayerToWwt(const std::string& imageUrl) {
+    _browser->addImageLayerToWwt(imageUrl);
 }
 
-void TargetBrowserPair::removeSelectedImage(int i) {
-    _browser->removeSelectedImage(i);
+void TargetBrowserPair::removeSelectedImage(const std::string& imageUrl) {
+    _browser->removeSelectedImage(imageUrl);
 }
 
 void TargetBrowserPair::loadImageCollection(const std::string& collection) {
     _browser->loadImageCollection(collection);
 }
 
-void TargetBrowserPair::setImageOpacity(int i, float opacity) {
-    _browser->setImageOpacity(i, opacity);
+void TargetBrowserPair::setImageOpacity(const std::string& imageUrl, float opacity) {
+    _browser->setImageOpacity(imageUrl, opacity);
 }
 
 void TargetBrowserPair::hideChromeInterface() {
@@ -286,10 +293,17 @@ void TargetBrowserPair::incrementallyAnimateToCoordinate() {
         aimTargetGalactic(_targetNode->identifier(), _targetAnimation.newValue());
         _fovAnimation.start();
         _targetIsAnimating = false;
+        _fovIsAnimating = true;
     }
+    // After the target has animated to its position, animate the field of view 
     if (_fovAnimation.isAnimating()) {
         _browser->setVerticalFov(_fovAnimation.newValue());
         _targetRenderable->setVerticalFov(_browser->verticalFov());
+    }
+    else if (!_fovAnimation.isAnimating() && _fovIsAnimating) {
+        // Set the finished field of view
+        setVerticalFov(_fovAnimation.newValue());
+        _fovIsAnimating = false;
     }
 }
 
@@ -315,7 +329,7 @@ void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd)
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     double fovSpeed = module->browserAnimationSpeed();
     // The speed is given degrees /sec
-    double fovTime = abs(_browser->verticalFov() - fovEnd) / fovSpeed;
+    double fovTime = std::abs(_browser->verticalFov() - fovEnd) / fovSpeed;
     // Fov animation
     _fovAnimation = skybrowser::Animation(_browser->verticalFov(), fovEnd, fovTime);
 

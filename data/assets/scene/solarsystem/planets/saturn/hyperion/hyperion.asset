@@ -50,14 +50,43 @@ local Hyperion = {
   }
 }
 
+
+local HyperionLabel = {
+  Identifier = "HyperionLabel",
+  Parent = Hyperion.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Hyperion",
+    FontSize = 70.0,
+    Size = 6.2,
+    MinMaxSize = { 1, 35 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.5, 20.0 },
+    FadeWidths = { 0.3, 20.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Hyperion Label",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = "Label for Saturn's moon Hyperion"
+  }
+}
+
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Hyperion)
+  openspace.addSceneGraphNode(HyperionLabel)
 end)
-  
+
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HyperionLabel)
   openspace.removeSceneGraphNode(Hyperion)
 end)
-  
+
 asset.export(Hyperion)
 
 

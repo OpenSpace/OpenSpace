@@ -3,14 +3,14 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Tsunami Historical Series: Lisbon - 1755"
 local Identifier = "noaa-sos-oceans-tsunami_historical_series-lisbon"
-local Description = [[On the morning of November 1, 1755, a great earthquake shook 
-Portugal's capital city of Lisbon as worshipers filled churches and cathedrals for the 
-All Saints' Day Mass. In seconds it left the city in ruins and in minutes those ruins 
-were on fire. The earthquake probably killed about 30,000 people, though some estimates 
-double that figure. Many of the survivors fled to the wharves and keys of Lisbon's port, 
-but they would find no safety there. The first tsunami wave surged up the Tagus estuary 
-about an hour after the earthquake, reached a maximum runup of 12 meters (40 feet), and 
-killed another 1000 people. At least two more tsunami waves surged into the city, 
+local Description = [[On the morning of November 1, 1755, a great earthquake shook
+Portugal's capital city of Lisbon as worshipers filled churches and cathedrals for the
+All Saints' Day Mass. In seconds it left the city in ruins and in minutes those ruins
+were on fire. The earthquake probably killed about 30,000 people, though some estimates
+double that figure. Many of the survivors fled to the wharves and keys of Lisbon's port,
+but they would find no safety there. The first tsunami wave surged up the Tagus estuary
+about an hour after the earthquake, reached a maximum runup of 12 meters (40 feet), and
+killed another 1000 people. At least two more tsunami waves surged into the city,
 completing the earthquake's destruction]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-lisbon-1755/"
 
@@ -51,7 +51,7 @@ local layer_null = {
 }
 
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_coastal)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy_coastal)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy)

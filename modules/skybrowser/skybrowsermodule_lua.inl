@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -98,7 +98,7 @@ std::string prunedIdentifier(std::string identifier) {
  * Takes an index to an image and selects that image in the currently
  * selected sky browser.
  */
-[[codegen::luawrap]] void selectImage(int imageIndex) {
+[[codegen::luawrap]] void selectImage(std::string imageUrl) {
     using namespace openspace;
 
     // Load image
@@ -107,8 +107,17 @@ std::string prunedIdentifier(std::string identifier) {
     if (module->isCameraInSolarSystem()) {
         TargetBrowserPair* selected = module->pair(module->selectedBrowserId());
         if (selected) {
-            const ImageData& image = module->wwtDataHandler().image(imageIndex);
+            std::optional<const ImageData> found = module->wwtDataHandler().image(
+                imageUrl
+            );
+            if (!found.has_value()) {
+                LINFO(fmt::format(
+                    "No image with identifier {} was found in the collection.", imageUrl
+                ));
+                return;
+            }
             // Load image into browser
+            const ImageData& image = found.value();
             std::string str = image.name;
             // Check if character is ASCII - if it isn't, remove
             str.erase(
@@ -121,7 +130,7 @@ std::string prunedIdentifier(std::string identifier) {
                 str.end()
             );
             LINFO("Loading image " + str);
-            selected->selectImage(image, imageIndex);
+            selected->selectImage(image);
 
             bool isInView = skybrowser::isCoordinateInView(image.equatorialCartesian);
             // If the coordinate is not in view, rotate camera
@@ -154,10 +163,10 @@ std::string prunedIdentifier(std::string identifier) {
 /**
  * Moves the hover circle to the coordinate specified by the image index.
  */
-[[codegen::luawrap]] void moveCircleToHoverImage(int imageIndex) {
+[[codegen::luawrap]] void moveCircleToHoverImage(std::string imageUrl) {
     using namespace openspace;
 
-    global::moduleEngine->module<SkyBrowserModule>()->moveHoverCircle(imageIndex, false);
+    global::moduleEngine->module<SkyBrowserModule>()->moveHoverCircle(imageUrl, false);
 }
 
 /**
@@ -174,7 +183,7 @@ std::string prunedIdentifier(std::string identifier) {
  * which it should have in the selected image list. The image is then changed to have this
  * order.
  */
-[[codegen::luawrap]] void setImageLayerOrder(std::string identifier, int imageIndex,
+[[codegen::luawrap]] void setImageLayerOrder(std::string identifier, std::string imageUrl,
                                              int imageOrder)
 {
     using namespace openspace;
@@ -182,7 +191,7 @@ std::string prunedIdentifier(std::string identifier) {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->setImageOrder(imageIndex, imageOrder);
+        pair->setImageOrder(imageUrl, imageOrder);
     }
 }
 
@@ -328,10 +337,7 @@ std::string prunedIdentifier(std::string identifier) {
 
     // Create Lua table to send to the GUI
     ghoul::Dictionary list;
-
-    for (int i = 0; i < module->nLoadedImages(); i++) {
-        const ImageData& img = module->wwtDataHandler().image(i);
-
+    for (auto const& [id, img] : module->wwtDataHandler().images()) {
         // Push ("Key", value)
         ghoul::Dictionary image;
         image.setValue("name", img.name);
@@ -344,11 +350,9 @@ std::string prunedIdentifier(std::string identifier) {
         image.setValue("hasCelestialCoords", img.hasCelestialCoords);
         image.setValue("credits", img.credits);
         image.setValue("creditsUrl", img.creditsUrl);
-        image.setValue("identifier", std::to_string(i));
+        image.setValue("identifier", img.identifier);
 
-        // Index for current ImageData
-        // Set table for the current ImageData
-        list.setValue(std::to_string(i + 1), image);
+        list.setValue(img.identifier, image);
     }
 
     return list;
@@ -409,7 +413,8 @@ std::string prunedIdentifier(std::string identifier) {
             target.setValue("dec", spherical.y);
             target.setValue("roll", pair->targetRoll());
             target.setValue("color", pair->borderColor());
-            std::vector<std::pair<std::string, glm::dvec3>> copies = pair->displayCopies();
+            std::vector<std::pair<std::string, glm::dvec3>> copies =
+                pair->displayCopies();
             ghoul::Dictionary copiesData;
             for (size_t i = 0; i < copies.size(); i++) {
                 copiesData.setValue(copies[i].first, copies[i].second);
@@ -440,15 +445,15 @@ std::string prunedIdentifier(std::string identifier) {
  * Takes an identifier to a sky browser or sky target, an index to an image and a value
  * for the opacity.
  */
-[[codegen::luawrap]] void setOpacityOfImageLayer(std::string identifier, int imageIndex,
-                                                 float opacity)
+[[codegen::luawrap]] void setOpacityOfImageLayer(std::string identifier, 
+                                                 std::string imageUrl, float opacity)
 {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->setImageOpacity(imageIndex, opacity);
+        pair->setImageOpacity(imageUrl, opacity);
     }
 }
 
@@ -498,7 +503,7 @@ std::string prunedIdentifier(std::string identifier) {
     glm::vec3 positionTarget = glm::vec3(0.9f, 0.4f, -2.1f);
     glm::dvec3 galacticTarget = skybrowser::localCameraToGalactic(positionTarget);
     if (glm::any(glm::isnan(galacticTarget))) {
-        galacticTarget = { skybrowser::CelestialSphereRadius, 0.0, 0.0 };
+        galacticTarget = glm::dvec3 (0.0, 0.0, skybrowser::CelestialSphereRadius);
     }
     std::string guiPath = "/Sky Browser";
     std::string url = "http://wwt.openspaceproject.com/1/openspace/";
@@ -624,14 +629,14 @@ std::string prunedIdentifier(std::string identifier) {
  * image from that sky browser.
  */
 [[codegen::luawrap]] void removeSelectedImageInBrowser(std::string identifier,
-                                                       int imageIndex)
+                                                       std::string imageUrl)
 {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->browser()->removeSelectedImage(imageIndex);
+        pair->browser()->removeSelectedImage(imageUrl);
     }
 }
 
@@ -786,7 +791,6 @@ std::string prunedIdentifier(std::string identifier) {
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->fineTuneTarget(translation);
-       
     }
 }
 
@@ -808,13 +812,13 @@ std::string prunedIdentifier(std::string identifier) {
         LINFO("Image collection is loaded in Screen Space Sky Browser " + prunedId);
         pair->setImageCollectionIsLoaded(true);
         // Add all selected images to WorldWide Telescope
-        const std::vector<int>& images = pair->selectedImages();
+        const std::vector<std::string>& images = pair->selectedImages();
         std::for_each(
             images.rbegin(), images.rend(),
-            [&](int index) {
-                const ImageData& image = module->wwtDataHandler().image(index);
-                // Index of image is used as layer ID as it is unique in the image data set
-                pair->browser()->addImageLayerToWwt(image.imageUrl, index);
+            [&](std::string imageUrl) {
+                const ImageData& image = module->wwtDataHandler().image(imageUrl).value();
+                // Index of image is used as layer ID as it's unique in the image data set
+                pair->browser()->addImageLayerToWwt(image.imageUrl);
             }
         );
     }

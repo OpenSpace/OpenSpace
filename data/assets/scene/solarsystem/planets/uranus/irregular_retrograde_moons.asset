@@ -6,13 +6,14 @@ local kernel = asset.require("./kernels").ura112
 
 local parentIdentifier = transforms.UranusBarycenter.Identifier
 local parentSpice = "URANUS BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_irregular_retrograde", "moon_minor" }
+local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_irregular_retrograde", "moon_minor", "moon_minor_uranus" }
 local trailColor = { 0.60, 0.65, 0.84 }
-local trailTags = { 
+local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_uranus",
-  "moonTrail_minor"
+  "moonTrail_minor",
+  "moonTrail_minor_uranus"
 }
 
 local irregularMoons = {
@@ -154,20 +155,59 @@ local irregularMoons = {
   }
 }
 
+-- Generate all moon labels
+local moon_labels = {}
+
+for i, moon in ipairs(irregularMoons) do
+  local moonName = moon.GUI.Name or moon.Identifier
+  moon_labels[i] = {
+    Identifier = moon.Identifier .. "Label",
+    Parent = moon.Identifier,
+    Renderable = {
+      Enabled = false,
+      Type = "RenderableLabel",
+      Text = moonName,
+      FontSize = 70.0,
+      Size = 7.0,
+      MinMaxSize = { 1, 25 },
+      OrientationOption = "Camera View Direction",
+      BlendMode = "Normal",
+      EnableFading = true,
+      FadeUnit = "Gm",
+      FadeDistances = { 2.0, 80.0 },
+      FadeWidths = { 1.0, 40.0 }
+    },
+    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+    GUI = {
+      Name = moonName .. " Label",
+      Path = "/Solar System/Planets/Uranus/Moons",
+      Description = "Label for Uranus' moon " .. moonName .. " (Irregular retrograde group)"
+    }
+  }
+end
+
 local nodes = proceduralGlobes.createGlobes(irregularMoons)
 
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
+
+  for _, moon in ipairs(moon_labels) do
+    openspace.addSceneGraphNode(moon)
+  end
 end)
-  
+
 asset.onDeinitialize(function()
+  for i = #moon_labels, 1, -1 do
+    openspace.removeSceneGraphNode(moon_labels[i])
+  end
+
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end
 end)
-  
+
 for _, node in ipairs(nodes) do
   asset.export(node)
 end

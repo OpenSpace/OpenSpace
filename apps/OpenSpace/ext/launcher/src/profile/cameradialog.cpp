@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -384,11 +384,11 @@ void CameraDialog::approved() {
             !_navState.upY->text().isEmpty() &&
             !_navState.upZ->text().isEmpty())
         {
-            glm::dvec3 u = {
+            glm::dvec3 u = glm::dvec3(
                 _navState.upX->text().toDouble(),
                 _navState.upY->text().toDouble(),
                 _navState.upZ->text().toDouble()
-            };
+            );
             nav.up = u;
         }
         else {

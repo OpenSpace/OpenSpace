@@ -49,7 +49,7 @@ local densityVolume = {
 }
 
 local toggle_volume = {
-  Identifier = "density_volume.toggle_volume",
+  Identifier = "os.events.bastilleday.densityvolume.togglevolume",
   Name = "Toggle volume",
   Command = propertyHelper.invert("Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Enabled"),
   Documentation = "Toggle volume rendering of CME",
@@ -72,7 +72,7 @@ asset.export(densityVolume)
 
 asset.meta = {
   Name = "Predictive Science Inc. Volume Rendering Bastille Day",
-  Version = "1.0",
+  Version = "1.1",
   Description = "Volumetric rendering for the bastille day CME event",
   Author = "CCMC, OpenSpace team",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",

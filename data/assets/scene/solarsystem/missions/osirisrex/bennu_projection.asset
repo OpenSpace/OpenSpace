@@ -53,7 +53,7 @@ local BennuProjection = {
             Spice = { "ORX_OCAMS_POLYCAM" },
           },
         },
-        Target = { 
+        Target = {
           Read  = {
             "TARGET_NAME",
             "INSTRUMENT_HOST_NAME",
@@ -109,11 +109,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(BennuProjection)
   openspace.addSceneGraphNode(BennuTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(BennuTrail)
   openspace.removeSceneGraphNode(BennuProjection)
 end)
-    
+
 asset.export(BennuProjection)
 asset.export(BennuTrail)
