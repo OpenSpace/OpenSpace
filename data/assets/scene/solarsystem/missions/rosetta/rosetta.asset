@@ -602,10 +602,6 @@ local toggle_philae_trail = {
   isLocal = false
 }
 
-local actionlist = { , , ,  }
-
--- initilize asset
-
 asset.onInitialize(function ()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)

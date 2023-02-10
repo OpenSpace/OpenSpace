@@ -60,8 +60,6 @@ local toggle_minormoon_trails = {
   isLocal = false
 }
 
-local actionlist = { , , , ,  }
-
 asset.onInitialize(function()
   openspace.action.registerAction(jupiter_approach)
   openspace.action.registerAction(saturn_approach)

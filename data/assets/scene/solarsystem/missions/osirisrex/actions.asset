@@ -83,8 +83,6 @@ local toggle_sun_marker = {
   isLocal = false
 }
 
-local actionlist = { , , , , , ,  }
-
 asset.onInitialize(function()
   openspace.action.registerAction(focus_osirisrex)
   openspace.action.registerAction(focus_bennu)
