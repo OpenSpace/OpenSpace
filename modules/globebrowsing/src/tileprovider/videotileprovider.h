@@ -128,6 +128,7 @@ private:
     double _fps = 24.0; // If when we read it it is 0, use 24 fps 
     double _videoDuration = 0.0;
     glm::ivec2 _videoResolution = glm::ivec2(4096, 2048); // Used for the fbos
+    bool _isPaused = false;
 
     // Libmpv
     mpv_handle* _mpvHandle = nullptr;

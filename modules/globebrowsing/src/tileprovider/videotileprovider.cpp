@@ -304,13 +304,13 @@ ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int max
 }
 
 void VideoTileProvider::pause() {
-    bool pause = true;
+    _isPaused = true;
     int result = mpv_set_property_async(
         _mpvHandle,
         static_cast<uint64_t>(LibmpvPropertyKey::Pause),
         "pause",
         MPV_FORMAT_FLAG,
-        &pause
+        &_isPaused
     );
     if (!checkMpvError(result)) {
         LWARNING("Error when pausing video");
@@ -318,13 +318,13 @@ void VideoTileProvider::pause() {
 }
 
 void VideoTileProvider::play() {
-    bool pause = false;
+    _isPaused = false;
     int result = mpv_set_property_async(
         _mpvHandle,
         static_cast<uint64_t>(LibmpvPropertyKey::Pause),
         "pause",
         MPV_FORMAT_FLAG,
-        &pause
+        &_isPaused
     );
     if (!checkMpvError(result)) {
         LWARNING("Error when playing video");
@@ -507,7 +507,7 @@ void VideoTileProvider::renderMpv() {
         double time = correctVideoPlaybackTime();
         bool shouldSeek = abs(time - _currentVideoTime) > _seekThreshold;
         if (shouldSeek) {
-            seekToTime(time - (2.0/_fps)); // We end up two frames too late
+            seekToTime(time); // We end up two frames too late
         }
     }
    
@@ -564,14 +564,45 @@ void VideoTileProvider::handleMpvEvents() {
             }
             case MPV_EVENT_PROPERTY_CHANGE: {
                 mpv_event_property* prop = (mpv_event_property*)event->data;
-                if (!checkMpvError(event->error)) {
-                    LWARNING(fmt::format("Error getting property {}", prop->name));
+                if (strcmp(prop->name, "video-params") == 0 &&
+                    prop->format == MPV_FORMAT_NODE)
+                {
+                    getPropertyAsyncMpv("video-params", MPV_FORMAT_NODE, LibmpvPropertyKey::Params);
                 }
-                else {
-                    // If the property has changed, request its value
-                    uint64_t i = event->reply_userdata;
-                    LibmpvPropertyKey key = static_cast<LibmpvPropertyKey>(i);
-                    getPropertyAsyncMpv(prop->name, prop->format, key);
+                if (strcmp(prop->name, "time-pos") == 0 &&
+                    prop->format == MPV_FORMAT_DOUBLE)
+                {
+                    getPropertyAsyncMpv("time-pos", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Time);
+                }
+                if (strcmp(prop->name, "duration") == 0 &&
+                    prop->format == MPV_FORMAT_DOUBLE)
+                {
+                    getPropertyAsyncMpv("duration", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Duration);
+                }
+                if (strcmp(prop->name, "container-fps") == 0 &&
+                    prop->format == MPV_FORMAT_DOUBLE)
+                {
+                    getPropertyAsyncMpv("container-fps", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Fps);
+                }
+                if (strcmp(prop->name, "pause") == 0 &&
+                    prop->format == MPV_FORMAT_FLAG)
+                {
+                    getPropertyAsyncMpv("pause", MPV_FORMAT_FLAG, LibmpvPropertyKey::Pause);
+                }
+                if (strcmp(prop->name, "height") == 0 &&
+                    prop->format == MPV_FORMAT_INT64)
+                {
+                    getPropertyAsyncMpv("height", MPV_FORMAT_INT64, LibmpvPropertyKey::Height);
+                }
+                if (strcmp(prop->name, "width") == 0 &&
+                    prop->format == MPV_FORMAT_INT64)
+                {
+                    getPropertyAsyncMpv("width", MPV_FORMAT_INT64, LibmpvPropertyKey::Width);
+                }
+                if (strcmp(prop->name, "metadata") == 0 &&
+                    prop->format == MPV_FORMAT_NODE)
+                {
+                    getPropertyAsyncMpv("metadata", MPV_FORMAT_NODE, LibmpvPropertyKey::Meta);
                 }
                 break;
             }
@@ -715,6 +746,7 @@ void VideoTileProvider::handleMpvProperties(mpv_event* event) {
             LWARNING("Could not find video parameters of video");
         }
 
+        LINFO("Printing meta data reply");
         if (node.format == MPV_FORMAT_NODE_MAP) {
             for (int n = 0; n < node.u.list->num; n++) {
                 if (node.u.list->values[n].format == MPV_FORMAT_STRING) {
@@ -852,6 +884,7 @@ void VideoTileProvider::swapBuffersMpv() {
 void VideoTileProvider::cleanUpMpv() {
     // Destroy the GL renderer and all of the GL objects it allocated. If video
     // is still running, the video track will be deselected.
+    _isInitialized = false;
     mpv_render_context_free(_mpvRenderContext);
 
     mpv_destroy(_mpvHandle);
