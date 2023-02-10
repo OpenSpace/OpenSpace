@@ -548,7 +548,7 @@ void VideoTileProvider::renderMpv() {
 
 void VideoTileProvider::handleMpvEvents() {
     while (_mpvHandle) {
-        mpv_event* event = mpv_wait_event(_mpvHandle, 0);
+        mpv_event* event = mpv_wait_event(_mpvHandle, 0.0);
         if (event->event_id == MPV_EVENT_NONE) {
             return;
         }
