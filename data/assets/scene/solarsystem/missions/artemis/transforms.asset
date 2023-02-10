@@ -1,0 +1,52 @@
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+asset.require("spice/base")
+
+local kernels = asset.syncedResource({
+  Name = "Artemis Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "artemis_kernels",
+  Version = 1
+})
+
+local ArtemisPosition = {
+  Identifier = "ArtemisPosition",
+  Parent = earthTransforms.EarthCenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = 'SpiceTranslation',
+      Target = -1023, -- Artemis
+      Observer = "EARTH",
+      Frame = 'GALACTIC',
+      Kernels = { kernels .. "artemisJPLH-fetchDec15.bsp" }
+    },
+  },
+  GUI = {
+    Name = "Artemis Position",
+    Path = "/Solar System/Missions/Artemis",
+    Hidden = true,
+    Description = [[
+      Artemis Position relative to Earth.
+    ]],
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(ArtemisPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ArtemisPosition)
+end)
+
+asset.export(ArtemisPosition)
+
+asset.meta = {
+  Name = "Artemis Transforms",
+  Version = "1.0",
+  Description = [[
+    Artemis transforms: Artemis position relative to Earth.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
