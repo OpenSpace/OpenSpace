@@ -27,6 +27,7 @@
 
 #include <filesystem>
 #include <memory>
+#include <optional>
 
 namespace tinyxml2 { class XMLElement; }
 
