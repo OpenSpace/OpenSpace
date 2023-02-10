@@ -137,6 +137,7 @@ private:
     int _wakeup = 0; // Signals when libmpv has a new frame ready
     bool _didRender = false; // To know when to swap buffers
     bool _isInitialized = false; // If libmpv has been inititalized
+    bool _isDestroying = false; // If libmpv has been inititalized
     bool _isSeeking = false; // Prevent seeking while already seeking
     double _seekThreshold = 1.0; // Threshold where we are officially out of sync
 

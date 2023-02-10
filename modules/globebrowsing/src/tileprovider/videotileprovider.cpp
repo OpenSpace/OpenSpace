@@ -233,7 +233,7 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
         if (!_isInitialized) {
             initializeMpv();
         }
-        else {
+        else if(!_isDestroying) {
             renderMpv();
         }
     });
@@ -881,9 +881,9 @@ void VideoTileProvider::swapBuffersMpv() {
 }
 
 void VideoTileProvider::cleanUpMpv() {
+    _isDestroying = true;
     // Destroy the GL renderer and all of the GL objects it allocated. If video
     // is still running, the video track will be deselected.
-    _isInitialized = false;
     mpv_render_context_free(_mpvRenderContext);
 
     mpv_destroy(_mpvHandle);
