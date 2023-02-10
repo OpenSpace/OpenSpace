@@ -41,7 +41,7 @@ namespace {
 constexpr std::string_view _loggerCat = "SkyBrowserModule";
 
 bool browserBelongsToCurrentNode(std::string identifier) {
-    size_t found = identifier.find('-');
+    size_t found = identifier.find('_');
     std::string errorMessage = "The Sky Browser encountered a problem when it tried to "
         "initialize the browser";
     if (found == std::string::npos) {
@@ -60,7 +60,7 @@ bool browserBelongsToCurrentNode(std::string identifier) {
 
 std::string prunedIdentifier(std::string identifier) {
     // Removes the node number at the end of the identifier
-    std::string res = identifier.substr(0, identifier.find('-'));
+    std::string res = identifier.substr(0, identifier.find('_'));
     return res;
 }
 
