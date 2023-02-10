@@ -53,7 +53,6 @@ public:
 
     double setVerticalFovWithScroll(float scroll);
     void setOpacity(float opacity);
-    void setRatio(float ratio);
     void setIdInBrowser() const;
     void setIsInitialized(bool isInitialized);
     void setPointSpaceCraft(bool point);
@@ -79,14 +78,11 @@ private:
     void bindTexture() override;
 
     // Flags
-    bool _isSyncedWithWwt = false;
-    bool _textureDimensionsIsDirty = false;
-    bool _ratioIsDirty = false;
-    bool _radiusIsDirty = false;
     bool _isInitialized = false;
+    bool _radiusIsDirty = false;
     int _borderRadiusTimer = -1;
 
-    float _ratio = 1.f;
+    float _lastTextureQuality = 1.f;
 };
 
 } // namespace openspace

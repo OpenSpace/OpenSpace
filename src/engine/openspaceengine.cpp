@@ -1362,6 +1362,18 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         return;
     }
 
+    // We need to do this check before the callback functions as we would otherwise
+    // immediately cancel a shutdown if someone pressed the ESC key. Similar argument for
+    // only checking for the Press action.  Since the 'Press' of ESC will trigger the
+    // shutdown, the 'Release' in some frame later would cancel it immediately again
+    if (action == KeyAction::Press && _shutdown.inShutdown) {
+        _shutdown.inShutdown = false;
+        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+            events::EventApplicationShutdown::State::Aborted
+        );
+        return;
+    }
+
     using F = global::callback::KeyboardCallback;
     for (const F& func : *global::callback::keyboard) {
         const bool isConsumed = func(key, mod, action, isGuiWindow);
@@ -1401,6 +1413,13 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier,
 
     global::luaConsole->charCallback(codepoint, modifier);
     global::interactionMonitor->markInteraction();
+
+    if (_shutdown.inShutdown) {
+        _shutdown.inShutdown = false;
+        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+            events::EventApplicationShutdown::State::Aborted
+        );
+    }
 }
 
 void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action,
@@ -1441,6 +1460,13 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
 
     global::navigationHandler->mouseButtonCallback(button, action);
     global::interactionMonitor->markInteraction();
+
+    if (_shutdown.inShutdown) {
+        _shutdown.inShutdown = false;
+        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+            events::EventApplicationShutdown::State::Aborted
+            );
+    }
 }
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y, IsGuiWindow isGuiWindow) {

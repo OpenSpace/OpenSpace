@@ -127,6 +127,10 @@ void ScreenSpaceImageOnline::update() {
                     // image is only RGB
                     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+                    if (texture->format() == ghoul::opengl::Texture::Format::Red) {
+                        texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
+                    }
+
                     texture->uploadTexture();
                     texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
                     texture->purgeFromRAM();

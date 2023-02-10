@@ -182,7 +182,7 @@ SkyBrowserModule::SkyBrowserModule()
     // Set callback functions
     global::callback::mouseButton->emplace(
         global::callback::mouseButton->begin(),
-        [&](MouseButton button, MouseAction action, KeyModifier, IsGuiWindow) -> bool {
+        [&](MouseButton, MouseAction action, KeyModifier, IsGuiWindow) -> bool {
             if (action == MouseAction::Press) {
                 _cameraRotation.stop();
             }
@@ -237,7 +237,7 @@ SkyBrowserModule::SkyBrowserModule()
 void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
-    _enabled = p.enabled.value_or(true);
+    _enabled = p.enabled.value_or(_enabled);
     _allowCameraRotation = p.allowCameraRotation.value_or(_allowCameraRotation);
     _cameraRotationSpeed = p.cameraRotSpeed.value_or(_cameraRotationSpeed);
     _targetAnimationSpeed = p.targetSpeed.value_or(_targetAnimationSpeed);
@@ -318,9 +318,12 @@ void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
     disableHoverCircle();
 }
 
-void SkyBrowserModule::moveHoverCircle(int i, bool useScript) {
-    const ImageData& image = _dataHandler.image(i);
-
+void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScript) {
+    std::optional<const ImageData> found = _dataHandler.image(imageUrl);
+    if (!found.has_value()) {
+        return;
+    }
+    const ImageData image = *found;
     // Only move and show circle if the image has coordinates
     if (!(_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem)) {
         return;

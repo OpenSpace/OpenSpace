@@ -594,7 +594,11 @@ void ActionDialog::actionSaved() {
     
 
     action->name = _actionWidgets.name->text().toStdString();
-    action->guiPath = _actionWidgets.guiPath->text().toStdString();
+    std::string guiPath = _actionWidgets.guiPath->text().toStdString();
+    if (!guiPath.starts_with('/')) {
+        guiPath = "/" + guiPath;
+    }
+    action->guiPath = guiPath;
     action->documentation = _actionWidgets.documentation->text().toStdString();
     action->isLocal = _actionWidgets.isLocal->isChecked();
     action->script = _actionWidgets.script->toPlainText().toStdString();

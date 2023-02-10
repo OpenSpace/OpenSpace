@@ -56,7 +56,7 @@ ServerModule::ServerModule()
         // Trigger callbacks
         using K = CallbackHandle;
         using V = CallbackFunction;
-        for (const std::pair<const K, V>& it : _preSyncCallbacks) {
+        for (const std::pair<K, V>& it : _preSyncCallbacks) {
             it.second(); // call function
         }
     });

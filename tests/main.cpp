@@ -22,8 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#define CATCH_CONFIG_RUNNER
-#include "catch2/catch.hpp"
+#include <catch2/catch_session.hpp>
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>

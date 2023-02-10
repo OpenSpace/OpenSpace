@@ -57,7 +57,6 @@ private:
     void updateBuffers();
 
     bool _updateDataBuffersAtNextRender = false;
-    bool _isFileReadinitialized = false;
     std::streamoff _numObjects;
     std::vector<size_t> _segmentSize;
     properties::UIntProperty _segmentQuality;
