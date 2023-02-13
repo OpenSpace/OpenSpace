@@ -116,6 +116,14 @@ namespace {
                 );
                 module->startRotatingCamera(dir);
             }
+
+            if (selected->pointSpaceCraft()) {
+                global::eventEngine->publishEvent<events::EventPointSpacecraft>(
+                    image.equatorialSpherical.x,
+                    image.equatorialSpherical.y,
+                    module->spaceCraftAnimationTime()
+                );
+            }
         }
     }
 }
@@ -798,22 +806,6 @@ namespace {
     for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
         pair->setEnabled(show);
     }
-}
-
-/**
- * Point spacecraft to the equatorial coordinates the target points to. Takes an
- * identifier to a sky browser.
- */
-[[codegen::luawrap]] void pointSpaceCraft(std::string identifier) {
-    using namespace openspace;
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
-    glm::dvec2 equatorial = pair->targetDirectionEquatorial();
-    global::eventEngine->publishEvent<events::EventPointSpacecraft>(
-        equatorial.x,
-        equatorial.y,
-        module->spaceCraftAnimationTime()
-        );
 }
 
 /**
