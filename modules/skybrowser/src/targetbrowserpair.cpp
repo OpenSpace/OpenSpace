@@ -148,7 +148,7 @@ std::string TargetBrowserPair::targetNodeId() const {
 }
 
 bool TargetBrowserPair::pointSpaceCraft() const {
-    return _browser->pointSpaceCraft();
+    return _browser->isPointingSpacecraft();
 }
 
 double TargetBrowserPair::verticalFov() const {

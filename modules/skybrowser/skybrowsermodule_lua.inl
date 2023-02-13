@@ -122,7 +122,7 @@ namespace {
                     image.equatorialSpherical.x,
                     image.equatorialSpherical.y,
                     module->spaceCraftAnimationTime()
-                    );
+                );
             }
         }
     }

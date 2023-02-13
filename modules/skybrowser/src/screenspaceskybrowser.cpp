@@ -70,9 +70,9 @@ namespace {
         "be"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointSpaceCraftInfo = {
-        "PointSpaceCraft",
-        "Point Space Craft",
+    constexpr openspace::properties::Property::PropertyInfo PointSpacecraftInfo = {
+        "PointSpacecraft",
+        "Point Spacecraft",
         "If checked, spacecrafts will point towards the coordinate of an image upon "
         "selection."
     };
@@ -84,8 +84,8 @@ namespace {
         // [[codegen::verbatim(IsHiddenInfo.description)]]
         std::optional<bool> isHidden;
 
-        // [[codegen::verbatim(PointSpaceCraftInfo.description)]]
-        std::optional<bool> pointSpaceCraft;
+        // [[codegen::verbatim(PointSpacecraftInfo.description)]]
+        std::optional<bool> pointSpacecraft;
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
@@ -117,7 +117,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     , WwtCommunicator(dictionary)
     , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
     , _isHidden(IsHiddenInfo, true)
-    , _pointSpaceCraft(PointSpaceCraftInfo, false)
+    , _isPointingSpacecraft(PointSpacecraftInfo, false)
 {
     _identifier = makeUniqueIdentifier(_identifier);
 
@@ -125,7 +125,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _textureQuality = p.textureQuality.value_or(_textureQuality);
     _isHidden = p.isHidden.value_or(_isHidden);
-    _pointSpaceCraft = p.pointSpaceCraft.value_or(_pointSpaceCraft);
+    _isPointingSpacecraft = p.pointSpacecraft.value_or(_isPointingSpacecraft);
 
     addProperty(_isHidden);
     addProperty(_url);
@@ -133,7 +133,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     addProperty(_reload);
     addProperty(_textureQuality);
     addProperty(_verticalFov);
-    addProperty(_pointSpaceCraft);
+    addProperty(_isPointingSpacecraft);
 
     _textureQuality.onChange([this]() { _isDimensionsDirty = true; });
 
@@ -190,8 +190,8 @@ bool ScreenSpaceSkyBrowser::isInitialized() const {
     return _isInitialized;
 }
 
-bool ScreenSpaceSkyBrowser::pointSpaceCraft() const {
-    return _pointSpaceCraft;
+bool ScreenSpaceSkyBrowser::isPointingSpacecraft() const {
+    return _isPointingSpacecraft;
 }
 
 void ScreenSpaceSkyBrowser::setIdInBrowser() const {
@@ -202,8 +202,8 @@ void ScreenSpaceSkyBrowser::setIsInitialized(bool isInitialized) {
     _isInitialized = isInitialized;
 }
 
-void ScreenSpaceSkyBrowser::setPointSpaceCraft(bool point) {
-    _pointSpaceCraft = point;
+void ScreenSpaceSkyBrowser::setPointSpaceCraft(bool shouldPoint) {
+    _isPointingSpacecraft = shouldPoint;
 }
 
 void ScreenSpaceSkyBrowser::updateTextureResolution() {
