@@ -984,11 +984,11 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
         firstUpdate();
     }
 
-    _isInInterval = _files.size() > 0 &&
+    _inInterval = _files.size() > 0 &&
         currentTime >= _files[0].timestamp &&
         currentTime < _sequenceEndTime;
 
-    if (!_isInInterval && _renderForever) {
+    if (!_inInterval && _renderForever) {
         updateActiveIndex(currentTime);
     }
 
@@ -1037,7 +1037,7 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
 
 void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTasks&) {
     if (_files.empty()) return;
-    if (!_isInInterval && !_renderForever) return;
+    if (!_inInterval && !_renderForever) return;
 
     _shaderProgram->activate();
 

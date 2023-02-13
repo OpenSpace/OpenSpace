@@ -141,7 +141,7 @@ private:
     double _sequenceEndTime = 0.0;
     // If there's just one state it should never disappear
     bool _renderForever = false;
-    bool _isInInterval = false;
+    bool _inInterval = false;
 
     // dataID that corresponds to what dataset to use if using DynamicDownloading
     int _dataID;
