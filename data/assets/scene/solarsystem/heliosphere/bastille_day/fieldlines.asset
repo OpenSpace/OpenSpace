@@ -29,9 +29,11 @@ local fieldlines = {
     Type = "RenderableFieldlinesSequenceNew",
     SourceFolder = fieldlinesDirectory,
     AlphaBlendlingEnabled = false,
+    LoadingType = "DynamicLoading",
     InputFileType = "Osfls",
-    LineWidth = 10,
-    ColorQuantity = 1, -- current
+    LineWidth = 1,
+    ShowAtAllTimes = false,
+    ColorQuantity = 0, -- current
     ColorTablePath = asset.localResource("transferfunctions/density-fieldlines.txt"),
     ColorMinMaxRange = {
       0, 1000000,

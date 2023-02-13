@@ -40,7 +40,6 @@
 #include <ghoul/opengl/textureunit.h>
 #include <thread>
 
-
 namespace {
     constexpr std::string_view _loggerCat = "RenderableFieldlinesSequenceNew";
 
@@ -159,6 +158,8 @@ namespace {
         "This value specifies the line width of the fieldlines"
     };
 
+
+
     struct [[codegen::Dictionary(RenderableFieldlinesSequenceNew)]] Parameters {
         enum class [[codegen::map(openspace::RenderableFieldlinesSequenceNew::ColorMethod)]] ColorMethod {
             Uniform = 0,
@@ -209,10 +210,13 @@ namespace {
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
+        // Set if first/last file should render forever
+        bool showAtAllTimes;
+
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
         // ManuelTimeOffset will be added to trigger time.
-        std::optional<double> manualTimeOffset;
+        std::optional<float> manualTimeOffset;
 
         enum class [[codegen::map(openspace::fls::Model)]] Model {
             Batsrus,
@@ -366,7 +370,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
         try {
             _model = codegen::map<openspace::fls::Model>(*p.simulationModel);
         }
-        catch (const std::exception& e) {
+        catch (const std::exception&) {
             _model = fls::Model::Invalid;
         }
     }
@@ -408,11 +412,6 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
         }
     }
 
-    if (_loadingType == LoadingType::StaticLoading){
-        staticallyLoadFiles(p.seedPointDirectory, p.tracingVariable);
-        computeSequenceEndTime();
-    }
-
     _extraVars = p.extraVariables.value_or(_extraVars);
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
     _flowColor = p.flowColor.value_or(_flowColor);
@@ -424,8 +423,13 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     _maskingQuantityTemp = p.maskingQuantity.value_or(_maskingQuantityTemp);
     _domainEnabled = p.domainEnabled.value_or(_domainEnabled);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
+    _renderForever = p.showAtAllTimes;
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
 
+    if (_loadingType == LoadingType::StaticLoading){
+        staticallyLoadFiles(p.seedPointDirectory, p.tracingVariable);
+        computeSequenceEndTime();
+    }
     // Color group
     if (p.colorTablePath.has_value()) {
         _colorTablePath = *p.colorTablePath;
@@ -513,7 +517,6 @@ void RenderableFieldlinesSequenceNew::staticallyLoadFiles(
                     _extraVars,
                     extraMagVars
                 );
-
                 break;
             }
             case SourceFileType::Json:
@@ -543,10 +546,7 @@ void RenderableFieldlinesSequenceNew::staticallyLoadFiles(
     for (std::thread& thread : openThreads) {
         thread.join();
     }
-
-    //std::make_heap(_files.begin(), _files.end());
-    //std::sort_heap(_files.begin(), _files.end());
-
+    _isLoadingStateFromDisk = false;
     for (auto& file : _files) {
         if (!file.path.empty() && file.status != File::FileStatus::Loaded) {
             file.status = File::FileStatus::Loaded;
@@ -830,6 +830,11 @@ void RenderableFieldlinesSequenceNew::computeSequenceEndTime() {
     }
     else if (_files.size() == 1) {
         _sequenceEndTime = _files[0].timestamp + 3600.f;
+        if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
+            //TODO: Alternativly check at construction and throw exeption.
+            LWARNING("Only one file in data set, but ShowAtAllTimes set to false. "
+                "Using arbitrary duration to visualize data file instead");
+        }
     }
     else if (_files.size() > 1) {
         const double lastTriggerTime = _files.back().timestamp;
@@ -841,22 +846,20 @@ void RenderableFieldlinesSequenceNew::computeSequenceEndTime() {
 
 std::thread RenderableFieldlinesSequenceNew::loadFile(File& file) {
     _isLoadingStateFromDisk = true;
-    if (_inputFileType == SourceFileType::Osfls) {
+//    if (_inputFileType == SourceFileType::Osfls) {
         std::thread readFileThread([this, &file]() {
             try {
                 //std::lock_guard<std::mutex> lock(_mutex);
                 file.state = FieldlinesState::createStateFromOsfls(file.path.string());
                 //const bool success = file.state.loadStateFromOsfls(file.path.string());
                 //file.status = File::FileStatus::Loaded;
-                _atLeastOneFileLoaded = true;
-                _isLoadingStateFromDisk = false;
             }
             catch(const std::exception& e ) {
                 LERROR(e.what());
             }
         });
         return readFileThread;
-    }
+//    }
 
     // So far uncleare why model is needed and if scalingFactor can be changed afterwards.
     // If these 2 things can be desided afterwards, without affecting Ganamyde fieldlines
@@ -881,9 +884,11 @@ std::thread RenderableFieldlinesSequenceNew::loadFile(File& file) {
 
 std::vector<RenderableFieldlinesSequenceNew::File>::iterator
 RenderableFieldlinesSequenceNew::insertToFilesInOrder(File& file) {
-    auto iter = std::upper_bound(
-        _files.begin(), _files.end(), file.timestamp, [](double t, File& f) {
-            return f.timestamp < t;
+    const std::vector<File>::const_iterator iter = std::upper_bound(
+        _files.begin(), _files.end(),
+        file.timestamp,
+        [](double timeRef, const File& fileRef) {
+            return timeRef < fileRef.timestamp;
         }
     );
     auto iterToInserted = _files.insert(iter, std::move(file));
@@ -896,16 +901,19 @@ int RenderableFieldlinesSequenceNew::updateActiveIndex(const double nowTime) {
     // if size == 1 at this point, we can expect to not have a sequence and wants to show
     // the one files fieldlines at any point in time
     if (_files.begin()->timestamp == nowTime || _files.size() == 1) return 0;
-    int index = 0;
 
-    std::vector<File>::iterator iter = std::upper_bound(
+    int index = 0;
+    const std::vector<File>::const_iterator iter = std::upper_bound(
         _files.begin(), _files.end(), nowTime, [](double timeRef, const File& fileRef) {
             return timeRef < fileRef.timestamp;
         }
     );
 
-    if (iter != _files.end()) {
-        index = static_cast<int>(std::distance(_files.begin(), iter)) -1;
+    if (iter == _files.begin()) {
+        index = 0;
+    }
+    else if (iter != _files.end()) {
+        index = static_cast<int>(std::distance(_files.cbegin(), iter)) -1;
     }
     else {
         index = static_cast<int>(_files.size()) - 1;
@@ -917,16 +925,6 @@ bool RenderableFieldlinesSequenceNew::isReady() const {
     return true; // _shaderProgram != nullptr;
 }
 
-void RenderableFieldlinesSequenceNew::updateStaticLoading(const double currentTime,
-                                                                   const double deltaTime)
-{
-
-}
-void RenderableFieldlinesSequenceNew::updateDynamicLoading(const double currentTime,
-                                                                   const double deltaTime)
-{
-
-}
 void RenderableFieldlinesSequenceNew::updateDynamicDownloading(const double currentTime,
                                                                    const double deltaTime)
 {
@@ -979,33 +977,19 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
     const double currentTime = data.time.j2000Seconds();
     const double deltaTime = global::timeManager->deltaTime();
 
-    switch (_loadingType) {
-        case LoadingType::StaticLoading:
-            updateStaticLoading(currentTime, deltaTime);
-            break;
-        case LoadingType::DynamicLoading:
-            updateDynamicLoading(currentTime, deltaTime);
-            break;
-        case LoadingType::DynamicDownloading:
-            updateDynamicDownloading(currentTime, deltaTime);
-            break;
-        default:
-            break;
+    if (_loadingType == LoadingType::DynamicDownloading) {
+        updateDynamicDownloading(currentTime, deltaTime);
     }
-
     if (_firstLoad && _atLeastOneFileLoaded) {
         firstUpdate();
     }
 
-    bool isInInterval = _files.size() > 0 &&
+    _isInInterval = _files.size() > 0 &&
         currentTime >= _files[0].timestamp &&
         currentTime < _sequenceEndTime;
-    // TODO Change _files.size() == 1 to variable specifying to show at all times
-    if (_files.size() == 1 && _loadingType == LoadingType::StaticLoading) {
-        isInInterval = true;
-    }
-    if (!isInInterval) {
-        return;
+
+    if (!_isInInterval && _renderForever) {
+        updateActiveIndex(currentTime);
     }
 
     // for the sake of this if statment, it is easiest to think of activeIndex as the
@@ -1031,6 +1015,11 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
             // would be optimal if loading of next file would happen in the background
             std::thread t = loadFile(_files[_activeIndex]);
             t.join();
+            _isLoadingStateFromDisk = false;
+            _files[_activeIndex].status = File::FileStatus::Loaded;
+            _files[_activeIndex].timestamp =
+                extractTriggerTimeFromFilename(_files[_activeIndex].path);
+            _atLeastOneFileLoaded = true;
             computeSequenceEndTime();
         }
 
@@ -1047,9 +1036,9 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
 }
 
 void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTasks&) {
-    if (_files.empty()) {
-        return;
-    }
+    if (_files.empty()) return;
+    if (!_isInInterval && !_renderForever) return;
+
     _shaderProgram->activate();
 
     // Calculate Model View MatrixProjection
@@ -1205,16 +1194,6 @@ void RenderableFieldlinesSequenceNew::updateVertexMaskingBuffer() {
         _maskingQuantity,
         success
     );
-
-    float i = *std::min_element(maskings.begin(), maskings.end());
-    std::string min = std::to_string(i);
-    float a = *std::max_element(maskings.begin(), maskings.end());
-    std::string max = std::to_string(a);
-    LWARNING(fmt::format("min :{}", min));
-    LWARNING(fmt::format("max :{}", max));
-    const std::vector<std::string>& names = state.extraQuantityNames();
-    std::string name = names[_maskingQuantity];
-    LWARNING(fmt::format("name:{}", name));
 
     if (success) {
         glBufferData(

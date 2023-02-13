@@ -72,15 +72,12 @@ public:
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
-    void updateStaticLoading(const double currentTime, const double deltaTime);
-    void updateDynamicLoading(const double currentTime, const double deltaTime);
     void updateDynamicDownloading(const double currentTime, const double deltaTime);
     void firstUpdate();
     void computeSequenceEndTime();
 
     static documentation::Documentation Documentation();
 
-private:
     struct File {
         //explicit File() = default;
         //explicit File(const File& file) = delete;
@@ -95,13 +92,13 @@ private:
         double timestamp = -1.0;
         FieldlinesState state;
 
-        //bool operator<(const double other) const {
-        //    return timestamp < other;
-        //}
         bool operator<(const File& other) const {
             return timestamp < other.timestamp;
         }
     };
+private:
+
+
 
     void definePropertyCallbackFunctions();
     void setupProperties();
@@ -140,9 +137,11 @@ private:
     std::vector<std::string> _extraVars;
     // Manual time offset
     float _manualTimeOffset = 0.0;
-    // Estimated end of sequence.
+    // Estimated/ calculated end of sequence.
+    double _sequenceEndTime = 0.0;
     // If there's just one state it should never disappear
-    float _sequenceEndTime = 0.0;
+    bool _renderForever = false;
+    bool _isInInterval = false;
 
     // dataID that corresponds to what dataset to use if using DynamicDownloading
     int _dataID;
