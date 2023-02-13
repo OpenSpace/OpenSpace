@@ -92,12 +92,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
     }
     catch (const documentation::SpecificationError& e) {
         LERROR(fmt::format("Could not load tasks file {}. {}", absTasksFile, e.what()));
-        for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERROR(ghoul::to_string(o));
-        }
-        for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNING(ghoul::to_string(w));
-        }
+        logError(e);
 
         return std::vector<std::unique_ptr<Task>>();
     }
