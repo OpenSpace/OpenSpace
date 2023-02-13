@@ -6,10 +6,8 @@ local gaia618Destination = asset.syncedResource({
   Type = "HttpSynchronization",
   Identifier = "gaia_stars_618M_octree",
   Version = 1,
-  Unzip = {
-    UnzipFiles = true,
-    Destination = "data"
-  }
+  UnzipFiles = true,
+  UnzipFilesDestination = "data"
 })
 local gaia618DestinationExtracted = gaia618Destination .. "data";
 
