@@ -69,8 +69,8 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
         ));
     }
     catch (const documentation::SpecificationError& e) {
-        LERROR(ghoul::to_string(e.result));
         LERROR(fmt::format("Error loading state machine: {}", e.what()));
+        logError(e);
     }
 }
 
