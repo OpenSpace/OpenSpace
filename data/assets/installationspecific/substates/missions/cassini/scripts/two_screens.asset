@@ -138,6 +138,8 @@ local huygensScripts = [[
   openspace.scriptScheduler.loadScheduledScript(
     "2004-11-21 08:44:54.000", -- 1 sec pre delay
     "openspace.setPropertyValueSingle('Scene.huygensTrail.Renderable.Enabled', true)" ..
+    "openspace.setPropertyValueSingle('Scene.CassiniSaturnLabel.Renderable.Enabled', true)" ..
+    "openspace.setPropertyValueSingle('Scene.CassiniTitanLabel.Renderable.Enabled', true)" ..
     "openspace.time.interpolateDeltaTime(172800)" .. -- 2 days per second
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-2days.png' .. [[')" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', true)"
@@ -147,6 +149,8 @@ local huygensScripts = [[
   openspace.scriptScheduler.loadScheduledScript(
     "2004-12-21 08:44:53.000",
     "openspace.time.interpolateDeltaTime(86400)" .. -- 1 day per second
+    "openspace.setPropertyValueSingle('Scene.CassiniSaturnLabel.Renderable.Enabled', false)" ..
+    "openspace.setPropertyValueSingle('Scene.CassiniTitanLabel.Renderable.Enabled', false)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-1day.png' .. [[')" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..

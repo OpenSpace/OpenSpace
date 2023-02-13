@@ -44,6 +44,8 @@ local cassiniState = {
     openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', false)
     openspace.setPropertyValueSingle('Scene.equinoxMission.Renderable.Enabled', false)
     openspace.setPropertyValueSingle('Scene.solsticeMission.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle("Scene.CassiniSaturnLabel.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.CassiniTitanLabel.Renderable.Enabled", false)
     openspace.setPropertyValueSingle('Scene.grandFinale.Renderable.Enabled', false)
     openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.Enabled', false)
     openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false)

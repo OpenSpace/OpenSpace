@@ -14,6 +14,7 @@ asset.require("installationspecific/screenspace_renderables")
 asset.require("installationspecific/extra_scenegraphnodes")
 asset.require("installationspecific/others/olympus_mons_node")
 asset.require("installationspecific/substates/missions/cassini/trail")
+asset.require("installationspecific/substates/missions/cassini/labels")
 asset.require("installationspecific/substates/missions/rover_assets/mars_curiosity_path")
 asset.require("installationspecific/substates/missions/rover_assets/perseverance")
 
