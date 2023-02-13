@@ -1,6 +1,7 @@
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local sun = asset.require("scene/solarsystem/sun/sun")
 asset.require("spice/base")
+asset.require("../actions")
 
 local models = asset.syncedResource({
   Name = "Apollo Models",

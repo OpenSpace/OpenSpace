@@ -73,12 +73,45 @@ local EarthLabel = {
   }
 }
 
+local focus_earth = {
+  Identifier = "os.solarsystem.earth.focus",
+  Name = "Focus on Earth",
+  Command = [[
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth'); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+  ]],
+  Documentation = "Set camera focus on the Earth",
+  GuiPath = "/Solar System/Earth",
+  isLocal = false
+}
+
+local toggle_earth_satellitetrails = {
+  Identifier = "os.solarsystem.earth.togglesatellitetrails",
+  Name = "Toggle satellite trails",
+  Command = [[
+    local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); 
+    for _,v in pairs(list) do 
+      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+    end
+  ]],
+  Documentation = "Toggle trails on or off for satellites around Earth",
+  GuiPath = "/Solar System/Earth",
+  isLocal = false
+}
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Earth)
   openspace.addSceneGraphNode(EarthLabel)
+
+  openspace.action.registerAction(focus_earth)
+  openspace.action.registerAction(toggle_earth_satellitetrails)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(toggle_earth_satellitetrails)
+  openspace.action.removeAction(focus_earth)
+
   openspace.removeSceneGraphNode(EarthLabel)
   openspace.removeSceneGraphNode(Earth)
 end)
@@ -90,7 +123,7 @@ asset.export(EarthLabel)
 
 asset.meta = {
   Name = "Earth",
-  Version = "1.0",
+  Version = "1.1",
   Description = "Earth is a special planet with special needs",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

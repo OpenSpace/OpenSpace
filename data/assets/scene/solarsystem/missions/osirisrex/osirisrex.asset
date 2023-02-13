@@ -5,6 +5,7 @@ asset.require("./trail")
 asset.require("scene/solarsystem/sun/marker")
 
 asset.require("./script_schedule")
+asset.require("./actions")
 
 local mission = asset.localResource("osirisrex.mission")
 local missionName
