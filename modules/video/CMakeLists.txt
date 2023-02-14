@@ -27,6 +27,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 set(HEADER_FILES
   videomodule.h
   include/videotileprovider.h
+  include/videoplayer.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -34,6 +35,7 @@ set(SOURCE_FILES
   videomodule.cpp
   videomodule_lua.inl
   src/videotileprovider.cpp
+  src/videoplayer.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

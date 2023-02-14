@@ -65,7 +65,6 @@ void VideoModule::internalInitialize(const ghoul::Dictionary& dict) {
         FactoryManager::ref().factory<TileProvider>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
     fTileProvider->registerClass<VideoTileProvider>("VideoTileLayer");
-
 }
 
 std::vector<documentation::Documentation> VideoModule::documentations() const {
