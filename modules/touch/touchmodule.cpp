@@ -28,44 +28,98 @@
 #include <modules/touch/include/win32_touch.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
+#include <algorithm>
 
 using namespace TUIO;
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TouchActiveInfo = {
-        "TouchActive",
-        "True if we want to use touch input as 3D navigation",
-        "Use this if we want to turn on or off Touch input navigation. "
-        "Disabling this will reset all current touch inputs to the navigation."
+    constexpr std::string_view _loggerCat = "TouchModule";
+
+    constexpr openspace::properties::Property::PropertyInfo EnableTouchInfo = {
+        "EnableTouchInteraction",
+        "Enable Touch Interaction",
+        "Use this property to turn on/off touch input navigation in the 3D scene. "
+        "Disabling will reset all current touch inputs to the navigation."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
+        "DetectedTouchEvent",
+        "Detected Touch Event",
+        "True when there is an active touch event",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        DefaultDirectTouchRenderableTypesInfo =
+    {
+        "DefaultDirectTouchRenderableTypes",
+        "Default Direct Touch Renderable Types",
+        "A list of renderable types that will automatically use the \'direct "
+        "manipulation\' scheme when interacted with, keeping the finger on a static "
+        "position on the interaction sphere of the object when touching. Good for "
+        "relatively spherical objects.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 }
 namespace openspace {
 
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
-    , _touchActive(TouchActiveInfo, true)
+    , _touchIsEnabled(EnableTouchInfo, true)
+    , _hasActiveTouchEvent(EventsInfo, false)
+    , _defaultDirectTouchRenderableTypes(DefaultDirectTouchRenderableTypesInfo)
 {
     addPropertySubOwner(_touch);
     addPropertySubOwner(_markers);
-    addProperty(_touchActive);
-    _touchActive.onChange([&] {
+    addProperty(_touchIsEnabled);
+    _touchIsEnabled.onChange([&]() {
         _touch.resetAfterInput();
         _lastTouchInputs.clear();
     });
+
+    _hasActiveTouchEvent.setReadOnly(true);
+    addProperty(_hasActiveTouchEvent);
+
+    _defaultDirectTouchRenderableTypes.onChange([&]() {
+        _sortedDefaultRenderableTypes.clear();
+        for (const std::string& s : _defaultDirectTouchRenderableTypes.value()) {
+            ghoul::TemplateFactory<Renderable>* fRenderable =
+                FactoryManager::ref().factory<Renderable>();
+
+            if (!fRenderable->hasClass(s)) {
+                LWARNING(fmt::format(
+                    "In property 'DefaultDirectTouchRenderableTypes': '{}' is not a "
+                    "registered renderable type. Ignoring", s
+                ));
+                continue;
+            }
+
+            _sortedDefaultRenderableTypes.insert(s);
+        }
+    });
+    addProperty(_defaultDirectTouchRenderableTypes);
 }
 
 TouchModule::~TouchModule() {
     // intentionally left empty
 }
 
-void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
+bool TouchModule::isDefaultDirectTouchType(std::string_view renderableType) const {
+    return _sortedDefaultRenderableTypes.find(std::string(renderableType)) !=
+        _sortedDefaultRenderableTypes.end();
+}
+
+void TouchModule::internalInitialize(const ghoul::Dictionary&){
     _ear.reset(new TuioEar());
 
     global::callback::initializeGL->push_back([&]() {
-        LDEBUGC("TouchModule", "Initializing TouchMarker OpenGL");
+        LDEBUG("Initializing TouchMarker OpenGL");
         _markers.initialize();
 #ifdef WIN32
         // We currently only support one window of touch input internally
@@ -78,7 +132,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
     });
 
     global::callback::deinitializeGL->push_back([&]() {
-        LDEBUGC("TouchMarker", "Deinitialize TouchMarker OpenGL");
+        LDEBUG("Deinitialize TouchMarker OpenGL");
         _markers.deinitialize();
     });
 
@@ -104,26 +158,37 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
 
 
     global::callback::preSync->push_back([&]() {
-        if (!_touchActive) {
+        if (!_touchIsEnabled) {
+            return;
+        }
+
+        OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+        if (mode == OpenSpaceEngine::Mode::CameraPath ||
+            mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+        {
+            // Reset everything, to avoid problems once we process inputs again
+            _lastTouchInputs.clear();
+            _touch.resetAfterInput();
+            clearInputs();
             return;
         }
 
         _touch.setCamera(global::navigationHandler->camera());
-        _touch.setFocusNode(global::navigationHandler->orbitalNavigator().anchorNode());
 
-        if (processNewInput() && global::windowDelegate->isMaster()) {
+        bool gotNewInput = processNewInput();
+        if (gotNewInput && global::windowDelegate->isMaster()) {
             _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
         }
         else if (_touchPoints.empty()) {
             _touch.resetAfterInput();
         }
 
-        // update lastProcessed
+        // Update last processed touch inputs
         _lastTouchInputs.clear();
         for (const TouchInputHolder& points : _touchPoints) {
             _lastTouchInputs.emplace_back(points.latestInput());
         }
-        // calculate the new camera state for this frame
+        // Calculate the new camera state for this frame
         _touch.step(global::windowDelegate->deltaTime());
         clearInputs();
     });
@@ -145,14 +210,15 @@ bool TouchModule::processNewInput() {
         removeTouchInput(removal);
     }
 
-    // Set touch property to active (to void mouse input, mainly for mtdev bridges)
-    _touch.touchActive(!_touchPoints.empty());
+    bool touchHappened = !_touchPoints.empty();
+    _hasActiveTouchEvent = touchHappened;
 
-    if (!_touchPoints.empty()) {
+    // Set touch property to active (to void mouse input, mainly for mtdev bridges)
+    if (touchHappened) {
         global::interactionMonitor->markInteraction();
     }
 
-    // Erase old input id's that no longer exists
+    // Erase old input ids that no longer exist
     _lastTouchInputs.erase(
         std::remove_if(
             _lastTouchInputs.begin(),
@@ -168,7 +234,7 @@ bool TouchModule::processNewInput() {
             }
         ),
         _lastTouchInputs.end()
-                );
+     );
 
     if (_tap) {
         _touch.tap();
@@ -180,9 +246,11 @@ bool TouchModule::processNewInput() {
     if (_touchPoints.size() == _lastTouchInputs.size() &&
         !_touchPoints.empty())
     {
+        // @TODO (emmbr26, 2023-02-03) Looks to me like this code will always return
+        // true? That's a bit weird and should probably be investigated
         bool newInput = true;
-        // go through list and check if the last registrered time is newer than the one in
-        // lastProcessed (last frame)
+        // Go through list and check if the last registrered time is newer than the
+        // last processed touch inputs (last frame)
         std::for_each(
             _lastTouchInputs.begin(),
             _lastTouchInputs.end(),
@@ -197,7 +265,8 @@ bool TouchModule::processNewInput() {
                 if (!holder->isMoving()) {
                     newInput = true;
                 }
-            });
+            }
+        );
         return newInput;
     }
     else {
