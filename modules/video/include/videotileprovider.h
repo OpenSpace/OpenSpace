@@ -38,7 +38,8 @@
 
 namespace openspace { struct Documentation; }
 
-namespace openspace::globebrowsing {
+namespace openspace {
+using namespace globebrowsing;
 
 class VideoTileProvider : public TileProvider {
 public:
@@ -146,6 +147,6 @@ private:
     bool _tileIsReady = false;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace video::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__VIDEOTILEPROVIDER___H__

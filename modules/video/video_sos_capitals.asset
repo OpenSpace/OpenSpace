@@ -1,0 +1,26 @@
+local layer = {
+  Identifier = "Capitals",
+  FilePath = "C:/Users/ylvaselling/Documents/Work/Testmovies/capitals/4096.png",
+  Name = "Capitals",
+  Enabled = asset.enabled,
+  Description = [[Testing video]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer("Earth", "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer("Earth", "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+asset.meta = {
+  Name = "Aqua Modis (Temporal)",
+  Version = "1.1",
+  Description = "GIBS hosted layer",
+  Author = "NASA EOSDIS Global Imagery Browse Services",
+  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
+  License = "NASA"
+}

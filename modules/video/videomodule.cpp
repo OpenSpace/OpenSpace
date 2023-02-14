@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/video/videomodule.h>
+#include <modules/video/include/videotileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
@@ -55,30 +57,21 @@ VideoModule::VideoModule()
 
 void VideoModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
+    using namespace globebrowsing;
 
     _enabled = p.enabled.value_or(_enabled);
-    /*
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
-        FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
 
-    // Register ScreenSpaceSkyBrowser
-    fScreenSpaceRenderable->registerClass<ScreenSpaceSkyBrowser>("ScreenSpaceSkyBrowser");
+    ghoul::TemplateFactory<TileProvider>* fTileProvider =
+        FactoryManager::ref().factory<TileProvider>();
+    ghoul_assert(fTileProvider, "TileProvider factory was not created");
+    fTileProvider->registerClass<VideoTileProvider>("VideoTileLayer");
 
-    ghoul::TemplateFactory<Renderable>* fRenderable =
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
-
-    // Register ScreenSpaceSkyTarget
-    fRenderable->registerClass<RenderableSkyTarget>("RenderableSkyTarget");
-    */
 }
 
 std::vector<documentation::Documentation> VideoModule::documentations() const {
-    /* return {
-        RenderableSkyTarget::Documentation(),
-        ScreenSpaceSkyBrowser::Documentation()
-    };*/
+     return {
+        VideoTileProvider::Documentation(),
+    };
     return std::vector<documentation::Documentation>();
 }
 

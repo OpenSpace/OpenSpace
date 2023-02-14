@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/tileprovider/videotileprovider.h>
+#include <modules/video/include/videotileprovider.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
@@ -107,7 +107,7 @@ namespace {
 #include "videotileprovider_codegen.cpp"
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 bool checkMpvError(int status) {
     if (status < 0) {
@@ -175,7 +175,7 @@ void VideoTileProvider::commandAsyncMpv(const char* cmd[], LibmpvPropertyKey key
 }
 
 documentation::Documentation VideoTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_videotileprovider");
+    return codegen::doc<Parameters>("video_videotileprovider");
 }
 
 VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary) 
@@ -982,4 +982,4 @@ void VideoTileProvider::internalDeinitialize() {
     cleanUpMpv();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace::video

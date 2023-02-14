@@ -1,0 +1,27 @@
+local layer = {
+  Identifier = "SosLoop2",
+  File = "C:/Users/ylvaselling/Documents/Work/Testmovies/2048_jpg-2048x1024.mp4",
+  Name = "Science On A Sphere Loop Video",
+  Enabled = asset.enabled,
+  Type = "VideoTileLayer",
+  Description = [[Testing video]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer("Earth", "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer("Earth", "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+asset.meta = {
+  Name = "Aqua Modis (Temporal)",
+  Version = "1.1",
+  Description = "GIBS hosted layer",
+  Author = "NASA EOSDIS Global Imagery Browse Services",
+  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
+  License = "NASA"
+}

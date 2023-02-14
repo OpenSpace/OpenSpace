@@ -26,14 +26,40 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   videomodule.h
+  include/videotileprovider.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   videomodule.cpp
   videomodule_lua.inl
+  src/videotileprovider.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
+
+# Libmpv
+if(WIN32)
+  add_library(libmpv SHARED IMPORTED)
+  target_include_directories(libmpv SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/include)
+  set_target_properties(libmpv PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/bin/mpv-2.dll"
+    IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/lib/mpv.lib"
+  )
+
+  add_library(libopenh264 SHARED IMPORTED)
+  set_target_properties(libopenh264 PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/bin/libopenh264.dll"
+    IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/lib/mpv.lib"
+  )
+
+  target_link_libraries(openspace-module-globebrowsing PUBLIC libmpv libopenh264)
+else(WIN32)
+  find_package(LIBMPV REQUIRED)
+
+  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${LIBMPV_INCLUDE_DIR})
+  target_link_libraries(openspace-module-globebrowsing PRIVATE ${LIBMPV_LIBRARY})
+  mark_as_advanced(LIBMPV_CONFIG LIBMPV_INCLUDE_DIR LIBMPV_LIBRARY)
+endif() # WIN32
 
 create_new_module(
   "Video"
