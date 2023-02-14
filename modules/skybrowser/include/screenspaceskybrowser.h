@@ -49,11 +49,13 @@ public:
     float opacity() const;
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     bool isInitialized() const;
+    bool isPointingSpacecraft() const;
 
     double setVerticalFovWithScroll(float scroll);
     void setOpacity(float opacity);
     void setIdInBrowser() const;
     void setIsInitialized(bool isInitialized);
+    void setPointSpaceCraft(bool shouldPoint);
 
     void updateTextureResolution();
 
@@ -69,13 +71,13 @@ private:
     static constexpr int RadiusTimeOut = 25;
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
+    properties::BoolProperty _isPointingSpacecraft;
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
     std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 
     void bindTexture() override;
 
     // Flags
-    bool _isSyncedWithWwt = false;
     bool _isInitialized = false;
     bool _radiusIsDirty = false;
     int _borderRadiusTimer = -1;

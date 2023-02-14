@@ -81,13 +81,42 @@ local MoonLabel = {
   }
 }
 
+local focus_moon = {
+  Identifier = "os.solarsystem.earth.moon.focus",
+  Name = "Focus on Moon",
+  Command = [[
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon'); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+  ]],
+  Documentation = "Set camera focus on the Moon",
+  GuiPath = "/Solar System/Earth/Moon",
+  isLocal = false
+}
+
+local toggle_moon_shading = {
+  Identifier = "os.solarsystem.earth.moon.toggleshading",
+  Name = "Toggle Moon shading",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.PerformShading', not openspace.getPropertyValue('Scene.Moon.Renderable.PerformShading'));
+  ]],
+  Documentation = "Toggles the shading of the Moon",
+  GuiPath = "/Solar System/Earth/Moon",
+  isLocal = false
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Moon)
   openspace.addSceneGraphNode(MoonLabel)
+
+  openspace.action.registerAction(focus_moon)
+  openspace.action.registerAction(toggle_moon_shading)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(toggle_moon_shading)
+  openspace.action.removeAction(focus_moon)
+
   openspace.removeSceneGraphNode(MoonLabel)
   openspace.removeSceneGraphNode(Moon)
 end)
@@ -98,8 +127,8 @@ asset.export(Moon)
 
 asset.meta = {
   Name = "Moon",
-  Version = "1.1",
-  Description = "Moon globe with labels",
+  Version = "1.2",
+  Description = "Moon globe with labels and actions",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

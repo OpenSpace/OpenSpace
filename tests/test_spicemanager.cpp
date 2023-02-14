@@ -239,7 +239,7 @@ TEST_CASE("SpiceManager: Get Value From ID 1D", "[spicemanager]") {
     std::string target  = "EARTH";
     std::string value1D = "MAG_NORTH_POLE_LAT";
 
-    double return1D;
+    double return1D = 0.0;
     CHECK_NOTHROW(openspace::SpiceManager::ref().getValue(target, value1D, return1D));
     CHECK(return1D == 78.565);
 
@@ -291,8 +291,8 @@ TEST_CASE("SpiceManager: String To Ephemeris Time", "[spicemanager]") {
 
     loadLSKKernel();
 
-    double ephemerisTime;
-    double control_ephemerisTime;
+    double ephemerisTime = -1.0;
+    double control_ephemerisTime = 0.0;
     char date[SRCLEN] = "Thu Mar 20 12:53:29 PST 1997";
     str2et_c(date, &control_ephemerisTime);
 

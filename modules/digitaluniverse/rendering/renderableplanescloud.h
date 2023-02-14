@@ -87,7 +87,6 @@ private:
 
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
-    bool _textColorIsDirty = true;
     bool _hasLabels = false;
 
     properties::FloatProperty _scaleFactor;

@@ -8,6 +8,8 @@ asset.require("./charon")
 
 asset.require("./othermoons")
 
+asset.require("./actions")
+
 local mission = asset.localResource("newhorizons.mission")
 local missionName
 

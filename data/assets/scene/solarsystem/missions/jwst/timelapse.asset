@@ -504,7 +504,7 @@ end
 
 local function createActions()
   local playForwards = {
-    Identifier = "jwst.play.forwards",
+    Identifier = "os.missions.jwst.play.forwards",
     Name = "Play JWST from start",
     Command = [[
       openspace.scriptScheduler.clear(0)
@@ -520,7 +520,7 @@ local function createActions()
   }
 
   local playFromDetach = {
-    Identifier = "jwst.play.detach",
+    Identifier = "os.missions.jwst.play.detach",
     Name = "Play JWST from detach",
     Command = [[
       openspace.scriptScheduler.clear(0)
@@ -538,7 +538,7 @@ local function createActions()
   }
 
   local playBackwards = {
-    Identifier = "jwst.play.backwards",
+    Identifier = "os.missions.jwst.play.backwards",
     Name = "Play JWST from end",
     Command = [[
       openspace.scriptScheduler.clear(0)
@@ -554,7 +554,7 @@ local function createActions()
   }
 
   local clearPlay = {
-    Identifier = "jwst.play.clear",
+    Identifier = "os.missions.jwst.play.clear",
     Name = "Clear JWST timelapse",
     Command = [[
       openspace.scriptScheduler.clear(0)
@@ -562,7 +562,7 @@ local function createActions()
       openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma", 1.0)
       openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", true)
       local deltaTime = openspace.time.deltaTime()
-      if deltaTime > 0 then
+      if deltaTime >= 0 then
         openspace.time.setDeltaTime(1)
       else
         openspace.time.setDeltaTime(-1)
@@ -574,7 +574,7 @@ local function createActions()
   }
 
   local togglePlayDirection = {
-    Identifier = "jwst.toggle.direction",
+    Identifier = "os.missions.jwst.toggledirection",
     Name = "Toggle forwards / backwards",
     Command = [[
       -- Flip deltatime
@@ -611,7 +611,7 @@ local function createActions()
     IsLocal = false
   }
 
-  return {playForwards, playFromDetach, playBackwards, clearPlay, togglePlayDirection}
+  return { playForwards, playFromDetach, playBackwards, clearPlay, togglePlayDirection }
 end
 
 local text = {
@@ -623,7 +623,7 @@ local text = {
 
 asset.onInitialize(function()
   actionsList = createActions()
-  for i, action in ipairs(actionsList) do
+  for _, action in ipairs(actionsList) do
     openspace.action.registerAction(action)
   end
 
@@ -642,7 +642,7 @@ end)
 
 asset.meta = {
   Name = "James Webb Space Telescope Timelapse",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[
     Scripts that are scheduled to alter the speed of the simulation time so the deployment
     of the James Webb Space Telescope looks smoother.

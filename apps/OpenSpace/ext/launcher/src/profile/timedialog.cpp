@@ -52,7 +52,8 @@ TimeDialog::TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>*
             if (_timeData.value.empty()) {
                 _timeData.value = "0d";
             }
-            _relativeEdit->setSelection(0, _relativeEdit->text().length());
+            int len = static_cast<int>(_relativeEdit->text().length());
+            _relativeEdit->setSelection(0, len);
         }
         else {
             _absoluteEdit->setSelectedSection(QDateTimeEdit::YearSection);
