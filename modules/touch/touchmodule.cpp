@@ -110,8 +110,8 @@ TouchModule::~TouchModule() {
     // intentionally left empty
 }
 
-bool TouchModule::isDefaultDirectTouchType(const std::string& renderableType) {
-    return _sortedDefaultRenderableTypes.find(renderableType) !=
+bool TouchModule::isDefaultDirectTouchType(std::string_view renderableType) const {
+    return _sortedDefaultRenderableTypes.find(std::string(renderableType)) !=
         _sortedDefaultRenderableTypes.end();
 }
 

@@ -240,7 +240,7 @@ double Renderable::interactionSphere() const {
     return _interactionSphere;
 }
 
-std::string Renderable::typeAsString() const {
+std::string_view Renderable::typeAsString() const {
     return _renderableType;
 }
 

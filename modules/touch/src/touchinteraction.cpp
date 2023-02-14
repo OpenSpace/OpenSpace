@@ -636,16 +636,16 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
 #endif
 
     if (_zoomOutTap) {
-        return ZOOM_OUT;
+        return InteractionType::ZOOM_OUT;
     }
     else if (list.size() == 1) {
-        return ROTATION;
+        return InteractionType::ROTATION;
     }
     else {
         float avgDistance = static_cast<float>(std::abs(dist - lastDist));
         // If average distance between 3 fingers are constant we have panning
         if (_panEnabled && (avgDistance < _interpretPan && list.size() == 3)) {
-            return PAN;
+            return InteractionType::PAN;
         }
 
         // We have roll if one finger is still, or the total roll angles around the
@@ -655,7 +655,7 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
                 (std::abs(rollOn) < 100.0 &&
                  normalizedCentroidDistance < _centroidStillThreshold))
         {
-            return ROLL;
+            return InteractionType::ROLL;
         }
         else {
             const bool sameInput0 = _pinchInputs[0].holdsInput(list[0].latestInput());
@@ -667,7 +667,7 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
                 _pinchInputs[0] = TouchInputHolder(list[0].latestInput());
                 _pinchInputs[1] = TouchInputHolder(list[1].latestInput());
             }
-            return PINCH;
+            return InteractionType::PINCH;
         }
     }
 }
@@ -710,7 +710,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
     const float aspectRatio =
         static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
     switch (action) {
-        case ROTATION: {
+        case InteractionType::ROTATION: {
             // Add rotation velocity
             _vel.orbit += glm::dvec2(inputHolder.speedX() *
                           _sensitivity.orbit.x, inputHolder.speedY() *
@@ -721,7 +721,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             );
             break;
         }
-        case PINCH: {
+        case InteractionType::PINCH: {
             if (_disableZoom) {
                 break;
             }
@@ -752,7 +752,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
                 std::max(_touchScreenSize.value() * 0.1, 1.0);
             break;
         }
-        case ROLL: {
+        case InteractionType::ROLL: {
             if (_disableRoll) {
                 break;
             }
@@ -793,7 +793,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             _constTimeDecayCoeff.roll = computeConstTimeDecayCoefficient(_vel.roll);
             break;
         }
-        case PAN: {
+        case InteractionType::PAN: {
             if (!_panEnabled) {
                 break;
             }
@@ -805,7 +805,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             _constTimeDecayCoeff.pan = computeConstTimeDecayCoefficient(panVelocityAvg);
             break;
         }
-        case ZOOM_OUT: {
+        case InteractionType::ZOOM_OUT: {
             if (_disableZoom) {
                 break;
             }

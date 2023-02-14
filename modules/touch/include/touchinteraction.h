@@ -66,7 +66,7 @@ class TouchInteraction : public properties::PropertyOwner {
 public:
     TouchInteraction();
 
-    enum InteractionType {
+    enum class InteractionType {
         ROTATION = 0,
         PINCH,
         PAN,

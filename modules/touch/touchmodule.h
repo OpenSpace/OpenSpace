@@ -50,7 +50,7 @@ public:
 
     // Function to check if the given renderable type is one that should
     // use direct maniuplation
-    bool isDefaultDirectTouchType(const std::string& renderableType);
+    bool isDefaultDirectTouchType(std::string_view renderableType) const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;

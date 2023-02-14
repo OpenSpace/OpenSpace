@@ -543,13 +543,13 @@ glm::quat OrbitalNavigator::anchorNodeToCameraRotation() const {
 glm::dvec3 OrbitalNavigator::pushToSurfaceOfAnchor(
                                                   const glm::dvec3& cameraPosition) const
 {
-    SurfacePositionHandle posHandle =
+    const SurfacePositionHandle posHandle =
         calculateSurfacePositionHandle(*_anchorNode, cameraPosition);
 
      return pushToSurface(
          cameraPosition,
          _anchorNode->worldPosition(),
-        posHandle
+         posHandle
     );
 }
 
