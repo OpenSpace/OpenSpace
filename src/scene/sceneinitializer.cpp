@@ -32,25 +32,11 @@
 
 namespace openspace {
 
-void SingleThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
-    node->initialize();
-    _initializedNodes.push_back(node);
-}
-
-std::vector<SceneGraphNode*> SingleThreadedSceneInitializer::takeInitializedNodes() {
-    std::vector<SceneGraphNode*> nodes = std::move(_initializedNodes);
-    return nodes;
-}
-
-bool SingleThreadedSceneInitializer::isInitializing() const {
-    return false;
-}
-
-MultiThreadedSceneInitializer::MultiThreadedSceneInitializer(unsigned int nThreads)
+SceneInitializer::SceneInitializer(unsigned int nThreads)
     : _threadPool(nThreads)
 {}
 
-void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
+void SceneInitializer::initializeNode(SceneGraphNode* node) {
     ZoneScoped;
 
     auto initFunction = [this, node]() {
@@ -107,7 +93,7 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     _threadPool.enqueue(initFunction);
 }
 
-std::vector<SceneGraphNode*> MultiThreadedSceneInitializer::takeInitializedNodes() {
+std::vector<SceneGraphNode*> SceneInitializer::takeInitializedNodes() {
     // Some of the scene graph nodes might still be in the initialization queue and we
     // should wait for those to finish or we end up in some half-initialized state since
     // other parts of the application already know about their existence
@@ -120,8 +106,8 @@ std::vector<SceneGraphNode*> MultiThreadedSceneInitializer::takeInitializedNodes
     return nodes;
 }
 
-bool MultiThreadedSceneInitializer::isInitializing() const {
-    const std::lock_guard g(_mutex);
+bool SceneInitializer::isInitializing() const {
+    std::lock_guard g(_mutex);
     return !_initializingNodes.empty();
 }
 

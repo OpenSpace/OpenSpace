@@ -35,29 +35,11 @@ class SceneGraphNode;
 
 class SceneInitializer {
 public:
-    virtual ~SceneInitializer() = default;
-    virtual void initializeNode(SceneGraphNode* node) = 0;
-    virtual std::vector<SceneGraphNode*> takeInitializedNodes() = 0;
-    virtual bool isInitializing() const = 0;
-};
+    SceneInitializer(unsigned int nThreads);
 
-class SingleThreadedSceneInitializer final : public SceneInitializer {
-public:
-    void initializeNode(SceneGraphNode* node) override;
-    std::vector<SceneGraphNode*> takeInitializedNodes() override;
-    bool isInitializing() const override;
-
-private:
-    std::vector<SceneGraphNode*> _initializedNodes;
-};
-
-class MultiThreadedSceneInitializer final : public SceneInitializer {
-public:
-    explicit MultiThreadedSceneInitializer(unsigned int nThreads);
-
-    void initializeNode(SceneGraphNode* node) override;
-    std::vector<SceneGraphNode*> takeInitializedNodes() override;
-    bool isInitializing() const override;
+    void initializeNode(SceneGraphNode* node);
+    std::vector<SceneGraphNode*> takeInitializedNodes();
+    bool isInitializing() const;
 
 private:
     std::vector<SceneGraphNode*> _initializedNodes;
