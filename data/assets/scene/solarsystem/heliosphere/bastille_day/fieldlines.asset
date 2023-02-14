@@ -48,7 +48,7 @@ local fieldlines = {
 }
 
 local toggle_fieldlines = {
-  Identifier = "fieldlines.toggle_fieldlines",
+  Identifier = "os.events.bastilleday.fieldlines.togglefieldlines",
   Name = "Toggle Fieldlines",
   Command = propertyHelper.invert("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled"),
   Documentation = "Toggle fieldline rendering of CME",
@@ -70,7 +70,7 @@ asset.export(fieldlines)
 
 asset.meta = {
   Name = "Predictive Science Inc. Fieldlines Bastille Day",
-  Version = "1.0",
+  Version = "1.1",
   Description = "Magnetic fieldlines for the bastille day CME event",
   Author = "CCMC, Jonathan Grangien, Matthias Berg",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",

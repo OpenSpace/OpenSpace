@@ -4,10 +4,67 @@ asset.require("./minor/norse_group")
 asset.require("./minor/other_group")
 asset.require("./minor/shepherd_group")
 
+local minormoons_on = {
+  Identifier = "os.solarsystem.saturn.minormoonson",
+  Name = "Turn ON minor moons and trails",
+  Command = [[
+    local trails = openspace.getProperty('{moonTrail_minor_saturn}.Renderable.Enabled');
+    local trails_fade = openspace.getProperty('{moonTrail_minor_saturn}.Renderable.Fade');
+
+    local moons = openspace.getProperty('{moon_minor_saturn}.Renderable.Enabled');
+    local moons_fade = openspace.getProperty('{moon_minor_saturn}.Renderable.Fade');
+
+    for i, v in pairs(trails_fade) do 
+      openspace.setPropertyValueSingle(trails[i], true)
+      openspace.setPropertyValueSingle(v, 1, 2, 'Linear') 
+    end
+
+    for i, v in pairs(moons_fade) do 
+      openspace.setPropertyValueSingle(moons[i], true)
+      openspace.setPropertyValueSingle(v, 1, 2, 'Linear') 
+    end
+  ]],
+  Documentation = "Turn ON Saturn's minor moons and their trails",
+  GuiPath = "/Solar System/Saturn",
+  IsLocal = true
+}
+
+local minormoons_off = {
+  Identifier = "os.solarsystem.saturn.minormoonsoff",
+  Name = "Turn OFF minors moon and trails",
+  Command = [[
+    local trails = openspace.getProperty('{moonTrail_minor_saturn}.Renderable.Enabled');
+    local trails_fade = openspace.getProperty('{moonTrail_minor_saturn}.Renderable.Fade');
+
+    local moons = openspace.getProperty('{moon_minor_saturn}.Renderable.Enabled');
+    local moons_fade = openspace.getProperty('{moon_minor_saturn}.Renderable.Fade');
+
+    for i, v in pairs(trails_fade) do 
+      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)" ) 
+    end
+
+    for i, v in pairs(moons_fade) do
+      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)" ) 
+    end
+  ]],
+  Documentation = "Turn OFF Saturn's minor moons and their trails",
+  GuiPath = "/Solar System/Saturn",
+  IsLocal = true
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(minormoons_on)
+  openspace.action.registerAction(minormoons_off)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(minormoons_off)
+  openspace.action.removeAction(minormoons_on)
+end)
 
 asset.meta = {
   Name = "Saturn Minor Moons",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Meta asset containing five moon groups: Gallic, Inuit, Norse, Shepherd
     moons and Other]],
   Author = "OpenSpace Team",

@@ -1,8 +1,10 @@
 [ 
     { "type": "pause", 
       "value": "true"},
-    { "type": "keys", 
-      "value": "F11"},
+    { "type": "action", 
+      "value": "profile.setup.apollo11"},
+    { "type": "wait", 
+      "value": "10"},
     { "type": "navigationstate", 
       "value": "{Anchor='Apollo11LemPosition',Pitch=-0.275871E-1,Position={-3.291966E2,7.262499E2,-7.671269E2},ReferenceFrame='Root',Up={-0.833341E0,-0.532887E0,-0.146881E0},Yaw=-0.141130E-3}"},
     { "type": "wait", 

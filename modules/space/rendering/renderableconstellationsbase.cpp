@@ -98,10 +98,10 @@ documentation::Documentation RenderableConstellationsBase::Documentation() {
 RenderableConstellationsBase::RenderableConstellationsBase(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _drawLabels(DrawLabelInfo, false)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
-    , _namesFilename(NamesFileInfo)
     , _selection(SelectionInfo)
+    , _drawLabels(DrawLabelInfo, false)
+    , _namesFilename(NamesFileInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -188,7 +188,7 @@ void RenderableConstellationsBase::loadConstellationFile() {
 }
 
 void RenderableConstellationsBase::fillSelectionProperty() {
-    for (const std::pair<std::string, std::string>& pair : _namesTranslation) {
+    for (const std::pair<const std::string, std::string>& pair : _namesTranslation) {
         _selection.addOption(pair.second);
     }
 }

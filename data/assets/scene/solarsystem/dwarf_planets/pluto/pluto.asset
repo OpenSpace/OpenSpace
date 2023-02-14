@@ -57,10 +57,14 @@ local PlutoLabel = {
     Type = "RenderableLabel",
     Text = "Pluto",
     FontSize = 70.0,
-    Size = 9.05,
+    Size = 9.10,
     MinMaxSize = { 1, 100 },
     BlendMode = "Additive",
-    OrientationOption = "Camera View Direction"
+    OrientationOption = "Camera View Direction",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.0, 120.0 },
+    FadeWidths = { 1.0, 150.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {

@@ -1,86 +1,4 @@
 {
-  "actions": [
-    {
-      "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Solar System/Earth",
-      "identifier": "profile.toggle.satellitetrails",
-      "is_local": false,
-      "name": "Toggle satellite trails",
-      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-    },
-    {
-      "documentation": "Toggle points and labels for the Lagrangian points for Earth Sun system",
-      "gui_path": "/JWST",
-      "identifier": "profile.toggle.lagrangianpoints",
-      "is_local": false,
-      "name": "Toggle Lagrangian points",
-      "script": "local list = openspace.getProperty('{lagrange_points_earth}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-    },
-    {
-      "documentation": "Toggle Hubble Ultra Deep Field image and line towards its coordinate",
-      "gui_path": "/JWST",
-      "identifier": "profile.toggle.hudf",
-      "is_local": false,
-      "name": "Toggle Hubble Ultra Deep Field",
-      "script": "local list = openspace.getProperty('{mission_jwst_hudf}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-    },
-    {
-      "documentation": "Toggle L2 label, point and line",
-      "gui_path": "/JWST",
-      "identifier": "profile.toggle.l2",
-      "is_local": false,
-      "name": "Toggle L2 line and small L2 label",
-      "script": "local list = openspace.getProperty('{lagrange_points_earth_l2_small}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-    },
-    {
-      "documentation": "Toggle James Webb Space Telecope field of view and view band",
-      "gui_path": "/JWST",
-      "identifier": "profile.toggle.jwst_fov",
-      "is_local": false,
-      "name": "Toggle JWST field of view and view band",
-      "script": "local list = openspace.getProperty('{mission_jwst_fov}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-    },
-    {
-      "documentation": "Set the time to the launch time of JWST",
-      "gui_path": "/JWST",
-      "identifier": "profile.set.jwst_launch",
-      "is_local": false,
-      "name": "Set to JWST launch time",
-      "script": "openspace.time.setDeltaTime(1); openspace.time.setTime('2021-12-25T12:20:01');"
-    },
-    {
-      "documentation": "Set the time to the detach time of JWST",
-      "gui_path": "/JWST",
-      "identifier": "profile.set.jwst_detach",
-      "is_local": false,
-      "name": "Set to JWST detach time",
-      "script": "openspace.time.setDeltaTime(1); openspace.time.setTime('2021-12-25T12:50:00');"
-    },
-    {
-      "documentation": "Toggle JWST trail relative to the Sun",
-      "gui_path": "/JWST",
-      "identifier": "profile.toggle.sun_trail",
-      "is_local": false,
-      "name": "Toggle JWST Sun trail",
-      "script": "local value = openspace.getPropertyValue('Scene.JWSTSunTrail.Renderable.Enabled'); openspace.setPropertyValueSingle('Scene.JWSTSunTrail.Renderable.Enabled', not value);"
-    },
-    {
-      "documentation": "Toggle all planet and moon trails, except the Moon",
-      "gui_path": "/JWST",
-      "identifier": "profile.toggle.trails_not_moon",
-      "is_local": false,
-      "name": "Toggle trails (except Moon)",
-      "script": "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled') for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Enabled', true)"
-    },
-    {
-      "documentation": "Toggle JWST launch, cruise and L2 co-revolving orbit trails, not the Sun trail",
-      "gui_path": "/JWST",
-      "identifier": "profile.toggle.jwst_trails",
-      "is_local": false,
-      "name": "Toggle JWST trail",
-      "script": "local list = {'Scene.JWSTTrailLaunch.Renderable.Enabled', 'Scene.JWSTTrailCruise.Renderable.Enabled', 'Scene.JWSTTrailCoRevOrbit.Renderable.Enabled'}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)); end"
-    }
-  ],
   "additional_scripts": [
     "openspace.setPropertyValue(\"Scene.MoonTrail.Renderable.Appearance.Color\", {0.7, 0.5, 0.5});"
   ],
@@ -140,55 +58,55 @@
   ],
   "keybindings": [
     {
-      "action": "profile.toggle.satellitetrails",
+      "action": "os.solarsystem.earth.togglesatellitetrails",
       "key": "S"
     },
     {
-      "action": "profile.toggle.lagrangianpoints",
+      "action": "os.missions.jwst.togglelagrangianpoints",
       "key": "P"
     },
     {
-      "action": "profile.toggle.hudf",
+      "action": "os.missions.jwst.togglehudf",
       "key": "U"
     },
     {
-      "action": "profile.toggle.l2",
+      "action": "os.missions.jwst.togglel2",
       "key": "O"
     },
     {
-      "action": "profile.toggle.jwst_fov",
+      "action": "os.missions.jwst.togglefov",
       "key": "V"
     },
     {
-      "action": "profile.set.jwst_launch",
+      "action": "os.missoins.jwst.setup.launch",
       "key": "J"
     },
     {
-      "action": "profile.toggle.sun_trail",
+      "action": "os.missions.jwst.togglesuntrail",
       "key": "K"
     },
     {
-      "action": "jwst.play.forwards",
+      "action": "os.missions.jwst.play.forwards",
       "key": "M"
     },
     {
-      "action": "jwst.play.backwards",
+      "action": "os.missions.jwst.play.backwards",
       "key": "N"
     },
     {
-      "action": "jwst.play.clear",
+      "action": "os.missions.jwst.play.clear",
       "key": "B"
     },
     {
-      "action": "profile.toggle.trails_not_moon",
+      "action": "os.missions.jwst.toggletrialsexceptmoon",
       "key": "G"
     },
     {
-      "action": "jwst.toggle.direction",
+      "action": "os.missions.jwst.toggledirection",
       "key": "Y"
     },
     {
-      "action": "profile.toggle.jwst_trails",
+      "action": "os.missions.jwst.togglejwsttrails",
       "key": "T"
     }
   ],

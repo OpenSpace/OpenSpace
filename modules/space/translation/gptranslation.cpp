@@ -70,7 +70,8 @@ GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary) {
         p.file,
         codegen::map<kepler::Format>(p.format)
     );
-    if (parameters.size() < element) {
+
+    if (element > static_cast<int>(parameters.size())) {
         throw ghoul::RuntimeError(fmt::format(
             "Requested element {} but only {} are available", element, parameters.size()
         ));

@@ -22,14 +22,37 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/global_variables.cmake)
+
+function (copy_files target)
+  # Add the copy command
+  foreach (file_i ${ARGN})
+    if (IS_DIRECTORY "${file_i}")
+      # copy_if_different doesn't handle directories well and just copies them without
+      # contents.  So if the path is a directory, we need to issue a different copy
+      # command
+      get_filename_component(folder ${file_i} NAME)
+      add_custom_command(
+        TARGET ${target}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${file_i}" "$<TARGET_FILE_DIR:${target}>/${folder}"
+      )
+    else ()
+      add_custom_command(
+        TARGET ${target}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${file_i}" $<TARGET_FILE_DIR:${target}>
+      )
+    endif ()
+  endforeach ()
+endfunction ()
 
 function (create_new_application application_name)
   add_executable(${application_name} MACOSX_BUNDLE ${ARGN})
   set_openspace_compile_settings(${application_name})
   if (WIN32)
     get_external_library_dependencies(ext_lib)
-    ghl_copy_files(${application_name} ${ext_lib})
+    copy_files(${application_name} ${ext_lib})
   endif ()
 
   target_link_libraries(${application_name} PUBLIC openspace-module-base)
