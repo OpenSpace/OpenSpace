@@ -466,7 +466,7 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
         if (info.prop == prop) {
             info.beginTime = now;
             info.durationSeconds = durationSeconds;
-            info.postScript = std::move(postScript),
+            info.postScript = std::move(postScript);
             info.easingFunction = func;
             // If we found it, we can break since we make sure that each property is only
             // represented once in this

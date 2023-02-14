@@ -31,6 +31,7 @@
 #include <deque>
 
 namespace openspace {
+using SelectedImageDeque = std::deque<std::pair<std::string, double>>;
 
 class WwtCommunicator : public Browser {
 public:
@@ -40,12 +41,12 @@ public:
     void update();
 
     // WorldWide Telescope communication
-    void selectImage(const std::string& url, int i);
-    void addImageLayerToWwt(const std::string& url, int i);
-    void removeSelectedImage(int i);
-    void setImageOrder(int i, int order);
+    void selectImage(const std::string& imageUrl);
+    void addImageLayerToWwt(const std::string& imageUrl);
+    void removeSelectedImage(const std::string& imageUrl);
+    void setImageOrder(const std::string& imageUrl, int order);
     void loadImageCollection(const std::string& collection);
-    void setImageOpacity(int i, float opacity);
+    void setImageOpacity(const std::string& imageUrl, float opacity);
     void hideChromeInterface() const;
 
     bool isImageCollectionLoaded() const;
@@ -54,7 +55,7 @@ public:
     glm::ivec3 borderColor() const;
     glm::dvec2 equatorialAim() const;
     glm::dvec2 fieldsOfView() const;
-    std::vector<int> selectedImages() const;
+    std::vector<std::string> selectedImages() const;
     std::vector<double> opacities() const;
     double borderRadius() const;
 
@@ -70,7 +71,7 @@ public:
 
 protected:
     void setIdInBrowser(const std::string& id) const;
-    std::deque<std::pair<int, double>>::iterator findSelectedImage(int i);
+    SelectedImageDeque::iterator findSelectedImage(const std::string& id);
 
     properties::DoubleProperty _verticalFov;
 
@@ -79,7 +80,7 @@ protected:
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
     double _targetRoll = 0.0;
     bool _isImageCollectionLoaded = false;
-    std::deque<std::pair<int, double>> _selectedImages;
+    SelectedImageDeque _selectedImages;
 
 private:
     void sendMessageToWwt(const ghoul::Dictionary& msg) const;

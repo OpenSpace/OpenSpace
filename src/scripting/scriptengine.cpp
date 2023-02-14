@@ -445,12 +445,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                 library.documentations.push_back(std::move(func));
             }
             catch (const documentation::SpecificationError& e) {
-                for (const documentation::TestResult::Offense& o : e.result.offenses) {
-                    LERRORC(o.offender, ghoul::to_string(o.reason));
-                }
-                for (const documentation::TestResult::Warning& w : e.result.warnings) {
-                    LWARNINGC(w.offender, ghoul::to_string(w.reason));
-                }
+                logError(e);
             }
             lua_pop(state, 1);
         }
@@ -576,26 +571,31 @@ void ScriptEngine::writeLog(const std::string& script) {
 void ScriptEngine::preSync(bool isMaster) {
     ZoneScoped
 
-    if (!isMaster) {
-        return;
-    }
-
     std::lock_guard guard(_clientScriptsMutex);
-    while (!_incomingScripts.empty()) {
-        QueueItem item = std::move(_incomingScripts.front());
-        _incomingScripts.pop();
+    if (isMaster) {
+        while (!_incomingScripts.empty()) {
+            QueueItem item = std::move(_incomingScripts.front());
+            _incomingScripts.pop();
 
-        _scriptsToSync.push_back(item.script);
-        const bool remoteScripting = item.remoteScripting;
+            _scriptsToSync.push_back(item.script);
+            const bool remoteScripting = item.remoteScripting;
 
-        // Not really a received script but the master also needs to run the script...
-        _masterScriptQueue.push(item);
+            // Not really a received script but the master also needs to run the script...
+            _masterScriptQueue.push(item);
 
-        if (global::parallelPeer->isHost() && remoteScripting) {
-            global::parallelPeer->sendScript(item.script);
+            if (global::parallelPeer->isHost() && remoteScripting) {
+                global::parallelPeer->sendScript(item.script);
+            }
+            if (global::sessionRecording->isRecording()) {
+                global::sessionRecording->saveScriptKeyframeToTimeline(item.script);
+            }
         }
-        if (global::sessionRecording->isRecording()) {
-            global::sessionRecording->saveScriptKeyframeToTimeline(item.script);
+    }
+    else {
+        while (!_incomingScripts.empty()) {
+            QueueItem item = std::move(_incomingScripts.front());
+            _incomingScripts.pop();
+            _clientScriptQueue.push(item.script);
         }
     }
 }

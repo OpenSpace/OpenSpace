@@ -22,9 +22,8 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 
 # We are getting all_enabled_modules from the handle_applications.cmake file which gets
 # it from the main CMakeLists file
@@ -43,14 +42,14 @@ if (OPENSPACE_OPENVR_SUPPORT)
     if (WIN32)
       find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
         NAMES SGCTOpenVR.h
-        PATHS ${OPENSPACE_BASE_DIR}/ext/sgct/additional_includes/openvr NO_DEFAULT_PATH
+        PATHS ${PROJECT_SOURCE_DIR}/ext/sgct/additional_includes/openvr NO_DEFAULT_PATH
         REQUIRED
       )
     else ()
       find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
         NAMES SGCTOpenVR.h
         PATH_SUFFIXES SGCTOpenVR
-        PATHS ${OPENSPACE_BASE_DIR}/ext/sgct/additional_includes/openvr
+        PATHS ${PROJECT_SOURCE_DIR}/ext/sgct/additional_includes/openvr
         REQUIRED
       )
     endif ()
@@ -115,19 +114,14 @@ set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_FREETYPE OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
+set(SGCT_DEP_INCLUDE_CATCH2 OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
 target_link_libraries(OpenSpace PRIVATE sgct)
 
-set_folder_location(sgct "External")
-set_folder_location(glfw "External")
-set_folder_location(miniziplibstatic "External")
-set_folder_location(png16_static "External")
-set_folder_location(quat "External")
-set_folder_location(tinyxml2static "External")
-set_folder_location(vrpn "External")
-set_folder_location(zlibstatic "External")
-set_folder_location(SGCTTest "Unit Tests")
+set_target_properties(sgct PROPERTIES FOLDER "External")
+set_target_properties(glfw PROPERTIES FOLDER "External")
+set_target_properties(SGCTTest PROPERTIES FOLDER "External")
 
 if (UNIX AND (NOT APPLE))
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
@@ -161,7 +155,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   set(PROJECT_ARCH "x86_64")
 
   if (WIN32)
-    set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
+    set(RESOURCE_FILE openspace.rc)
   endif ()
 
   # Add the CEF binary distribution's cmake/ directory to the module path and

@@ -53,14 +53,6 @@ namespace {
         "elements not listed"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IgnoreHiddenInfo = {
-        "IgnoreHidden",
-        "Ignore Hidden Hint",
-        "If this value is 'true', all 'Hidden' hints passed into the SceneGraphNodes are "
-        "ignored and thus all SceneGraphNodes are displayed. If this value is 'false', "
-        "the hidden hints are followed"
-    };
-
     int nVisibleProperties(const std::vector<openspace::properties::Property*>& props)
     {
         using Visibility = openspace::properties::Property::Visibility;

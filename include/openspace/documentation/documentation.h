@@ -121,6 +121,8 @@ struct SpecificationError : public ghoul::RuntimeError {
     TestResult result;
 };
 
+void logError(const SpecificationError& error, std::string component = "");
+
 struct Verifier;
 
 /**
