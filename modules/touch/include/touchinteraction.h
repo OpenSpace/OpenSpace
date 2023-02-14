@@ -182,8 +182,6 @@ private:
 
     properties::BoolProperty _enableDirectManipulation;
     properties::FloatProperty _directTouchDistanceThreshold;
-    //properties::FloatProperty _orbitSpeedThreshold;
-    //properties::FloatProperty _spinSensitivity;
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     struct DebugProperties : PropertyOwner {

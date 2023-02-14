@@ -160,9 +160,11 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IsDirectlyTouchableInfo = {
-        "IsDirectlyTouchable",
-        "Is Directly Touchable",
+    constexpr openspace::properties::Property::PropertyInfo
+        SupportsDirectInteractionInfo =
+    {
+        "SupportsDirectInteraction",
+        "Supports Direct Interaction",
         "Only relevant when using touch interaction. If true, the \'direct "
         "manipulation\' scheme will be used when interacting with this scene graph "
         "node, meaning that the positions on the interaction sphere that intersects "
@@ -202,8 +204,8 @@ namespace {
         // [[codegen::verbatim(InteractionSphereInfo.description)]]
         std::optional<double> interactionSphere;
 
-        // [[codegen::verbatim(IsDirectlyTouchableInfo.description)]]
-        std::optional<bool> isDirectlyTouchable;
+        // [[codegen::verbatim(SupportsDirectInteractionInfo.description)]]
+        std::optional<bool> supportsDirectInteraction;
 
         struct Transform {
             // This node describes a translation that is applied to the scene graph node
@@ -529,7 +531,7 @@ SceneGraphNode::SceneGraphNode()
     , _screenSizeRadius(ScreenSizeRadiusInfo, 0)
     , _visibilityDistance(VisibilityDistanceInfo, 6e10f)
     , _showDebugSphere(ShowDebugSphereInfo, false)
-    , _isDirectlyTouchable(IsDirectlyTouchableInfo, false)
+    , _supportsDirectInteraction(SupportsDirectInteractionInfo, false)
 {
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
@@ -570,7 +572,7 @@ SceneGraphNode::SceneGraphNode()
 
     addProperty(_showDebugSphere);
 
-    addProperty(_isDirectlyTouchable);
+    addProperty(_supportsDirectInteraction);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
@@ -1226,8 +1228,8 @@ double SceneGraphNode::approachFactor() const {
     return _approachFactor;
 }
 
-bool SceneGraphNode::isDirectlyTouchable() const {
-    return _isDirectlyTouchable;
+bool SceneGraphNode::supportsDirectInteraction() const {
+    return _supportsDirectInteraction;
 }
 
 const Renderable* SceneGraphNode::renderable() const {

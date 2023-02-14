@@ -224,18 +224,6 @@ namespace {
         "as a factor times the interaction sphere"
     };
 
-    //constexpr openspace::properties::Property::PropertyInfo OrbitSpinningThreshold = {
-    //    "OrbitThreshold",
-    //    "Threshold to activate orbit spinning in direct-manipulation",
-    //    "" // @TODO Missing documentation
-    //};
-
-    //constexpr openspace::properties::Property::PropertyInfo SpinningSensitivityInfo = {
-    //    "SpinningSensitivity",
-    //    "Sensitivity of spinning in direct-manipulation",
-    //    "" // @TODO Missing documentation
-    //};
-
     // Compute coefficient of decay based on current frametime; if frametime has been
     // longer than usual then multiple decay steps may be applied to keep the decay
     // relative to user time
@@ -298,9 +286,6 @@ TouchInteraction::TouchInteraction()
     // projDiffLength/diffLength.
     , _enableDirectManipulation(EnableDirectManipulationInfo, true)
     , _directTouchDistanceThreshold(DirectManipulationThresholdInfo, 5.f, 0.f, 10.f)
-    //, _orbitSpeedThreshold(OrbitSpinningThreshold, 0.005f, 0.f, 0.01f, 0.0001f)
-    //, _spinSensitivity(SpinningSensitivityInfo, 0.25f, 0.f, 2.f, 0.01f)
-
 {
     addProperty(_disableZoom);
     addProperty(_disableRoll);
@@ -327,8 +312,6 @@ TouchInteraction::TouchInteraction()
 
     addProperty(_enableDirectManipulation);
     addProperty(_directTouchDistanceThreshold);
-    //addProperty(_orbitSpeedThreshold);
-    //addProperty(_spinSensitivity);
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     addPropertySubOwner(_debugProperties);
@@ -483,7 +466,7 @@ void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolde
     bool isDirectTouchRenderable = node->renderable() &&
         module->isDefaultDirectTouchType(node->renderable()->typeAsString());
 
-    if (!(node->isDirectlyTouchable() || isDirectTouchRenderable)) {
+    if (!(node->supportsDirectInteraction() || isDirectTouchRenderable)) {
         return;
     }
 
@@ -1090,17 +1073,11 @@ void TouchInteraction::resetAfterInput() {
     _debugProperties.nFingers = 0;
     _debugProperties.interactionMode = "None";
 #endif
-    // @TODO (emmbr 2023-02-03) This also seems to not quite work, and only trigger in
-    // unexpected situations. We should try to reimplement this but using the friction
-    // parameters in the orbitalnavigator somehow. Maybe the velocities affected by
-    // the touch should actually be the orbitalnavigator's?
-    //if (_directTouchMode && !_selectedNodeSurfacePoints.empty() && _lmSuccess) {
-    //    double spinDelta = _spinSensitivity / global::windowDelegate->averageDeltaTime();
-    //    if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) {
-    //         // allow node to start "spinning" after direct-manipulation finger is let go
-    //        _vel.orbit = _lastVel.orbit * spinDelta;
-    //    }
-    //}
+    // @TODO (emmbr 2023-02-03) Bring back feature that allows node to spin when
+    // the direct manipulaiton finger is let go. Should implement this using the
+    // orbitalnavigator's friction values. This also implies passing velocities to
+    // the orbitalnavigator, instead of setting the camera directly as is currently
+    // done in this class.
 
     // Reset variables
     _lastVel.orbit = glm::dvec2(0.0);
