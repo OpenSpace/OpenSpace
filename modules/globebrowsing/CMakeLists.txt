@@ -151,12 +151,19 @@ target_precompile_headers(${globebrowsing_module} PRIVATE
 # Libmpv
 if(WIN32)
   add_library(libmpv SHARED IMPORTED)
+  target_include_directories(libmpv SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/include)
   set_target_properties(libmpv PROPERTIES
-    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/lib/mpv-2.dll"
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/bin/mpv-2.dll"
     IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/lib/mpv.lib"
-    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/include"
   )
-  target_link_libraries(openspace-module-globebrowsing PUBLIC libmpv)
+
+  add_library(libopenh264 SHARED IMPORTED)
+  set_target_properties(libopenh264 PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/bin/libopenh264.dll"
+    IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/lib/mpv.lib"
+  )
+
+  target_link_libraries(openspace-module-globebrowsing PUBLIC libmpv libopenh264)
 else(WIN32)
   find_package(LIBMPV REQUIRED)
 
