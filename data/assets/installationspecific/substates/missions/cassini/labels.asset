@@ -1,0 +1,97 @@
+local saturn = asset.require("scene/solarsystem/planets/saturn/saturn")
+local titan = asset.require("scene/solarsystem/planets/saturn/titan/titan")
+local saturnRadius = 58232000
+local titanRadius = 2574.700
+
+local CassiniSaturnLabel = {
+  Identifier = "CassiniSaturnLabel",
+  Parent = saturn.Saturn.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = {
+        0.0,
+        0.0,
+        2.0 * saturnRadius
+      }
+    }
+  },
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Saturn",
+    FontSize = 70.0,
+    Size = 6.3,
+    MinMaxSize = { 1, 35 },
+    BlendMode = "Additive",
+    OrientationOption = "Camera View Direction",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.5, 20.0 },
+    FadeWidths = { 0.3, 20.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Saturn Label (for Cassini mission)",
+    Path = "/Solar System/Planets/Saturn",
+    Description = "Cassini mission planet label for Saturn",
+  }
+}
+
+local CassiniTitanLabel = {
+  Identifier = "CassiniTitanLabel",
+  Parent = titan.Titan.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = {
+        0.0,
+        0.0,
+        2.0 * titanRadius
+      }
+    }
+  },
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Titan",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 35 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.5, 20.0 },
+    FadeWidths = { 0.3, 20.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Titan Label (for Cassini mission)",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = "Cassini mission label for Saturn's moon Titan"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CassiniSaturnLabel)
+  openspace.addSceneGraphNode(CassiniTitanLabel)
+end)
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CassiniTitanLabel)
+  openspace.removeSceneGraphNode(CassiniSaturnLabel)
+end)
+
+asset.export(CassiniSaturnLabel)
+asset.export(CassiniTitanLabel)
+
+asset.meta = {
+  Name = "Cassini missions labels for Titan and Saturn",
+  Version = "1.0",
+  Description = [[
+    Labels for Saturn and Titan, to be used togeher with the Cassini mission
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
