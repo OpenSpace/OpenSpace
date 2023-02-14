@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/include/comparesonification.h
@@ -44,7 +44,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
 	"Sonification"
-	sonification_module
+	sonification
 	STATIC
-	${HEADER_FILES} ${SOURCE_FILES}
+	${HEADER_FILES}
+	${SOURCE_FILES}
 )

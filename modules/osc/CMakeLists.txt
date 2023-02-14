@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/include/oscconnection.h
@@ -36,9 +36,21 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
 	"Osc"
-	osc_module
+	osc
 	STATIC
-	${HEADER_FILES} ${SOURCE_FILES}
+	${HEADER_FILES}
+	${SOURCE_FILES}
 )
 
-include_external_library(${osc_module} PUBLIC oscpack ${CMAKE_CURRENT_SOURCE_DIR}/ext/osc)
+add_subdirectory(ext/osc SYSTEM)
+set_target_properties(oscpack PROPERTIES FOLDER "External")
+
+if (MSVC)
+  target_compile_options(oscpack PRIVATE "/W0")
+  target_compile_definitions(oscpack PRIVATE "_SCL_SECURE_NO_WARNINGS")
+else ()
+  target_compile_options(oscpack PRIVATE "-w")
+endif ()
+
+target_include_directories(openspace-module-osc SYSTEM PRIVATE ext ext/osc)
+target_link_libraries(openspace-module-osc PRIVATE oscpack)
