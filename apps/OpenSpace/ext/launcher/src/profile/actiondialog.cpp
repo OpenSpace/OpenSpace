@@ -114,17 +114,13 @@ void ActionDialog::createWidgets() {
 
     layout->addWidget(new Line, 16, 0, 1, 3);
 
-    _mainButtons = new QDialogButtonBox;
-    _mainButtons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+    _mainButton = new QDialogButtonBox;
+    _mainButton->setStandardButtons(QDialogButtonBox::Close);
     QObject::connect(
-        _mainButtons, &QDialogButtonBox::accepted,
-        this, &ActionDialog::applyChanges
-    );
-    QObject::connect(
-        _mainButtons, &QDialogButtonBox::rejected,
+        _mainButton, &QDialogButtonBox::rejected,
         this, &ActionDialog::reject
     );
-    layout->addWidget(_mainButtons, 17, 2, Qt::AlignRight);
+    layout->addWidget(_mainButton, 17, 2, Qt::AlignRight);
 }
 
 void ActionDialog::createActionWidgets(QGridLayout* layout) {
@@ -427,12 +423,6 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
     layout->addWidget(_keybindingWidgets.saveButtons, 14, 2, Qt::AlignRight);
 }
 
-void ActionDialog::applyChanges() {
-    *_actions = std::move(_actionData);
-    *_keybindings = std::move(_keybindingsData);
-    accept();
-}
-
 Profile::Action* ActionDialog::selectedAction() {
     QListWidgetItem* item = _actionWidgets.list->currentItem();
     const int idx = _actionWidgets.list->row(item);
@@ -476,6 +466,10 @@ void ActionDialog::actionRemove() {
             _keybindingsData.erase(_keybindingsData.begin() + i);
             delete _keybindingWidgets.list->takeItem(static_cast<int>(i));
             i--;
+            //Save the updated keybindings to the profile
+            if (_keybindings) {
+                *_keybindings = _keybindingsData;
+            }
         }
         else {
             // If the user chooses 'No' at least once, we have to bail
@@ -494,6 +488,10 @@ void ActionDialog::actionRemove() {
                 _keybindingWidgets.action->addItem(QString::fromStdString(a.identifier));
             }
             clearKeybindingFields();
+            //Save the updated actions to the profile
+            if (_actions) {
+                *_actions = _actionData;
+            }
             return;
         }
     }
@@ -523,9 +521,10 @@ void ActionDialog::actionSelected() {
         _actionWidgets.addButton->setEnabled(false);
         _actionWidgets.removeButton->setEnabled(true);
         _actionWidgets.saveButtons->setEnabled(true);
-        if (_mainButtons) {
-            _mainButtons->setEnabled(false);
+        if (_mainButton) {
+            _mainButton->setEnabled(false);
         }
+        _actionWidgets.list->setEnabled(false);
     }
     else {
         // No action selected
@@ -533,9 +532,10 @@ void ActionDialog::actionSelected() {
         _actionWidgets.removeButton->setEnabled(false);
         _actionWidgets.saveButtons->setEnabled(false);
         //Keybinding panel must also be in valid state to re-enable main start button
-        if (_mainButtons && !_keybindingWidgets.saveButtons->isEnabled()) {
-            _mainButtons->setEnabled(true);
+        if (_mainButton && !_keybindingWidgets.saveButtons->isEnabled()) {
+            _mainButton->setEnabled(true);
         }
+        _actionWidgets.list->setEnabled(true);
     }
 }
 
@@ -610,6 +610,10 @@ void ActionDialog::actionSaved() {
     for (const Profile::Action& a : _actionData) {
         _keybindingWidgets.action->addItem(QString::fromStdString(a.identifier));
     }
+    //Save the updated actions to the profile
+    if (_actions) {
+        *_actions = _actionData;
+    }
     clearKeybindingFields();
     clearActionFields();
 }
@@ -630,6 +634,7 @@ void ActionDialog::clearActionFields() {
     _actionWidgets.script->clear();
     _actionWidgets.script->setEnabled(false);
     _actionWidgets.saveButtons->setEnabled(false);
+    _actionWidgets.list->setEnabled(true);
 }
 
 void ActionDialog::actionRejected() {
@@ -675,6 +680,10 @@ void ActionDialog::keybindingRemove() {
             clearKeybindingFields();
             _keybindingsData.erase(_keybindingsData.begin() + i);
             delete _keybindingWidgets.list->takeItem(static_cast<int>(i));
+            //Save the updated keybindings to the profile
+            if (_keybindings) {
+                *_keybindings = _keybindingsData;
+            }
             return;
         }
     }
@@ -716,9 +725,10 @@ void ActionDialog::keybindingSelected() {
         _keybindingWidgets.saveButtons->button(QDialogButtonBox::Save)->setEnabled(
             _keybindingWidgets.key->currentIndex() > 0
         );
-        if (_mainButtons) {
-            _mainButtons->setEnabled(false);
+        if (_mainButton) {
+            _mainButton->setEnabled(false);
         }
+        _keybindingWidgets.list->setEnabled(false);
     }
     else {
         // No keybinding selected
@@ -726,9 +736,10 @@ void ActionDialog::keybindingSelected() {
         _keybindingWidgets.removeButton->setEnabled(false);
         _keybindingWidgets.saveButtons->setEnabled(false);
         //Action panel must also be in valid state to re-enable main start button
-        if (_mainButtons && !_actionWidgets.saveButtons->isEnabled()) {
-            _mainButtons->setEnabled(true);
+        if (_mainButton && !_actionWidgets.saveButtons->isEnabled()) {
+            _mainButton->setEnabled(true);
         }
+        _keybindingWidgets.list->setEnabled(true);
     }
 }
 
@@ -766,6 +777,10 @@ void ActionDialog::keybindingSaved() {
     keybinding->action = _keybindingWidgets.actionText->text().toStdString();
 
     updateListItem(_keybindingWidgets.list->currentItem(), *keybinding);
+    //Save the updated keybindings to the profile
+    if (_keybindings) {
+        *_keybindings = _keybindingsData;
+    }
     clearKeybindingFields();
 }
 
@@ -783,6 +798,7 @@ void ActionDialog::clearKeybindingFields() {
     _keybindingWidgets.action->setEnabled(false);
     _keybindingWidgets.actionText->clear();
     _keybindingWidgets.actionText->setEnabled(false);
+    _keybindingWidgets.list->setEnabled(true);
 }
 
 void ActionDialog::keybindingRejected() {

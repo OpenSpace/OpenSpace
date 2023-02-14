@@ -101,7 +101,7 @@ private:
         QDialogButtonBox* saveButtons = nullptr;
     } _keybindingWidgets;
 
-    QDialogButtonBox* _mainButtons = nullptr;
+    QDialogButtonBox* _mainButton = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ACTIONDIALOG___H__
