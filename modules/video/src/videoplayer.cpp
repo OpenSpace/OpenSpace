@@ -609,7 +609,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
 
             if (!foundWidth || !foundHeight) {
-                LERROR("Could not find width or height params");
+                LINFO("Could not find width or height params from parameters");
                 return;
             }
 
