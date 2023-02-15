@@ -60,6 +60,12 @@ namespace {
         "Go to start in video"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
+       "Reset",
+       "Reset",
+       "Reset video"
+    };
+
     struct [[codegen::Dictionary(ScreenSpaceVideo)]] Parameters {
         // Specifies the GUI name of the ScreenspaceImage
         std::optional<std::string> name;
@@ -82,6 +88,7 @@ ScreenSpaceVideo::ScreenSpaceVideo(const ghoul::Dictionary& dictionary)
     , _play(PlayInfo)
     , _pause(PauseInfo)
     , _goToStart(GoToStartInfo)
+    , _reset(ResetInfo)
     
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -105,6 +112,8 @@ ScreenSpaceVideo::ScreenSpaceVideo(const ghoul::Dictionary& dictionary)
     addProperty(_pause);
     _goToStart.onChange([this]() { _videoPlayer.goToStart(); });
     addProperty(_goToStart);
+    _reset.onChange([this]() { _videoPlayer.reset(); });
+    addProperty(_reset);
 }
 
 void ScreenSpaceVideo::update() {
