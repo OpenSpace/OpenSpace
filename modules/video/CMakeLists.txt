@@ -29,6 +29,7 @@ set(HEADER_FILES
   include/videotileprovider.h
   include/videoplayer.h
   include/screenspacevideo.h
+  include/renderablevideosphere.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -38,6 +39,7 @@ set(SOURCE_FILES
   src/videotileprovider.cpp
   src/videoplayer.cpp
   src/screenspacevideo.cpp
+  src/renderablevideosphere.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

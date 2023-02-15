@@ -1,0 +1,33 @@
+local sphere = {
+  Identifier = "VideoSphereVeryCool",
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0, 0, 0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableVideoSphere",
+    Enabled = true,
+    Size = 100.0,
+    Segments = 80,
+    Opacity = 1,
+    Texture = openspace.absPath("${DATA}/test2.jpg"),
+    File = "C:/Users/ylvaselling/Documents/Work/Testmovies/2048_jpg-2048x1024.mp4",
+    Orientation = "Both",
+  },
+  GUI = {
+    Name = "Test Sphere Cool",
+    Path = "/Other/Spheres"
+  }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(sphere)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(sphere)
+end)
+
+asset.export(sphere)
