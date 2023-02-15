@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__VIDEOTILEPROVIDER___H__
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
+#include <modules/video/include/videoplayer.h>
 
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -55,62 +56,23 @@ public:
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& tileIndex) override final;
     TileDepthTransform depthTransform() override final;
-
-    // Video interaction
-    void pause();
-    void play();
-    void goToStart();
-    void stepFrameForward();
-    void stepFrameBackward();
-    void seekToTime(double time);
+    void syncToSimulationTime(); 
 
     static documentation::Documentation Documentation();
 
 private:
-  
     properties::TriggerProperty _play;
     properties::TriggerProperty _pause;
     properties::TriggerProperty _goToStart;
-
-    // libmpv property keys
-    enum class LibmpvPropertyKey : uint64_t {
-        Duration = 1,
-        Height,
-        Width,
-        Meta,
-        Params,
-        Time,
-        Command,
-        Seek,
-        Fps,
-        Pause
-    };
 
     enum class PlaybackMode {
         MapToSimulationTime = 0,
         RealTimeLoop
     };
-
-    void createFBO(int width, int height);
-    void resizeFBO(int width, int height);
     
     // Map to simulation time functions
     double correctVideoPlaybackTime() const;
     bool isWithingStartEndTime() const;
-
-    // Libmpv
-    static void on_mpv_render_update(void*); // Has to be static because of C api
-    void initializeMpv(); // Called first time in postSyncPreDraw
-    void renderMpv(); // Called in postSyncPreDraw
-    void handleMpvEvents();
-    void handleMpvProperties(mpv_event* event);
-    void swapBuffersMpv(); // Called in postDraw
-    void cleanUpMpv(); // Called in internalDeinitialze
-    void observePropertyMpv(std::string name, mpv_format format, LibmpvPropertyKey key);
-    void setPropertyStringMpv(std::string name, std::string value);
-    void getPropertyAsyncMpv(std::string name, mpv_format format, LibmpvPropertyKey key);
-    void commandAsyncMpv(const char* cmd[], 
-        LibmpvPropertyKey key = LibmpvPropertyKey::Command);
 
     void internalInitialize() override final;
     void internalDeinitialize() override final;
@@ -124,27 +86,12 @@ private:
     double _timeAtLastRender = 0.0;
     double _frameDuration = 0.0;
 
-    // Video properties. Try to read all these values from the video
-    double _currentVideoTime = 0.0;
-    double _fps = 24.0; // If when we read it it is 0, use 24 fps 
-    double _videoDuration = 0.0;
-    glm::ivec2 _videoResolution = glm::ivec2(4096, 2048); // Used for the fbos
-
-    // Libmpv
-    mpv_handle* _mpvHandle = nullptr;
-    mpv_render_context* _mpvRenderContext = nullptr;
-    std::unique_ptr<ghoul::opengl::Texture> _frameTexture = nullptr;
-    GLuint _fbo = 0; // Our opengl framebuffer where mpv renders to
-    int _wakeup = 0; // Signals when libmpv has a new frame ready
-    bool _didRender = false; // To know when to swap buffers
-    bool _isInitialized = false; // If libmpv has been inititalized
-    bool _isDestroying = false; // If libmpv has been inititalized
-    bool _isSeeking = false; // Prevent seeking while already seeking
-    double _seekThreshold = 1.0; // Threshold where we are officially out of sync
-
     // Tile handling
     std::map<TileIndex::TileHashKey, Tile> _tileCache; // Cache for rendering 1 frame
     bool _tileIsReady = false;
+    double _seekThreshold = 1.0; // Threshold to ensure we seek to a different time
+
+    VideoPlayer _videoPlayer;
 };
 
 } // namespace video::globebrowsing

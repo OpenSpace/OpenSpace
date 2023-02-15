@@ -42,24 +42,6 @@ namespace {
         "video that is then loaded and used for all tiles"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PlayInfo = {
-        "Play",
-        "Play",
-        "Play video"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo PauseInfo = {
-        "Pause",
-        "Pause",
-        "Pause video"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo GoToStartInfo = {
-        "GoToStart",
-        "Go To Start",
-        "Go to start in video"
-    };
-
     struct [[codegen::Dictionary(VideoPlayer)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
@@ -140,9 +122,6 @@ documentation::Documentation VideoPlayer::Documentation() {
 
 VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary) 
     : PropertyOwner({ "VideoPlayer" })
-    , _play(PlayInfo)
-    , _pause(PauseInfo)
-    , _goToStart(GoToStartInfo)
 {
     ZoneScoped
 
@@ -167,6 +146,9 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 }
 
 void VideoPlayer::pause() {
+    if (!_isInitialized) {
+        return;
+    }
     bool isPaused = true;
     int result = mpv_set_property_async(
         _mpvHandle,
@@ -181,12 +163,16 @@ void VideoPlayer::pause() {
 }
 
 void VideoPlayer::play() {
+    if (!_isInitialized) {
+        return;
+    }
+    bool isPaused = false;
     int result = mpv_set_property_async(
         _mpvHandle,
         static_cast<uint64_t>(LibmpvPropertyKey::Pause),
         "pause",
         MPV_FORMAT_FLAG,
-        nullptr
+        &isPaused
     );
     if (!checkMpvError(result)) {
         LWARNING("Error when playing video");
@@ -198,11 +184,17 @@ void VideoPlayer::goToStart() {
 }
 
 void VideoPlayer::stepFrameForward() {
+    if (!_isInitialized) {
+        return;
+    }
     const char* cmd[] = { "frame-step", nullptr };
     commandAsyncMpv(cmd);
 }
 
 void VideoPlayer::stepFrameBackward() {
+    if (!_isInitialized) {
+        return;
+    }
     const char* cmd[] = { "frame-back-step", nullptr };
     commandAsyncMpv(cmd);
 }
@@ -248,7 +240,7 @@ void VideoPlayer::initializeMpv() {
     //mpv_set_property_string(_mpvHandle, "script-opts", "autoload-disabled=yes");
     
     // Verbose mode
-    //mpv_set_property_string(_mpvHandle, "msg-level", "all=v");
+    mpv_set_property_string(_mpvHandle, "msg-level", "all=v");
     //mpv_request_log_messages(_mpvHandle, "debug");
     
     if (mpv_initialize(_mpvHandle) < 0) {
@@ -286,7 +278,8 @@ void VideoPlayer::initializeMpv() {
     );
 
     // Load file
-    const char* cmd[] = { "loadfile", _videoFile.string().c_str(), nullptr };
+    std::string file = _videoFile.string();
+    const char* cmd[] = { "loadfile", file.c_str(), nullptr };
     int result = mpv_command(_mpvHandle, cmd);
     if (!checkMpvError(result)) {
         LERROR("Could not open video file");
@@ -310,6 +303,9 @@ void VideoPlayer::initializeMpv() {
 }
 
 void VideoPlayer::seekToTime(double time) {
+    if (!_isInitialized) {
+        return;
+    }
     // Prevent from seeking to the same time multiple times in a row
     bool seekIsDifferent = abs(time - _currentVideoTime) > _seekThreshold;
     if (seekIsDifferent && !_isSeeking) {
@@ -323,9 +319,14 @@ void VideoPlayer::seekToTime(double time) {
     }
 }
 
+bool VideoPlayer::isPaused() const {
+    return _isPaused;
+}
+
 void VideoPlayer::renderMpv() {
     handleMpvEvents();
-
+    std::string isPaused = _isPaused ? "Is Paused" : "Not Paused";
+    //LINFO(isPaused);
     if (_wakeup) {
         if ((mpv_render_context_update(_mpvRenderContext) & MPV_RENDER_UPDATE_FRAME)) {
             // See render_gl.h on what OpenGL environment mpv expects, and other API 
@@ -666,6 +667,8 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             LERROR("Could not find pause property");
             break;
         }
+        bool* videoIsPaused = static_cast<bool*>(event->data);
+        _isPaused = *videoIsPaused;
         break;
     }
     default: {
@@ -684,7 +687,7 @@ void VideoPlayer::swapBuffersMpv() {
     }
 }
 
-void VideoPlayer::cleanUpMpv() {
+void VideoPlayer::destroy() {
     _isDestroying = true;
     // Destroy the GL renderer and all of the GL objects it allocated. If video
     // is still running, the video track will be deselected.
@@ -695,12 +698,28 @@ void VideoPlayer::cleanUpMpv() {
     glDeleteFramebuffers(1, &_fbo);
 }
 
+const std::unique_ptr<ghoul::opengl::Texture>& VideoPlayer::frameTexture() const {
+    return _frameTexture;
+}
+
 void VideoPlayer::reset() {
     if (_videoFile.empty()) {
         return;
     }
-    cleanUpMpv();
+    destroy();
     initializeMpv();
+}
+
+bool VideoPlayer::isInitialized() const {
+    return _isInitialized;
+}
+
+double VideoPlayer::videoDuration() const {
+    return _videoDuration;
+}
+
+double VideoPlayer::currentPlaybackTime() const {
+    return _currentVideoTime;
 }
 
 void VideoPlayer::createFBO(int width, int height) {
@@ -746,11 +765,10 @@ void VideoPlayer::createFBO(int width, int height) {
 }
 
 void VideoPlayer::resizeFBO(int width, int height) {
-    LINFO(fmt::format("Resizing FBO with width: {} and height: {}", width, height));
-
     if (width == _videoResolution.x && height == _videoResolution.y) {
         return;
     }
+    LINFO(fmt::format("Resizing FBO with width: {} and height: {}", width, height));
 
     // Update resolution of video
     _videoResolution = glm::ivec2(width, height);

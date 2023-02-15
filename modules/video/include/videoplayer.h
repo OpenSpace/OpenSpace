@@ -53,15 +53,17 @@ public:
     void stepFrameBackward();
     void seekToTime(double time);
 
+    const std::unique_ptr<ghoul::opengl::Texture>& frameTexture() const;
+    bool isPaused() const;
+    bool isInitialized() const;
+    double videoDuration() const;
+    double currentPlaybackTime() const;
+
     void reset();
+    void destroy();
 
     documentation::Documentation Documentation();
 private:
-  
-    properties::TriggerProperty _play;
-    properties::TriggerProperty _pause;
-    properties::TriggerProperty _goToStart;
-
     // libmpv property keys
     enum class LibmpvPropertyKey : uint64_t {
         Duration = 1,
@@ -76,17 +78,8 @@ private:
         Pause
     };
 
-    enum class PlaybackMode {
-        MapToSimulationTime = 0,
-        RealTimeLoop
-    };
-
     void createFBO(int width, int height);
     void resizeFBO(int width, int height);
-    
-    // Map to simulation time functions
-    double correctVideoPlaybackTime() const;
-    bool isWithingStartEndTime() const;
 
     // Libmpv
     static void on_mpv_render_update(void*); // Has to be static because of C api
@@ -95,7 +88,6 @@ private:
     void handleMpvEvents();
     void handleMpvProperties(mpv_event* event);
     void swapBuffersMpv(); // Called in postDraw
-    void cleanUpMpv(); // Called in internalDeinitialze
     void observePropertyMpv(std::string name, mpv_format format, LibmpvPropertyKey key);
     void setPropertyStringMpv(std::string name, std::string value);
     void getPropertyAsyncMpv(std::string name, mpv_format format, LibmpvPropertyKey key);
@@ -108,8 +100,8 @@ private:
     double _currentVideoTime = 0.0;
     double _fps = 24.0; // If when we read it it is 0, use 24 fps 
     double _videoDuration = 0.0;
-    glm::ivec2 _videoResolution = glm::ivec2(4096, 2048); // Used for the fbos
-
+    glm::ivec2 _videoResolution = glm::ivec2(2048, 1024); // Used for the fbos
+    bool _isPaused = false;
     // Libmpv
     mpv_handle* _mpvHandle = nullptr;
     mpv_render_context* _mpvRenderContext = nullptr;
@@ -120,8 +112,7 @@ private:
     bool _isInitialized = false; // If libmpv has been inititalized
     bool _isDestroying = false; // If libmpv has been inititalized
     bool _isSeeking = false; // Prevent seeking while already seeking
-    double _seekThreshold = 1.0; // Threshold to ensure we seek to a 
-
+    double _seekThreshold = 1.0; // Threshold to ensure we seek to a different time
 };
 } // namespace video::globebrowsing
 
