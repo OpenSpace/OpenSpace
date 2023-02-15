@@ -96,7 +96,7 @@ private:
     void commandAsyncMpv(const char* cmd[], 
         LibmpvPropertyKey key = LibmpvPropertyKey::Command);
 
-    std::filesystem::path _videoFile;
+    std::string _videoFile;
 
     // Video properties. Try to read all these values from the video
     double _currentVideoTime = 0.0;

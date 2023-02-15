@@ -44,7 +44,7 @@ namespace {
 
     struct [[codegen::Dictionary(VideoPlayer)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
-        std::filesystem::path file;
+        std::string file;
     };
 #include "videoplayer_codegen.cpp"
 } // namespace
@@ -284,7 +284,7 @@ void VideoPlayer::initializeMpv() {
     );
 
     // Load file
-    std::string file = _videoFile.string();
+    std::string file = _videoFile;
     const char* cmd[] = { "loadfile", file.c_str(), nullptr };
     int result = mpv_command(_mpvHandle, cmd);
     if (!checkMpvError(result)) {
