@@ -58,8 +58,9 @@ void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
             if (!global::actionManager->hasAction(it->second)) {
                 // Silently ignoring the unknown action as the user might have intended to
                 // bind a key to multiple actions, only one of which could be defined
-                global::actionManager->triggerAction(it->second, ghoul::Dictionary());
+                continue;
             }
+            global::actionManager->triggerAction(it->second, ghoul::Dictionary());
         }
     }
 }

@@ -539,6 +539,20 @@ glm::quat OrbitalNavigator::anchorNodeToCameraRotation() const {
     return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
 }
 
+
+glm::dvec3 OrbitalNavigator::pushToSurfaceOfAnchor(
+                                                  const glm::dvec3& cameraPosition) const
+{
+    const SurfacePositionHandle posHandle =
+        calculateSurfacePositionHandle(*_anchorNode, cameraPosition);
+
+     return pushToSurface(
+         cameraPosition,
+         _anchorNode->worldPosition(),
+         posHandle
+    );
+}
+
 void OrbitalNavigator::resetVelocities() {
     _mouseStates.resetVelocities();
     _joystickStates.resetVelocities();
@@ -703,7 +717,6 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // Perform the vertical movements based on user input
     pose.position = translateVertically(deltaTime, pose.position, anchorPos, posHandle);
     pose.position = pushToSurface(
-        _minimumAllowedDistance,
         pose.position,
         anchorPos,
         posHandle
@@ -990,6 +1003,10 @@ bool OrbitalNavigator::hasZoomFriction() const {
 
 bool OrbitalNavigator::hasRollFriction() const {
     return _friction.roll;
+}
+
+double OrbitalNavigator::minAllowedDistance() const {
+    return _minimumAllowedDistance;
 }
 
 OrbitalNavigator::CameraRotationDecomposition
@@ -1473,8 +1490,7 @@ glm::dquat OrbitalNavigator::rotateHorizontally(double deltaTime,
     return mouseCameraRollRotation * globalCameraRotation;
 }
 
-glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
-                                           const glm::dvec3& cameraPosition,
+glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
                                            const glm::dvec3& objectPosition,
                                         const SurfacePositionHandle& positionHandle) const
 {
@@ -1495,7 +1511,7 @@ glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
         glm::sign(dot(actualSurfaceToCamera, referenceSurfaceOutDirection));
 
     return cameraPosition + referenceSurfaceOutDirection *
-        glm::max(minHeightAboveGround - surfaceToCameraSigned, 0.0);
+        glm::max(_minimumAllowedDistance - surfaceToCameraSigned, 0.0);
 }
 
 glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
@@ -1520,7 +1536,7 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
 
 SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
                                                 const SceneGraphNode& node,
-                                                const glm::dvec3 cameraPositionWorldSpace)
+                                        const glm::dvec3& cameraPositionWorldSpace) const
 {
     ghoul_assert(
         glm::length(cameraPositionWorldSpace) > 0.0,

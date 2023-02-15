@@ -52,7 +52,7 @@ public:
     virtual glm::vec2 size() const = 0;
 
 protected:
-    properties::BoolProperty _isEnabled;
+    properties::BoolProperty _enabled;
 };
 
 } // openspace

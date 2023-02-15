@@ -1199,12 +1199,7 @@ int main(int argc, char* argv[]) {
     }
     catch (const documentation::SpecificationError& e) {
         LFATALC("main", "Loading of configuration file failed");
-        for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERRORC(o.offender, ghoul::to_string(o.reason));
-        }
-        for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNINGC(w.offender, ghoul::to_string(w.reason));
-        }
+        logError(e);
         ghoul::deinitialize();
         exit(EXIT_FAILURE);
     }

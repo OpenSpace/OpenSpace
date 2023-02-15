@@ -265,12 +265,7 @@ void OpenSpaceEngine::initialize() {
         }
         catch (const documentation::SpecificationError& e) {
             LERROR("Failed loading of log");
-            for (const documentation::TestResult::Offense& o : e.result.offenses) {
-                LERRORC(o.offender, ghoul::to_string(o.reason));
-            }
-            for (const documentation::TestResult::Warning& w : e.result.warnings) {
-                LWARNINGC(w.offender, ghoul::to_string(w.reason));
-            }
+            logError(e);
             throw;
         }
     }

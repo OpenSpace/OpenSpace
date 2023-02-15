@@ -2,7 +2,6 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./67p")
 
-
 local models = asset.syncedResource({
   Name = "Rosetta Models",
   Type = "HttpSynchronization",
@@ -556,13 +555,70 @@ local nodes = {
   PhilaeTrail
 }
 
+-- actions
+local focus_rosetta = {
+  Identifier = "os.missions.rosetta.focus",
+  Name = "Focus on Rosetta",
+  Command = [[
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Rosetta'); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+  ]],
+  Documentation = "Sets the focus of the camera on Rosetta",
+  GuiPath = "/Missions/Rosetta",
+  isLocal = false
+}
+
+local setup_lander_release_time = {
+  Identifier = "os.missions.rosetta.setup.landerrelease",
+  Name = "Set lander release time",
+  Command = [[
+    openspace.time.setTime('2014-11-12T08:20:00.00');
+  ]],
+  Documentation = "Jumps to the time when the Philae lander is released",
+  GuiPath = "/Missions/Rosetta",
+  isLocal = false
+}
+
+local toggle_image_plane = {
+  Identifier = "os.missions.rosetta.toggleimageplane",
+  Name = "Toggle image plane",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.ImagePlaneRosetta.Renderable.Enabled', not openspace.getPropertyValue('Scene.ImagePlaneRosetta.Renderable.Enabled'));
+  ]],
+  Documentation = "Toggles the visibility of the free floating image plane",
+  GuiPath = "/Missions/Rosetta",
+  isLocal = false
+}
+
+local toggle_philae_trail = {
+  Identifier = "os.mission.rosetta.togglephilaetrail",
+  Name = "Toggle Philae trail",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.PhilaeTrail.Renderable.Enabled', not openspace.getPropertyValue('Scene.PhilaeTrail.Renderable.Enabled'));
+  ]],
+  Documentation = "Toggles the visibility of Philae's trail",
+  GuiPath = "/Missions/Rosetta",
+  isLocal = false
+}
+
 asset.onInitialize(function ()
-  for i, node in ipairs(nodes) do
+  for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
+
+  openspace.action.registerAction(focus_rosetta)
+  openspace.action.registerAction(setup_lander_release_time)
+  openspace.action.registerAction(toggle_image_plane)
+  openspace.action.registerAction(toggle_philae_trail)
 end)
 
 asset.onDeinitialize(function ()
+  openspace.action.removeAction(toggle_philae_trail)
+  openspace.action.removeAction(toggle_image_plane)
+  openspace.action.removeAction(setup_lander_release_time)
+  openspace.action.removeAction(focus_rosetta)
+
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end

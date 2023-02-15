@@ -1,62 +1,4 @@
 {
-  "actions": [
-    {
-      "documentation": "Sets the focus of the camera on 'OsirisRex'",
-      "gui_path": "/Missions/Osiris Rex",
-      "identifier": "profile.focus.osirisrex",
-      "is_local": false,
-      "name": "Focus on OsirisRex",
-      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'OsirisRex'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    },
-    {
-      "documentation": "Sets the focus of the camera on 'Bennu'",
-      "gui_path": "/Missions/Osiris Rex",
-      "identifier": "profile.focus.bennu",
-      "is_local": false,
-      "name": "Focus on Bennu",
-      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'BennuBarycenter'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    },
-    {
-      "documentation": "Sets the time to the approach at Bennu",
-      "gui_path": "/Missions/Osiris Rex",
-      "identifier": "profile.setup.bennu_approach",
-      "is_local": false,
-      "name": "Set Bennu approach time",
-      "script": "openspace.printInfo('Set time: Approach');openspace.time.setTime('2018-SEP-11 21:31:01.183');"
-    },
-    {
-      "documentation": "Sets the time to the preliminary survey of Bennu",
-      "gui_path": "/Missions/Osiris Rex",
-      "identifier": "profile.setup.bennu_survey",
-      "is_local": false,
-      "name": "Set Bennu survey time",
-      "script": "openspace.printInfo('Set time: Preliminary Survey'); openspace.time.setTime('2018-NOV-20 01:13:12.183');"
-    },
-    {
-      "documentation": "Sets the time to the orbital B event",
-      "gui_path": "/Missions/Osiris Rex",
-      "identifier": "profile.setup.orbital_b_event",
-      "is_local": false,
-      "name": "Set orbital B event time",
-      "script": "openspace.printInfo('Set time: Orbital B'); openspace.time.setTime('2019-APR-08 10:35:27.186');"
-    },
-    {
-      "documentation": "Sets the time to the recon event",
-      "gui_path": "/Missions/Osiris Rex",
-      "identifier": "profile.setup.recon_event",
-      "is_local": false,
-      "name": "Set recon event time",
-      "script": "openspace.printInfo('Set time: Recon'); openspace.time.setTime('2019-MAY-25 03:50:31.195');"
-    },
-    {
-      "documentation": "Toggles the visibility of the text marking the location of the Sun",
-      "gui_path": "/Missions/Osiris Rex",
-      "identifier": "profile.toggle.sun_marker",
-      "is_local": false,
-      "name": "Toggle Sun marker",
-      "script": "openspace.setPropertyValueSingle('Scene.SunMarker.Renderable.Enabled', not openspace.getPropertyValue('Scene.SunMarker.Renderable.Enabled'));"
-    }
-  ],
   "assets": [
     "base",
     "scene/solarsystem/missions/osirisrex/dashboard",
@@ -99,31 +41,31 @@
   ],
   "keybindings": [
     {
-      "action": "profile.focus.osirisrex",
+      "action": "os.missions.osirisrex.focus",
       "key": "A"
     },
     {
-      "action": "profile.focus.bennu",
+      "action": "os.missions.osirisrex.bennu.focus",
       "key": "S"
     },
     {
-      "action": "profile.setup.bennu_approach",
+      "action": "os.missions.osirisrex.setup.bennuapproach",
       "key": "F8"
     },
     {
-      "action": "profile.setup.bennu_survey",
+      "action": "os.missions.osirisrex.setup.bennusurvey",
       "key": "F9"
     },
     {
-      "action": "profile.setup.orbital_b_event",
+      "action": "os.missions.osirisrex.setup.bennueventb",
       "key": "F10"
     },
     {
-      "action": "profile.setup.recon_event",
+      "action": "os.missions.osirisrex.setup.bennureconevent",
       "key": "F11"
     },
     {
-      "action": "profile.toggle.sun_marker",
+      "action": "os.missions.osirisrex.togglesunmarker",
       "key": "Q"
     }
   ],
@@ -138,7 +80,7 @@
     "license": "MIT License",
     "name": "Osiris-Rex",
     "url": "https://www.openspaceproject.com",
-    "version": "1.0"
+    "version": "1.1"
   },
   "properties": [
     {
