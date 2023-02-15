@@ -167,8 +167,6 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
         });
         // Ensure we are synchronized to OpenSpace time in presync step
         global::callback::preSync->emplace_back([this]() {
-            // This mode should always be paused as we're stepping through the frames
-            //_videoPlayer.pause(); 
             syncToSimulationTime();
         });
     }
