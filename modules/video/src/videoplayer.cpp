@@ -311,7 +311,7 @@ void VideoPlayer::seekToTime(double time) {
     bool seekIsDifferent = abs(time - _currentVideoTime) > _seekThreshold;
     if (seekIsDifferent && !_isSeeking) {
         // Pause while seeking
-        //pause();
+        pause();
         std::string timeString = std::to_string(time);
         const char* params = timeString.c_str();
         const char* cmd[] = { "seek", params, "absolute", NULL };

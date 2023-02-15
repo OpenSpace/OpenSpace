@@ -186,9 +186,6 @@ Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
         LINFO("Framebuffer is not complete");
     }
 
-
-    return Tile{ _videoPlayer.frameTexture().get(), std::nullopt, Tile::Status::OK };
-    /*
     // For now, don't use the cache as we're trying to debug the problem w playback
     uint64_t hash = tileIndex.hashKey();
     auto foundTile = _tileCache.find(hash);
@@ -203,7 +200,7 @@ Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
         };
     }
 
-    return _tileCache[hash];*/
+    return _tileCache[hash];
 }
 
 Tile::Status VideoTileProvider::tileStatus(const TileIndex& tileIndex) {
