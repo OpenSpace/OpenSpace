@@ -274,12 +274,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
     }
     catch (const documentation::SpecificationError& e) {
         LERROR("Could not create camera path");
-        for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERRORC(o.offender, ghoul::to_string(o.reason));
-        }
-        for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNINGC(w.offender, ghoul::to_string(w.reason));
-        }
+        logError(e);
     }
     catch (const PathCurve::TooShortPathError&) {
         // Do nothing

@@ -99,13 +99,7 @@ Layer* LayerManager::addLayer(layers::Group::ID id, const ghoul::Dictionary& lay
         return _layerGroups[static_cast<size_t>(id)]->addLayer(layerDict);
     }
     catch (const documentation::SpecificationError& e) {
-        LERRORC(e.component, e.message);
-        for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERRORC(o.offender, ghoul::to_string(o.reason));
-        }
-        for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNINGC(w.offender, ghoul::to_string(w.reason));
-        }
+        logError(e);
         return nullptr;
     }
     catch (const ghoul::RuntimeError& e) {

@@ -445,12 +445,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                 library.documentations.push_back(std::move(func));
             }
             catch (const documentation::SpecificationError& e) {
-                for (const documentation::TestResult::Offense& o : e.result.offenses) {
-                    LERRORC(o.offender, ghoul::to_string(o.reason));
-                }
-                for (const documentation::TestResult::Warning& w : e.result.warnings) {
-                    LWARNINGC(w.offender, ghoul::to_string(w.reason));
-                }
+                logError(e);
             }
             lua_pop(state, 1);
         }
