@@ -44,8 +44,6 @@ local cassiniState = {
     openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', false)
     openspace.setPropertyValueSingle('Scene.equinoxMission.Renderable.Enabled', false)
     openspace.setPropertyValueSingle('Scene.solsticeMission.Renderable.Enabled', false)
-    openspace.setPropertyValueSingle("Scene.CassiniSaturnLabel.Renderable.Enabled", false)
-    openspace.setPropertyValueSingle("Scene.CassiniTitanLabel.Renderable.Enabled", false)
     openspace.setPropertyValueSingle('Scene.grandFinale.Renderable.Enabled', false)
     openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.Enabled', false)
     openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false)
@@ -79,6 +77,8 @@ local huygensState = {
   Exit = [[
     openspace.setPropertyValueSingle('Scene.huygensTrail.Renderable.Enabled', false)
     openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false)
+    openspace.setPropertyValueSingle("Scene.CassiniSaturnLabel.Renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Scene.CassiniTitanLabel.Renderable.Enabled", false)
     openspace.scriptScheduler.clear()
     ]] .. util.fadeOutNodes({ "huygensTrail" }) .. [[
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 1.0, 3.0)
