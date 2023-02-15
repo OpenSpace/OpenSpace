@@ -113,15 +113,19 @@ documentation::Documentation VideoTileProvider::Documentation() {
     return codegen::doc<Parameters>("video_videotileprovider");
 }
 
-VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary) 
+bool isDifferent(double first, double second) {
+    return abs(first - second) > glm::epsilon<double>();
+}
+
+VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     : _videoPlayer(dictionary)
     , _play(PlayInfo)
     , _pause(PauseInfo)
-    , _goToStart(GoToStartInfo) 
+    , _goToStart(GoToStartInfo)
 {
     ZoneScoped
 
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+        const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _videoFile = p.file;
 
@@ -138,7 +142,6 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
             throw ghoul::MissingCaseException();
         }
     }
-
     if (_playbackMode == PlaybackMode::RealTimeLoop) {
         // Video interaction. Only valid for real time looping
         _play.onChange([this]() { _videoPlayer.play(); });
@@ -165,7 +168,7 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
         // Ensure we are synchronized to OpenSpace time in presync step
         global::callback::preSync->emplace_back([this]() {
             // This mode should always be paused as we're stepping through the frames
-            _videoPlayer.pause(); 
+            //_videoPlayer.pause(); 
             syncToSimulationTime();
         });
     }
@@ -174,32 +177,32 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
 Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped
 
-    if (!_videoPlayer.isInitialized()) {
-        return Tile();
-    }
+        if (!_videoPlayer.isInitialized()) {
+            return Tile();
+        }
 
     // Always check that our framebuffer is ok
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         LINFO("Framebuffer is not complete");
     }
-    
-    
+
+
     return Tile{ _videoPlayer.frameTexture().get(), std::nullopt, Tile::Status::OK };
     /*
-    // For now, don't use the cache as we're trying to debug the problem w playback    
+    // For now, don't use the cache as we're trying to debug the problem w playback
     uint64_t hash = tileIndex.hashKey();
     auto foundTile = _tileCache.find(hash);
-    bool textureChanged = foundTile != _tileCache.end() && 
+    bool textureChanged = foundTile != _tileCache.end() &&
         foundTile->second.texture != _videoPlayer.frameTexture().get();
 
     if (foundTile == _tileCache.end() || textureChanged) {
         _tileCache[hash] = Tile{
             _videoPlayer.frameTexture().get(),
-            std::nullopt, 
+            std::nullopt,
             Tile::Status::OK
         };
     }
-    
+
     return _tileCache[hash];*/
 }
 
@@ -226,9 +229,6 @@ void VideoTileProvider::reset() {
 }
 
 ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
-    ZoneScoped
-
-    ghoul_assert(_isInitialized, "VideoTileProvider was not initialized");
 
     lambda ascendToParent = [](TileIndex& ti, TileUvTransform& uv) {
         ti.level--;
@@ -239,7 +239,7 @@ ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int max
     float offsetX = ratios.x * static_cast<float>(tileIndex.x);
     // The tiles on the y-axis should be traversed backwards
     float offsetY = ratios.y * (noOfTiles.y - static_cast<float>(tileIndex.y) - 1.f);
-    
+
     TileUvTransform uvTransform = { glm::vec2(offsetX, offsetY), ratios };
 
     return traverseTree(tileIndex, parents, maxParents, ascendToParent, uvTransform);
@@ -248,6 +248,11 @@ ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int max
 bool VideoTileProvider::isWithingStartEndTime() const {
     const double now = global::timeManager->time().j2000Seconds();
     return now <= _endJ200Time && now >= _startJ200Time;
+}
+
+void VideoTileProvider::updateFrameDuration() {
+    double openspaceVideoLength = (_endJ200Time - _startJ200Time) / _videoDuration;
+    _frameDuration = (1.0 / _fps) * openspaceVideoLength;
 }
 
 double VideoTileProvider::correctVideoPlaybackTime() const {
@@ -267,6 +272,21 @@ double VideoTileProvider::correctVideoPlaybackTime() const {
 
 void VideoTileProvider::syncToSimulationTime() {
     if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+        bool fpsChanged = isDifferent(_videoPlayer.fps(), _fps);
+        bool durationChanged = isDifferent(_videoPlayer.videoDuration(), _videoDuration);
+        if (fpsChanged) {
+            _fps = _videoPlayer.fps();
+        }
+        if (durationChanged) {
+            _videoDuration = _videoPlayer.videoDuration();
+        }
+
+        if (fpsChanged || durationChanged) {
+            updateFrameDuration();
+        }
+        if (!_videoPlayer.isPaused()) {
+            //_videoPlayer.pause();
+        }
         // If we are in valid times, step frames accordingly
         if (isWithingStartEndTime()) {
             double now = global::timeManager->time().j2000Seconds();

@@ -57,6 +57,7 @@ public:
     bool isPaused() const;
     bool isInitialized() const;
     double videoDuration() const;
+    double fps() const;
     double currentPlaybackTime() const;
 
     void reset();
@@ -75,7 +76,8 @@ private:
         Command,
         Seek,
         Fps,
-        Pause
+        Pause,
+        IsSeeking
     };
 
     void createFBO(int width, int height);

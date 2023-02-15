@@ -73,6 +73,7 @@ private:
     // Map to simulation time functions
     double correctVideoPlaybackTime() const;
     bool isWithingStartEndTime() const;
+    void updateFrameDuration();
 
     void internalInitialize() override final;
     void internalDeinitialize() override final;
@@ -85,6 +86,8 @@ private:
     double _endJ200Time = 0.0;
     double _timeAtLastRender = 0.0;
     double _frameDuration = 0.0;
+    double _fps = 24.0;
+    double _videoDuration = 1.0;
 
     // Tile handling
     std::map<TileIndex::TileHashKey, Tile> _tileCache; // Cache for rendering 1 frame

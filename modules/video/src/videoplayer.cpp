@@ -149,7 +149,7 @@ void VideoPlayer::pause() {
     if (!_isInitialized) {
         return;
     }
-    bool isPaused = true;
+    int isPaused = 1;
     int result = mpv_set_property_async(
         _mpvHandle,
         static_cast<uint64_t>(LibmpvPropertyKey::Pause),
@@ -166,7 +166,7 @@ void VideoPlayer::play() {
     if (!_isInitialized) {
         return;
     }
-    bool isPaused = false;
+    int isPaused = 0;
     int result = mpv_set_property_async(
         _mpvHandle,
         static_cast<uint64_t>(LibmpvPropertyKey::Pause),
@@ -298,6 +298,7 @@ void VideoPlayer::initializeMpv() {
     observePropertyMpv("width", MPV_FORMAT_INT64, LibmpvPropertyKey::Width);
     observePropertyMpv("metadata", MPV_FORMAT_NODE, LibmpvPropertyKey::Meta);
     observePropertyMpv("container-fps", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Fps);
+    observePropertyMpv("seeking", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::IsSeeking);
 
     _isInitialized = true;
 }
@@ -310,7 +311,7 @@ void VideoPlayer::seekToTime(double time) {
     bool seekIsDifferent = abs(time - _currentVideoTime) > _seekThreshold;
     if (seekIsDifferent && !_isSeeking) {
         // Pause while seeking
-        pause();
+        //pause();
         std::string timeString = std::to_string(time);
         const char* params = timeString.c_str();
         const char* cmd[] = { "seek", params, "absolute", NULL };
@@ -325,8 +326,7 @@ bool VideoPlayer::isPaused() const {
 
 void VideoPlayer::renderMpv() {
     handleMpvEvents();
-    std::string isPaused = _isPaused ? "Is Paused" : "Not Paused";
-    //LINFO(isPaused);
+
     if (_wakeup) {
         if ((mpv_render_context_update(_mpvRenderContext) & MPV_RENDER_UPDATE_FRAME)) {
             // See render_gl.h on what OpenGL environment mpv expects, and other API 
@@ -640,6 +640,18 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
         _currentVideoTime = *time;
         break;
     }
+    case LibmpvPropertyKey::IsSeeking: {
+        if (!event->data) {
+            LERROR("Could not find playback time property");
+            break;
+        }
+
+        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+        bool* isSeekingBool = static_cast<bool*>(property->data);
+        std::string isSeekingString = *isSeekingBool ? "is Seeking" : "is not seeking";
+        LINFO(isSeekingString);
+        break;
+    }
     case LibmpvPropertyKey::Fps: {
         if (!event->data) {
             LERROR("Could not find fps property");
@@ -667,8 +679,9 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             LERROR("Could not find pause property");
             break;
         }
-        bool* videoIsPaused = static_cast<bool*>(event->data);
-        _isPaused = *videoIsPaused;
+        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+        int* videoIsPaused = static_cast<int*>(property->data);
+        _isPaused = *videoIsPaused == 0 ? false : true;
         break;
     }
     default: {
@@ -680,7 +693,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
 
 void VideoPlayer::swapBuffersMpv() {
     // Only swap buffers if there was a frame rendered and there is a new frame waiting
-    if (_wakeup && _didRender) {
+    if (_wakeup && _didRender && !_isDestroying) {
         mpv_render_context_report_swap(_mpvRenderContext);
         _wakeup = 0;
         _didRender = 0;
@@ -716,6 +729,10 @@ bool VideoPlayer::isInitialized() const {
 
 double VideoPlayer::videoDuration() const {
     return _videoDuration;
+}
+
+double VideoPlayer::fps() const {
+    return _fps;
 }
 
 double VideoPlayer::currentPlaybackTime() const {
