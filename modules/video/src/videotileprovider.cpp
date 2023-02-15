@@ -125,7 +125,7 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
 {
     ZoneScoped
 
-        const Parameters p = codegen::bake<Parameters>(dictionary);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _videoFile = p.file;
 

@@ -135,7 +135,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         if (!_isInitialized) {
             initializeMpv();
         }
-        else if(!_isDestroying) {
+        else if(_mpvRenderContext && _mpvHandle) {
             renderMpv();
         }
     });
@@ -693,7 +693,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
 
 void VideoPlayer::swapBuffersMpv() {
     // Only swap buffers if there was a frame rendered and there is a new frame waiting
-    if (_wakeup && _didRender && !_isDestroying) {
+    if (_wakeup && _didRender && _mpvRenderContext) {
         mpv_render_context_report_swap(_mpvRenderContext);
         _wakeup = 0;
         _didRender = 0;
@@ -701,13 +701,13 @@ void VideoPlayer::swapBuffersMpv() {
 }
 
 void VideoPlayer::destroy() {
-    _isDestroying = true;
+    _isInitialized = false;
     // Destroy the GL renderer and all of the GL objects it allocated. If video
     // is still running, the video track will be deselected.
     mpv_render_context_free(_mpvRenderContext);
-
+    _mpvRenderContext = nullptr;
     mpv_destroy(_mpvHandle);
-
+    _mpvHandle = nullptr;
     glDeleteFramebuffers(1, &_fbo);
 }
 
