@@ -130,6 +130,9 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     _videoFile = p.file;
     
     global::callback::postSyncPreDraw->emplace_back([this]() {
+        if (_isDestroying) {
+            return;
+        }
         // Initialize mpv here to ensure that the opengl context is the same as in for 
         // the rendering
         if (!_isInitialized) {
@@ -141,6 +144,9 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     });
 
     global::callback::postDraw->emplace_back([this]() {
+        if (_isDestroying) {
+            return;
+        }
         swapBuffersMpv();
     });
 }
@@ -701,7 +707,7 @@ void VideoPlayer::swapBuffersMpv() {
 }
 
 void VideoPlayer::destroy() {
-    _isInitialized = false;
+    _isDestroying = true;
     // Destroy the GL renderer and all of the GL objects it allocated. If video
     // is still running, the video track will be deselected.
     mpv_render_context_free(_mpvRenderContext);
@@ -720,6 +726,7 @@ void VideoPlayer::reset() {
         return;
     }
     destroy();
+    _isDestroying = false;
     initializeMpv();
 }
 

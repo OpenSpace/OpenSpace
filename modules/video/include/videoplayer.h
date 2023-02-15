@@ -113,6 +113,7 @@ private:
     bool _didRender = false; // To know when to swap buffers
     bool _isInitialized = false; // If libmpv has been inititalized
     bool _isSeeking = false; // Prevent seeking while already seeking
+    bool _isDestroying = false;
     double _seekThreshold = 1.0; // Threshold to ensure we seek to a different time
 };
 } // namespace video::globebrowsing
