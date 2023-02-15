@@ -31,7 +31,8 @@
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/missions/artemis/artemis",
-    "scene/solarsystem/missions/artemis/trail"
+    "scene/solarsystem/missions/artemis/trail",
+    "scene/solarsystem/missions/artemis/frame"
   ],
   "camera": {
     "altitude": 17000000.0,

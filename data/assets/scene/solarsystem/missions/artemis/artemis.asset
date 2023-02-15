@@ -16,7 +16,6 @@ local OrionModel = {
     GeometryFile = models .. "artemis.glb",
     ModelScale = "Meter",
     InvertModelScale = false,
-    EnableAnimation = false,
     PerformShading = true,
     DisableFaceCulling = true,
     LightSources = {

@@ -1,4 +1,6 @@
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local transforms = asset.require("./frame")
+asset.require("./frame")
 asset.require("spice/base")
 
 local kernels = asset.syncedResource({
@@ -36,7 +38,7 @@ local ArtemisEarthTrail= {
 
 local ArtemisTrailCoRevOrbit = {
   Identifier = "ArtemisTrailCoRevOrbit",
-  Parent = earthTransforms.EarthMoonCoRevFrame.Identifier,
+  Parent = transforms.EarthMoonCoRevFrame.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
