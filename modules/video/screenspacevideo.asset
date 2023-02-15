@@ -1,0 +1,16 @@
+local spec = {
+  Type = "ScreenSpaceVideo",
+  Identifier = "ScreenSpaceVideoExample",
+  Name = "Screen Space Browser Example",
+  File = "C:/Users/ylvaselling/Documents/Work/Testmovies/chlorophyll_model_2048.mp4",
+};
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(spec)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(spec)
+end)
+
+asset.export(spec)

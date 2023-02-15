@@ -22,72 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/video/videomodule.h>
-#include <modules/video/include/videotileprovider.h>
-#include <modules/video/include/screenspacevideo.h>
-#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/scripting/lualibrary.h>
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEVIDEO___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACEVIDEO___H__
 
-#include "videomodule_lua.inl"
+#include <openspace/rendering/screenspacerenderable.h>
 
-namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Decides if this module should be enabled"
-    };
+#include <modules/video/include/videoplayer.h>
+#include <openspace/properties/stringproperty.h>
 
-    struct [[codegen::Dictionary(VideoModule)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
-    };
-
-#include "videomodule_codegen.cpp"
-} // namespace
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-VideoModule::VideoModule()
-    : OpenSpaceModule(VideoModule::Name)
-    , _enabled(EnabledInfo)
-{
-    addProperty(_enabled);
-}
+namespace documentation { struct Documentation; }
 
-void VideoModule::internalInitialize(const ghoul::Dictionary& dict) {
-    const Parameters p = codegen::bake<Parameters>(dict);
-    using namespace globebrowsing;
+class ScreenSpaceVideo : public ScreenSpaceRenderable {
+public:
+    ScreenSpaceVideo(const ghoul::Dictionary& dictionary);
 
-    _enabled = p.enabled.value_or(_enabled);
+    bool deinitializeGL() override;
+    void update() override;
 
-    ghoul::TemplateFactory<TileProvider>* fTileProvider =
-        FactoryManager::ref().factory<TileProvider>();
-    ghoul_assert(fTileProvider, "TileProvider factory was not created");
-    fTileProvider->registerClass<VideoTileProvider>("VideoTileLayer");
+    static documentation::Documentation Documentation();
 
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
-        FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
+private:
+    void bindTexture() override;
 
-    fSsRenderable->registerClass<ScreenSpaceVideo>("ScreenSpaceVideo");
-}
+    properties::TriggerProperty _play;
+    properties::TriggerProperty _pause;
+    properties::TriggerProperty _goToStart;
 
-std::vector<documentation::Documentation> VideoModule::documentations() const {
-     return {
-        VideoTileProvider::Documentation(),
-    };
-    return std::vector<documentation::Documentation>();
-}
-
-scripting::LuaLibrary VideoModule::luaLibrary() const {
-    return {
-        "video",
-        {
-           
-        }
-    };
-}
+    VideoPlayer _videoPlayer;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEVIDEO___H__

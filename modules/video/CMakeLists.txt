@@ -28,6 +28,7 @@ set(HEADER_FILES
   videomodule.h
   include/videotileprovider.h
   include/videoplayer.h
+  include/screenspacevideo.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -36,6 +37,7 @@ set(SOURCE_FILES
   videomodule_lua.inl
   src/videotileprovider.cpp
   src/videoplayer.cpp
+  src/screenspacevideo.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
