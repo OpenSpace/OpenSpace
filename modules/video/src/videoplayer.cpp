@@ -379,7 +379,6 @@ void VideoPlayer::toggleMute() {
         return;
     }
     const char* mute = _playAudio ? "no" : "yes";
-    LINFO(mute);
     int result = mpv_set_property_async(
         _mpvHandle,
         static_cast<uint64_t>(LibmpvPropertyKey::Mute),
