@@ -38,13 +38,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "VideoTileProvider";
 
-    constexpr openspace::properties::Property::PropertyInfo FileInfo = {
-        "File",
-        "File",
-        "The file path that is used for this video provider. The file must point to a "
-        "video that is then loaded and used for all tiles"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start Time",
@@ -66,28 +59,7 @@ namespace {
         "video can be set, or the video can be played as a loop in real time."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PlayInfo = {
-        "Play",
-        "Play",
-        "Play video"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo PauseInfo = {
-        "Pause",
-        "Pause",
-        "Pause video"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo GoToStartInfo = {
-        "GoToStart",
-        "Go To Start",
-        "Go to start in video"
-    };
-
     struct [[codegen::Dictionary(VideoTileProvider)]] Parameters {
-        // [[codegen::verbatim(FileInfo.description)]]
-        std::filesystem::path file;
-
         // [[codegen::verbatim(StartTimeInfo.description)]]
         std::optional<std::string> startTime [[codegen::datetime()]];
 
@@ -119,15 +91,13 @@ bool isDifferent(double first, double second) {
 
 VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     : _videoPlayer(dictionary)
-    , _play(PlayInfo)
-    , _pause(PauseInfo)
-    , _goToStart(GoToStartInfo)
 {
     ZoneScoped
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _videoFile = p.file;
+    addProperty(_videoPlayer._reset);
+    addProperty(_videoPlayer._playAudio);
 
     if (p.playbackMode.has_value()) {
         switch (*p.playbackMode) {
@@ -142,14 +112,12 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
             throw ghoul::MissingCaseException();
         }
     }
+
     if (_playbackMode == PlaybackMode::RealTimeLoop) {
         // Video interaction. Only valid for real time looping
-        _play.onChange([this]() { _videoPlayer.play(); });
-        addProperty(_play);
-        _pause.onChange([this]() { _videoPlayer.pause(); });
-        addProperty(_pause);
-        _goToStart.onChange([this]() { _videoPlayer.goToStart(); });
-        addProperty(_goToStart);
+        addProperty(_videoPlayer._play);
+        addProperty(_videoPlayer._pause);
+        addProperty(_videoPlayer._goToStart);
     }
     else if (_playbackMode == PlaybackMode::MapToSimulationTime) {
         if (!p.startTime.has_value() || !p.endTime.has_value()) {

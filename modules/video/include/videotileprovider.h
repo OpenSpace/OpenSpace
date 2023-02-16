@@ -61,10 +61,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    properties::TriggerProperty _play;
-    properties::TriggerProperty _pause;
-    properties::TriggerProperty _goToStart;
-
     enum class PlaybackMode {
         MapToSimulationTime = 0,
         RealTimeLoop
@@ -79,7 +75,6 @@ private:
     void internalDeinitialize() override final;
 
     PlaybackMode _playbackMode = PlaybackMode::RealTimeLoop; // Default is to loop
-    std::filesystem::path _videoFile;
 
     // Video stretching: map to simulation time animation mode
     double _startJ200Time = 0.0;

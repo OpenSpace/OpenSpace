@@ -42,29 +42,6 @@
 
 namespace {
 
-    constexpr openspace::properties::Property::PropertyInfo PlayInfo = {
-        "Play",
-        "Play",
-        "Play video"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo PauseInfo = {
-        "Pause",
-        "Pause",
-        "Pause video"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo GoToStartInfo = {
-        "GoToStart",
-        "Go To Start",
-        "Go to start in video"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
-       "Reset",
-       "Reset",
-       "Reset video"
-    };
 
 struct [[codegen::Dictionary(RenderableVideoSphere)]] Parameters {
     
@@ -75,25 +52,18 @@ struct [[codegen::Dictionary(RenderableVideoSphere)]] Parameters {
 namespace openspace {
 
 documentation::Documentation RenderableVideoSphere::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_sphere");
+    return codegen::doc<Parameters>("renderable_video_sphere");
 }
 
 RenderableVideoSphere::RenderableVideoSphere(const ghoul::Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _videoPlayer(dictionary)
-    , _play(PlayInfo)
-    , _pause(PauseInfo)
-    , _goToStart(GoToStartInfo)
-    , _reset(ResetInfo)
 {
-    _play.onChange([this]() { _videoPlayer.play(); });
-    addProperty(_play);
-    _pause.onChange([this]() { _videoPlayer.pause(); });
-    addProperty(_pause);
-    _goToStart.onChange([this]() { _videoPlayer.goToStart(); });
-    addProperty(_goToStart);
-    _reset.onChange([this]() { _videoPlayer.reset(); });
-    addProperty(_reset);
+    addProperty(_videoPlayer._play);
+    addProperty(_videoPlayer._pause);
+    addProperty(_videoPlayer._goToStart);
+    addProperty(_videoPlayer._reset);
+    addProperty(_videoPlayer._playAudio);
 }
 
 void RenderableVideoSphere::bindTexture() {
