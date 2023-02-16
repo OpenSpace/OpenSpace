@@ -48,11 +48,6 @@ public:
 private:
     void bindTexture() override;
 
-    properties::TriggerProperty _play;
-    properties::TriggerProperty _pause;
-    properties::TriggerProperty _goToStart;
-    properties::TriggerProperty _reset;
-
     VideoPlayer _videoPlayer;
 };
 
