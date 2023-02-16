@@ -1000,11 +1000,11 @@ struct OrVerifier : public Verifier {
      *
      * \pre values must contain at least two values
      *
-     * \todo:  The use of the variant to use both raw pointers and shared pointers is
-     *         definitely undesired. At the momement we are not handling the ownership of
-     *         the verifiers very well and this must be cleaned up when doing a pass over
-     *         the entire ownership model of the documentation/verifiers. For now it was
-     *         necessary to make the codegen work in all cases without complications there
+     * \todo The use of the variant to use both raw pointers and shared pointers is
+     *       definitely undesired. At the momement we are not handling the ownership of
+     *       the verifiers very well and this must be cleaned up when doing a pass over
+     *       the entire ownership model of the documentation/verifiers. For now it was
+     *       necessary to make the codegen work in all cases without complications there
      */
     OrVerifier(const std::vector<std::variant<Verifier*,
         std::shared_ptr<Verifier>>> values);

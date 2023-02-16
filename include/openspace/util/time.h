@@ -66,6 +66,8 @@ public:
      * \pre \p timeString must not be empty
      */
     static double convertTime(const std::string& time);
+
+    /// \overload static double convertTime(const std::string& time)
     static double convertTime(const char* time);
 
     explicit Time(double secondsJ2000 = -1);
