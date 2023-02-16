@@ -52,11 +52,11 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseinputSt
     bool primaryPressed = mouseinputState.isMouseButtonPressed(primary);
     bool secondaryPressed = mouseinputState.isMouseButtonPressed(secondary);
     bool button3Pressed = mouseinputState.isMouseButtonPressed(MouseButton::Button3);
-    bool keyCtrlPressed = keyboardinputState.isKeyPressed(Key::LeftControl) |
+    bool keyCtrlPressed = keyboardinputState.isKeyPressed(Key::LeftControl) ||
                           keyboardinputState.isKeyPressed(Key::RightControl);
-    bool keyShiftPressed = keyboardinputState.isKeyPressed(Key::LeftShift) |
+    bool keyShiftPressed = keyboardinputState.isKeyPressed(Key::LeftShift) ||
                            keyboardinputState.isKeyPressed(Key::RightShift);
-    bool keyAltPressed = keyboardinputState.isKeyPressed(Key::LeftAlt) |
+    bool keyAltPressed = keyboardinputState.isKeyPressed(Key::LeftAlt) ||
                          keyboardinputState.isKeyPressed(Key::RightAlt);
 
     // Update the mouse states

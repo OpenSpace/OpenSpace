@@ -46,6 +46,8 @@ namespace {
         std::string identifier;
 
         std::optional<std::string> guiName;
+
+        std::optional<bool> enabled;
     };
 #include "dashboarditem_codegen.cpp"
 } // namespace
@@ -71,7 +73,7 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
 
 DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "", "" })
-    , _isEnabled(EnabledInfo, true)
+    , _enabled(EnabledInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -80,11 +82,12 @@ DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
         setGuiName(*p.guiName);
     }
 
-    addProperty(_isEnabled);
+    _enabled = p.enabled.value_or(_enabled);
+    addProperty(_enabled);
 }
 
 bool DashboardItem::isEnabled() const {
-    return _isEnabled;
+    return _enabled;
 }
 
 } // namespace openspace

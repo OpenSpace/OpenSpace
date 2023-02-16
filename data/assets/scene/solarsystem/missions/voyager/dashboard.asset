@@ -5,7 +5,8 @@ local distance_voyager1 = {
   SourceType = "Node",
   SourceNodeName = "Voyager_1",
   DestinationType = "Node",
-  DestinationNodeName = "Earth"
+  DestinationNodeName = "Earth",
+  Enabled = asset.enabled
 }
 
 local distance_voyager2 = {
@@ -15,7 +16,8 @@ local distance_voyager2 = {
   SourceType = "Node",
   SourceNodeName = "Voyager_2",
   DestinationType = "Node",
-  DestinationNodeName = "Earth"
+  DestinationNodeName = "Earth",
+  Enabled = asset.enabled
 }
 
 asset.onInitialize(function()

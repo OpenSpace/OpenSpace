@@ -603,7 +603,7 @@ namespace {
             node.hasValue<std::string>("Identifier") ?
             node.value<std::string>("Identifier") :
             "Scene";
-        LERRORC(cat, ghoul::to_string(e.result));
+        logError(e, cat);
 
         throw ghoul::lua::LuaError(
             fmt::format("Error loading scene graph node: {}", e.what())

@@ -1713,7 +1713,7 @@ void RenderableGlobe::recompileShaders() {
     }
 
     ghoul::Dictionary layerGroupNames;
-    for (int i = 0; i < layers::Groups.size(); ++i) {
+    for (size_t i = 0; i < layers::Groups.size(); ++i) {
         layerGroupNames.setValue(
             std::to_string(i),
             std::string(layers::Groups[i].identifier)

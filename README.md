@@ -37,7 +37,7 @@ OpenSpace requires at least support for [OpenGL](https://www.opengl.org/) versio
 This repository contains the source code and example profiles for OpenSpace, but does not contain any data.  To build and install the application, please check out the [GitHub Wiki](https://github.com/OpenSpace/OpenSpace/wiki).  Here, you will find two pages, a [build instruction](https://github.com/OpenSpace/OpenSpace/wiki/Compiling) for all operating systems and then additional instructions for [Windows](https://github.com/OpenSpace/OpenSpace/wiki/Compiling-Windows), [Linux (Ubuntu)](https://github.com/OpenSpace/OpenSpace/wiki/Compiling-Ubuntu), and [MacOS](https://github.com/OpenSpace/OpenSpace/wiki/Compiling-MacOS). Please note that the Apple Silicon series of chips do not support OpenGL natively and Metal 2 does not support `double` precision accuracy (see [here](https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf) Section 2.1), therefore only the Intel processors for MacOS are supported and maintained.
 
 Requirements for compiling are:
- - CMake version 3.10 or above
+ - CMake version 3.25 or above
  - C++ compiler supporting C++20 (MSVC 19.31, GCC11, Clang14, AppleClang 13.1.6)
  - [Boost](http://www.boost.org/)
  - [Qt](http://www.qt.io/download)

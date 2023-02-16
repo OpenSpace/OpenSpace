@@ -73,8 +73,10 @@ local Voyager1Main = {
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
+    },
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_part" },
   GUI = {
     Name = "Voyager 1 Main",
     Path = "/Solar System/Missions/Voyager 1"
@@ -95,8 +97,10 @@ local Voyager1Antenna = {
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
+    },
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_part" },
   GUI = {
     Name = "Voyager 1 Antenna",
     Path = "/Solar System/Missions/Voyager 1"
@@ -120,8 +124,10 @@ local VoyagerTrailCruiseEarthJupiter = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1977 SEP 05",
     EndTime = "1979 MAR 04",
-    SampleInterval = 545 * 2  -- 545 is the number of days between the Start and End time
+    SampleInterval = 545 * 2,  -- 545 is the number of days between the Start and End time
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Cruise Earth-Jupiter",
     Path = "/Solar System/Missions/Voyager 1"
@@ -143,8 +149,10 @@ local VoyagerTrailEncounterJupiter = {
     EnableFade = false,
     StartTime = "1979 MAR 03 23:24:00", -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
     EndTime = "1979 MAR 09",
-    SampleInterval = 100
+    SampleInterval = 100,
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Encounter Jupiter",
     Path = "/Solar System/Missions/Voyager 1"
@@ -166,8 +174,10 @@ local VoyagerTrailCruiseJupiterSaturn = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1979 MAR 09",
     EndTime = "1980 NOV 11",
-    SampleInterval = 618 * 2  -- 618 is the number of days between the Start and End time
+    SampleInterval = 618 * 2,  -- 618 is the number of days between the Start and End time
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Cruise Jupiter-Saturn",
     Path = "/Solar System/Missions/Voyager 1"
@@ -189,8 +199,10 @@ local VoyagerTrailEncounterSaturn = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1980 NOV 10 23:08:30",  -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
     EndTime = "1980 NOV 16",
-    SampleInterval = 100
+    SampleInterval = 100,
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Encounter Saturn",
     Path = "/Solar System/Missions/Voyager 1"
@@ -211,9 +223,11 @@ local VoyagerTrailCruiseSaturnInf = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1980 NOV 16",
-    EndTime = "2021 JAN 01",
-    SampleInterval = 14656 * 2  -- 14656 is the number of days between the Start and End time
+    EndTime = "2300 JAN 01",
+    SampleInterval = 116558 * 2,  -- 116558 is the number of days between the Start and End time
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Cruise Saturn-Inf",
     Path = "/Solar System/Missions/Voyager 1"
@@ -231,13 +245,34 @@ local nodes = {
   VoyagerTrailCruiseSaturnInf
 }
 
+-- Actions
+
+local focus_voyager1 = {
+  Identifier = "os.missions.voyager.v1.focus",
+  Name = "Focus on Voyager 1",
+  Command = [[
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Voyager_1');
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')
+  ]],
+  Documentation = "Set camera focus to Voyager 1",
+  GuiPath = "/Missions/Voyager",
+  isLocal = false
+}
+
+-- Initialize
+
 asset.onInitialize(function()
   for i, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
+
+  openspace.action.registerAction(focus_voyager1)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(focus_voyager1)
+
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end

@@ -928,7 +928,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
 
     // Wait until camera has stabilized before we traverse the Octree/stream from files.
-    const double rotationDiff = abs(length(_previousCameraRotation) -
+    const double rotationDiff = std::abs(length(_previousCameraRotation) -
                                 length(data.camera.rotationQuaternion()));
     if (_firstDrawCalls && rotationDiff > 1e-10) {
         _previousCameraRotation = data.camera.rotationQuaternion();
