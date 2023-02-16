@@ -174,9 +174,7 @@ public:
      * Starts a recording session, which will save data to the provided filename
      * in ASCII data format until recording is stopped using stopRecording() method.
      *
-     * \param filename file saved with recorded keyframes.
-     *
-     * \return \c true if recording to file starts without errors
+     * \param dataMode The format in which the session recording is stored
      */
     void setRecordDataFormat(DataMode dataMode);
 
@@ -303,7 +301,7 @@ public:
      *
      * \param callback function handle for the callback
      */
-    void removeStateChangeCallback(CallbackHandle handle);
+    void removeStateChangeCallback(CallbackHandle callback);
 
     /**
      * Provides list of available playback files.
@@ -492,7 +490,7 @@ public:
     /**
      * Reads header information from a session recording file
      *
-     * \param stringstream reference to ifstream that contains the session recording file
+     * \param stream reference to ifstream that contains the session recording file
      *        data
      * \param readLen_chars number of characters to be read, which may be the expected
      *        length of the header line, or an arbitrary number of characters within it
@@ -556,7 +554,7 @@ public:
      * header version number). Accepts a relative path (currently from task runner dir)
      * rather than a path assumed to be relative to ${RECORDINGS}.
      *
-     * \param filename name of the file to convert
+     * \param filenameRelative name of the file to convert
      */
     void convertFileRelativePath(std::string filenameRelative);
 

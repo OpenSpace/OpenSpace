@@ -124,8 +124,7 @@ public:
      * This method encodes the stored value into a std::string object. The resulting
      * encoding must also be a valid JSON representation fo the property.
      *
-     * \param value The string object in which to store the resulting encoding
-     * \return \c true if the encoding succeeded; \c false otherwise
+     * \return The string representation of the stored property value
      */
     virtual std::string stringValue() const override;
 

@@ -119,10 +119,10 @@ public:
         std::numeric_limits<OnChangeHandle>::max();
 
     /**
-     * The constructor for the property. The \p info (see #PropertyInfo) contains
-     * necessary information for this Property. #PropertyInfo::identifier needs to be
-     * unique for each PropertyOwner. The #PropertyInfo::guiName will be stored in the
-     * metaData to be accessed by the GUI elements using the #PropertyInfo::guiName key.
+     * The constructor for the property. The \p info (see PropertyInfo) contains
+     * necessary information for this Property. PropertyInfo::identifier needs to be
+     * unique for each PropertyOwner. The PropertyInfo::guiName will be stored in the
+     * metaData to be accessed by the GUI elements using the PropertyInfo::guiName key.
      * The default visibility settings is Visibility::Always, whereas the default
      * read-only state is \c false.
      *
@@ -222,8 +222,7 @@ public:
      * <code>std::string</code>. The specific details of this serialization is up to the
      * property developer. The default implementation is a no-op.
      *
-     * \param value The value to which the Property will be encoded
-     * \return \p true if the encoding succeeded, \p false otherwise
+     * \return The string representation of the stored property value
      */
     virtual std::string stringValue() const;
 
@@ -435,7 +434,7 @@ public:
     /**
      * Creates the information that is general to every Property and adds the
      * \c Identifier, \c Name, \c Type, and \c MetaData keys and their values. The meta
-     * data is handles by the generateMetaDataDescription method, which has to be
+     * data is handles by the generateMetaDataJsonDescription method, which has to be
      * overloaded if a concrete base class wants to add meta data that is not curated by
      * the Property class.
      *
@@ -459,9 +458,10 @@ public:
      * override this method and return the string containing all of the additional
      * information. The base implementation of the #description method will return the Lua
      * script:
-     * <code>return { generateBaseDescription(), generateMetaDataDescription(),</code>
-     * <code>generateAdditionalDescription()}</code>, which #generateMetaDataDescription
-     * and this method being the override points to customize the behavior.
+     * <code>return { generateBaseDescription(), generateMetaDataJsonDescription(),</code>
+     * <code>generateAdditionalDescription()}</code>, which
+     * #generateMetaDataJsonDescription and this method being the override points to
+     * customize the behavior.
      *
      * \return The information specific to each subclass of Property
      */

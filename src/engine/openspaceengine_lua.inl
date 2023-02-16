@@ -183,6 +183,7 @@ namespace {
 /**
  * This function returns information about the current OpenSpace version. The resulting
  * table has the structure:
+ * \code
  * Version = {
  *   Major = <number>
  *   Minor = <number>
@@ -190,6 +191,7 @@ namespace {
  * },
  * Commit = <string>
  * Branch = <string>
+ * \endcode
  */
 [[codegen::luawrap]] ghoul::Dictionary version() {
     ghoul::Dictionary res;

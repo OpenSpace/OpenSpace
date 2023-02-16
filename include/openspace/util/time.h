@@ -58,9 +58,11 @@ public:
      * Converts the \p timeString representing a date to a double precision
      * value representing the ephemeris time; that is the number of TDB
      * seconds past the J2000 epoch.
-     * \param timeString A string representing the time to be converted
+     *
+     * \param time A string representing the time to be converted
      * \return The converted time; the number of TDB seconds past the J2000 epoch,
      * representing the passed \p timeString
+     *
      * \pre \p timeString must not be empty
      */
     static double convertTime(const std::string& time);
@@ -72,8 +74,7 @@ public:
 
     /**
      * Initializes the Time singleton.
-     * \return <code>true</code> if the initialization succeeded, <code>false</code>
-     * otherwise
+     *
      * \pre The Time singleton must not have been initialized
      */
     static void initialize();
@@ -90,7 +91,8 @@ public:
     /**
      * Sets the current time to the specified value in seconds past the J2000 epoch. This
      * value can be negative to represent dates before the epoch.
-     * \param value The number of seconds after the J2000 epoch
+     *
+     * \param j2000Seconds The number of seconds after the J2000 epoch
      */
     void setTime(double j2000Seconds);
 
@@ -98,9 +100,18 @@ public:
      * Sets the current time to the specified value given as a Spice compliant string as
      * described in the Spice documentation
      * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html)
+     *
      * \param time The time to be set as a date string
      */
     void setTime(const std::string& time);
+
+    /**
+     * Sets the current time to the specified value given as a Spice compliant string as
+     * described in the Spice documentation
+     * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html)
+     *
+     * \param time The time to be set as a date string
+     */
     void setTime(const char* time);
 
     /**

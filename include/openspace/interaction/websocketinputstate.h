@@ -104,7 +104,7 @@ struct WebsocketInputStates : public std::unordered_map<size_t, WebsocketInputSt
      *
      * \param button The button that is to be checked
      * \param action The action which is checked for each button
-     * \return \c true if there is at least one websocket whose \param button is in the
+     * \return \c true if there is at least one websocket whose \p button is in the
      *         \p action state
      *
      * \pre \p button must be 0 or positive

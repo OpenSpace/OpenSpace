@@ -203,7 +203,7 @@ class HttpDownload {
 public:
     /**
      * Creates a new HttpDownload that will start to download the file pointed to by the
-     * \param url parameter as soon as the download is #start ed.
+     * \p url parameter as soon as the download is #start ed.
      *
      * \param url The URL that should be downloaded by this HttpDownload
      *

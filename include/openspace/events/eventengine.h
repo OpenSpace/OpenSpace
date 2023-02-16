@@ -77,7 +77,7 @@ public:
      * Registers a new action for a specific event type.
      *
      * \param type The type for which a new action is registered
-     * \param actionIdentifier The identifier of the action that will be triggered the
+     * \param identifier The identifier of the action that will be triggered the
      *        identifier must not exist at this moment, but must exist by the time the
      *        event is encountered next
      * \param filter If the filter is provided, it describes the event parameters that are
@@ -91,7 +91,7 @@ public:
      * Removing registration for a type/action combination.
      *
      * \param type The type of the action that should be unregistered
-     * \param actionIdentifier The identifier of the action that should be unregistered
+     * \param identifier The identifier of the action that should be unregistered
      * \param filter The optional filter applied to the event-action combination
      */
     void unregisterEventAction(events::Event::Type type,

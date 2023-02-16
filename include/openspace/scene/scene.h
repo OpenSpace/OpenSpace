@@ -71,7 +71,7 @@ public:
          * \param component The optional compoment that caused this exception to be thrown
          * \pre message may not be empty
          */
-        explicit InvalidSceneError(std::string msg, std::string comp = "");
+        explicit InvalidSceneError(std::string message, std::string component = "");
     };
 
     /// This struct describes a time that has some intrinsic interesting-ness to this
@@ -195,7 +195,7 @@ public:
      *
      * \param prop The Property that should not longer be updated
      *
-     * \pre \prop must not be nullptr
+     * \pre \p prop must not be nullptr
      * \post No interpolation record exists for \p prop
      */
     void removePropertyInterpolation(properties::Property* prop);
@@ -203,11 +203,11 @@ public:
     /**
      * Informs all Property%s with active interpolations about applying a new update tick
      * using the Property::interpolateValue method, passing a parameter \c t which is \c 0
-     * if no time has passed between the #addInterpolation method and \c 1 if an amount of
-     * time equal to the requested interpolation time has passed. The parameter \c t is
-     * updated with a resolution of 1 microsecond, which means that if this function is
-     * called twice within 1 microsecond, the passed parameter \c t might be the same for
-     * both calls
+     * if no time has passed between the #addPropertyInterpolation method and \c 1 if an
+     * amount of time equal to the requested interpolation time has passed. The parameter
+     * \c t is updated with a resolution of 1 microsecond, which means that if this
+     * function is called twice within 1 microsecond, the passed parameter \c t might be
+     * the same for both calls
      */
     void updateInterpolations();
 
@@ -215,7 +215,7 @@ public:
      * Adds the provided \p time as an interesting time to this scene. The same time can
      * be added multiple times.
      *
-     * \param The time that should be added
+     * \param time The time that should be added
      *
      * \pre \p time.time must not be empty
      * \pre \p time.name must not be empty
@@ -281,9 +281,6 @@ private:
      *
      * \param L the lua state to (eventually) push to
      * \param value string representation of the value with which to set property
-     * \param didPushToLua Bool reference that represents the lua push state at the end
-     *        of this function call. This will be set to true if the value (e.g. table)
-     *        has already been pushed to the lua stack
      * \return The ProfilePropertyLua variant type translated from string representation
      */
     ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,

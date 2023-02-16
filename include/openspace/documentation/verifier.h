@@ -242,7 +242,7 @@ struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
      * \return A TestResult containing the results of the testing. If DocumentationEntry%s
      *         were specified in the constructor and one of those values find an offending
      *         key inside the table, it's name will be returned with a fully qualified
-     *         name by prepending the name (= \key) of the table.
+     *         name by prepending the name (= \p key) of the table.
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -748,7 +748,7 @@ struct InRangeVerifier : public T {
     /**
      * Constructs a InRangeVerifier that checks whether the incoming value is of the
      * correct type and whether the value is greater or equal to \p lower and less or
-     * equal to \upper.
+     * equal to \p upper.
      *
      * \param lower The (inclusive) lower limit of the range
      * \param upper The (inclusive) upper limit of the range
@@ -908,12 +908,13 @@ struct DeprecatedVerifier : public T {
 struct ReferencingVerifier : public TableVerifier {
     /**
      * Creates a ReferencingVerifier that references a documentation with the provided
-     * identifier \p id. The ReferencingVerifier will use the static DocumentationEngine
-     * to retrieve Documentation%s and find the \p identifier among them.
+     * identifier \p identifier. The ReferencingVerifier will use the static
+     * DocumentationEngine to retrieve Documentation%s and find the \p identifier among
+     * them.
      *
      * \param identifier The identifier of the Documentation that this Verifier references
      */
-    ReferencingVerifier(std::string id);
+    ReferencingVerifier(std::string identifier);
 
     /**
      * Checks whether the \p key in the \p dictionary exists and is of type Table (similar
