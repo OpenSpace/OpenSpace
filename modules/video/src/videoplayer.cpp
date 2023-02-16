@@ -35,11 +35,11 @@
 namespace {
     constexpr std::string_view _loggerCat = "VideoPlayer";
 
-    constexpr openspace::properties::Property::PropertyInfo FileInfo = {
-        "File",
-        "File",
-        "The file path that is used for this video provider. The file must point to a "
-        "video that is then loaded and used for all tiles"
+    constexpr openspace::properties::Property::PropertyInfo VideoInfo = {
+        "Video",
+        "Video",
+        "This should point to the video that should be played. It can "
+        "be either a file path or a url to a youtube video."
     };
 
     constexpr openspace::properties::Property::PropertyInfo PlayInfo = {
@@ -61,9 +61,9 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
-       "Reset",
-       "Reset",
-       "Reset video"
+        "Reset",
+        "Reset",
+        "Reset video"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AudioInfo = {
@@ -73,8 +73,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(VideoPlayer)]] Parameters {
-        // [[codegen::verbatim(FileInfo.description)]]
-        std::string file;
+        // [[codegen::verbatim(VideoInfo.description)]]
+        std::string video;
 
         // [[codegen::verbatim(AudioInfo.description)]]
         std::optional<bool> playAudio;
@@ -165,7 +165,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _videoFile = p.file;
+    _videoFile = p.video;
 
     // Video interaction. Only valid for real time looping
     _play.onChange([this]() { play(); });

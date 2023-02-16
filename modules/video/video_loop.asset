@@ -1,6 +1,6 @@
 local layer = {
   Identifier = "TestVideoLoop",
-  File = "C:/Users/ylvaselling/Documents/Work/Testmovies/black_carbon_sulfate.mp4",
+  Video = "C:/Users/ylvaselling/Documents/Work/Testmovies/black_carbon_sulfate.mp4",
   Name = "Test Video Loop",
   Enabled = asset.enabled,
   Type = "VideoTileLayer",

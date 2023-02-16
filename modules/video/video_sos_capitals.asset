@@ -1,6 +1,6 @@
 local layer = {
   Identifier = "Capitals",
-  FilePath = "C:/Users/ylvaselling/Documents/Work/Testmovies/capitals/4096.png",
+  Video = "C:/Users/ylvaselling/Documents/Work/Testmovies/capitals/4096.png",
   Name = "Capitals",
   Enabled = asset.enabled,
   Description = [[Testing video]]
