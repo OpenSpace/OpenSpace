@@ -42,9 +42,42 @@ namespace {
         "video that is then loaded and used for all tiles"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo PlayInfo = {
+        "Play",
+        "Play",
+        "Play video"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PauseInfo = {
+        "Pause",
+        "Pause",
+        "Pause video"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo GoToStartInfo = {
+        "GoToStart",
+        "Go To Start",
+        "Go to start in video"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
+       "Reset",
+       "Reset",
+       "Reset video"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo AudioInfo = {
+        "PlayAudio",
+        "Play Audio",
+        "Play audio"
+    };
+
     struct [[codegen::Dictionary(VideoPlayer)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::string file;
+
+        // [[codegen::verbatim(AudioInfo.description)]]
+        std::optional<bool> playAudio;
     };
 #include "videoplayer_codegen.cpp"
 } // namespace
@@ -122,12 +155,24 @@ documentation::Documentation VideoPlayer::Documentation() {
 
 VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary) 
     : PropertyOwner({ "VideoPlayer" })
+    , _play(PlayInfo)
+    , _pause(PauseInfo)
+    , _goToStart(GoToStartInfo)
+    , _reset(ResetInfo)
+    , _playAudio(AudioInfo, false)
 {
     ZoneScoped
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _videoFile = p.file;
+
+    // Video interaction. Only valid for real time looping
+    _play.onChange([this]() { play(); });
+    _pause.onChange([this]() { pause(); });
+    _goToStart.onChange([this]() { goToStart(); });
+    _reset.onChange([this]() { reset(); });
+    _playAudio.onChange([this]() { toggleMute(); });
     
     global::callback::postSyncPreDraw->emplace_back([this]() {
         if (_isDestroying) {
@@ -241,6 +286,9 @@ void VideoPlayer::initializeMpv() {
     // https://mpv.io/manual/master/#options-video-timing-offset
     setPropertyStringMpv("video-timing-offset", "0");
 
+    // Turn off audio as default
+    setPropertyStringMpv("mute", "yes");
+
     //setPropertyStringMpv("load-stats-overlay", "");
 
     //mpv_set_property_string(_mpvHandle, "script-opts", "autoload-disabled=yes");
@@ -323,6 +371,24 @@ void VideoPlayer::seekToTime(double time) {
         const char* cmd[] = { "seek", params, "absolute", NULL };
         commandAsyncMpv(cmd, LibmpvPropertyKey::Seek);
         _isSeeking = true;
+    }
+}
+
+void VideoPlayer::toggleMute() {
+    if (!_isInitialized) {
+        return;
+    }
+    const char* mute = _playAudio ? "no" : "yes";
+    LINFO(mute);
+    int result = mpv_set_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::Mute),
+        "mute",
+        MPV_FORMAT_STRING,
+        &mute
+    );
+    if (!checkMpvError(result)) {
+        LWARNING("Error when pausing video");
     }
 }
 

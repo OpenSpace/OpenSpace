@@ -29,8 +29,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/triggerproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
 
@@ -52,6 +51,7 @@ public:
     void stepFrameForward();
     void stepFrameBackward();
     void seekToTime(double time);
+    void toggleMute();
 
     const std::unique_ptr<ghoul::opengl::Texture>& frameTexture() const;
     bool isPaused() const;
@@ -64,7 +64,14 @@ public:
     void destroy();
 
     documentation::Documentation Documentation();
+
+    properties::TriggerProperty _play;
+    properties::TriggerProperty _pause;
+    properties::TriggerProperty _goToStart;
+    properties::TriggerProperty _reset;
+    properties::BoolProperty _playAudio;
 private:
+
     // libmpv property keys
     enum class LibmpvPropertyKey : uint64_t {
         Duration = 1,
@@ -77,7 +84,8 @@ private:
         Seek,
         Fps,
         Pause,
-        IsSeeking
+        IsSeeking,
+        Mute
     };
 
     void createFBO(int width, int height);
@@ -104,6 +112,7 @@ private:
     double _videoDuration = 0.0;
     glm::ivec2 _videoResolution = glm::ivec2(2048, 1024); // Used for the fbos
     bool _isPaused = false;
+
     // Libmpv
     mpv_handle* _mpvHandle = nullptr;
     mpv_render_context* _mpvRenderContext = nullptr;
