@@ -66,11 +66,15 @@ ScreenSpaceVideo::ScreenSpaceVideo(const ghoul::Dictionary& dictionary)
     identifier = makeUniqueIdentifier(identifier);
     setIdentifier(identifier);
 
-    addProperty(_videoPlayer._play);
-    addProperty(_videoPlayer._pause);
-    addProperty(_videoPlayer._goToStart);
     addProperty(_videoPlayer._reset);
     addProperty(_videoPlayer._playAudio);
+
+    if (_videoPlayer.playbackMode() == PlaybackMode::RealTimeLoop) {
+        // Video interaction. Only valid for real time looping
+        addProperty(_videoPlayer._play);
+        addProperty(_videoPlayer._pause);
+        addProperty(_videoPlayer._goToStart);
+    }
 }
 
 void ScreenSpaceVideo::update() {

@@ -1,6 +1,6 @@
 local layer = {
   Identifier = "SosLoopTest",
-  File = "C:/Users/ylvaselling/Documents/Work/Testmovies/chlorophyll_model_2048.mp4",
+  Video = "C:/Users/ylvaselling/Documents/Work/Testmovies/chlorophyll_model_2048.mp4",
   Name = "Science On A Sphere Loop Video",
   Enabled = asset.enabled,
   Type = "VideoTileLayer",

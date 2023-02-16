@@ -56,38 +56,16 @@ public:
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& tileIndex) override final;
     TileDepthTransform depthTransform() override final;
-    void syncToSimulationTime(); 
 
     static documentation::Documentation Documentation();
 
 private:
-    enum class PlaybackMode {
-        MapToSimulationTime = 0,
-        RealTimeLoop
-    };
-    
-    // Map to simulation time functions
-    double correctVideoPlaybackTime() const;
-    bool isWithingStartEndTime() const;
-    void updateFrameDuration();
-
     void internalInitialize() override final;
     void internalDeinitialize() override final;
-
-    PlaybackMode _playbackMode = PlaybackMode::RealTimeLoop; // Default is to loop
-
-    // Video stretching: map to simulation time animation mode
-    double _startJ200Time = 0.0;
-    double _endJ200Time = 0.0;
-    double _timeAtLastRender = 0.0;
-    double _frameDuration = 0.0;
-    double _fps = 24.0;
-    double _videoDuration = 1.0;
 
     // Tile handling
     std::map<TileIndex::TileHashKey, Tile> _tileCache; // Cache for rendering 1 frame
     bool _tileIsReady = false;
-    double _seekThreshold = 1.0; // Threshold to ensure we seek to a different time
 
     VideoPlayer _videoPlayer;
 };

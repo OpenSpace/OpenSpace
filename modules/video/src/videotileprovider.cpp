@@ -38,42 +38,7 @@
 namespace {
     constexpr std::string_view _loggerCat = "VideoTileProvider";
 
-    constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
-        "StartTime",
-        "Start Time",
-        "The date and time that the video should start in the format "
-        "'YYYY MM DD hh:mm:ss'."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo EndTimeInfo = {
-        "EndTime",
-        "End Time",
-        "The date and time that the video should end in the format "
-        "'YYYY MM DD hh:mm:ss'."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo PlaybackModeInfo = {
-        "PlaybackMode",
-        "Playback Mode",
-        "Determines the way the video should be played. The start and end time of the "
-        "video can be set, or the video can be played as a loop in real time."
-    };
-
     struct [[codegen::Dictionary(VideoTileProvider)]] Parameters {
-        // [[codegen::verbatim(StartTimeInfo.description)]]
-        std::optional<std::string> startTime [[codegen::datetime()]];
-
-        // [[codegen::verbatim(EndTimeInfo.description)]]
-        std::optional<std::string> endTime [[codegen::datetime()]];
-
-        enum class PlaybackMode {
-            MapToSimulationTime = 0,
-            RealTimeLoop
-        };
-
-        // The mode of how the video should be played back.
-        // Default is video is played back according to the set start and end times.
-        std::optional<PlaybackMode> playbackMode;
 
     };
 #include "videotileprovider_codegen.cpp"
@@ -99,44 +64,11 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     addProperty(_videoPlayer._reset);
     addProperty(_videoPlayer._playAudio);
 
-    if (p.playbackMode.has_value()) {
-        switch (*p.playbackMode) {
-        case Parameters::PlaybackMode::RealTimeLoop:
-            _playbackMode = PlaybackMode::RealTimeLoop;
-            break;
-        case Parameters::PlaybackMode::MapToSimulationTime:
-            _playbackMode = PlaybackMode::MapToSimulationTime;
-            break;
-        default:
-            LERROR("Missing playback mode in VideoTileProvider");
-            throw ghoul::MissingCaseException();
-        }
-    }
-
-    if (_playbackMode == PlaybackMode::RealTimeLoop) {
+    if (_videoPlayer.playbackMode() == PlaybackMode::RealTimeLoop) {
         // Video interaction. Only valid for real time looping
         addProperty(_videoPlayer._play);
         addProperty(_videoPlayer._pause);
         addProperty(_videoPlayer._goToStart);
-    }
-    else if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-        if (!p.startTime.has_value() || !p.endTime.has_value()) {
-            LERROR("Video tile layer tried to map to simulation time but lacked start or"
-                " end time");
-            return;
-        }
-        _startJ200Time = Time::convertTime(*p.startTime);
-        _endJ200Time = Time::convertTime(*p.endTime);
-        ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
-
-        // Change the video time if OpenSpace time changes
-        global::timeManager->addTimeJumpCallback([this]() {
-            _videoPlayer.seekToTime(correctVideoPlaybackTime());
-        });
-        // Ensure we are synchronized to OpenSpace time in presync step
-        global::callback::preSync->emplace_back([this]() {
-            syncToSimulationTime();
-        });
     }
 }
 
@@ -165,7 +97,6 @@ Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
             Tile::Status::OK
         };
     }
-
     return _tileCache[hash];
 }
 
@@ -206,75 +137,6 @@ ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int max
     TileUvTransform uvTransform = { glm::vec2(offsetX, offsetY), ratios };
 
     return traverseTree(tileIndex, parents, maxParents, ascendToParent, uvTransform);
-}
-
-bool VideoTileProvider::isWithingStartEndTime() const {
-    const double now = global::timeManager->time().j2000Seconds();
-    return now <= _endJ200Time && now >= _startJ200Time;
-}
-
-void VideoTileProvider::updateFrameDuration() {
-    double openspaceVideoLength = (_endJ200Time - _startJ200Time) / _videoDuration;
-    _frameDuration = (1.0 / _fps) * openspaceVideoLength;
-}
-
-double VideoTileProvider::correctVideoPlaybackTime() const {
-    const double now = global::timeManager->time().j2000Seconds();
-    double percentage = 0.0;
-    if (now > _endJ200Time) {
-        percentage = 1.0;
-    }
-    else if (now < _startJ200Time) {
-        percentage = 0.0;
-    }
-    else {
-        percentage = (now - _startJ200Time) / (_endJ200Time - _startJ200Time);
-    }
-    return percentage * _videoPlayer.videoDuration();
-}
-
-void VideoTileProvider::syncToSimulationTime() {
-    if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-        bool fpsChanged = isDifferent(_videoPlayer.fps(), _fps);
-        bool durationChanged = isDifferent(_videoPlayer.videoDuration(), _videoDuration);
-        if (fpsChanged) {
-            _fps = _videoPlayer.fps();
-        }
-        if (durationChanged) {
-            _videoDuration = _videoPlayer.videoDuration();
-        }
-
-        if (fpsChanged || durationChanged) {
-            updateFrameDuration();
-        }
-        if (!_videoPlayer.isPaused()) {
-            //_videoPlayer.pause();
-        }
-        // If we are in valid times, step frames accordingly
-        if (isWithingStartEndTime()) {
-            double now = global::timeManager->time().j2000Seconds();
-            double deltaTime = now - _timeAtLastRender;
-            if (deltaTime > _frameDuration) {
-                // Stepping forwards
-                _videoPlayer.stepFrameForward();
-                _timeAtLastRender = now;
-            }
-            else if (deltaTime < -_frameDuration) {
-                // Stepping backwards
-                _videoPlayer.stepFrameBackward();
-                _timeAtLastRender = now;
-            }
-        }
-        else if (!_videoPlayer.isPaused()) {
-            _videoPlayer.pause();
-        }
-        // Make sure we are at the correct time
-        double time = correctVideoPlaybackTime();
-        bool shouldSeek = abs(time - _videoPlayer.currentPlaybackTime()) > _seekThreshold;
-        if (shouldSeek) {
-            _videoPlayer.seekToTime(time);
-        }
-    }
 }
 
 int VideoTileProvider::minLevel() {

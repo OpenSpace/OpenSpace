@@ -39,6 +39,11 @@
 
 namespace openspace {
 
+enum class PlaybackMode {
+    MapToSimulationTime = 0,
+    RealTimeLoop
+};
+
 class VideoPlayer : public properties::PropertyOwner {
 public:
     VideoPlayer(const ghoul::Dictionary& dictionary);
@@ -59,6 +64,7 @@ public:
     double videoDuration() const;
     double fps() const;
     double currentPlaybackTime() const;
+    PlaybackMode playbackMode() const;
 
     void reset();
     void destroy();
@@ -71,6 +77,20 @@ public:
     properties::TriggerProperty _reset;
     properties::BoolProperty _playAudio;
 private:
+    
+    PlaybackMode _playbackMode = PlaybackMode::RealTimeLoop; // Default is to loop
+
+    // Map to simulation time functions
+    double correctVideoPlaybackTime() const;
+    bool isWithingStartEndTime() const;
+    void updateFrameDuration();
+    void syncToSimulationTime();
+
+    // Video stretching: map to simulation time animation mode
+    double _startJ200Time = 0.0;
+    double _endJ200Time = 0.0;
+    double _timeAtLastRender = 0.0;
+    double _frameDuration = 0.0;
 
     // libmpv property keys
     enum class LibmpvPropertyKey : uint64_t {
