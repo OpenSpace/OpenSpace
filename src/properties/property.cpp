@@ -40,8 +40,6 @@ namespace {
     constexpr std::string_view IdentifierKey = "Identifier";
     constexpr std::string_view NameKey = "Name";
     constexpr std::string_view TypeKey = "Type";
-    constexpr std::string_view DescriptionKey = "Description";
-    constexpr std::string_view JsonValueKey = "Value";
     constexpr std::string_view MetaDataKey = "MetaData";
     constexpr std::string_view AdditionalDataKey = "AdditionalData";
 } // namespace

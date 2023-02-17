@@ -25,36 +25,27 @@
 #ifndef __OPENSPACE_MODULE_SONIFICATION___COSMICSONIFICATION___H__
 #define __OPENSPACE_MODULE_SONIFICATION___COSMICSONIFICATION___H__
 
-#include <openspace/properties/propertyowner.h>
+#include <modules/sonification/include/sonificationbase.h>
 
-#include "openspace/scene/scene.h"
-#include "ghoul/glm.h"
-#include <atomic>
-#include <thread>
+#include <map>
 
 namespace openspace {
 
-class CosmicSonification : public properties::PropertyOwner {
+class CosmicSonification : public SonificationBase {
 
 public:
-    CosmicSonification();
+    CosmicSonification(const std::string& ip, int port);
     virtual ~CosmicSonification();
 
-    void start();
+    virtual void update(const Scene* scene, const Camera* camera) override;
 
 private:
-    std::thread _thread;
-    std::atomic<bool> _isRunning;
 
-    void threadMain(std::atomic<bool>& isRunning);
+    double _anglePrecision;
+    double _distancePrecision;
 
-    void subscripbeFocusDistance(const Scene* scene,
-        const glm::dvec3 cameraPosition, const SceneGraphNode* focusNode);
-    void subscripbeNodeDistance(const Scene* scene,
-        const Camera* camera, const std::string& distance);
-
-    std::vector<std::pair<std::string, std::vector<double>>> _nodeSubscriptions;
-    double _prevFocusDistance;
+    // std::map<<Identifier, <distance, angle>>>
+    std::map<std::string, std::vector<double>> _nodeData;
 };
 
 } // openspace namespace

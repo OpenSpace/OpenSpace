@@ -22,24 +22,32 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/include/comparesonification.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/cosmicsonification.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/planetssonification.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/solarsonification.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/sonificationbase.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/timesonification.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/comparesonification.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/cosmicsonification.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/solarsonification.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/sonificationbase.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/timesonification.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
 	"Sonification"
-	sonification_module
+	sonification
 	STATIC
-	${HEADER_FILES} ${SOURCE_FILES}
+	${HEADER_FILES}
+	${SOURCE_FILES}
 )
-
-include_external_library(${sonification_module} PUBLIC oscpack ${CMAKE_CURRENT_SOURCE_DIR}/ext/osc)
-

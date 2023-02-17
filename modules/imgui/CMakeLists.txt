@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   include/guiactioncomponent.h
@@ -74,4 +74,6 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-include_external_library(${imgui_module} PUBLIC Imgui ${CMAKE_CURRENT_SOURCE_DIR}/ext/imgui)
+add_subdirectory(ext/imgui SYSTEM)
+target_link_libraries(${imgui_module} PUBLIC Imgui)
+set_target_properties(Imgui PROPERTIES FOLDER "External")

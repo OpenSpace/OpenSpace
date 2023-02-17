@@ -45,12 +45,6 @@ namespace {
         "The speck label file with the data for the labels"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UnitInfo = {
-        "Unit",
-        "Unit",
-        "Distance unit for the label data"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",

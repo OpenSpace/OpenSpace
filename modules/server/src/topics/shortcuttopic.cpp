@@ -28,6 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <ghoul/logging/logmanager.h>
 
 using nlohmann::json;
 
@@ -69,6 +70,13 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
         global::keybindingManager->keyBindings();
 
     for (const std::pair<const KeyWithModifier, std::string>& keyBinding : keyBindings) {
+        if (!global::actionManager->hasAction(keyBinding.second)) {
+            // We don't warn here as we don't know if the user didn't expect the action
+            // to be there or not. They might have defined a keybind to do multiple things
+            // only one of which is actually defined
+            continue;
+        }
+
         const KeyWithModifier& k = keyBinding.first;
         // @TODO (abock, 2021-08-05) Probably this should be rewritten to better account
         // for the new action mechanism
