@@ -9,7 +9,8 @@
     "cosmic_view/lineage",
     "cosmic_view/mutations",
     "cosmic_view/superfamily",
-    "events/toggle_image_trail"
+    "events/toggle_image_trail",
+    "modules/sonification/actions"
   ],
   "camera": {
     "aim": "",
@@ -49,6 +50,12 @@
     157680000.0,
     315360000.0,
     630720000.0
+  ],
+  "keybindings": [
+    {
+      "action": "module.sonification.toggle.enabled",
+      "key": "E"
+    }
   ],
   "mark_nodes": [
     "Earth",

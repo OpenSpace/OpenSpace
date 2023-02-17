@@ -164,20 +164,6 @@ local Catarrhini_volume = {
     }
 }
 
-local Catarrhini_volume_center = {
-    Identifier = "Catarrhini_volume_center",
-    Parent = lineage.lineage_17.Identifier,
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = { 186.17289602440673, -194.22355806701506, 440.5954140267485 }
-        }
-    },
-    GUI = {
-        Path = "/Volumes/Density"
-    }
-}
-
 local Cercopithecoidea_volume = {
     Identifier = "Cercopithecoidea_volume",
     Parent = lineage.lineage_17.Identifier,
@@ -201,6 +187,20 @@ local Cercopithecoidea_volume = {
             Type = "StaticScale",
             Scale = 1000
         }
+    }
+}
+
+local Cercopithecoidea_volume_center = {
+    Identifier = "Cercopithecoidea_volume_center",
+    Parent = lineage.lineage_17.Identifier,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 186.17289602440673, -194.22355806701506, 440.5954140267485 }
+        }
+    },
+    GUI = {
+        Path = "/Volumes/Density"
     }
 }
 
@@ -253,8 +253,8 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Platyrrhini_volume)
   openspace.addSceneGraphNode(Platyrrhini_volume_center)
   openspace.addSceneGraphNode(Catarrhini_volume)
-  openspace.addSceneGraphNode(Catarrhini_volume_center)
   openspace.addSceneGraphNode(Cercopithecoidea_volume)
+  openspace.addSceneGraphNode(Cercopithecoidea_volume_center)
   openspace.addSceneGraphNode(Hominoidea_volume)
   openspace.addSceneGraphNode(Hominoidea_volume_center)
 end)
@@ -267,8 +267,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Platyrrhini_volume)
   openspace.removeSceneGraphNode(Platyrrhini_volume_center)
   openspace.removeSceneGraphNode(Catarrhini_volume)
-  openspace.removeSceneGraphNode(Catarrhini_volume_center)
   openspace.removeSceneGraphNode(Cercopithecoidea_volume)
+  openspace.removeSceneGraphNode(Cercopithecoidea_volume_center)
   openspace.removeSceneGraphNode(Hominoidea_volume)
   openspace.removeSceneGraphNode(Hominoidea_volume_center)
 end)
@@ -280,7 +280,7 @@ asset.export(Strepsirrhini_volume_center)
 asset.export(Platyrrhini_volume)
 asset.export(Platyrrhini_volume_center)
 asset.export(Catarrhini_volume)
-asset.export(Catarrhini_volume_center)
 asset.export(Cercopithecoidea_volume)
+asset.export(Cercopithecoidea_volume_center)
 asset.export(Hominoidea_volume)
 asset.export(Hominoidea_volume_center)
