@@ -47,6 +47,7 @@ public:
 private:
     void update(std::atomic<bool>& isRunning);
 
+    properties::BoolProperty _enabled;
     std::thread _updateThread;
     std::atomic<bool> _isRunning = false;
     std::vector<SonificationBase*> _sonifications;

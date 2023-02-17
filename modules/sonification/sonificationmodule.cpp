@@ -40,13 +40,22 @@ namespace {
     //Output to SuperCollider
     constexpr std::string_view SuperColliderIp = "127.0.0.1";
     constexpr int SuperColliderPort = 57120;
+
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "Enable or disable all sonifications"
+    };
 } // namespace
 
 namespace openspace {
 
 SonificationModule::SonificationModule()
     : OpenSpaceModule("Sonification")
-{}
+    , _enabled(EnabledInfo, false)
+{
+    addProperty(_enabled);
+}
 
 SonificationModule::~SonificationModule() {
     // Clear the sonifications list
@@ -92,9 +101,10 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary&) {
 void SonificationModule::internalDeinitialize() {
     // Join the thread
     _isRunning = false;
-    if (_updateThread.joinable()) {
-        _updateThread.join();
-    }
+
+    // Wait before joining the thread
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    _updateThread.join();
 }
 
 void SonificationModule::update(std::atomic<bool>& isRunning) {
@@ -102,12 +112,13 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
     Camera* camera = nullptr;
     bool isInitialized = false;
 
-    // Need to manually wait for the scene to finish initializing
-    LINFO("Wating for scene...");
-    std::this_thread::sleep_for(std::chrono::minutes(2));
-    LINFO("Starting Sonifications");
-
     while (isRunning) {
+        // Wait for the scene to initialize, then user can trigger enabled
+        if (!_enabled) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            continue;
+        }
+
         if (!isInitialized) {
             // Find scene
             if (!scene) {
