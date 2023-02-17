@@ -34,6 +34,8 @@
 #include <openspace/rendering/renderengine.h>
 
 namespace {
+    constexpr std::string_view _loggerCat = "SonificationModule";
+
     //Output to SuperCollider
     constexpr std::string_view SuperColliderIp = "127.0.0.1";
     constexpr int SuperColliderPort = 57120;
@@ -93,6 +95,11 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
     Scene* scene = nullptr;
     Camera* camera = nullptr;
     bool isInitialized = false;
+
+    // Need to manually wait for the scene to finish initializing
+    LINFO("Wating for scene...");
+    std::this_thread::sleep_for(std::chrono::minutes(2));
+    LINFO("Starting Sonifications");
 
     while (isRunning) {
         if (!isInitialized) {
