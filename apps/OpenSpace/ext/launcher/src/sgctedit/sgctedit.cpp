@@ -83,6 +83,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
     , _userConfigPath(configBasePath)
     , _configurationFilename(configName)
     , _readOnlyConfigs(configsReadOnly)
+    , _didImportValues(true)
 {
     setWindowTitle("Window Configuration Editor");
     createWidgets(createMonitorInfoSet(), false);
@@ -209,7 +210,7 @@ std::filesystem::path SgctEdit::saveFilename() const {
 }
 
 void SgctEdit::save() {
-    sgct::config::Cluster cluster = generateConfiguration();
+    generateConfiguration();
     if (hasWindowIssues(cluster)) {
         int ret = QMessageBox::warning(
             this,
@@ -239,7 +240,6 @@ void SgctEdit::save() {
     );
     if (!fileName.isEmpty()) {
         _saveTarget = fileName.toStdString();
-        _cluster = std::move(cluster);
         accept();
     }
 }
@@ -275,14 +275,12 @@ void SgctEdit::apply() {
     accept();
 }
 
-sgct::config::Cluster SgctEdit::generateConfiguration() const {
-    sgct::config::Cluster cluster;
+void SgctEdit::generateConfiguration() const {
+    _cluster.scene.orientation = _settingsWidget->orientation();
 
-    sgct::config::Scene scene;
-    scene.orientation = _settingsWidget->orientation();
-    cluster.scene = std::move(scene);
-
-    cluster.masterAddress = "localhost";
+    if (!_didImportValues) {
+        _cluster.masterAddress = "localhost";
+    }
 
     if (_settingsWidget->vsync()) {
         sgct::config::Settings::Display display;
@@ -291,20 +289,28 @@ sgct::config::Cluster SgctEdit::generateConfiguration() const {
         sgct::config::Settings settings;
         settings.display = display;
 
-        cluster.settings = settings;
+        _cluster.settings = settings;
     }
 
-    sgct::config::Node node;
-    node.address = "localhost";
-    node.port = 20401;
+    if (_cluster.nodes.size() == 0) {
+        _cluster.nodes.push_back(sgct::config::Node);
+    }
+    if (!_didImportValues) {
+        _cluster.nodes.back().address = "localhost";
+        _cluster.nodes.back().port = 20401;
+    }
 
     // Save Windows
-    unsigned int windowIndex = 0;
-    for (WindowControl* wCtrl : _displayWidget->activeWindowControls()) {
-        sgct::config::Window window = wCtrl->generateWindowInformation();
-
-        window.id = windowIndex++;
-        node.windows.push_back(std::move(window));
+    for (unsigned int wIdx = 0; wIdx < _cluster.nodes.back().windows.size(); ++wIdx);
+        if (_cluster.nodes.back().windows.size() == 0) {
+            _cluster.nodes.back().windows.push_back(sgct::config::Window);
+        }
+        if (!_didImportValues) {
+//            sgct::config::Window window = wCtrl->generateWindowInformation();
+            _cluster.nodes.back().windows[wIdx].generateWindowInformation();
+        }
+        _cluster.nodes.back().windows[wIdx].id = windowIndex++;
+        _cluster.nodes.back().windows.push_back(std::move(window));
     }
 
     if (_settingsWidget->showUiOnFirstWindow()) {
@@ -314,15 +320,12 @@ sgct::config::Cluster SgctEdit::generateConfiguration() const {
         window.draw2D = true;
         window.draw3D = false;
     }
-
-    cluster.nodes.push_back(node);
+    _cluster.nodes.push_back(node);
 
     sgct::config::User user;
     user.eyeSeparation = 0.065f;
     user.position = { 0.f, 0.f, 4.f };
-    cluster.users = { user };
-
-    return cluster;
+    _cluster.users = { user };
 }
 
 sgct::config::Cluster SgctEdit::cluster() const {

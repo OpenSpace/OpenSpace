@@ -86,7 +86,7 @@ public:
 private:
     std::vector<QRect> createMonitorInfoSet();
     void createWidgets(const std::vector<QRect>& monitorSizes, bool setToDefaults);
-    sgct::config::Cluster generateConfiguration() const;
+    void generateConfiguration() const;
 
     void save();
     void apply();
@@ -109,6 +109,7 @@ private:
     QPushButton* _cancelButton = nullptr;
     QPushButton* _applyButton = nullptr;
     std::string _saveTarget;
+    bool _didImportValues = false;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
