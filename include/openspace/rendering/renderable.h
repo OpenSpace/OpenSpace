@@ -99,6 +99,8 @@ public:
     void setRenderBin(RenderBin bin);
     bool matchesRenderBinMask(int binMask);
 
+    bool matchesSecondaryRenderBin(int binMask);
+
     void setFade(float fade);
 
     bool isVisible() const;
@@ -128,6 +130,10 @@ protected:
     SceneGraphNode* _parent = nullptr;
     bool _shouldUpdateIfDisabled = false;
     RenderBin _renderBin = RenderBin::Opaque;
+
+    // An optional renderbin that renderables can use for certain components, in cases
+    // where all parts of the renderable should not be rendered in the same bin
+    std::optional<RenderBin>_secondaryRenderBin = std::nullopt;
 
 private:
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want

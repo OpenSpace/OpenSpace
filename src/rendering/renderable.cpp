@@ -268,7 +268,16 @@ void Renderable::setRenderBin(RenderBin bin) {
 }
 
 bool Renderable::matchesRenderBinMask(int binMask) {
-    return binMask & static_cast<int>(renderBin());
+    bool matchesPrimary = binMask & static_cast<int>(_renderBin);
+    bool matchesSecondary = matchesSecondaryRenderBin(binMask);
+    return matchesPrimary || matchesSecondary;
+}
+
+bool Renderable::matchesSecondaryRenderBin(int binMask) {
+    if (!_secondaryRenderBin.has_value()) {
+        return false;
+    }
+    return binMask & static_cast<int>(*_secondaryRenderBin);
 }
 
 void Renderable::setFade(float fade) {

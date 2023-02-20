@@ -664,6 +664,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _generalProperties.shadowMapping = true;
     }
     _generalProperties.shadowMapping.onChange(notifyShaderRecompilation);
+
+    // Use a secondary renderbin for labels
+    _secondaryRenderBin = RenderBin::PreDeferredTransparent;
 }
 
 void RenderableGlobe::initializeGL() {
@@ -725,6 +728,14 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
         data.modelTransform.translation
     );
 
+    if (matchesSecondaryRenderBin(data.renderBinMask)) {
+        _globeLabelsComponent.draw(data);
+
+        if (*_secondaryRenderBin != _renderBin) {
+            return;
+        }
+    }
+
     // This distance will be enough to render the globe as one pixel if the field of
     // view is 'fov' radians and the screen resolution is 'res' pixels.
     //constexpr double fov = 2 * glm::pi<double>() / 6; // 60 degrees
@@ -735,9 +746,6 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
     if ((distanceToCamera < distance) || (_generalProperties.renderAtDistance)) {
         try {
-            // Before Shadows
-            _globeLabelsComponent.draw(data);
-
             if (_hasShadows && _shadowComponent.isEnabled()) {
                 // Set matrices and other GL states
                 RenderData lightRenderData(_shadowComponent.begin(data));
