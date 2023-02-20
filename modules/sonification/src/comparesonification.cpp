@@ -33,8 +33,8 @@ namespace {
     constexpr std::string_view _loggerCat = "CompareSonification";
 
     // Set the differnet levels of precision
-    constexpr double LowDistancePrecision = 10000;
-    constexpr double HighDistancePrecision = 1000;
+    constexpr double LowDistancePrecision = 10000.0;
+    constexpr double HighDistancePrecision = 1000.0;
     constexpr double LowAnglePrecision = 0.1;
     constexpr double HighAnglePrecision = 0.05;
 
@@ -45,7 +45,7 @@ namespace {
        "CompareSonification",
        "Compare Sonification",
        "Sonification that compares two different planets to each other in different "
-       "aspects."
+       "aspects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FirstOptionInfo = {
@@ -67,37 +67,37 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeDayInfo = {
-        "EnableSizeDay",
+        "SizeDay",
         "Size/Day",
         "Toggle size/day sonification for both selected planets"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GravityInfo = {
-        "EnableGravity",
+        "Gravity",
         "Gravity",
         "Toggle gravity sonification for both selected planets"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TemperatureInfo = {
-        "EnableTemperature",
+        "Temperature",
         "Temperature",
         "Toggle temperature sonification for both selected planets"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereInfo = {
-        "EnableAtmosphere",
+        "Atmosphere",
         "Atmosphere",
         "Toggle atmosphere sonification for both selected planets"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MoonsInfo = {
-        "EnableMoons",
+        "Moons",
         "Moons",
         "Toggle moons sonification for both selected planets"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RingsInfo = {
-        "EnableRings",
+        "Rings",
         "Rings",
         "Toggle rings sonification for both selected planets"
     };
@@ -192,13 +192,13 @@ CompareSonification::CompareSonification(const std::string& ip, int port)
     // Add onChange for the properties
     _firstPlanet.onChange([this]() { onFirstChanged(); });
     _secondPlanet.onChange([this]() { onSecondChanged(); });
-    _toggleAll.onChange([this]() { onAllChanged(); });
-    _sizeDayEnabled.onChange([this]() { onSettingChanged(); });
-    _gravityEnabled.onChange([this]() { onSettingChanged(); });
-    _temperatureEnabled.onChange([this]() { onSettingChanged(); });
-    _atmosphereEnabled.onChange([this]() { onSettingChanged(); });
-    _moonsEnabled.onChange([this]() { onSettingChanged(); });
-    _ringsEnabled.onChange([this]() { onSettingChanged(); });
+    _toggleAll.onChange([this]() { onToggleAllChanged(); });
+    _sizeDayEnabled.onChange([this]() { sendSettings(); });
+    _gravityEnabled.onChange([this]() { sendSettings(); });
+    _temperatureEnabled.onChange([this]() { sendSettings(); });
+    _atmosphereEnabled.onChange([this]() { sendSettings(); });
+    _moonsEnabled.onChange([this]() { sendSettings(); });
+    _ringsEnabled.onChange([this]() { sendSettings(); });
 
     // Add the properties
     addProperty(_firstPlanet);
@@ -221,7 +221,7 @@ CompareSonification::~CompareSonification() {
 }
 
 osc::Blob CompareSonification::createSettingsBlob() const {
-    bool settings[6];
+    bool settings[6] = { false };
 
     settings[0] = _sizeDayEnabled;
     settings[1] = _gravityEnabled;
@@ -251,7 +251,7 @@ void CompareSonification::planetSelectionChanged(
 {
     if (changedPlanet != 0 && changedPlanet == notChangedPlanet) {
         LINFO("Cannot compare a planet to itself");
-        changedPlanet = 0;
+        changedPlanet.setValue(0);
         return;
     }
 
@@ -295,22 +295,17 @@ void CompareSonification::onSecondChanged() {
     planetSelectionChanged(_secondPlanet, _firstPlanet, _oldSecond);
 }
 
-void CompareSonification::onAllChanged() {
-    _sizeDayEnabled = _toggleAll;
-    _gravityEnabled = _toggleAll;
-    _temperatureEnabled = _toggleAll;
-    _atmosphereEnabled = _toggleAll;
-    _moonsEnabled = _toggleAll;
-    _ringsEnabled = _toggleAll;
-}
-
-void CompareSonification::onSettingChanged() {
-    sendSettings();
+void CompareSonification::onToggleAllChanged() {
+    _sizeDayEnabled.setValue(_toggleAll);
+    _gravityEnabled.setValue(_toggleAll);
+    _temperatureEnabled.setValue(_toggleAll);
+    _atmosphereEnabled.setValue(_toggleAll);
+    _moonsEnabled.setValue(_toggleAll);
+    _ringsEnabled.setValue(_toggleAll);
 }
 
 // Extract the data from the given identifier
-bool CompareSonification::getData(const Camera* camera, Planet& planet)
-{
+bool CompareSonification::getData(const Camera* camera, Planet& planet) {
     double distance = SonificationBase::calculateDistanceTo(
         camera,
         planet.identifier,
@@ -350,8 +345,7 @@ bool CompareSonification::getData(const Camera* camera, Planet& planet)
     return isNewData;
 }
 
-void CompareSonification::update(const Scene*, const Camera* camera) {
-    // Which node is in focus?
+void CompareSonification::update(const Camera* camera) {
     const SceneGraphNode* focusNode =
         global::navigationHandler->orbitalNavigator().anchorNode();
 
@@ -359,7 +353,7 @@ void CompareSonification::update(const Scene*, const Camera* camera) {
         return;
     }
 
-    // Update data from all planets
+    // Update data for all planets
     for (Planet& planet : _planets) {
         // Increase presision if the planet is in focus
         if (focusNode->identifier() == planet.identifier) {

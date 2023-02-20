@@ -36,7 +36,12 @@ public:
     CompareSonification(const std::string& ip, int port);
     virtual ~CompareSonification() override;
 
-    virtual void update(const Scene*, const Camera* camera) override;
+    /**
+     * Main update function for the sonification
+     *
+     * \param camera pointer to the camera in the scene
+     */
+    virtual void update(const Camera* camera) override;
 
 private:
     // Struct to hold data for all the planets
@@ -74,7 +79,7 @@ private:
     osc::Blob createSettingsBlob() const;
 
     /**
-     * Send current sonification settings over osc connection
+     * Send current sonification settings over the osc connection
      * Order of data: name of first planet, name of second planet, settings
      */
     void sendSettings();
@@ -94,8 +99,7 @@ private:
     // Properties onChange
     void onFirstChanged();
     void onSecondChanged();
-    void onAllChanged();
-    void onSettingChanged();
+    void onToggleAllChanged();
 
     double _anglePrecision;
     double _distancePrecision;

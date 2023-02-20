@@ -45,10 +45,9 @@ public:
     /**
      * Main update function for the sonification
      *
-     * \param scene pointer to the scene
      * \param camera pointer to the camera in the scene
      */
-    virtual void update(const Scene* scene, const Camera* camera) = 0;
+    virtual void update(const Camera* camera) = 0;
 
     /**
      * Calculate the distance from the camera to the node with the given identifier, in

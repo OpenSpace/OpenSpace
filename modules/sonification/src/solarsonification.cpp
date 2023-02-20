@@ -28,68 +28,73 @@
 #include <openspace/navigation/orbitalnavigator.h>
 
 namespace {
-    constexpr int NumSecPerDay = 86400;
+    constexpr std::string_view _loggerCat = "SolarSonification";
+
+    // Set the differnet levels of precision
+    constexpr double DistancePrecision = 10000.0;
+    constexpr double AnglePrecision = 0.1;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         SolarSonificationInfo =
     {
        "SolarSonification",
        "Solar Sonification",
-       "The Solar Sonification"
+       "Sonification that gives an overview of the planets in the solarsystem with "
+       "simpler sounds"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableAllInfo = {
-        "Enabled",
+    constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
+        "ToggleAll",
         "All",
-        "Enable or disable all the soloar sonifications"
+        "Toggle the sonification for all planets"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableMercuryInfo = {
-        "EnableMercury",
         "Mercury",
-        "Enable or disable sonification for Mercury"
+        "Mercury",
+        "Toggle sonification for Mercury"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableVenusInfo = {
-        "EnableVenus",
         "Venus",
-        "Enable or disable sonification for Venus"
+        "Venus",
+        "Toggle sonification for Venus"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableEarthInfo = {
-        "EnableEarth",
         "Earth",
-        "Enable or disable sonification for Earth"
+        "Earth",
+        "Toggle sonification for Earth"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableMarsInfo = {
-        "EnableMars",
         "Mars",
-        "Enable or disable sonification for Mars"
+        "Mars",
+        "Toggle sonification for Mars"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableJupiterInfo = {
-        "EnableJupiter",
         "Jupiter",
-        "Enable or disable sonification for Jupiter"
+        "Jupiter",
+        "Toggle sonification for Jupiter"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableSaturnInfo = {
-        "EnableSaturn",
         "Saturn",
-        "Enable or disable sonification for Saturn"
+        "Saturn",
+        "Toggle sonification for Saturn"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableUranusInfo = {
-        "EnableUranus",
         "Uranus",
-        "Enable or disable sonification for Uranus"
+        "Uranus",
+        "Toggle sonification for Uranus"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableNeptuneInfo = {
-        "EnableNeptune",
         "Neptune",
-        "Enable or disable sonification for Neptune"
+        "Neptune",
+        "Toggle sonification for Neptune"
     };
 } // namespace
 
@@ -97,7 +102,7 @@ namespace openspace {
 
 SolarSonification::SolarSonification(const std::string& ip, int port)
     : SonificationBase(SolarSonificationInfo, ip, port)
-    , _enableAll(EnableAllInfo, false)
+    , _toggleAll(ToggleAllInfo, false)
     , _mercuryEnabled(EnableMercuryInfo, false)
     , _venusEnabled(EnableVenusInfo, false)
     , _earthEnabled(EnableEarthInfo, false)
@@ -107,9 +112,6 @@ SolarSonification::SolarSonification(const std::string& ip, int port)
     , _uranusEnabled(EnableUranusInfo, false)
     , _neptuneEnabled(EnableNeptuneInfo, false)
 {
-    _anglePrecision = 0.1;
-    _distancePrecision = 10000.0;
-
     // Fill the _planets list
     _planets.push_back(Planet("Mercury"));
     _planets.push_back(Planet("Venus"));
@@ -121,18 +123,18 @@ SolarSonification::SolarSonification(const std::string& ip, int port)
     _planets.push_back(Planet("Neptune"));
 
     // Add onChange functions to the properties
-    _enableAll.onChange([this]() { onAllEnabledChanged(); });
-    _mercuryEnabled.onChange([this]() { onSettingChanged(); });
-    _venusEnabled.onChange([this]() { onSettingChanged(); });
-    _earthEnabled.onChange([this]() { onSettingChanged(); });
-    _marsEnabled.onChange([this]() { onSettingChanged(); });
-    _jupiterEnabled.onChange([this]() { onSettingChanged(); });
-    _saturnEnabled.onChange([this]() { onSettingChanged(); });
-    _uranusEnabled.onChange([this]() { onSettingChanged(); });
-    _neptuneEnabled.onChange([this]() { onSettingChanged(); });
+    _toggleAll.onChange([this]() { onToggleAllChanged(); });
+    _mercuryEnabled.onChange([this]() { sendSettings(); });
+    _venusEnabled.onChange([this]() { sendSettings(); });
+    _earthEnabled.onChange([this]() { sendSettings(); });
+    _marsEnabled.onChange([this]() { sendSettings(); });
+    _jupiterEnabled.onChange([this]() { sendSettings(); });
+    _saturnEnabled.onChange([this]() { sendSettings(); });
+    _uranusEnabled.onChange([this]() { sendSettings(); });
+    _neptuneEnabled.onChange([this]() { sendSettings(); });
 
     // Add the properties
-    addProperty(_enableAll);
+    addProperty(_toggleAll);
     addProperty(_mercuryEnabled);
     addProperty(_venusEnabled);
     addProperty(_earthEnabled);
@@ -144,11 +146,11 @@ SolarSonification::SolarSonification(const std::string& ip, int port)
 }
 
 SolarSonification::~SolarSonification() {
-    _enableAll = false;
+    _toggleAll = false;
 }
 
 osc::Blob SolarSonification::createSettingsBlob() const {
-    bool settings[8];
+    bool settings[8] = { false };
 
     settings[0] = _mercuryEnabled;
     settings[1] = _venusEnabled;
@@ -171,77 +173,51 @@ void SolarSonification::sendSettings() {
     _connection->send(label, data);
 }
 
-void SolarSonification::onAllEnabledChanged() {
-    _mercuryEnabled = _enableAll;
-    _venusEnabled = _enableAll;
-    _earthEnabled = _enableAll;
-    _marsEnabled = _enableAll;
-    _jupiterEnabled = _enableAll;
-    _saturnEnabled = _enableAll;
-    _uranusEnabled = _enableAll;
-    _neptuneEnabled = _enableAll;
-}
-
-void SolarSonification::onSettingChanged() {
-    sendSettings();
+void SolarSonification::onToggleAllChanged() {
+    _mercuryEnabled.setValue(_toggleAll);
+    _venusEnabled.setValue(_toggleAll);
+    _earthEnabled.setValue(_toggleAll);
+    _marsEnabled.setValue(_toggleAll);
+    _jupiterEnabled.setValue(_toggleAll);
+    _saturnEnabled.setValue(_toggleAll);
+    _uranusEnabled.setValue(_toggleAll);
+    _neptuneEnabled.setValue(_toggleAll);
 }
 
 // Extract the data from the given identifier
-bool SolarSonification::extractData(const Camera* camera, const std::string& identifier,
-                                    int i)
-{
+bool SolarSonification::getData(const Camera* camera, Planet& planet) {
     double distance = SonificationBase::calculateDistanceTo(
         camera,
-        identifier,
+        planet.identifier,
         DistanceUnit::Kilometer
     );
-    double angle = SonificationBase::calculateAngleFromAToB(camera, "Sun", identifier);
+    double angle =
+        SonificationBase::calculateAngleFromAToB(camera, "Sun", planet.identifier);
 
     if (abs(distance) < std::numeric_limits<double>::epsilon()) {
         return false;
     }
 
     // Check if this data is new, otherwise don't send it
-    bool shouldSendData = false;
-    if (abs(_planets[i].distance - distance) > _distancePrecision ||
-        abs(_planets[i].angle - angle) > _anglePrecision)
+    bool isNewData = false;
+    if (abs(planet.distance - distance) > DistancePrecision ||
+        abs(planet.angle - angle) > AnglePrecision)
     {
         // Update the saved data for the planet
-        _planets[i].distance = distance;
-        _planets[i].angle = angle;
-        shouldSendData = true;
+        planet.distance = distance;
+        planet.angle = angle;
+        isNewData = true;
     }
-    return shouldSendData;
+    return isNewData;
 }
 
-void SolarSonification::update(const Scene* scene, const Camera* camera) {
-    const SceneGraphNode* focusNode = nullptr;
-    const SceneGraphNode* previousFocusNode = nullptr;
-
-    // Check what node is in focus
-    focusNode = global::navigationHandler->orbitalNavigator().anchorNode();
-    if (!focusNode) {
-        return;
-    }
-
-    // Extract data from all the planets
-    for (int i = 0; i < _planets.size(); ++i) {
+void SolarSonification::update(const Camera* camera) {
+    // Update data for all planets
+    for (Planet& planet : _planets) {
+        bool hasDataUpdated = getData(camera, planet);
 
         // Only send data if something new has happened
-        // If the node is in focus, increase sensitivity
-        if (focusNode->identifier() == _planets[i].identifier) {
-            _anglePrecision = 0.05;
-            _distancePrecision = 1000.0;
-        }
-        else {
-            _anglePrecision = 0.1;
-            _distancePrecision = 10000.0;
-        }
-
-        bool hasDataUpdated = extractData(camera, _planets[i].identifier, i);
-
         if (hasDataUpdated) {
-            // Send the data to SuperCollider
             sendSettings();
         }
     }

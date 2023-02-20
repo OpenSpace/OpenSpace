@@ -29,7 +29,13 @@
 #include <openspace/util/distanceconversion.h>
 
 namespace {
-    constexpr int NumSecPerDay = 86400;
+    constexpr std::string_view _loggerCat = "PlanetSonification";
+
+    // Set the differnet levels of precision
+    constexpr double LowDistancePrecision = 10000.0;
+    constexpr double HighDistancePrecision = 1000.0;
+    constexpr double LowAnglePrecision = 0.1;
+    constexpr double HighAnglePrecision = 0.05;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         PlanetSonificationInfo =
@@ -39,10 +45,10 @@ namespace {
        "Sonification of the planets in our solarsystem"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableAllInfo = {
-        "Enabled",
-        "All Planets",
-        "Enable or disable the sonifications for all planets"
+    constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
+        "ToggleAll",
+        "All",
+        "Toggle all sonifications for all planets"
     };
 
     // Planets
@@ -95,46 +101,46 @@ namespace {
     };
 
     // Per planet settings
-    constexpr openspace::properties::Property::PropertyInfo EnableInfo = {
-        "Enabled",
+    constexpr openspace::properties::Property::PropertyInfo PlanetToggleAllInfo = {
+        "ToggleAll",
         "All",
-        "Enable or disable all sonifications for the planet"
+        "Toggle all sonifications for the planet"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeDayInfo = {
-        "SizeDayInfo",
+        "SizeDay",
         "Size/Day",
-        "Enable or disable size/day sonification or"
+        "Toggle the size/day sonification for the planet"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GravityInfo = {
-        "GravityInfo",
         "Gravity",
-        "Enable or disable gravity sonification"
+        "Gravity",
+        "Toggle the gravity sonification for the planet"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TemperatureInfo = {
-        "TemperatureInfo",
         "Temperature",
-        "Enable or disable temperature sonification"
+        "Temperature",
+        "Toggle the temperature sonification for the planet"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereInfo = {
-        "AtmosphereInfo",
         "Atmosphere",
-        "Enable or disable atmosphere sonification"
+        "Atmosphere",
+        "Toggle the atmosphere sonification for the planet"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MoonsInfo = {
-        "MoonsInfo",
         "Moons",
-        "Enable or disable moons sonification"
+        "Moons",
+        "Toggle the moons sonification for the planet"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RingsInfo = {
-        "RingsInfo",
         "Rings",
-        "Enable or disable rings sonification"
+        "Rings",
+        "Toggle the rings sonification for the planet"
     };
 } // namespace
 
@@ -142,7 +148,7 @@ namespace openspace {
 
 PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     : SonificationBase(PlanetSonificationInfo, ip, port)
-    , _enableAll(EnableAllInfo, false)
+    , _toggleAll(ToggleAllInfo, false)
     , _mercuryProperty(PlanetsSonification::PlanetProperty(MercuryInfo))
     , _venusProperty(PlanetsSonification::PlanetProperty(VenusInfo))
     , _earthProperty(PlanetsSonification::PlanetProperty(EarthInfo))
@@ -152,8 +158,8 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     , _uranusProperty(PlanetsSonification::PlanetProperty(UranusInfo))
     , _neptuneProperty(PlanetsSonification::PlanetProperty(NeptuneInfo))
 {
-    _anglePrecision = 0.1;
-    _distancePrecision = 10000.0;
+    _anglePrecision = LowAnglePrecision;
+    _distancePrecision = LowDistancePrecision;
 
     // Fill the _planets list
     _planets.reserve(8);
@@ -200,23 +206,23 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _planets.back().moons.push_back({ "Triton", 0.0 });
 
     // Add onChange for the properties
-    _enableAll.onChange([this]() { onAllEnabledChanged(); });
+    _toggleAll.onChange([this]() { onToggleAllChanged(); });
 
     // Mercury
-    _mercuryProperty.enabled.onChange([this]() { onMercuryEnabledChanged(); });
+    _mercuryProperty.toggleAll.onChange([this]() { onMercuryAllChanged(); });
     _mercuryProperty.sizeDayEnabled.onChange([this]() { onMercurySettingChanged(); });
     _mercuryProperty.gravityEnabled.onChange([this]() { onMercurySettingChanged(); });
     _mercuryProperty.temperatureEnabled.onChange([this]() { onMercurySettingChanged(); });
 
     // Venus
-    _venusProperty.enabled.onChange([this]() { onVenusEnabledChanged(); });
+    _venusProperty.toggleAll.onChange([this]() { onVenusAllChanged(); });
     _venusProperty.sizeDayEnabled.onChange([this]() { onVenusSettingChanged(); });
     _venusProperty.gravityEnabled.onChange([this]() { onVenusSettingChanged(); });
     _venusProperty.temperatureEnabled.onChange([this]() { onVenusSettingChanged(); });
     _venusProperty.atmosphereEnabled.onChange([this]() { onVenusSettingChanged(); });
 
     // Earth
-    _earthProperty.enabled.onChange([this]() { onEarthEnabledChanged(); });
+    _earthProperty.toggleAll.onChange([this]() { onEarthAllChanged(); });
     _earthProperty.sizeDayEnabled.onChange([this]() { onEarthSettingChanged(); });
     _earthProperty.gravityEnabled.onChange([this]() { onEarthSettingChanged(); });
     _earthProperty.temperatureEnabled.onChange([this]() { onEarthSettingChanged(); });
@@ -224,7 +230,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _earthProperty.moonsEnabled.onChange([this]() { onEarthSettingChanged(); });
 
     // Mars
-    _marsProperty.enabled.onChange([this]() { onMarsEnabledChanged(); });
+    _marsProperty.toggleAll.onChange([this]() { onMarsAllChanged(); });
     _marsProperty.sizeDayEnabled.onChange([this]() { onMarsSettingChanged(); });
     _marsProperty.gravityEnabled.onChange([this]() { onMarsSettingChanged(); });
     _marsProperty.temperatureEnabled.onChange([this]() { onMarsSettingChanged(); });
@@ -232,7 +238,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _marsProperty.moonsEnabled.onChange([this]() { onMarsSettingChanged(); });
 
     // Jupiter
-    _jupiterProperty.enabled.onChange([this]() { onJupiterEnabledChanged(); });
+    _jupiterProperty.toggleAll.onChange([this]() { onJupiterAllChanged(); });
     _jupiterProperty.sizeDayEnabled.onChange([this]() { onJupiterSettingChanged(); });
     _jupiterProperty.gravityEnabled.onChange([this]() { onJupiterSettingChanged(); });
     _jupiterProperty.temperatureEnabled.onChange([this]() { onJupiterSettingChanged(); });
@@ -240,7 +246,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _jupiterProperty.moonsEnabled.onChange([this]() { onJupiterSettingChanged(); });
 
     // Saturn
-    _saturnProperty.enabled.onChange([this]() { onSaturnEnabledChanged(); });
+    _saturnProperty.toggleAll.onChange([this]() { onSaturnAllChanged(); });
     _saturnProperty.sizeDayEnabled.onChange([this]() { onSaturnSettingChanged(); });
     _saturnProperty.gravityEnabled.onChange([this]() { onSaturnSettingChanged(); });
     _saturnProperty.temperatureEnabled.onChange([this]() { onSaturnSettingChanged(); });
@@ -249,7 +255,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _saturnProperty.ringsEnabled.onChange([this]() { onSaturnSettingChanged(); });
 
     // Uranus
-    _uranusProperty.enabled.onChange([this]() { onUranusEnabledChanged(); });
+    _uranusProperty.toggleAll.onChange([this]() { onUranusAllChanged(); });
     _uranusProperty.sizeDayEnabled.onChange([this]() { onUranusSettingChanged(); });
     _uranusProperty.gravityEnabled.onChange([this]() { onUranusSettingChanged(); });
     _uranusProperty.temperatureEnabled.onChange([this]() { onUranusSettingChanged(); });
@@ -257,7 +263,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _uranusProperty.moonsEnabled.onChange([this]() { onUranusSettingChanged(); });
 
     // Neptune
-    _neptuneProperty.enabled.onChange([this]() { onNeptuneEnabledChanged(); });
+    _neptuneProperty.toggleAll.onChange([this]() { onNeptuneAllChanged(); });
     _neptuneProperty.sizeDayEnabled.onChange([this]() { onNeptuneSettingChanged(); });
     _neptuneProperty.gravityEnabled.onChange([this]() { onNeptuneSettingChanged(); });
     _neptuneProperty.temperatureEnabled.onChange([this]() { onNeptuneSettingChanged(); });
@@ -265,7 +271,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _neptuneProperty.moonsEnabled.onChange([this]() { onNeptuneSettingChanged(); });
 
     // Add the properties
-    addProperty(_enableAll);
+    addProperty(_toggleAll);
     addPropertySubOwner(_mercuryProperty);
     addPropertySubOwner(_venusProperty);
     addPropertySubOwner(_earthProperty);
@@ -277,13 +283,13 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
 }
 
 PlanetsSonification::~PlanetsSonification() {
-    _enableAll = false;
+    _toggleAll = false;
 }
 
 PlanetsSonification::PlanetProperty::PlanetProperty(
     properties::PropertyOwner::PropertyOwnerInfo planetInfo)
     : properties::PropertyOwner(planetInfo)
-    , enabled(EnableInfo, false)
+    , toggleAll(PlanetToggleAllInfo, false)
     , sizeDayEnabled(SizeDayInfo, false)
     , gravityEnabled(GravityInfo, false)
     , temperatureEnabled(TemperatureInfo, false)
@@ -291,7 +297,7 @@ PlanetsSonification::PlanetProperty::PlanetProperty(
     , moonsEnabled(MoonsInfo, false)
     , ringsEnabled(RingsInfo, false)
 {
-    addProperty(enabled);
+    addProperty(toggleAll);
     addProperty(sizeDayEnabled);
     addProperty(gravityEnabled);
     addProperty(temperatureEnabled);
@@ -309,27 +315,79 @@ PlanetsSonification::PlanetProperty::PlanetProperty(
 }
 
 osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
-    std::vector<const properties::PropertyOwner*> planets(_planets.size());
-    planets[0] = &_mercuryProperty;
-    planets[1] = &_venusProperty;
-    planets[2] = &_earthProperty;
-    planets[3] = &_marsProperty;
-    planets[4] = &_jupiterProperty;
-    planets[5] = &_saturnProperty;
-    planets[6] = &_uranusProperty;
-    planets[7] = &_neptuneProperty;
+    bool settings[6] = { false };
 
-    bool settings[7];
-
-    int i = 0;
-    for (properties::Property* p : planets[planetIndex]->properties()) {
-        settings[i++] = p;
+    switch (planetIndex) {
+        case 0:
+            // Mercury
+            settings[0] = _mercuryProperty.sizeDayEnabled;
+            settings[1] = _mercuryProperty.gravityEnabled;
+            settings[2] = _mercuryProperty.temperatureEnabled;
+            break;
+        case 1:
+            // Venus
+            settings[0] = _venusProperty.sizeDayEnabled;
+            settings[1] = _venusProperty.gravityEnabled;
+            settings[2] = _venusProperty.temperatureEnabled;
+            settings[3] = _venusProperty.atmosphereEnabled;
+            break;
+        case 2:
+            // Earth
+            settings[0] = _earthProperty.sizeDayEnabled;
+            settings[1] = _earthProperty.gravityEnabled;
+            settings[2] = _earthProperty.temperatureEnabled;
+            settings[3] = _earthProperty.atmosphereEnabled;
+            settings[4] = _earthProperty.moonsEnabled;
+            break;
+        case 3:
+            // Mars
+            settings[0] = _marsProperty.sizeDayEnabled;
+            settings[1] = _marsProperty.gravityEnabled;
+            settings[2] = _marsProperty.temperatureEnabled;
+            settings[3] = _marsProperty.atmosphereEnabled;
+            settings[4] = _marsProperty.moonsEnabled;
+            break;
+        case 4:
+            // Jupiter
+            settings[0] = _jupiterProperty.sizeDayEnabled;
+            settings[1] = _jupiterProperty.gravityEnabled;
+            settings[2] = _jupiterProperty.temperatureEnabled;
+            settings[3] = _jupiterProperty.atmosphereEnabled;
+            settings[4] = _jupiterProperty.moonsEnabled;
+            break;
+        case 5:
+            // Saturn
+            settings[0] = _saturnProperty.sizeDayEnabled;
+            settings[1] = _saturnProperty.gravityEnabled;
+            settings[2] = _saturnProperty.temperatureEnabled;
+            settings[3] = _saturnProperty.atmosphereEnabled;
+            settings[4] = _saturnProperty.moonsEnabled;
+            settings[5] = _saturnProperty.ringsEnabled;
+            break;
+        case 6:
+            // Uranus
+            settings[0] = _uranusProperty.sizeDayEnabled;
+            settings[1] = _uranusProperty.gravityEnabled;
+            settings[2] = _uranusProperty.temperatureEnabled;
+            settings[3] = _uranusProperty.atmosphereEnabled;
+            settings[4] = _uranusProperty.moonsEnabled;
+            break;
+        case 7:
+            // Neptune
+            settings[0] = _neptuneProperty.sizeDayEnabled;
+            settings[1] = _neptuneProperty.gravityEnabled;
+            settings[2] = _neptuneProperty.temperatureEnabled;
+            settings[3] = _neptuneProperty.atmosphereEnabled;
+            settings[4] = _neptuneProperty.moonsEnabled;
+            break;
+        default:
+            throw ghoul::MissingCaseException();
     }
 
-    return osc::Blob(settings, 7);
+    return osc::Blob(settings, 6);
 }
 
-void PlanetsSonification::sendSettings(const int planetIndex) {
+void PlanetsSonification::sendSettings(int planetIndex) {
     std::string label = "/" + _planets[planetIndex].identifier;
     std::vector<OscDataType> data;
 
@@ -352,139 +410,121 @@ void PlanetsSonification::sendSettings(const int planetIndex) {
     _connection->send(label, data);
 }
 
-void PlanetsSonification::onAllEnabledChanged() {
+void PlanetsSonification::onToggleAllChanged() {
     // Set all the settings
-    std::vector<properties::PropertyOwner*> planets(_planets.size());
-    planets[0] = &_mercuryProperty;
-    planets[1] = &_venusProperty;
-    planets[2] = &_earthProperty;
-    planets[3] = &_marsProperty;
-    planets[4] = &_jupiterProperty;
-    planets[5] = &_saturnProperty;
-    planets[6] = &_uranusProperty;
-    planets[7] = &_neptuneProperty;
-
-    for (properties::PropertyOwner* planet : planets) {
-        std::vector<properties::Property*> planetProperties = planet->properties();
-
-        for (properties::Property* p : planetProperties) {
-            p->set(_enableAll);
-        }
-    }
+    _mercuryProperty.toggleAll.setValue(_toggleAll);
+    _venusProperty.toggleAll.setValue(_toggleAll);
+    _earthProperty.toggleAll.setValue(_toggleAll);
+    _marsProperty.toggleAll.setValue(_toggleAll);
+    _jupiterProperty.toggleAll.setValue(_toggleAll);
+    _saturnProperty.toggleAll.setValue(_toggleAll);
+    _uranusProperty.toggleAll.setValue(_toggleAll);
+    _neptuneProperty.toggleAll.setValue(_toggleAll);
 }
 
 // Mercury
-void PlanetsSonification::onMercuryEnabledChanged() {
-    _mercuryProperty.sizeDayEnabled = _mercuryProperty.enabled;
-    _mercuryProperty.gravityEnabled = _mercuryProperty.enabled;
-    _mercuryProperty.temperatureEnabled = _mercuryProperty.enabled;
+void PlanetsSonification::onMercuryAllChanged() {
+    _mercuryProperty.sizeDayEnabled.setValue(_mercuryProperty.toggleAll);
+    _mercuryProperty.gravityEnabled.setValue(_mercuryProperty.toggleAll);
+    _mercuryProperty.temperatureEnabled.setValue(_mercuryProperty.toggleAll);
 }
-
 void PlanetsSonification::onMercurySettingChanged() {
     sendSettings(0);
 }
 
 // Venus
-void PlanetsSonification::onVenusEnabledChanged() {
-    _venusProperty.sizeDayEnabled = _venusProperty.enabled;
-    _venusProperty.gravityEnabled = _venusProperty.enabled;
-    _venusProperty.temperatureEnabled = _venusProperty.enabled;
-    _venusProperty.atmosphereEnabled = _venusProperty.enabled;
+void PlanetsSonification::onVenusAllChanged() {
+    _venusProperty.sizeDayEnabled.setValue(_venusProperty.toggleAll);
+    _venusProperty.gravityEnabled.setValue(_venusProperty.toggleAll);
+    _venusProperty.temperatureEnabled.setValue(_venusProperty.toggleAll);
+    _venusProperty.atmosphereEnabled.setValue(_venusProperty.toggleAll);
 }
-
 void PlanetsSonification::onVenusSettingChanged() {
     sendSettings(1);
 }
 
 // Earth
-void PlanetsSonification::onEarthEnabledChanged() {
-    _earthProperty.sizeDayEnabled = _earthProperty.enabled;
-    _earthProperty.gravityEnabled = _earthProperty.enabled;
-    _earthProperty.temperatureEnabled = _earthProperty.enabled;
-    _earthProperty.atmosphereEnabled = _earthProperty.enabled;
-    _earthProperty.moonsEnabled = _earthProperty.enabled;
+void PlanetsSonification::onEarthAllChanged() {
+    _earthProperty.sizeDayEnabled.setValue(_earthProperty.toggleAll);
+    _earthProperty.gravityEnabled.setValue(_earthProperty.toggleAll);
+    _earthProperty.temperatureEnabled.setValue(_earthProperty.toggleAll);
+    _earthProperty.atmosphereEnabled.setValue(_earthProperty.toggleAll);
+    _earthProperty.moonsEnabled.setValue(_earthProperty.toggleAll);
 }
-
 void PlanetsSonification::onEarthSettingChanged() {
     sendSettings(2);
 }
 
 // Mars
-void PlanetsSonification::onMarsEnabledChanged() {
-    _marsProperty.sizeDayEnabled = _marsProperty.enabled;
-    _marsProperty.gravityEnabled = _marsProperty.enabled;
-    _marsProperty.temperatureEnabled = _marsProperty.enabled;
-    _marsProperty.atmosphereEnabled = _marsProperty.enabled;
-    _marsProperty.moonsEnabled = _marsProperty.enabled;
+void PlanetsSonification::onMarsAllChanged() {
+    _marsProperty.sizeDayEnabled.setValue(_marsProperty.toggleAll);
+    _marsProperty.gravityEnabled.setValue(_marsProperty.toggleAll);
+    _marsProperty.temperatureEnabled.setValue(_marsProperty.toggleAll);
+    _marsProperty.atmosphereEnabled.setValue(_marsProperty.toggleAll);
+    _marsProperty.moonsEnabled.setValue(_marsProperty.toggleAll);
 }
-
 void PlanetsSonification::onMarsSettingChanged() {
     sendSettings(3);
 }
 
 // Jupiter
-void PlanetsSonification::onJupiterEnabledChanged() {
-    _jupiterProperty.sizeDayEnabled = _jupiterProperty.enabled;
-    _jupiterProperty.gravityEnabled = _jupiterProperty.enabled;
-    _jupiterProperty.temperatureEnabled = _jupiterProperty.enabled;
-    _jupiterProperty.atmosphereEnabled = _jupiterProperty.enabled;
-    _jupiterProperty.moonsEnabled = _jupiterProperty.enabled;
+void PlanetsSonification::onJupiterAllChanged() {
+    _jupiterProperty.sizeDayEnabled.setValue(_jupiterProperty.toggleAll);
+    _jupiterProperty.gravityEnabled.setValue(_jupiterProperty.toggleAll);
+    _jupiterProperty.temperatureEnabled.setValue(_jupiterProperty.toggleAll);
+    _jupiterProperty.atmosphereEnabled.setValue(_jupiterProperty.toggleAll);
+    _jupiterProperty.moonsEnabled.setValue(_jupiterProperty.toggleAll);
 }
-
 void PlanetsSonification::onJupiterSettingChanged() {
     sendSettings(4);
 }
 
 // Saturn
-void PlanetsSonification::onSaturnEnabledChanged() {
-    _saturnProperty.sizeDayEnabled = _saturnProperty.enabled;
-    _saturnProperty.gravityEnabled = _saturnProperty.enabled;
-    _saturnProperty.temperatureEnabled = _saturnProperty.enabled;
-    _saturnProperty.atmosphereEnabled = _saturnProperty.enabled;
-    _saturnProperty.moonsEnabled = _saturnProperty.enabled;
-    _saturnProperty.ringsEnabled = _saturnProperty.enabled;
+void PlanetsSonification::onSaturnAllChanged() {
+    _saturnProperty.sizeDayEnabled.setValue(_saturnProperty.toggleAll);
+    _saturnProperty.gravityEnabled.setValue(_saturnProperty.toggleAll);
+    _saturnProperty.temperatureEnabled.setValue(_saturnProperty.toggleAll);
+    _saturnProperty.atmosphereEnabled.setValue(_saturnProperty.toggleAll);
+    _saturnProperty.moonsEnabled.setValue(_saturnProperty.toggleAll);
+    _saturnProperty.ringsEnabled.setValue(_saturnProperty.toggleAll);
 }
-
 void PlanetsSonification::onSaturnSettingChanged() {
     sendSettings(5);
 }
 
 // Uranus
-void PlanetsSonification::onUranusEnabledChanged() {
-    _uranusProperty.sizeDayEnabled = _uranusProperty.enabled;
-    _uranusProperty.gravityEnabled = _uranusProperty.enabled;
-    _uranusProperty.temperatureEnabled = _uranusProperty.enabled;
-    _uranusProperty.atmosphereEnabled = _uranusProperty.enabled;
-    _uranusProperty.moonsEnabled = _uranusProperty.enabled;
+void PlanetsSonification::onUranusAllChanged() {
+    _uranusProperty.sizeDayEnabled.setValue(_uranusProperty.toggleAll);
+    _uranusProperty.gravityEnabled.setValue(_uranusProperty.toggleAll);
+    _uranusProperty.temperatureEnabled.setValue(_uranusProperty.toggleAll);
+    _uranusProperty.atmosphereEnabled.setValue(_uranusProperty.toggleAll);
+    _uranusProperty.moonsEnabled.setValue(_uranusProperty.toggleAll);
 }
-
 void PlanetsSonification::onUranusSettingChanged() {
     sendSettings(6);
 }
 
 // Neptune
-void PlanetsSonification::onNeptuneEnabledChanged() {
-    _neptuneProperty.sizeDayEnabled = _neptuneProperty.enabled;
-    _neptuneProperty.gravityEnabled = _neptuneProperty.enabled;
-    _neptuneProperty.temperatureEnabled = _neptuneProperty.enabled;
-    _neptuneProperty.atmosphereEnabled = _neptuneProperty.enabled;
-    _neptuneProperty.moonsEnabled = _neptuneProperty.enabled;
+void PlanetsSonification::onNeptuneAllChanged() {
+    _neptuneProperty.sizeDayEnabled.setValue(_neptuneProperty.toggleAll);
+    _neptuneProperty.gravityEnabled.setValue(_neptuneProperty.toggleAll);
+    _neptuneProperty.temperatureEnabled.setValue(_neptuneProperty.toggleAll);
+    _neptuneProperty.atmosphereEnabled.setValue(_neptuneProperty.toggleAll);
+    _neptuneProperty.moonsEnabled.setValue(_neptuneProperty.toggleAll);
 }
-
 void PlanetsSonification::onNeptuneSettingChanged() {
     sendSettings(7);
 }
 
 // Extract data from the given identifier
-bool PlanetsSonification::extractData(const Camera* camera, const std::string& identifier,
-                                      int i)
-{
+bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
     double distance = SonificationBase::calculateDistanceTo(
         camera,
-        identifier,
+        _planets[planetIndex].identifier,
         DistanceUnit::Kilometer
     );
-    double angle = SonificationBase::calculateAngleTo(camera, identifier);
+    double angle =
+        SonificationBase::calculateAngleTo(camera, _planets[planetIndex].identifier);
 
     if (abs(distance) < std::numeric_limits<double>::epsilon()) {
         return false;
@@ -492,35 +532,35 @@ bool PlanetsSonification::extractData(const Camera* camera, const std::string& i
 
     // Also calculate angle to moons if this planet is in focus
     bool updateMoons = false;
-    for (int m = 0; m < _planets[i].moons.size(); ++m) {
+    for (int m = 0; m < _planets[planetIndex].moons.size(); ++m) {
         double moonAngle = SonificationBase::calculateAngleFromAToB(
             camera,
-            identifier,
-            _planets[i].moons[m].first
+            _planets[planetIndex].identifier,
+            _planets[planetIndex].moons[m].first
         );
 
-        if (abs(_planets[i].moons[m].second - moonAngle) > _anglePrecision) {
+        if (abs(_planets[planetIndex].moons[m].second - moonAngle) > _anglePrecision) {
             updateMoons = true;
-            _planets[i].moons[m].second = moonAngle;
+            _planets[planetIndex].moons[m].second = moonAngle;
         }
     }
 
     // Check if this data is new, otherwise don't send it
     bool shouldSendData = false;
-    if (abs(_planets[i].distance - distance) > _distancePrecision ||
-        abs(_planets[i].angle - angle) > _anglePrecision ||
+    if (abs(_planets[planetIndex].distance - distance) > _distancePrecision ||
+        abs(_planets[planetIndex].angle - angle) > _anglePrecision ||
         updateMoons)
     {
         // Update the saved data for the planet
-        _planets[i].distance = distance;
-        _planets[i].angle = angle;
+        _planets[planetIndex].distance = distance;
+        _planets[planetIndex].angle = angle;
         shouldSendData = true;
     }
 
     return shouldSendData;
 }
 
-void PlanetsSonification::update(const Scene* scene, const Camera* camera) {
+void PlanetsSonification::update(const Camera* camera) {
     const SceneGraphNode* focusNode =
         global::navigationHandler->orbitalNavigator().anchorNode();
 
@@ -528,23 +568,22 @@ void PlanetsSonification::update(const Scene* scene, const Camera* camera) {
         return;
     }
 
-    // Extract data from all the planets
+    // Update data for all planets
     for (int i = 0; i < _planets.size(); ++i) {
-        // Only send data if something new has happened
-        // If the node is in focus, increase sensitivity
+        // Increase presision if the planet is in focus
         if (focusNode->identifier() == _planets[i].identifier) {
-            _anglePrecision = 0.05;
-            _distancePrecision = 1000.0;
+            _anglePrecision = HighAnglePrecision;
+            _distancePrecision = HighDistancePrecision;
         }
         else {
-            _anglePrecision = 0.1;
-            _distancePrecision = 10000.0;
+            _anglePrecision = LowAnglePrecision;
+            _distancePrecision = LowDistancePrecision;
         }
 
-        bool hasNewData = extractData(camera, _planets[i].identifier, i);
+        bool hasNewData = getData(camera, i);
 
+        // Only send data if something new has happened
         if (hasNewData) {
-            // Send the data to SuperCollider
             sendSettings(i);
         }
     }
