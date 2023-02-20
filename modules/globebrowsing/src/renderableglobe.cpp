@@ -665,7 +665,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     }
     _generalProperties.shadowMapping.onChange(notifyShaderRecompilation);
 
-    // Use a secondary renderbin for labels
+    // Use a secondary renderbin for labels, and other things that we want to be able to
+    // render with transparency, on top of the globe, after the atmosphere step
     _secondaryRenderBin = RenderBin::PreDeferredTransparent;
 }
 
