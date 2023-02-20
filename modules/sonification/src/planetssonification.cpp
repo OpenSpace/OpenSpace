@@ -53,49 +53,49 @@ namespace {
 
     // Planets
     const openspace::properties::PropertyOwner::PropertyOwnerInfo MercuryInfo = {
-        "MercurySonification",
+        "Mercury",
         "Mercury",
         "Settings for the sonification of Mercury"
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo VenusInfo = {
-        "VenusSonification",
+        "Venus",
         "Venus",
         "Settings for the sonification of Venus"
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo EarthInfo = {
-        "EarthSonification",
+        "Earth",
         "Earth",
         "Settings for the sonification of Earth"
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo MarsInfo = {
-        "MarsSonification",
+        "Mars",
         "Mars",
         "Settings for the sonification of Mars"
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo JupiterInfo = {
-        "JupiterSonification",
+        "Jupiter",
         "Jupiter",
         "Settings for the sonification of Jupiter"
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo SaturnInfo = {
-        "SaturnSonification",
+        "Saturn",
         "Saturn",
         "Settings for the sonification of Saturn"
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo UranusInfo = {
-        "UranusSonification",
+        "Uranus",
         "Uranus",
         "Settings for the sonification of Uranus"
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo NeptuneInfo = {
-        "NeptuneSonification",
+        "Neptune",
         "Neptune",
         "Settings for the sonification of  Neptune"
     };
@@ -287,7 +287,7 @@ PlanetsSonification::~PlanetsSonification() {
 }
 
 PlanetsSonification::PlanetProperty::PlanetProperty(
-    properties::PropertyOwner::PropertyOwnerInfo planetInfo)
+                                  properties::PropertyOwner::PropertyOwnerInfo planetInfo)
     : properties::PropertyOwner(planetInfo)
     , toggleAll(PlanetToggleAllInfo, false)
     , sizeDayEnabled(SizeDayInfo, false)
@@ -303,13 +303,13 @@ PlanetsSonification::PlanetProperty::PlanetProperty(
     addProperty(temperatureEnabled);
 
     // Check if any special cases should be added
-    if (planetInfo.identifier != "Mercury") {
+    if (planetInfo.guiName != "Mercury") {
         addProperty(atmosphereEnabled);
     }
-    if (planetInfo.identifier != "Mercury" && planetInfo.identifier != "Venus") {
+    if (planetInfo.guiName != "Mercury" && planetInfo.guiName != "Venus") {
         addProperty(moonsEnabled);
     }
-    if (planetInfo.identifier == "Saturn") {
+    if (planetInfo.guiName == "Saturn") {
         addProperty(ringsEnabled);
     }
 }
