@@ -42,12 +42,54 @@ public:
         const std::string& ip, int port);
     virtual ~SonificationBase();
 
+    /**
+     * Main update function for the sonification
+     *
+     * \param scene pointer to the scene
+     * \param camera pointer to the camera in the scene
+     */
     virtual void update(const Scene* scene, const Camera* camera) = 0;
 
+    /**
+     * Calculate the distance from the camera to the node with the given identifier, in
+     * the given distance unit
+     *
+     * \param camera pointer to the camera in the scene that the distance should be
+     *               calculated from
+     * \param identifier the identifier of the node that the distance should be
+     *                   calculate to
+     * \param unit the distance unit the answer should be in, default is meter
+     *
+     * \return distance from the camera to the node with the given identifier in the
+     *         given distance unit
+     */
     static double calculateDistanceTo(const Camera* camera, const std::string& identifier,
        DistanceUnit unit = DistanceUnit::Meter);
 
+    /**
+     * Calculate the angle from the camera to the node with the given identifier,
+     * in radians
+     *
+     * \param camera pointer to the camera in the scene that the angle should be
+     *               calculated from
+     * \param identifier the identifier of the node that the angle should be calculate to
+     *
+     * \return angle from the camera to the node with the given identifier in radians
+     */
     static double calculateAngleTo(const Camera* camera, const std::string& identifier);
+
+    /**
+     * Calculate the angle from the first node with the given identifier to the second
+     * node with the given identifier, in radians
+     *
+     * \param camera pointer to the camera in the scene
+     * \param idA the identifier of the first node that the angle should be
+                  calculated from
+     * \param idB the identifier of the second node that the angle should be calculated to
+     *
+     * \return angle from the first node with the given identifier to the second node with
+     *               the given identifier in radians
+     */
     static double calculateAngleFromAToB(const Camera* camera, const std::string& idA,
         const std::string& idB);
 

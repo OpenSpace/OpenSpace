@@ -87,7 +87,7 @@ double SonificationBase::calculateAngleTo(const Camera* camera,
         return 0.0;
     }
 
-    // Calculate angle from camera to the node in the camera plane.
+    // Calculate angle from camera to the node in the camera plane
     // Pplane(v) is v projected down to the camera plane,
     // Pn(v) is v projected on the normal n of the plane ->
     // Pplane(v) = v - Pn(v)
@@ -126,7 +126,7 @@ double SonificationBase::calculateAngleFromAToB(const Camera* camera,
         return 0.0;
     }
 
-    // Calculate vector from A to the B in the camera plane.
+    // Calculate vector from A to B in the camera plane
     // Pplane(v) is v projected down to the camera plane,
     // Pn(v) is v projected on the normal n of the plane ->
     // Pplane(v) = v - Pn(v)
@@ -136,7 +136,7 @@ double SonificationBase::calculateAngleFromAToB(const Camera* camera,
 
     // Angle from A to B with respect to the camera
     // NOTE (malej 2023-FEB-06): This might not work if the camera is looking straight
-    // down on the planet
+    // down on node A
     return glm::orientedAngle(
         glm::normalize(camera->viewDirectionWorldSpace()),
         glm::normalize(AToProjectedB),
@@ -145,4 +145,3 @@ double SonificationBase::calculateAngleFromAToB(const Camera* camera,
 }
 
 } // namespace openspace
-

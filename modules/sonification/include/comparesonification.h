@@ -36,19 +36,9 @@ public:
     CompareSonification(const std::string& ip, int port);
     virtual ~CompareSonification() override;
 
-    virtual void update(const Scene* scene, const Camera* camera) override;
+    virtual void update(const Scene*, const Camera* camera) override;
 
 private:
-    // Extract the data from the given identifier
-    bool extractData(const Camera* camera, const std::string& identifier, int i);
-
-    osc::Blob createSettingsBlob() const;
-    void sendSettings();
-    void onFirstChanged();
-    void onSecondChanged();
-    void onAllChanged();
-    void onSettingChanged();
-
     // Struct to hold data for all the planets
     struct Planet {
         Planet(std::string id = "") {
@@ -59,13 +49,58 @@ private:
         double distance = 0.0;
         double angle = 0.0;
 
-        // std::pair<name of moon, latset calculated angle to it>
+        // std::vector<std::pair<name of moon, latset calculated angle to it>>
         std::vector<std::pair<std::string, double>> moons;
     };
 
-    double _focusScale = 2000;
+    /**
+     * Update distance and angle data for the given planet
+     *
+     * \param camera pointer to the camera in the scene. Used to calculated the data for
+     *               the planet
+     * \param planet a reference to the internally stored planet data that should be
+     *               updated
+     *
+     * \return true if the data is new compared to before, otherwise false
+     */
+    bool getData(const Camera* camera, Planet& planet);
+
+    /**
+     * Create a osc::Blob object with current sonification settings.
+     * Order of settings: size/day, gravity, temperature, atmosphere, moons, rings
+     *
+     * \return a osc::Blob object with current sonificaiton settings
+     */
+    osc::Blob createSettingsBlob() const;
+
+    /**
+     * Send current sonification settings over osc connection
+     * Order of data: name of first planet, name of second planet, settings
+     */
+    void sendSettings();
+
+
+    /**
+     * Function that gets called when either the first or second planet selection
+     * was changed
+     *
+     * \param changedPlanet the planet that was recently changed
+     * \param notChangedPlanet the planet that was NOT changed
+     * \param prevChangedPlanet the previous value of the planet that was recently changed
+     */
+    void planetSelectionChanged(properties::OptionProperty& changedPlanet,
+        properties::OptionProperty& notChangedPlanet, std::string& prevChangedPlanet);
+
+    // Properties onChange
+    void onFirstChanged();
+    void onSecondChanged();
+    void onAllChanged();
+    void onSettingChanged();
+
     double _anglePrecision;
     double _distancePrecision;
+
+    float _focusScale = 2000.f;
     std::vector<Planet> _planets;
     std::string _oldFirst;
     std::string _oldSecond;
@@ -74,7 +109,7 @@ private:
     properties::OptionProperty _firstPlanet;
     properties::OptionProperty _secondPlanet;
 
-    properties::BoolProperty _enableAll;
+    properties::BoolProperty _toggleAll;
     properties::BoolProperty _sizeDayEnabled;
     properties::BoolProperty _gravityEnabled;
     properties::BoolProperty _temperatureEnabled;
