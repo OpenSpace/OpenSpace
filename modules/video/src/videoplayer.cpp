@@ -629,13 +629,13 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
         }
     }
     else {
-        prop = (struct mpv_event_property*)event->data;
+        prop = reinterpret_cast<mpv_event_property*>(event->data);
     }
 
     // Handle new values
     switch (key) {
         case MpvKey::Duration: {
-            double* duration = static_cast<double*>(prop->data);
+            double* duration = reinterpret_cast<double*>(prop->data);
 
             if (!duration) {
                 LERROR("Could not find duration property");
@@ -651,7 +651,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         case MpvKey::Height: {
-            int* height = static_cast<int*>(prop->data);
+            int* height = reinterpret_cast<int*>(prop->data);
 
             if (!height) {
                 LERROR("Could not find height property");
@@ -671,7 +671,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         case MpvKey::Width: {
-            int* width = static_cast<int*>(prop->data);
+            int* width = reinterpret_cast<int*>(prop->data);
 
             if (!width) {
                 LERROR("Could not find width property");
@@ -691,7 +691,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         case MpvKey::Time: {
-            double* time = static_cast<double*>(prop->data);
+            double* time = reinterpret_cast<double*>(prop->data);
 
             if (!time) {
                 LERROR("Could not find playback time property");
@@ -701,14 +701,15 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         case MpvKey::IsSeeking: {
-            bool* isSeekingBool = static_cast<bool*>(prop->data);
+            bool* isSeekingBool = reinterpret_cast<bool*>(prop->data);
             std::string isSeekingString = *isSeekingBool ? "Is Seeking" : "Not Seeking";
             LINFO(isSeekingString);
             break;
         }
         case MpvKey::Fps: {
-            double* fps = static_cast<double*>(prop->data);
+            double* fps = reinterpret_cast<double*>(prop->data);
             if (*fps < glm::epsilon<double>()) {
+                _fps = 24.0;
                 LWARNING("Detected fps was 0. Falling back on 24 fps");
                 break;
             }
@@ -726,8 +727,8 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         case MpvKey::Pause: {
-            int* videoIsPaused = static_cast<int*>(prop->data);
-            _isPaused = *videoIsPaused == 0 ? false : true;
+            int* videoIsPaused = reinterpret_cast<int*>(prop->data);
+            _isPaused = *videoIsPaused == 0;
             break;
         }
         case MpvKey::Meta: {
