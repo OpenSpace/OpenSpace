@@ -67,9 +67,9 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
 Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped
 
-        if (!_videoPlayer.isInitialized()) {
-            return Tile();
-        }
+    if (!_videoPlayer.isInitialized()) {
+        return Tile();
+    }
 
     // Always check that our framebuffer is ok
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
