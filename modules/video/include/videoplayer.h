@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
+#include <map>
 
 // libmpv
 #include <client.h>
@@ -93,20 +94,23 @@ private:
     double _frameDuration = 0.0;
 
     // libmpv property keys
-    enum class LibmpvPropertyKey : uint64_t {
+    enum class MpvKey : uint64_t {
         Duration = 1,
         Height,
         Width,
         Meta,
         Params,
         Time,
-        Command,
-        Seek,
         Fps,
         Pause,
         IsSeeking,
-        Mute
+        Mute,
+        Command,
+        Seek
     };
+
+    std::map<MpvKey, const char*> keys;
+    std::map<MpvKey, mpv_format> formats;
 
     void createFBO(int width, int height);
     void resizeFBO(int width, int height);
@@ -118,11 +122,10 @@ private:
     void handleMpvEvents();
     void handleMpvProperties(mpv_event* event);
     void swapBuffersMpv(); // Called in postDraw
-    void observePropertyMpv(std::string name, mpv_format format, LibmpvPropertyKey key);
+    void observePropertyMpv(MpvKey key);
     void setPropertyStringMpv(std::string name, std::string value);
-    void getPropertyAsyncMpv(std::string name, mpv_format format, LibmpvPropertyKey key);
-    void commandAsyncMpv(const char* cmd[], 
-        LibmpvPropertyKey key = LibmpvPropertyKey::Command);
+    void getPropertyAsyncMpv(MpvKey key);
+    void commandAsyncMpv(const char* cmd[], MpvKey key = MpvKey::Command);
 
     std::string _videoFile;
 

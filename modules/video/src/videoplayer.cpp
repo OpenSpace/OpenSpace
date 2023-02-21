@@ -142,13 +142,12 @@ void VideoPlayer::on_mpv_render_update(void* ctx) {
     static_cast<VideoPlayer*>(ctx)->_wakeup = 1;
 }
 
-void VideoPlayer::observePropertyMpv(std::string name, mpv_format format, 
-                                           LibmpvPropertyKey key) {
+void VideoPlayer::observePropertyMpv(MpvKey key) {
     mpv_observe_property(
         _mpvHandle, 
         static_cast<uint64_t>(key), 
-        name.c_str(), 
-        format
+        keys[key],
+        formats[key]
     );
 }
 
@@ -159,28 +158,27 @@ void VideoPlayer::setPropertyStringMpv(std::string name, std::string value) {
     }
 }
 
-void VideoPlayer::getPropertyAsyncMpv(std::string name, mpv_format format, 
-                                            LibmpvPropertyKey key) {
+void VideoPlayer::getPropertyAsyncMpv(MpvKey key) {
     int result = mpv_get_property_async(
         _mpvHandle,
         static_cast<uint64_t>(key),
-        name.c_str(),
-        format
+        keys[key],
+        formats[key]
     );
     if (!checkMpvError(result)) {
-        LWARNING("Could not find property " + name);
+        LWARNING(fmt::format("Could not find property {}", keys[key]));
         return;
     }
 }
 
-void VideoPlayer::commandAsyncMpv(const char* cmd[], LibmpvPropertyKey key) {
+void VideoPlayer::commandAsyncMpv(const char* cmd[], MpvKey key) {
     int result = mpv_command_async(
         _mpvHandle,
         static_cast<uint64_t>(key),
         cmd
     );
     if (!checkMpvError(result)) {
-        LERROR(fmt::format("Could not execute command {}", cmd[0]));
+        LERROR(fmt::format("Could not execute command {}", keys[key]));
         return;
     }
 }
@@ -249,6 +247,11 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
         // Ensure we are synchronized to OpenSpace time in presync step
         global::callback::preSync->emplace_back([this]() {
+            // find time to seek to
+            // send the next current time to the nodes
+            // Presync
+            // encode / decode
+            // sync
             syncToSimulationTime();
         });
     }
@@ -273,6 +276,33 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         }
         swapBuffersMpv();
     });
+
+    keys = {
+        {MpvKey::Pause, "pause"},
+        {MpvKey::Params, "video-params"},
+        {MpvKey::Time, "time-pos"},
+        {MpvKey::Duration, "duration"},
+        {MpvKey::Height, "height"},
+        {MpvKey::Width, "width"},
+        {MpvKey::Meta, "metadata"},
+        {MpvKey::Fps, "container-fps"},
+        {MpvKey::IsSeeking, "seeking"},
+        {MpvKey::Mute, "mute"},
+        {MpvKey::Seek, "seek"}
+    };
+
+    formats = {
+        {MpvKey::Pause, MPV_FORMAT_FLAG},
+        {MpvKey::Params, MPV_FORMAT_NODE},
+        {MpvKey::Time, MPV_FORMAT_DOUBLE},
+        {MpvKey::Duration, MPV_FORMAT_DOUBLE},
+        {MpvKey::Height, MPV_FORMAT_INT64},
+        {MpvKey::Width, MPV_FORMAT_INT64},
+        {MpvKey::Meta, MPV_FORMAT_NODE},
+        {MpvKey::Fps, MPV_FORMAT_DOUBLE},
+        {MpvKey::IsSeeking, MPV_FORMAT_DOUBLE},
+        {MpvKey::Mute, MPV_FORMAT_STRING}
+    };
 }
 
 void VideoPlayer::pause() {
@@ -282,9 +312,9 @@ void VideoPlayer::pause() {
     int isPaused = 1;
     int result = mpv_set_property_async(
         _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::Pause),
-        "pause",
-        MPV_FORMAT_FLAG,
+        static_cast<uint64_t>(MpvKey::Pause),
+        keys[MpvKey::Pause],
+        formats[MpvKey::Pause],
         &isPaused
     );
     if (!checkMpvError(result)) {
@@ -299,9 +329,9 @@ void VideoPlayer::play() {
     int isPaused = 0;
     int result = mpv_set_property_async(
         _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::Pause),
-        "pause",
-        MPV_FORMAT_FLAG,
+        static_cast<uint64_t>(MpvKey::Pause),
+        keys[MpvKey::Pause],
+        formats[MpvKey::Pause],
         &isPaused
     );
     if (!checkMpvError(result)) {
@@ -423,15 +453,14 @@ void VideoPlayer::initializeMpv() {
     createFBO(_videoResolution.x, _videoResolution.y);
 
     //Observe video parameters
-    observePropertyMpv("video-params", MPV_FORMAT_NODE, LibmpvPropertyKey::Params);
-    observePropertyMpv("pause", MPV_FORMAT_FLAG, LibmpvPropertyKey::Pause);
-    observePropertyMpv("time-pos", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Time);
-    observePropertyMpv("duration", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Duration);
-    observePropertyMpv("height", MPV_FORMAT_INT64, LibmpvPropertyKey::Height);
-    observePropertyMpv("width", MPV_FORMAT_INT64, LibmpvPropertyKey::Width);
-    observePropertyMpv("metadata", MPV_FORMAT_NODE, LibmpvPropertyKey::Meta);
-    observePropertyMpv("container-fps", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Fps);
-    observePropertyMpv("seeking", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::IsSeeking);
+    observePropertyMpv(MpvKey::Params);
+    observePropertyMpv(MpvKey::Duration);
+    observePropertyMpv(MpvKey::Meta);
+    observePropertyMpv(MpvKey::Height);
+    observePropertyMpv(MpvKey::Width);
+    observePropertyMpv(MpvKey::Pause);
+    observePropertyMpv(MpvKey::Fps);
+    observePropertyMpv(MpvKey::Time);
 
     _isInitialized = true;
 }
@@ -447,8 +476,8 @@ void VideoPlayer::seekToTime(double time) {
         pause();
         std::string timeString = std::to_string(time);
         const char* params = timeString.c_str();
-        const char* cmd[] = { "seek", params, "absolute", NULL };
-        commandAsyncMpv(cmd, LibmpvPropertyKey::Seek);
+        const char* cmd[] = { keys[MpvKey::Seek], params, "absolute", NULL};
+        commandAsyncMpv(cmd, MpvKey::Seek);
         _isSeeking = true;
     }
 }
@@ -460,9 +489,9 @@ void VideoPlayer::toggleMute() {
     const char* mute = _playAudio ? "no" : "yes";
     int result = mpv_set_property_async(
         _mpvHandle,
-        static_cast<uint64_t>(LibmpvPropertyKey::Mute),
-        "mute",
-        MPV_FORMAT_STRING,
+        static_cast<uint64_t>(MpvKey::Mute),
+        keys[MpvKey::Mute],
+        formats[MpvKey::Mute],
         &mute
     );
     if (!checkMpvError(result)) {
@@ -512,102 +541,69 @@ void VideoPlayer::renderMpv() {
 void VideoPlayer::handleMpvEvents() {
     while (_mpvHandle) {
         mpv_event* event = mpv_wait_event(_mpvHandle, 0.0);
+        
+        // Validate event
         if (event->event_id == MPV_EVENT_NONE) {
-            return;
+            break;
+        }
+        if (!checkMpvError(event->error)) {
+            LWARNING(fmt::format(
+                "Error at mpv event : {} {}", event->event_id, event->reply_userdata
+            ));
+            break;
         }
 
         switch (event->event_id) {
             case MPV_EVENT_VIDEO_RECONFIG: {
                 // Retrieve the new video size
-                // Get width
-                getPropertyAsyncMpv("width", MPV_FORMAT_INT64, LibmpvPropertyKey::Width);
-                getPropertyAsyncMpv("height", MPV_FORMAT_INT64, LibmpvPropertyKey::Height);
+                getPropertyAsyncMpv(MpvKey::Width);
+                getPropertyAsyncMpv(MpvKey::Height);
                 break;
             }
             case MPV_EVENT_PROPERTY_CHANGE: {
-                mpv_event_property* prop = (mpv_event_property*)event->data;
-                if (strcmp(prop->name, "video-params") == 0 &&
-                    prop->format == MPV_FORMAT_NODE)
-                {
-                    getPropertyAsyncMpv("video-params", MPV_FORMAT_NODE, LibmpvPropertyKey::Params);
+                mpv_event_property* prop =
+                    reinterpret_cast<mpv_event_property*>(event->data);
+                // Validate reply
+                if (prop->format == MPV_FORMAT_NONE) {
+                    break;
                 }
-                if (strcmp(prop->name, "time-pos") == 0 &&
-                    prop->format == MPV_FORMAT_DOUBLE)
-                {
-                    getPropertyAsyncMpv("time-pos", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Time);
+                // Validate reply with what we have stored
+                MpvKey key = static_cast<MpvKey>(event->reply_userdata);
+                if (formats[key] != prop->format) {
+                    LINFO(fmt::format("Wrong format for property {}", keys[key]));
+                    break;
                 }
-                if (strcmp(prop->name, "duration") == 0 &&
-                    prop->format == MPV_FORMAT_DOUBLE)
-                {
-                    getPropertyAsyncMpv("duration", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Duration);
-                }
-                if (strcmp(prop->name, "container-fps") == 0 &&
-                    prop->format == MPV_FORMAT_DOUBLE)
-                {
-                    getPropertyAsyncMpv("container-fps", MPV_FORMAT_DOUBLE, LibmpvPropertyKey::Fps);
-                }
-                if (strcmp(prop->name, "pause") == 0 &&
-                    prop->format == MPV_FORMAT_FLAG)
-                {
-                    getPropertyAsyncMpv("pause", MPV_FORMAT_FLAG, LibmpvPropertyKey::Pause);
-                }
-                if (strcmp(prop->name, "height") == 0 &&
-                    prop->format == MPV_FORMAT_INT64)
-                {
-                    getPropertyAsyncMpv("height", MPV_FORMAT_INT64, LibmpvPropertyKey::Height);
-                }
-                if (strcmp(prop->name, "width") == 0 &&
-                    prop->format == MPV_FORMAT_INT64)
-                {
-                    getPropertyAsyncMpv("width", MPV_FORMAT_INT64, LibmpvPropertyKey::Width);
-                }
-                if (strcmp(prop->name, "metadata") == 0 &&
-                    prop->format == MPV_FORMAT_NODE)
-                {
-                    getPropertyAsyncMpv("metadata", MPV_FORMAT_NODE, LibmpvPropertyKey::Meta);
-                }
+                getPropertyAsyncMpv(key); 
+                break;
+            }
+            case MPV_EVENT_GET_PROPERTY_REPLY: {
+                handleMpvProperties(event);
                 break;
             }
             case MPV_EVENT_LOG_MESSAGE: {
-                struct mpv_event_log_message* msg =
-                    (struct mpv_event_log_message*)event->data;
+                mpv_event_log_message* msg = 
+                    reinterpret_cast<mpv_event_log_message*>(event->data);
                 std::stringstream ss;
                 ss << "[" << msg->prefix << "] " << msg->level << ": " << msg->text;
                 LINFO(ss.str());
                 break;
             }
             case MPV_EVENT_COMMAND_REPLY: {
-                switch (event->reply_userdata) {
-                    case static_cast<uint64_t>(LibmpvPropertyKey::Command): {
-                        int result = event->error;
-                        if (!checkMpvError) {
-                            LINFO("Command Error");
-                        }
-                        break;
-                    }
-                    case static_cast<uint64_t>(LibmpvPropertyKey::Seek): {
-                        int result = event->error;
-                        if (!checkMpvError) {
-                            LINFO("Seek Error");
-                        }
-                        _isSeeking = false;
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
-                }
-                break;
-            }
-            case MPV_EVENT_GET_PROPERTY_REPLY: {
-                int result = event->error;
-                if (!checkMpvError(result)) {
-                    LWARNING(fmt::format(
-                        "Error while gettting property of type: {}", event->reply_userdata
-                    ));
+                MpvKey key = static_cast<MpvKey>(event->reply_userdata);
+
+                switch (key) {
+                case MpvKey::Command: {
+                    
                     break;
                 }
-                handleMpvProperties(event);
+                case MpvKey::Seek: {
+                    _isSeeking = false;
+                    break;
+                }
+                default: {
+                    break;
+                }
+                }
                 break;
             }
             default: {
@@ -619,15 +615,31 @@ void VideoPlayer::handleMpvEvents() {
 }
 
 void VideoPlayer::handleMpvProperties(mpv_event* event) {
-    switch (static_cast<LibmpvPropertyKey>(event->reply_userdata)) {
-    case LibmpvPropertyKey::Duration: {
-        if (!event->data) {
-            LERROR("Could not find duration property");
-            break;
+    MpvKey key = static_cast<MpvKey>(event->reply_userdata);
+    
+    if (!event->data) {
+        LERROR(fmt::format("Could not find data for property: {}", keys[key]));
+        return;
+    }
+    // Cast event to node or property depending on its format
+    mpv_event_property* prop = nullptr;
+    mpv_node node;
+    if (formats[key] == MPV_FORMAT_NODE) {
+        int result = mpv_event_to_node(&node, event);
+        if (!checkMpvError(result)) {
+            LWARNING(
+                fmt::format("Error getting data from libmpv property {}", keys[key])
+            );
         }
+    }
+    else {
+        prop = (struct mpv_event_property*)event->data;
+    }
 
-        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-        double* duration = static_cast<double*>(property->data);
+    // Handle new values
+    switch (key) {
+    case MpvKey::Duration: {
+        double* duration = static_cast<double*>(prop->data);
 
         if (!duration) {
             LERROR("Could not find duration property");
@@ -642,14 +654,8 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
         LINFO(fmt::format("Duration: {}", *duration));
         break;
     }
-    case LibmpvPropertyKey::Height: {
-        if (!event->data) {
-            LERROR("Could not find height property");
-            break;
-        }
-
-        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-        int* height = static_cast<int*>(property->data);
+    case MpvKey::Height: {
+        int* height = static_cast<int*>(prop->data);
 
         if (!height) {
             LERROR("Could not find height property");
@@ -668,14 +674,8 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
 
         break;
     }
-    case LibmpvPropertyKey::Width: {
-        if (!event->data) {
-            LERROR("Could not find height property");
-            break;
-        }
-
-        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-        int* width = static_cast<int*>(property->data);
+    case MpvKey::Width: {
+        int* width = static_cast<int*>(prop->data);
 
         if (!width) {
             LERROR("Could not find width property");
@@ -694,18 +694,47 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
         
         break;
     }
-    case LibmpvPropertyKey::Meta: {
-        if (!event->data) {
-            LERROR("Could not find video parameters");
+    case MpvKey::Time: {
+        double* time = static_cast<double*>(prop->data);
+
+        if (!time) {
+            LERROR("Could not find playback time property");
             break;
         }
-
-        mpv_node node;
-        int result = mpv_event_to_node(&node, event);
-        if (!checkMpvError(result)) {
-            LWARNING("Could not find video parameters of video");
+        _currentVideoTime = *time;
+        break;
+    }
+    case MpvKey::IsSeeking: {
+        bool* isSeekingBool = static_cast<bool*>(prop->data);
+        std::string isSeekingString = *isSeekingBool ? "is Seeking" : "is not seeking";
+        LINFO(isSeekingString);
+        break;
+    }
+    case MpvKey::Fps: {
+        double* fps = static_cast<double*>(prop->data);
+        if (*fps < glm::epsilon<double>()) {
+            LWARNING("Detected fps was 0. Falling back on 24 fps");
+            break;
+        }
+        if (!fps) {
+            LERROR("Could not find fps property");
+            break;
+        }
+        _fps = *fps;
+        if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+            updateFrameDuration();
         }
 
+        LINFO(fmt::format("Detected fps: {}", *fps));
+        _seekThreshold = 2.0 * (1.0 / _fps);
+        break;
+    }
+    case MpvKey::Pause: {
+        int* videoIsPaused = static_cast<int*>(prop->data);
+        _isPaused = *videoIsPaused == 0 ? false : true;
+        break;
+    }
+    case MpvKey::Meta: {
         LINFO("Printing meta data reply");
         if (node.format == MPV_FORMAT_NODE_MAP) {
             for (int n = 0; n < node.u.list->num; n++) {
@@ -720,22 +749,11 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
 
         break;
     }
-    case LibmpvPropertyKey::Params: {
-        if (!event->data) {
-            LINFO("Could not find video parameters");
-            break;
-        }
-
-        mpv_node videoParams;
-        int result = mpv_event_to_node(&videoParams, event);
-        if (!checkMpvError(result)) {
-            LWARNING("Could not find video parameters of video");
-        }
-
-        if (videoParams.format == MPV_FORMAT_NODE_ARRAY ||
-            videoParams.format == MPV_FORMAT_NODE_MAP)
+    case MpvKey::Params: {
+        if (node.format == MPV_FORMAT_NODE_ARRAY ||
+            node.format == MPV_FORMAT_NODE_MAP)
         {
-            mpv_node_list* list = videoParams.u.list;
+            mpv_node_list* list = node.u.list;
 
             mpv_node width, height;
             bool foundWidth = false;
@@ -777,69 +795,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
         }
         break;
     }
-    case LibmpvPropertyKey::Time: {
-        if (!event->data) {
-            LERROR("Could not find playback time property");
-            break;
-        }
-
-        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-        double* time = static_cast<double*>(property->data);
-
-        if (!time) {
-            LERROR("Could not find playback time property");
-            break;
-        }
-        _currentVideoTime = *time;
-        break;
-    }
-    case LibmpvPropertyKey::IsSeeking: {
-        if (!event->data) {
-            LERROR("Could not find playback time property");
-            break;
-        }
-
-        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-        bool* isSeekingBool = static_cast<bool*>(property->data);
-        std::string isSeekingString = *isSeekingBool ? "is Seeking" : "is not seeking";
-        LINFO(isSeekingString);
-        break;
-    }
-    case LibmpvPropertyKey::Fps: {
-        if (!event->data) {
-            LERROR("Could not find fps property");
-            break;
-        }
-
-        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-        double* fps = static_cast<double*>(property->data);
-        if (*fps < glm::epsilon<double>()) {
-            LWARNING("Detected fps was 0. Falling back on 24 fps");
-            break;
-        }
-        if (!fps) {
-            LERROR("Could not find fps property");
-            break;
-        }
-        _fps = *fps;
-        if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-            updateFrameDuration();
-        }
-
-        LINFO(fmt::format("Detected fps: {}", *fps));
-        _seekThreshold = 2.0 * (1.0 / _fps);
-        break;
-    }
-    case LibmpvPropertyKey::Pause: {
-        if (!event->data) {
-            LERROR("Could not find pause property");
-            break;
-        }
-        struct mpv_event_property* property = (struct mpv_event_property*)event->data;
-        int* videoIsPaused = static_cast<int*>(property->data);
-        _isPaused = *videoIsPaused == 0 ? false : true;
-        break;
-    }
+    
     default: {
         throw ghoul::MissingCaseException();
         break;
