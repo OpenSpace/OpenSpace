@@ -118,7 +118,9 @@ void TileProvider::deinitializeDefaultTile() {
     DefaultTileTexture = nullptr;
 }
 
-TileProvider::TileProvider() : properties::PropertyOwner({ "TileProvider" }) {}
+TileProvider::TileProvider()
+    : properties::PropertyOwner({ "TileProvider", "Tile Provider"})
+{}
 
 void TileProvider::initialize() {
     ZoneScoped

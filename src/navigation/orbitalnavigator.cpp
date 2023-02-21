@@ -291,7 +291,7 @@ OrbitalNavigator::Friction::Friction()
 }
 
 OrbitalNavigator::IdleBehavior::IdleBehavior()
-    : properties::PropertyOwner({ "IdleBehavior" })
+    : properties::PropertyOwner({ "IdleBehavior", "Idle Behavior" })
     , apply(ApplyIdleBehaviorInfo, false)
     , shouldTriggerWhenIdle(ShouldTriggerIdleBehaviorWhenIdleInfo, false)
     , idleWaitTime(IdleWaitTimeInfo, 5.f, 0.f, 3600.f)
@@ -326,7 +326,7 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
 }
 
 OrbitalNavigator::OrbitalNavigator()
-    : properties::PropertyOwner({ "OrbitalNavigator" })
+    : properties::PropertyOwner({ "OrbitalNavigator", "Orbital Navigator" })
     , _anchor(AnchorInfo)
     , _aim(AimInfo)
     , _retargetAnchor(RetargetAnchorInfo)

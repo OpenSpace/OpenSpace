@@ -67,7 +67,7 @@ namespace {
 namespace openspace {
 
 TouchMarker::TouchMarker()
-    : properties::PropertyOwner({ "TouchMarker" })
+    : properties::PropertyOwner({ "TouchMarker", "Touch Marker" })
     , _visible(VisibilityInfo, true)
     , _radiusSize(RadiusInfo, 30.f, 0.f, 100.f)
     , _opacity(OpacityInfo, 0.8f, 0.f, 1.f)
