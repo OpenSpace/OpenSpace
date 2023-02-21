@@ -158,6 +158,38 @@ void VideoPlayer::setPropertyStringMpv(std::string name, std::string value) {
     }
 }
 
+void VideoPlayer::setPropertyAsyncMpv(int value, MpvKey key) {
+    if (!_isInitialized) {
+        return;
+    }
+    int result = mpv_set_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(key),
+        keys[key],
+        formats[key],
+        &value
+    );
+    if (!checkMpvError(result)) {
+        LWARNING("Error when playing video");
+    }
+}
+
+void VideoPlayer::setPropertyAsyncMpv(const char* value, MpvKey key) {
+    if (!_isInitialized) {
+        return;
+    }
+    int result = mpv_set_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(key),
+        keys[key],
+        formats[key],
+        &value
+    );
+    if (!checkMpvError(result)) {
+        LWARNING("Error when playing video");
+    }
+}
+
 void VideoPlayer::getPropertyAsyncMpv(MpvKey key) {
     int result = mpv_get_property_async(
         _mpvHandle,
@@ -301,37 +333,13 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 }
 
 void VideoPlayer::pause() {
-    if (!_isInitialized) {
-        return;
-    }
     int isPaused = 1;
-    int result = mpv_set_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(MpvKey::Pause),
-        keys[MpvKey::Pause],
-        formats[MpvKey::Pause],
-        &isPaused
-    );
-    if (!checkMpvError(result)) {
-        LWARNING("Error when pausing video");
-    }
+    setPropertyAsyncMpv(isPaused, MpvKey::Pause);
 }
 
 void VideoPlayer::play() {
-    if (!_isInitialized) {
-        return;
-    }
     int isPaused = 0;
-    int result = mpv_set_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(MpvKey::Pause),
-        keys[MpvKey::Pause],
-        formats[MpvKey::Pause],
-        &isPaused
-    );
-    if (!checkMpvError(result)) {
-        LWARNING("Error when playing video");
-    }
+    setPropertyAsyncMpv(isPaused, MpvKey::Pause);
 }
 
 void VideoPlayer::goToStart() {
@@ -479,20 +487,8 @@ void VideoPlayer::seekToTime(double time) {
 }
 
 void VideoPlayer::toggleMute() {
-    if (!_isInitialized) {
-        return;
-    }
     const char* mute = _playAudio ? "no" : "yes";
-    int result = mpv_set_property_async(
-        _mpvHandle,
-        static_cast<uint64_t>(MpvKey::Mute),
-        keys[MpvKey::Mute],
-        formats[MpvKey::Mute],
-        &mute
-    );
-    if (!checkMpvError(result)) {
-        LWARNING("Error when pausing video");
-    }
+    setPropertyAsyncMpv(mute, MpvKey::Mute);
 }
 
 bool VideoPlayer::isPaused() const {
