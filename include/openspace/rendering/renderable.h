@@ -82,8 +82,9 @@ public:
 
     std::string_view typeAsString() const;
 
-    virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
+    virtual void render(const RenderData& data, RendererTasks& rendererTask);
+    virtual void renderSecondary(const RenderData& data, RendererTasks& rendererTask);
 
     // The 'surface' in this case is the interaction sphere of this renderable. In some
     // cases (i.e., planets) this corresponds directly to the physical surface, but in

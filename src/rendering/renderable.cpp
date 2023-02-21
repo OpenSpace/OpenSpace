@@ -224,6 +224,8 @@ void Renderable::update(const UpdateData&) {}
 
 void Renderable::render(const RenderData&, RendererTasks&) {}
 
+void Renderable::renderSecondary(const RenderData&, RendererTasks&) {}
+
 void Renderable::setBoundingSphere(double boundingSphere) {
     _boundingSphere = boundingSphere;
 }
@@ -268,9 +270,7 @@ void Renderable::setRenderBin(RenderBin bin) {
 }
 
 bool Renderable::matchesRenderBinMask(int binMask) {
-    bool matchesPrimary = binMask & static_cast<int>(_renderBin);
-    bool matchesSecondary = matchesSecondaryRenderBin(binMask);
-    return matchesPrimary || matchesSecondary;
+    return binMask & static_cast<int>(_renderBin);
 }
 
 bool Renderable::matchesSecondaryRenderBin(int binMask) {

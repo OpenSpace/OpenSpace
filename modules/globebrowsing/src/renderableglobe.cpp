@@ -667,7 +667,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     // Use a secondary renderbin for labels, and other things that we want to be able to
     // render with transparency, on top of the globe, after the atmosphere step
-    _secondaryRenderBin = RenderBin::PreDeferredTransparent;
+    _secondaryRenderBin = RenderBin::PostDeferredTransparent;
 }
 
 void RenderableGlobe::initializeGL() {
@@ -728,14 +728,6 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
         data.camera.positionVec3(),
         data.modelTransform.translation
     );
-
-    if (matchesSecondaryRenderBin(data.renderBinMask)) {
-        _globeLabelsComponent.draw(data);
-
-        if (*_secondaryRenderBin != _renderBin) {
-            return;
-        }
-    }
 
     // This distance will be enough to render the globe as one pixel if the field of
     // view is 'fov' radians and the screen resolution is 'res' pixels.
@@ -813,6 +805,10 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     }
 
     _lastChangedLayer = nullptr;
+}
+
+void RenderableGlobe::renderSecondary(const RenderData& data, RendererTasks&) {
+    _globeLabelsComponent.draw(data);
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
