@@ -624,7 +624,7 @@ void RenderableModel::initializeGL() {
     // Check status
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("Framebuffer is not complete!");
+        LERROR("Framebuffer is not complete");
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -787,6 +787,21 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Prepare framebuffer
         GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+
+        // Re-bind first texture to use the currently not used Ping-Pong texture in the
+        // FramebufferRenderer
+        glFramebufferTexture(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            global::renderEngine->renderer()->additionalColorTexture1(),
+            0
+        );
+        // Check status
+        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
+            LERROR("Framebuffer is not complete");
+        }
+
         glDrawBuffers(3, ColorAttachmentArray);
         glClearBufferfv(GL_COLOR, 1, glm::value_ptr(glm::vec4(0.f, 0.f, 0.f, 0.f)));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

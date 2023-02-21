@@ -65,6 +65,10 @@ public:
      * for all RenderBins. However, it cannot be used at the same time as the Deferred
      * Caster Tasks. The size of the texture is the resolution of the viewport.
      *
+     * NOTE (malej 2023-FEB-21): The currently NOT used pingPongTexture might change
+     * depending on where in the render cycle you are. Especially after the Deferred
+     * Caster Tasks.
+     *
      * \return GLuint identifier of the currently NOT used pingPongTexture
      */
     GLuint additionalColorTexture1();
