@@ -240,19 +240,19 @@ struct Documentation {
      * \param n The human-readable name of this Documentation
      * \param i A unique identifier which can be used by applications (or other
      *        Documentation%s to reference this entry
-     * \param entries A list of DocumentationEntry%s that describe the individual keys for
+     * \param ents A list of DocumentationEntry%s that describe the individual keys for
      *        this entrie Documentation
      */
-    Documentation(std::string n, std::string i, DocumentationEntries entries = {});
+    Documentation(std::string n, std::string i, DocumentationEntries ents = {});
 
     /**
     * Creates a Documentation with a human-readable name \p n.
     *
     * \param n The human-readable name of this Documentation
-    * \param entries A list of DocumentationEntry%s that describe the individual keys for
+    * \param ents A list of DocumentationEntry%s that describe the individual keys for
     *        this entrie Documentation
     */
-    Documentation(std::string n, DocumentationEntries entries = {});
+    Documentation(std::string n, DocumentationEntries ents = {});
 
     /**
     * Creates a Documentation.
@@ -260,7 +260,7 @@ struct Documentation {
     * \param entries A list of DocumentationEntry%s that describe the individual keys for
     *        this entrie Documentation
     */
-    Documentation(DocumentationEntries entries = {});
+    Documentation(DocumentationEntries ents = {});
 
     /// The human-readable name of the Documentation
     std::string name;

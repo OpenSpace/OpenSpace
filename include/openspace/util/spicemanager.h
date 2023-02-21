@@ -1001,6 +1001,7 @@ private:
      * by using mainly the \c ckcov_c and \c ckobj_c functions.
      *
      * \param path The path to the kernel that should be examined
+     * \return true if the operation was successful
      *
      * \pre \p path must be nonempty and be an existing file
      * \post Coverage times are stored only if loading was successful
@@ -1015,6 +1016,7 @@ private:
      * by using mainly the \c spkcov_c and \c spkobj_c functions.
      *
      * \param path The path to the kernel that should be examined
+     * \return true if the operation was successful
      *
      * \pre \p path must be nonempty and be an existing file
      * \post Coverage times are stored only if loading was successful

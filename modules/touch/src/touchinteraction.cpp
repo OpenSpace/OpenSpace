@@ -240,7 +240,7 @@ namespace {
 namespace openspace {
 
 TouchInteraction::TouchInteraction()
-    : properties::PropertyOwner({ "TouchInteraction" })
+    : properties::PropertyOwner({ "TouchInteraction", "Touch Interaction" })
     , _unitTest(UnitTestInfo, false)
     , _disableZoom(DisableZoomInfo, false)
     , _disableRoll(DisableRollInfo, false)
@@ -1148,7 +1148,7 @@ double FrameTimeAverage::averageFrameTime() const {
 
 #ifdef TOUCH_DEBUG_PROPERTIES
 TouchInteraction::DebugProperties::DebugProperties()
-    : properties::PropertyOwner({ "TouchDebugProperties" })
+    : properties::PropertyOwner({ "TouchDebugProperties", "Touch Debug Properties"})
     , interactionMode(
         { "interactionMode", "Current interaction mode", "" },
         "Unknown"
