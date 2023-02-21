@@ -151,8 +151,9 @@ void VideoPlayer::observePropertyMpv(MpvKey key) {
     );
 }
 
-void VideoPlayer::setPropertyStringMpv(std::string name, std::string value) {
-    int result = mpv_set_property_string(_mpvHandle, name.c_str(), value.c_str());
+void VideoPlayer::setPropertyStringMpv(const char* name, const char* value)
+{
+    int result = mpv_set_property_string(_mpvHandle, name, value);
     if (!checkMpvError(result)) {
         LWARNING(fmt::format("Error setting property {}", name));
     }
@@ -489,10 +490,6 @@ void VideoPlayer::seekToTime(double time) {
 void VideoPlayer::toggleMute() {
     const char* mute = _playAudio ? "no" : "yes";
     setPropertyAsyncMpv(mute, MpvKey::Mute);
-}
-
-bool VideoPlayer::isPaused() const {
-    return _isPaused;
 }
 
 void VideoPlayer::renderMpv() {
@@ -833,23 +830,6 @@ bool VideoPlayer::isInitialized() const {
     return _isInitialized;
 }
 
-double VideoPlayer::videoDuration() const {
-    return _videoDuration;
-}
-
-double VideoPlayer::fps() const {
-    return _fps;
-}
-
-double VideoPlayer::currentPlaybackTime() const {
-    return _currentVideoTime;
-}
-
-PlaybackMode VideoPlayer::playbackMode() const {
-    return _playbackMode;
-}
-
-
 bool VideoPlayer::isWithingStartEndTime() const {
     const double now = global::timeManager->time().j2000Seconds();
     return now <= _endJ200Time && now >= _startJ200Time;
@@ -872,7 +852,7 @@ double VideoPlayer::correctVideoPlaybackTime() const {
     else {
         percentage = (now - _startJ200Time) / (_endJ200Time - _startJ200Time);
     }
-    return percentage * videoDuration();
+    return percentage * _videoDuration;
 }
 
 void VideoPlayer::syncToSimulationTime() {

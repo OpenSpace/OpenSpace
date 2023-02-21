@@ -54,46 +54,19 @@ public:
     void pause();
     void play();
     void goToStart();
-    void stepFrameForward();
-    void stepFrameBackward();
+   
     void seekToTime(double time);
     void toggleMute();
 
     const std::unique_ptr<ghoul::opengl::Texture>& frameTexture() const;
-    bool isPaused() const;
     bool isInitialized() const;
-    double videoDuration() const;
-    double fps() const;
-    double currentPlaybackTime() const;
-    PlaybackMode playbackMode() const;
 
     void reset();
     void destroy();
 
     documentation::Documentation Documentation();
-
-    properties::TriggerProperty _play;
-    properties::TriggerProperty _pause;
-    properties::TriggerProperty _goToStart;
-    properties::TriggerProperty _reset;
-    properties::BoolProperty _playAudio;
 private:
-    
-    PlaybackMode _playbackMode = PlaybackMode::RealTimeLoop; // Default is to loop
-
-    // Map to simulation time functions
-    double correctVideoPlaybackTime() const;
-    bool isWithingStartEndTime() const;
-    void updateFrameDuration();
-    void syncToSimulationTime();
-
-    // Video stretching: map to simulation time animation mode
-    double _startJ200Time = 0.0;
-    double _endJ200Time = 0.0;
-    double _timeAtLastRender = 0.0;
-    double _frameDuration = 0.0;
-
-    // libmpv property keys
+    // Libmpv keys
     enum class MpvKey : uint64_t {
         Duration = 1,
         Height,
@@ -108,10 +81,7 @@ private:
         Command,
         Seek
     };
-
-    std::map<MpvKey, const char*> keys;
-    std::map<MpvKey, mpv_format> formats;
-
+    // Framebuffer
     void createFBO(int width, int height);
     void resizeFBO(int width, int height);
 
@@ -119,22 +89,50 @@ private:
     static void on_mpv_render_update(void*); // Has to be static because of C api
     void initializeMpv(); // Called first time in postSyncPreDraw
     void renderMpv(); // Called in postSyncPreDraw
-    void handleMpvEvents();
-    void handleMpvProperties(mpv_event* event);
     void swapBuffersMpv(); // Called in postDraw
-    void observePropertyMpv(MpvKey key);
-    void setPropertyStringMpv(std::string name, std::string value);
-    void getPropertyAsyncMpv(MpvKey key);
     void commandAsyncMpv(const char* cmd[], MpvKey key = MpvKey::Command);
+    void handleMpvEvents();
+    // Libmpv properties
+    void handleMpvProperties(mpv_event* event);
+    void observePropertyMpv(MpvKey key);
+    void setPropertyStringMpv(const char* name, const char* value);
+    void setPropertyAsyncMpv(int value, MpvKey key);
+    void setPropertyAsyncMpv(const char* value, MpvKey key);
+    void getPropertyAsyncMpv(MpvKey key);
 
-    std::string _videoFile;
+    // Map to simulation time functions
+    double correctVideoPlaybackTime() const;
+    bool isWithingStartEndTime() const;
+    void updateFrameDuration();
+    void syncToSimulationTime();
+    void stepFrameForward();
+    void stepFrameBackward();
+
+    // Properties for user interaction
+    properties::TriggerProperty _play;
+    properties::TriggerProperty _pause;
+    properties::TriggerProperty _goToStart;
+    properties::TriggerProperty _reset;
+    properties::BoolProperty _playAudio;
 
     // Video properties. Try to read all these values from the video
+    std::string _videoFile;
     double _currentVideoTime = 0.0;
     double _fps = 24.0; // If when we read it it is 0, use 24 fps 
     double _videoDuration = 0.0;
     glm::ivec2 _videoResolution = glm::ivec2(2048, 1024); // Used for the fbos
     bool _isPaused = false;
+    PlaybackMode _playbackMode = PlaybackMode::RealTimeLoop; // Default is to loop
+
+    // Maps for keeping track of libmpv commands and formats
+    std::map<MpvKey, const char*> keys;
+    std::map<MpvKey, mpv_format> formats;
+
+    // Video stretching: map to simulation time animation mode
+    double _startJ200Time = 0.0;
+    double _endJ200Time = 0.0;
+    double _timeAtLastRender = 0.0;
+    double _frameDuration = 0.0;
 
     // Libmpv
     mpv_handle* _mpvHandle = nullptr;
