@@ -247,11 +247,6 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
         // Ensure we are synchronized to OpenSpace time in presync step
         global::callback::preSync->emplace_back([this]() {
-            // find time to seek to
-            // send the next current time to the nodes
-            // Presync
-            // encode / decode
-            // sync
             syncToSimulationTime();
         });
     }
@@ -461,6 +456,7 @@ void VideoPlayer::initializeMpv() {
     observePropertyMpv(MpvKey::Pause);
     observePropertyMpv(MpvKey::Fps);
     observePropertyMpv(MpvKey::Time);
+    observePropertyMpv(MpvKey::IsSeeking);
 
     _isInitialized = true;
 }
@@ -638,168 +634,168 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
 
     // Handle new values
     switch (key) {
-    case MpvKey::Duration: {
-        double* duration = static_cast<double*>(prop->data);
+        case MpvKey::Duration: {
+            double* duration = static_cast<double*>(prop->data);
 
-        if (!duration) {
-            LERROR("Could not find duration property");
+            if (!duration) {
+                LERROR("Could not find duration property");
+                break;
+            }
+
+            _videoDuration = *duration;
+            if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+                updateFrameDuration();
+            }
+
+            LINFO(fmt::format("Duration: {}", *duration));
             break;
         }
+        case MpvKey::Height: {
+            int* height = static_cast<int*>(prop->data);
 
-        _videoDuration = *duration;
-        if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-            updateFrameDuration();
-        }
+            if (!height) {
+                LERROR("Could not find height property");
+                break;
+            }
 
-        LINFO(fmt::format("Duration: {}", *duration));
-        break;
-    }
-    case MpvKey::Height: {
-        int* height = static_cast<int*>(prop->data);
+            if (*height == _videoResolution.y) {
+                break;
+            }
 
-        if (!height) {
-            LERROR("Could not find height property");
+            LINFO(fmt::format("New height: {}", *height));
+
+            if (*height > 0 && _videoResolution.x > 0 && _fbo > 0) {
+                resizeFBO(_videoResolution.x, *height);
+            }
+
             break;
         }
+        case MpvKey::Width: {
+            int* width = static_cast<int*>(prop->data);
 
-        if (*height == _videoResolution.y) {
-            break;
-        }
+            if (!width) {
+                LERROR("Could not find width property");
+                break;
+            }
 
-        LINFO(fmt::format("New height: {}", *height));
+            if (*width == _videoResolution.y) {
+                break;
+            }
 
-        if (*height > 0 && _videoResolution.x > 0 && _fbo > 0) {
-            resizeFBO(_videoResolution.x, *height);
-        }
+            LINFO(fmt::format("New width: {}", *width));
 
-        break;
-    }
-    case MpvKey::Width: {
-        int* width = static_cast<int*>(prop->data);
-
-        if (!width) {
-            LERROR("Could not find width property");
-            break;
-        }
-
-        if (*width == _videoResolution.y) {
-            break;
-        }
-
-        LINFO(fmt::format("New width: {}", *width));
-
-        if (*width > 0 && _videoResolution.y > 0 && _fbo > 0) {
-            resizeFBO(*width, _videoResolution.y);
-        }
+            if (*width > 0 && _videoResolution.y > 0 && _fbo > 0) {
+                resizeFBO(*width, _videoResolution.y);
+            }
         
-        break;
-    }
-    case MpvKey::Time: {
-        double* time = static_cast<double*>(prop->data);
-
-        if (!time) {
-            LERROR("Could not find playback time property");
             break;
         }
-        _currentVideoTime = *time;
-        break;
-    }
-    case MpvKey::IsSeeking: {
-        bool* isSeekingBool = static_cast<bool*>(prop->data);
-        std::string isSeekingString = *isSeekingBool ? "is Seeking" : "is not seeking";
-        LINFO(isSeekingString);
-        break;
-    }
-    case MpvKey::Fps: {
-        double* fps = static_cast<double*>(prop->data);
-        if (*fps < glm::epsilon<double>()) {
-            LWARNING("Detected fps was 0. Falling back on 24 fps");
+        case MpvKey::Time: {
+            double* time = static_cast<double*>(prop->data);
+
+            if (!time) {
+                LERROR("Could not find playback time property");
+                break;
+            }
+            _currentVideoTime = *time;
             break;
         }
-        if (!fps) {
-            LERROR("Could not find fps property");
+        case MpvKey::IsSeeking: {
+            bool* isSeekingBool = static_cast<bool*>(prop->data);
+            std::string isSeekingString = *isSeekingBool ? "Is Seeking" : "Not Seeking";
+            LINFO(isSeekingString);
             break;
         }
-        _fps = *fps;
-        if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-            updateFrameDuration();
-        }
+        case MpvKey::Fps: {
+            double* fps = static_cast<double*>(prop->data);
+            if (*fps < glm::epsilon<double>()) {
+                LWARNING("Detected fps was 0. Falling back on 24 fps");
+                break;
+            }
+            if (!fps) {
+                LERROR("Could not find fps property");
+                break;
+            }
+            _fps = *fps;
+            if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+                updateFrameDuration();
+            }
 
-        LINFO(fmt::format("Detected fps: {}", *fps));
-        _seekThreshold = 2.0 * (1.0 / _fps);
-        break;
-    }
-    case MpvKey::Pause: {
-        int* videoIsPaused = static_cast<int*>(prop->data);
-        _isPaused = *videoIsPaused == 0 ? false : true;
-        break;
-    }
-    case MpvKey::Meta: {
-        LINFO("Printing meta data reply");
-        if (node.format == MPV_FORMAT_NODE_MAP) {
-            for (int n = 0; n < node.u.list->num; n++) {
-                if (node.u.list->values[n].format == MPV_FORMAT_STRING) {
-                    LINFO(node.u.list->values[n].u.string);
+            LINFO(fmt::format("Detected fps: {}", *fps));
+            _seekThreshold = 2.0 * (1.0 / _fps);
+            break;
+        }
+        case MpvKey::Pause: {
+            int* videoIsPaused = static_cast<int*>(prop->data);
+            _isPaused = *videoIsPaused == 0 ? false : true;
+            break;
+        }
+        case MpvKey::Meta: {
+            LINFO("Printing meta data reply");
+            if (node.format == MPV_FORMAT_NODE_MAP) {
+                for (int n = 0; n < node.u.list->num; n++) {
+                    if (node.u.list->values[n].format == MPV_FORMAT_STRING) {
+                        LINFO(node.u.list->values[n].u.string);
+                    }
                 }
             }
-        }
-        else {
-            LWARNING("No meta data could be read");
-        }
+            else {
+                LWARNING("No meta data could be read");
+            }
 
-        break;
-    }
-    case MpvKey::Params: {
-        if (node.format == MPV_FORMAT_NODE_ARRAY ||
-            node.format == MPV_FORMAT_NODE_MAP)
-        {
-            mpv_node_list* list = node.u.list;
+            break;
+        }
+        case MpvKey::Params: {
+            if (node.format == MPV_FORMAT_NODE_ARRAY ||
+                node.format == MPV_FORMAT_NODE_MAP)
+            {
+                mpv_node_list* list = node.u.list;
 
-            mpv_node width, height;
-            bool foundWidth = false;
-            bool foundHeight = false;
-            for (int i = 0; i < list->num; ++i) {
-                if (foundWidth && foundHeight) {
-                    break;
+                mpv_node width, height;
+                bool foundWidth = false;
+                bool foundHeight = false;
+                for (int i = 0; i < list->num; ++i) {
+                    if (foundWidth && foundHeight) {
+                        break;
+                    }
+
+                    if (list->keys[i] == "w") {
+                        width = list->values[i];
+                        foundWidth = true;
+                    }
+                    else if (list->keys[i] == "h") {
+                        height = list->values[i];
+                        foundHeight = true;
+                    }
                 }
 
-                if (list->keys[i] == "w") {
-                    width = list->values[i];
-                    foundWidth = true;
+                if (!foundWidth || !foundHeight) {
+                    LINFO("Could not find width or height params from parameters");
+                    return;
                 }
-                else if (list->keys[i] == "h") {
-                    height = list->values[i];
-                    foundHeight = true;
+
+                int w = -1;
+                int h = -1;
+                if (width.format == MPV_FORMAT_INT64) {
+                    w = width.u.int64;
                 }
-            }
+                if (height.format == MPV_FORMAT_INT64) {
+                    h = height.u.int64;
+                }
 
-            if (!foundWidth || !foundHeight) {
-                LINFO("Could not find width or height params from parameters");
-                return;
+                if (w == -1 || h == -1) {
+                    LERROR("Invalid width or height params");
+                    return;
+                }
+                resizeFBO(w, h);
             }
-
-            int w = -1;
-            int h = -1;
-            if (width.format == MPV_FORMAT_INT64) {
-                w = width.u.int64;
-            }
-            if (height.format == MPV_FORMAT_INT64) {
-                h = height.u.int64;
-            }
-
-            if (w == -1 || h == -1) {
-                LERROR("Invalid width or height params");
-                return;
-            }
-            resizeFBO(w, h);
+            break;
         }
-        break;
-    }
     
-    default: {
-        throw ghoul::MissingCaseException();
-        break;
-    }
+        default: {
+            throw ghoul::MissingCaseException();
+            break;
+        }
     }
 }
 
