@@ -71,11 +71,11 @@ namespace {
        GL_COLOR_ATTACHMENT2,
     };
 
-    constexpr std::array<const char*, 10> UniformNames = {
+    constexpr std::array<const char*, 12> UniformNames = {
         "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",
-        "specularIntensity"
+        "specularIntensity", "performManualDepthTest", "gBufferDepthTexture"
     };
 
     constexpr std::array<const char*, 5> UniformOpacityNames = {
@@ -781,6 +781,12 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     }
 
     if (!shouldRenderTwise) {
+        // Reset manual depth test
+        _program->setUniform(
+            _uniformCache.performManualDepthTest,
+            false
+        );
+
         _geometry->render(*_program);
     }
     else {
@@ -805,6 +811,26 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glDrawBuffers(3, ColorAttachmentArray);
         glClearBufferfv(GL_COLOR, 1, glm::value_ptr(glm::vec4(0.f, 0.f, 0.f, 0.f)));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Use a manuel depth test to make the models aware of the rest of the envierment
+        _program->setUniform(
+            _uniformCache.performManualDepthTest,
+            true
+        );
+
+        // Bind the G-buffer depth texture for a manual depth test towards the rest
+        // of the scene
+        ghoul::opengl::TextureUnit gBufferDepthTextureUnit;
+        gBufferDepthTextureUnit.activate();
+        glBindTexture(
+            GL_TEXTURE_2D,
+            global::renderEngine->renderer()->gBufferDepthTexture()
+        );
+        _program->setUniform(
+            _uniformCache.gBufferDepthTexture,
+            gBufferDepthTextureUnit
+        );
+
 
         // Render Pass 1
         // Render all parts of the model into the new framebuffer without opacity

@@ -87,9 +87,9 @@ namespace {
 
 namespace openspace {
 
-//=====================================//
-//=====  Reuse NOT used textures  =====//
-//=====================================//
+//============================//
+//=====  Reuse textures  =====//
+//============================//
 // Gives access to the currently NOT used pingPongTexture
 GLuint FramebufferRenderer::additionalColorTexture1() {
     int unusedPingPongIndex = _pingPongIndex == 0 ? 1 : 0;
@@ -109,6 +109,29 @@ GLuint FramebufferRenderer::additionalColorTexture3() {
 // Gives access to the exitDepthTexture
 GLuint FramebufferRenderer::additionalDepthTexture() {
     return _exitDepthTexture;
+}
+
+//=============================//
+//=====  Access G-buffer  =====//
+//=============================//
+// / Gives access to the color texture of the G-buffer
+GLuint FramebufferRenderer::gBufferColorTexture() {
+    return _gBuffers.colorTexture;
+}
+
+//  Gives access to the position texture of the G-buffer
+GLuint FramebufferRenderer::gBufferPositionTexture() {
+    return _gBuffers.positionTexture;
+}
+
+//  Gives access to the normal texture of the G-buffer
+GLuint FramebufferRenderer::gBufferNormalTexture() {
+    return _gBuffers.normalTexture;
+}
+
+//  Gives access to the depth texture of the G-buffer
+GLuint FramebufferRenderer::gBufferDepthTexture() {
+    return _gBuffers.depthTexture;
 }
 
 void FramebufferRenderer::initialize() {

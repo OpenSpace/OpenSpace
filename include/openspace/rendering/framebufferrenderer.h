@@ -59,7 +59,9 @@ class FramebufferRenderer final : public RaycasterListener, public Deferredcaste
 public:
     virtual ~FramebufferRenderer() override = default;
 
-    // Functions to access and reuse some of the existing textures
+    //============================//
+    //=====  Reuse textures  =====//
+    //============================//
     /**
      * Gives access to the currently NOT used pingPongTexture. This texture is available
      * for all RenderBins. However, it cannot be used at the same time as the Deferred
@@ -99,6 +101,46 @@ public:
      * \return GLuint identifier of the exitDepthTexture
      */
     GLuint additionalDepthTexture();
+
+    //=============================//
+    //=====  Access G-buffer  =====//
+    //=============================//
+    // Functions to access the G-buffer textures
+    /**
+     * Gives access to the color texture of the G-buffer. NOTE: This texture is used for
+     * the majority of rendering the scene and might be already in use. Use CAUTION when
+     * using this function. The size of the texture is the resolution of the viewport.
+     *
+     * \return GLuint identifier of the color texture of the G-buffer
+     */
+    GLuint gBufferColorTexture();
+
+    /**
+     * Gives access to the position texture of the G-buffer. NOTE: This texture is used for
+     * the majority of rendering the scene and might be already in use. Use CAUTION when
+     * using this function. The size of the texture is the resolution of the viewport.
+     *
+     * \return GLuint identifier of the position texture of the G-buffer
+     */
+    GLuint gBufferPositionTexture();
+
+    /**
+     * Gives access to the normal texture of the G-buffer. NOTE: This texture is used for
+     * the majority of rendering the scene and might be already in use. Use CAUTION when
+     * using this function. The size of the texture is the resolution of the viewport.
+     *
+     * \return GLuint identifier of the normal texture of the G-buffer
+     */
+    GLuint gBufferNormalTexture();
+
+    /**
+     * Gives access to the depth texture of the G-buffer. NOTE: This texture is used for
+     * the majority of rendering the scene and might be already in use. Use CAUTION when
+     * using this function. The size of the texture is the resolution of the viewport.
+     *
+     * \return GLuint identifier of the depth texture of the G-buffer
+     */
+    GLuint gBufferDepthTexture();
 
     void initialize();
     void deinitialize();
