@@ -584,17 +584,17 @@ void VideoPlayer::handleMpvEvents() {
                 MpvKey key = static_cast<MpvKey>(event->reply_userdata);
 
                 switch (key) {
-                case MpvKey::Command: {
+                    case MpvKey::Command: {
                     
-                    break;
-                }
-                case MpvKey::Seek: {
-                    _isSeeking = false;
-                    break;
-                }
-                default: {
-                    break;
-                }
+                        break;
+                    }
+                    case MpvKey::Seek: {
+                        _isSeeking = false;
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
                 }
                 break;
             }
