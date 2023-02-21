@@ -437,6 +437,10 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     const double distance = glm::distance(trailPosWorld, data.camera.eyePositionVec3());
 
     if (distance > _boundingSphere * DISTANCE_CULLING_RADII) {
+        // Reset
+        global::renderEngine->openglStateCache().resetBlendState();
+        global::renderEngine->openglStateCache().resetDepthState();
+
         return;
     }
 
@@ -471,8 +475,9 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(0);
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthMask(true);
+    // Reset
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 
     _programObject->deactivate();
 }
