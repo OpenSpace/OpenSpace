@@ -61,15 +61,7 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_videoPlayer._reset);
-    addProperty(_videoPlayer._playAudio);
-
-    if (_videoPlayer.playbackMode() == PlaybackMode::RealTimeLoop) {
-        // Video interaction. Only valid for real time looping
-        addProperty(_videoPlayer._play);
-        addProperty(_videoPlayer._pause);
-        addProperty(_videoPlayer._goToStart);
-    }
+    addPropertySubOwner(_videoPlayer);
 }
 
 Tile VideoTileProvider::tile(const TileIndex& tileIndex) {

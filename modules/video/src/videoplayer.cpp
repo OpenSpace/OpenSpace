@@ -203,12 +203,20 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
     _videoFile = p.video;
 
-    // Video interaction. Only valid for real time looping
-    _play.onChange([this]() { play(); });
-    _pause.onChange([this]() { pause(); });
-    _goToStart.onChange([this]() { goToStart(); });
     _reset.onChange([this]() { reset(); });
+    addProperty(_reset);
     _playAudio.onChange([this]() { toggleMute(); });
+    addProperty(_playAudio);
+
+    if (_playbackMode == PlaybackMode::RealTimeLoop) {
+        // Video interaction. Only valid for real time looping
+        _play.onChange([this]() { play(); });
+        addProperty(_play);
+        _pause.onChange([this]() { pause(); });
+        addProperty(_pause);
+        _goToStart.onChange([this]() { goToStart(); });
+        addProperty(_goToStart);
+    }
 
     if (p.playbackMode.has_value()) {
         switch (*p.playbackMode) {
