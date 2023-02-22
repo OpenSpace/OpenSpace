@@ -277,11 +277,6 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         global::timeManager->addTimeJumpCallback([this]() {
             seekToTime(correctVideoPlaybackTime());
         });
-
-        // Ensure we are synchronized to OpenSpace time in presync step
-        global::callback::preSync->emplace_back([this]() {
-            syncToSimulationTime();
-        });
     }
     
     global::callback::postSyncPreDraw->emplace_back([this]() {
@@ -813,6 +808,29 @@ void VideoPlayer::destroy() {
     glDeleteFramebuffers(1, &_fbo);
 }
 
+void VideoPlayer::preSync(bool isMaster) {
+    if (isMaster) {
+        syncToSimulationTime();
+        _correctPlaybackTime = _currentVideoTime; 
+    }
+}
+
+void VideoPlayer::encode(SyncBuffer* syncBuffer) {
+    syncBuffer->encode(_correctPlaybackTime);
+}
+
+void VideoPlayer::decode(SyncBuffer* syncBuffer) {
+    syncBuffer->decode(_correctPlaybackTime);
+}
+
+void VideoPlayer::postSync(bool isMaster) {
+    if (!isMaster) {
+        if (abs(_currentVideoTime - _correctPlaybackTime) < glm::epsilon<double>()) {
+            seekToTime(_correctPlaybackTime);
+        }
+    }
+}
+
 const std::unique_ptr<ghoul::opengl::Texture>& VideoPlayer::frameTexture() const {
     return _frameTexture;
 }
@@ -856,6 +874,9 @@ double VideoPlayer::correctVideoPlaybackTime() const {
 }
 
 void VideoPlayer::syncToSimulationTime() {
+    if (!global::windowDelegate->isMaster()) {
+        return;
+    }
     if (_playbackMode == PlaybackMode::MapToSimulationTime) {
         // If we are in valid times, step frames accordingly
         if (isWithingStartEndTime()) {

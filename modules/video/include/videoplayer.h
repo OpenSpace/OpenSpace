@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__VIDEOPLAYER___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/util/syncable.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/triggerproperty.h>
@@ -45,7 +46,7 @@ enum class PlaybackMode {
     RealTimeLoop
 };
 
-class VideoPlayer : public properties::PropertyOwner {
+class VideoPlayer : public properties::PropertyOwner, Syncable {
 public:
     VideoPlayer(const ghoul::Dictionary& dictionary);
     ~VideoPlayer();
@@ -63,6 +64,11 @@ public:
 
     void reset();
     void destroy();
+
+    virtual void preSync(bool isMaster) override;
+    virtual void encode(SyncBuffer* syncBuffer) override;
+    virtual void decode(SyncBuffer* syncBuffer) override;
+    virtual void postSync(bool isMaster) override;
 
     documentation::Documentation Documentation();
 private:
@@ -127,6 +133,9 @@ private:
     // Maps for keeping track of libmpv commands and formats
     std::map<MpvKey, const char*> keys;
     std::map<MpvKey, mpv_format> formats;
+
+    // Syncing with multiple nodes
+    double _correctPlaybackTime = 0.0;
 
     // Video stretching: map to simulation time animation mode
     double _startJ200Time = 0.0;
