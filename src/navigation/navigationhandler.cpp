@@ -89,7 +89,7 @@ namespace {
 namespace openspace::interaction {
 
 NavigationHandler::NavigationHandler()
-    : properties::PropertyOwner({ "NavigationHandler" })
+    : properties::PropertyOwner({ "NavigationHandler", "Navigation Handler" })
     , _disableKeybindings(DisableKeybindingsInfo, false)
     , _disableMouseInputs(DisableMouseInputInfo, false)
     , _disableJoystickInputs(DisableJoystickInputInfo, false)

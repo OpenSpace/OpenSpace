@@ -82,7 +82,7 @@ namespace openspace {
 using datamessagestructures::TimeKeyframe;
 
 TimeManager::TimeManager()
-    : properties::PropertyOwner({ "TimeManager" })
+    : properties::PropertyOwner({ "TimeManager", "Time Manager" })
     , _defaultTimeInterpolationDuration(DefaultTimeInterpolationDurationInfo,
         2.f,
         0.f,
