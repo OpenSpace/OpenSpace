@@ -716,7 +716,8 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
         }
         case MpvKey::Pause: {
             int* videoIsPaused = reinterpret_cast<int*>(prop->data);
-            _isPaused = *videoIsPaused == 0;
+            _isPaused = *videoIsPaused == 1;
+            LINFO(fmt::format("Is Paused: {}", _isPaused));
             break;
         }
         case MpvKey::Meta: {
