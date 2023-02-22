@@ -25,11 +25,11 @@
 #include "fragment.glsl"
 
 in vec2 vs_st;
-in vec2 viewportPixelCoord;
+in vec2 vs_viewportPixelCoord;
 in vec3 vs_normalViewSpace;
 in vec4 vs_positionCameraSpace;
 in float vs_screenSpaceDepth;
-in mat3 TBN;
+in mat3 vs_TBN;
 
 uniform float ambientIntensity = 0.2;
 uniform float diffuseIntensity = 1.0;
@@ -57,13 +57,14 @@ Fragment getFragment() {
   frag.gPosition = vs_positionCameraSpace;
   frag.gNormal = vec4(vs_normalViewSpace, 0.0);
   frag.disableLDR2HDR = true;
+  frag.color.a = 1.0;
 
   if (performManualDepthTest) {
     // Manual depth test
     float gBufferDepth =
-      denormalizeFloat(texture(gBufferDepthTexture, viewportPixelCoord).x);
+      denormalizeFloat(texture(gBufferDepthTexture, vs_viewportPixelCoord).x);
     if (vs_screenSpaceDepth > gBufferDepth) {
-      frag.color = vec4(0.f);
+      frag.color = vec4(0.0);
       frag.depth = gBufferDepth;
       return frag;
     }
@@ -78,10 +79,10 @@ Fragment getFragment() {
 
     // Pink and complementary green in a chessboard pattern
     frag.color.rgb = mix(vec3(1.0, 0.0, 0.8), vec3(0.0, 1.0, 0.2), chessboard);
-    frag.color.a = 1.0;
     return frag;
   }
 
+  // Base color
   vec4 diffuseAlbedo;
   if (has_texture_diffuse) {
     diffuseAlbedo = texture(texture_diffuse, vs_st);
@@ -91,55 +92,57 @@ Fragment getFragment() {
   }
 
   if (performShading) {
+    // Specular color
     vec3 specularAlbedo;
     if (has_texture_specular) {
       specularAlbedo = texture(texture_specular, vs_st).rgb;
     }
     else {
       if (has_color_specular) {
-        specularAlbedo = color_specular.rgb ;
+        specularAlbedo = color_specular.rgb;
       }
       else {
-        specularAlbedo = vec3(1.0);
+        specularAlbedo = diffuseAlbedo.rgb;
       }
     }
 
-    // Some of these values could be passed in as uniforms
-    const vec3 lightColorAmbient = vec3(1.0);
-    const vec3 lightColor = vec3(1.0);
-
-    vec3 n;
+    // Bumb mapping
+    vec3 normal;
     if (has_texture_normal) {
       vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;
       normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);
-      n = normalize(TBN * normalAlbedo);
+      normal = normalize(vs_TBN * normalAlbedo);
     }
     else {
-      n = normalize(vs_normalViewSpace);
+      normal = normalize(vs_normalViewSpace);
     }
 
-    vec3 c = normalize(vs_positionCameraSpace.xyz);
+    // Could be seperated into ambinet, diffuse and specular and passed in as uniforms
+    const vec3 lightColor = vec3(1.0);
+    const float specularPower = 100.0;
 
-    vec3 color = ambientIntensity * lightColorAmbient * diffuseAlbedo.rgb;
+    // Ambient light
+    vec3 totalLightColor = ambientIntensity * lightColor * diffuseAlbedo.rgb;
+
+    vec3 viewDirection = normalize(vs_positionCameraSpace.xyz);
 
     for (int i = 0; i < nLightSources; ++i) {
-      vec3 l = lightDirectionsViewSpace[i];
-      vec3 r = reflect(l, n);
-
-      float diffuseCosineFactor = dot(n,l);
-      float specularCosineFactor = dot(c,r);
-      const float specularPower = 100.0;
-
+      // Diffuse light
+      vec3 lightDirection = lightDirectionsViewSpace[i];
+      float diffuseFactor =  max(dot(normal, lightDirection), 0.0);
       vec3 diffuseColor =
-        diffuseIntensity * lightColor * diffuseAlbedo.rgb * max(diffuseCosineFactor, 0);
+        diffuseIntensity * lightColor * diffuseFactor * diffuseAlbedo.rgb;
 
+      // Specular light
+      vec3 reflectDirection = reflect(lightDirection, normal);
+      float specularFactor =
+        pow(max(dot(viewDirection, reflectDirection), 0.0), specularPower);
       vec3 specularColor =
-        specularIntensity * lightColor * specularAlbedo *
-          pow(max(specularCosineFactor, 0), specularPower);
+        specularIntensity * lightColor * specularFactor * specularAlbedo;
 
-      color += lightIntensities[i] * (diffuseColor + specularColor);
+      totalLightColor += lightIntensities[i] * (diffuseColor + specularColor);
     }
-    frag.color.rgb = color;
+    frag.color.rgb = totalLightColor;
   }
   else {
     frag.color.rgb = diffuseAlbedo.rgb;

@@ -32,11 +32,11 @@ layout(location = 2) in vec3 in_normal;
 layout(location = 3) in vec3 in_tangent;
 
 out vec2 vs_st;
-out vec2 viewportPixelCoord;
+out vec2 vs_viewportPixelCoord;
 out vec3 vs_normalViewSpace;
 out float vs_screenSpaceDepth;
 out vec4 vs_positionCameraSpace;
-out mat3 TBN;
+out mat3 vs_TBN;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -67,10 +67,10 @@ void main() {
 	// Retrieve perpendicular vector B with cross product of T and N
 	vec3 B = normalize(cross(N, T));
 
-	TBN = mat3(T, B, N);
+	vs_TBN = mat3(T, B, N);
 
-	// Figure out the fragments position in the viewport
-	vec3 ndc = gl_Position.xyz / gl_Position.w; //perspective divide/normalize
-	vec2 viewportCoord = ndc.xy * 0.5 + 0.5; //ndc is -1 to 1 in GL. scale for 0 to 1
-	viewportPixelCoord = viewportCoord;
+	// Figure out the fragment's position in the viewport
+	vec3 ndc = gl_Position.xyz / gl_Position.w; // perspective divide/normalize
+	vec2 viewportCoord = ndc.xy * 0.5 + 0.5; // ndc is -1 to 1 in GL. scale for 0 to 1
+	vs_viewportPixelCoord = viewportCoord;
 }
