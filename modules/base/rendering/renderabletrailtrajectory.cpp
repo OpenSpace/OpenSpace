@@ -190,79 +190,67 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             _end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
 
             _totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
-            
             _nValues = static_cast<int>((_end - _start) / _totalSampleInterval);
 
             // Make space for the vertices
             _vertexArray.clear();
             _vertexArray.resize(_nValues);
-
-            _sweeping = true;
-        }
-
-        
-        if (_sweeping) {
-            // Calculate sweeping range for this iteration
-            int startIndex = _sweepIteration * _sweepChunk;
-            int nextIndex = (_sweepIteration + 1) * _sweepChunk;
-            int stopIndex = (nextIndex < _nValues) ? nextIndex : _nValues;
-
-            // ... fill all of the values
-            for (int i = startIndex; i < stopIndex; ++i) {
-                const glm::vec3 p = _translation->position({
-                    {},
-                    Time(_start + i * _totalSampleInterval),
-                    Time(0.0)
-                    });
-                _vertexArray[i] = { p.x, p.y, p.z };
-
-                // Set max and min vertex for bounding sphere calculations
-                _maxVertex.x = std::max(_maxVertex.x, p.x);
-                _maxVertex.y = std::max(_maxVertex.y, p.y);
-                _maxVertex.z = std::max(_maxVertex.z, p.z);
-
-                _minVertex.x = std::min(_minVertex.x, p.x);
-                _minVertex.y = std::min(_minVertex.y, p.y);
-                _minVertex.z = std::min(_minVertex.z, p.z);
-            }
-            ++_sweepIteration;
-
-            if (stopIndex == _nValues) {
-                _sweepIteration = 0;
-                _sweeping = false;
-
-                setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.f);
-            }
         }
         
+        // Calculate sweeping range for this iteration
+        int startIndex = _sweepIteration * _sweepChunk;
+        int nextIndex = (_sweepIteration + 1) * _sweepChunk;
+        int stopIndex = (nextIndex < _nValues) ? nextIndex : _nValues;
 
-        if (!_sweeping) {
-            // ... and upload them to the GPU
-            glBindVertexArray(_primaryRenderInformation._vaoID);
-            glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
-            glBufferData(
-                GL_ARRAY_BUFFER,
-                _vertexArray.size() * sizeof(TrailVBOLayout),
-                _vertexArray.data(),
-                GL_STATIC_DRAW
-            );
+        // Calculate all vertex positions
+        for (int i = startIndex; i < stopIndex; ++i) {
+            const glm::vec3 p = _translation->position({
+                {},
+                Time(_start + i * _totalSampleInterval),
+                Time(0.0)
+                });
+            _vertexArray[i] = { p.x, p.y, p.z };
 
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+            // Set max and min vertex for bounding sphere calculations
+            _maxVertex.x = std::max(_maxVertex.x, p.x);
+            _maxVertex.y = std::max(_maxVertex.y, p.y);
+            _maxVertex.z = std::max(_maxVertex.z, p.z);
 
-            // We clear the indexArray just in case. The base class will take care not to use
-            // it if it is empty
-            _indexArray.clear();
-
-            _subsamplingIsDirty = true;
-            _needsFullSweep = false;
+            _minVertex.x = std::min(_minVertex.x, p.x);
+            _minVertex.y = std::min(_minVertex.y, p.y);
+            _minVertex.z = std::min(_minVertex.z, p.z);
         }
+        ++_sweepIteration;
 
+        if (stopIndex == _nValues) {
+            _sweepIteration = 0;
+            setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.f);
+        }
+        else { 
+            // Early return as we don't need to render if we are still doing full sweep calculations
+            return;
+        }
+        
+        // Upload vertices to the GPU
+        glBindVertexArray(_primaryRenderInformation._vaoID);
+        glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            _vertexArray.size() * sizeof(TrailVBOLayout),
+            _vertexArray.data(),
+            GL_STATIC_DRAW
+        );
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        // We clear the indexArray just in case. The base class will take care not to use
+        // it if it is empty
+        _indexArray.clear();
+
+        _subsamplingIsDirty = true;
+        _needsFullSweep = false;
     }
-
-    // Early return as we don't need to do the render portion if we are still doing a full sweep
-    if (_needsFullSweep)
-        return;
 
     // This has to be done every update step;
     if (_renderFullTrail) {

@@ -92,11 +92,8 @@ private:
     /// The conversion of the _endTime into the internal time format
     double _end = 0.0;
 
-    //tracker for sweeping
+    /// Keeps track of the sweep iteration and is used to calculate which vertices we work on each frame.
     int _sweepIteration = 0;
-
-    //flag for if the sweep is done or not
-    bool _sweeping = false;
 
     /// How many values do we need to compute given the distance between the start and end date and the desired sample interval
     int _nValues = 0;
