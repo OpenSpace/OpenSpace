@@ -111,6 +111,13 @@ documentation::Documentation RenderableTrailTrajectory::Documentation() {
     );
 }
 
+void RenderableTrailTrajectory::reset() {
+    _needsFullSweep = true; 
+    _sweepIteration = 0;
+    _maxVertex = glm::vec3(-std::numeric_limits<float>::max());
+    _minVertex = glm::vec3(std::numeric_limits<float>::max());
+}
+
 RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
     , _startTime(StartTimeInfo)
@@ -121,18 +128,18 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _translation->onParameterChange([this]() { _needsFullSweep = true; });
+    _translation->onParameterChange([this]() { reset(); });
 
     _startTime = p.startTime;
-    _startTime.onChange([this] { _needsFullSweep = true; });
+    _startTime.onChange([this] { reset(); });
     addProperty(_startTime);
 
     _endTime = p.endTime;
-    _endTime.onChange([this] { _needsFullSweep = true; });
+    _endTime.onChange([this] { reset(); });
     addProperty(_endTime);
 
     _sampleInterval = p.sampleInterval;
-    _sampleInterval.onChange([this] { _needsFullSweep = true; });
+    _sampleInterval.onChange([this] { reset(); });
     addProperty(_sampleInterval);
 
     _timeStampSubsamplingFactor =
@@ -142,6 +149,9 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
 
     _renderFullTrail = p.showFullTrail.value_or(_renderFullTrail);
     addProperty(_renderFullTrail);
+
+    _maxVertex = glm::vec3(-std::numeric_limits<float>::max());
+    _minVertex = glm::vec3(std::numeric_limits<float>::max());
 
     // We store the vertices with ascending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
@@ -173,49 +183,86 @@ void RenderableTrailTrajectory::deinitializeGL() {
 
 void RenderableTrailTrajectory::update(const UpdateData& data) {
     if (_needsFullSweep) {
-        // Convert the start and end time from string representations to J2000 seconds
-        _start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
-        _end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
 
-        const double totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
-        // How many values do we need to compute given the distance between the start and
-        // end date and the desired sample interval
-        const int nValues = static_cast<int>((_end - _start) / totalSampleInterval);
+        if (_sweepIteration == 0) {
+            // Convert the start and end time from string representations to J2000 seconds
+            _start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
+            _end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
 
-        // Make space for the vertices
-        _vertexArray.clear();
-        _vertexArray.resize(nValues);
+            _totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
+            
+            _nValues = static_cast<int>((_end - _start) / _totalSampleInterval);
 
-        // ... fill all of the values
-        for (int i = 0; i < nValues; ++i) {
-            const glm::vec3 p = _translation->position({
-                {},
-                Time(_start + i * totalSampleInterval),
-                Time(0.0)
-            });
-            _vertexArray[i] = { p.x, p.y, p.z };
+            // Make space for the vertices
+            _vertexArray.clear();
+            _vertexArray.resize(_nValues);
+
+            _sweeping = true;
         }
 
-        // ... and upload them to the GPU
-        glBindVertexArray(_primaryRenderInformation._vaoID);
-        glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            _vertexArray.size() * sizeof(TrailVBOLayout),
-            _vertexArray.data(),
-            GL_STATIC_DRAW
-        );
+        
+        if (_sweeping) {
+            // Calculate sweeping range for this iteration
+            int startIndex = _sweepIteration * _sweepChunk;
+            int nextIndex = (_sweepIteration + 1) * _sweepChunk;
+            int stopIndex = (nextIndex < _nValues) ? nextIndex : _nValues;
 
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+            // ... fill all of the values
+            for (int i = startIndex; i < stopIndex; ++i) {
+                const glm::vec3 p = _translation->position({
+                    {},
+                    Time(_start + i * _totalSampleInterval),
+                    Time(0.0)
+                    });
+                _vertexArray[i] = { p.x, p.y, p.z };
 
-        // We clear the indexArray just in case. The base class will take care not to use
-        // it if it is empty
-        _indexArray.clear();
+                // Set max and min vertex for bounding sphere calculations
+                _maxVertex.x = std::max(_maxVertex.x, p.x);
+                _maxVertex.y = std::max(_maxVertex.y, p.y);
+                _maxVertex.z = std::max(_maxVertex.z, p.z);
 
-        _subsamplingIsDirty = true;
-        _needsFullSweep = false;
+                _minVertex.x = std::min(_minVertex.x, p.x);
+                _minVertex.y = std::min(_minVertex.y, p.y);
+                _minVertex.z = std::min(_minVertex.z, p.z);
+            }
+            ++_sweepIteration;
+
+            if (stopIndex == _nValues) {
+                _sweepIteration = 0;
+                _sweeping = false;
+
+                setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.f);
+            }
+        }
+        
+
+        if (!_sweeping) {
+            // ... and upload them to the GPU
+            glBindVertexArray(_primaryRenderInformation._vaoID);
+            glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                _vertexArray.size() * sizeof(TrailVBOLayout),
+                _vertexArray.data(),
+                GL_STATIC_DRAW
+            );
+
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+            // We clear the indexArray just in case. The base class will take care not to use
+            // it if it is empty
+            _indexArray.clear();
+
+            _subsamplingIsDirty = true;
+            _needsFullSweep = false;
+        }
+
     }
+
+    // Early return as we don't need to do the render portion if we are still doing a full sweep
+    if (_needsFullSweep)
+        return;
 
     // This has to be done every update step;
     if (_renderFullTrail) {
@@ -298,24 +345,6 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
     }
 
     glBindVertexArray(0);
-
-    // Updating bounding sphere
-    glm::vec3 maxVertex(-std::numeric_limits<float>::max());
-    glm::vec3 minVertex(std::numeric_limits<float>::max());
-
-    auto setMax = [&maxVertex, &minVertex](const TrailVBOLayout& vertexData) {
-        maxVertex.x = std::max(maxVertex.x, vertexData.x);
-        maxVertex.y = std::max(maxVertex.y, vertexData.y);
-        maxVertex.z = std::max(maxVertex.z, vertexData.z);
-
-        minVertex.x = std::min(minVertex.x, vertexData.x);
-        minVertex.y = std::min(minVertex.y, vertexData.y);
-        minVertex.z = std::min(minVertex.z, vertexData.z);
-    };
-
-    std::for_each(_vertexArray.begin(), _vertexArray.end(), setMax);
-
-    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.f);
 
 }
 

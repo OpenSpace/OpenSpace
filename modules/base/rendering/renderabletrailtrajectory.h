@@ -60,6 +60,13 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    
+    /// Reset some variables to default state
+    void reset();
+
+    /// The number of vertices that we do calculations for during each frame of the full sweep pass
+    static const int _sweepChunk = 200;
+
     /// The start time of the trail
     properties::StringProperty _startTime;
     /// The end time of the trail
@@ -84,6 +91,21 @@ private:
     double _start = 0.0;
     /// The conversion of the _endTime into the internal time format
     double _end = 0.0;
+
+    //tracker for sweeping
+    int _sweepIteration = 0;
+
+    //flag for if the sweep is done or not
+    bool _sweeping = false;
+
+    /// How many values do we need to compute given the distance between the start and end date and the desired sample interval
+    int _nValues = 0;
+
+    int _totalSampleInterval = 0;
+
+    /// Max and min vertex used to calculate the bounding sphere
+    glm::vec3 _maxVertex;
+    glm::vec3 _minVertex;
 };
 
 } // namespace openspace
