@@ -98,7 +98,7 @@ private:
     /// How many values do we need to compute given the distance between the start and end date and the desired sample interval
     int _nValues = 0;
 
-    int _totalSampleInterval = 0;
+    double _totalSampleInterval = 0.0;
 
     /// Max and min vertex used to calculate the bounding sphere
     glm::vec3 _maxVertex;
