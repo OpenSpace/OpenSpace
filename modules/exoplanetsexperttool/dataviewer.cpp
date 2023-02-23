@@ -361,14 +361,14 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     // TODO: make sure that settings are preserved between sessions?
     _variableSelection.push_back(ColorMappedVariable());
 
-    // Interaction callbacks. OBS! A biut ugly to hadnle thsi separately from ImGui io....
+    // Interaction callbacks. OBS! A bit ugly to handle this separately from ImGui io....
     global::callback::keyboard->emplace_back(
-        [&](Key, KeyModifier modifier, KeyAction action, bool) -> bool {
-            const bool hasCtrl = hasKeyModifier(modifier, KeyModifier::Control);
-            if (hasCtrl && action == KeyAction::Press) {
+        [&](Key key, KeyModifier modifier, KeyAction action, bool) -> bool {
+            bool isCtrl = key == Key::LeftControl;
+            if (isCtrl && action == KeyAction::Press) {
                 _holdingCtrl = true;
             }
-            else if (action == KeyAction::Release) {
+            else if (isCtrl && action == KeyAction::Release) {
                 _holdingCtrl = false;
             }
             // Do not capture

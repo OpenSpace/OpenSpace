@@ -195,16 +195,16 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
 
     // Picking callbacks
     global::callback::keyboard->emplace_back(
-        [&](Key key, KeyModifier modifier, KeyAction action, bool) -> bool {
+        [&](Key key, KeyModifier, KeyAction action, bool) -> bool {
             if (!_enabled) {
                 return false;
             }
 
-            const bool hasCtrl = hasKeyModifier(modifier, KeyModifier::Control);
-            if (hasCtrl && action == KeyAction::Press) {
+            bool isCtrl = key == Key::LeftControl;
+            if (isCtrl && action == KeyAction::Press) {
                 _isInSelectionMode = true;
             }
-            else if (action == KeyAction::Release) {
+            else if (isCtrl && action == KeyAction::Release) {
                 _isInSelectionMode = false;
                 _currentlyHoveredIndex = -1;
             }
