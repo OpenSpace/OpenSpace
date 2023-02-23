@@ -1,0 +1,157 @@
+local toggle_lagrangian_points = {
+  Identifier = "os.missions.jwst.togglelagrangianpoints",
+  Name = "Toggle Lagrangian points",
+  Command = [[
+    local list = openspace.getProperty('{lagrange_points_earth}.Renderable.Enabled'); 
+    for _,v in pairs(list) do 
+      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+    end
+  ]],
+  Documentation = "Toggle points and labels for the Lagrangian points for Earth Sun system",
+  GuiPath = "/JWST",
+  isLocal = false
+}
+
+local toggle_hudf = {
+  Identifier = "os.missions.jwst.togglehudf",
+  Name = "Toggle Hubble Ultra Deep Field",
+  Command = [[
+    local list = openspace.getProperty('{mission_jwst_hudf}.*.Enabled'); 
+    for _,v in pairs(list) do 
+      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+    end
+  ]],
+  Documentation = "Toggle Hubble Ultra Deep Field image and line towards its coordinate",
+  GuiPath = "/JWST",
+  isLocal = false
+}
+
+local toggle_l2 = {
+  Identifier = "os.missions.jwst.togglel2",
+  Name = "Toggle L2 line and small L2 label",
+  Command = [[
+    local list = openspace.getProperty('{lagrange_points_earth_l2_small}.*.Enabled'); 
+    for _,v in pairs(list) do 
+      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+    end
+  ]],
+  Documentation = "Toggle L2 label, point and line",
+  GuiPath = "/JWST",
+  isLocal = false
+}
+
+local toggle_fov = {
+  Identifier = "os.missions.jwst.togglefov",
+  Name = "Toggle JWST field of view and view band",
+  Command = [[
+    local list = openspace.getProperty('{mission_jwst_fov}.*.Enabled'); 
+    for _,v in pairs(list) do 
+      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+    end
+  ]],
+  Documentation = "Toggle James Webb Space Telecope field of view and view band",
+  GuiPath = "/JWST",
+  isLocal = false
+}
+
+local setup_launch = {
+  Identifier = "os.missoins.jwst.setup.launch",
+  Name = "Set to JWST launch time",
+  Command = [[
+    openspace.time.setDeltaTime(1); 
+    openspace.time.setTime('2021-12-25T12:20:01');
+  ]],
+  Documentation = "Set the time to the launch time of JWST",
+  GuiPath = "/JWST",
+  isLocal = false
+}
+
+local setup_detach = {
+  Identifier = "os.missions.jwst.setup.detach",
+  Name = "Set to JWST detach time",
+  Command = [[
+    openspace.time.setDeltaTime(1); 
+    openspace.time.setTime('2021-12-25T12:50:00');
+  ]],
+  Documentation = "Set the time to the detach time of JWST",
+  GuiPath = "/JWST",
+  isLocal = false
+}
+
+local toggle_sun_trail = {
+  Identifier = "os.missions.jwst.togglesuntrail",
+  Name = "Toggle JWST Sun trail",
+  Command = [[
+    local value = openspace.getPropertyValue('Scene.JWSTSunTrail.Renderable.Enabled'); 
+    openspace.setPropertyValueSingle('Scene.JWSTSunTrail.Renderable.Enabled', not value);
+  ]],
+  Documentation = "Toggle JWST trail relative to the Sun",
+  GuiPath = "/JWST",
+  isLocal = false
+}
+
+local toggle_trails_except_moon = {
+  Identifier = "os.missions.jwst.toggletrialsexceptmoon",
+  Name = "Toggle trails (except Moon)",
+  Command = [[
+    local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); 
+    for _,v in pairs(list) do 
+      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+    end 
+    local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled') 
+    for _,v in pairs(moonlist) do 
+      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+    end 
+    openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Enabled', true)
+  ]],
+  Documentation = "Toggle all planet and moon trails, except the Moon",
+  GuiPath = "/JWST",
+  isLocal = false
+}
+
+local toggle_jwst_trail = {
+  Identifier = "os.missions.jwst.togglejwsttrails",
+  Name = "Toggle JWST trail",
+  Command = [[
+    local list = {'Scene.JWSTTrailLaunch.Renderable.Enabled', 'Scene.JWSTTrailCruise.Renderable.Enabled', 'Scene.JWSTTrailCoRevOrbit.Renderable.Enabled'}; 
+    for _,v in pairs(list) do 
+      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)); 
+    end
+  ]],
+  Documentation = "Toggle JWST launch, cruise and L2 co-revolving orbit trails, not the Sun trail",
+  GuiPath = "/JWST",
+  isLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(toggle_lagrangian_points)
+  openspace.action.registerAction(toggle_hudf)
+  openspace.action.registerAction(toggle_l2)
+  openspace.action.registerAction(toggle_fov)
+  openspace.action.registerAction(setup_launch)
+  openspace.action.registerAction(setup_detach)
+  openspace.action.registerAction(toggle_sun_trail)
+  openspace.action.registerAction(toggle_trails_except_moon)
+  openspace.action.registerAction(toggle_jwst_trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(toggle_jwst_trail)
+  openspace.action.removeAction(toggle_trails_except_moon)
+  openspace.action.removeAction(toggle_sun_trail)
+  openspace.action.removeAction(setup_detach)
+  openspace.action.removeAction(setup_launch)
+  openspace.action.removeAction(toggle_fov)
+  openspace.action.removeAction(toggle_l2)
+  openspace.action.removeAction(toggle_hudf)
+  openspace.action.removeAction(toggle_lagrangian_points)
+end)
+
+asset.meta = {
+  Name = "Actions - JWST",
+  Version = "1.0",
+  Description = "Actions related to the JWST mission",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

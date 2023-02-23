@@ -9,8 +9,8 @@ local layer = {
     Gamma = 1.0,
     Multiplier = 1.23
   },
-  Description = [[This near-global mosaic was generated using data from the SELenological 
-    and Engineering Explorer (SELENE) "Kaguya" Terrain Camera (TC) instrument. TC source 
+  Description = [[This near-global mosaic was generated using data from the SELenological
+    and Engineering Explorer (SELENE) "Kaguya" Terrain Camera (TC) instrument. TC source
     data originated as map-projected tiles at ~10 meters per pixel (m) spatial
     resolution]]
 }

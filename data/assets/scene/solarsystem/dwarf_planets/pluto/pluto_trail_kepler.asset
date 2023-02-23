@@ -36,11 +36,11 @@ local PlutoKeplerianTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(PlutoKeplerianTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoKeplerianTrail)
 end)
-  
+
 asset.export(PlutoKeplerianTrail)
 
 

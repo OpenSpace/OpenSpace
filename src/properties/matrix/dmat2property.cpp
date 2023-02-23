@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ DMat2Property::DMat2Property(Property::PropertyInfo info, glm::dmat2x2 value,
     )
 {}
 
-std::string DMat2Property::className() const {
+std::string_view DMat2Property::className() const {
     return "DMat2Property";
 }
 

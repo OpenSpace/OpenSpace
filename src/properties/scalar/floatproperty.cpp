@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@ FloatProperty::FloatProperty(Property::PropertyInfo info, float value,
     : NumericalProperty<float>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-std::string FloatProperty::className() const {
+std::string_view FloatProperty::className() const {
     return "FloatProperty";
 }
 

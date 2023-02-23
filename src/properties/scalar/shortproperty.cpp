@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@ ShortProperty::ShortProperty(Property::PropertyInfo info, short value, short min
     : NumericalProperty<short>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-std::string ShortProperty::className() const {
+std::string_view ShortProperty::className() const {
     return "ShortProperty";
 }
 

@@ -1,0 +1,60 @@
+-- This file was automatically generated using a script found at
+-- https://github.com/OpenSpace/scripts/treks-to-openspace. See the README.md file
+-- in that repository for more information on how to run the script to update these
+-- files. In particular in the case of errors, prefer to change that script rather
+-- than the individual files
+
+local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Mars.Identifier
+
+local treks_Mars_MGS_MOLA_ClrShade_merge_global_463m = {
+  Identifier = "Mars_MGS_MOLA_ClrShade_merge_global_463m",
+  Name = [[MGS MOLA, Global Color Hillshade]],
+  FilePath = asset.localResource("MGS_MOLA/Global_Color_Hillshade.vrt"),
+  Description = [[This data was acquired using the Mars Orbiter Laser Altimeter instrument aboard NASA's Mars Global Surveyor spacecraft (MGS). MGS was launched on November 7, 1996 and arrived at Mars on September 11, 1997. It maintained a circular polar orbit, completing an orbital revolution every 117.65 minutes at an average altitude of 378 km (235 mi). Until November 2, 2006, MGS characterized and mapped Mars' surface features, properties, topography, composition, and processes, as well as studied Mars' weather and atmospheric structure.
+
+The Mars Orbiter Laser Altimeter (MOLA) made precise measurements of the heights and depths of surface features on Mars. MOLA fired infrared laser pulses downward 10 times per second, and measured the time it took for the reflected pulses to return from the surface. Converting this data to a colorized hillshade makes it particularly easy to visualize surface topography. The image used for the base of this map represents more than 600 million measurements gathered between 1999 and 2001. The average accuracy of each point is originally ~100 meters in horizontal position and the total elevation uncertainty is at least Â±3 m.]]
+}
+
+local treks_mola128_mola64_merge_90Nto90S_SimpleC_clon0 = {
+  Identifier = "mola128_mola64_merge_90Nto90S_SimpleC_clon0",
+  Name = [[MGS MOLA, Global DEM]],
+  FilePath = asset.localResource("MGS_MOLA/Global_DEM.vrt"),
+  Description = [[This data was acquired using the Mars Orbiter Laser Altimeter instrument aboard NASA’s Mars Global Surveyor spacecraft (MGS). MGS was launched on November 7, 1996 and arrived at Mars on September 11, 1997. It maintained a circular polar orbit, completing an orbital revolution every 117.65 minutes at an average altitude of 378 km (235 mi). Until November 2, 2006, MGS characterized and mapped Mars’ surface features, properties, topography, composition, and processes, as well as studied Mars’ weather and atmospheric structure. 
+
+The DEM represents more than 600 million measurements gathered between 1999 and 2001, adjusted for consistency and converted to planetary radii. These have been converted to elevations above the areoid as determined from a Martian gravity field solution GMM-2B, truncated to degree and order 50, and oriented according to current standards. The average accuracy of each point is originally ~100 meters in horizontal position and ~1 meter in radius. However, the total elevation uncertainty is at least ±3 m due to the global error in the areoid (±1.8 meters) and regional uncertainties in its shape. This DEM is a blend of data obtained with a resolution of 128 pixels per degree and 64 pixels per degree. The majority of the surface is covered at the higher resolution 128 pixels per degree. In projection, these pixels are 463 meters in size at the equator. However, these higher resolution data are very sparse near the two poles (above 87° north and below 87° south latitude) because these areas were sampled by only a few off-nadir altimetry tracks. Gaps between tracks of 1–2 km are common, and some gaps of up to 12 km occur near the equator.This data was acquired using the Mars Orbiter Laser Altimeter instrument aboard NASA’s Mars Global Surveyor spacecraft (MGS). MGS was launched on November 7, 1996 and arrived at Mars on September 11, 1997. It maintained a circular polar orbit, completing an orbital revolution every 117.65 minutes at an average altitude of 378 km (235 mi). Until November 2, 2006, MGS characterized and mapped Mars’ surface features, properties, topography, composition, and processes, as well as studied Mars’ weather and atmospheric structure. 
+
+The DEM represents more than 600 million measurements gathered between 1999 and 2001, adjusted for consistency and converted to planetary radii. These have been converted to elevations above the areoid as determined from a Martian gravity field solution GMM-2B, truncated to degree and order 50, and oriented according to current standards. The average accuracy of each point is originally ~100 meters in horizontal position and ~1 meter in radius. However, the total elevation uncertainty is at least ±3 m due to the global error in the areoid (±1.8 meters) and regional uncertainties in its shape. This DEM is a blend of data obtained with a resolution of 128 pixels per degree and 64 pixels per degree. The majority of the surface is covered at the higher resolution 128 pixels per degree. In projection, these pixels are 463 meters in size at the equator. However, these higher resolution data are very sparse near the two poles (above 87° north and below 87° south latitude) because these areas were sampled by only a few off-nadir altimetry tracks. Gaps between tracks of 1–2 km are common, and some gaps of up to 12 km occur near the equator.]]
+}
+
+local treks_mola_roughness = {
+  Identifier = "mola_roughness",
+  Name = [[MGS MOLA, Global Surface Roughness]],
+  FilePath = asset.localResource("MGS_MOLA/Global_Surface_Roughness.vrt"),
+  Description = [[The Mars Orbiter Laser Altimeter (MOLA) aboard the Mars Global Surveyor (MGS) spacecraft, made precise altimetry measurements from orbit around Mars from September 1997 to June, 2001. The MOLA instrument transmitted infrared laser pulses towards Mars at a rate of 10 times per second, and measured the time of flight to determine the range (distance) of the MGS spacecraft to the Martian surface. The range measurements resulted in precise topographic maps of Mars. This kilometer-scale global roughness map is presented as an RGB composite image. The Blue, Green and Red channels contain roughness at 0.6 km, 2.4 km, and 9.2 km baselines. Brighter shades denote rougher surface. Thus, general brightness denotes general roughness, and color hue denotes the nature of the scale dependence of roughness. Map resolution/scale: 8 ppd/7.5km. Kreslavsky and Head, 2000, JGR, VOL. 105, NO. Ell, PAGES 26,695-26,711]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Mars_MGS_MOLA_ClrShade_merge_global_463m)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_mola128_mola64_merge_90Nto90S_SimpleC_clon0)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_mola_roughness)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Mars_MGS_MOLA_ClrShade_merge_global_463m")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_mola128_mola64_merge_90Nto90S_SimpleC_clon0")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_mola_roughness")
+end)
+
+asset.export("Mars_MGS_MOLA_ClrShade_merge_global_463m", treks_Mars_MGS_MOLA_ClrShade_merge_global_463m)
+asset.export("mola128_mola64_merge_90Nto90S_SimpleC_clon0", treks_mola128_mola64_merge_90Nto90S_SimpleC_clon0)
+asset.export("mola_roughness", treks_mola_roughness)
+
+
+asset.meta = {
+  Name = [[NASA Treks Layers for Mars MGS_MOLA],
+  Version = "1.0",
+  Author = "NASA/Treks",
+  URL = "https://trek.nasa.gov/mars",
+  License = "NASA/Treks",
+  Description = [[MGS_MOLA layers from NASA/Treks for Mars]]
+}

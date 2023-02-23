@@ -20,10 +20,11 @@ local images = asset.syncedResource({
   Name = "Rosetta Images",
   Type = "HttpSynchronization",
   Identifier = "rosettaimages",
-  Version = 2
+  Version = 2,
+  UnzipFiles = true
 })
 
-local imagesDestination = images .. "images"
+local imagesDestination = images .. "images_v1_v2"
 
 local Barycenter = {
   Identifier = "67PBarycenter",
@@ -70,7 +71,7 @@ local Comet67P = {
               Spice  = { "ROS_NAVCAM-A" }
             }
           },
-          Target = { 
+          Target = {
             Read  = {
               "TARGET_NAME",
               "INSTRUMENT_HOST_NAME",
@@ -130,27 +131,63 @@ local Trail67P = {
   }
 }
 
-asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting Rosetta images")
-    openspace.unzipFile(images .. "images_v1_v2.zip", imagesDestination, true)
-  end
-end)
+-- actions
+local focus_67p = {
+  Identifier = "os.missions.rosetta.67p.focus",
+  Name = "Focus on 67P",
+  Command = [[
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', '67P'); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+  ]],
+  Documentation = "Sets the focus of the camera on 67P",
+  GuiPath = "/Missions/Rosetta",
+  isLocal = false
+}
 
+local clear_image_projections_67p = {
+  Identifier = "os.missions.rosetta.67p.clearimageprojections",
+  Name = "Clear 67P projections",
+  Command = [[
+    openspace.setPropertyValue('Scene.67P.Renderable.ProjectionComponent.ClearAllProjections', true);
+  ]],
+  Documentation = "Removes all image projections from 67P",
+  GuiPath = "/Missions/Rosetta",
+  isLocal = false
+}
+
+local toggle_67p_projection = {
+  Identifier = "os.missions.rosetta.toggle67pprojection",
+  Name = "Toggle 67P projection",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.67P.Renderable.ProjectionComponent.PerformProjection', not openspace.getPropertyValue('Scene.67P.Renderable.ProjectionComponent.PerformProjection'));
+  ]],
+  Documentation = "Enables or disables the image projection on 67P",
+  GuiPath = "/Missions/Rosetta",
+  isLocal = false
+}
 
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Barycenter)
   openspace.addSceneGraphNode(Comet67P)
   openspace.addSceneGraphNode(Trail67P)
+
+  openspace.action.registerAction(focus_67p)
+  openspace.action.registerAction(clear_image_projections_67p)
+  openspace.action.registerAction(toggle_67p_projection)
 end)
-    
+
 asset.onDeinitialize(function()
+  openspace.action.removeAction(toggle_67p_projection)
+  openspace.action.removeAction(clear_image_projections_67p)
+  openspace.action.removeAction(focus_67p)
+
   openspace.removeSceneGraphNode(Trail67P)
   openspace.removeSceneGraphNode(Comet67P)
   openspace.removeSceneGraphNode(Barycenter)
 end)
-    
+
 asset.export("Barycenter", Barycenter) -- @TODO: This double export should disappear
 asset.export(Barycenter)
 asset.export("Comet67P", Comet67P)  -- @TODO: This double export should disappear

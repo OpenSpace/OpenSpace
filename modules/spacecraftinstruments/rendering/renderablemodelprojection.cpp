@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -112,7 +112,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     addProperty(_performShading);
 }
 
-RenderableModelProjection::~RenderableModelProjection() {} // NOLINT
+RenderableModelProjection::~RenderableModelProjection() {}
 
 bool RenderableModelProjection::isReady() const {
     return (_programObject != nullptr) && _projectionComponent.isReady();

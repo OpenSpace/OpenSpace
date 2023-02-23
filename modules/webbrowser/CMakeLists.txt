@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,10 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
-
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 include(cmake/webbrowser_helpers.cmake)
 
 set(WEBBROWSER_MODULE_NAME WebBrowser)
@@ -90,14 +87,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
 find_package(CEF REQUIRED)
 
 # Include the libcef_dll_wrapper target (executes libcef_dll/CMakeLists.txt).
-add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
+add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper SYSTEM)
 
 mark_as_advanced(CEF_DEBUG_INFO_FLAG USE_ATL USE_OFFICIAL_BUILD_SANDBOX USE_SANDBOX)
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-  # The CEF DLL wrapper is raising a lot of warnings on GCC
-  target_compile_options(libcef_dll_wrapper PRIVATE "-w")
-endif ()
+target_compile_options(libcef_dll_wrapper PRIVATE "-w")
 
 target_precompile_headers(libcef_dll_wrapper PRIVATE
   [["include/cef_client.h"]]
@@ -266,8 +260,7 @@ target_precompile_headers(${webbrowser_module} PRIVATE
   <include/wrapper/cef_helpers.h>
 )
 
-set_folder_location(libcef_dll_wrapper "Helper")
-set_folder_location(openspace_web_helper "Helper")
+set_target_properties(libcef_dll_wrapper PROPERTIES FOLDER "Helper")
 
 # Display CEF configuration settings.
 # PRINT_CEF_CONFIG()

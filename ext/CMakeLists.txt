@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -21,8 +21,6 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE   #
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
-
-include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
 
 # System libraries
 if (APPLE)
@@ -48,16 +46,14 @@ endif ()
 
 # Ghoul
 add_subdirectory(ghoul)
-set_folder_location(Lua "External")
-set_folder_location(lz4 "External")
-set_folder_location(GhoulTest "Unit Tests")
+set_target_properties(GhoulTest PROPERTIES FOLDER "Unit Tests")
 
 # Spice
 begin_dependency("Spice")
 set(SPICE_BUILD_SHARED_LIBRARY OFF CACHE BOOL "" FORCE)
-add_subdirectory(spice)
+add_subdirectory(spice SYSTEM)
 target_compile_features(spice PUBLIC cxx_std_20)
-set_folder_location(spice "External")
+set_target_properties(spice PROPERTIES FOLDER "External")
 end_dependency()
 
 # Curl

@@ -24,7 +24,7 @@ local Enceladus = {
       SourceFrame = "IAU_ENCELADUS",
       DestinationFrame = "GALACTIC"
     }
-  },    
+  },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 252000,
@@ -51,14 +51,43 @@ local Enceladus = {
   }
 }
 
+
+local EnceladusLabel = {
+  Identifier = "EnceladusLabel",
+  Parent = Enceladus.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Enceladus",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.3, 10.0 },
+    FadeWidths = { 0.15, 10.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Enceladus Label",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = "Label for Saturn's moon Enceladus"
+  }
+}
+
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Enceladus)
+  openspace.addSceneGraphNode(EnceladusLabel)
 end)
-  
+
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EnceladusLabel)
   openspace.removeSceneGraphNode(Enceladus)
 end)
-  
+
 asset.export(Enceladus)
 
 

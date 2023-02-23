@@ -65,11 +65,11 @@ local GaiaStars = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GaiaStars)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GaiaStars)
 end)
-  
+
 asset.export(GaiaStars)
 
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,6 @@ namespace openspace::globebrowsing::layers {
 // The order and values of these enums are implicitly used in many places in the code and
 // in the shaders, so we need to ensure that the order is not messed with
 
-    
 static_assert(
     std::is_sorted(
         Groups.begin(),

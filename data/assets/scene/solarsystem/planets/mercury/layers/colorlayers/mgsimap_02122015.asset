@@ -12,7 +12,7 @@ local layer = {
   Identifier = "mgsimap_02122015",
   Enabled = asset.enabled,
   FilePath = texturesPath .. "mgsimap_02122015.png",
-  Settings = { 
+  Settings = {
     Gamma = 1.33,
     Multiplier = 1.15
   },

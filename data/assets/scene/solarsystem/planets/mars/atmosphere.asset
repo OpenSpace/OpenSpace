@@ -20,7 +20,7 @@ local Atmosphere = {
           Wavelengths = { 680, 550, 440 },
           -- Reflection coefficients are given in km^-1
           Scattering = { 19.918E-3, 13.57E-3, 5.75E-3 }
-          -- In Rayleigh scattering, the coefficients of 
+          -- In Rayleigh scattering, the coefficients of
           -- absorption and scattering are the same.
         },
       -- Thickness of atmosphere if its density were uniform, in Km
@@ -36,7 +36,7 @@ local Atmosphere = {
         },
         -- Mie Height scale (atmosphere thickness for constant density) in Km
         H_M = 3.09526,
-        -- Mie Phase Function Value (G e [-1.0, 1.0]. 
+        -- Mie Phase Function Value (G e [-1.0, 1.0].
         -- If G = 1.0, Mie phase function = Rayleigh Phase Function)
         G = 0.85
       },
@@ -55,11 +55,11 @@ local Atmosphere = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Atmosphere)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Atmosphere)
 end)
-  
+
 asset.export(Atmosphere)
 
 

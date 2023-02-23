@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -82,17 +82,11 @@ void ModuleEngine::initialize(
             m->initialize(configuration);
         }
         catch (const documentation::SpecificationError& e) {
-            for (const documentation::TestResult::Offense& o : e.result.offenses) {
-                LERRORC(e.component, o.offender + ": " + ghoul::to_string(o.reason));
-            }
-            for (const documentation::TestResult::Warning& w : e.result.warnings) {
-                LWARNINGC(e.component, w.offender + ": " + ghoul::to_string(w.reason));
-            }
+            logError(e);
             throw;
         }
 
         addPropertySubOwner(m);
-
     }
 }
 
@@ -153,12 +147,11 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod) {
     );
     if (it != _modules.end()) {
         throw ghoul::RuntimeError(
-            "Module name '" + mod->identifier() + "' was registered before",
+            fmt::format("Module name '{}' was registered before", mod->identifier()),
             "ModuleEngine"
         );
     }
 
-    LDEBUG(fmt::format("Registering module '{}'", mod->identifier()));
     LDEBUG(fmt::format("Registered module '{}'", mod->identifier()));
     _modules.push_back(std::move(mod));
 }
@@ -173,7 +166,7 @@ std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
 }
 
 ghoul::systemcapabilities::Version ModuleEngine::requiredOpenGLVersion() const {
-    ghoul::systemcapabilities::Version version = { 0, 0, 0 };
+    ghoul::systemcapabilities::Version version = { .major = 0, .minor = 0, .release = 0 };
 
     for (const std::unique_ptr<OpenSpaceModule>& m : _modules) {
         version = std::max(version, m->requiredOpenGLVersion());

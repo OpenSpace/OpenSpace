@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
     columnfilter.h
@@ -67,4 +67,7 @@ create_new_module(
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-include_external_library(${exoplanets_expert_tool_module} PRIVATE Implot ${CMAKE_CURRENT_SOURCE_DIR}/ext/implot)
+add_subdirectory(ext/implot SYSTEM)
+target_link_libraries(${exoplanets_expert_tool_module} PRIVATE Implot)
+set_target_properties(Implot PROPERTIES FOLDER "External")
+

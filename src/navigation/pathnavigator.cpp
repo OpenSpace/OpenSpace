@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -118,7 +118,7 @@ namespace {
 namespace openspace::interaction {
 
 PathNavigator::PathNavigator()
-    : properties::PropertyOwner({ "PathNavigator" })
+    : properties::PropertyOwner({ "PathNavigator", "Path Navigator" })
     , _defaultPathType(
         DefaultCurveOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -157,7 +157,7 @@ PathNavigator::PathNavigator()
     addProperty(_relevantNodeTags);
 }
 
-PathNavigator::~PathNavigator() {} // NOLINT
+PathNavigator::~PathNavigator() {}
 
 Camera* PathNavigator::camera() const {
     return global::navigationHandler->camera();
@@ -274,12 +274,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
     }
     catch (const documentation::SpecificationError& e) {
         LERROR("Could not create camera path");
-        for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERRORC(o.offender, ghoul::to_string(o.reason));
-        }
-        for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNINGC(w.offender, ghoul::to_string(w.reason));
-        }
+        logError(e);
     }
     catch (const PathCurve::TooShortPathError&) {
         // Do nothing
@@ -537,18 +532,25 @@ SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
 }
 
 void PathNavigator::removeRollRotation(CameraPose& pose, double deltaTime) {
-    const glm::dvec3 anchorPos = anchor()->worldPosition();
+    // The actual position for the camera does not really matter. Use the origin,
+    // to avoid precision problems when we have large values for the position
+    const glm::dvec3 cameraPos = glm::dvec3(0.0);
     const glm::dvec3 cameraDir = glm::normalize(
         pose.rotation * Camera::ViewDirectionCameraSpace
     );
-    const double anchorToPosDistance = glm::distance(anchorPos, pose.position);
-    const double notTooCloseDistance = deltaTime * anchorToPosDistance;
-    glm::dvec3 lookAtPos = pose.position + notTooCloseDistance * cameraDir;
+
+    // The actual distance does not really matter either. Just has to be far
+    // enough away from the camera
+    constexpr double NotTooCloseDistance = 10000.0;
+
+    glm::dvec3 lookAtPos = cameraPos + NotTooCloseDistance * cameraDir;
+
     glm::dquat rollFreeRotation = ghoul::lookAtQuaternion(
-        pose.position,
+        cameraPos,
         lookAtPos,
         camera()->lookUpVectorWorldSpace()
     );
+
     pose.rotation = rollFreeRotation;
 }
 

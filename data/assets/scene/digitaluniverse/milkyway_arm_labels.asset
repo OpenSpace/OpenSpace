@@ -31,7 +31,7 @@ local plane = {
   },
   GUI = {
     Name = "Milky Way Arms Labels",
-    Path = "/Universe/Galaxies",
+    Path = "/Milky Way",
     Description = [[Census: 1 image. DU Version:  1.2. This image contains labels for
       the Milky Way's spiral arms. We label them in this manner ("hard coding" the
       labels into an image rather than having native labels) so that they can retain
@@ -43,11 +43,11 @@ local plane = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(plane)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(plane)
 end)
-  
+
 asset.export(plane)
 
 

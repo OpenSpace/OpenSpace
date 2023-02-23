@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,13 +58,10 @@ LabelParser::LabelParser(std::string fileName, const ghoul::Dictionary& dictiona
         if (decoderStr == "Instrument") {
             // for each playbook call -> create a Decoder object
             for (std::string_view key : typeDict.keys()) {
-                std::string currentKey = fmt::format("{}.{}", decoderStr, key);
-
-                if (!dictionary.hasValue<ghoul::Dictionary>(currentKey)) {
+                if (!typeDict.hasValue<ghoul::Dictionary>(key)) {
                     continue;
                 }
-                ghoul::Dictionary decoderDict =
-                    dictionary.value<ghoul::Dictionary>(currentKey);
+                ghoul::Dictionary decoderDict = typeDict.value<ghoul::Dictionary>(key);
 
                 std::unique_ptr<Decoder> decoder = Decoder::createFromDictionary(
                     decoderDict,
@@ -274,12 +271,12 @@ bool LabelParser::create() {
                         spiceInstrument.push_back(_instrumentID);
 
                         Image image = {
-                            TimeRange(startTime, stopTime),
-                            imagePath,
-                            spiceInstrument,
-                            _target,
-                            false,
-                            false
+                            .timeRange = TimeRange(startTime, stopTime),
+                            .path = imagePath,
+                            .activeInstruments = spiceInstrument,
+                            .target = _target,
+                            .isPlaceholder = false,
+                            .projected = false
                         };
 
                         _subsetMap[image.target]._subset.push_back(image);

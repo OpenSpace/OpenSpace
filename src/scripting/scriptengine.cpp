@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -253,10 +253,7 @@ bool ScriptEngine::hasLibrary(const std::string& name) {
 bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback) {
     ZoneScoped
 
-    if (script.empty()) {
-        LWARNING("Script was empty");
-        return false;
-    }
+    ghoul_assert(!script.empty(), "Script must not be empty");
 
     if (_logScripts) {
         // Write command to log before it's executed
@@ -448,31 +445,12 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                 library.documentations.push_back(std::move(func));
             }
             catch (const documentation::SpecificationError& e) {
-                for (const documentation::TestResult::Offense& o : e.result.offenses)
-                {
-                    LERRORC(o.offender, ghoul::to_string(o.reason));
-                }
-                for (const documentation::TestResult::Warning& w : e.result.warnings)
-                {
-                    LWARNINGC(w.offender, ghoul::to_string(w.reason));
-                }
+                logError(e);
             }
             lua_pop(state, 1);
         }
         lua_pop(state, 1);
     }
-}
-
-void ScriptEngine::remapPrintFunction() {
-    //ghoul::lua::logStack(_state);
- //   lua_getglobal(_state, _luaGlobalNamespace.c_str());
-    //ghoul::lua::logStack(_state);
- //   lua_pushstring(_state, _printFunctionName.c_str());
-    //ghoul::lua::logStack(_state);
- //   lua_pushcfunction(_state, _printFunctionReplacement);
-    //ghoul::lua::logStack(_state);
- //   lua_settable(_state, _setTableOffset);
-    //ghoul::lua::logStack(_state);
 }
 
 bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
@@ -548,7 +526,7 @@ std::string ScriptEngine::generateJson() const {
     return json.str();
 }
 
-bool ScriptEngine::writeLog(const std::string& script) {
+void ScriptEngine::writeLog(const std::string& script) {
     ZoneScoped
 
     // Check that logging is enabled and initialize if necessary
@@ -571,12 +549,12 @@ bool ScriptEngine::writeLog(const std::string& script) {
                     std::filesystem::path(_logFilename)
                 ));
 
-                return false;
+                return;
             }
         }
         else {
             _logScripts = false;
-            return false;
+            return;
         }
     }
 
@@ -584,38 +562,40 @@ bool ScriptEngine::writeLog(const std::string& script) {
     std::ofstream file(_logFilename, std::ofstream::app);
     if (!file.good()) {
         LERROR(fmt::format("Could not open file '{}' for logging scripts", _logFilename));
-        return false;
+        return;
     }
 
-    file << script << std::endl;
-    file.close();
-
-    return true;
+    file << script << '\n';
 }
 
 void ScriptEngine::preSync(bool isMaster) {
     ZoneScoped
 
-    if (!isMaster) {
-        return;
-    }
-
     std::lock_guard guard(_clientScriptsMutex);
-    while (!_incomingScripts.empty()) {
-        QueueItem item = std::move(_incomingScripts.front());
-        _incomingScripts.pop();
+    if (isMaster) {
+        while (!_incomingScripts.empty()) {
+            QueueItem item = std::move(_incomingScripts.front());
+            _incomingScripts.pop();
 
-        _scriptsToSync.push_back(item.script);
-        const bool remoteScripting = item.remoteScripting;
+            _scriptsToSync.push_back(item.script);
+            const bool remoteScripting = item.remoteScripting;
 
-        // Not really a received script but the master also needs to run the script...
-        _masterScriptQueue.push(item);
+            // Not really a received script but the master also needs to run the script...
+            _masterScriptQueue.push(item);
 
-        if (global::parallelPeer->isHost() && remoteScripting) {
-            global::parallelPeer->sendScript(item.script);
+            if (global::parallelPeer->isHost() && remoteScripting) {
+                global::parallelPeer->sendScript(item.script);
+            }
+            if (global::sessionRecording->isRecording()) {
+                global::sessionRecording->saveScriptKeyframeToTimeline(item.script);
+            }
         }
-        if (global::sessionRecording->isRecording()) {
-            global::sessionRecording->saveScriptKeyframeToTimeline(item.script);
+    }
+    else {
+        while (!_incomingScripts.empty()) {
+            QueueItem item = std::move(_incomingScripts.front());
+            _incomingScripts.pop();
+            _clientScriptQueue.push(item.script);
         }
     }
 }
@@ -682,9 +662,10 @@ void ScriptEngine::queueScript(std::string script,
 {
     ZoneScoped
 
-    if (!script.empty()) {
-        _incomingScripts.push({ std::move(script), remoteScripting, callback });
+    if (script.empty()) {
+        return;
     }
+    _incomingScripts.push({ std::move(script), remoteScripting, std::move(callback) });
 }
 
 
@@ -692,8 +673,8 @@ void ScriptEngine::addBaseLibrary() {
     ZoneScoped
 
     LuaLibrary lib = {
-        "",
-        {
+        .name = "",
+        .functions = {
             {
                 "printTrace",
                 &luascriptfunctions::printTrace,

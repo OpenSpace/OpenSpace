@@ -20,9 +20,9 @@ local ToyVolume = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ToyVolume)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ToyVolume)
 end)
-  
+
 asset.export(ToyVolume)

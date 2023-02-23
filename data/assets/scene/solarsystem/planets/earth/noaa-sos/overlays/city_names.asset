@@ -3,9 +3,9 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "City Names"
 local Identifier = "noaa-sos-overlays-city_names"
-local Description = [[Overlays are datasets with transparent backgrounds that contain 
-foreground data used to augment other SOS datasets.This particular dataset overlays city 
-names from Wikipedia's List of Metropolitan Areas by Population onto any dataset that you 
+local Description = [[Overlays are datasets with transparent backgrounds that contain
+foreground data used to augment other SOS datasets.This particular dataset overlays city
+names from Wikipedia's List of Metropolitan Areas by Population onto any dataset that you
 are viewing]]
 local URL = "https://sos.noaa.gov/catalog/datasets/city-names/"
 
@@ -25,7 +25,7 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
 end)
 

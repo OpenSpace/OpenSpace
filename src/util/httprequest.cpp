@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,7 +58,7 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
     }
 
     curl_easy_setopt(curl, CURLOPT_URL, _url.data());
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace"); // NOLINT
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace");
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
     // The leading + in all of the lambda expressions are to cause an implicit conversion

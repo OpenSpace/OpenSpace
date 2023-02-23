@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -168,7 +168,10 @@ constexpr TimeUnit timeUnitFromString(std::string_view unitName) {
     }
 }
 
-std::pair<double, std::string> simplifyTime(double seconds,
+std::pair<double, std::string_view> simplifyTime(double seconds,
+    bool forceSingularForm = false);
+
+std::vector<std::pair<double, std::string_view>> splitTime(double seconds,
     bool forceSingularForm = false);
 
 constexpr double convertTime(double t, TimeUnit sourceUnit, TimeUnit destinationUnit) {

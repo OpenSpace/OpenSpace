@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -90,6 +90,10 @@ public:
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
+    bool disabledKeybindings() const;
+    bool disabledMouse() const;
+    bool disabledJoystick() const;
+
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
@@ -169,6 +173,7 @@ private:
 
     std::optional<NavigationState> _pendingNavigationState;
 
+    properties::BoolProperty _disableKeybindings;
     properties::BoolProperty _disableMouseInputs;
     properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;

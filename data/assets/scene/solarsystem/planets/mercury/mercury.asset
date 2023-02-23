@@ -59,10 +59,14 @@ local MercuryLabel = {
     Type = "RenderableLabel",
     Text = "Mercury",
     FontSize = 70.0,
-    Size = 8.46,
-    MinMaxSize = { 1, 100 },
+    Size = 8.5,
+    MinMaxSize = { 1, 40 },
     OrientationOption = "Camera View Direction",
-    BlendMode = "Additive"
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 20.0 },
+    FadeWidths = { 1.0, 30.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
@@ -75,12 +79,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Mercury)
   openspace.addSceneGraphNode(MercuryLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MercuryLabel)
   openspace.removeSceneGraphNode(Mercury)
 end)
-    
+
 asset.export(Mercury)
 asset.export(MercuryLabel)
 

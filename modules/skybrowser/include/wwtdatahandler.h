@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <filesystem>
 #include <memory>
+#include <optional>
 
 namespace tinyxml2 { class XMLElement; }
 
@@ -45,19 +46,21 @@ struct ImageData {
     float fov = 0.f;
     glm::dvec2 equatorialSpherical = glm::dvec2(0.0);
     glm::dvec3 equatorialCartesian = glm::dvec3(0.0);
+    std::string identifier;
 };
 
 class WwtDataHandler {
 public:
     void loadImages(const std::string& root, const std::filesystem::path& directory);
     int nLoadedImages() const;
-    const ImageData& image(int i) const;
+    std::optional<const ImageData> image(const std::string& imageUrl) const;
+    const std::map<std::string, ImageData>& images() const;
 
 private:
     void saveImagesFromXml(const tinyxml2::XMLElement* root, std::string collection);
 
     // Images
-    std::vector<ImageData> _images;
+    std::map<std::string, ImageData> _images;
 };
 } // namespace openspace
 

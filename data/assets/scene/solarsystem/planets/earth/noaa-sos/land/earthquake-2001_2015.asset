@@ -3,16 +3,16 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Earthquakes - 2001-2015"
 local Identifier = "noaa-sos-land-earthquake-2001_2015"
-local Description = [[This animation shows every recorded earthquake in sequence as they 
-occurred from January 1, 2001, through December 31, 2015, at a rate of 30 days per 
-second. The earthquake hypocenters first appear as flashes then remain as colored circles 
-before shrinking with time so as not to obscure subsequent earthquakes. The size of the 
-circle represents the earthquake magnitude while the color represents its depth within 
-the earth. At the end of the animation it will first show all quakes in this 15-year 
-period. Next, it will show only those earthquakes greater than magnitude 6.5, the 
-smallest earthquake size known to make a tsunami. Finally it will only show those 
-earthquakes with magnitudes of magnitude 8.0 or larger, the "great" earthquakes most 
-likely to pose a tsunami threat when they occur under the ocean or near a coastline and 
+local Description = [[This animation shows every recorded earthquake in sequence as they
+occurred from January 1, 2001, through December 31, 2015, at a rate of 30 days per
+second. The earthquake hypocenters first appear as flashes then remain as colored circles
+before shrinking with time so as not to obscure subsequent earthquakes. The size of the
+circle represents the earthquake magnitude while the color represents its depth within
+the earth. At the end of the animation it will first show all quakes in this 15-year
+period. Next, it will show only those earthquakes greater than magnitude 6.5, the
+smallest earthquake size known to make a tsunami. Finally it will only show those
+earthquakes with magnitudes of magnitude 8.0 or larger, the "great" earthquakes most
+likely to pose a tsunami threat when they occur under the ocean or near a coastline and
 when they are shallow within the earth (less than 100 km or 60 mi. deep)]]
 local URL = "https://sos.noaa.gov/catalog/datasets/earthquakes-2001-2015/"
 
@@ -68,13 +68,13 @@ local legend = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_allquakes)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_quake_basemap)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_tsunami_basemap)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_quakes_gte6_5)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_quakes_gte8)
-  openspace.addScreenSpaceRenderable(legend);  
+  openspace.addScreenSpaceRenderable(legend)
 end)
 
 asset.onDeinitialize(function()

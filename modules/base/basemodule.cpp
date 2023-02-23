@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,9 @@
 #include <modules/base/dashboard/dashboarditemangle.h>
 #include <modules/base/dashboard/dashboarditemdate.h>
 #include <modules/base/dashboard/dashboarditemdistance.h>
+#include <modules/base/dashboard/dashboarditemelapsedtime.h>
 #include <modules/base/dashboard/dashboarditemframerate.h>
+#include <modules/base/dashboard/dashboarditeminputstate.h>
 #include <modules/base/dashboard/dashboarditemmission.h>
 #include <modules/base/dashboard/dashboarditemparallelconnection.h>
 #include <modules/base/dashboard/dashboarditempropertyvalue.h>
@@ -107,7 +109,9 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fDashboard->registerClass<DashboardItemAngle>("DashboardItemAngle");
     fDashboard->registerClass<DashboardItemDate>("DashboardItemDate");
     fDashboard->registerClass<DashboardItemDistance>("DashboardItemDistance");
+    fDashboard->registerClass<DashboardItemElapsedTime>("DashboardItemElapsedTime");
     fDashboard->registerClass<DashboardItemFramerate>("DashboardItemFramerate");
+    fDashboard->registerClass<DashboardItemInputState>("DashboardItemInputState");
     fDashboard->registerClass<DashboardItemMission>("DashboardItemMission");
     fDashboard->registerClass<DashboardItemParallelConnection>(
         "DashboardItemParallelConnection"

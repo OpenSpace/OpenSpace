@@ -3,18 +3,18 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Satellites: Paths and Positions"
 local Identifier = "noaa-sos-atmosphere-all_sats"
-local Description = [[Satellites are a key tool for scientists to monitor and observe 
-the Earth's atmosphere from space. Geostationary satellites orbit around the Earth at the 
-same rate as the Earth rotates so that the satellites are over the same spot on Earth all 
-the time. This allows them to collect a continuous stream of data for one location so 
-that "movies" of the data can be made. The satellites are positioned 22,300 miles above 
-the Earth's surface in order to view the Earth's full disk and to maintain their 
-geostationary orbit. Geostationary satellites travel at about 7000mph in order to 
-maintain their geostationary orbit. In addition to geostationary satellites, scientists 
-also use polar orbiting satellites. These satellites circle the Earth, crossing the poles 
-on each orbit. Typically, polar orbiting satellites are about 500 miles above the Earth's 
-surface. The satellites travel at almost 17,000mph, allowing them to orbit the Earth in 
-roughly 100 minutes. A polar orbiting satellite is able to cover the whole Earth in less 
+local Description = [[Satellites are a key tool for scientists to monitor and observe
+the Earth's atmosphere from space. Geostationary satellites orbit around the Earth at the
+same rate as the Earth rotates so that the satellites are over the same spot on Earth all
+the time. This allows them to collect a continuous stream of data for one location so
+that "movies" of the data can be made. The satellites are positioned 22,300 miles above
+the Earth's surface in order to view the Earth's full disk and to maintain their
+geostationary orbit. Geostationary satellites travel at about 7000mph in order to
+maintain their geostationary orbit. In addition to geostationary satellites, scientists
+also use polar orbiting satellites. These satellites circle the Earth, crossing the poles
+on each orbit. Typically, polar orbiting satellites are about 500 miles above the Earth's
+surface. The satellites travel at almost 17,000mph, allowing them to orbit the Earth in
+roughly 100 minutes. A polar orbiting satellite is able to cover the whole Earth in less
 than one day]]
 local URL = "https://sos.noaa.gov/catalog/datasets/satellites-paths-and-positions/"
 
@@ -23,26 +23,20 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
   Type = "ImageSequenceTileLayer",
-  FolderPath = imagesDestination,
+  FolderPath = syncedDirectory .. "2048",
   Description = Description
 }
 
-asset.onInitialize(function() 
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "2048.zip", imagesDestination, true)
-  end
-
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

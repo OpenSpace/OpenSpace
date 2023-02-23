@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -354,7 +354,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     else {
         const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
         const double convertedD = convertMeters(d, unit);
-        dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
+        dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
     std::fill(_buffer.begin(), _buffer.end(), char(0));
@@ -385,7 +385,7 @@ glm::vec2 DashboardItemDistance::size() const {
     else {
         DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
         double convertedD = convertMeters(d, unit);
-        dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
+        dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
     return _font->boundingBox(

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,15 @@
 
 #include <modules/touch/include/touchmarker.h>
 #include <modules/touch/include/touchinteraction.h>
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/openspacemodule.h>
 #include <openspace/util/touch.h>
 #include <memory>
 
 namespace openspace {
 
-    class TuioEar;
+class TuioEar;
 
 #ifdef WIN32
 class Win32TouchHook;
@@ -41,8 +43,14 @@ class Win32TouchHook;
 
 class TouchModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "Touch";
+
     TouchModule();
     ~TouchModule();
+
+    // Function to check if the given renderable type is one that should
+    // use direct maniuplation
+    bool isDefaultDirectTouchType(std::string_view renderableType) const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
@@ -64,7 +72,13 @@ private:
     std::vector<TouchInput> _deferredRemovals;
     std::vector<TouchInput> _lastTouchInputs;
 
-    properties::BoolProperty _touchActive;
+    properties::BoolProperty _touchIsEnabled;
+    properties::BoolProperty _hasActiveTouchEvent;
+    properties::StringListProperty _defaultDirectTouchRenderableTypes;
+
+    // A sorted version of the list in the property
+    std::set<std::string> _sortedDefaultRenderableTypes;
+
     // contains an id and the Point that was processed last frame
     glm::ivec2 _webPositionCallback = glm::ivec2(0);
 #ifdef WIN32

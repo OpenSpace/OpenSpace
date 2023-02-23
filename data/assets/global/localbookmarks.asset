@@ -5,16 +5,18 @@ local nodes = bookmarkHelper.getBookmarks("Local Bookmarks", "${ASSETS}/customiz
 
 asset.onInitialize(function()
   for _, n in ipairs(nodes) do
-    openspace.addSceneGraphNode(n)
+    pcall(openspace.addSceneGraphNode, n)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for _, n in ipairs(nodes) do
-    openspace.removeSceneGraphNode(n)
+    if openspace.hasSceneGraphNode(n.Identifier) then
+      openspace.removeSceneGraphNode(n)
+    end
   end
 end)
-  
+
 for _, n in ipairs(nodes) do
   asset.export(n)
 end

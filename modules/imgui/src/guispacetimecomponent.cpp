@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -339,9 +339,9 @@ void GuiSpaceTimeComponent::render() {
     {
         const float dt = static_cast<float>(global::timeManager->targetDeltaTime());
         if (_firstFrame) {
-            const std::pair<double, std::string>& dtInfo = simplifyTime(dt);
+            const std::pair<double, std::string_view>& dtInfo = simplifyTime(dt);
             _deltaTime = static_cast<float>(dtInfo.first);
-            _deltaTimeUnit = timeUnitFromString(dtInfo.second.c_str());
+            _deltaTimeUnit = timeUnitFromString(dtInfo.second);
 
             _timeUnits = std::accumulate(
                 openspace::TimeUnits.begin(),

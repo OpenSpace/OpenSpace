@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -177,7 +177,7 @@ bool Sphere::initialize() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)) // NOLINT
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))
     );
 
     glEnableVertexAttribArray(2);
@@ -187,7 +187,7 @@ bool Sphere::initialize() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)) // NOLINT
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal))
     );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);

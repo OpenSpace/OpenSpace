@@ -2155,8 +2155,8 @@ void DataViewer::renderSettingsMenuContent() {
                 fmt::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.BillboardMinMaxSize', {})",
                     ExoplanetsExpertToolModule::GlyphCloudIdentifier,
-                    glm::dvec2(DefaultGlyphSize * glyphSizeScale
-                )),
+                    ghoul::to_string(glm::dvec2(DefaultGlyphSize * glyphSizeScale))
+                ),
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         }

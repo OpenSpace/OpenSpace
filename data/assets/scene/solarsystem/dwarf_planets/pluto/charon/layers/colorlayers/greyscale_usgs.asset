@@ -7,7 +7,7 @@ local layer = {
   FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/charon_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_CHARON_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90.0003,359.972,90",
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

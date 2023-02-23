@@ -82,13 +82,13 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(MoonTrail)
   openspace.addSceneGraphNode(EarthBarycenterTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthBarycenterTrail)
   openspace.removeSceneGraphNode(MoonTrail)
   openspace.removeSceneGraphNode(LaunchTrail)
 end)
-    
+
 asset.export(LaunchTrail)
 asset.export(MoonTrail)
 asset.export(EarthBarycenterTrail)

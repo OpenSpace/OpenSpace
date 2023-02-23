@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -394,6 +394,31 @@ namespace {
     }
     else {
         return j2000Seconds + dt;
+    }
+}
+
+/**
+ * Converts the given time to either a J2000 seconds number or a ISO 8601 timestamp,
+ * depending on the type of the given time.
+ *
+ * If the given time is a timestamp: the function returns a double precision value
+ * representing the ephemeris version of that time; that is the number of TDB seconds past
+ * the J2000 epoch.
+ *
+ * If the given time is a J2000 seconds value: the function returns a ISO 8601 timestamp.
+ */
+[[codegen::luawrap]] std::variant<std::string, double> convertTime(
+                                                   std::variant<std::string, double> time)
+{
+    using namespace openspace;
+
+    // Convert from timestamp to J2000 seconds
+    if (std::holds_alternative<std::string>(time)) {
+        return Time::convertTime(std::get<std::string>(time));
+    }
+    // Convert from J2000 seconds to ISO 8601 timestamp
+    else {
+        return std::string(Time(std::get<double>(time)).ISO8601());
     }
 }
 

@@ -3,9 +3,9 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Nighttime Lights - 2012"
 local Identifier = "noaa-sos-land-earth_night-2012"
-local Description = [[Earth at Night has been an SOS-user favorite dataset for many 
-years. Black Marble 2012 is the newest version of the spectacular view of our planet from 
-near-Earth orbit at night, which is the result of a partnership between NOAA, NASA, and 
+local Description = [[Earth at Night has been an SOS-user favorite dataset for many
+years. Black Marble 2012 is the newest version of the spectacular view of our planet from
+near-Earth orbit at night, which is the result of a partnership between NOAA, NASA, and
 the Department of Defense]]
 local URL = "https://sos.noaa.gov/catalog/datasets/nighttime-lights-2012/"
 
@@ -25,7 +25,7 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -99,13 +99,7 @@ Layer* LayerManager::addLayer(layers::Group::ID id, const ghoul::Dictionary& lay
         return _layerGroups[static_cast<size_t>(id)]->addLayer(layerDict);
     }
     catch (const documentation::SpecificationError& e) {
-        LERRORC(e.component, e.message);
-        for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERRORC(o.offender, ghoul::to_string(o.reason));
-        }
-        for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNINGC(w.offender, ghoul::to_string(w.reason));
-        }
+        logError(e);
         return nullptr;
     }
     catch (const ghoul::RuntimeError& e) {
@@ -145,7 +139,7 @@ std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups(
     ZoneScoped
 
     std::array<LayerGroup*, NumLayerGroups> res = {};
-    for (int i = 0; i < NumLayerGroups; ++i) {
+    for (size_t i = 0; i < NumLayerGroups; ++i) {
         res[i] = _layerGroups[i].get();
     }
     return res;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,7 +49,7 @@ public:
      * Returns the class name <code>TriggerProperty</code>.
      * \return The class name <code>TriggerProperty</code>
      */
-    std::string className() const override;
+    std::string_view className() const override;
 
     /**
      * Accepts only the <code>LUA_TNIL</code> type and will notify all the listeners
@@ -65,8 +65,6 @@ public:
      * \param value The ignored value
      */
     void set(std::any value) override;
-
-    std::string toJson() const override;
 
     std::string jsonValue() const override;
 };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -293,6 +293,14 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
         if (_tileProvider) {
             _tileProvider->reset();
             _parent.deleteLayer(identifier());
+        }
+    });
+
+    _renderSettings.onChange([&]() {
+        // Only if we are a height layer will anyone care about these settings changing as
+        // that will change the overall bounding box of the layer and thus require culling
+        if (_parent.isHeightLayer() && _onChangeCallback) {
+            _onChangeCallback(this);
         }
     });
 

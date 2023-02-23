@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,13 +68,6 @@ namespace {
         { "Points+Lines", RenderingModeLinesPoints }
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo AppearanceInfo =
-    {
-        "Appearance",
-        "Appearance",
-        "The appearance of the trail"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
@@ -117,7 +110,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering Mode",
-        "Determines how the trail should be rendered to the screen.If 'Lines' is "
+        "Determines how the trail should be rendered to the screen. If 'Lines' is "
         "selected, only the line part is visible, if 'Points' is selected, only the "
         "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts"
     };
@@ -162,7 +155,11 @@ documentation::Documentation RenderableTrail::Documentation() {
 }
 
 RenderableTrail::Appearance::Appearance()
-    : properties::PropertyOwner(AppearanceInfo)
+    : properties::PropertyOwner({
+        "Appearance",
+        "Appearance",
+        "The appearance of the trail"
+    })
     , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
     , lineFade(FadeInfo, 1.f, 0.f, 30.f)

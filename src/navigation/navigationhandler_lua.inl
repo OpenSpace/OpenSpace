@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,17 +70,6 @@ namespace {
 [[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState) {
     using namespace openspace;
 
-    documentation::TestResult r = documentation::testSpecification(
-        interaction::NavigationState::Documentation(),
-        navigationState
-    );
-
-    if (!r.success) {
-        throw ghoul::lua::LuaError(
-            fmt::format("Could not set camera state: {}", ghoul::to_string(r))
-        );
-    }
-
     global::navigationHandler->setNavigationStateNextFrame(
         interaction::NavigationState(navigationState)
     );
@@ -136,6 +125,38 @@ namespace {
     else {
         // Otherwise we can just select the next one
         global::navigationHandler->orbitalNavigator().setFocusNode(*(it + 1));
+    }
+    global::navigationHandler->orbitalNavigator().startRetargetAnchor();
+}
+
+// Picks the previous node from the interesting nodes out of the profile and selects that.
+// If the current anchor is not an interesting node, the first will be selected
+[[codegen::luawrap]] void targetPreviousInterestingAnchor() {
+    using namespace openspace;
+    if (global::profile->markNodes.empty()) {
+        LWARNINGC(
+            "targetPreviousInterestingAnchor",
+            "Profile does not define any interesting nodes"
+        );
+        return;
+    }
+    const std::vector<std::string>& markNodes = global::profile->markNodes;
+
+    std::string currAnchor =
+        global::navigationHandler->orbitalNavigator().anchorNode()->identifier();
+
+    auto it = std::find(markNodes.begin(), markNodes.end(), currAnchor);
+    if (it == markNodes.end()) {
+        // We want to use the first node if the current node is not an interesting node
+        global::navigationHandler->orbitalNavigator().setFocusNode(markNodes.front());
+    }
+    else if (it == markNodes.begin()) {
+        // We want to use the last node if the current node is the first in the list
+        global::navigationHandler->orbitalNavigator().setFocusNode(markNodes.back());
+    }
+    else {
+        // Otherwise we can just select the previous one
+        global::navigationHandler->orbitalNavigator().setFocusNode(*(it - 1));
     }
     global::navigationHandler->orbitalNavigator().startRetargetAnchor();
 }
@@ -372,6 +393,46 @@ joystickAxis(std::string joystickName, int axis)
 [[codegen::luawrap]] std::vector<std::string> listAllJoysticks() {
     using namespace openspace;
     return global::navigationHandler->listAllJoysticks();
+}
+
+/**
+ * Returns the distance in meters to the current focus node
+ */
+[[codegen::luawrap]] double distanceToFocus() {
+    using namespace openspace;
+
+    const SceneGraphNode * focus = global::navigationHandler->anchorNode();
+    Camera * camera = global::navigationHandler->camera();
+
+    return glm::distance(camera->positionVec3(), focus->worldPosition());
+}
+
+/**
+ * Returns the distance in meters to the current focus node's bounding sphere
+ */
+[[codegen::luawrap]] double distanceToFocusBoundingSphere() {
+    using namespace openspace;
+
+    const SceneGraphNode* focus = global::navigationHandler->anchorNode();
+    Camera* camera = global::navigationHandler->camera();
+
+    double distance = glm::distance(camera->positionVec3(), focus->worldPosition());
+
+    return distance - focus->boundingSphere();
+}
+
+/**
+ * Returns the distance in meters to the current focus node's interaction sphere
+ */
+[[codegen::luawrap]] double distanceToFocusInteractionSphere() {
+    using namespace openspace;
+
+    const SceneGraphNode* focus = global::navigationHandler->anchorNode();
+    Camera* camera = global::navigationHandler->camera();
+
+    double distance = glm::distance(camera->positionVec3(), focus->worldPosition());
+
+    return distance - focus->interactionSphere();
 }
 
 #include "navigationhandler_lua_codegen.cpp"
