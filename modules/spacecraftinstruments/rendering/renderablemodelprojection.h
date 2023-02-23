@@ -73,9 +73,10 @@ private:
     ProjectionComponent _projectionComponent;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    UniformCache(performShading, directionToSunViewSpace, modelViewTransform,
-        projectionTransform, projectionFading, baseTexture,
-        projectionTexture) _mainUniformCache;
+    UniformCache(modelViewTransform, projectionTransform, meshTransform,
+        meshNormalTransform, has_texture_diffuse, baseTexture, baseColor,
+        projectionTexture, performShading, projectionFading,
+        directionToSunViewSpace) _mainUniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
     UniformCache(projectionTexture, depthTexture, needShadowMap, ProjectorMatrix,

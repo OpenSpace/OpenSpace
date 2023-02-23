@@ -38,9 +38,11 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr std::array<const char*, 7> MainUniformNames = {
-        "performShading", "directionToSunViewSpace", "modelViewTransform",
-        "projectionTransform", "projectionFading", "baseTexture", "projectionTexture"
+    constexpr std::array<const char*, 11> MainUniformNames = {
+        "modelViewTransform", "projectionTransform", "meshTransform",
+        "meshNormalTransform", "has_texture_diffuse", "baseTexture", "baseColor",
+        "projectionTexture", "performShading", "projectionFading",
+        "directionToSunViewSpace"
     };
 
     constexpr std::array<const char*, 6> FboUniformNames = {
@@ -224,6 +226,8 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
     const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * transform;
+
+    // malej 2023-FEB-23: The light sources should probably not be hard coded
     const glm::vec3 directionToSun = glm::normalize(_sunPosition - bodyPos);
     const glm::vec3 directionToSunViewSpace = glm::normalize(
         glm::mat3(data.camera.combinedViewMatrix()) * directionToSun
