@@ -30,6 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/distanceconversion.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/updatestructures.h>

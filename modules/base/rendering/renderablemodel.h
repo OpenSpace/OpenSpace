@@ -33,7 +33,6 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/util/distanceconversion.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/opengl/uniformcache.h>

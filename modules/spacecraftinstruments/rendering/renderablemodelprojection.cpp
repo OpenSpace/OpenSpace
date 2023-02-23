@@ -30,6 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/distanceconversion.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/model/modelgeometry.h>
@@ -69,6 +70,38 @@ namespace {
         // This specifies the model that is rendered by the Renderable.
         std::filesystem::path geometryFile;
 
+        enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
+            Nanometer,
+            Micrometer,
+            Millimeter,
+            Centimeter,
+            Decimeter,
+            Meter,
+            Kilometer,
+
+            // Weird units
+            Thou,
+            Inch,
+            Foot,
+            Yard,
+            Chain,
+            Furlong,
+            Mile
+        };
+
+        // The scale of the model. For example if the model is in centimeters
+        // then ModelScale = Centimeter or ModelScale = 0.01
+        std::optional<std::variant<ScaleUnit, double>> modelScale;
+
+        // By default the given ModelScale is used to scale the model down,
+        // by setting this setting to true the model is instead scaled up with the
+        // given ModelScale
+        std::optional<bool> invertModelScale;
+
+        // Set if invisible parts (parts with no textures or materials) of the model
+        // should be forced to render or not.
+        std::optional<bool> forceRenderInvisible;
+
         // Contains information about projecting onto this planet.
         ghoul::Dictionary projection
             [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
@@ -97,18 +130,52 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    if (p.forceRenderInvisible.has_value()) {
+        _forceRenderInvisible = *p.forceRenderInvisible;
+
+        if (!_forceRenderInvisible) {
+            // Asset file have specifically said to not render invisible parts,
+            // do not notify in the log if invisible parts are detected and dropped
+            _notifyInvisibleDropped = false;
+        }
+    }
+
     std::filesystem::path file = absPath(p.geometryFile.string());
     _geometry = ghoul::io::ModelReader::ref().loadModel(
         file.string(),
-        ghoul::io::ModelReader::ForceRenderInvisible::No,
-        ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
+        ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
+        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
     );
+
+    _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
+
+    if (p.modelScale.has_value()) {
+        if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
+            Parameters::ScaleUnit scaleUnit =
+                std::get<Parameters::ScaleUnit>(*p.modelScale);
+            DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
+            _modelScale = toMeter(distanceUnit);
+        }
+        else if (std::holds_alternative<double>(*p.modelScale)) {
+            _modelScale = std::get<double>(*p.modelScale);
+        }
+        else {
+            throw ghoul::MissingCaseException();
+        }
+
+        if (_invertModelScale) {
+            _modelScale = 1.0 / _modelScale;
+        }
+    }
 
     addPropertySubOwner(_projectionComponent);
     _projectionComponent.initialize(identifier(), p.projection);
 
-    double boundingSphereRadius = p.boundingSphereRadius.value_or(1.0e9);
-    setBoundingSphere(boundingSphereRadius);
+    if (p.boundingSphereRadius.has_value()) {
+        _shouldOverrideBoundingSphere = true;
+        double boundingSphereRadius = p.boundingSphereRadius.value();
+        setBoundingSphere(boundingSphereRadius);
+    }
 
     _performShading = p.performShading.value_or(_performShading);
     addProperty(_performShading);
@@ -186,6 +253,16 @@ ghoul::opengl::Texture& RenderableModelProjection::baseTexture() const {
 }
 
 void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
+    // Update boundingsphere
+    if (!_shouldOverrideBoundingSphere) {
+        setBoundingSphere(_geometry->boundingRadius() * _modelScale *
+            glm::compMax(data.modelTransform.scale)
+        );
+
+        // Set Interaction sphere size to be 10% of the bounding sphere
+        setInteractionSphere(_boundingSphere * 0.1);
+    }
+
     if (_projectionComponent.needsClearProjection()) {
         _projectionComponent.clearAllProjections();
     }
