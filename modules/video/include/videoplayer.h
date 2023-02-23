@@ -110,7 +110,6 @@ private:
     double correctVideoPlaybackTime() const;
     bool isWithingStartEndTime() const;
     void updateFrameDuration();
-    void syncToSimulationTime();
     void stepFrameForward();
     void stepFrameBackward();
 
@@ -136,6 +135,7 @@ private:
 
     // Syncing with multiple nodes
     double _correctPlaybackTime = 0.0;
+    double _deltaTime = 0.0;
 
     // Video stretching: map to simulation time animation mode
     double _startJ200Time = 0.0;
