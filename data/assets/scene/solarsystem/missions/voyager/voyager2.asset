@@ -77,8 +77,10 @@ local Voyager2Main = {
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
+    },
+    Enabled = asset.enabled
   },
+  Tag = { "voyager2_part" },
   GUI = {
     Name = "Voyager 2 Main",
     Path = "/Solar System/Missions/Voyager 2"
@@ -99,8 +101,10 @@ local Voyager2Antenna = {
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
+    },
+    Enabled = asset.enabled
   },
+  Tag = { "voyager2_part" },
   GUI = {
     Name = "Voyager 2 Antenna",
     Path = "/Solar System/Missions/Voyager 2"
@@ -124,8 +128,10 @@ local VoyagerTrailCruiseEarthJupiter = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1977-AUG-20 16:07:06.535",
     EndTime = "1979 JUL 06",
-    SampleInterval = 669 * 2  -- 669 is the number of days between the Start and End time
+    SampleInterval = 669 * 2,  -- 669 is the number of days between the Start and End time
+    Enabled = asset.enabled
   },
+  Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Cruise Earth-Jupiter",
     Path = "/Solar System/Missions/Voyager 2"
@@ -147,8 +153,10 @@ local VoyagerTrailEncounterJupiter = {
     EnableFade = false,
     StartTime = "1979 JUL 05 23:24:00", -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
     EndTime = "1979 JUL 15",
-    SampleInterval = 100
+    SampleInterval = 100,
+    Enabled = asset.enabled
   },
+  Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Encounter Jupiter",
     Path = "/Solar System/Missions/Voyager 2"
@@ -170,8 +178,10 @@ local VoyagerTrailCruiseJupiterSaturn = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1979 JUL 15",
     EndTime = "1981 AUG 23",
-    SampleInterval = 770 * 2  -- 770 is the number of days between the Start and End time
+    SampleInterval = 770 * 2,  -- 770 is the number of days between the Start and End time
+    Enabled = asset.enabled
   },
+  Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Cruise Jupiter-Saturn",
     Path = "/Solar System/Missions/Voyager 2"
@@ -193,8 +203,10 @@ local VoyagerTrailEncounterSaturn = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1981 AUG 22 23:08:30",  -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
     EndTime = "1981 AUG 30",
-    SampleInterval = 100
+    SampleInterval = 100,
+    Enabled = asset.enabled
   },
+  Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Encounter Saturn",
     Path = "/Solar System/Missions/Voyager 2"
@@ -216,8 +228,10 @@ local VoyagerTrailCruiseSaturnUranus = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1981 AUG 30",
     EndTime = "1986 JAN 22",
-    SampleInterval = 1971  * 2  -- 1971 is the number of days between the Start and End time
+    SampleInterval = 1971  * 2,  -- 1971 is the number of days between the Start and End time
+    Enabled = asset.enabled
   },
+  Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Cruise Saturn-Uranus",
     Path = "/Solar System/Missions/Voyager 2"
@@ -239,8 +253,10 @@ local VoyagerTrailEncounterUranus = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1986 JAN 21 23:30:00", -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
     EndTime = "1986 JAN 27",
-    SampleInterval = 100
+    SampleInterval = 100,
+    Enabled = asset.enabled
   },
+  Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Encounter Uranus",
     Path = "/Solar System/Missions/Voyager 2"
@@ -262,8 +278,10 @@ local VoyagerTrailCruiseUranusNeptune = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1986 JAN 27",
     EndTime = "1989 AUG 24",
-    SampleInterval = 1305  * 2  -- 1305 is the number of days between the Start and End time
+    SampleInterval = 1305  * 2,  -- 1305 is the number of days between the Start and End time
+    Enabled = asset.enabled
   },
+  Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Cruise Uranus-Neptune",
     Path = "/Solar System/Missions/Voyager 2"
@@ -285,8 +303,10 @@ local VoyagerTrailEncounterNeptune = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1989 AUG 23 23:30:00", -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
     EndTime = "1989 AUG 26",
-    SampleInterval = 100
+    SampleInterval = 100,
+    Enabled = asset.enabled
   },
+  Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Encounter Neptune",
     Path = "/Solar System/Missions/Voyager 2"
@@ -308,8 +328,10 @@ local VoyagerTrailCruiseNeptuneInf = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1989 AUG 26",
     EndTime = "2300 JAN 01",
-    SampleInterval = 113353   * 2  -- 113353 is the number of days between the Start and End time
+    SampleInterval = 113353   * 2,  -- 113353 is the number of days between the Start and End time
+    Enabled = asset.enabled
   },
+  Tag = { "voyager2_trail" },
   GUI = {
     Name = "Voyager 2 Trail Cruise Neptune-Inf",
     Path = "/Solar System/Missions/Voyager 2"

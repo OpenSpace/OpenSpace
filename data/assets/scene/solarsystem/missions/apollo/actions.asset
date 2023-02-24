@@ -42,8 +42,8 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.registerAction(focus_earth)
-  openspace.action.registerAction(focus_moon)
+  openspace.action.removeAction(focus_earth)
+  openspace.action.removeAction(focus_moon)
   openspace.action.removeAction(toggle_moon_shading)
 end)
 

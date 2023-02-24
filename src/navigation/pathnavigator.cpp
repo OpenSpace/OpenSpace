@@ -118,7 +118,7 @@ namespace {
 namespace openspace::interaction {
 
 PathNavigator::PathNavigator()
-    : properties::PropertyOwner({ "PathNavigator" })
+    : properties::PropertyOwner({ "PathNavigator", "Path Navigator" })
     , _defaultPathType(
         DefaultCurveOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown

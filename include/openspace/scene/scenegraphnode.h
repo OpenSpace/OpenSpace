@@ -139,6 +139,8 @@ public:
     double reachFactor() const;
     double approachFactor() const;
 
+    bool supportsDirectInteraction() const;
+
     SceneGraphNode* childNode(const std::string& identifier);
 
     const Renderable* renderable() const;
@@ -204,6 +206,7 @@ private:
     properties::DoubleProperty _distFromCamToNode;
     properties::DoubleProperty _screenSizeRadius;
     properties::FloatProperty _visibilityDistance;
+    properties::BoolProperty _supportsDirectInteraction;
 
     // This variable is used for the rate-limiting of the screenspace positions (if they
     // are calculated when _computeScreenSpaceValues is true)

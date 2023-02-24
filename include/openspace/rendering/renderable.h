@@ -33,6 +33,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <string_view>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl {
@@ -78,6 +79,8 @@ public:
 
     double boundingSphere() const;
     double interactionSphere() const;
+
+    std::string_view typeAsString() const;
 
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
