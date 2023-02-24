@@ -27,7 +27,6 @@
 #include <openspace/util/timemanager.h>
 
 namespace {
-    constexpr int NumSecPerDay = 86400;
     constexpr double TimePrecision = 0.0001;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
@@ -38,28 +37,77 @@ namespace {
        "Sonification that alters all other sonificatoins based on the current delta time"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UnitOptionInfo = {
+        "UnitOption",
+        "Time Unit",
+        "Choose a ´time unit that the sonification should use"
+    };
+
 } // namespace
 
 namespace openspace {
 
 TimeSonification::TimeSonification(const std::string& ip, int port)
     : SonificationBase(TimeSonificationInfo, ip, port)
+    , _unitOption(UnitOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     _timeSpeed = 0.0;
+
+    // Add time units option
+    _unitOption.addOptions({
+        { 0, "Seconds" },
+        { 1, "Minutes" },
+        { 2, "Hours" },
+        { 3, "Days" },
+        { 4, "Months" },
+        { 5, "Years" }
+    });
+
+    // Set days as default unit
+    _unitOption.setValue(3);
+    _unit = TimeUnit::Day;
+
+    _unitOption.onChange([this]() { reCalculateTimeUnit(); });
+
+    addProperty(_unitOption);
 }
 
 void TimeSonification::update(const Camera*) {
-    double timeSpeed = global::timeManager->deltaTime() / NumSecPerDay;
+    if (!_enabled) {
+        return;
+    }
 
-    if (abs(_timeSpeed - timeSpeed) > TimePrecision) {
+    double timeSpeed = convertTime(global::timeManager->deltaTime(), TimeUnit::Second, _unit);
+
+    if (_unitDirty || abs(_timeSpeed - timeSpeed) > TimePrecision) {
         _timeSpeed = timeSpeed;
 
         std::string label = "/Time";
-        std::vector<OscDataType> data(1);
+        std::vector<OscDataType> data(2);
         data[0] = _timeSpeed;
+        data[1] = nameForTimeUnit(_unit).data();
 
         _connection->send(label, data);
+
+        if (_unitDirty) {
+            _unitDirty = false;
+        }
     }
+}
+
+void TimeSonification::stop() {}
+
+void TimeSonification::reCalculateTimeUnit() {
+    std::string selectedUnit = _unitOption.getDescriptionByValue(_unitOption.value());
+    std::transform(
+        selectedUnit.begin(),
+        selectedUnit.end(),
+        selectedUnit.begin(),
+        [](unsigned char c) { return std::tolower(c); }
+    );
+
+    _unit = timeUnitFromString(selectedUnit);
+    _unitDirty = true;
 }
 
 } // namespace openspace

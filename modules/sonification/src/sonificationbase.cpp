@@ -29,13 +29,30 @@
 #include <glm/gtx/projection.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Is Enabled",
+        "This setting determines whether this sonification will be enabled or not"
+    };
+} // namespace
+
 namespace openspace {
 
 SonificationBase::SonificationBase(properties::PropertyOwner::PropertyOwnerInfo info,
                                    const std::string& ip, int port)
     : properties::PropertyOwner(info)
+    , _enabled(EnabledInfo, false)
 {
     _connection = new OscConnection(ip, port);
+
+    addProperty(_enabled);
+    _enabled.onChange([this]() {
+        if (!_enabled) {
+            // Disable sending of data
+            stop();
+        }
+    });
 }
 
 SonificationBase::~SonificationBase() {

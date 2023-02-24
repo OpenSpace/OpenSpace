@@ -284,7 +284,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
 }
 
 PlanetsSonification::~PlanetsSonification() {
-    _toggleAll = false;
+    stop();
 }
 
 PlanetsSonification::PlanetProperty::PlanetProperty(
@@ -562,6 +562,10 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
 }
 
 void PlanetsSonification::update(const Camera* camera) {
+    if (!_enabled) {
+        return;
+    }
+
     const SceneGraphNode* focusNode =
         global::navigationHandler->orbitalNavigator().anchorNode();
 
@@ -588,6 +592,10 @@ void PlanetsSonification::update(const Camera* camera) {
             sendSettings(i);
         }
     }
+}
+
+void PlanetsSonification::stop() {
+    _toggleAll = false;
 }
 
 } // namespace openspace

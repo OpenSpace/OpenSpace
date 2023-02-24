@@ -146,7 +146,7 @@ SolarSonification::SolarSonification(const std::string& ip, int port)
 }
 
 SolarSonification::~SolarSonification() {
-    _toggleAll = false;
+    stop();
 }
 
 osc::Blob SolarSonification::createSettingsBlob() const {
@@ -212,6 +212,10 @@ bool SolarSonification::getData(const Camera* camera, Planet& planet) {
 }
 
 void SolarSonification::update(const Camera* camera) {
+    if (!_enabled) {
+        return;
+    }
+
     // Update data for all planets
     for (Planet& planet : _planets) {
         bool hasDataUpdated = getData(camera, planet);
@@ -221,6 +225,10 @@ void SolarSonification::update(const Camera* camera) {
             sendSettings();
         }
     }
+}
+
+void SolarSonification::stop() {
+    _toggleAll = false;
 }
 
 } // namespace openspace
