@@ -1,0 +1,19 @@
+asset.onInitialize(function ()
+  openspace.setPropertyValueSingle("Modules.Touch.EnableTouchInteraction", true)
+
+  -- A list of renderable types that apply the "direct manipulation". Works best for
+  -- things with a sperical-ish shape and an intearction sphere of about the same size
+  -- as the bounding sphere.
+  -- Can also be set for each scene graph node using the "IsDirectlyTouchable" property
+  local directTouchList = { "RenderableGlobe" }
+  openspace.setPropertyValueSingle("Modules.Touch.DefaultDirectTouchRenderableTypes", directTouchList)
+end)
+
+asset.meta = {
+  Name = "Touch Module Default Settings",
+  Version = "1.0",
+  Description = "Some default settings related to the touch module",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

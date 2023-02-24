@@ -68,13 +68,6 @@ namespace {
         { "Points+Lines", RenderingModeLinesPoints }
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo AppearanceInfo =
-    {
-        "Appearance",
-        "Appearance",
-        "The appearance of the trail"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
@@ -162,7 +155,11 @@ documentation::Documentation RenderableTrail::Documentation() {
 }
 
 RenderableTrail::Appearance::Appearance()
-    : properties::PropertyOwner(AppearanceInfo)
+    : properties::PropertyOwner({
+        "Appearance",
+        "Appearance",
+        "The appearance of the trail"
+    })
     , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
     , lineFade(FadeInfo, 1.f, 0.f, 30.f)

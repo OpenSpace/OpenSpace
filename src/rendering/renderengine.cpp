@@ -270,7 +270,7 @@ namespace {
 namespace openspace {
 
 RenderEngine::RenderEngine()
-    : properties::PropertyOwner({ "RenderEngine" })
+    : properties::PropertyOwner({ "RenderEngine", "Render Engine" })
     , _showOverlayOnClients(ShowOverlayClientsInfo, false)
     , _showLog(ShowLogInfo, true)
     , _verticalLogOffset(VerticalLogOffsetInfo, 0.f, 0.f, 1.f)

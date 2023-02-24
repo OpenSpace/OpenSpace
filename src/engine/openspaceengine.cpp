@@ -147,7 +147,7 @@ namespace openspace {
 class Scene;
 
 OpenSpaceEngine::OpenSpaceEngine()
-    : properties::PropertyOwner({ "OpenSpaceEngine" })
+    : properties::PropertyOwner({ "OpenSpaceEngine", "OpenSpace Engine" })
     , _printEvents(PrintEventsInfo, false)
     , _visibility(VisibilityInfo)
     , _showHiddenSceneGraphNodes(ShowHiddenSceneInfo, false)

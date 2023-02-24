@@ -810,11 +810,19 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the value is interpolated at each step in between. The fourth "
                 "parameter is an optional easing function if a 'duration' has been "
                 "specified. If 'duration' is 0, this parameter value is ignored. "
-                "Otherwise, it has to be 'linear', 'easein', 'easeout', or 'easeinout'. "
+                "Otherwise, it has to be one of the easing functions defined in the list below. "
                 "This is the same as calling the setValue method and passing 'single' as "
                 "the fourth argument to setPropertyValue. The fifth argument is another "
                 "Lua script that will be executed when the interpolation provided in "
-                "parameter 3 finishes."
+                "parameter 3 finishes. "
+                "\n Avaiable easing functions: "
+                "Linear, QuadraticEaseIn, QuadraticEaseOut, QuadraticEaseInOut, "
+                "CubicEaseIn, CubicEaseOut, CubicEaseInOut, QuarticEaseIn, "
+                "QuarticEaseOut, QuarticEaseInOut, QuinticEaseIn, QuinticEaseOut, "
+                "QuinticEaseInOut, SineEaseIn, SineEaseOut, SineEaseInOut, CircularEaseIn, "
+                "CircularEaseOut, CircularEaseInOut, ExponentialEaseIn, ExponentialEaseOut, "
+                "ExponentialEaseInOut, ElasticEaseIn, ElasticEaseOut, ElasticEaseInOut, "
+                "BounceEaseIn, BounceEaseOut, BounceEaseInOut"
             },
             {
                 "getPropertyValue",
