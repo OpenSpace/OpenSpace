@@ -215,10 +215,7 @@ CompareSonification::CompareSonification(const std::string& ip, int port)
 }
 
 CompareSonification::~CompareSonification() {
-    _toggleAll = false;
-
-    _firstPlanet = 0;
-    _secondPlanet = 0;
+    stop();
 }
 
 osc::Blob CompareSonification::createSettingsBlob() const {
@@ -347,6 +344,10 @@ bool CompareSonification::getData(const Camera* camera, Planet& planet) {
 }
 
 void CompareSonification::update(const Camera* camera) {
+    if (!_enabled) {
+        return;
+    }
+
     const SceneGraphNode* focusNode =
         global::navigationHandler->orbitalNavigator().anchorNode();
 
@@ -373,6 +374,13 @@ void CompareSonification::update(const Camera* camera) {
             sendSettings();
         }
     }
+}
+
+void CompareSonification::stop() {
+    _toggleAll = false;
+
+    _firstPlanet = 0;
+    _secondPlanet = 0;
 }
 
 } // namespace openspace

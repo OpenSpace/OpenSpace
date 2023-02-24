@@ -27,6 +27,9 @@
 
 #include <modules/sonification/include/sonificationbase.h>
 
+#include <openspace/properties/optionproperty.h>
+#include <openspace/util/timeconversion.h>
+
 namespace openspace {
 
 class TimeSonification : public SonificationBase {
@@ -42,7 +45,18 @@ public:
      */
     virtual void update(const Camera*) override;
 
+    /**
+     * Function to stop the sonification
+     */
+    virtual void stop() override;
+
 private:
+    void reCalculateTimeUnit();
+
+    properties::OptionProperty _unitOption;
+    TimeUnit _unit;
+    bool _unitDirty = false;
+
     double _timeSpeed;
 };
 

@@ -29,6 +29,7 @@
 
 #include <modules/osc/include/oscconnection.h>
 #include <openspace/camera/camera.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/distanceconversion.h>
 #include <variant>
 
@@ -48,6 +49,11 @@ public:
      * \param camera pointer to the camera in the scene
      */
     virtual void update(const Camera* camera) = 0;
+
+    /**
+     * Function to stop the sonification
+     */
+    virtual void stop() = 0;
 
     /**
      * Calculate the distance from the camera to the node with the given identifier, in
@@ -98,6 +104,7 @@ public:
         std::variant<std::string, glm::dvec3> nodeIdOrPosB);
 
 protected:
+    properties::BoolProperty _enabled;
     OscConnection* _connection = nullptr;
 
 private:

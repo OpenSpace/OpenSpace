@@ -43,6 +43,11 @@ public:
      */
     virtual void update(const Camera* camera) override;
 
+    /**
+     * Function to stop the sonification
+     */
+    virtual void stop() override;
+
 private:
     // Struct to hold data for all the planets
     struct Planet {
