@@ -34,11 +34,16 @@ public:
     TimeSonification(const std::string& ip, int port);
     virtual ~TimeSonification() override = default;
 
-    virtual void update(const Scene*, const Camera*) override;
+    /**
+     * Main update function for the sonification. Checks the current delta time and sends
+     * it via the osc connection in the unit of days/second.
+     *
+     * \param camera pointer to the camera in the scene (not used in this sonification)
+     */
+    virtual void update(const Camera*) override;
 
 private:
     double _timeSpeed;
-    double _timePrecision;
 };
 
 } // namespace openspace

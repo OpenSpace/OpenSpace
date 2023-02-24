@@ -27,7 +27,7 @@
 
 #include <modules/sonification/include/sonificationbase.h>
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace {
 
@@ -36,50 +36,15 @@ public:
     PlanetsSonification(const std::string& ip, int port);
     virtual ~PlanetsSonification() override;
 
-    virtual void update(const Scene* scene, const Camera* camera) override;
+    /**
+     * Main update function for the sonification
+     *
+     * \param camera pointer to the camera in the scene
+     */
+    virtual void update(const Camera* camera) override;
 
 private:
-    //Extract the data from the given identifier
-    bool extractData(const Camera* camera, const std::string& identifier, int i);
-
-    //Property functions
-    osc::Blob createSettingsBlob(int planetIndex) const;
-    void sendSettings(const int planetIndex);
-    void onAllEnabledChanged();
-
-    //Mercury
-    void onMercuryEnabledChanged();
-    void onMercurySettingChanged();
-
-    //Venus
-    void onVenusEnabledChanged();
-    void onVenusSettingChanged();
-
-    //Earth
-    void onEarthEnabledChanged();
-    void onEarthSettingChanged();
-
-    //Mars
-    void onMarsEnabledChanged();
-    void onMarsSettingChanged();
-
-    //Jupiter
-    void onJupiterEnabledChanged();
-    void onJupiterSettingChanged();
-
-    //Saturn
-    void onSaturnEnabledChanged();
-    void onSaturnSettingChanged();
-
-    //Uranus
-    void onUranusEnabledChanged();
-    void onUranusSettingChanged();
-
-    //Neptune
-    void onNeptuneEnabledChanged();
-    void onNeptuneSettingChanged();
-
-    //Struct to hold data for all the planets and moons
+    // Struct to hold data for all the planets
     struct Planet {
         Planet(std::string id = "") {
             identifier = id;
@@ -89,20 +54,84 @@ private:
         double distance = 0.0;
         double angle = 0.0;
 
-        // std::pair<name of moon, latset calculated angle to it>
+        // std::vector<std::pair<name of moon, latset calculated angle to it>>
         std::vector<std::pair<std::string, double>> moons;
     };
+
+    /**
+     * Update distance and angle data for the given planet
+     *
+     * \param camera pointer to the camera in the scene. Used to calculated the data for
+     *               the planet
+     * \param planetIndex index to the internally stored planet data that should be
+     *                    updated
+     *
+     * \return true if the data is new compared to before, otherwise false
+     */
+    bool getData(const Camera* camera, int planetIndex);
+
+    /**
+     * Create a osc::Blob object with current sonification settings for the indicated
+     * planet. Order of settings: size/day, gravity, temperature, (atmosphere, moons,
+     * rings).
+     *
+     * \param planetIndex indicates which planet to create the settings blob for
+     *
+     * \return a osc::Blob object with current sonificaiton settings
+     */
+    osc::Blob createSettingsBlob(int planetIndex) const;
+
+    /**
+     * Send current sonification settings for the indicated planet over the osc connection
+     * Order of data: distance, angle, settings, moon angles
+     */
+    void sendSettings(int planetIndex);
+
+    // Properties onChange
+    void onToggleAllChanged();
+
+    //Mercury
+    void onMercuryAllChanged();
+    void onMercurySettingChanged();
+
+    //Venus
+    void onVenusAllChanged();
+    void onVenusSettingChanged();
+
+    //Earth
+    void onEarthAllChanged();
+    void onEarthSettingChanged();
+
+    //Mars
+    void onMarsAllChanged();
+    void onMarsSettingChanged();
+
+    //Jupiter
+    void onJupiterAllChanged();
+    void onJupiterSettingChanged();
+
+    //Saturn
+    void onSaturnAllChanged();
+    void onSaturnSettingChanged();
+
+    //Uranus
+    void onUranusAllChanged();
+    void onUranusSettingChanged();
+
+    //Neptune
+    void onNeptuneAllChanged();
+    void onNeptuneSettingChanged();
 
     double _anglePrecision;
     double _distancePrecision;
     std::vector<Planet> _planets;
 
-    //Properties
+    // Properties
     struct PlanetProperty : properties::PropertyOwner {
         PlanetProperty(properties::PropertyOwner::PropertyOwnerInfo planetInfo);
 
         // All planets have these
-        properties::BoolProperty enabled;
+        properties::BoolProperty toggleAll;
         properties::BoolProperty sizeDayEnabled;
         properties::BoolProperty gravityEnabled;
         properties::BoolProperty temperatureEnabled;
@@ -113,7 +142,7 @@ private:
         properties::BoolProperty ringsEnabled;
     };
 
-    properties::BoolProperty _enableAll;
+    properties::BoolProperty _toggleAll;
     PlanetProperty _mercuryProperty;
     PlanetProperty _venusProperty;
     PlanetProperty _earthProperty;

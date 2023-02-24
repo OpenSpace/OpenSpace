@@ -27,6 +27,8 @@
 
 #include <modules/sonification/include/sonificationbase.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+
 namespace openspace {
 
 class SolarSonification : public SonificationBase {
@@ -34,23 +36,14 @@ public:
     SolarSonification(const std::string& ip, int port);
     virtual ~SolarSonification() override;
 
-    virtual void update(const Scene* scene, const Camera* camera) override;
+    /**
+     * Main update function for the sonification
+     *
+     * \param camera pointer to the camera in the scene
+     */
+    virtual void update(const Camera* camera) override;
 
 private:
-    /**
-     * Extracts data from the given identifier
-     * \param identifier of the scene graph node to extract data from
-     * \param i index in internal list of planets that corresponds to the identifier
-     *
-     * \return boolean if the data extracted is new or not
-     */
-    bool extractData(const Camera* camera, const std::string& identifier, int i);
-
-    osc::Blob createSettingsBlob() const;
-    void sendSettings();
-    void onAllEnabledChanged();
-    void onSettingChanged();
-
     // Struct to hold data for all the planets
     struct Planet {
         Planet(std::string id = "") {
@@ -62,12 +55,38 @@ private:
         double angle = 0.0;
     };
 
-    double _anglePrecision;
-    double _distancePrecision;
+    /**
+     * Update distance and angle data for the given planet
+     *
+     * \param camera pointer to the camera in the scene. Used to calculated the data for
+     *               the planet
+     * \param planet a reference to the internally stored planet data that should be
+     *               updated
+     *
+     * \return true if the data is new compared to before, otherwise false
+     */
+    bool getData(const Camera* camera, Planet& planet);
+
+    /**
+     * Create a osc::Blob object with current sonification settings.
+     * Order of settings: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune
+     *
+     * \return a osc::Blob object with current sonificaiton settings
+     */
+    osc::Blob createSettingsBlob() const;
+
+    /**
+     * Send current sonification settings over the osc connection
+     */
+    void sendSettings();
+
+    // Properties onChange
+    void onToggleAllChanged();
+
     std::vector<Planet> _planets;
 
     // Properties
-    properties::BoolProperty _enableAll;
+    properties::BoolProperty _toggleAll;
     properties::BoolProperty _mercuryEnabled;
     properties::BoolProperty _venusEnabled;
     properties::BoolProperty _earthEnabled;

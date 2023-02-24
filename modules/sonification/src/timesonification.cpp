@@ -28,13 +28,14 @@
 
 namespace {
     constexpr int NumSecPerDay = 86400;
+    constexpr double TimePrecision = 0.0001;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         TimeSonificationInfo =
     {
        "TimeSonification",
        "Time Sonification",
-       "The Time Sonification"
+       "Sonification that alters all other sonificatoins based on the current delta time"
     };
 
 } // namespace
@@ -45,12 +46,12 @@ TimeSonification::TimeSonification(const std::string& ip, int port)
     : SonificationBase(TimeSonificationInfo, ip, port)
 {
     _timeSpeed = 0.0;
-    _timePrecision = 0.0001;
 }
 
-void TimeSonification::update(const Scene*, const Camera*) {
+void TimeSonification::update(const Camera*) {
     double timeSpeed = global::timeManager->deltaTime() / NumSecPerDay;
-    if (abs(_timeSpeed - timeSpeed) > _timePrecision) {
+
+    if (abs(_timeSpeed - timeSpeed) > TimePrecision) {
         _timeSpeed = timeSpeed;
 
         std::string label = "/Time";
