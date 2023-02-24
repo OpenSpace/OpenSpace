@@ -27,6 +27,7 @@
 
 #include <modules/sonification/include/sonificationbase.h>
 
+#include <modules/space/speckloader.h>
 #include <map>
 
 namespace openspace {
@@ -40,12 +41,22 @@ public:
     virtual void update(const Camera* camera) override;
 
 private:
+    struct LabelsData {
+        speck::Labelset* labels = nullptr;
+        bool isInitialized = false;
+
+        // std::vector<std::vector<distance, angle>>
+        std::vector<std::vector<double>> prevValues;
+    };
 
     double _anglePrecision;
     double _distancePrecision;
 
-    // std::map<<Identifier, <distance, angle>>>
+    // std::map<<Identifier, std::vector<distance, angle>>>
     std::map<std::string, std::vector<double>> _nodeData;
+
+    // std::map<Identifier, Labels data>
+    std::map<std::string, LabelsData> _labelsData;
 };
 
 } // openspace namespace
