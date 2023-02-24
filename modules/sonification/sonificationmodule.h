@@ -28,6 +28,7 @@
 #include "openspace/util/openspacemodule.h"
 
 #include <modules/sonification/include/sonificationbase.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <atomic>
 
 namespace openspace {

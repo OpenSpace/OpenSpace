@@ -27,6 +27,7 @@
 
 #include <modules/sonification/include/sonificationbase.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/optionproperty.h>
 
 namespace openspace {

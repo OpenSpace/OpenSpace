@@ -43,20 +43,10 @@ SonificationBase::~SonificationBase() {
 }
 
 double SonificationBase::calculateDistanceTo(const Camera* camera,
-                                             const std::string& identifier,
+                                        std::variant<std::string, glm::dvec3> nodeIdOrPos,
                                              DistanceUnit unit)
 {
-    if (identifier.empty()) {
-        return 0.0;
-    }
-
-    // Find the node
-    SceneGraphNode* node = sceneGraphNode(identifier);
-    if (!node) {
-        return 0.0;
-    }
-
-    glm::dvec3 nodePosition = node->worldPosition();
+    glm::dvec3 nodePosition = getNodePosition(nodeIdOrPos);
     if (glm::length(nodePosition) < std::numeric_limits<glm::f64>::epsilon()) {
         return 0.0;
     }
@@ -70,19 +60,9 @@ double SonificationBase::calculateDistanceTo(const Camera* camera,
 }
 
 double SonificationBase::calculateAngleTo(const Camera* camera,
-                                          const std::string& identifier)
+                                        std::variant<std::string, glm::dvec3> nodeIdOrPos)
 {
-    if (identifier.empty()) {
-        return 0.0;
-    }
-
-    // Find the node
-    SceneGraphNode* node = sceneGraphNode(identifier);
-    if (!node) {
-        return 0.0;
-    }
-
-    glm::dvec3 nodePosition = node->worldPosition();
+    glm::dvec3 nodePosition = getNodePosition(nodeIdOrPos);
     if (glm::length(nodePosition) < std::numeric_limits<glm::f64>::epsilon()) {
         return 0.0;
     }
@@ -104,22 +84,11 @@ double SonificationBase::calculateAngleTo(const Camera* camera,
 }
 
 double SonificationBase::calculateAngleFromAToB(const Camera* camera,
-                                                const std::string& idA,
-                                                const std::string& idB)
+                                       std::variant<std::string, glm::dvec3> nodeIdOrPosA,
+                                       std::variant<std::string, glm::dvec3> nodeIdOrPosB)
 {
-    if (idA.empty() || idB.empty()) {
-        return 0.0;
-    }
-
-    // Find the nodes
-    SceneGraphNode* nodeA = sceneGraphNode(idA);
-    SceneGraphNode* nodeB = sceneGraphNode(idB);
-    if (!nodeA || !nodeB) {
-        return 0.0;
-    }
-
-    glm::dvec3 nodeAPos = nodeA->worldPosition();
-    glm::dvec3 nodeBPos = nodeB->worldPosition();
+    glm::dvec3 nodeAPos = getNodePosition(nodeIdOrPosA);
+    glm::dvec3 nodeBPos = getNodePosition(nodeIdOrPosB);
     if (glm::length(nodeAPos) < std::numeric_limits<glm::f64>::epsilon() ||
         glm::length(nodeBPos) < std::numeric_limits<glm::f64>::epsilon())
     {
@@ -142,6 +111,29 @@ double SonificationBase::calculateAngleFromAToB(const Camera* camera,
         glm::normalize(AToProjectedB),
         glm::normalize(cameraUpVector)
     );
+}
+
+glm::dvec3 SonificationBase::getNodePosition(std::variant<std::string,
+                                             glm::dvec3> nodeIdOrPos)
+{
+    if (std::holds_alternative<std::string>(nodeIdOrPos)) {
+        std::string identifier = std::get<std::string>(nodeIdOrPos);
+
+        if (identifier.empty()) {
+            return glm::dvec3(0.0);
+        }
+
+        // Find the node
+        SceneGraphNode* node = sceneGraphNode(identifier);
+        if (!node) {
+            return glm::dvec3(0.0);
+        }
+
+        return node->worldPosition();
+    }
+    else {
+        return std::get<glm::dvec3>(nodeIdOrPos);
+    }
 }
 
 } // namespace openspace

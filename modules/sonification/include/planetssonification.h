@@ -27,6 +27,8 @@
 
 #include <modules/sonification/include/sonificationbase.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+
 namespace openspace {
 
 class PlanetsSonification : public SonificationBase {

@@ -29,8 +29,8 @@
 
 #include <modules/osc/include/oscconnection.h>
 #include <openspace/camera/camera.h>
-#include <openspace/scene/scene.h>
 #include <openspace/util/distanceconversion.h>
+#include <variant>
 
 namespace openspace {
 
@@ -55,15 +55,16 @@ public:
      *
      * \param camera pointer to the camera in the scene that the distance should be
      *               calculated from
-     * \param identifier the identifier of the node that the distance should be
-     *                   calculate to
+     * \param nodeIdOrPos either the identifier or the position of the node, that the
+     *                    distance should be calculate to
      * \param unit the distance unit the answer should be in, default is meter
      *
      * \return distance from the camera to the node with the given identifier in the
      *         given distance unit
      */
-    static double calculateDistanceTo(const Camera* camera, const std::string& identifier,
-       DistanceUnit unit = DistanceUnit::Meter);
+    static double calculateDistanceTo(const Camera* camera,
+        std::variant<std::string, glm::dvec3> nodeIdOrPos,
+        DistanceUnit unit = DistanceUnit::Meter);
 
     /**
      * Calculate the angle from the camera to the node with the given identifier,
@@ -71,29 +72,44 @@ public:
      *
      * \param camera pointer to the camera in the scene that the angle should be
      *               calculated from
-     * \param identifier the identifier of the node that the angle should be calculate to
+     * \param nodeIdOrPos either the identifier or the position of the node, that the
+     *                    angle should be calculate to
      *
      * \return angle from the camera to the node with the given identifier in radians
      */
-    static double calculateAngleTo(const Camera* camera, const std::string& identifier);
+    static double calculateAngleTo(const Camera* camera,
+        std::variant<std::string, glm::dvec3> nodeIdOrPos);
 
     /**
      * Calculate the angle from the first node with the given identifier to the second
      * node with the given identifier, in radians
      *
      * \param camera pointer to the camera in the scene
-     * \param idA the identifier of the first node that the angle should be
-                  calculated from
-     * \param idB the identifier of the second node that the angle should be calculated to
+     * \param nodeIdOrPosA either the identifier or the position of the first node that
+     *                     the angle should be calculated from
+     * \param nodeIdOrPosB either the identifier or the position of the second node that
+     *                     the angle should be calculated to
      *
      * \return angle from the first node with the given identifier to the second node with
      *               the given identifier in radians
      */
-    static double calculateAngleFromAToB(const Camera* camera, const std::string& idA,
-        const std::string& idB);
+    static double calculateAngleFromAToB(const Camera* camera,
+        std::variant<std::string, glm::dvec3> nodeIdOrPosA,
+        std::variant<std::string, glm::dvec3> nodeIdOrPosB);
 
 protected:
     OscConnection* _connection = nullptr;
+
+private:
+    /**
+     * Get the position of the node given by the input variant
+     *
+     * \param nodeIdOrPos either the identifier or the position of the node to get the
+     *                    position for
+     *
+     * \return the position of the node
+     */
+    static glm::dvec3 getNodePosition(std::variant<std::string, glm::dvec3> nodeIdOrPos);
 };
 
 } // namespace openspace

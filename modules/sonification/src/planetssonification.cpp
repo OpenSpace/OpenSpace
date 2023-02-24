@@ -26,6 +26,7 @@
 
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
 
 namespace {
