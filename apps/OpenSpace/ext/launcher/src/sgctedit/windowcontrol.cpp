@@ -42,13 +42,20 @@ namespace {
         "Primary", "Secondary", "Tertiary", "Quaternary"
     };
 
+    const int nQualityTypes = 10;
+
     const QList<QString> QualityTypes = {
         "Low (256)", "Medium (512)", "High (1K)", "1.5K (1536)", "2K (2048)", "4K (4096)",
         "8K (8192)", "16K (16384)", "32K (32768)", "64K (65536)"
     };
 
-    constexpr int QualityValues[10] = {
+    constexpr int QualityValues[nQualityTypes] = {
         256, 512, 1024, 1536, 2048, 4096, 8192, 16384, 32768, 65536
+    };
+
+    const QList<QString> ProjectionTypes = {
+        "Planar Projection", "Fisheye", "Spherical Mirror Projection",
+        "Cylindrical Projection", "Equirectangular Projection"
     };
 
     constexpr std::array<QRectF, 4> DefaultWindowSizes = {
@@ -294,11 +301,11 @@ void WindowControl::createWidgets(const QColor& windowColor) {
 
         _projectionType = new QComboBox;
         _projectionType->addItems({
-            "Planar Projection",
-            "Fisheye",
-            "Spherical Mirror Projection",
-            "Cylindrical Projection",
-            "Equirectangular Projection"
+            ProjectionTypes[0],
+            ProjectionTypes[1],
+            ProjectionTypes[2],
+            ProjectionTypes[3],
+            ProjectionTypes[4],
         });
         _projectionType->setToolTip("Select from the supported window projection types");
         _projectionType->setCurrentIndex(0);
@@ -638,6 +645,14 @@ void WindowControl::showWindowLabel(bool show) {
     _windowNumber->setVisible(show);
 }
 
+void WindowControl::setWindowName(std::string windowName) {
+    _windowName->setText(QString::fromStdString(windowName));
+}
+
+void WindowControl::setDecorationState(bool hasWindowDecoration) {
+    _windowDecoration->setChecked(hasWindowDecoration);
+}
+
 sgct::config::Projections WindowControl::generateProjectionInformation() const {
     ProjectionIndices type =
         static_cast<WindowControl::ProjectionIndices>(_projectionType->currentIndex());
@@ -715,8 +730,7 @@ sgct::config::Projections WindowControl::generateProjectionInformation() const {
     }
 }
 
-sgct::config::Window WindowControl::generateWindowInformation() const {
-    sgct::config::Window window;
+void WindowControl::generateWindowInformation(sgct::config::Window& window) const {
     window.size = { _sizeX->text().toInt(), _sizeY->text().toInt() };
     QRect resolution = _monitorResolutions[_monitor->currentIndex()];
     window.pos = {
@@ -739,7 +753,44 @@ sgct::config::Window WindowControl::generateWindowInformation() const {
     if (!_windowName->text().isEmpty()) {
         window.name = _windowName->text().toStdString();
     }
-    return window;
+}
+
+void WindowControl::setProjectionPlanar(float hfov, float vfov) {
+    _planar.fovH->setValue(hfov);
+    _planar.fovV->setValue(vfov);
+    _projectionType->setCurrentIndex(0);
+}
+
+void WindowControl::setProjectionFisheye(int quality, bool spoutOutput) {
+    setQualityComboBoxFromLinesResolution(quality, _fisheye.quality);
+    _fisheye.spoutOutput->setChecked(spoutOutput);
+    _projectionType->setCurrentIndex(1);
+}
+
+void WindowControl::setProjectionSphericalMirror(int quality) {
+    setQualityComboBoxFromLinesResolution(quality, _sphericalMirror.quality);
+    _projectionType->setCurrentIndex(2);
+}
+
+void WindowControl::setProjectionCylindrical(int quality, float heightOffset) {
+    setQualityComboBoxFromLinesResolution(quality, _cylindrical.quality);
+    _cylindrical.heightOffset->setValue(heightOffset);
+    _projectionType->setCurrentIndex(3);
+}
+
+void WindowControl::setProjectionEquirectangular(int quality, bool spoutOutput) {
+    setQualityComboBoxFromLinesResolution(quality, _equirectangular.quality);
+    _equirectangular.spoutOutput->setChecked(spoutOutput);
+    _projectionType->setCurrentIndex(4);
+}
+
+void WindowControl::setQualityComboBoxFromLinesResolution(int lines, QComboBox* combo) {
+    for (unsigned int v = 0; v < nQualityTypes; ++v) {
+        if (lines == QualityValues[v]) {
+            combo->setCurrentIndex(v);
+            break;
+        }
+    }
 }
 
 void WindowControl::onSizeXChanged(int newValue) {

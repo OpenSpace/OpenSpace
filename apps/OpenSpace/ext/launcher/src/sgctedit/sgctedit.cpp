@@ -27,7 +27,6 @@
 #include <sgctedit/displaywindowunion.h>
 #include <sgctedit/monitorbox.h>
 #include <sgctedit/settingswidget.h>
-#include <sgctedit/windowcontrol.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <QApplication>
 #include <QFileDialog>
@@ -65,6 +64,9 @@ namespace {
         // We got to the end without running into any problems, so we are golden
         return false;
     }
+
+    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 } // namespace
 
 SgctEdit::SgctEdit(QWidget* parent, const std::string& userConfigPath)
@@ -72,7 +74,7 @@ SgctEdit::SgctEdit(QWidget* parent, const std::string& userConfigPath)
     , _userConfigPath(userConfigPath)
 {
     setWindowTitle("Window Configuration Editor");
-    createWidgets(createMonitorInfoSet(), true);
+    createWidgets(createMonitorInfoSet(), 1, true);
 }
 
 SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
@@ -86,12 +88,14 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
     , _didImportValues(true)
 {
     setWindowTitle("Window Configuration Editor");
-    createWidgets(createMonitorInfoSet(), false);
-    unsigned int existingWindowsControlSize = _displayWidget->windowControls().size();
     unsigned int nWindows = _cluster.nodes.front().windows.size();
+    bool firstWindowGuiIsEnabled = (nWindows > 1) ? true : false;
+    createWidgets(createMonitorInfoSet(), nWindows, false);
+    unsigned int existingWindowsControlSize = _displayWidget->windowControls().size();
     for (unsigned int i = 0; i < nWindows; ++i) {
-        sgct::config::Window w = _cluster.nodes.front().windows[i];
-        if (i < existingWindowsControlSize) {
+        sgct::config::Window& w = _cluster.nodes.front().windows[i];
+        WindowControl* wCtrl = _displayWidget->windowControls()[i];
+        if (i < existingWindowsControlSize && wCtrl) {
             unsigned int posX = 0;
             unsigned int posY = 0;
             if (w.pos.has_value()) {
@@ -104,9 +108,91 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
                 w.size.x,
                 w.size.y
             );
-            _displayWidget->windowControls()[i]->setDimensions(newDims);
+            wCtrl->setDimensions(newDims);
+            if (w.name.has_value()) {
+                wCtrl->setWindowName(w.name.value());
+            }
+            wCtrl->setDecorationState(w.isDecorated.value());
         }
+        // If first window only renders 2D, and all subsequent windows render 3D, then
+        // will enable the checkbox option for showing GUI only on first window
+        if (w.draw2D.has_value() && w.draw3D.has_value()) {
+            firstWindowGuiIsEnabled &= (i == 0) ?  w.draw2D.value() : !w.draw2D.value();
+            firstWindowGuiIsEnabled &= (i == 0) ? !w.draw3D.value() :  w.draw3D.value();
+        }
+        else {
+            firstWindowGuiIsEnabled = false;
+        }
+        setupProjectionTypeInGui(w.viewports.back(), wCtrl);
     }
+    _settingsWidget->setShowUiOnFirstWindow(firstWindowGuiIsEnabled);
+    _settingsWidget->setVsync(_cluster.settings && _cluster.settings.value().display &&
+        _cluster.settings.value().display.value().swapInterval);
+}
+
+void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
+                                                                     WindowControl* wCtrl)
+{
+    std::visit(overloaded{
+        [&](sgct::config::CylindricalProjection p) {
+            if (p.quality && p.heightOffset) {
+                wCtrl->setProjectionCylindrical(
+                    static_cast<int>(p.quality.value()),
+                    p.heightOffset.value()
+                );
+            }
+        },
+        [&](sgct::config::EquirectangularProjection p) {
+            if (p.quality) {
+                wCtrl->setProjectionEquirectangular(
+                    static_cast<int>(p.quality.value()),
+                    false
+                );
+            }
+        },
+        [&](sgct::config::FisheyeProjection p) {
+            if (p.quality) {
+                wCtrl->setProjectionFisheye(
+                    static_cast<int>(p.quality.value()),
+                    false
+                );
+            }
+        },
+        [&](sgct::config::PlanarProjection p) {
+            wCtrl->setProjectionPlanar(
+                (std::fabs(p.fov.left) + std::fabs(p.fov.right)),
+                (std::fabs(p.fov.up) + std::fabs(p.fov.down))
+            );
+        },
+        [&](sgct::config::SphericalMirrorProjection p) {
+            if (p.quality) {
+                wCtrl->setProjectionSphericalMirror(static_cast<int>(p.quality.value()));
+            }
+        },
+        [&](sgct::config::SpoutOutputProjection p) {
+            if (p.quality) {
+                if (p.mapping ==
+                    sgct::config::SpoutOutputProjection::Mapping::Equirectangular)
+                {
+                    wCtrl->setProjectionEquirectangular(
+                        static_cast<int>(p.quality.value()),
+                        true
+                    );
+                }
+                else if (p.mapping ==
+                         sgct::config::SpoutOutputProjection::Mapping::Fisheye)
+                {
+                    wCtrl->setProjectionFisheye(
+                        static_cast<int>(p.quality.value()),
+                        true
+                    );
+                }
+            }
+        },
+        [&](sgct::config::NoProjection p) { (void)p; },
+        [&](sgct::config::ProjectionPlane p) { (void)p; },
+        [&](sgct::config::SpoutFlatProjection p) { (void)p; }
+    }, vPort.projection);
 }
 
 std::vector<QRect> SgctEdit::createMonitorInfoSet() {
@@ -128,7 +214,9 @@ std::vector<QRect> SgctEdit::createMonitorInfoSet() {
     return monitorSizes;
 }
 
-void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes, bool setToDefaults) {
+void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
+                             unsigned int nWindows, bool setToDefaults)
+{
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setSizeConstraint(QLayout::SetFixedSize);
 
@@ -165,7 +253,9 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes, bool setToD
             _displayWidget, &DisplayWindowUnion::nWindowsChanged,
             monitorBox, &MonitorBox::nWindowsDisplayedChanged
         );
-        _displayWidget->addWindow();
+        for (unsigned int i = 0; i < nWindows; ++i) {
+            _displayWidget->addWindow();
+        }
         
         displayLayout->addWidget(_displayWidget);
         
@@ -211,7 +301,7 @@ std::filesystem::path SgctEdit::saveFilename() const {
 
 void SgctEdit::save() {
     generateConfiguration();
-    if (hasWindowIssues(cluster)) {
+    if (hasWindowIssues(_cluster)) {
         int ret = QMessageBox::warning(
             this,
             "Window Sizes Incompatible",
@@ -245,8 +335,8 @@ void SgctEdit::save() {
 }
 
 void SgctEdit::apply() {
-    sgct::config::Cluster cluster = generateConfiguration();
-    if (hasWindowIssues(cluster)) {
+    generateConfiguration();
+    if (hasWindowIssues(_cluster)) {
         int ret = QMessageBox::warning(
             this,
             "Window Sizes Incompatible",
@@ -271,12 +361,11 @@ void SgctEdit::apply() {
         std::filesystem::create_directories(absPath(userCfgTempDir));
     }
     _saveTarget = userCfgTempDir + "/apply-without-saving.json";
-    _cluster = std::move(cluster);
     accept();
 }
 
-void SgctEdit::generateConfiguration() const {
-    _cluster.scene.orientation = _settingsWidget->orientation();
+void SgctEdit::generateConfiguration() {
+    _cluster.scene->orientation = _settingsWidget->orientation();
 
     if (!_didImportValues) {
         _cluster.masterAddress = "localhost";
@@ -291,36 +380,61 @@ void SgctEdit::generateConfiguration() const {
 
         _cluster.settings = settings;
     }
+    else {
+        _cluster.settings = std::nullopt;
+    }
 
     if (_cluster.nodes.size() == 0) {
-        _cluster.nodes.push_back(sgct::config::Node);
+        _cluster.nodes.push_back(sgct::config::Node());
     }
+    sgct::config::Node& node = _cluster.nodes.back();
+
     if (!_didImportValues) {
-        _cluster.nodes.back().address = "localhost";
-        _cluster.nodes.back().port = 20401;
+        node.address = "localhost";
+        node.port = 20401;
     }
 
     // Save Windows
-    for (unsigned int wIdx = 0; wIdx < _cluster.nodes.back().windows.size(); ++wIdx);
-        if (_cluster.nodes.back().windows.size() == 0) {
-            _cluster.nodes.back().windows.push_back(sgct::config::Window);
+    std::vector<WindowControl*> windowControls = _displayWidget->activeWindowControls();
+    for (unsigned int wIdx = 0; wIdx < windowControls.size(); ++wIdx) {
+        if (node.windows.size() <= wIdx) {
+            node.windows.push_back(sgct::config::Window());
         }
         if (!_didImportValues) {
-//            sgct::config::Window window = wCtrl->generateWindowInformation();
-            _cluster.nodes.back().windows[wIdx].generateWindowInformation();
+            if (windowControls[wIdx]) {
+                windowControls[wIdx]->generateWindowInformation(
+                    node.windows[wIdx]
+                );
+            }
         }
-        _cluster.nodes.back().windows[wIdx].id = windowIndex++;
-        _cluster.nodes.back().windows.push_back(std::move(window));
+        node.windows[wIdx].id = wIdx;
     }
 
-    if (_settingsWidget->showUiOnFirstWindow()) {
-        sgct::config::Window& window = node.windows.front();
-        window.viewports.back().isTracked = false;
-        window.tags.push_back("GUI");
-        window.draw2D = true;
-        window.draw3D = false;
+    
+    for (unsigned int i = 0; i < node.windows.size(); ++i) {
+        //First apply default settings to each window...
+        node.windows[i].draw2D = true;
+        node.windows[i].draw3D = true;
+        node.windows[i].viewports.back().isTracked = true;
+        node.windows[i].tags.erase(
+            std::remove_if(
+                node.windows[i].tags.begin(),
+                node.windows[i].tags.end(),
+                [](const std::string& s) { return s == "GUI"; }
+            ),
+            node.windows[i].tags.end()
+        );
+        //if "show UI on first window" option is enabled, then modify the settings
+        // depending on if this is the first window or not
+        if (_settingsWidget->showUiOnFirstWindow()) {
+            if (i == 0) {
+                node.windows[i].viewports.back().isTracked = false;
+                node.windows[i].tags.push_back("GUI");
+            }
+            node.windows[i].draw2D = (i == 0);
+            node.windows[i].draw3D = (i != 0);
+        }
     }
-    _cluster.nodes.push_back(node);
 
     sgct::config::User user;
     user.eyeSeparation = 0.065f;

@@ -28,6 +28,7 @@
 #include <QDialog>
 
 #include <sgct/config.h>
+#include <sgctedit/windowcontrol.h>
 #include <QColor>
 #include <array>
 #include <filesystem>
@@ -85,8 +86,10 @@ public:
 
 private:
     std::vector<QRect> createMonitorInfoSet();
-    void createWidgets(const std::vector<QRect>& monitorSizes, bool setToDefaults);
-    void generateConfiguration() const;
+    void createWidgets(const std::vector<QRect>& monitorSizes, unsigned int nWindows,
+        bool setToDefaults);
+    void generateConfiguration();
+    void setupProjectionTypeInGui(sgct::config::Viewport& vPort, WindowControl* wCtrl);
 
     void save();
     void apply();
