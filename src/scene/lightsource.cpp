@@ -80,7 +80,7 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
 }
 
 LightSource::LightSource()
-    : properties::PropertyOwner({ "LightSource" })
+    : properties::PropertyOwner({ "LightSource", "Light Source" })
     , _enabled(EnabledInfo, true)
 {
     addProperty(_enabled);
