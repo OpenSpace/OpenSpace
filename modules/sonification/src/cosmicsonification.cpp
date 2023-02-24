@@ -26,6 +26,7 @@
 
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
 
 namespace {
@@ -64,7 +65,7 @@ CosmicSonification::~CosmicSonification() {
 }
 
 
-void CosmicSonification::update(const Scene* scene, const Camera* camera) {
+void CosmicSonification::update(const Camera* camera) {
     // Get the current focus
     const SceneGraphNode* focusNode =
         global::navigationHandler->orbitalNavigator().anchorNode();
@@ -73,6 +74,7 @@ void CosmicSonification::update(const Scene* scene, const Camera* camera) {
         return;
     }
 
+    // Update node data
     for (auto& [identifier, data] : _nodeData) {
         std::string id = identifier;
         if (identifier == "Focus") {

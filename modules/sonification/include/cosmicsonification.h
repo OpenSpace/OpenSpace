@@ -37,7 +37,7 @@ public:
     CosmicSonification(const std::string& ip, int port);
     virtual ~CosmicSonification();
 
-    virtual void update(const Scene* scene, const Camera* camera) override;
+    virtual void update(const Camera* camera) override;
 
 private:
 
