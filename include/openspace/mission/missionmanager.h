@@ -74,7 +74,7 @@ public:
      * MissionManager.
      *
      * \param missionName The name of the mission that is to be tested
-     * \return \c true if the \p missionName has been added before
+     * \return `true` if the \p missionName has been added before
      */
     bool hasMission(const std::string& missionName);
 

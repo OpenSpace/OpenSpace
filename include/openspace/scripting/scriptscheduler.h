@@ -45,7 +45,7 @@ namespace openspace::scripting {
 struct LuaLibrary;
 
 /**
- * Maintains an ordered list of <code>ScheduledScript</code>s and provides a simple
+ * Maintains an ordered list of `ScheduledScript`s and provides a simple
  * interface for retrieveing scheduled scripts
  */
 class ScriptScheduler : public properties::PropertyOwner {

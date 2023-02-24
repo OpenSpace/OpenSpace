@@ -63,7 +63,7 @@ public:
      *
      * \pre name must not be empty
      * \pre jsonName must not be empty
-     * \pre Each handlebarTemplates' \c name must not be empty
+     * \pre Each handlebarTemplates' `name` must not be empty
      * \pre javascriptFilename must not be empty
      */
     DocumentationGenerator(std::string name, std::string jsonName,
@@ -82,7 +82,8 @@ public:
      * This abstract method is used by concrete subclasses to provide the actual data that
      * is used in the documentation written by this DocumentationGenerator class. The JSON
      * string returned by this function will be stored in the variable with the
-     * \c jsonName as passed in the constructor.
+     * `jsonName` as passed in the constructor.
+     *
      * \return A JSON script that is parsed and stored in the variable passed in the
      * DocumentationGenerator constructor
      */

@@ -125,9 +125,8 @@ public:
         Unavailable,
 
         /**
-         * Can be set by <code>TileProvider</code>s if the requested
-         * <code>TileIndex</code> is undefined for that particular
-         * provider.
+         * Can be set by `TileProvider`s if the requested `TileIndex` is undefined for
+         * that particular provider.
          * texture and metaData are both null
          */
         OutOfRange,

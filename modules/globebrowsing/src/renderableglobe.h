@@ -153,8 +153,8 @@ private:
      * Test if a specific chunk can safely be culled without affecting the rendered
      * image.
      *
-     * Goes through all available <code>ChunkCuller</code>s and check if any of them
-     * allows culling of the <code>Chunk</code>s in question.
+     * Goes through all available `ChunkCuller`s and check if any of them
+     * allows culling of the `Chunk`s in question.
      */
     bool testIfCullable(const Chunk& chunk, const RenderData& renderData,
         const BoundingHeights& heights, const glm::dmat4& mvp) const;
@@ -163,10 +163,10 @@ private:
      * Gets the desired level which can be used to determine if a chunk should split
      * or merge.
      *
-     * Using <code>ChunkLevelEvaluator</code>s, the desired level can be higher or
-     * lower than the current level of the <code>Chunks</code>s
-     * <code>TileIndex</code>. If the desired level is higher than that of the
-     * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
+     * Using `ChunkLevelEvaluator`s, the desired level can be higher or
+     * lower than the current level of the `Chunks`s
+     * `TileIndex`. If the desired level is higher than that of the
+     * `Chunk`, it wants to split. If it is lower, it wants to merge with
      * its siblings.
      */
     int desiredLevel(const Chunk& chunk, const RenderData& renderData,
@@ -178,8 +178,8 @@ private:
      *
      * The height can be negative if the height map contains negative values.
      *
-     * \param <code>position</code> is the position of a point that gets geodetically
-     * projected on the reference ellipsoid. <code>position</code> must be in
+     * \param `position` is the position of a point that gets geodetically
+     * projected on the reference ellipsoid. `position` must be in
      * cartesian model space.
      * \returns the height from the reference ellipsoid to the globe surface.
      */

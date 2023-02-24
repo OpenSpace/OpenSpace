@@ -25,26 +25,15 @@
 #ifndef __OPENSPACE_CORE___UINTPROPERTY___H__
 #define __OPENSPACE_CORE___UINTPROPERTY___H__
 
- /**
- * \file uintproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class UIntProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>unsigned int</code>.
-
- * @} @}
- */
-
 #include <openspace/properties/numericalproperty.h>
 #include <limits>
 
 namespace openspace::properties {
 
+/**
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type `unsigned int`.
+ */
 class UIntProperty : public NumericalProperty<unsigned int> {
 public:
     UIntProperty(Property::PropertyInfo info, unsigned int value = 0,

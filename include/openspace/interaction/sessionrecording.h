@@ -204,7 +204,7 @@ public:
      * \param loop if true then the file will playback in loop mode, continuously
      *             looping back to the beginning until it is manually stopped
      *
-     * \return \c true if recording to file starts without errors
+     * \return `true` if recording to file starts without errors
      */
     bool startPlayback(std::string& filename, KeyframeTimeRef timeMode,
         bool forceSimTimeAtStart, bool loop);
@@ -218,7 +218,7 @@ public:
     /**
      * Returns playback pause status.
      *
-     * \return \c true if playback is paused
+     * \return `true` if playback is paused
      */
     bool isPlaybackPaused();
 

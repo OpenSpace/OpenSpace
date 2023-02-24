@@ -45,7 +45,7 @@ public:
     };
 
     /**
-     * This function returns the first event stored in the EventEngine, or \c nullptr if
+     * This function returns the first event stored in the EventEngine, or `nullptr` if
      * no event exists. To navigate the full list of events, you can access the returned
      * Event's next function. If the end of the list is reached, the next pointer will be
      * a nullptr
@@ -57,8 +57,8 @@ public:
     /**
      * Publish a new event of type T by providing optional arguments Args to the Event's
      * constructor. An example of usage is
-     * <code>engine.publishEvent<MyEvent>("a", 2.0);</code> which would call the
-     * constructor of \c MyEvent with a <code>const char*</code> and \c double parameter.
+     * `engine.publishEvent<MyEvent>("a", 2.0);` which would call the
+     * constructor of `MyEvent` with a `const char*` and `double` parameter.
      *
      * \param args The arguments that are passed to the constructor of T
      * \tparam T The subclass of Event that is to be published
