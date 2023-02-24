@@ -1,0 +1,274 @@
+-- Cosmic View of Life on Earth / Birds: Larus canus DNA sequence data
+-- This file is auto-generated in the make_asset() function inside slice_by_taxon.py
+-- Author: Brian Abbott <abbott@amnh.org>
+
+-- Set file paths
+local speck_anas_platyrhynchos = asset.localResource("taxon/anas_platyrhynchos.speck")
+local speck_cardinalis_cardinalis = asset.localResource("taxon/cardinalis_cardinalis.speck")
+local speck_columba_livia = asset.localResource("taxon/columba_livia.speck")
+local speck_haliaeetus_leucocephalus = asset.localResource("taxon/haliaeetus_leucocephalus.speck")
+local speck_larus_canus = asset.localResource("taxon/larus_canus.speck")
+local speck_turdus_migratorius = asset.localResource("taxon/turdus_migratorius.speck")
+
+local texture_file = asset.localResource("point3A.png")
+
+-- Set some parameters for OpenSpace settings
+local scale_factor = 90.0
+local text_size = 2.75
+local text_min_size = 15
+local text_max_size = 30
+
+local birds_anas_platyrhynchos = {
+    Identifier = "birds_anas_platyrhynchos",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 1.000000, 1.000000, 0.623529 },	-- Lemon Yellow
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_anas_platyrhynchos,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Anas Platyrhynchos",
+        Path = "/Birds_UMAP/Taxon",
+    }
+}
+
+local birds_anas_platyrhynchos_center = {
+    Identifier = "birds_anas_platyrhynchos_center",
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 249934.28469843394, 409729.5456689395, -26636.029435332708 }
+        }
+    },
+    GUI = {
+        Name = "Anas Platyrhynchos Center",
+        Path = "/Birds_UMAP/Taxon",
+    }
+}
+
+local birds_cardinalis_cardinalis = {
+    Identifier = "birds_cardinalis_cardinalis",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.576471, 0.874510, 0.721569 },	-- Sea Green
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_cardinalis_cardinalis,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Cardinalis Cardinalis",
+        Path = "/Birds_UMAP/Taxon",
+    }
+}
+
+local birds_cardinalis_cardinalis_center = {
+    Identifier = "birds_cardinalis_cardinalis_center",
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { -238152.8180649795, -313588.81497073226, 85498.38874459831 }
+        }
+    },
+    GUI = {
+        Name = "Cardinalis Cardinalis Center",
+        Path = "/Birds_UMAP/Taxon",
+    }
+}
+
+local birds_columba_livia = {
+    Identifier = "birds_columba_livia",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.764706, 0.803922, 0.90196 },	-- Periwinkle
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_columba_livia,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Columba Livia",
+        Path = "/Birds_UMAP/Taxon",
+    }
+}
+
+local birds_columba_livia_center = {
+    Identifier = "birds_columba_livia_center",
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 80925.03353291181, 49438.291367072205, -36688.60902565133 }
+        }
+    },
+    GUI = {
+        Name = "Columba Livia Center",
+        Path = "/Birds_UMAP/Taxon",
+    }
+}
+
+local birds_haliaeetus_leucocephalus = {
+    Identifier = "birds_haliaeetus_leucocephalus",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.788235, 0.627451, 0.862745 },	-- Wisteria
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_haliaeetus_leucocephalus,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Haliaeetus Leucocephalus",
+        Path = "/Birds_UMAP/Taxon",
+    }
+}
+
+local birds_haliaeetus_leucocephalus_center = {
+    Identifier = "birds_haliaeetus_leucocephalus_center",
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 52064.13678867171, -88164.37431961996, -318375.6313845558 }
+        }
+    },
+    GUI = {
+        Name = "Haliaeetus Leucocephalus Center",
+        Path = "/Birds_UMAP/Taxon",
+    }
+}
+
+local birds_larus_canus = {
+    Identifier = "birds_larus_canus",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 1.000000, 0.650980, 0.788235 },	-- Carnation Pink
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_larus_canus,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Larus Canus",
+        Path = "/Birds_UMAP/Taxon",
+    }
+}
+
+local birds_larus_canus_center = {
+    Identifier = "birds_larus_canus_center",
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 62447.14650354212, -107689.78768874182, -120849.49754766248 }
+        }
+    },
+    GUI = {
+        Name = "Larus Canus Center",
+        Path = "/Birds_UMAP/Taxon",
+    }
+}
+
+local birds_turdus_migratorius = {
+    Identifier = "birds_turdus_migratorius",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.619608, 0.356863, 0.25098 },	-- Sepia
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_turdus_migratorius,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Turdus Migratorius",
+        Path = "/Birds_UMAP/Taxon",
+    }
+}
+
+local birds_turdus_migratorius_center = {
+    Identifier = "birds_turdus_migratorius_center",
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { -286865.17604563764, -67022.6885408974, 193159.25237975057 }
+        }
+    },
+    GUI = {
+        Name = "Turdus Migratorius Center",
+        Path = "/Birds_UMAP/Taxon",
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(birds_anas_platyrhynchos)
+    openspace.addSceneGraphNode(birds_anas_platyrhynchos_center)
+    openspace.addSceneGraphNode(birds_cardinalis_cardinalis)
+    openspace.addSceneGraphNode(birds_cardinalis_cardinalis_center)
+    openspace.addSceneGraphNode(birds_columba_livia)
+    openspace.addSceneGraphNode(birds_columba_livia_center)
+    openspace.addSceneGraphNode(birds_haliaeetus_leucocephalus)
+    openspace.addSceneGraphNode(birds_haliaeetus_leucocephalus_center)
+    openspace.addSceneGraphNode(birds_larus_canus)
+    openspace.addSceneGraphNode(birds_larus_canus_center)
+    openspace.addSceneGraphNode(birds_turdus_migratorius)
+    openspace.addSceneGraphNode(birds_turdus_migratorius_center)
+    
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(birds_anas_platyrhynchos)
+    openspace.removeSceneGraphNode(birds_anas_platyrhynchos_center)
+    openspace.removeSceneGraphNode(birds_cardinalis_cardinalis)
+    openspace.removeSceneGraphNode(birds_cardinalis_cardinalis_center)
+    openspace.removeSceneGraphNode(birds_columba_livia)
+    openspace.removeSceneGraphNode(birds_columba_livia_center)
+    openspace.removeSceneGraphNode(birds_haliaeetus_leucocephalus)
+    openspace.removeSceneGraphNode(birds_haliaeetus_leucocephalus_center)
+    openspace.removeSceneGraphNode(birds_larus_canus)
+    openspace.removeSceneGraphNode(birds_larus_canus_center)
+    openspace.removeSceneGraphNode(birds_turdus_migratorius)
+    openspace.removeSceneGraphNode(birds_turdus_migratorius_center)
+end)
+
+asset.export(birds_anas_platyrhynchos)
+asset.export(birds_cardinalis_cardinalis)
+asset.export(birds_columba_livia)
+asset.export(birds_haliaeetus_leucocephalus)
+asset.export(birds_larus_canus)
+asset.export(birds_turdus_migratorius)
+

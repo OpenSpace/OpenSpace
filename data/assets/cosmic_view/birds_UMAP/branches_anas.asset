@@ -1,0 +1,203 @@
+-- Cosmic View of Life on Earth / Birds_UMAP: Traced lineage DNA sequence data for taxon Anas
+-- This file is auto-generated in the make_asset() function inside slice_by_lineage.py
+-- Author: Brian Abbott <abbott@amnh.org>
+
+-- Set file paths
+local speck_27001_aves = asset.localResource("lineage_branches/anas/27001_aves.speck")
+local speck_28001_neognathae = asset.localResource("lineage_branches/anas/28001_neognathae.speck")
+local speck_29006_galloanserae = asset.localResource("lineage_branches/anas/29006_galloanserae.speck")
+local speck_30028_anseriformes = asset.localResource("lineage_branches/anas/30028_anseriformes.speck")
+local speck_31099_anatidae = asset.localResource("lineage_branches/anas/31099_anatidae.speck")
+local speck_32202_anatinae = asset.localResource("lineage_branches/anas/32202_anatinae.speck")
+local speck_33084_anas = asset.localResource("lineage_branches/anas/33084_anas.speck")
+
+local texture_file = asset.localResource("point3A.png")
+
+-- Set some parameters for OpenSpace settings
+local scale_factor = 90.0
+local text_size = 2.75
+local text_min_size = 15
+local text_max_size = 30
+
+local birds_27001_aves = {
+    Identifier = "birds_27001_aves",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 1.000000, 0.796078, 0.643137 },	-- Peach
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_27001_aves,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "27001 Aves",
+        Path = "/Birds_UMAP/Lineage Branches/Anas",
+    }
+}
+
+local birds_28001_neognathae = {
+    Identifier = "birds_28001_neognathae",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.756863, 0.329412, 0.756863 },	-- Fuchsia
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_28001_neognathae,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "28001 Neognathae",
+        Path = "/Birds_UMAP/Lineage Branches/Anas",
+    }
+}
+
+local birds_29006_galloanserae = {
+    Identifier = "birds_29006_galloanserae",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.886275, 0.611765, 0.823529 },	-- Orchid
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_29006_galloanserae,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "29006 Galloanserae",
+        Path = "/Birds_UMAP/Lineage Branches/Anas",
+    }
+}
+
+local birds_30028_anseriformes = {
+    Identifier = "birds_30028_anseriformes",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.309804, 0.411765, 0.77647 },	-- Indigo
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_30028_anseriformes,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "30028 Anseriformes",
+        Path = "/Birds_UMAP/Lineage Branches/Anas",
+    }
+}
+
+local birds_31099_anatidae = {
+    Identifier = "birds_31099_anatidae",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.462745, 0.843137, 0.917647 },	-- Sky Blue
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_31099_anatidae,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "31099 Anatidae",
+        Path = "/Birds_UMAP/Lineage Branches/Anas",
+    }
+}
+
+local birds_32202_anatinae = {
+    Identifier = "birds_32202_anatinae",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.482353, 0.627451, 0.356863 },	-- Asparagus
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_32202_anatinae,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "32202 Anatinae",
+        Path = "/Birds_UMAP/Lineage Branches/Anas",
+    }
+}
+
+local birds_33084_anas = {
+    Identifier = "birds_33084_anas",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.949020, 0.776471, 0.286275 },	-- Maize
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_33084_anas,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "33084 Anas",
+        Path = "/Birds_UMAP/Lineage Branches/Anas",
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(birds_27001_aves)
+    openspace.addSceneGraphNode(birds_28001_neognathae)
+    openspace.addSceneGraphNode(birds_29006_galloanserae)
+    openspace.addSceneGraphNode(birds_30028_anseriformes)
+    openspace.addSceneGraphNode(birds_31099_anatidae)
+    openspace.addSceneGraphNode(birds_32202_anatinae)
+    openspace.addSceneGraphNode(birds_33084_anas)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(birds_27001_aves)
+    openspace.removeSceneGraphNode(birds_28001_neognathae)
+    openspace.removeSceneGraphNode(birds_29006_galloanserae)
+    openspace.removeSceneGraphNode(birds_30028_anseriformes)
+    openspace.removeSceneGraphNode(birds_31099_anatidae)
+    openspace.removeSceneGraphNode(birds_32202_anatinae)
+    openspace.removeSceneGraphNode(birds_33084_anas)
+end)
+
+asset.export(birds_27001_aves)
+asset.export(birds_28001_neognathae)
+asset.export(birds_29006_galloanserae)
+asset.export(birds_30028_anseriformes)
+asset.export(birds_31099_anatidae)
+asset.export(birds_32202_anatinae)
+asset.export(birds_33084_anas)
+

@@ -1,0 +1,48 @@
+-- Cosmic View of Life on Earth / Birds_UMAP: DNA sequence data
+-- This file is auto-generated in the make_asset() function inside sequence.py
+-- Author: Brian Abbott <abbott@amnh.org>
+
+local speck_sequences = asset.localResource("sequences/sequences.speck")
+local cmap_sequences_taxon = asset.localResource("sequences/sequences_taxon.cmap")
+local texture_file = asset.localResource("point3A.png")
+
+-- Set some parameters for OpenSpace settings
+local scale_factor = 90.0
+local text_size = 2.75
+local text_min_size = 15
+local text_max_size = 30
+
+local birds_sequences = {
+    Identifier = "birds_sequences",
+    Renderable = {
+        Type = "RenderableCosmicPoints",
+        Color = { 0.8, 0.8, 0.8 },
+        ColorMap = cmap_sequences_taxon,
+        ColorOption = { "lineage_30_code", "taxon_code" },
+        ColorRange = { {30001, 30025}, {1, 322} },
+        Opacity = 1.0,
+        ScaleFactor = scale_factor,
+        File = speck_sequences,
+        DrawLabels = false,
+        Unit = "Km",
+        Texture = texture_file,
+        BillboardMinMaxSize = { 0.0, 25.0 },
+        EnablePixelSizeControl = true,
+        EnableLabelFading = false,
+        Enabled = false
+    },
+    GUI = {
+        Name = "DNA Sequences",
+        Path = "/Birds_UMAP",
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(birds_sequences)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(birds_sequences)
+end)
+
+asset.export(birds_sequences)
