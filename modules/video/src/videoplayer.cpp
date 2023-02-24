@@ -26,6 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/syncengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/time.h>
@@ -300,6 +301,8 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         swapBuffersMpv();
     });
 
+    global::syncEngine->addSyncable(this);
+
     keys = {
         {MpvKey::Pause, "pause"},
         {MpvKey::Params, "video-params"},
@@ -326,6 +329,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         {MpvKey::IsSeeking, MPV_FORMAT_DOUBLE},
         {MpvKey::Mute, MPV_FORMAT_STRING}
     };
+
 }
 
 void VideoPlayer::pause() {
@@ -811,24 +815,51 @@ void VideoPlayer::destroy() {
 
 void VideoPlayer::preSync(bool isMaster) {
     if (isMaster) {
-        syncToSimulationTime();
-        _correctPlaybackTime = _currentVideoTime; 
+        if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+            _correctPlaybackTime = correctVideoPlaybackTime();
+            double now = global::timeManager->time().j2000Seconds();
+            _deltaTime = now - _timeAtLastRender;
+        }
+        else if (_playbackMode == PlaybackMode::RealTimeLoop) {
+            _correctPlaybackTime = _currentVideoTime; 
+        }
     }
 }
 
 void VideoPlayer::encode(SyncBuffer* syncBuffer) {
     syncBuffer->encode(_correctPlaybackTime);
+    syncBuffer->encode(_deltaTime);
 }
 
 void VideoPlayer::decode(SyncBuffer* syncBuffer) {
     syncBuffer->decode(_correctPlaybackTime);
+    syncBuffer->decode(_deltaTime);
 }
 
 void VideoPlayer::postSync(bool isMaster) {
-    if (!isMaster) {
-        if (abs(_currentVideoTime - _correctPlaybackTime) < glm::epsilon<double>()) {
-            seekToTime(_correctPlaybackTime);
+    if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+        // If we are in valid times, step frames accordingly
+        if (isWithingStartEndTime()) {
+            double now = global::timeManager->time().j2000Seconds();
+            if (_deltaTime > _frameDuration) {
+                // Stepping forwards
+                stepFrameForward();
+                _timeAtLastRender = now; // Only used on master node
+            }
+            else if (_deltaTime < -_frameDuration) {
+                // Stepping backwards
+                stepFrameBackward();
+                _timeAtLastRender = now; // Only used on master node
+            }
         }
+        else if (!_isPaused) {
+            pause();
+        }
+    }
+    // Make sure we are at the correct time
+    bool shouldSeek = abs(_correctPlaybackTime - _currentVideoTime) > _seekThreshold;
+    if (shouldSeek) {
+        seekToTime(_correctPlaybackTime);
     }
 }
 
@@ -873,39 +904,6 @@ double VideoPlayer::correctVideoPlaybackTime() const {
     }
     return percentage * _videoDuration;
 }
-
-void VideoPlayer::syncToSimulationTime() {
-    if (!global::windowDelegate->isMaster()) {
-        return;
-    }
-    if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-        // If we are in valid times, step frames accordingly
-        if (isWithingStartEndTime()) {
-            double now = global::timeManager->time().j2000Seconds();
-            double deltaTime = now - _timeAtLastRender;
-            if (deltaTime > _frameDuration) {
-                // Stepping forwards
-                stepFrameForward();
-                _timeAtLastRender = now;
-            }
-            else if (deltaTime < -_frameDuration) {
-                // Stepping backwards
-                stepFrameBackward();
-                _timeAtLastRender = now;
-            }
-        }
-        else if (!_isPaused) {
-            pause();
-        }
-        // Make sure we are at the correct time
-        double time = correctVideoPlaybackTime();
-        bool shouldSeek = abs(time - _currentVideoTime) > _seekThreshold;
-        if (shouldSeek) {
-            seekToTime(time);
-        }
-    }
-}
-
 
 void VideoPlayer::createFBO(int width, int height) {
     LINFO(fmt::format("Creating new FBO with width: {} and height: {}", width, height));
