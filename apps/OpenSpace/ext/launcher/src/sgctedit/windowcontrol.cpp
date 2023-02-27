@@ -65,7 +65,7 @@ namespace {
         QRectF{ 150.f, 150.f, 1280.f, 720.f }
     };
 
-    constexpr int LineEditWidthFixedWindowSize = 50;
+    constexpr int LineEditWidthFixedWindowSize = 64;
     constexpr float DefaultFovH = 80.f;
     constexpr float DefaultFovV = 50.534f;
     constexpr float DefaultHeightOffset = 0.f;
@@ -734,8 +734,8 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
     window.size = { _sizeX->text().toInt(), _sizeY->text().toInt() };
     QRect resolution = _monitorResolutions[_monitor->currentIndex()];
     window.pos = {
-        resolution.x() + _offsetX->text().toInt(),
-        resolution.y() + _offsetY->text().toInt()
+        _offsetX->text().toInt(),
+        _offsetY->text().toInt()
     };
 
     sgct::config::Viewport vp;
@@ -743,6 +743,7 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
     vp.position = { 0.f, 0.f };
     vp.size = { 1.f, 1.f };
     vp.projection = generateProjectionInformation();
+    window.viewports.clear();
     window.viewports.push_back(vp);
     
     window.isDecorated = _windowDecoration->isChecked();

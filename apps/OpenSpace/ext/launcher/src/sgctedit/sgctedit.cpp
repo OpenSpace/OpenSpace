@@ -37,6 +37,8 @@
 #include <QVBoxLayout>
 #include <filesystem>
 
+#include <iostream>
+
 namespace {
     constexpr QRect MonitorWidgetSize = { 0, 0, 500, 500 };
     constexpr int MaxNumberWindows = 4;
@@ -372,13 +374,15 @@ void SgctEdit::generateConfiguration() {
     }
 
     if (_settingsWidget->vsync()) {
-        sgct::config::Settings::Display display;
-        display.swapInterval = 1;
-        
-        sgct::config::Settings settings;
-        settings.display = display;
-
-        _cluster.settings = settings;
+        if (!_cluster.settings || !_cluster.settings.value().display ||
+            !_cluster.settings.value().display.value().swapInterval)
+        {
+            sgct::config::Settings::Display display;
+            display.swapInterval = 1;
+            sgct::config::Settings settings;
+            settings.display = display;
+            _cluster.settings = settings;
+        }
     }
     else {
         _cluster.settings = std::nullopt;
@@ -400,16 +404,13 @@ void SgctEdit::generateConfiguration() {
         if (node.windows.size() <= wIdx) {
             node.windows.push_back(sgct::config::Window());
         }
-        if (!_didImportValues) {
-            if (windowControls[wIdx]) {
-                windowControls[wIdx]->generateWindowInformation(
-                    node.windows[wIdx]
-                );
-            }
+        if (windowControls[wIdx]) {
+            windowControls[wIdx]->generateWindowInformation(
+                node.windows[wIdx]
+            );
         }
         node.windows[wIdx].id = wIdx;
     }
-
     
     for (unsigned int i = 0; i < node.windows.size(); ++i) {
         //First apply default settings to each window...
@@ -436,10 +437,12 @@ void SgctEdit::generateConfiguration() {
         }
     }
 
-    sgct::config::User user;
-    user.eyeSeparation = 0.065f;
-    user.position = { 0.f, 0.f, 4.f };
-    _cluster.users = { user };
+    if (!_didImportValues) {
+        sgct::config::User user;
+        user.eyeSeparation = 0.065f;
+        user.position = { 0.f, 0.f, 4.f };
+        _cluster.users = { user };
+    }
 }
 
 sgct::config::Cluster SgctEdit::cluster() const {
