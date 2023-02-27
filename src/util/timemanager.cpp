@@ -927,18 +927,20 @@ bool TimeManager::isPlayingBackSessionRecording() const {
 
 void TimeManager::setTimeFromProfile(const Profile& p) {
     if (p.time.has_value()) {
-        switch (p.time.value().type) {
+        switch (p.time->type) {
             case Profile::Time::Type::Relative:
-                Time::setTimeRelativeFromProfile(p.time.value().value);
+                Time::setTimeRelativeFromProfile(p.time->value);
                 break;
 
             case Profile::Time::Type::Absolute:
-                Time::setTimeAbsoluteFromProfile(p.time.value().value);
+                Time::setTimeAbsoluteFromProfile(p.time->value);
                 break;
 
             default:
                 throw ghoul::MissingCaseException();
         }
+
+        setPause(p.time->startPaused);
     }
     else {
         // No value was specified so we are using 'now' instead
