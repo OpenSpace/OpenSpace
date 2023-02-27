@@ -759,7 +759,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     };
 
     if (_renderable->matchesSecondaryRenderBin(data.renderBinMask)) {
-        TracyGpuZone("Render Secondary")
+        TracyGpuZone("Render Secondary Bin")
         _renderable->renderSecondary(newData, tasks);
     }
 

@@ -269,11 +269,11 @@ void Renderable::setRenderBin(RenderBin bin) {
     _renderBin = bin;
 }
 
-bool Renderable::matchesRenderBinMask(int binMask) {
+bool Renderable::matchesRenderBinMask(int binMask) const noexcept {
     return binMask & static_cast<int>(_renderBin);
 }
 
-bool Renderable::matchesSecondaryRenderBin(int binMask) {
+bool Renderable::matchesSecondaryRenderBin(int binMask) const noexcept {
     if (!_secondaryRenderBin.has_value()) {
         return false;
     }
