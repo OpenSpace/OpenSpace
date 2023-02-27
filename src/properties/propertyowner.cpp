@@ -125,7 +125,7 @@ PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
     );
     ghoul_precondition(
         _identifier.find_first_of('.') == std::string::npos,
-        "Identifier must contain any whitespaces"
+        "Identifier must contain any dots"
     );
 }
 

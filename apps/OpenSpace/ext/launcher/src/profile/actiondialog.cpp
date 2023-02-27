@@ -75,44 +75,44 @@ ActionDialog::ActionDialog(QWidget* parent,
 }
 
 void ActionDialog::createWidgets() {
-    //         Column 0            Column 1         Column 2
-    //  *----------------------*---------------*----------------*
-    //  | Actions                                               |    Row 0
-    //  |                      | Identifier    | [oooooooooooo] |    Row 1
-    //  |                      | Name          | [oooooooooooo] |    Row 2
-    //  |                      | GUI Path      | [oooooooooooo] |    Row 3
-    //  |                      | Documentation | [oooooooooooo] |    Row 4
-    //  |                      | Is Local      | [] [choosescr] |    Row 5
-    //  |                      | Script        | [oooooooooooo] |    Row 6
-    //  *----------------------*---------------*----------------*
-    //  | [+] [-]              |               | <Save> <Cancel>|    Row 7
-    //  *----------------------*---------------*----------------*
-    //  |=======================================================|    Row 8
-    //  | Keybindings                                           |    Row 9
-    //  *----------------------*---------------*----------------|
-    //  |                      | Modifier      | []S []C []A    |    Row 10
-    //  |                      | Key           | DDDDDDDDDDDD>  |    Row 11
-    //  |                      | Add actions   | DDDDDDDDDDDD>  |    Row 12
-    //  |                      | Action        | [oooooooooooo] |    Row 13
-    //  *----------------------*---------------*----------------*
-    //  | [+] [-]              |               | <Save> <Cancel>|    Row 14
-    //  *----------------------*---------------*----------------*
-    //  |=======================================================|    Row 16
-    //  *----------------------*---------------*----------------*
-    //  |                                      | <Save> <Cancel>|    Row 17
-    //  *----------------------*---------------*----------------*
+    //         Column 0            Column 1      Column 2   Col3
+    //  *----------------------*---------------*----------|------*
+    //  | Actions                                                |    Row 0
+    //  |                      | Identifier    | [oooooo] | Info |    Row 1
+    //  |                      | Name          | [ooooooooooooo] |    Row 2
+    //  |                      | GUI Path      | [ooooooooooooo] |    Row 3
+    //  |                      | Documentation | [ooooooooooooo] |    Row 4
+    //  |                      | Is Local      | []  [choosescr] |    Row 5
+    //  |                      | Script        | [ooooooooooooo] |    Row 6
+    //  *----------------------*---------------*-----------------*
+    //  | [+] [-]              |               | <Save> <Cancel> |    Row 7
+    //  *----------------------*---------------*-----------------*
+    //  |========================================================|    Row 8
+    //  | Keybindings                                            |    Row 9
+    //  *----------------------*---------------*-----------------|
+    //  |                      | Modifier      | []S []C []A     |    Row 10
+    //  |                      | Key           | DDDDDDDDDDDD>   |    Row 11
+    //  |                      | Add actions   | DDDDDDDDDDDD>   |    Row 12
+    //  |                      | Action        | [ooooooooooooo] |    Row 13
+    //  *----------------------*---------------*-----------------*
+    //  | [+] [-]              |               | <Save> <Cancel> |    Row 14
+    //  *----------------------*---------------*-----------------*
+    //  |========================================================|    Row 16
+    //  *----------------------*---------------*-----------------*
+    //  |                                      | <Save> <Cancel> |    Row 17
+    //  *----------------------*---------------*-----------------*
 
     QGridLayout* layout = new QGridLayout(this);
     
     createActionWidgets(layout);
     clearActionFields();
 
-    layout->addWidget(new Line, 8, 0, 1, 3);
+    layout->addWidget(new Line, 8, 0, 1, 4);
 
     createKeyboardWidgets(layout);
     clearKeybindingFields();
 
-    layout->addWidget(new Line, 16, 0, 1, 3);
+    layout->addWidget(new Line, 16, 0, 1, 4);
 
     _mainButton = new QDialogButtonBox;
     _mainButton->setStandardButtons(QDialogButtonBox::Close);
@@ -126,7 +126,7 @@ void ActionDialog::createWidgets() {
 void ActionDialog::createActionWidgets(QGridLayout* layout) {
     QLabel* title = new QLabel("Actions");
     title->setObjectName("heading");
-    layout->addWidget(title, 0, 0, 1, 3);
+    layout->addWidget(title, 0, 0, 1, 4);
 
     _actionWidgets.list = new QListWidget;
     _actionWidgets.list->setToolTip(
@@ -157,7 +157,30 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         "separated hierarchical structure is suggested to prevent name clashes"
     );
     _actionWidgets.identifier->setEnabled(false);
+    connect(
+        _actionWidgets.identifier, &QLineEdit::textEdited,
+        [this]() {
+            // Check if the identifier is legal
+            std::string identifier = _actionWidgets.identifier->text().toStdString();
+            bool isLegal = identifier.find_first_of("\t\n. ") == std::string::npos;
+            if (isLegal) {
+                _actionWidgets.infoText->clear();
+                _actionWidgets.infoText->setHidden(true);
+            }
+            else {
+                _actionWidgets.infoText->setText(
+                    "Identifier must not contain whitespace or ."
+                );
+                _actionWidgets.infoText->setHidden(false);
+            }
+        }
+    );
     layout->addWidget(_actionWidgets.identifier, 1, 2);
+
+    _actionWidgets.infoText = new QLabel;
+    _actionWidgets.infoText->setHidden(true);
+    _actionWidgets.infoText->setObjectName("error-message");
+    layout->addWidget(_actionWidgets.infoText, 1, 3);
 
     layout->addWidget(new QLabel("Name"), 2, 1);
     _actionWidgets.name = new QLineEdit;
@@ -166,7 +189,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         "name should be as concise and informative as possible"
     );
     _actionWidgets.name->setEnabled(false);
-    layout->addWidget(_actionWidgets.name, 2, 2);
+    layout->addWidget(_actionWidgets.name, 2, 2, 1, 2);
 
     layout->addWidget(new QLabel("GUI Path"), 3, 1);
     _actionWidgets.guiPath = new QLineEdit;
@@ -176,7 +199,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         "character that denotes the root folder"
     );
     _actionWidgets.guiPath->setEnabled(false);
-    layout->addWidget(_actionWidgets.guiPath, 3, 2);
+    layout->addWidget(_actionWidgets.guiPath, 3, 2, 1, 2);
 
     layout->addWidget(new QLabel("Documentation"), 4, 1);
     _actionWidgets.documentation = new QLineEdit;
@@ -187,7 +210,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         "parameters that that action can consume"
     );
     _actionWidgets.documentation->setEnabled(false);
-    layout->addWidget(_actionWidgets.documentation, 4, 2);
+    layout->addWidget(_actionWidgets.documentation, 4, 2, 1, 2);
 
     layout->addWidget(new QLabel("Is Local"), 5, 1);
     _actionWidgets.isLocal = new QCheckBox;
@@ -200,7 +223,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         "instances as well"
     );
     _actionWidgets.isLocal->setEnabled(false);
-    layout->addWidget(_actionWidgets.isLocal, 5, 2);
+    layout->addWidget(_actionWidgets.isLocal, 5, 2, 1, 2);
 
     _actionWidgets.chooseScripts = new QPushButton("Choose Scripts");
     _actionWidgets.chooseScripts->setToolTip(
@@ -211,7 +234,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         this, &ActionDialog::chooseScripts
     );
     _actionWidgets.chooseScripts->setEnabled(false);
-    layout->addWidget(_actionWidgets.chooseScripts, 5, 2, Qt::AlignRight);
+    layout->addWidget(_actionWidgets.chooseScripts, 5, 2, 1, 2, Qt::AlignRight);
 
     layout->addWidget(new QLabel("Script"), 6, 1);
     _actionWidgets.script = new QTextEdit;
@@ -222,7 +245,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         "variable does not exist"
     );
     _actionWidgets.script->setEnabled(false);
-    layout->addWidget(_actionWidgets.script, 6, 2);
+    layout->addWidget(_actionWidgets.script, 6, 2, 1, 2);
 
 
     // + / - buttons
@@ -266,13 +289,13 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         _actionWidgets.saveButtons, &QDialogButtonBox::rejected,
         this, &ActionDialog::actionRejected
     );
-    layout->addWidget(_actionWidgets.saveButtons, 7, 2, Qt::AlignRight);
+    layout->addWidget(_actionWidgets.saveButtons, 7, 2, 1, 2, Qt::AlignRight);
 }
 
 void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
     QLabel* title = new QLabel("Keybindings");
     title->setObjectName("heading");
-    layout->addWidget(title);
+    layout->addWidget(title, 9, 0, 1, 4);
 
     _keybindingWidgets.list = new QListWidget;
     _keybindingWidgets.list->setToolTip(
@@ -307,7 +330,7 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         _keybindingWidgets.altModifier = new QCheckBox("Alt");
         _keybindingWidgets.altModifier->setEnabled(false);
         containerLayout->addWidget(_keybindingWidgets.altModifier);
-        layout->addWidget(container, 10, 2);
+        layout->addWidget(container, 10, 2, 1, 2);
     }
 
     layout->addWidget(new QLabel("Key"), 11, 1);
@@ -338,7 +361,7 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
             );
         }
     );
-    layout->addWidget(_keybindingWidgets.key, 11, 2);
+    layout->addWidget(_keybindingWidgets.key, 11, 2, 1, 2);
 
     layout->addWidget(new QLabel("Action chooser"), 12, 1);
     _keybindingWidgets.action = new QComboBox;
@@ -357,7 +380,7 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
     );
 
     _keybindingWidgets.action->setEnabled(false);
-    layout->addWidget(_keybindingWidgets.action, 12, 2);
+    layout->addWidget(_keybindingWidgets.action, 12, 2, 1, 2);
 
     layout->addWidget(new QLabel("Action"), 13, 1);
     _keybindingWidgets.actionText = new QLineEdit;
@@ -372,7 +395,7 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         "at startup"
     );
     _keybindingWidgets.actionText->setEnabled(false);
-    layout->addWidget(_keybindingWidgets.actionText, 13, 2);
+    layout->addWidget(_keybindingWidgets.actionText, 13, 2, 1, 2);
 
 
     // +/- buttons
@@ -420,7 +443,7 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         this, &ActionDialog::keybindingRejected
     );
 
-    layout->addWidget(_keybindingWidgets.saveButtons, 14, 2, Qt::AlignRight);
+    layout->addWidget(_keybindingWidgets.saveButtons, 14, 2, 1, 2, Qt::AlignRight);
 }
 
 Profile::Action* ActionDialog::selectedAction() {
@@ -622,6 +645,8 @@ void ActionDialog::clearActionFields() {
     _actionWidgets.list->setCurrentRow(-1);
     _actionWidgets.identifier->clear();
     _actionWidgets.identifier->setEnabled(false);
+    _actionWidgets.infoText->clear();
+    _actionWidgets.infoText->setHidden(true);
     _actionWidgets.name->clear();
     _actionWidgets.name->setEnabled(false);
     _actionWidgets.guiPath->clear();

@@ -33,6 +33,7 @@ class QCheckBox;
 class QComboBox;
 class QDialogButtonBox;
 class QGridLayout;
+class QLabel;
 class QLineEdit;
 class QListWidget;
 class QPushButton;
@@ -77,6 +78,7 @@ private:
     struct {
         QListWidget* list = nullptr;
         QLineEdit* identifier = nullptr;
+        QLabel* infoText = nullptr;
         QLineEdit* name = nullptr;
         QLineEdit* guiPath = nullptr;
         QLineEdit* documentation = nullptr;
