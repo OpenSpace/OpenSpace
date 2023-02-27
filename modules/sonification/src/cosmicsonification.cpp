@@ -63,6 +63,13 @@ CosmicSonification::CosmicSonification(const std::string& ip, int port)
     _nodeData["Platyrrhini_volume_center"] = std::vector<double>(NumDataItems);
     _nodeData["Strepsirrhini_volume_center"] = std::vector<double>(NumDataItems);
 
+    _nodeData["birds_anas_platyrhynchos_center"] = std::vector<double>(NumDataItems);
+    _nodeData["birds_cardinalis_cardinalis_center"] = std::vector<double>(NumDataItems);
+    _nodeData["birds_columba_livia_center"] = std::vector<double>(NumDataItems);
+    _nodeData["birds_haliaeetus_leucocephalus_center"] = std::vector<double>(NumDataItems);
+    _nodeData["birds_larus_canus_center"] = std::vector<double>(NumDataItems);
+    _nodeData["birds_turdus_migratorius_center"] = std::vector<double>(NumDataItems);
+
     // List all labels to subscribe to
     _labelsData["birds_lineage_29"] = LabelsData();
 }
