@@ -111,13 +111,6 @@ documentation::Documentation RenderableTrailTrajectory::Documentation() {
     );
 }
 
-void RenderableTrailTrajectory::reset() {
-    _needsFullSweep = true; 
-    _sweepIteration = 0;
-    _maxVertex = glm::vec3(-std::numeric_limits<float>::max());
-    _minVertex = glm::vec3(std::numeric_limits<float>::max());
-}
-
 RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
     , _startTime(StartTimeInfo)
@@ -125,6 +118,8 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     , _sampleInterval(SampleIntervalInfo, 2.0, 2.0, 1e6)
     , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 1000000000)
     , _renderFullTrail(RenderFullPathInfo, false)
+    , _maxVertex(glm::vec3(-std::numeric_limits<float>::max()))
+    , _minVertex(glm::vec3(std::numeric_limits<float>::max()))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -149,9 +144,6 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
 
     _renderFullTrail = p.showFullTrail.value_or(_renderFullTrail);
     addProperty(_renderFullTrail);
-
-    _maxVertex = glm::vec3(-std::numeric_limits<float>::max());
-    _minVertex = glm::vec3(std::numeric_limits<float>::max());
 
     // We store the vertices with ascending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
@@ -181,6 +173,13 @@ void RenderableTrailTrajectory::deinitializeGL() {
     RenderableTrail::deinitializeGL();
 }
 
+void RenderableTrailTrajectory::reset() {
+    _needsFullSweep = true;
+    _sweepIteration = 0;
+    _maxVertex = glm::vec3(-std::numeric_limits<float>::max());
+    _minVertex = glm::vec3(std::numeric_limits<float>::max());
+}
+
 void RenderableTrailTrajectory::update(const UpdateData& data) {
     if (_needsFullSweep) {
 
@@ -200,7 +199,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // Calculate sweeping range for this iteration
         int startIndex = _sweepIteration * _sweepChunk;
         int nextIndex = (_sweepIteration + 1) * _sweepChunk;
-        int stopIndex = (nextIndex < _nValues) ? nextIndex : _nValues;
+        int stopIndex = std::min(nextIndex, _nValues);
 
         // Calculate all vertex positions
         for (int i = startIndex; i < stopIndex; ++i) {
@@ -208,17 +207,12 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 {},
                 Time(_start + i * _totalSampleInterval),
                 Time(0.0)
-                });
+            });
             _vertexArray[i] = { p.x, p.y, p.z };
 
             // Set max and min vertex for bounding sphere calculations
-            _maxVertex.x = std::max(_maxVertex.x, p.x);
-            _maxVertex.y = std::max(_maxVertex.y, p.y);
-            _maxVertex.z = std::max(_maxVertex.z, p.z);
-
-            _minVertex.x = std::min(_minVertex.x, p.x);
-            _minVertex.y = std::min(_minVertex.y, p.y);
-            _minVertex.z = std::min(_minVertex.z, p.z);
+            _maxVertex = glm::max(_maxVertex, p);
+            _minVertex = glm::min(_minVertex, p);
         }
         ++_sweepIteration;
 
