@@ -52,6 +52,8 @@ namespace openspace {
 CosmicSonification::CosmicSonification(const std::string& ip, int port)
     : SonificationBase(CosmicSonificationInfo, ip, port)
 {
+    _enabled = true;
+
     _anglePrecision = 0.05;
     _distancePrecision = 0.1;
 
@@ -71,6 +73,10 @@ CosmicSonification::~CosmicSonification() {
 }
 
 void CosmicSonification::update(const Camera* camera) {
+    if (!_enabled) {
+        return;
+    }
+
     // Get the current focus
     const SceneGraphNode* focusNode =
         global::navigationHandler->orbitalNavigator().anchorNode();
@@ -211,6 +217,10 @@ void CosmicSonification::update(const Camera* camera) {
             }
         }
     }
+}
+
+void CosmicSonification::stop() {
+
 }
 
 } // openspace namespace

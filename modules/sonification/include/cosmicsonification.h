@@ -38,7 +38,17 @@ public:
     CosmicSonification(const std::string& ip, int port);
     virtual ~CosmicSonification();
 
+    /**
+     * Main update function for the sonification
+     *
+     * \param camera pointer to the camera in the scene
+     */
     virtual void update(const Camera* camera) override;
+
+    /**
+     * Function to stop the sonification
+     */
+    virtual void stop() override;
 
 private:
     struct LabelsData {
