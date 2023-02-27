@@ -368,6 +368,8 @@ void RenderableVideoSphere::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableVideoSphere::update(const UpdateData&) {
+    _videoPlayer.update();
+
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);

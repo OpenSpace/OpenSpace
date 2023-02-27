@@ -42,6 +42,7 @@ public:
 
     bool deinitializeGL() override;
     void update() override;
+    void render() override;
 
     static documentation::Documentation Documentation();
 

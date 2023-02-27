@@ -281,17 +281,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     }
     
     global::callback::postSyncPreDraw->emplace_back([this]() {
-        if (_isDestroying) {
-            return;
-        }
-        // Initialize mpv here to ensure that the opengl context is the same as in for 
-        // the rendering
-        if (!_isInitialized) {
-            initializeMpv();
-        }
-        else if(_mpvRenderContext && _mpvHandle) {
-            renderMpv();
-        }
+        
     });
 
     global::callback::postDraw->emplace_back([this]() {
@@ -491,6 +481,20 @@ void VideoPlayer::toggleMute() {
     setPropertyAsyncMpv(mute, MpvKey::Mute);
 }
 
+void VideoPlayer::update() {
+    if (_isDestroying) {
+        return;
+    }
+    // Initialize mpv here to ensure that the opengl context is the same as in for 
+    // the rendering
+    if (!_isInitialized) {
+        initializeMpv();
+    }
+    else if (_mpvRenderContext && _mpvHandle) {
+        renderMpv();
+    }
+}
+
 void VideoPlayer::renderMpv() {
     handleMpvEvents();
 
@@ -519,8 +523,8 @@ void VideoPlayer::renderMpv() {
             /* TODO: remove this comment in case we never encounter this issue again */
             // We have to set the Viewport on every cycle because 
             // mpv_render_context_render internally rescales the fb of the context(?!)...
-            //glm::ivec2 window = global::windowDelegate->currentDrawBufferResolution();
-            //glViewport(0, 0, window.x, window.y);
+            glm::ivec2 window = global::windowDelegate->currentDrawBufferResolution();
+            glViewport(0, 0, window.x, window.y);
             _didRender = true;
         }
     }

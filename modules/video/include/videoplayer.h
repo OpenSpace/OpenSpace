@@ -64,6 +64,7 @@ public:
 
     void reset();
     void destroy();
+    void update();
 
     virtual void preSync(bool isMaster) override;
     virtual void encode(SyncBuffer* syncBuffer) override;

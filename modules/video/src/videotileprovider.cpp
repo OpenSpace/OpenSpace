@@ -108,7 +108,9 @@ TileDepthTransform VideoTileProvider::depthTransform() {
     return { 0.f, 1.f };
 }
 
-void VideoTileProvider::update() {}
+void VideoTileProvider::update() {
+    _videoPlayer.update();
+}
 
 void VideoTileProvider::reset() {
     _videoPlayer.reset();
