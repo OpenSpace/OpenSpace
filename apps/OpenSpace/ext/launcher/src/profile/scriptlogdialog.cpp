@@ -40,9 +40,10 @@
 #include <QPushButton>
 #include <QTextStream>
 
-ScriptlogDialog::ScriptlogDialog(QWidget* parent)
+ScriptlogDialog::ScriptlogDialog(QWidget* parent, std::string filter)
     : QDialog(parent)
     , _scriptLogFile(openspace::global::configuration->scriptLog)
+    , _fixedFilter(std::move(filter))
 {
     setWindowTitle("Scriptlog");
     createWidgets();
@@ -151,7 +152,10 @@ void ScriptlogDialog::updateScriptList() {
     int index = -1;
     _scriptlogList->clear();
     for (const std::string& script : _scripts) {
-        if (script.find(filter) != std::string::npos) {
+        bool foundDynamic = script.find(filter) != std::string::npos;
+        bool foundStatic =
+            _fixedFilter.empty() ? true : script.find(_fixedFilter) != std::string::npos;
+        if (foundDynamic && foundStatic) {
             if (script == selection && index == -1) {
                 index = _scriptlogList->count();
             }
@@ -161,15 +165,11 @@ void ScriptlogDialog::updateScriptList() {
 }
 
 void ScriptlogDialog::saveChosenScripts() {
-    std::string chosenScripts;
+    std::vector<std::string> chosenScripts;
     QList<QListWidgetItem*> itemList = _scriptlogList->selectedItems();
-    for (int i = 0; i < itemList.size(); ++i) {
-        chosenScripts += itemList.at(i)->text().toStdString();
-        if (i < itemList.size()) {
-            chosenScripts += "\n";
-        }
+    for (QListWidgetItem* item : _scriptlogList->selectedItems()) {
+        chosenScripts.push_back(item->text().toStdString());
     }
     emit scriptsSelected(chosenScripts);
-
     accept();
 }

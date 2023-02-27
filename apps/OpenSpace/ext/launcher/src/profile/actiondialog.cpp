@@ -649,12 +649,17 @@ void ActionDialog::actionRejected() {
 
 void ActionDialog::chooseScripts() {
     ScriptlogDialog d(this);
-    connect(&d, &ScriptlogDialog::scriptsSelected, this, &ActionDialog::appendScriptsToTextfield);
+    connect(
+        &d, &ScriptlogDialog::scriptsSelected,
+        this, &ActionDialog::appendScriptsToTextfield
+    );
     d.exec();
 }
 
-void ActionDialog::appendScriptsToTextfield(std::string scripts) {
-    _actionWidgets.script->append(QString::fromStdString(std::move(scripts)));
+void ActionDialog::appendScriptsToTextfield(std::vector<std::string> scripts) {
+    for (std::string script : scripts) {
+        _actionWidgets.script->append(QString::fromStdString(std::move(script)));
+    }
 }
 
 Profile::Keybinding* ActionDialog::selectedKeybinding() {
