@@ -88,7 +88,7 @@ local DawnPosition = {
     -- Rotation for model version 2
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { M_PI/2.0, 0, M_PI/2.0 }
+      Rotation = { M_PI/2.0, 0.0, M_PI/2.0 }
     }
   },
   GUI = {
@@ -219,6 +219,7 @@ local DawnFramingCamera2 = {
 }]]
 
 local nodes = {
+  --MeassureStick,
   DawnPosition,
   Dawn,
   DawnTrail,
