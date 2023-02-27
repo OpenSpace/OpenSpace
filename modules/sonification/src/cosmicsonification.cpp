@@ -36,6 +36,8 @@ namespace {
     constexpr int DistanceIndex = 0;
     constexpr int AngleIndex = 1;
     constexpr int NumDataItems = 2;
+    constexpr double AnglePrecision = 0.05;
+    constexpr double DistancePrecision = 0.1;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         CosmicSonificationInfo =
@@ -53,9 +55,6 @@ CosmicSonification::CosmicSonification(const std::string& ip, int port)
     : SonificationBase(CosmicSonificationInfo, ip, port)
 {
     _enabled = true;
-
-    _anglePrecision = 0.05;
-    _distancePrecision = 0.1;
 
     // List all nodes to subscribe to
     _nodeData["Focus"] = std::vector<double>(NumDataItems);
@@ -105,8 +104,8 @@ void CosmicSonification::update(const Camera* camera) {
 
         // Check if this data is new, otherwise don't send it
         bool shouldSendData = false;
-        if (std::abs(data[DistanceIndex] - distance) > _distancePrecision ||
-            std::abs(data[AngleIndex] - angle) > _anglePrecision)
+        if (std::abs(data[DistanceIndex] - distance) > DistancePrecision ||
+            std::abs(data[AngleIndex] - angle) > AnglePrecision)
         {
             // Update the saved data for the planet
             data[DistanceIndex] = distance;
@@ -164,6 +163,7 @@ void CosmicSonification::update(const Camera* camera) {
         // Get labels if not set already
         if (!data.isInitialized) {
             data.labels = cosmicRenderable->labels();
+            data.unit = cosmicRenderable->unit();
             data.prevValues.resize(
                 data.labels->entries.size(),
                 std::vector<double>(NumDataItems)
@@ -174,14 +174,17 @@ void CosmicSonification::update(const Camera* camera) {
 
         // Update distances to all labels
         for (int i = 0; i < data.labels->entries.size(); ++i) {
+            glm::vec3 scaledPos(data.labels->entries[i].position);
+            scaledPos *= toMeter(data.unit);
+
             double distance = SonificationBase::calculateDistanceTo(
                 camera,
-                data.labels->entries[i].position,
+                scaledPos,
                 DistanceUnit::Meter
             );
             double angle = SonificationBase::calculateAngleTo(
                 camera,
-                data.labels->entries[i].position
+                scaledPos
             );
 
             if (abs(distance) < std::numeric_limits<double>::epsilon()) {
@@ -190,8 +193,8 @@ void CosmicSonification::update(const Camera* camera) {
 
             // Check if this data is new, otherwise don't send it
             bool shouldSendData = false;
-            if (std::abs(data.prevValues[i][DistanceIndex] - distance) > _distancePrecision ||
-                std::abs(data.prevValues[i][AngleIndex] - angle) > _anglePrecision)
+            if (std::abs(data.prevValues[i][DistanceIndex] - distance) > DistancePrecision ||
+                std::abs(data.prevValues[i][AngleIndex] - angle) > AnglePrecision)
             {
                 // Update the saved data for the planet
                 data.prevValues[i][DistanceIndex] = distance;

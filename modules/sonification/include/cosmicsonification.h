@@ -53,14 +53,12 @@ public:
 private:
     struct LabelsData {
         speck::Labelset* labels = nullptr;
+        DistanceUnit unit;
         bool isInitialized = false;
 
         // std::vector<std::vector<distance, angle>>
         std::vector<std::vector<double>> prevValues;
     };
-
-    double _anglePrecision;
-    double _distancePrecision;
 
     // std::map<<Identifier, std::vector<distance, angle>>>
     std::map<std::string, std::vector<double>> _nodeData;

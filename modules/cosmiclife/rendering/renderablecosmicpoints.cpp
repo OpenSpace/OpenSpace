@@ -1023,6 +1023,10 @@ speck::Labelset* RenderableCosmicPoints::labels() {
     return &_labelset;
 }
 
+DistanceUnit RenderableCosmicPoints::unit() const {
+    return _unit;
+}
+
 
 std::vector<float> RenderableCosmicPoints::createDataSlice() {
 

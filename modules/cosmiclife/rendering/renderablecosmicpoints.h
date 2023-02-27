@@ -72,6 +72,7 @@ public:
 
     // For sonification
     speck::Labelset* labels();
+    DistanceUnit unit() const;
 
     static documentation::Documentation Documentation();
 
