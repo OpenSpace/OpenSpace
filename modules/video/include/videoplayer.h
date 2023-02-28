@@ -105,6 +105,7 @@ private:
     void setPropertyStringMpv(const char* name, const char* value);
     void setPropertyAsyncMpv(int value, MpvKey key);
     void setPropertyAsyncMpv(const char* value, MpvKey key);
+    void setPropertyAsyncMpv(double value, MpvKey key);
     void getPropertyAsyncMpv(MpvKey key);
 
     // Map to simulation time functions

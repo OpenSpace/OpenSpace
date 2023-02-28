@@ -192,6 +192,22 @@ void VideoPlayer::setPropertyAsyncMpv(const char* value, MpvKey key) {
     }
 }
 
+void VideoPlayer::setPropertyAsyncMpv(double value, MpvKey key) {
+    if (!_isInitialized) {
+        return;
+    }
+    int result = mpv_set_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(key),
+        keys[key],
+        formats[key],
+        &value
+    );
+    if (!checkMpvError(result)) {
+        LWARNING("Error when playing video");
+    }
+}
+
 void VideoPlayer::getPropertyAsyncMpv(MpvKey key) {
     int result = mpv_get_property_async(
         _mpvHandle,
