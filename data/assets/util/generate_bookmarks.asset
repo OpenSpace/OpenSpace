@@ -7,6 +7,8 @@ local getBookmarks = function (guiPath, bookmarkfile)
       local matchstring = "(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$"
       local group, name, globe, lat, lon, altitude, x, y, z, scale, linewidth = line:match(matchstring)
 
+      local identifier = string.gsub(guiPath .. "-" .. name, " ", "_")
+
       scale = (scale == "" and 75000 or scale)
       linewidth = (linewidth == "" and 2.0 or tonumber(linewidth))
       group = (group == "" and globe or group)
@@ -14,7 +16,7 @@ local getBookmarks = function (guiPath, bookmarkfile)
       local parent = (globe == "" and "Root" or globe)
 
       local sgn = {
-        Identifier = guiPath .. "-" .. name,
+        Identifier = identifier,
         Parent = parent,
         Transform = {
           Scale = {

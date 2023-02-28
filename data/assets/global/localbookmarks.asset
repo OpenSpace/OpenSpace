@@ -5,7 +5,10 @@ local nodes = bookmarkHelper.getBookmarks("Local Bookmarks", "${ASSETS}/customiz
 
 asset.onInitialize(function()
   for _, n in ipairs(nodes) do
-    pcall(openspace.addSceneGraphNode, n)
+    local success, error = pcall(openspace.addSceneGraphNode, n)
+    if not success then
+      openspace.printError(error)
+    end
   end
 end)
 

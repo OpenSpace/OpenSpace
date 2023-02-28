@@ -109,6 +109,8 @@ void AdditionalScriptsDialog::chooseScripts() {
     d.exec();
 }
 
-void AdditionalScriptsDialog::appendScriptsToTextfield(std::string scripts) {
-    _textScripts->append(QString::fromStdString(std::move(scripts)));
+void AdditionalScriptsDialog::appendScriptsToTextfield(std::vector<std::string> scripts) {
+    for (std::string script : scripts) {
+        _textScripts->append(QString::fromStdString(std::move(script)));
+    }
 }

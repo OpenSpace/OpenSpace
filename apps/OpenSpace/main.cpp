@@ -658,7 +658,7 @@ std::vector<std::byte> mainEncodeFun() {
 
 
 
-void mainDecodeFun(const std::vector<std::byte>& data, unsigned int) {
+void mainDecodeFun(const std::vector<std::byte>& data) {
     ZoneScoped
     LTRACE("main::mainDecodeFun(begin)");
 
@@ -711,9 +711,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.averageDeltaTime = []() {
         ZoneScoped
 
-        return Engine::instance().statistics().avgDt(
-            Engine::instance().currentFrameNumber()
-        );
+        return Engine::instance().statistics().avgDt();
     };
     sgctDelegate.minDeltaTime = []() {
         ZoneScoped
@@ -733,7 +731,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.applicationTime = []() {
         ZoneScoped
 
-        return sgct::Engine::getTime();
+        return time();
     };
     sgctDelegate.currentWindowSize = []() {
         ZoneScoped
@@ -1077,7 +1075,6 @@ int main(int argc, char* argv[]) {
             LogMgr.addLog(std::make_unique<ghoul::logging::VisualStudioOutputLog>());
         }
 #endif // WIN32
-
     }
 
     ghoul::initialize();
@@ -1366,7 +1363,7 @@ int main(int argc, char* argv[]) {
     Engine::instance().setSyncParameters(false, 15.f * 60.f);
 
     LINFO("Starting rendering loop");
-    Engine::instance().render();
+    Engine::instance().exec();
     LINFO("Ending rendering loop");
 
     global::openSpaceEngine->deinitializeGL();
