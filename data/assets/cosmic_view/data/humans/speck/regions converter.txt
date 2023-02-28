@@ -1,0 +1,97 @@
+*Africa*
+South Africa = 1
+	- San: Botswana, Namibia, Angola, Zambia, Zimbabwe, Lesotho and South Africa
+	- BantuSouthAfrica; South Africa
+
+West Africa = 2
+	- Mandenka: Mali, Gambia 
+	- Yoruba: Nigeria, Benin and Togo
+
+Central Africa = 3
+	- MbutiPygmy: Kongo
+	- BiakaPygmy: Cameroon, Gabon, congo, central african republic, rwanda, tanzania, uganda, zambia, angola and nambia
+	- BantuKenya: kenya
+North Africa = 4
+	- Mozabite: Northern Sahara, Morocco, 
+
+*Europe*
+Europe = 5
+	- French
+	- Sardinian
+	- Orcadian: Scotland
+	- Russian
+	- Italian
+	- Tuscan
+	- Basque: Spain, France, the Pyrenees Moutains
+
+*Asia*
+Western Asia = 6
+	- Druze: Lebanon, Syria, Israel
+	- Bedouin: North Africa, the Arabian Peninsula, Egypt, Israel, Iraq, Syria, and Jordan.
+	- Palestinian
+
+Central Asia = 7
+	- Pathan: Iran, Afghanistan
+	- Uygur: China, Pakistan, kazakhstan, Mongolia, Turkey, Uzbekistan
+	- Adygei: Russia, Turkey, Jordan, Syria, Libya, Egypt
+
+South Asia = 8
+	- Brahui: Pakistan, Afghanistan, Iran
+	- Balochi: Iran, Pakistan, Afghanistan
+	- Hazara: Afganhistan
+	- Makrani: India, Pakistan
+	- Sindhi: Pakistan, India, United Arab Emirates, Malasyia
+	- Kalash: Pakistan
+	- Burusho Pakistan, India
+
+South East Asia = 9
+	- Cambodian
+
+East Asia = 10 
+	- Japanese
+	- Han: China
+	- Tujia: China, Japan
+	- Yi: China, Vietnam and Thailand
+	- Miao: China, Myanmar, Vietnam, Laos and Thailand
+	- Oroqen: China and Mongolia
+	- Daur: China and Mongolia
+	- Mongola: Mongolia
+	- Xibo: China 
+	- Han-NChina: China
+	- Dai: Myanmar, Vietnam, China, Laos, Thailand
+	- Lahu: China, Myanmar, Thailand, Laos
+	- She: China
+	- Naxi: China (Himalayas)
+	- Tu: Mongolia and China
+
+North East Asia = 11
+	- Yakut: Russia, Kazakhstan, Ukraine, Latvia
+	- Hezhen: Russia, China
+
+*Oceania*
+Oceania = 12
+	- Papuan: New Guinea
+	- Melanesian: Maluku islands, East Nusa Tenggara, New Guenia, Vantuatu, Fiji
+
+*America*
+North America = 13 
+	- Pima: United States
+
+Central America = 14 
+	- Maya: Guatemala, Mexico, Belize
+
+South America = 15
+	- Colombian
+	- Surui: Brazil
+	- Karitiana: Brazil
+
+
+
+
+
+
+
+
+
+
+

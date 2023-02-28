@@ -1,0 +1,16 @@
+# DIGITAL UNIVERSE ATLAS
+# American Museum of Natural History and Hayden Planetarium
+# http://www.haydenplanetarium.org/universe/ 
+#
+# Use of these data is subject to the terms of the License.
+#
+# Large Scale Structure Color Map version 2.0
+# Prepared by: Linn Storesund & Emma Segolsson (AMNH/Hayden Planetarium)
+
+4
+1.0 0.0 0.0 1.0  # red
+1.0 1.0 0.0 1.0  # yellow
+0.18 0.47 0.82 1.0 # dark teal 
+0.0 1.0 0.0 1.0  # green
+
+

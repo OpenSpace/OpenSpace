@@ -1,32 +1,29 @@
--- Your personal path --
-local path = "C:/MasterThesis_cosmicView"
-
 -- Speck files --
-local lineage_file = asset.localResource(path .. "/data/lineage/speck/lineage_file.speck")
+local lineage_file = asset.localResource("data/lineage/speck/lineage_file.speck")
 
 -- Label files --
-local label_17 = asset.localResource(path .. "/data/lineage/label/label_17.speck")
-local label_18 = asset.localResource(path .. "/data/lineage/label/label_18.speck")
-local label_19 = asset.localResource(path .. "/data/lineage/label/label_19.speck")
-local label_20 = asset.localResource(path .. "/data/lineage/label/label_20.speck")
-local label_21 = asset.localResource(path .. "/data/lineage/label/label_21.speck")
-local label_22 = asset.localResource(path .. "/data/lineage/label/label_22.speck")
-local label_23 = asset.localResource(path .. "/data/lineage/label/label_23.speck")
-local label_genus = asset.localResource(path .. "/data/lineage/label/label_genus.speck")
-local label_species = asset.localResource(path .. "/data/lineage/label/label_species.speck")
+local label_17 = asset.localResource("data/lineage/label/label_17.speck")
+local label_18 = asset.localResource("data/lineage/label/label_18.speck")
+local label_19 = asset.localResource("data/lineage/label/label_19.speck")
+local label_20 = asset.localResource("data/lineage/label/label_20.speck")
+local label_21 = asset.localResource("data/lineage/label/label_21.speck")
+local label_22 = asset.localResource("data/lineage/label/label_22.speck")
+local label_23 = asset.localResource("data/lineage/label/label_23.speck")
+local label_genus = asset.localResource("data/lineage/label/label_genus.speck")
+local label_species = asset.localResource("data/lineage/label/label_species.speck")
 
 -- Color maps -- 
-local color_17 = asset.localResource(path .. "/data/lineage/cmap/color_17.cmap")
-local color_18 = asset.localResource(path .. "/data/lineage/cmap/color_18.cmap")
-local color_19 = asset.localResource(path .. "/data/lineage/cmap/color_19.cmap")
-local color_20 = asset.localResource(path .. "/data/lineage/cmap/color_20.cmap")
-local color_21 = asset.localResource(path .. "/data/lineage/cmap/color_21.cmap")
-local color_22 = asset.localResource(path .. "/data/lineage/cmap/color_22.cmap")
-local color_23 = asset.localResource(path .. "/data/lineage/cmap/color_23.cmap")
-local color_genus = asset.localResource(path .. "/data/lineage/cmap/color_genus.cmap")
+local color_17 = asset.localResource("data/lineage/cmap/color_17.cmap")
+local color_18 = asset.localResource("data/lineage/cmap/color_18.cmap")
+local color_19 = asset.localResource("data/lineage/cmap/color_19.cmap")
+local color_20 = asset.localResource("data/lineage/cmap/color_20.cmap")
+local color_21 = asset.localResource("data/lineage/cmap/color_21.cmap")
+local color_22 = asset.localResource("data/lineage/cmap/color_22.cmap")
+local color_23 = asset.localResource("data/lineage/cmap/color_23.cmap")
+local color_genus = asset.localResource("data/lineage/cmap/color_genus.cmap")
 
 -- Texture files -- 
-local lineage_texture = asset.localResource(path .. "/data/texture/point3A.png")
+local lineage_texture = asset.localResource("data/texture/point3A.png")
 
 -- Scale factor --
 local scale_factor = 12

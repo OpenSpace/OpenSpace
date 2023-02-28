@@ -1,0 +1,16 @@
+# Cosmic View of Life on Earth
+# American Museum of Natural History and Hayden Planetarium
+# http://www.haydenplanetarium.org/
+#
+# Use of these data is subject to the terms of the License.
+# The Digital Universe is funded by NASA.
+#
+# Large Scale Structure Color Map version 1.0
+# Prepared by: Emma Segolsson (Liu), Linn Storesund (Liu)
+
+datavar 0 Status
+datavar 1 Trend
+datavar 2 Population
+
+-0.265644141 0.16734497 0.39360441300000004 2 0 3200 # Golden lion tamarin 
+0.282490576 -0.191598717 0.18704688 3 0 2500000 # crab-eating macaque 

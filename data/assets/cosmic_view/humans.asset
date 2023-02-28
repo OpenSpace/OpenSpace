@@ -1,34 +1,31 @@
--- Your personal path --
-local path = "C:/MasterThesis_cosmicView"
-
 -- Speck files --
-local all_humans = asset.localResource(path .. "/data/humans/speck/all_human_continents.speck")
-local south_africa_file = asset.localResource(path .. "/data/humans/speck/regions/south_africa.speck")
-local west_africa_file = asset.localResource(path .. "/data/humans/speck/regions/west_africa.speck")
-local central_africa_file = asset.localResource(path .. "/data/humans/speck/regions/central_africa.speck")
-local north_africa_file = asset.localResource(path .. "/data/humans/speck/regions/north_africa.speck")
-local europe_file = asset.localResource(path .. "/data/humans/speck/regions/europe.speck")
-local west_asia_file = asset.localResource(path .. "/data/humans/speck/regions/west_asia.speck")
-local central_asia_file = asset.localResource(path .. "/data/humans/speck/regions/central_asia.speck")
-local south_asia_file = asset.localResource(path .. "/data/humans/speck/regions/south_asia.speck")
-local south_east_asia_file = asset.localResource(path .. "/data/humans/speck/regions/south_east_asia.speck")
-local east_asia_file =  asset.localResource(path .. "/data/humans/speck/regions/east_asia.speck")
-local north_east_asia_file = asset.localResource(path .. "/data/humans/speck/regions/north_east_asia.speck")
-local oceania_file = asset.localResource(path .. "/data/humans/speck/regions/oceania.speck")
-local north_america_file = asset.localResource(path .. "/data/humans/speck/regions/north_america.speck")
-local central_america_file = asset.localResource(path .. "/data/humans/speck/regions/central_america.speck")
-local south_america_file = asset.localResource(path .. "/data/humans/speck/regions/south_america.speck")
+local all_humans = asset.localResource("data/humans/speck/all_human_continents.speck")
+local south_africa_file = asset.localResource("data/humans/speck/regions/south_africa.speck")
+local west_africa_file = asset.localResource("data/humans/speck/regions/west_africa.speck")
+local central_africa_file = asset.localResource("data/humans/speck/regions/central_africa.speck")
+local north_africa_file = asset.localResource("data/humans/speck/regions/north_africa.speck")
+local europe_file = asset.localResource("data/humans/speck/regions/europe.speck")
+local west_asia_file = asset.localResource("data/humans/speck/regions/west_asia.speck")
+local central_asia_file = asset.localResource("data/humans/speck/regions/central_asia.speck")
+local south_asia_file = asset.localResource("data/humans/speck/regions/south_asia.speck")
+local south_east_asia_file = asset.localResource("data/humans/speck/regions/south_east_asia.speck")
+local east_asia_file =  asset.localResource("data/humans/speck/regions/east_asia.speck")
+local north_east_asia_file = asset.localResource("data/humans/speck/regions/north_east_asia.speck")
+local oceania_file = asset.localResource("data/humans/speck/regions/oceania.speck")
+local north_america_file = asset.localResource("data/humans/speck/regions/north_america.speck")
+local central_america_file = asset.localResource("data/humans/speck/regions/central_america.speck")
+local south_america_file = asset.localResource("data/humans/speck/regions/south_america.speck")
 
-local test_file = asset.localResource(path .. "/data/humans/speck/test_oceanien.speck")
+local test_file = asset.localResource("data/humans/speck/test_oceanien.speck")
 
 -- Label files --
-local all_humans_label = asset.localResource(path .. "/data/humans/label/human_tribe_label.speck")
+local all_humans_label = asset.localResource("data/humans/label/human_tribe_label.speck")
 
 -- Color maps -- 
-local color_continents = asset.localResource(path .. "/data/humans/cmap/human_continents.cmap")
+local color_continents = asset.localResource("data/humans/cmap/human_continents.cmap")
 
 -- Texture files -- 
-local human_texture = asset.localResource(path .. "/data/texture/point3A.png")
+local human_texture = asset.localResource("data/texture/point3A.png")
 
 
 

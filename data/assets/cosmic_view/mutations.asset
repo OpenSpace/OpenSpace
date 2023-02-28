@@ -1,22 +1,19 @@
--- Your personal path --
-local path = "C:/MasterThesis_cosmicView"
-
 -- Speck files --
-local mutations_file = asset.localResource(path .. "/data/mutations/speck/primates_mutations_file.speck")
+local mutations_file = asset.localResource("data/mutations/speck/primates_mutations_file.speck")
 
 -- Label files --
-local mutations_label = asset.localResource(path .. "/data/mutations/label/primates_commonname_label.speck")
+local mutations_label = asset.localResource("data/mutations/label/primates_commonname_label.speck")
 
 -- Color map --
-local color_map = asset.localResource(path .. "/data/mutations/cmap/redyellow.cmap")
+local color_map = asset.localResource("data/mutations/cmap/redyellow.cmap")
 
 -- Testing of Colormaps --
-local color_map1 = asset.localResource(path .. "/data/mutations/cmap/redblue.cmap")
-local color_map2 = asset.localResource(path .. "/data/mutations/cmap/inferno.cmap")
-local color_map3 = asset.localResource(path .. "/data/mutations/cmap/plasma.cmap")
+local color_map1 = asset.localResource("data/mutations/cmap/redblue.cmap")
+local color_map2 = asset.localResource("data/mutations/cmap/inferno.cmap")
+local color_map3 = asset.localResource("data/mutations/cmap/plasma.cmap")
 
 -- Textire --
-local mutations_texture = asset.localResource(path .. "/data/texture/point3A.png")
+local mutations_texture = asset.localResource("data/texture/point3A.png")
 
 
 local mutations = {

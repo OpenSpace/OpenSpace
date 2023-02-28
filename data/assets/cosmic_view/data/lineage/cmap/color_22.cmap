@@ -1,0 +1,66 @@
+# DIGITAL UNIVERSE ATLAS
+# American Museum of Natural History and Hayden Planetarium
+# http://www.haydenplanetarium.org/universe/ 
+#
+# Use of these data is subject to the terms of the License.
+#
+# Prepared by: Linn Storesund (AMNH/Hayden Planetarium)
+# 24 = Eulemur, green       26 = Lemur, green           27 = Otolemur, light green   28 = Varecia, deep blue      29 = Daubentonia, purple
+# 30 = Avahi, turqoise      31 = Indri, turqoise       32 = Propithecus, turqoise  33 = Lepilemur, green        34 = Microcebus, deep blue   
+# 35 = Nycticebus, pink     36 = Hapalemur,light green 37 = Allocebus, deep blue   38 = Cheirogaleus, deep blue 39 = Mirza, deep blue        40 = Phaner, deep blue 
+# 41 = Galago, light gree   42 = Pachylemur, green     43 = Prolemur, green        44 = Carlito, light pink     45 = Perodicticus, deep pink 46 = Galagoides, light green 
+# 47 = Loris, deep pink     48 = Cephalopachuslightgree 49 = Tarsius, mango pink    50 = Megaladapis, green      51 = Palaeopropithecus, red
+
+# lineage_22: 52 = Saimiriinae (Cebidae, yellow),  53 = Cebinae (Cebidae, yellow),     
+# 54 = Atelinae (20 = Atelidae, yellow), 55 = Pitheciinae (21 = Pitheciidae, yellow),   
+# 56 = Callitrichinae (Cebidae, yellow),   57 = Hominidae (Hominoidea, orange ),  
+# 58 = Cercopithecidae (Cercopithecoidea, orange), 59 = Aotus (Aotidae, yellow ),           
+# 60 = Hylobatidae (Hominoidea, orange ),  61 = Callicebinae (21 = Pitheciidae, yellow), 62 = Alouattinae ((20 = Atelidae, yellow)), 
+#
+38
+1.0 1.0 1.0 1.0
+0.133 0.545 0.133 1.0 # forest green Eulemur
+0.741 0.949 0.431 1.0 # chartreuse Lemur
+0.811 0.160 1.0 1.0 # light green Otolemur
+0.125 0.698 0.6667 1.0 #light sea green Varecia
+0.713 0.160 1 1.0 # purple Daubentonia
+0.160 0.992 1 1.0 # turqoise avahi
+0.796 0.901 0.905 1.0 # grey white blue indri
+0.152 0.564 0.529 1.0 # dark turqoise Propithecus
+0.0 1.0 0.0 1.0 # green Lepilemur
+0.576 0.670 0.964 1.0 # baby dark blue Microcebus
+1 0.478 0.874 1.0 # barbie pink Nycticebus
+0.678 0.929 0.650 1.0 # light green Hapalemur
+0.043 0.623 0.976 1.0 # deep blue baby Allocebus
+0.545 0.470 0.886 1.0 # light purple Cheirogaleus
+0.705 0.725 0.815 1.0 # blue gray Mirza
+0.501 0.784 0.898 1.0 # light blue gray Phaner
+0.109 0.027 0.733 1.0 # blue purple Galago
+0 1 0.337 1.0 # green blue Pachylemur
+0.580 0.976 0.8 1.0 # light blue Prolemur
+0.972 0.627 0.850 1.0 # light pink Carlito
+0.584 0.050 0.607 1.0 # pink purple Perodicticus
+0.082 0.682 0.039 1.0 # dark green Galagoides
+1 0.141 0.494 1.0 # grynet pink Loris
+0.576 0.639 0.560 1.0 # green gray Cephalopachus
+0.901 0.396 0.23 1.0 # mango Tarsius
+0.776 0.949 0.568 1.0 # baby green Megaladapis
+0.901 0.215 0.2 1.0 # deep red Palaeopropithecus
+0.8 1.0 0 1.0 # scream lime yellow Saimiriinae
+0.976 0.925 0.141 1.0 # yellow Cebinae
+0.768 0.568 0.0078 1.0 # dijon Atelidae
+1.0 1.0 0.654 1.0 # pale yellow Pitheciinae
+0.643 0.596 0.156 1.0 # green brown Callitrichinae
+1 0.611 0.0 1.0 # melon yellow Hominidae
+1 0.811 0.6 1.0 # deep napoli yellow Cercopithecidae
+0.980 0.956 0.717 1.0 # light yellow Aotus
+0.643 0.301 0.156 1.0 # brown orange Hylobatidae
+0.917 0.498 0.023 1.0 # orange brown light Callicebinae
+1 0.8 0.2 1.0 # sunglow yellow Alouattinae
+
+
+
+
+
+
+

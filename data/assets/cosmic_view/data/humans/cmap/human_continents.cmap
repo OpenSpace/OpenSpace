@@ -1,0 +1,25 @@
+# DIGITAL UNIVERSE ATLAS
+# American Museum of Natural History and Hayden Planetarium
+# http://www.haydenplanetarium.org/universe/ 
+#
+# Use of these data is subject to the terms of the License.
+#
+# Prepared by: Linn Storesund (AMNH/Hayden Planetarium)
+#
+16
+1.0 1.0 1.0 1.0 # white
+1 0.263 0.263 1.0 # red south_africa
+1 0.263 0.263 1.0 # west_africa
+1 0.263 0.263 1.0 # central_africa
+1 0.263 0.263 1.0 # north_africa
+0.776 0.251 1.0 1.0 # purple europe
+0.659 1 0.361 1.0 # green west_asia
+0.659 1 0.361 1.0 # central_asia
+0.659 1 0.361 1.0 # south_asia
+0.659 1 0.361 1.0 # south_east_asia
+0.659 1 0.361 1.0 # east_asia 
+0.659 1 0.361 1.0 # north_east_asia
+1.0 1.0 0.0 1.0 # yellow oceania
+0.075 0.69 1.0 1.0 # blue north_america
+0.075 0.69 1.0 1.0 # central_america
+0.067 1.0 0.906 1.0 # south_america

@@ -1,0 +1,33 @@
+# Cosmic View of Life on Earth
+# American Museum of Natural History and Hayden Planetarium
+# http://www.haydenplanetarium.org/
+#
+# Use of these data is subject to the terms of the License.
+# The Digital Universe is funded by NASA.
+#
+# Large Scale Structure Color Map version 1.0
+# Prepared by: Emma Segolsson (Liu), Linn Storesund (Liu)
+
+datavar 0 synonymousDiff
+datavar 1 NonSynonymousDiff
+datavar 2 lineage_17
+datavar 3 lineage_18
+datavar 4 lineage_19
+datavar 5 lineage_20
+datavar 6 lineage_21
+datavar 7 lineage_22
+datavar 8 lineage_23
+datavar 9 Genus
+datavar 10 nbSeqs
+datavar 11 nbVariable
+datavar 12 Pi
+datavar 13 maxDiff
+datavar 14 frcVariable
+datavar 15 Pinorm
+datavar 16 maxDiffnorm
+
+-0.001745157 0.012552264 -0.000337666 14 3 0 1 3 9 22 57 69 1 5 3 1.28 3 0.0078125 0.003333333 0.0078125 # Denisovan 
+-0.002973892 0.002384656 -0.016720713 13 1 0 1 3 9 22 57 69 1 5 3 1.28 3 0.0078125 0.003333333 0.0078125 # Denisovan 
+-0.001745157 0.012552264 -0.000337666 14 3 0 1 3 9 22 57 69 1 5 3 1.28 3 0.0078125 0.003333333 0.0078125 # Denisovan 
+0.002432324 0.005307641 -0.017202178 14 1 0 1 3 9 22 57 69 1 5 3 1.28 3 0.0078125 0.003333333 0.0078125 # Denisovan 
+-0.001745157 0.012552264 -0.000337666 14 3 0 1 3 9 22 57 69 1 5 3 1.28 3 0.0078125 0.003333333 0.0078125 # Denisovan 

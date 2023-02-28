@@ -1,0 +1,332 @@
+# Cosmic View of Life on Earth
+# American Museum of Natural History and Hayden Planetarium
+# http://www.haydenplanetarium.org/
+#
+# Use of these data is subject to the terms of the License.
+# The Digital Universe is funded by NASA.
+#
+# Primates unscaled
+# Prepared by: Emma Segolsson (Liu), Linn Storesund (Liu), Wandrille Duchemin (Basel)
+
+
+0.031922783 -0.022213102 0.060271132 text Pongo abelii 
+0.030030821 0.001046404 0.077372022 text Pongo pygmaeus 
+-0.254412885 0.272718623 0.391510164 text Plecturocebus donacophilus 
+-0.186420971 0.094365449 0.429282104 text Saguinus oedipus 
+-0.035397661 0.01228366 0.002335091 text Gorilla beringei graueri 
+-0.035397661 0.01228366 0.002335091 text Gorilla beringei 
+-0.036457638 0.002191236 -0.011295851 text Gorilla gorilla gorilla 
+-0.036946231 0.000706817 -0.013047799 text Gorilla gorilla 
+-0.281486527 0.212699375 0.413618966 text Sapajus apella 
+-0.266839461 0.29200343 0.43888168 text Cebus apella 
+-0.277156007 0.284816735 0.330275769 text Saimiri oerstedii citrinellus 
+-0.27111809 0.287086684 0.325380617 text Saimiri sciureus 
+-0.269583344 0.276202991 0.333302523 text Saimiri boliviensis 
+-0.269960104 0.270675644 0.334653596 text Saimiri boliviensis boliviensis 
+-0.219747473 0.280894945 0.477173993 text Cebus albifrons 
+-0.251336882 0.282926215 0.422334436 text Sapajus xanthosternos 
+-0.265644141 0.16734497 0.393604413 text Leontopithecus rosalia 
+-0.262123731 0.148349619 0.384092835 text Leontopithecus chrysopygus 
+-0.207713277 0.211892593 0.456555365 text Cacajao calvus 
+-0.237440302 0.206952005 0.454664229 text Chiropotes israelita 
+-0.265777641 0.210697917 0.455610866 text Chiropotes albinasus 
+-0.231285777 0.137909125 0.36279107 text Callimico goeldii 
+-0.255746198 0.176187135 0.338671439 text Callithrix pygmaea 
+-0.236941895 0.23440176 0.405779718 text Callithrix penicillata 
+-0.24650415 0.233660468 0.398882645 text Callithrix jacchus 
+-0.248370815 0.228359324 0.408679388 text Callithrix kuhlii 
+-0.249987488 0.239877175 0.391999328 text Callithrix geoffroyi 
+-0.240459664 0.20975009 0.420692176 text Cheracebus lugens 
+-0.276538443 0.271077543 0.451336053 text Plecturocebus cupreus 
+-0.290802474 0.298035433 0.429959419 text Aotus trivirgatus 
+-0.265996246 0.272313622 0.470483098 text Aotus azarae 
+-0.265996246 0.272313622 0.470483098 text Aotus azarae azarai 
+-0.255115675 0.262800819 0.457945498 text Aotus nigriceps 
+-0.266709553 0.273953019 0.474096286 text Aotus nancymaae 
+-0.274335205 0.282990079 0.418575857 text Aotus vociferans 
+-0.283205791 0.294099571 0.425264537 text Aotus lemurinus 
+-0.275811707 0.285302378 0.424374075 text Aotus griseimembra 
+-0.267218267 0.279274703 0.439880609 text Alouatta guariba clamitans 
+-0.269081574 0.263876303 0.435327241 text Alouatta caraya 
+-0.268920897 0.258166893 0.402536137 text Alouatta seniculus 
+-0.205011894 0.278979986 0.392931664 text Lagothrix lagotricha 
+-0.275728983 0.287856717 0.488719251 text Ateles belzebuth 
+0.013268399 0.027698542 -0.030430457 text Pan troglodytes troglodytes 
+0.014377225 0.02847553 -0.030779899 text Pan troglodytes schweinfurthii 
+1.00E-10 1.00E-11 1.00E-10 text Homo sapiens 
+0.000568327 -0.088972069 -0.053139445 text Nomascus gabriellae 
+0.000533529 -0.066874017 -0.061506197 text Nomascus siki 
+-0.007335134 -0.072871927 -0.066054343 text Nomascus leucogenys 
+-0.009263007 -0.100424362 -0.117038781 text Hoolock hoolock 
+-0.00968465 -0.101802236 -0.122112848 text Hoolock tianxing 
+-0.010536969 -0.109472054 -0.125205335 text Hoolock leuconedys 
+-0.00968465 -0.101802236 -0.122112848 text Hoolock leuconedys x Hoolock tianxing 
+-0.025748157 -0.117521762 -0.080873964 text Symphalangus syndactylus 
+0.01102949 -0.091600405 -0.064488341 text Hylobates pileatus 
+-0.028613196 -0.062304375 -0.101801794 text Hylobates lar 
+-0.028894743 -0.0549084 -0.102307503 text Hylobates agilis 
+0.015300053 0.031919993 -0.060320327 text Pan paniscus 
+0.029256521 0.033717887 -0.019083686 text Pan troglodytes verus 
+0.029933796 0.035904324 -0.024737812 text Pan troglodytes 
+0.026515848 0.032323112 -0.014862862 text Pan troglodytes ellioti 
+-0.000908348 0.010090826 -0.007149957 text Homo denisova 
+-0.005680684 -0.007223887 0.016679461 text Homo neanderthalensis 
+-0.262554211 0.279962133 0.327454921 text Saimiri boliviensis peruviensis 
+0.010307357 -0.080671716 -0.046152549 text Nomascus concolor 
+-0.006524528 -0.069070229 -0.100178351 text Hylobates moloch 
+0.000395965 -0.081360304 -0.089652762 text Hylobates klossii 
+-0.021431955 -0.088606107 -0.098117695 text Hylobates muelleri 
+-0.275705091 0.187192854 0.370652966 text Brachyteles arachnoides 
+-0.277155135 0.280381659 0.326660917 text Saimiri oerstedii oerstedii 
+-0.275594953 0.281791919 0.333738149 text Saimiri oerstedii 
+-0.270188507 0.278452309 0.336230184 text Saimiri sciureus sciureus 
+-0.252541494 0.277221453 0.329114564 text Saimiri sciureus macrodon 
+-0.187771056 0.075364695 0.391827991 text Saguinus midas 
+-0.19842498 0.132519273 0.436170711 text Saguinus leucopus 
+-0.184695938 0.097349575 0.409721056 text Saguinus geoffroyi 
+-0.188385288 0.25521572 0.466682234 text Cebus kaapori 
+-0.219451077 0.27641539 0.468081956 text Cebus olivaceus 
+-0.25415592 0.254776641 0.454247176 text Sapajus nigritus 
+-0.259749506 0.292664934 0.438299045 text Sapajus apella macrocephalus 
+-0.263374747 0.29545051 0.419149592 text Sapajus flavius 
+-0.256720816 0.293842444 0.440773144 text Sapajus libidinosus 
+-0.183056036 0.180978426 0.422473832 text Pithecia pithecia 
+-0.248764501 0.211720117 0.409046416 text Cheracebus lucifer 
+-0.25207821 0.253766779 0.373562749 text Callicebus nigrifrons 
+-0.273396305 0.245518935 0.394064132 text Callicebus personatus 
+-0.25902205 0.248592336 0.422906969 text Plecturocebus brunneus 
+-0.268818463 0.245008074 0.423050815 text Plecturocebus miltoni 
+-0.261163107 0.254115707 0.42511937 text Plecturocebus cinerascens 
+-0.296929055 0.264553019 0.448635847 text Plecturocebus bernhardi 
+-0.288376051 0.248724706 0.463230404 text Plecturocebus moloch 
+-0.292768905 0.240072303 0.467026049 text Plecturocebus vieirai 
+-0.284666294 0.269648873 0.47412064 text Ateles paniscus 
+-0.276875202 0.278693914 0.474590808 text Ateles fusciceps 
+-0.275345502 0.279550932 0.486745991 text Ateles hybridus 
+-0.278808271 0.275280242 0.48087935 text Ateles geoffroyi 
+0.020144581 -0.114764271 0.254055163 text Colobus angolensis palliatus 
+-0.20547554 -0.164990617 0.306226381 text Perodicticus potto 
+-0.320748933 -0.238696909 0.264260449 text Palaeopropithecus ingens 
+-0.349770122 -0.251490049 0.246595672 text Avahi laniger 
+-0.41967957 -0.32945684 0.367666257 text Eulemur macaco macaco 
+-0.38927353 -0.311601508 0.344673921 text Eulemur macaco 
+-0.456249059 -0.322232804 0.339835032 text Eulemur rufus 
+-0.449421815 -0.335646526 0.369081044 text Eulemur fulvus mayottensis 
+-0.431772228 -0.32945465 0.34459126 text Eulemur mongoz 
+-0.455776865 -0.369312207 0.368075744 text Eulemur rubriventer 
+-0.427016101 -0.297899193 0.345936664 text Varecia variegata variegata 
+-0.44349079 -0.290960917 0.333763756 text Varecia variegata 
+-0.461953977 -0.352029255 0.274805906 text Microcebus jollyae 
+-0.282799169 -0.19291246 0.263160378 text Tarsius syrichta 
+-0.282799169 -0.19291246 0.263160378 text Carlito syrichta 
+-0.27471442 -0.207143295 0.266931461 text Nycticebus javanicus 
+-0.275993442 -0.207645728 0.272241372 text Nycticebus coucang 
+-0.274100101 -0.208635131 0.275315858 text Nycticebus bengalensis 
+0.049815629 -0.092873839 0.393021723 text Trachypithecus pileatus 
+0.033480434 -0.084378672 0.377314052 text Trachypithecus shortridgei 
+-0.273439328 -0.218821482 0.310668383 text Nycticebus pygmaeus 
+-0.27068877 -0.210961777 0.271387421 text Nycticebus menagensis 
+-0.28872845 -0.213411511 0.23468373 text Galago senegalensis 
+-0.282600058 -0.218877238 0.236214401 text Galago moholi 
+-0.246604953 -0.197368436 0.272130527 text Otolemur crassicaudatus 
+-0.250364609 -0.214650492 0.267649279 text Daubentonia madagascariensis 
+-0.384201328 -0.213997979 0.320380836 text Phaner pallescens 
+-0.398839408 -0.183246549 0.32698058 text Phaner parienti 
+-0.394546423 -0.204005643 0.330828795 text Phaner electromontis 
+-0.255638478 -0.204955836 0.289804424 text Loris tardigradus 
+-0.243387429 -0.208596294 0.30346084 text Loris lydekkerianus 
+-0.316794168 -0.249992167 0.297424362 text Indri indri 
+-0.363960136 -0.290387006 0.278921661 text Propithecus edwardsi 
+-0.375425752 -0.286824287 0.287883694 text Propithecus diadema 
+-0.398607979 -0.290415114 0.304624975 text Propithecus verreauxi 
+-0.389006539 -0.262142743 0.295921201 text Propithecus tattersalli 
+-0.382979219 -0.25244245 0.280214752 text Propithecus coquereli 
+-0.358621788 -0.241894517 0.327527414 text Megaladapis edwardsi 
+-0.432821121 -0.443971287 0.320952725 text Lepilemur hollandorum 
+-0.443246315 -0.444384313 0.350580887 text Lepilemur seali 
+-0.432878998 -0.4523398 0.356729828 text Lepilemur scottorum 
+-0.444312707 -0.420867067 0.333006219 text Lepilemur wrighti 
+-0.450401825 -0.411789436 0.338717821 text Lepilemur fleuretae 
+-0.461538321 -0.427544648 0.335577134 text Lepilemur jamesi 
+-0.466193397 -0.437192636 0.335407618 text Lepilemur betsileo 
+-0.474582188 -0.438198891 0.322227198 text Lepilemur mustelinus 
+-0.449664687 -0.422880868 0.350993428 text Lepilemur microdon 
+-0.469330315 -0.436616204 0.360328906 text Lepilemur otto 
+-0.465087633 -0.44495952 0.354427686 text Lepilemur grewcocki 
+-0.468981402 -0.436244566 0.359566607 text Lepilemur edwardsi 
+-0.463090727 -0.435856338 0.372464912 text Lepilemur sahamalazensis 
+-0.459558046 -0.434351653 0.397670633 text Lepilemur ahmansoni 
+-0.470225423 -0.442772125 0.341363404 text Lepilemur dorsalis 
+-0.470225423 -0.442772125 0.341363404 text Lepilemur mittermeieri 
+-0.465784162 -0.436191658 0.361076765 text Lepilemur tymerlachsoni 
+-0.471937073 -0.456628887 0.371136014 text Lepilemur ankaranensis 
+-0.481152536 -0.455814399 0.350106032 text Lepilemur milanoii 
+-0.427307341 -0.412324137 0.330929018 text Lepilemur leucopus 
+-0.427405621 -0.407361272 0.325875712 text Lepilemur petteri 
+-0.427719159 -0.440842375 0.37201672 text Lepilemur hubbardorum 
+-0.41558467 -0.448216383 0.381665683 text Lepilemur ruficaudatus 
+-0.439480159 -0.427159438 0.387863631 text Lepilemur randrianasoloi 
+-0.425497636 -0.4224446 0.360762878 text Lepilemur aeeclis 
+-0.40492689 -0.262655656 0.313103116 text Hapalemur griseus 
+-0.394537512 -0.353404233 0.398110975 text Prolemur simus 
+-0.350361041 -0.30416354 0.341785201 text Lemur catta 
+-0.437659143 -0.271406613 0.34535126 text Cheirogaleus sibreei 
+-0.477305766 -0.33680508 0.307175695 text Cheirogaleus medius 
+-0.424477126 -0.274779247 0.288149879 text Cheirogaleus major 
+-0.43785761 -0.288937262 0.291794392 text Cheirogaleus crossleyi 
+-0.409293079 -0.258693522 0.272488036 text Allocebus trichotis 
+-0.443604468 -0.321011268 0.379768326 text Mirza coquereli 
+-0.422374431 -0.331986354 0.394644822 text Mirza zaza 
+-0.475958393 -0.34222501 0.328160694 text Microcebus griseorufus 
+-0.478686175 -0.345604576 0.300550625 text Microcebus murinus 
+-0.483512322 -0.361552378 0.314380768 text Microcebus danfossi 
+-0.487860564 -0.356282378 0.336120795 text Microcebus bongolavensis 
+-0.48438897 -0.372929407 0.318173503 text Microcebus ravelobensis 
+-0.544190846 -0.419412037 0.335496219 text Microcebus rufus 
+-0.467355859 -0.354510562 0.347973954 text Microcebus simmonsi 
+-0.524256685 -0.376243563 0.343196043 text Microcebus margotmarshae 
+-0.516444112 -0.367074951 0.332848586 text Microcebus mamiratra 
+-0.500934075 -0.407824232 0.294709774 text Microcebus tavaratra 
+-0.510651417 -0.425575974 0.332386257 text Microcebus sambiranensis 
+-0.514712471 -0.435315689 0.354524907 text Microcebus arnholdi 
+-0.485530659 -0.407036231 0.317980257 text Microcebus mittermeieri 
+-0.499725794 -0.376075402 0.317316407 text Microcebus berthae 
+-0.50632273 -0.391888633 0.333947432 text Microcebus lehilahytsara 
+-0.499396842 -0.368685437 0.342661232 text Microcebus myoxinus 
+-0.5047085 -0.423888262 0.333516942 text Microcebus tanosi 
+-0.299776404 -0.243726877 0.369113929 text Tarsius bancanus 
+-0.299776404 -0.243726877 0.369113929 text Cephalopachus bancanus 
+-0.332588144 -0.187646822 0.32070568 text Tarsius wallacei 
+-0.341398019 -0.195076157 0.319105109 text Tarsius lariang 
+-0.328226369 -0.180265562 0.318841283 text Tarsius dentatus 
+-0.232755013 -0.208741527 0.246799324 text Perodicticus potto edwarsi 
+0.164672112 -0.198132803 0.049176964 text Papio cynocephalus 
+0.016956977 -0.139366579 0.382826434 text Rhinopithecus brelichi 
+0.165611253 -0.196577583 0.154567066 text Macaca sylvanus 
+0.236296538 -0.172130602 0.174127312 text Macaca sinica 
+0.275263133 -0.210402338 0.180436394 text Macaca fascicularis aureus 
+0.190605984 -0.15305333 0.231120485 text Macaca radiata 
+0.238687304 -0.195133543 0.189711651 text Macaca leucogenys 
+0.25771701 -0.185783021 0.147537066 text Macaca arctoides 
+0.226156236 -0.190835397 0.23838992 text Macaca assamensis 
+0.238468242 -0.191035777 0.219744261 text Macaca thibetana 
+0.212386996 -0.150784981 0.137179568 text Macaca leonina 
+0.256946595 -0.179155933 0.125235928 text Macaca nemestrina 
+0.228268492 -0.173849911 0.141304525 text Macaca silenus 
+0.284279563 -0.190042238 0.109895624 text Macaca mulatta 
+0.271910021 -0.184086918 0.11784585 text Macaca fuscata 
+0.267467355 -0.190479599 0.14050558 text Macaca cyclopis 
+0.262887998 -0.160136194 0.103585243 text Macaca mulatta vestita 
+0.262553852 -0.181199876 0.13917336 text Macaca nigra 
+0.261732721 -0.196672947 0.183564161 text Macaca mulatta brevicaudus 
+0.261364626 -0.178932659 0.149947752 text Macaca mulatta lasiotus 
+0.004764392 -0.102945126 0.332444506 text Procolobus verus 
+-0.005481703 -0.091268403 0.327198508 text Piliocolobus badius 
+-0.003077414 -0.099055506 0.257820212 text Colobus guereza 
+0.044297625 -0.093360418 0.395410868 text Semnopithecus entellus 
+0.015280566 -0.102710816 0.316633072 text Trachypithecus vetulus 
+0.034982126 -0.108298166 0.352878588 text Trachypithecus johnii 
+0.036718758 -0.156926572 0.360081355 text Pygathrix nigripes 
+0.019811568 -0.09970019 0.375547934 text Pygathrix nemaeus 
+0.044844405 -0.157862625 0.320741736 text Presbytis melalophos 
+0.034503502 -0.15307012 0.331688489 text Presbytis femoralis femoralis 
+0.027686748 -0.170865517 0.353759164 text Presbytis comata comata 
+0.038103294 -0.157542483 0.355771696 text Presbytis melalophos mitrata 
+0.008948783 -0.146582668 0.317096083 text Simias concolor 
+0.015946246 -0.159715135 0.304807614 text Nasalis larvatus 
+0.015852506 -0.155106627 0.426643876 text Rhinopithecus avunculus 
+0.040585037 -0.143104006 0.414098512 text Rhinopithecus strykeri 
+0.040378131 -0.143437337 0.382700414 text Rhinopithecus bieti 
+0.005961471 -0.131945407 0.388460952 text Rhinopithecus roxellana 
+0.045304719 -0.144632752 0.390605769 text Trachypithecus obscurus 
+0.02672202 -0.125709743 0.389244699 text Trachypithecus phayrei phayrei 
+0.048998189 -0.108270609 0.382877769 text Trachypithecus phayrei crepuscula 
+0.044476428 -0.11389843 0.381914152 text Trachypithecus barbei 
+0.035380465 -0.11451504 0.369173597 text Trachypithecus poliocephalus 
+0.044026285 -0.122822416 0.360092576 text Trachypithecus francoisi 
+0.024228858 -0.141064238 0.353296913 text Trachypithecus delacouri 
+0.017009466 -0.129288192 0.345519643 text Trachypithecus hatinhensis 
+0.040649271 -0.111891751 0.381602389 text Trachypithecus cristatus 
+0.037323339 -0.084285955 0.412703481 text Trachypithecus germaini 
+0.018516687 -0.105953669 0.421694203 text Trachypithecus auratus 
+0.012116305 -0.088230753 0.390784796 text Trachypithecus mauritius 
+0.193135699 -0.140157493 0.180100822 text Macaca maura 
+0.19452646 -0.174118156 0.169264947 text Macaca tonkeana 
+0.282490576 -0.191598717 0.18704688 text Macaca fascicularis 
+0.137747868 -0.124731732 0.137049369 text Cercocebus torquatus 
+0.17936375 -0.122469279 0.175982664 text Mandrillus sphinx 
+0.189559985 -0.136481095 0.152854797 text Cercocebus atys 
+0.14864961 -0.150122289 0.127330352 text Cercocebus atys atys 
+0.169064418 -0.152679525 0.137525023 text Cercocebus chrysogaster 
+0.190052261 -0.139584929 0.113691515 text Mandrillus leucophaeus 
+0.187870876 -0.171371564 0.115314456 text Theropithecus gelada 
+0.24768779 -0.198010289 0.085124771 text Lophocebus aterrimus 
+0.172411029 -0.187347439 0.051410398 text Papio anubis 
+0.166541923 -0.186510575 0.059455436 text Papio hamadryas 
+0.178836539 -0.192680036 0.050468227 text Papio kindae 
+0.200938602 -0.186276589 0.064823826 text Papio ursinus 
+0.180022662 -0.185813613 0.088324229 text Papio papio 
+0.192493179 -0.179904702 0.383086406 text Cercopithecus diana 
+0.247960726 -0.211772511 0.29946528 text Allenopithecus nigroviridis 
+0.208894412 -0.180174662 0.438749413 text Erythrocebus patas 
+0.323022499 -0.282562899 0.474350028 text Chlorocebus pygerythrus 
+0.268901552 -0.269616928 0.476088412 text Chlorocebus djamdjamensis 
+0.313131132 -0.276987681 0.451273589 text Chlorocebus cynosuros 
+0.301631019 -0.252652991 0.536109934 text Chlorocebus sabaeus 
+0.262802594 -0.257334993 0.430945672 text Chlorocebus aethiops x Chlorocebus pygerythrus 
+0.31737544 -0.260720398 0.536683833 text Chlorocebus aethiops 
+0.309690169 -0.264392492 0.501871528 text Chlorocebus tantalus 
+0.33684259 -0.25034842 0.599281026 text Cercopithecus albogularis 
+0.32657775 -0.239828325 0.591734798 text Cercopithecus albogularis albotorquatus 
+0.353510358 -0.250147776 0.601913839 text Cercopithecus mitis 
+0.314299985 -0.256067466 0.605454046 text Cercopithecus mitis stuhlmanni 
+0.319844102 -0.250824663 0.590083863 text Cercopithecus mitis mitis 
+0.268418572 -0.281435301 0.576009163 text Allochrocebus lhoesti 
+0.268878649 -0.277176365 0.578401747 text Cercopithecus lhoesti 
+-0.48264433 -0.434153665 0.355517286 text Lepilemur septentrionalis 
+0.295496158 -0.284047181 0.600784956 text Cercopithecus petaurista petaurista 
+0.228354152 -0.20567633 0.08935847 text Lophocebus albigena 
+0.138753444 -0.196505592 0.369666938 text Miopithecus talapoin 
+0.257900881 -0.238964926 0.423994021 text Cercopithecus roloway 
+0.180770836 -0.220931444 0.436392891 text Cercopithecus neglectus 
+0.265484279 -0.232538238 0.475193925 text Cercopithecus mona 
+0.239892806 -0.218367923 0.417319626 text Cercopithecus pogonias nigripes 
+0.243020581 -0.216112551 0.451420022 text Cercopithecus pogonias pogonias 
+0.24421928 -0.227210501 0.409280432 text Cercopithecus pogonias 
+0.227750226 -0.231149401 0.432321053 text Cercopithecus pogonias schwarzianus 
+0.257610997 -0.239177781 0.450256695 text Cercopithecus nictitans martini 
+0.257442792 -0.242033009 0.475986442 text Cercopithecus denti 
+0.260623408 -0.236740039 0.47316117 text Cercopithecus wolfi 
+0.330944772 -0.265148698 0.59253989 text Cercopithecus albogularis moloneyi 
+0.329002301 -0.253420963 0.559308917 text Cercopithecus mitis boutourlinii 
+0.315888134 -0.250856507 0.618068494 text Cercopithecus mitis heymansi 
+0.345172455 -0.216940729 0.558929347 text Cercopithecus albogularis kolbi 
+0.3639636 -0.257499474 0.610085235 text Cercopithecus doggetti 
+0.373779575 -0.256582319 0.613384548 text Cercopithecus kandti 
+0.322579373 -0.256466697 0.582567303 text Cercopithecus mitis opisthostictus 
+0.304459907 -0.288317133 0.59955095 text Cercopithecus nictitans nictitans 
+0.313106533 -0.261340075 0.593259249 text Cercopithecus nictitans 
+0.292564644 -0.285193801 0.628552604 text Cercopithecus erythrotis erythrotis 
+0.28680151 -0.282464329 0.619071687 text Cercopithecus erythrotis camerunensis 
+0.274234023 -0.245125772 0.616714693 text Cercopithecus erythrogaster pococki 
+0.317557533 -0.284834741 0.647614019 text Cercopithecus cephus 
+0.300727905 -0.274085928 0.628688451 text Cercopithecus cephus ngottoensis 
+0.290675416 -0.276485437 0.639308948 text Cercopithecus ascanius schmidti 
+0.282608907 -0.281530367 0.634722511 text Cercopithecus ascanius katangae 
+0.278289924 -0.254297588 0.59690582 text Cercopithecus ascanius ascanius 
+0.233615436 -0.273394932 0.504575184 text Cercopithecus preussi insularis 
+0.129414163 -0.191983978 0.374396283 text Miopithecus ogouensis 
+0.272246788 -0.267675666 0.638376677 text Cercopithecus ascanius 
+-0.000922104 -0.117922852 0.269489644 text Colobus angolensis 
+-0.414814693 -0.313912988 0.347918048 text Eulemur fulvus 
+-0.428086775 -0.265316788 0.35244496 text Varecia rubra 
+0.024420707 -0.084814668 0.226093756 text Colobus satanas 
+0.005449443 -0.102244523 0.244908031 text Colobus polykomos 
+0.169064418 -0.152679525 0.137525023 text Cercocebus agilis 
+0.22408055 -0.185571706 0.082614138 text Rungwecebus kipunji 
+0.20797306 -0.216436906 0.471134014 text Cercopithecus campbelli 
+0.232568159 -0.219284261 0.403366548 text Cercopithecus hamlyni 
+0.267413989 -0.260015934 0.620881981 text Cercopithecus erythrogaster 
+-0.295269126 -0.194669234 0.240415677 text Galagoides demidoff 
+-0.24284741 -0.16621991 0.280729691 text Otolemur garnettii 
+0.270082649 -0.270314218 0.623051793 text Cercopithecus petaurista 

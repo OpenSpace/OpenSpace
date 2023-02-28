@@ -1,6 +1,13 @@
 {
   "assets": [
     "base_blank",
+    "cosmic_view/birds_UMAP/branches_anas",
+    "cosmic_view/birds_UMAP/clades",
+    "cosmic_view/birds_UMAP/consensus_species",
+    "cosmic_view/birds_UMAP/ex/sequence_lineage",
+    "cosmic_view/birds_UMAP/sequence_lineage",
+    "cosmic_view/birds_UMAP/sequences",
+    "cosmic_view/birds_UMAP/taxon",
     "cosmic_view/consensus",
     "cosmic_view/density_volumes/volume",
     "cosmic_view/endangered",

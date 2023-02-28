@@ -1,28 +1,25 @@
 
--- Your personal path --
-local path = "C:/MasterThesis_cosmicView"
-
 -- Speck files --
-local homosapiens = asset.localResource(path .. "/data/superfamily/speck/humans.speck")
-local neander = asset.localResource(path .. "/data/superfamily/speck/neander.speck")
-local denisova = asset.localResource(path .. "/data/superfamily/speck/denisova.speck")
-local homininae = asset.localResource(path .. "/data/superfamily/speck/homininae.speck")
-local homininae_genus = asset.localResource(path .. "/data/superfamily/speck/homininae_genus.speck")
-local hominioidae = asset.localResource(path .. "/data/superfamily/speck/hominioidae.speck")
+local homosapiens = asset.localResource("data/superfamily/speck/humans.speck")
+local neander = asset.localResource("data/superfamily/speck/neander.speck")
+local denisova = asset.localResource("data/superfamily/speck/denisova.speck")
+local homininae = asset.localResource("data/superfamily/speck/homininae.speck")
+local homininae_genus = asset.localResource("data/superfamily/speck/homininae_genus.speck")
+local hominioidae = asset.localResource("data/superfamily/speck/hominioidae.speck")
 
 -- Label files --
-local homo_label = asset.localResource(path .. "/data/superfamily/label/homo_label.speck") 
-local homininae_label = asset.localResource(path .. "/data/superfamily/label/homininae_label.speck")
-local homininae_genus_label = asset.localResource(path .. "/data/superfamily/label/homininae_genus_label.speck")
-local hominioidae_label = asset.localResource(path .. "/data/superfamily/label/hominioidae_label.speck")
+local homo_label = asset.localResource("data/superfamily/label/homo_label.speck")
+local homininae_label = asset.localResource("data/superfamily/label/homininae_label.speck")
+local homininae_genus_label = asset.localResource("data/superfamily/label/homininae_genus_label.speck")
+local hominioidae_label = asset.localResource("data/superfamily/label/hominioidae_label.speck")
 
 -- Color maps -- 
-local homininae_color =  asset.localResource(path .. "/data/superfamily/cmap/homininae.cmap") 
-local homininae_genus_color =  asset.localResource(path .. "/data/superfamily/cmap/homininae_genus.cmap") 
-local hominioidae_color =  asset.localResource(path .. "/data/superfamily/cmap/hominioidae.cmap") 
+local homininae_color =  asset.localResource("data/superfamily/cmap/homininae.cmap")
+local homininae_genus_color =  asset.localResource("data/superfamily/cmap/homininae_genus.cmap")
+local hominioidae_color =  asset.localResource("data/superfamily/cmap/hominioidae.cmap")
 
 -- Texture files -- 
-local texture = asset.localResource(path .. "/data/texture/point3A.png")
+local texture = asset.localResource("data/texture/point3A.png")
 
 -- Scale factor --
 local scale_factor = 12

@@ -1,16 +1,13 @@
--- Your personal path --
-local path = "C:/MasterThesis_cosmicView"
-
 -- Texture path --
-local endangered =  asset.localResource(path .. "/data/endangered/images/critically_endangered.png")
-local synonymous = asset.localResource(path .. "/data/mutations/images/syn.png")
-local nonsynonymous = asset.localResource(path .. "/data/mutations/images/nonsyn.png")
-local redyellowsyn = asset.localResource(path .. "/data/mutations/images/synredyellow.png")
-local redyellownonsyn = asset.localResource(path .. "/data/mutations/images/nonsynredyellow.png")
-local redblue = asset.localResource(path .. "/data/mutations/images/redblue.png")
-local world_continents =  asset.localResource(path .. "/data/humans/images/world_map.png")
-local superfamily =  asset.localResource(path .. "/data/superfamily/images/superfamilytrans.png")
-local volumeorder =  asset.localResource(path .. "/data/superfamily/images/volumeorder.png")
+local endangered =  asset.localResource("data/endangered/images/critically_endangered.png")
+local synonymous = asset.localResource("data/mutations/images/syn.png")
+local nonsynonymous = asset.localResource("data/mutations/images/nonsyn.png")
+local redyellowsyn = asset.localResource("data/mutations/images/synredyellow.png")
+local redyellownonsyn = asset.localResource("data/mutations/images/nonsynredyellow.png")
+local redblue = asset.localResource("data/mutations/images/redblue.png")
+local world_continents =  asset.localResource("data/humans/images/world_map.png")
+local superfamily =  asset.localResource("data/superfamily/images/superfamilytrans.png")
+local volumeorder =  asset.localResource("data/superfamily/images/volumeorder.png")
 
 local status_image = {
     Identifier = "endangered",

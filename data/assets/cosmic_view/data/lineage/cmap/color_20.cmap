@@ -1,0 +1,23 @@
+# DIGITAL UNIVERSE ATLAS
+# American Museum of Natural History and Hayden Planetarium
+# http://www.haydenplanetarium.org/universe/ 
+#
+# Use of these data is subject to the terms of the License.
+#
+# Prepared by: Linn Storesund (AMNH/Hayden Planetarium)
+#
+12
+1.0 1.0 1.0 1.0
+0.976 0.925 0.141 1.0 # yellow
+1 0.623 0.160 1.0 # orange
+0.647 1 0.160 1.0 
+0.141 0.976 0.627 1.0
+0.811 0.160 1.0 1.0 
+0.160 1.0 1.0 1.0 # green
+0.082 0.682 0.039 1.0 # dark green
+0.203 0.729 0.956 1.0 # baby blue
+0.956 0.203 0.925 1.0 # purple pink
+0.972 0.627 0.850 1.0 # light pink
+0.964 0.254 0.313 1.0 # mango
+
+

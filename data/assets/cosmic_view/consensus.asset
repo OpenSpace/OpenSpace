@@ -1,18 +1,15 @@
--- Your personal path --
-local path = "C:/MasterThesis_cosmicView"
-
 -- Speck files --
-local consensus_file = asset.localResource(path .. "/data/consensus/speck/primates_consensus.speck")
+local consensus_file = asset.localResource("data/consensus/speck/primates_consensus.speck")
 
 -- Label files --
-local consensus_label = asset.localResource(path .. "/data/consensus/label/primates_consensus_commonnames_label.speck")
+local consensus_label = asset.localResource("data/consensus/label/primates_consensus_commonnames_label.speck")
 
 -- Color maps --
-local color_mutations = asset.localResource(path .. "/data/mutations/cmap/redyellow.cmap")
-local color_lineage =  asset.localResource(path .. "/data/consensus/cmap/color_genus.cmap")
+local color_mutations = asset.localResource("data/mutations/cmap/redyellow.cmap")
+local color_lineage =  asset.localResource("data/consensus/cmap/color_genus.cmap")
 
 -- Texture files -- 
-local consensus_texture = asset.localResource(path .. "/data/texture/point3A.png")
+local consensus_texture = asset.localResource("data/texture/point3A.png")
 
 -- Scale factor --
 local scale_factor = 12

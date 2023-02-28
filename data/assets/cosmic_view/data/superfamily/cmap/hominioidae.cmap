@@ -1,0 +1,15 @@
+# DIGITAL UNIVERSE ATLAS
+# American Museum of Natural History and Hayden Planetarium
+# http://www.haydenplanetarium.org/universe/ 
+#
+# Use of these data is subject to the terms of the License.
+#
+# Prepared by: Linn Storesund and Emma Segolsson (AMNH/Hayden Planetarium)
+
+6
+1.0 1.0 1.0 1.0 # white
+1 0.349 0.372 1.0 # pink red Nomascus Hominoidea
+0.372 1 0.349 1.0 # green hylobates Hominoidea
+0.349 0.392 1 1.0 # blue hoolock gibbon Hominoidea
+0.949 0.654 0.094 1.0 # yellow Siamang Hominoidea
+1.0 1.0 0.0 1.0 # green orangutan Hominoidea
