@@ -1689,7 +1689,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::DownloadFile,
             codegen::lua::CreateSingleColorImage,
             codegen::lua::IsMaster,
-            codegen::lua::Version
+            codegen::lua::Version,
+            codegen::lua::ReadCSVFile
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")
