@@ -70,6 +70,8 @@ ScreenSpaceVideo::ScreenSpaceVideo(const ghoul::Dictionary& dictionary)
 }
 
 void ScreenSpaceVideo::update() {
+    _videoPlayer.update();
+
     if (!_videoPlayer.isInitialized()) {
         return;
     }
@@ -77,6 +79,13 @@ void ScreenSpaceVideo::update() {
     if (_objectSize != glm::ivec2(texDimensions.x, texDimensions.y)) {
         _objectSize = _videoPlayer.frameTexture()->dimensions();
     }
+}
+
+void ScreenSpaceVideo::render() {
+    if (!_videoPlayer.isInitialized()) {
+        return;
+    }
+    ScreenSpaceRenderable::render();
 }
 
 bool ScreenSpaceVideo::deinitializeGL() {

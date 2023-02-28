@@ -192,6 +192,22 @@ void VideoPlayer::setPropertyAsyncMpv(const char* value, MpvKey key) {
     }
 }
 
+void VideoPlayer::setPropertyAsyncMpv(double value, MpvKey key) {
+    if (!_isInitialized) {
+        return;
+    }
+    int result = mpv_set_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(key),
+        keys[key],
+        formats[key],
+        &value
+    );
+    if (!checkMpvError(result)) {
+        LWARNING("Error when playing video");
+    }
+}
+
 void VideoPlayer::getPropertyAsyncMpv(MpvKey key) {
     int result = mpv_get_property_async(
         _mpvHandle,
@@ -281,17 +297,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     }
     
     global::callback::postSyncPreDraw->emplace_back([this]() {
-        if (_isDestroying) {
-            return;
-        }
-        // Initialize mpv here to ensure that the opengl context is the same as in for 
-        // the rendering
-        if (!_isInitialized) {
-            initializeMpv();
-        }
-        else if(_mpvRenderContext && _mpvHandle) {
-            renderMpv();
-        }
+        
     });
 
     global::callback::postDraw->emplace_back([this]() {
@@ -326,7 +332,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         {MpvKey::Width, MPV_FORMAT_INT64},
         {MpvKey::Meta, MPV_FORMAT_NODE},
         {MpvKey::Fps, MPV_FORMAT_DOUBLE},
-        {MpvKey::IsSeeking, MPV_FORMAT_DOUBLE},
+        {MpvKey::IsSeeking, MPV_FORMAT_FLAG},
         {MpvKey::Mute, MPV_FORMAT_STRING}
     };
 
@@ -401,6 +407,9 @@ void VideoPlayer::initializeMpv() {
     // Turn off audio as default
     setPropertyStringMpv("mute", "yes");
 
+    // Starting MPV in a paused state seems to reduce problems with initialization
+    setPropertyStringMpv("pause", "");
+
     //setPropertyStringMpv("load-stats-overlay", "");
 
     //mpv_set_property_string(_mpvHandle, "script-opts", "autoload-disabled=yes");
@@ -469,26 +478,34 @@ void VideoPlayer::initializeMpv() {
     _isInitialized = true;
 }
 
-void VideoPlayer::seekToTime(double time) {
-    if (!_isInitialized) {
+void VideoPlayer::seekToTime(double time, bool pauseAfter) {
+    if (_isSeeking || abs(_currentVideoTime - time) < glm::epsilon<double>()) {
         return;
     }
-    // Prevent from seeking to the same time multiple times in a row
-    bool seekIsDifferent = abs(time - _currentVideoTime) > _seekThreshold;
-    if (seekIsDifferent && !_isSeeking) {
-        // Pause while seeking
-        pause();
-        std::string timeString = std::to_string(time);
-        const char* params = timeString.c_str();
-        const char* cmd[] = { keys[MpvKey::Seek], params, "absolute", NULL};
-        commandAsyncMpv(cmd, MpvKey::Seek);
-        _isSeeking = true;
+    pause();
+    setPropertyAsyncMpv(time, MpvKey::Time);
+    if (!pauseAfter) {
+        play();
     }
 }
 
 void VideoPlayer::toggleMute() {
     const char* mute = _playAudio ? "no" : "yes";
     setPropertyAsyncMpv(mute, MpvKey::Mute);
+}
+
+void VideoPlayer::update() {
+    if (_isDestroying) {
+        return;
+    }
+    // Initialize mpv here to ensure that the opengl context is the same as in for 
+    // the rendering
+    if (!_isInitialized) {
+        initializeMpv();
+    }
+    else if (_mpvRenderContext && _mpvHandle) {
+        renderMpv();
+    }
 }
 
 void VideoPlayer::renderMpv() {
@@ -519,8 +536,8 @@ void VideoPlayer::renderMpv() {
             /* TODO: remove this comment in case we never encounter this issue again */
             // We have to set the Viewport on every cycle because 
             // mpv_render_context_render internally rescales the fb of the context(?!)...
-            //glm::ivec2 window = global::windowDelegate->currentDrawBufferResolution();
-            //glViewport(0, 0, window.x, window.y);
+            glm::ivec2 window = global::windowDelegate->currentDrawBufferResolution();
+            glViewport(0, 0, window.x, window.y);
             _didRender = true;
         }
     }
@@ -585,7 +602,6 @@ void VideoPlayer::handleMpvEvents() {
                         break;
                     }
                     case MpvKey::Seek: {
-                        _isSeeking = false;
                         break;
                     }
                     default: {
@@ -694,6 +710,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
         }
         case MpvKey::IsSeeking: {
             bool* isSeekingBool = reinterpret_cast<bool*>(prop->data);
+            _isSeeking = *isSeekingBool;
             std::string isSeekingString = *isSeekingBool ? "Is Seeking" : "Not Seeking";
             LINFO(isSeekingString);
             break;

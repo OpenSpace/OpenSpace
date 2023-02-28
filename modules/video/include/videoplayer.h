@@ -56,7 +56,7 @@ public:
     void play();
     void goToStart();
    
-    void seekToTime(double time);
+    void seekToTime(double time, bool pauseAfter = false);
     void toggleMute();
 
     const std::unique_ptr<ghoul::opengl::Texture>& frameTexture() const;
@@ -64,6 +64,7 @@ public:
 
     void reset();
     void destroy();
+    void update();
 
     virtual void preSync(bool isMaster) override;
     virtual void encode(SyncBuffer* syncBuffer) override;
@@ -104,6 +105,7 @@ private:
     void setPropertyStringMpv(const char* name, const char* value);
     void setPropertyAsyncMpv(int value, MpvKey key);
     void setPropertyAsyncMpv(const char* value, MpvKey key);
+    void setPropertyAsyncMpv(double value, MpvKey key);
     void getPropertyAsyncMpv(MpvKey key);
 
     // Map to simulation time functions
