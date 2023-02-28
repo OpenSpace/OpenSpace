@@ -407,6 +407,9 @@ void VideoPlayer::initializeMpv() {
     // Turn off audio as default
     setPropertyStringMpv("mute", "yes");
 
+    // Starting MPV in a paused state seems to reduce problems with initialization
+    setPropertyStringMpv("pause", "");
+
     //setPropertyStringMpv("load-stats-overlay", "");
 
     //mpv_set_property_string(_mpvHandle, "script-opts", "autoload-disabled=yes");
