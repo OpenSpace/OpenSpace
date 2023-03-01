@@ -740,7 +740,9 @@ Profile::Profile(const std::string& content) {
             profile["keybindings"].get_to(keybindings);
         }
         if (profile.find("time") != profile.end()) {
-            time = profile["time"].get<Profile::Time>();
+            Profile::Time t;
+            profile["time"].get_to(t);
+            time = t;
         }
         if (profile.find("delta_times") != profile.end()) {
             profile["delta_times"].get_to(deltaTimes);
