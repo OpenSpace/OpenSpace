@@ -46,7 +46,7 @@ documentation::Documentation TileProviderByLevel::Documentation() {
 }
 
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -107,7 +107,7 @@ void TileProviderByLevel::internalDeinitialize() {
 }
 
 Tile TileProviderByLevel::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
 
     TileProvider* provider = levelProvider(tileIndex.level);
     if (provider) {
@@ -124,7 +124,7 @@ Tile::Status TileProviderByLevel::tileStatus(const TileIndex& index) {
 }
 
 TileProvider* TileProviderByLevel::levelProvider(int level) const {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_levelTileProviders.empty()) {
         int clampedLevel = glm::clamp(

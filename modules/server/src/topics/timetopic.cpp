@@ -133,7 +133,7 @@ const json TimeTopic::getNextPrevDeltaTimeStepJson() {
 }
 
 void TimeTopic::sendCurrentTime() {
-    ZoneScoped
+    ZoneScoped;
 
     const json timeJson = {
         { "time", global::timeManager->time().ISO8601() }

@@ -99,7 +99,7 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
         1                                           // Step: One MB
     )
 {
-    ZoneScoped
+    ZoneScoped;
 
     addProperty(_logGdalErrors);
     addProperty(_gdalMaximumCacheSize);

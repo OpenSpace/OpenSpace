@@ -144,8 +144,8 @@ VertexObjects& gVertexObjectsConstructor() {
 } // namespace detail
 
 void initialize() {
-    ZoneScoped
-    TracyGpuZone("helper::initialize")
+    ZoneScoped;
+    TracyGpuZone("helper::initialize");
 
     ghoul_assert(!isInitialized, "Rendering Helper initialized twice");
 

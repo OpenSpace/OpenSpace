@@ -479,7 +479,7 @@ double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char
 }
 
 bool TimeQuantizer::quantize(Time& t, bool clamp) {
-    ZoneScoped
+    ZoneScoped;
 
     constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
     constexpr int BufferSize = sizeof(Format);
@@ -551,7 +551,7 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
 void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ, double value,
                                          char unit)
 {
-    ZoneScoped
+    ZoneScoped;
 
     switch (unit) {
         case 'y':

@@ -632,7 +632,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
 }
 
 void Profile::addAsset(const std::string& path) {
-    ZoneScoped
+    ZoneScoped;
 
     if (ignoreUpdates) {
         return;
@@ -645,7 +645,7 @@ void Profile::addAsset(const std::string& path) {
 }
 
 void Profile::removeAsset(const std::string& path) {
-    ZoneScoped
+    ZoneScoped;
 
     if (ignoreUpdates) {
         return;

@@ -414,7 +414,7 @@ RenderEngine::RenderEngine()
 RenderEngine::~RenderEngine() {}
 
 void RenderEngine::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     // We have to perform these initializations here as the OsEng has not been initialized
     // in our constructor
@@ -458,7 +458,7 @@ void RenderEngine::initialize() {
 }
 
 void RenderEngine::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     LTRACE("RenderEngine::initializeGL(begin)");
 
@@ -477,8 +477,8 @@ void RenderEngine::initializeGL() {
 
     configuration::Configuration::FontSizes fontSize = global::configuration->fontSize;
     {
-        ZoneScopedN("Fonts")
-        TracyGpuZone("Fonts")
+        ZoneScopedN("Fonts");
+        TracyGpuZone("Fonts");
         _fontFrameInfo = global::fontManager->font(KeyFontMono, fontSize.frameInfo);
         _fontShutdown = global::fontManager->font(KeyFontMono, fontSize.shutdown);
         _fontCameraInfo = global::fontManager->font(KeyFontMono, fontSize.cameraInfo);
@@ -487,7 +487,7 @@ void RenderEngine::initializeGL() {
     }
 
     {
-        ZoneScopedN("Log")
+        ZoneScopedN("Log");
         LINFO("Initializing Log");
         auto log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
         _log = log.get();
@@ -499,13 +499,13 @@ void RenderEngine::initializeGL() {
 }
 
 void RenderEngine::deinitializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     _renderer.deinitialize();
 }
 
 void RenderEngine::updateScene() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_scene) {
         return;
@@ -526,7 +526,7 @@ void RenderEngine::updateScene() {
 }
 
 void RenderEngine::updateShaderPrograms() {
-    ZoneScoped
+    ZoneScoped;
 
     for (ghoul::opengl::ProgramObject* program : _programs) {
         try {
@@ -541,7 +541,7 @@ void RenderEngine::updateShaderPrograms() {
 }
 
 void RenderEngine::updateRenderer() {
-    ZoneScoped
+    ZoneScoped;
 
     const bool windowResized = global::windowDelegate->windowHasResized();
 
@@ -560,7 +560,7 @@ void RenderEngine::updateRenderer() {
 }
 
 void RenderEngine::updateScreenSpaceRenderables() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *global::screenSpaceRenderables) {
         ssr->update();
@@ -621,7 +621,7 @@ uint64_t RenderEngine::frameNumber() const {
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                           const glm::mat4& projectionMatrix)
 {
-    ZoneScoped
+    ZoneScoped;
 
     LTRACE("RenderEngine::render(begin)");
 
@@ -661,7 +661,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     if (_showFrameInformation) {
-        ZoneScopedN("Show Frame Information")
+        ZoneScopedN("Show Frame Information");
 
         glm::vec2 penPosition = glm::vec2(
             fontResolution().x / 2 - 50,
@@ -691,7 +691,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     if (renderingEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
-        ZoneScopedN("Render Screenspace Renderable")
+        ZoneScopedN("Render Screenspace Renderable");
 
         std::vector<ScreenSpaceRenderable*> ssrs;
         ssrs.reserve(global::screenSpaceRenderables->size());
@@ -771,7 +771,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 }
 
 void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
-    ZoneScoped
+    ZoneScoped;
 
     const bool isMaster = global::windowDelegate->isMaster();
     if (isMaster || _showOverlayOnClients) {
@@ -810,7 +810,7 @@ void RenderEngine::renderEndscreen() {
 }
 
 void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
-    ZoneScoped
+    ZoneScoped;
 
     timer = std::max(timer, 0.f);
 
@@ -853,7 +853,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 }
 
 void RenderEngine::renderDashboard() {
-    ZoneScoped
+    ZoneScoped;
 
     glm::vec2 dashboardStart = global::dashboard->getStartPositionOffset();
     glm::vec2 penPosition = glm::vec2(
@@ -865,7 +865,7 @@ void RenderEngine::renderDashboard() {
 }
 
 void RenderEngine::postDraw() {
-    ZoneScoped
+    ZoneScoped;
 
     ++_frameNumber;
 }
@@ -1123,7 +1123,7 @@ std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const
 }
 
 void RenderEngine::renderCameraInformation() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_showCameraInfo) {
         return;
@@ -1191,7 +1191,7 @@ void RenderEngine::renderCameraInformation() {
 }
 
 void RenderEngine::renderVersionInformation() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_showVersionInfo) {
         return;
@@ -1227,7 +1227,7 @@ void RenderEngine::renderVersionInformation() {
         // If we have Tracy enabled, we should inform the user about it that the
         // application will crash after a while if no profiler is attached
 
-        ZoneScopedN("Tracy Information")
+        ZoneScopedN("Tracy Information");
 
         const glm::vec2 tracyBox = _fontVersionInfo->boundingBox("TRACY PROFILING");
         const glm::vec2 penPosition = glm::vec2(
@@ -1246,7 +1246,7 @@ void RenderEngine::renderVersionInformation() {
 }
 
 void RenderEngine::renderScreenLog() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_showLog) {
         return;
@@ -1265,7 +1265,7 @@ void RenderEngine::renderScreenLog() {
     size_t nRows = 1;
     const auto now = std::chrono::steady_clock::now();
     for (size_t i = 1; i <= std::min(MaxNumberMessages, entries.size()); i += 1) {
-        ZoneScopedN("Entry")
+        ZoneScopedN("Entry");
 
         const ScreenLog::LogEntry& it = entries[entries.size() - i];
 
