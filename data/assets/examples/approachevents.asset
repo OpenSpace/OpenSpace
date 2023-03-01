@@ -32,14 +32,16 @@ local obj = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = model .. "BoxAnimated.glb",
-    ModelScale = 1.0,
+    ModelScale = 1000,
     LightSources = {
       sun.LightSource
     },
     PerformShading = true,
     EnableFaceCulling = true
   },
-  InteractionSphere = 1000.0,
+  InteractionSphere = 900,
+  ApproachFactor = 50.0,
+  ReachFactor = 5.0,
   OnApproach = { "os.example.generic" },
   OnReach = { "os.example.generic" },
   OnRecede = { "os.example.generic" },

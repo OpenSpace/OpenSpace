@@ -30,7 +30,7 @@ local Apollo8Launch = {
   },
   GUI = {
     Name = "Apollo 8 Launch Capsule",
-    Path = "/Solar System/Missions/Apollo"
+    Path = "/Solar System/Missions/Apollo/8"
   }
 }
 
