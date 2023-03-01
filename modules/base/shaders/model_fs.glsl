@@ -72,7 +72,7 @@ Fragment getFragment() {
 
   // Render invisible mesh with flashy procedural material
   if (use_forced_color) {
-    vec3 adjustedPos = floor(vs_positionCameraSpace.xyz * 3.0);
+    vec3 adjustedPos = floor(vs_positionCameraSpace.xyz / 500.0);
     float chessboard  = adjustedPos.x + adjustedPos.y + adjustedPos.z;
     chessboard = fract(chessboard * 0.5);
     chessboard *= 2;
