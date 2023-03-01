@@ -847,6 +847,11 @@ bool DataViewer::renderColormapEdit(ColorMappedVariable& variable,
             wasChanged = true;
         };
 
+        // Render an opacity slider
+        ImGui::SetNextItemWidth(InputWidth);
+        if (ImGui::SliderFloat("Opacity", &variable.opacity, 0.f, 1.f)) {
+            wasChanged = true;
+        }
         ImGui::EndGroup();
     }
 
@@ -1033,8 +1038,8 @@ void DataViewer::renderScatterPlotWindow(bool* open) {
 
             const ImVec4 pointColor = toImVec4(colorFromColormap(
                 item,
-                _variableSelection.front())
-            ); // from first map
+                _variableSelection.front()
+            )); // from first map
 
             const ImPlotPoint point = { item.ra.value, item.dec.value };
             const char* label = "Data " + i;
@@ -2760,6 +2765,9 @@ glm::vec4 DataViewer::colorFromColormap(const ExoplanetItem& item,
         ImPlot::PopColormap();
         pointColor = { c.x, c.y, c.z, c.w };
     }
+    // Apply opacity
+    pointColor.a *= variable.opacity;
+
     return pointColor;
 }
 

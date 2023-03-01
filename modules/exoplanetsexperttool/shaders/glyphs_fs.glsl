@@ -104,6 +104,10 @@ Fragment getFragment() {
     vec4 color = gs_colors[colorIndex];
     color.a *= opacity;
 
+    // If the glyph is not visible due to too transparent, don't include this pixel
+    if (color.a <  0.05) {
+        discard;
+    }
 
     Fragment frag;
 

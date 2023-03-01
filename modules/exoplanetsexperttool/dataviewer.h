@@ -97,6 +97,7 @@ private:
         int columnIndex = 5; // Default column is ESM. OBS! Fragile!
         float colorScaleMin = 0.f;
         float colorScaleMax = 100.f;
+        float opacity = 1.f;
     };
 
     void renderStartupInfo();
@@ -125,8 +126,8 @@ private:
     void handleDoubleClickHoveredPlanet(int index);
 
     // Updates the property in the module so that it matches the filtered rows in the UI,
-    // unless a specific list of indices is specified. This property is used by the 
-    // external webpage to decide what planets to show. 
+    // unless a specific list of indices is specified. This property is used by the
+    // external webpage to decide what planets to show.
     void updateFilteredRowsProperty(
         std::optional<std::vector<size_t>> customIndices = std::nullopt);
 
@@ -208,7 +209,7 @@ private:
     bool _filterChanged = false;
     bool _selectionChanged = false;
 
-    // Keep track on whether ctrl is held, to prevent undesried interaction 
+    // Keep track on whether ctrl is held, to prevent undesried interaction
     // when interacting with glyphs
     bool _holdingCtrl = false;
 
