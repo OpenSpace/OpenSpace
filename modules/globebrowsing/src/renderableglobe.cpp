@@ -64,6 +64,8 @@ namespace std {
 #endif
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderableGlobe";
+
     // Global flags to modify the RenderableGlobe
     constexpr bool LimitLevelByAvailableData = true;
     constexpr bool PerformFrustumCulling = true;
@@ -808,7 +810,12 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 }
 
 void RenderableGlobe::renderSecondary(const RenderData& data, RendererTasks&) {
-    _globeLabelsComponent.draw(data);
+    try {
+        _globeLabelsComponent.draw(data);
+    }
+    catch (const ghoul::opengl::TextureUnit::TextureUnitError& e) {
+        LERROR(fmt::format("Error on drawing globe labels: '{}'", e.message));
+    }
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
