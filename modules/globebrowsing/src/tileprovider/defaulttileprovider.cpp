@@ -84,7 +84,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     : _filePath(FilePathInfo, "")
     , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
 {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -116,7 +116,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 }
 
 void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) {
-    ZoneScoped
+    ZoneScoped;
 
     _asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
         name,
@@ -129,7 +129,7 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) 
 }
 
 Tile DefaultTileProvider::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(_asyncTextureDataProvider, "No data provider");
     if (tileIndex.level > maxLevel()) {

@@ -249,7 +249,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
 void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
                                       globebrowsing::RenderableGlobe* globe)
 {
-    ZoneScoped
+    ZoneScoped;
     _globe = globe;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);

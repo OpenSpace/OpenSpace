@@ -85,7 +85,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
 }
 
 void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_propertyIsDirty) {
         _property = openspace::property(_propertyUri);
@@ -104,7 +104,7 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemPropertyValue::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     return _font->boundingBox(_displayString.value());
 }

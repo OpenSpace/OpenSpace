@@ -126,7 +126,7 @@ ImGUIModule::ImGUIModule()
     }
 
     global::callback::draw2D->emplace_back([&]() {
-        ZoneScopedN("ImGUI")
+        ZoneScopedN("ImGUI");
 
         if (!_isEnabled) {
             return;
@@ -156,7 +156,7 @@ ImGUIModule::ImGUIModule()
         [&](Key key, KeyModifier mod, KeyAction action,
             IsGuiWindow isGuiWindow) -> bool
         {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled) {
                 return false;
@@ -169,7 +169,7 @@ ImGUIModule::ImGUIModule()
         [&](unsigned int codepoint, KeyModifier modifier,
             IsGuiWindow isGuiWindow) -> bool
         {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled) {
                 return false;
@@ -191,7 +191,7 @@ ImGUIModule::ImGUIModule()
         [&](MouseButton button, MouseAction action, KeyModifier,
             IsGuiWindow isGuiWindow) -> bool
         {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow) {
                 return false;
@@ -210,7 +210,7 @@ ImGUIModule::ImGUIModule()
 
     global::callback::mouseScrollWheel->emplace_back(
         [&](double, double posY, IsGuiWindow isGuiWindow) -> bool {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled) {
                 return false;

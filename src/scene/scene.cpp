@@ -174,7 +174,7 @@ void Scene::markNodeRegistryDirty() {
 }
 
 void Scene::updateNodeRegistry() {
-    ZoneScoped
+    ZoneScoped;
 
     sortTopologically();
     _dirtyNodeRegistry = false;
@@ -262,7 +262,7 @@ bool Scene::isInitializing() const {
 }
 
 void Scene::update(const UpdateData& data) {
-    ZoneScoped
+    ZoneScoped;
 
     std::vector<SceneGraphNode*> initializedNodes = _initializer->takeInitializedNodes();
     for (SceneGraphNode* node : initializedNodes) {
@@ -288,11 +288,11 @@ void Scene::update(const UpdateData& data) {
 }
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
-    ZoneScoped
+    ZoneScoped;
     ZoneName(
         renderBinToString(data.renderBinMask),
         strlen(renderBinToString(data.renderBinMask))
-    )
+    );
 
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
@@ -307,7 +307,7 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
     }
 
     {
-        ZoneScopedN("Get Error Hack")
+        ZoneScopedN("Get Error Hack");
 
         // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
         // thread and the CPU thread from diverging too much, particularly the uploading
@@ -508,7 +508,7 @@ void Scene::removePropertyInterpolation(properties::Property* prop) {
 }
 
 void Scene::updateInterpolations() {
-    ZoneScoped
+    ZoneScoped;
 
     using namespace std::chrono;
 

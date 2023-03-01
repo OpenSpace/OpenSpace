@@ -195,14 +195,14 @@ MemoryAwareTileCache::TextureContainer::TextureContainer(TileTextureInitData ini
     : _initData(std::move(initData))
     , _numTextures(numTextures)
 {
-    ZoneScoped
+    ZoneScoped;
 
     _textures.reserve(_numTextures);
     reset();
 }
 
 void MemoryAwareTileCache::TextureContainer::reset() {
-    ZoneScoped
+    ZoneScoped;
 
     _textures.clear();
     _freeTexture = 0;
@@ -228,7 +228,7 @@ void MemoryAwareTileCache::TextureContainer::reset() {
 }
 
 void MemoryAwareTileCache::TextureContainer::reset(size_t numTextures) {
-    ZoneScoped
+    ZoneScoped;
 
     _numTextures = numTextures;
     reset();
@@ -268,7 +268,7 @@ MemoryAwareTileCache::MemoryAwareTileCache(int tileCacheSize)
     , _applyTileCacheSize(ApplyTileCacheInfo)
     , _clearTileCache(ClearTileCacheInfo)
 {
-    ZoneScoped
+    ZoneScoped;
 
     createDefaultTextureContainers();
 
@@ -313,7 +313,7 @@ void MemoryAwareTileCache::clear() {
 }
 
 void MemoryAwareTileCache::createDefaultTextureContainers() {
-    ZoneScoped
+    ZoneScoped;
 
     for (const layers::Group& gi : layers::Groups) {
         TileTextureInitData initData = tileTextureInitData(gi.id, true);
@@ -324,7 +324,7 @@ void MemoryAwareTileCache::createDefaultTextureContainers() {
 void MemoryAwareTileCache::assureTextureContainerExists(
                                                       const TileTextureInitData& initData)
 {
-    ZoneScoped
+    ZoneScoped;
 
     TileTextureInitData::HashKey initDataKey = initData.hashKey;
     if (_textureContainerMap.find(initDataKey) == _textureContainerMap.end()) {
@@ -339,7 +339,7 @@ void MemoryAwareTileCache::assureTextureContainerExists(
 }
 
 void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
-    ZoneScoped
+    ZoneScoped;
     ghoul_assert(!_textureContainerMap.empty(), "Texture containers must exist");
 
     LDEBUG("Resetting tile cache size");
@@ -366,7 +366,7 @@ void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
 }
 
 void MemoryAwareTileCache::resetTextureContainerSize(size_t numTexturesPerTextureType) {
-    ZoneScoped
+    ZoneScoped;
 
     _numTextureBytesAllocatedOnCPU = 0;
     for (std::pair<const TileTextureInitData::HashKey,
@@ -391,7 +391,7 @@ bool MemoryAwareTileCache::exist(const ProviderTileKey& key) const {
 }
 
 Tile MemoryAwareTileCache::get(const ProviderTileKey& key) {
-    ZoneScoped
+    ZoneScoped;
 
     const TextureContainerMap::const_iterator it = std::find_if(
         _textureContainerMap.cbegin(),

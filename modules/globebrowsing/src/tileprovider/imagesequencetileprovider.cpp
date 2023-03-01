@@ -71,7 +71,7 @@ ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& di
     , _folderPath(FolderPathInfo)
     , _initDict(dictionary)
 {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -90,7 +90,7 @@ ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& di
 }
 
 Tile ImageSequenceTileProvider::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
 
     return _currentTileProvider ? _currentTileProvider->tile(tileIndex) : Tile();
 }

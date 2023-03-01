@@ -35,7 +35,7 @@ namespace openspace::globebrowsing {
 void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                              const LayerGroup& layerGroup, const TileIndex& tileIndex)
 {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(
         layerGroup.activeLayers().size() == _gpuActiveLayers.size(),
