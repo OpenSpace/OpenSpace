@@ -816,7 +816,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Use a manuel depth test to make the models aware of the rest of the envierment
         _program->setUniform(
             _uniformCache.performManualDepthTest,
-            true
+            _enableDepthTest
         );
 
         // Bind the G-buffer depth texture for a manual depth test towards the rest
