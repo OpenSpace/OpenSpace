@@ -101,7 +101,7 @@ public:
             Relative
         };
 
-        Type type;
+        Type type = Type::Relative;
         std::string value;
         bool startPaused = false;
     };
