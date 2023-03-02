@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -132,7 +132,7 @@ DashboardItemElapsedTime::DashboardItemElapsedTime(const ghoul::Dictionary& dict
 }
 
 void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     double delta = global::timeManager->time().j2000Seconds() - _referenceJ2000;
 
@@ -175,7 +175,7 @@ void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemElapsedTime::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     const double delta = global::timeManager->time().j2000Seconds() - _referenceJ2000;
     return _font->boundingBox(fmt::format(fmt::runtime(_formatString.value()), delta));

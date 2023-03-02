@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -174,6 +174,8 @@ private:
  * refers to an existing file on disk.
  */
 struct FileVerifier : public StringVerifier {
+    FileVerifier();
+
     TestResult operator()(const ghoul::Dictionary& dict,
         const std::string& key) const override;
 
@@ -185,6 +187,8 @@ struct FileVerifier : public StringVerifier {
 * refers to an existing directory on disk.
 */
 struct DirectoryVerifier : public StringVerifier {
+    DirectoryVerifier();
+
     TestResult operator()(const ghoul::Dictionary& dict,
         const std::string& key) const override;
 
@@ -196,6 +200,8 @@ struct DirectoryVerifier : public StringVerifier {
  * a valid date time
  */
 struct DateTimeVerifier : public StringVerifier {
+    DateTimeVerifier();
+
     TestResult operator()(const ghoul::Dictionary& dict,
         const std::string& key) const override;
 

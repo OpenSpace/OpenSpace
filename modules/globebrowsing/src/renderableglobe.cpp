@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -190,15 +190,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
         "ZFightingPercentage",
         "Z-Fighting Percentage",
-        "The percentage of the correct distance to the surface being shadowed. "
-        "Possible values: [0.0, 1.0]"
+        "The percentage of the correct distance to the surface being shadowed. Possible "
+        "values: [0.0, 1.0]"
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberShadowSamplesInfo = {
         "NumberShadowSamples",
         "Number of Shadow Samples",
-        "The number of samples used during shadow mapping calculation "
-        "(Percentage Closer Filtering)"
+        "The number of samples used during shadow mapping calculation (Percentage Closer "
+        "Filtering)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetLodScaleFactorInfo = {
@@ -318,7 +318,7 @@ using ChunkTileVector =
 ChunkTileVector tilesAndSettingsUnsorted(const LayerGroup& layerGroup,
                                          const TileIndex& tileIndex)
 {
-    ZoneScoped
+    ZoneScoped;
 
 #if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
     ChunkTileVector tilesAndSettings;
@@ -338,7 +338,7 @@ ChunkTileVector tilesAndSettingsUnsorted(const LayerGroup& layerGroup,
 }
 
 BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& lm) {
-    ZoneScoped
+    ZoneScoped;
 
     using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
 
@@ -403,7 +403,7 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
 }
 
 bool colorAvailableForChunk(const Chunk& chunk, const LayerManager& lm) {
-    ZoneScoped
+    ZoneScoped;
 
     const LayerGroup& colorLayers = lm.layerGroup(layers::Group::ID::ColorLayers);
     for (Layer* lyr : colorLayers.activeLayers()) {
@@ -422,7 +422,7 @@ std::array<glm::dvec4, 8> boundingCornersForChunk(const Chunk& chunk,
                                                   const Ellipsoid& ellipsoid,
                                                   const BoundingHeights& heights)
 {
-    ZoneScoped
+    ZoneScoped;
 
     // assume worst case
     const double patchCenterRadius = ellipsoid.maximumRadius();
@@ -807,7 +807,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_localRenderer.program && _localRenderer.program->isDirty()) {
         _localRenderer.program->rebuildFromFile();
@@ -914,7 +914,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
                                    const ShadowComponent::ShadowMapData& shadowData,
                                    bool renderGeomOnly)
 {
-    ZoneScoped
+    ZoneScoped;
 
 
     if (_layerManagerDirty) {
@@ -1147,7 +1147,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         int& iGlobal, std::vector<const Chunk*>& local, int& iLocal, int cutoff,
         std::vector<const Chunk*>& traversalMemory)
     {
-        ZoneScopedN("traversal")
+        ZoneScopedN("traversal");
 
         traversalMemory.clear();
 
@@ -1244,8 +1244,8 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
                                          const ShadowComponent::ShadowMapData& shadowData,
                                                                       bool renderGeomOnly)
 {
-    ZoneScoped
-    TracyGpuZone("renderChunkGlobally")
+    ZoneScoped;
+    TracyGpuZone("renderChunkGlobally");
 
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_globalRenderer.program;
@@ -1335,8 +1335,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
                                          const ShadowComponent::ShadowMapData& shadowData,
                                          bool renderGeomOnly)
 {
-    ZoneScoped
-    TracyGpuZone("renderChunkLocally")
+    ZoneScoped;
+    TracyGpuZone("renderChunkLocally");
 
     //PerfMeasure("locally");
     const TileIndex& tileIndex = chunk.tileIndex;
@@ -1473,7 +1473,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
                                        bool renderBounds) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     const std::array<glm::dvec4, 8>& modelSpaceCorners = chunk.corners;
 
@@ -1511,7 +1511,7 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
 {
     using namespace layers;
 
-    ZoneScoped
+    ZoneScoped;
 
     if (_generalProperties.useAccurateNormals &&
         !_layerManager.layerGroup(Group::ID::HeightLayers).activeLayers().empty())
@@ -1559,7 +1559,7 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
 }
 
 void RenderableGlobe::recompileShaders() {
-    ZoneScoped
+    ZoneScoped;
 
     struct LayerShaderPreprocessingData {
         struct LayerGroupPreprocessingData {
@@ -1713,7 +1713,7 @@ void RenderableGlobe::recompileShaders() {
     }
 
     ghoul::Dictionary layerGroupNames;
-    for (int i = 0; i < layers::Groups.size(); ++i) {
+    for (size_t i = 0; i < layers::Groups.size(); ++i) {
         layerGroupNames.setValue(
             std::to_string(i),
             std::string(layers::Groups[i].identifier)
@@ -1787,7 +1787,7 @@ void RenderableGlobe::recompileShaders() {
 SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
                                                  const glm::dvec3& targetModelSpace) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     glm::dvec3 centerToEllipsoidSurface =
         _ellipsoid.geodeticSurfaceProjection(targetModelSpace);
@@ -1820,7 +1820,7 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
                                      const BoundingHeights& heights,
                                      const glm::dmat4& mvp) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
            (PerformFrustumCulling && isCullableByFrustum(chunk, renderData, mvp));
@@ -1829,7 +1829,7 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,
                                   const BoundingHeights& heights) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     const int desiredLevel = _debugProperties.levelByProjectedAreaElseDistance ?
         desiredLevelByProjectedArea(chunk, renderData, heights) :
@@ -1846,7 +1846,7 @@ int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderDa
 }
 
 float RenderableGlobe::getHeight(const glm::dvec3& position) const {
-    ZoneScoped
+    ZoneScoped;
 
     float height = 0;
 
@@ -1875,13 +1875,13 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     const Geodetic2 southWest = patch.corner(Quad::SOUTH_WEST);
 
     const Geodetic2 geoDiffPatch = {
-        northEast.lat - southWest.lat,
-        northEast.lon - southWest.lon
+        .lat = northEast.lat - southWest.lat,
+        .lon = northEast.lon - southWest.lon
     };
 
     const Geodetic2 geoDiffPoint = {
-        geodeticPosition.lat - southWest.lat,
-        geodeticPosition.lon - southWest.lon
+        .lat = geodeticPosition.lat - southWest.lat,
+        .lon = geodeticPosition.lon - southWest.lon
     };
     const glm::vec2 patchUV = glm::vec2(
         geoDiffPoint.lon / geoDiffPatch.lon,
@@ -1996,7 +1996,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
                                              const RenderData& data, ShadowCompType stype)
 {
-    ZoneScoped
+    ZoneScoped;
 
     constexpr double KM_TO_M = 1000.0;
 
@@ -2159,7 +2159,7 @@ int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk,
                                             const RenderData& data,
                                             const BoundingHeights& heights) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     // Calculations are done in the reference frame of the globe
     // (model space). Hence, the camera position needs to be transformed
@@ -2195,7 +2195,7 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk,
                                                  const RenderData& data,
                                                  const BoundingHeights& heights) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     // Calculations are done in the reference frame of the globe
     // (model space). Hence, the camera position needs to be transformed
@@ -2277,7 +2277,7 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk,
 }
 
 int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
-    ZoneScoped
+    ZoneScoped;
 
     const int currLevel = chunk.tileIndex.level;
 
@@ -2302,7 +2302,7 @@ bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk,
                                           const RenderData&,
                                           const glm::dmat4& mvp) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     const std::array<glm::dvec4, 8>& corners = chunk.corners;
 
@@ -2323,7 +2323,7 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
                                           const RenderData& renderData,
                                           const BoundingHeights& heights) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     // Calculations are done in the reference frame of the globe. Hence, the camera
     // position needs to be transformed with the inverse model matrix
@@ -2394,7 +2394,7 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
-    ZoneScoped
+    ZoneScoped;
 
     if (depth > 0 && isLeaf(cn)) {
         std::vector<void*> memory = _chunkPool.allocate(
@@ -2424,7 +2424,7 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
 }
 
 void RenderableGlobe::freeChunkNode(Chunk* n) {
-    ZoneScoped
+    ZoneScoped;
 
     _chunkPool.free(n);
     for (Chunk* c : n->children) {
@@ -2436,7 +2436,7 @@ void RenderableGlobe::freeChunkNode(Chunk* n) {
 }
 
 void RenderableGlobe::mergeChunkNode(Chunk& cn) {
-    ZoneScoped
+    ZoneScoped;
 
     for (Chunk* child : cn.children) {
         if (child) {
@@ -2450,7 +2450,7 @@ void RenderableGlobe::mergeChunkNode(Chunk& cn) {
 bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data,
                                       const glm::dmat4& mvp)
 {
-    ZoneScoped
+    ZoneScoped;
 
     // abock:  I tried turning this into a queue and use iteration, rather than recursion
     //         but that made the code harder to understand as the breadth-first traversal
@@ -2458,7 +2458,7 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data,
     //         children and then again it self to be processed after the children finish).
     //         In addition, this didn't even improve performance ---  2018-10-04
     if (isLeaf(cn)) {
-        ZoneScopedN("leaf")
+        ZoneScopedN("leaf");
         updateChunk(cn, data, mvp);
 
         if (cn.status == Chunk::Status::WantSplit) {
@@ -2472,7 +2472,7 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data,
         return cn.status == Chunk::Status::WantMerge;
     }
     else {
-        ZoneScopedN("!leaf")
+        ZoneScopedN("!leaf");
         char requestedMergeMask = 0;
         for (int i = 0; i < 4; ++i) {
             if (updateChunkTree(*cn.children[i], data, mvp)) {
@@ -2500,7 +2500,7 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data,
 void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data,
                                   const glm::dmat4& mvp) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     const BoundingHeights& heights = boundingHeightsForChunk(chunk, _layerManager);
     chunk.heightTileOK = heights.tileOK;

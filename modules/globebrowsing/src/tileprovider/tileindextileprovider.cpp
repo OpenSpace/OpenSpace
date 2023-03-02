@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@ TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary&)
 {}
 
 Tile TileIndexTileProvider::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
     std::string text = fmt::format(
         "level: {}\nx: {}\ny: {}", tileIndex.level, tileIndex.x, tileIndex.y
     );

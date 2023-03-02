@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,7 +89,7 @@ bool GdalWrapper::logGdalErrors() const {
 }
 
 GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize)
-    : PropertyOwner({ "GdalWrapper" })
+    : PropertyOwner({ "GdalWrapper", "Gdal Wrapper" })
     , _logGdalErrors(LogGdalErrorInfo, false)
     , _gdalMaximumCacheSize(
         GdalMaximumCacheInfo,
@@ -99,7 +99,7 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
         1                                           // Step: One MB
     )
 {
-    ZoneScoped
+    ZoneScoped;
 
     addProperty(_logGdalErrors);
     addProperty(_gdalMaximumCacheSize);

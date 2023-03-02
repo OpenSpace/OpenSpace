@@ -58,6 +58,11 @@ local elapsed_time = {
   ReferenceTime = "2022-10-12 12:00:00"
 }
 
+local input_state = {
+  Type = "DashboardItemInputState",
+  Identifier = "InputState"
+}
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(angle)
   openspace.dashboard.addDashboardItem(date)
@@ -68,9 +73,11 @@ asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(mission)
   openspace.dashboard.addDashboardItem(property_value)
   openspace.dashboard.addDashboardItem(elapsed_time)
+  openspace.dashboard.addDashboardItem(input_state)
 end)
 
 asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(input_state)
   openspace.dashboard.removeDashboardItem(elapsed_time)
   openspace.dashboard.removeDashboardItem(property_value)
   openspace.dashboard.removeDashboardItem(mission)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,20 +33,28 @@ uniform vec3 color;
 
 
 Fragment getFragment() {
-  // calculate normal from texture coordinates
+  // Calculate normal from texture coordinates
   vec3 n;
   n.xy = gl_PointCoord.st * vec2(2.0, -2.0) + vec2(-1.0, 1.0);
   float mag = dot(n.xy, n.xy);
-  if (mag > 1.0) {
-    // kill pixels outside circle
-    discard;
+
+  float edgeSmoothing = 1.0;
+  float w = 0.1; // wdith for smoothing
+  if (mag > 1.0 - w) {
+    // Kill pixels outside circle. Do a smoothstep for soft border
+    float t = (mag - (1.0-w)) / w;
+    edgeSmoothing = smoothstep(1.0, 0.0, t);
+    if (edgeSmoothing <= 0.0) {
+        discard;
+    }
   }
   n.z = sqrt(1.0 - mag);
-  
-  // calculate lighting
+
+  // Calculate lighting
   vec3 light_dir = vec3(0.0, 0.0, 1.0);
   float diffuse = max(0.0, dot(light_dir, n));
   float alpha = min(pow(sqrt(mag), thickness), opacity);
+  alpha *= edgeSmoothing;
 
   Fragment frag;
   frag.color = vec4(color * diffuse, alpha);

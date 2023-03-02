@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -118,7 +118,7 @@ namespace {
 namespace openspace::interaction {
 
 PathNavigator::PathNavigator()
-    : properties::PropertyOwner({ "PathNavigator" })
+    : properties::PropertyOwner({ "PathNavigator", "Path Navigator" })
     , _defaultPathType(
         DefaultCurveOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -274,12 +274,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
     }
     catch (const documentation::SpecificationError& e) {
         LERROR("Could not create camera path");
-        for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERRORC(o.offender, ghoul::to_string(o.reason));
-        }
-        for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNINGC(w.offender, ghoul::to_string(w.reason));
-        }
+        logError(e);
     }
     catch (const PathCurve::TooShortPathError&) {
         // Do nothing

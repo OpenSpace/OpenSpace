@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,7 +49,8 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
 {
     // Add all window controls (some will be hidden from GUI initially)
     for (int i = 0; i < nMaxWindows; ++i) {
-        const int monitorNumForThisWindow = (nMaxWindows > 3 && i >= 2) ? 1 : 0;
+        const int monitorNumForThisWindow =
+            (monitorResolutions.size() > 1 && i >= 2) ? 1 : 0;
 
         WindowControl* ctrl = new WindowControl(
             monitorNumForThisWindow,

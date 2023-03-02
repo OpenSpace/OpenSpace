@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -695,16 +695,16 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
     ImGui::Text("%s", name.c_str());
 
     glm::mat2 value = glm::dmat2(*p);
-    glm::dvec2 minValues = {
+    glm::dvec2 minValues = glm::dvec2(
         glm::compMin(p->minValue()[0]),
         glm::compMin(p->minValue()[1])
-    };
+    );
     float min = static_cast<float>(glm::compMin(minValues));
 
-    glm::dvec2 maxValues = {
+    glm::dvec2 maxValues = glm::dvec2(
         glm::compMax(p->maxValue()[0]),
         glm::compMax(p->maxValue()[1])
-    };
+    );
     float max = static_cast<float>(glm::compMax(maxValues));
 
     bool changed = false;
@@ -747,18 +747,18 @@ void renderDMat3Property(Property* prop, const std::string& ownerName,
     ImGui::Text("%s", name.c_str());
 
     glm::mat3 value = glm::dmat3(*p);
-    glm::dvec3 minValues = {
+    glm::dvec3 minValues = glm::dvec3(
         glm::compMin(p->minValue()[0]),
         glm::compMin(p->minValue()[1]),
         glm::compMin(p->minValue()[2])
-    };
+    );
     float min = static_cast<float>(glm::compMin(minValues));
 
-    glm::dvec3 maxValues = {
+    glm::dvec3 maxValues = glm::dvec3(
         glm::compMax(p->maxValue()[0]),
         glm::compMax(p->maxValue()[1]),
         glm::compMax(p->maxValue()[2])
-    };
+    );
     float max = static_cast<float>(glm::compMax(maxValues));
 
     bool changed = false;
@@ -809,20 +809,20 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
     ImGui::Text("%s", name.c_str());
 
     glm::mat4 value = glm::dmat4(*p);
-    glm::dvec4 minValues = {
+    glm::dvec4 minValues = glm::dvec4(
         glm::compMin(p->minValue()[0]),
         glm::compMin(p->minValue()[1]),
         glm::compMin(p->minValue()[2]),
         glm::compMin(p->minValue()[3])
-    };
+    );
     float min = static_cast<float>(glm::compMin(minValues));
 
-    glm::dvec4 maxValues = {
+    glm::dvec4 maxValues = glm::dvec4(
         glm::compMax(p->maxValue()[0]),
         glm::compMax(p->maxValue()[1]),
         glm::compMax(p->maxValue()[2]),
         glm::compMax(p->maxValue()[3])
-    };
+    );
     float max = static_cast<float>(glm::compMax(maxValues));
 
     bool changed = false;

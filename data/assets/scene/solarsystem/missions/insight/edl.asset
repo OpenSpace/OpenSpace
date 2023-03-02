@@ -1,6 +1,8 @@
 asset.require("spice/base")
+asset.require("./actions")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local mars = asset.require("scene/solarsystem/planets/mars/mars")
+asset.require("scene/solarsystem/planets/mars/default_layers")
 
 local models = asset.syncedResource({
   Name = "Insight Models Chutes",

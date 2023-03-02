@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -301,7 +301,7 @@ std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) 
 
     // Calculate Dec
     int decDegrees = static_cast<int>(std::trunc(decDeg));
-    double decMinutesFull = (abs(decDeg) - abs(decDegrees)) * 60.0;
+    double decMinutesFull = (std::abs(decDeg) - std::abs(decDegrees)) * 60.0;
     int decMinutes = static_cast<int>(std::trunc(decMinutesFull));
     double decSeconds = (decMinutesFull - decMinutes) * 60.0;
 

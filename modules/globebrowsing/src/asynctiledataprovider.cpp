@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
     , _rawTileDataReader(std::move(rawTileDataReader))
     , _concurrentJobManager(LRUThreadPool<TileIndex::TileHashKey>(1, 10))
 {
-    ZoneScoped
+    ZoneScoped;
 
     performReset(ResetRawTileDataReader::No);
 }
@@ -55,7 +55,7 @@ const RawTileDataReader& AsyncTileDataProvider::rawTileDataReader() const {
 }
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_resetMode == ResetMode::ShouldNotReset && satisfiesEnqueueCriteria(tileIndex)) {
         auto job = std::make_unique<TileLoadJob>(*_rawTileDataReader, tileIndex);
@@ -95,7 +95,7 @@ std::optional<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
 }
 
 bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
 
     // Only satisfies if it is not already enqueued. Also bumps the request to the top.
     const bool alreadyEnqueued = _concurrentJobManager.touch(tileIndex.hashKey());
@@ -185,7 +185,7 @@ bool AsyncTileDataProvider::shouldBeDeleted() {
 }
 
 void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileDataReader) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(_enqueuedTileRequests.empty(), "No enqueued requests left");
 

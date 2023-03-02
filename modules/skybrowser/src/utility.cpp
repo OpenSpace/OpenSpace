@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -170,7 +170,9 @@ bool isCoordinateInView(const glm::dvec3& equatorial) {
     double r = windowRatio();
 
     bool isCoordInView =
-        abs(coordsScreen.x) < r && abs(coordsScreen.y) < 1.f && coordsScreen.z < 0.f;
+        std::abs(coordsScreen.x) < r &&
+        std::abs(coordsScreen.y) < 1.f &&
+        coordsScreen.z < 0.f;
     return isCoordInView;
 }
 
