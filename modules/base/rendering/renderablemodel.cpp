@@ -79,9 +79,8 @@ namespace {
         "specularIntensity", "performManualDepthTest", "gBufferDepthTexture"
     };
 
-    constexpr std::array<const char*, 5> UniformOpacityNames = {
-        "opacity", "colorTexture", "depthTexture", "positionTexture",
-        "normalTexture"
+    constexpr std::array<const char*, 3> UniformOpacityNames = {
+        "opacity", "colorTexture", "depthTexture"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
@@ -859,25 +858,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             global::renderEngine->renderer()->additionalColorTexture1()
         );
         _quadProgram->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
-
-        ghoul::opengl::TextureUnit positionTextureUnit;
-        positionTextureUnit.activate();
-        glBindTexture(
-            GL_TEXTURE_2D,
-            global::renderEngine->renderer()->additionalColorTexture2()
-        );
-        _quadProgram->setUniform(
-            _uniformOpacityCache.positionTexture,
-            positionTextureUnit
-        );
-
-        ghoul::opengl::TextureUnit normalTextureUnit;
-        normalTextureUnit.activate();
-        glBindTexture(
-            GL_TEXTURE_2D,
-            global::renderEngine->renderer()->additionalColorTexture3()
-        );
-        _quadProgram->setUniform(_uniformOpacityCache.normalTexture, normalTextureUnit);
 
         ghoul::opengl::TextureUnit depthTextureUnit;
         depthTextureUnit.activate();
