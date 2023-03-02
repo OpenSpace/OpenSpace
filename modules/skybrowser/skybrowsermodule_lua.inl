@@ -357,6 +357,7 @@ std::string prunedIdentifier(std::string identifier) {
         image.setValue("cartesianDirection", img.equatorialCartesian);
         image.setValue("hasCelestialCoords", img.hasCelestialCoords);
         image.setValue("credits", img.credits);
+        image.setValue("collection", img.collection);
         image.setValue("creditsUrl", img.creditsUrl);
         image.setValue("identifier", img.identifier);
 

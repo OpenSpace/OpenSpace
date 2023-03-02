@@ -39,7 +39,7 @@ TextTileProvider::TextTileProvider(TileTextureInitData initData_, size_t fontSiz
     : initData(std::move(initData_))
     , fontSize(fontSize_)
 {
-    ZoneScoped
+    ZoneScoped;
 
     tileCache = global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
 }
@@ -47,7 +47,7 @@ TextTileProvider::TextTileProvider(TileTextureInitData initData_, size_t fontSiz
 TextTileProvider::~TextTileProvider() {}
 
 void TextTileProvider::internalInitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     font = global::fontManager->font("Mono", static_cast<float>(fontSize));
     fontRenderer = ghoul::fontrendering::FontRenderer::createDefault();
@@ -62,8 +62,8 @@ void TextTileProvider::internalDeinitialize() {
 Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string& text,
                                   const glm::vec2& position, const glm::vec4& color)
 {
-    ZoneScoped
-    TracyGpuZone("tile")
+    ZoneScoped;
+    TracyGpuZone("tile");
 
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
     Tile tile = tileCache->get(key);
@@ -101,7 +101,7 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
 }
 
 void TextTileProvider::reset() {
-    ZoneScoped
+    ZoneScoped;
 
     tileCache->clear();
 }

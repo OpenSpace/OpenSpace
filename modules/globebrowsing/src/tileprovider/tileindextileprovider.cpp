@@ -31,7 +31,7 @@ TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary&)
 {}
 
 Tile TileIndexTileProvider::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
     std::string text = fmt::format(
         "level: {}\nx: {}\ny: {}", tileIndex.level, tileIndex.x, tileIndex.y
     );

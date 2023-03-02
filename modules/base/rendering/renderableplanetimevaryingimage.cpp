@@ -195,7 +195,7 @@ void RenderablePlaneTimeVaryingImage::bindTexture() {
 }
 
 void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
-    ZoneScoped
+    ZoneScoped;
     RenderablePlane::update(data);
 
     if (!_enabled || _startTimes.empty()) {

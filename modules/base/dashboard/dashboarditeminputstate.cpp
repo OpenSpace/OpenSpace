@@ -119,7 +119,7 @@ DashboardItemInputState::DashboardItemInputState(const ghoul::Dictionary& dictio
 }
 
 void DashboardItemInputState::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     std::vector<std::string> text;
     if (_showKeyboard) {
@@ -169,7 +169,7 @@ void DashboardItemInputState::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemInputState::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     std::vector<std::string> text;
     if (_showKeyboard) {

@@ -365,7 +365,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
 }
 
 void Layer::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_tileProvider) {
         _tileProvider->initialize();
@@ -379,7 +379,7 @@ void Layer::deinitialize() {
 }
 
 ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) const {
-    ZoneScoped
+    ZoneScoped;
 
     if (_tileProvider) {
         return _tileProvider->chunkTilePile(tileIndex, pileSize);
@@ -445,7 +445,7 @@ void Layer::onChange(std::function<void(Layer*)> callback) {
 }
 
 void Layer::update() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_tileProvider) {
         _tileProvider->update();

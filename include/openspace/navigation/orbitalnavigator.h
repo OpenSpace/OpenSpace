@@ -70,11 +70,12 @@ public:
         properties::BoolProperty shouldTriggerWhenIdle;
         properties::FloatProperty idleWaitTime;
         properties::BoolProperty abortOnCameraInteraction;
-        properties::FloatProperty speedScale;
+        properties::BoolProperty invert;
+        properties::FloatProperty speedScaleFactor;
         properties::FloatProperty dampenInterpolationTime;
 
         properties::OptionProperty defaultBehavior;
-        std::optional<Behavior> chosenBehavior = std::nullopt;
+        std::optional<Behavior> chosenBehavior;
     };
 
     OrbitalNavigator();
