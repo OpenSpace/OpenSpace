@@ -1027,6 +1027,14 @@ void RenderEngine::takeScreenshot() {
     );
 }
 
+/**
+ * Resets the screenshot index to 0
+ */
+void RenderEngine::resetScreenshotNumber() {
+    _latestScreenshotNumber = 0;
+    global::windowDelegate->resetScreenshotNumber();
+}
+
 unsigned int RenderEngine::latestScreenshotNumber() const {
     return _latestScreenshotNumber;
 }
@@ -1038,7 +1046,8 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             codegen::lua::AddScreenSpaceRenderable,
             codegen::lua::RemoveScreenSpaceRenderable,
             codegen::lua::TakeScreenshot,
-            codegen::lua::DpiScaling
+            codegen::lua::DpiScaling,
+            codegen::lua::ResetScreenshotNumber
         }
     };
 }

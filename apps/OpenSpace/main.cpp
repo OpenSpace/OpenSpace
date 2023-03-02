@@ -879,6 +879,10 @@ void setSgctDelegateFunctions() {
         Engine::instance().takeScreenshot(std::move(windowIds));
         return Engine::instance().screenShotNumber();
     };
+    sgctDelegate.resetScreenshotNumber = []() {
+        ZoneScoped;
+        Engine::instance().resetScreenshotNumber();
+    };
     sgctDelegate.swapBuffer = []() {
         ZoneScoped;
 
