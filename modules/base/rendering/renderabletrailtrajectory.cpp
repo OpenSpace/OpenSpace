@@ -83,6 +83,13 @@ namespace {
         "'false', only the trail until the current time in the application will be shown"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SweepChunkSizeInfo = {
+        "SweepChunkSize",
+        "Sweep Chunk Size",
+        "The number of vertices that will be calculated each frame whenever the trail needs to be recalculated. "
+        "A greater value will result in more calculations per frame."
+    };
+
     struct [[codegen::Dictionary(RenderableTrailTrajectory)]] Parameters {
         // [[codegen::verbatim(StartTimeInfo.description)]]
         std::string startTime [[codegen::annotation("A valid date in ISO 8601 format")]];
@@ -98,6 +105,9 @@ namespace {
 
         // [[codegen::verbatim(RenderFullPathInfo.description)]]
         std::optional<bool> showFullTrail;
+
+        // [[codegen::verbatim(SweepChunkSizeInfo.description)]]
+        std::optional<int> sweepChunkSize;
     };
 #include "renderabletrailtrajectory_codegen.cpp"
 } // namespace
@@ -145,6 +155,8 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _renderFullTrail = p.showFullTrail.value_or(_renderFullTrail);
     addProperty(_renderFullTrail);
 
+    _sweepChunkSize = p.sweepChunkSize.value_or(_sweepChunkSize);
+
     // We store the vertices with ascending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
 }
@@ -184,22 +196,32 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
     if (_needsFullSweep) {
 
         if (_sweepIteration == 0) {
+            // Max number of vertices
+            constexpr unsigned int maxNumberOfVertices = 1000000;
+
             // Convert the start and end time from string representations to J2000 seconds
             _start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
             _end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
+            double timespan = _end - _start;
 
             _totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
-            _nValues = static_cast<int>((_end - _start) / _totalSampleInterval);
+
+            // Cap _numberOfVertices in order to prevent overflow and extreme performance degredation/RAM usage 
+            _numberOfVertices = std::min(static_cast<unsigned int>(timespan / _totalSampleInterval), maxNumberOfVertices);
+
+            // We need to recalcuate the _totalSampleInterval if _numberOfVertices eqals maxNumberOfVertices
+            // If we don't do this the position for each vertex will not be correct for the number of vertices we are doing along the trail.
+            _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ? (timespan / _numberOfVertices) : _totalSampleInterval;
 
             // Make space for the vertices
             _vertexArray.clear();
-            _vertexArray.resize(_nValues);
+            _vertexArray.resize(_numberOfVertices);
         }
         
         // Calculate sweeping range for this iteration
-        int startIndex = _sweepIteration * _sweepChunk;
-        int nextIndex = (_sweepIteration + 1) * _sweepChunk;
-        int stopIndex = std::min(nextIndex, _nValues);
+        unsigned int startIndex = _sweepIteration * _sweepChunkSize;
+        unsigned int nextIndex = (_sweepIteration + 1) * _sweepChunkSize;
+        unsigned int stopIndex = std::min(nextIndex, _numberOfVertices);
 
         // Calculate all vertex positions
         for (int i = startIndex; i < stopIndex; ++i) {
@@ -216,7 +238,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         }
         ++_sweepIteration;
 
-        if (stopIndex == _nValues) {
+        if (stopIndex == _numberOfVertices) {
             _sweepIteration = 0;
             setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.f);
         }

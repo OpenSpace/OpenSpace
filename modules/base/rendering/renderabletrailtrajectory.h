@@ -65,7 +65,7 @@ private:
     void reset();
 
     /// The number of vertices that we do calculations for during each frame of the full sweep pass
-    static const int _sweepChunk = 200;
+    unsigned int _sweepChunkSize = 200;
 
     /// The start time of the trail
     properties::StringProperty _startTime;
@@ -96,7 +96,7 @@ private:
     int _sweepIteration = 0;
 
     /// How many values do we need to compute given the distance between the start and end date and the desired sample interval
-    int _nValues = 0;
+    unsigned int _numberOfVertices = 0;
 
     double _totalSampleInterval = 0.0;
 
