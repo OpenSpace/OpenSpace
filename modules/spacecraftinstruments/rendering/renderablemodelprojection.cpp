@@ -108,12 +108,6 @@ namespace {
 
         // [[codegen::verbatim(PerformShadingInfo.description)]]
         std::optional<bool> performShading;
-
-        // The radius of the bounding sphere of this object. This has to be a
-        // radius that is larger than anything that is rendered by it. It has to
-        // be at least as big as the convex hull of the object. The default value
-        // is 10e9 meters.
-        std::optional<double> boundingSphereRadius;
     };
 #include "renderablemodelprojection_codegen.cpp"
 } // namespace
@@ -170,12 +164,6 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 
     addPropertySubOwner(_projectionComponent);
     _projectionComponent.initialize(identifier(), p.projection);
-
-    if (p.boundingSphereRadius.has_value()) {
-        _shouldOverrideBoundingSphere = true;
-        double boundingSphereRadius = p.boundingSphereRadius.value();
-        setBoundingSphere(boundingSphereRadius);
-    }
 
     _performShading = p.performShading.value_or(_performShading);
     addProperty(_performShading);
@@ -254,14 +242,12 @@ ghoul::opengl::Texture& RenderableModelProjection::baseTexture() const {
 
 void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     // Update boundingsphere
-    if (!_shouldOverrideBoundingSphere) {
-        setBoundingSphere(_geometry->boundingRadius() * _modelScale *
-            glm::compMax(data.modelTransform.scale)
-        );
+    setBoundingSphere(_geometry->boundingRadius() * _modelScale *
+        glm::compMax(data.modelTransform.scale)
+    );
 
-        // Set Interaction sphere size to be 10% of the bounding sphere
-        setInteractionSphere(_boundingSphere * 0.1);
-    }
+    // Set Interaction sphere size to be 10% of the bounding sphere
+    setInteractionSphere(_boundingSphere * 0.1);
 
     if (_projectionComponent.needsClearProjection()) {
         _projectionComponent.clearAllProjections();

@@ -48,10 +48,10 @@ local Vesta = {
       DestinationFrame = "GALACTIC"
     }
   },
+  BoundingSphere = 262000,
   Renderable = {
     Type = "RenderableModelProjection",
     GeometryFile = models .. "VestaComet_5000.obj",
-    BoundingSphereRadius = 262000,
     Projection = {
       Sequence   = images,
       SequenceType = "image-sequence",
