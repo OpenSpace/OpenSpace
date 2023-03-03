@@ -28,6 +28,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconversion.h>
@@ -72,11 +73,12 @@ namespace {
        GL_COLOR_ATTACHMENT2,
     };
 
-    constexpr std::array<const char*, 12> UniformNames = {
+    constexpr std::array<const char*, 14> UniformNames = {
         "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",
-        "specularIntensity", "performManualDepthTest", "gBufferDepthTexture"
+        "specularIntensity", "performManualDepthTest", "gBufferDepthTexture",
+        "viewport", "resolution"
     };
 
     constexpr std::array<const char*, 3> UniformOpacityNames = {
@@ -812,7 +814,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glClearBufferfv(GL_COLOR, 1, glm::value_ptr(glm::vec4(0.f, 0.f, 0.f, 0.f)));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Use a manuel depth test to make the models aware of the rest of the envierment
+        // Use a manuel depth test to make the models aware of the rest of the scene
         _program->setUniform(
             _uniformCache.performManualDepthTest,
             _enableDepthTest
@@ -831,6 +833,23 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             gBufferDepthTextureUnit
         );
 
+        // Will also need the resolution and viewport to get a texture coordinate for the
+        // G-buffer depth texture
+        _program->setUniform(
+            _uniformCache.resolution,
+            glm::vec2(global::windowDelegate->currentDrawBufferResolution())
+        );
+
+        GLint vp[4] = { 0 };
+        global::renderEngine->openglStateCache().viewport(vp);
+        glm::ivec4 viewport = glm::ivec4(vp[0], vp[1], vp[2], vp[3]);
+        _program->setUniform(
+            _uniformCache.viewport,
+            static_cast<float>(viewport[0]),
+            static_cast<float>(viewport[1]),
+            static_cast<float>(viewport[2]),
+            static_cast<float>(viewport[3])
+        );
 
         // Render Pass 1
         // Render all parts of the model into the new framebuffer without opacity
