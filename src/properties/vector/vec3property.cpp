@@ -49,7 +49,7 @@ int Vec3Property::typeLua() const {
 }
 
 glm::vec3 Vec3Property::fromLuaConversion(lua_State* state, bool& success) const {
-    return ghoul::lua::tryGetValue<glm::vec3>(state, success);
+    return ghoul::lua::value<glm::vec3>(state);
 }
 
 } // namespace openspace::properties

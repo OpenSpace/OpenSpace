@@ -50,7 +50,7 @@ int UVec2Property::typeLua() const {
 }
 
 glm::uvec2 UVec2Property::fromLuaConversion(lua_State* state, bool& success) const {
-    return ghoul::lua::tryGetValue<glm::uvec2>(state, success);
+    return ghoul::lua::value<glm::uvec2>(state);
 }
 
 } // namespace openspace::properties
