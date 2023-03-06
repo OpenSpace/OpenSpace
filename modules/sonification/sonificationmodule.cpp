@@ -38,13 +38,25 @@ namespace {
     constexpr std::string_view _loggerCat = "SonificationModule";
 
     //Output to SuperCollider
-    constexpr std::string_view SuperColliderIp = "127.0.0.1";
-    constexpr int SuperColliderPort = 57120;
+    constexpr std::string_view DefaultSuperColliderIp = "127.0.0.1";
+    constexpr int DefaultSuperColliderPort = 57120;
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Enable or disable all sonifications"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo IpAddressInfo = {
+        "IpAddress",
+        "Ip address",
+        "The Ip address that the sonification osc messages will be sent to"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PortInfo = {
+        "Port",
+        "Port",
+        "The port that the sonification osc messages will be sent to"
     };
 } // namespace
 
@@ -53,8 +65,15 @@ namespace openspace {
 SonificationModule::SonificationModule()
     : OpenSpaceModule("Sonification")
     , _enabled(EnabledInfo, false)
+    , _ipAddress(IpAddressInfo, DefaultSuperColliderIp.data())
+    , _port(PortInfo, DefaultSuperColliderPort, 1025, 65536)
 {
+    _ipAddress.setReadOnly(true);
+    _port.setReadOnly(true);
+
     addProperty(_enabled);
+    addProperty(_ipAddress);
+    addProperty(_port);
 }
 
 SonificationModule::~SonificationModule() {
@@ -64,25 +83,32 @@ SonificationModule::~SonificationModule() {
     }
 }
 
-void SonificationModule::internalInitialize(const ghoul::Dictionary&) {
+void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary) {
+    if (dictionary.hasValue<std::string>(IpAddressInfo.identifier)) {
+        _ipAddress = dictionary.value<std::string>(IpAddressInfo.identifier);
+    }
+    if (dictionary.hasValue<int>(PortInfo.identifier)) {
+        _port = dictionary.value<int>(PortInfo.identifier);
+    }
+
     // Fill sonification list
     _sonifications.push_back(
-        new CompareSonification(SuperColliderIp.data(), SuperColliderPort)
+        new CompareSonification(_ipAddress, _port)
     );
     addPropertySubOwner(_sonifications.back());
 
     _sonifications.push_back(
-        new PlanetsSonification(SuperColliderIp.data(), SuperColliderPort)
+        new PlanetsSonification(_ipAddress, _port)
     );
     addPropertySubOwner(_sonifications.back());
 
     _sonifications.push_back(
-        new SolarSonification(SuperColliderIp.data(), SuperColliderPort)
+        new SolarSonification(_ipAddress, _port)
     );
     addPropertySubOwner(_sonifications.back());
 
     _sonifications.push_back(
-        new TimeSonification(SuperColliderIp.data(), SuperColliderPort)
+        new TimeSonification(_ipAddress, _port)
     );
     addPropertySubOwner(_sonifications.back());
 

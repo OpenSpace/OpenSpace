@@ -29,6 +29,8 @@
 
 #include <modules/sonification/include/sonificationbase.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <atomic>
 
 namespace openspace {
@@ -42,13 +44,16 @@ public:
     SonificationModule();
     ~SonificationModule();
 
-    virtual void internalInitialize(const ghoul::Dictionary&) override;
+    virtual void internalInitialize(const ghoul::Dictionary& dictionary) override;
     virtual void internalDeinitialize() override;
 
 private:
     void update(std::atomic<bool>& isRunning);
 
     properties::BoolProperty _enabled;
+    properties::StringProperty _ipAddress;
+    properties::IntProperty _port;
+
     std::thread _updateThread;
     std::atomic<bool> _isRunning = false;
     std::vector<SonificationBase*> _sonifications;
