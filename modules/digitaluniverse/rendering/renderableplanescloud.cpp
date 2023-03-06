@@ -305,7 +305,7 @@ bool RenderablePlanesCloud::isReady() const {
 }
 
 void RenderablePlanesCloud::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_hasSpeckFile && std::filesystem::is_regular_file(_speckFile)) {
         _dataset = speck::data::loadFileWithCache(_speckFile);
@@ -321,7 +321,7 @@ void RenderablePlanesCloud::initialize() {
 }
 
 void RenderablePlanesCloud::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         "RenderablePlanesCloud",

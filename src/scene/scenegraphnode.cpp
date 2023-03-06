@@ -578,8 +578,8 @@ SceneGraphNode::SceneGraphNode()
 SceneGraphNode::~SceneGraphNode() {}
 
 void SceneGraphNode::initialize() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     LDEBUG(fmt::format("Initializing: {}", identifier()));
 
@@ -602,8 +602,8 @@ void SceneGraphNode::initialize() {
 }
 
 void SceneGraphNode::initializeGL() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     LDEBUG(fmt::format("Initializing GL: {}", identifier()));
 
@@ -635,8 +635,8 @@ void SceneGraphNode::initializeGL() {
 }
 
 void SceneGraphNode::deinitialize() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     LDEBUG(fmt::format("Deinitializing: {}", identifier()));
 
@@ -652,8 +652,8 @@ void SceneGraphNode::deinitialize() {
 }
 
 void SceneGraphNode::deinitializeGL() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     LDEBUG(fmt::format("Deinitializing GL: {}", identifier()));
 
@@ -679,8 +679,8 @@ void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     State s = _state;
     if (s != State::Initialized && _state != State::GLInitialized) {
@@ -729,8 +729,8 @@ void SceneGraphNode::update(const UpdateData& data) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     if (_state != State::GLInitialized) {
         return;
@@ -1147,7 +1147,7 @@ Scene* SceneGraphNode::scene() {
 }
 
 void SceneGraphNode::setScene(Scene* scene) {
-    ZoneScoped
+    ZoneScoped;
 
     // Unregister from previous scene, bottom up
     traversePostOrder([](SceneGraphNode* node) {

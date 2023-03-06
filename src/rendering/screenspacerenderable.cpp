@@ -412,7 +412,7 @@ bool ScreenSpaceRenderable::deinitializeGL() {
 }
 
 void ScreenSpaceRenderable::render() {
-    ZoneScoped
+    ZoneScoped;
 
     draw(
         globalRotationMatrix() *

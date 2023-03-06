@@ -632,7 +632,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
 }
 
 void Profile::addAsset(const std::string& path) {
-    ZoneScoped
+    ZoneScoped;
 
     if (ignoreUpdates) {
         return;
@@ -645,7 +645,7 @@ void Profile::addAsset(const std::string& path) {
 }
 
 void Profile::removeAsset(const std::string& path) {
-    ZoneScoped
+    ZoneScoped;
 
     if (ignoreUpdates) {
         return;
@@ -740,7 +740,9 @@ Profile::Profile(const std::string& content) {
             profile["keybindings"].get_to(keybindings);
         }
         if (profile.find("time") != profile.end()) {
-            time = profile["time"].get<Time>();
+            Profile::Time t;
+            profile["time"].get_to(t);
+            time = t;
         }
         if (profile.find("delta_times") != profile.end()) {
             profile["delta_times"].get_to(deltaTimes);

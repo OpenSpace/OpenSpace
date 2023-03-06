@@ -161,7 +161,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     , _renderableType(RenderableTypeInfo, "Renderable")
     , _dimInAtmosphere(DimInAtmosphereInfo, false)
 {
-    ZoneScoped
+    ZoneScoped;
 
     // I can't come up with a good reason not to do this for all renderables
     registerUpdateRenderBinFromOpacity();

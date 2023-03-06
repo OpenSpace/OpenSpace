@@ -177,7 +177,7 @@ ScriptEngine::ScriptEngine()
 }
 
 void ScriptEngine::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Adding base library");
     addBaseLibrary();
@@ -187,13 +187,13 @@ void ScriptEngine::initialize() {
 }
 
 void ScriptEngine::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     _registeredLibraries.clear();
 }
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Create openspace base library");
     const int top = lua_gettop(state);
@@ -214,7 +214,7 @@ ghoul::lua::LuaState* ScriptEngine::luaState() {
 }
 
 void ScriptEngine::addLibrary(LuaLibrary library) {
-    ZoneScoped
+    ZoneScoped;
 
     auto sortFunc = [](const LuaLibrary::Function& lhs, const LuaLibrary::Function& rhs) {
         return lhs.name < rhs.name;
@@ -251,7 +251,7 @@ bool ScriptEngine::hasLibrary(const std::string& name) {
 }
 
 bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(!script.empty(), "Script must not be empty");
 
@@ -296,7 +296,7 @@ bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback)
 }
 
 bool ScriptEngine::runScriptFile(const std::filesystem::path& filename) {
-    ZoneScoped
+    ZoneScoped;
 
     if (!std::filesystem::is_regular_file(filename)) {
         LERROR(fmt::format("Script with name {} did not exist", filename));
@@ -373,7 +373,7 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
 void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                                        Replace replace)
 {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(state, "State must not be nullptr");
     for (const LuaLibrary::Function& p : library.functions) {
@@ -454,7 +454,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
 }
 
 bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(state, "State must not be nullptr");
     const int top = lua_gettop(state);
@@ -495,7 +495,7 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
 }
 
 std::vector<std::string> ScriptEngine::allLuaFunctions() const {
-    ZoneScoped
+    ZoneScoped;
 
     std::vector<std::string> result;
     for (const LuaLibrary& library : _registeredLibraries) {
@@ -506,7 +506,7 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
 }
 
 std::string ScriptEngine::generateJson() const {
-    ZoneScoped
+    ZoneScoped;
 
     // Create JSON
     std::stringstream json;
@@ -527,7 +527,7 @@ std::string ScriptEngine::generateJson() const {
 }
 
 void ScriptEngine::writeLog(const std::string& script) {
-    ZoneScoped
+    ZoneScoped;
 
     // Check that logging is enabled and initialize if necessary
     if (!_logFileExists) {
@@ -569,7 +569,7 @@ void ScriptEngine::writeLog(const std::string& script) {
 }
 
 void ScriptEngine::preSync(bool isMaster) {
-    ZoneScoped
+    ZoneScoped;
 
     std::lock_guard guard(_clientScriptsMutex);
     if (isMaster) {
@@ -601,7 +601,7 @@ void ScriptEngine::preSync(bool isMaster) {
 }
 
 void ScriptEngine::encode(SyncBuffer* syncBuffer) {
-    ZoneScoped
+    ZoneScoped;
 
     size_t nScripts = _scriptsToSync.size();
     syncBuffer->encode(nScripts);
@@ -612,7 +612,7 @@ void ScriptEngine::encode(SyncBuffer* syncBuffer) {
 }
 
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
-    ZoneScoped
+    ZoneScoped;
 
     std::lock_guard guard(_clientScriptsMutex);
     size_t nScripts;
@@ -626,7 +626,7 @@ void ScriptEngine::decode(SyncBuffer* syncBuffer) {
 }
 
 void ScriptEngine::postSync(bool isMaster) {
-    ZoneScoped
+    ZoneScoped;
 
     if (isMaster) {
         while (!_masterScriptQueue.empty()) {
@@ -660,7 +660,7 @@ void ScriptEngine::queueScript(std::string script,
                                ScriptEngine::RemoteScripting remoteScripting,
                                ScriptCallback callback)
 {
-    ZoneScoped
+    ZoneScoped;
 
     if (script.empty()) {
         return;
@@ -670,7 +670,7 @@ void ScriptEngine::queueScript(std::string script,
 
 
 void ScriptEngine::addBaseLibrary() {
-    ZoneScoped
+    ZoneScoped;
 
     LuaLibrary lib = {
         .name = "",

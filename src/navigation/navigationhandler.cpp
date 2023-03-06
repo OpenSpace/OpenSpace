@@ -107,7 +107,7 @@ NavigationHandler::NavigationHandler()
 NavigationHandler::~NavigationHandler() {}
 
 void NavigationHandler::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     global::parallelPeer->connectionEvent().subscribe(
         "NavigationHandler",
@@ -120,7 +120,7 @@ void NavigationHandler::initialize() {
 }
 
 void NavigationHandler::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     global::parallelPeer->connectionEvent().unsubscribe("NavigationHandler");
 }

@@ -151,7 +151,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     const double targetDt = global::timeManager->targetDeltaTime();
     const double currentDt = global::timeManager->deltaTime();
@@ -215,7 +215,7 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemSimulationIncrement::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     double t = global::timeManager->targetDeltaTime();
     std::pair<double, std::string> deltaTime;

@@ -227,7 +227,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableTrail::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
 #ifdef __APPLE__
     _programObject = BaseModule::ProgramObjectManager.request(
@@ -275,7 +275,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
                                      const glm::dmat4& modelTransform,
                                      RenderInformation& info, int nVertices, int offset)
 {
-    ZoneScoped
+    ZoneScoped;
 
     // We pass in the model view transformation matrix as double in order to maintain
     // high precision for vertices; especially for the trails, a high vertex precision
@@ -375,7 +375,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
 }
 
 void RenderableTrail::render(const RenderData& data, RendererTasks&) {
-    ZoneScoped
+    ZoneScoped;
 
     _programObject->activate();
     _programObject->setUniform(_uniformCache.opacity, opacity());
