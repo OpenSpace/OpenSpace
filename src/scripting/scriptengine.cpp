@@ -115,7 +115,7 @@ namespace {
             json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
             json << fmt::format(replStr, "help", escapedJson(f.helpText));
             json << fmt::format(
-                "\"sourceLocation\": {{ \"file\": {}, \"line\": {} }}",
+                "\"sourceLocation\": {{ \"file\": \"{}\", \"line\": {} }}",
                 escapedJson(f.sourceLocation.file), f.sourceLocation.line
             );
             json << "}";
