@@ -61,6 +61,11 @@ struct LuaLibrary {
         std::string returnType;
         /// A help text describing what the function does/
         std::string helpText;
+        /// The source location where the implementation for this Lua file is located
+        struct {
+            std::string file = "<none>";
+            int line = 0;
+        } sourceLocation;
     };
     /// The name of the library
     std::string name;

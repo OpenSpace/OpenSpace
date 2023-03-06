@@ -113,7 +113,11 @@ namespace {
             }
             json << "],";
             json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
-            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
+            json << fmt::format(replStr, "help", escapedJson(f.helpText));
+            json << fmt::format(
+                "\"sourceLocation\": {{ \"file\": {}, \"line\": {} }}",
+                escapedJson(f.sourceLocation.file), f.sourceLocation.line
+            );
             json << "}";
             if (&f != &library.functions.back() || !library.documentations.empty()) {
                 json << ",";
