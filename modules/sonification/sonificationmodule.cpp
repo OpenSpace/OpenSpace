@@ -24,6 +24,7 @@
 
 #include <modules/sonification/sonificationmodule.h>
 
+#include <openspace/documentation/documentation.h>
 #include <modules/sonification/include/comparesonification.h>
 #include <modules/sonification/include/planetssonification.h>
 #include <modules/sonification/include/solarsonification.h>
@@ -50,14 +51,23 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo IpAddressInfo = {
         "IpAddress",
         "Ip address",
-        "The Ip address that the sonification osc messages will be sent to"
+        "The network ip address that the sonification osc messages will be sent to"
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
-        "The port that the sonification osc messages will be sent to"
+        "The network port that the sonification osc messages will be sent to"
     };
+
+    struct [[codegen::Dictionary(SonificationModule)]] Parameters {
+        // [[codegen::verbatim(IpAddressInfo.description)]]
+        std::optional<std::string> ipAddress;
+
+        // [[codegen::verbatim(PortInfo.description)]]
+        std::optional<int> port;
+    };
+#include "sonificationmodule_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -84,12 +94,10 @@ SonificationModule::~SonificationModule() {
 }
 
 void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary) {
-    if (dictionary.hasValue<std::string>(IpAddressInfo.identifier)) {
-        _ipAddress = dictionary.value<std::string>(IpAddressInfo.identifier);
-    }
-    if (dictionary.hasValue<int>(PortInfo.identifier)) {
-        _port = dictionary.value<int>(PortInfo.identifier);
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _ipAddress = p.ipAddress.value_or(_ipAddress);
+    _port = p.port.value_or(_port);
 
     // Fill sonification list
     _sonifications.push_back(
