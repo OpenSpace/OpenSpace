@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ namespace {
 namespace openspace::interaction {
 
 InteractionMonitor::InteractionMonitor()
-    : properties::PropertyOwner({ "InteractionMonitor" })
+    : properties::PropertyOwner({ "InteractionMonitor", "Interaction Monitor" })
     , _isInActiveState(IsInActiveStateInfo, false)
     , _idleTime(IdleTimeInfo, 120.f, 0.f, 300.f)
 {

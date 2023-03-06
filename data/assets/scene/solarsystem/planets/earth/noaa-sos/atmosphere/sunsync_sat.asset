@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Polar Orbiting: NOAA-17 and NOAA-18"
 local Identifier = "noaa-sos-atmosphere-sunsync_sat"
-local Description = [[Satellites allow scientists to observe the Earth from above the 
-atmosphere. The National Oceanic and Atmospheric Administration, NOAA, has several 
-different types of satellites, including geostationary and polar orbiting satellites. 
-These datasets show the path of Polar-orbiting Operational Environmental Satellites, or 
-POES for short. NOAA has two POES in operation currently, a morning and afternoon 
-satellite. The morning satellite crosses the equator on the sun-light side of the Earth 
-in the morning, and the afternoon satellite crosses in the afternoon. Both satellites 
+local Description = [[Satellites allow scientists to observe the Earth from above the
+atmosphere. The National Oceanic and Atmospheric Administration, NOAA, has several
+different types of satellites, including geostationary and polar orbiting satellites.
+These datasets show the path of Polar-orbiting Operational Environmental Satellites, or
+POES for short. NOAA has two POES in operation currently, a morning and afternoon
+satellite. The morning satellite crosses the equator on the sun-light side of the Earth
+in the morning, and the afternoon satellite crosses in the afternoon. Both satellites
 orbit the Earth 14.1 times per day]]
 local URL = "https://sos.noaa.gov/catalog/datasets/polar-orbiting-noaa-17-and-noaa-18/"
 
@@ -18,10 +18,9 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
@@ -30,7 +29,7 @@ local layer = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = imagesDestination,
+    Folder = syncedDirectory .. "2048",
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "sunsync_%Y%j%H%M.jpg"
@@ -39,11 +38,6 @@ local layer = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "2048.zip", imagesDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

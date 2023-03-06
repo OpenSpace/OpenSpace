@@ -3,16 +3,16 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Volcanic Ash Eruption: Iceland"
 local Identifier = "noaa-sos-atmosphere-volcano_ash"
-local Description = [[Eyjafjallajokull, a glacier covered volcano in southern Iceland, 
-erupted explosively on April 14, 2010. The name Eyjafjallajokull is Icelandic for 
-island-mountain glacier. The volcano initially erupted on March 20, but this original 
-eruption was much smaller and only caused a brief evacuation of the local area. The April 
-14 event was 10 to 20 times more powerful and had international impacts. Locally, the 
-eruption and resulting lava melted the surrounding glacier, causing major flooding. 
-Internationally, air traffic was impacted for several days following the eruption. The 
-volcano ejected ash over 30,000ft into the atmosphere, causing significant disruptions to 
-the European and Trans-Atlantic air travel. Airspace over much of northern Europe was 
-closed from April 15 through April 23 for concerns over the abrasive volcanic ash causing 
+local Description = [[Eyjafjallajokull, a glacier covered volcano in southern Iceland,
+erupted explosively on April 14, 2010. The name Eyjafjallajokull is Icelandic for
+island-mountain glacier. The volcano initially erupted on March 20, but this original
+eruption was much smaller and only caused a brief evacuation of the local area. The April
+14 event was 10 to 20 times more powerful and had international impacts. Locally, the
+eruption and resulting lava melted the surrounding glacier, causing major flooding.
+Internationally, air traffic was impacted for several days following the eruption. The
+volcano ejected ash over 30,000ft into the atmosphere, causing significant disruptions to
+the European and Trans-Atlantic air travel. Airspace over much of northern Europe was
+closed from April 15 through April 23 for concerns over the abrasive volcanic ash causing
 engine failures]]
 local URL = "https://sos.noaa.gov/catalog/datasets/volcanic-ash-eruption-iceland/"
 
@@ -21,26 +21,20 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
   Type = "ImageSequenceTileLayer",
-  FolderPath = imagesDestination,
+  FolderPath = syncedDirectory .. "2992",
   Description = Description
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "2992.zip", imagesDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

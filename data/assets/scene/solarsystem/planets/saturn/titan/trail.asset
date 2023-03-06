@@ -29,11 +29,11 @@ local TitanTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(TitanTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TitanTrail)
 end)
-  
+
 asset.export(TitanTrail)
 
 

@@ -23,9 +23,9 @@ local Spout = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Spout)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Spout)
 end)
-  
+
 asset.export(Spout)

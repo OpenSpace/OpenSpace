@@ -12,8 +12,15 @@ local fieldlineData = asset.syncedResource({
   Name = "Fieldlines Data BATSRUS",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-batsrus",
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
+
+local unzippedDataDestination = {
+  openClosed = fieldlineData .. "magnetic_fieldlines-open_closed",
+  velocityFlow = fieldlineData .. "velocity_flowlines-upstream",
+  asherStatic = fieldlineData .. "ashers_static_seeds"
+}
 
 local loop = {
   Documentation = "Sets time to start of data, sets higher delta time and loops back from start, when at end of data",
@@ -29,12 +36,6 @@ local batsrusDensityColorTable = transferFunctions .. "batsrus_density.txt"
 local batsrusCurrentColorTable = transferFunctions .. "batsrus_current2.txt"
 local batsrusVelocityColorTable = transferFunctions .. "batsrus_velocity.txt"
 local batsrusTopologyColorTable = transferFunctions .. "batsrus_topology.txt"
-
-local unzippedDataDestination = {
-  openClosed = fieldlineData .. "magnetic_fieldlines-open_closed",
-  velocityFlow = fieldlineData .. "velocity_flowlines-upstream",
-  asherStatic = fieldlineData .. "ashers_static_seeds"
-}
 
 local colorRanges = {
   { 0, 100000000 },
@@ -130,19 +131,6 @@ local BatsrusAsherStaticSeedsFlowLines = {
 
 asset.onInitialize(function ()
   openspace.action.registerAction(loop)
-
-  if not openspace.directoryExists(unzippedDataDestination.openClosed) then
-    openspace.printInfo("Extracting " .. "Fieldlines from Batsrus model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "magnetic_fieldlines-open_closed.zip", unzippedDataDestination.openClosed, true)
-  end
-  if not openspace.directoryExists(unzippedDataDestination.velocityFlow) then
-    openspace.printInfo("Extracting " .. "Fieldlines from Batsrus model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "velocity_flowlines-upstream.zip", unzippedDataDestination.velocityFlow, true)
-  end
-  if not openspace.directoryExists(unzippedDataDestination.asherStatic) then
-    openspace.printInfo("Extracting " .. "Fieldlines from Batsrus model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "ashers_static_seeds.zip", unzippedDataDestination.asherStatic, true)
-  end
 
   openspace.addSceneGraphNode(BatsrusJ12OpenClosed)
   openspace.addSceneGraphNode(BatsrusJ12FlowLines)

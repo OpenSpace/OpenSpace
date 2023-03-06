@@ -3,26 +3,26 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Tsunami Historical Series: Chile - 2010"
 local Identifier = "noaa-sos-oceans-tsunami_historical_series-chile"
-local Description = [[At 3:34 on the morning of February 27, 2010 (06:34 UTC), an 8.8 
-moment magnitude earthquake struck near the coastline of central Chile. The Pacific 
-Tsunami Warning Center (PTWC) quickly determined that the large magnitude of this 
-earthquake, its location near the coastline, its relatively shallow depth within the 
-earth, and a history of megathrust earthquakes in the region meant that it could have 
-moved the seafloor and thus posed a significant tsunami risk and PTWC issued their first 
-tsunami warning several minutes later for Chile and Peru. The earthquake did in fact 
-cause a tsunami, and over the following hours as PTWC learned more about the earthquake 
-(confirming it was a megathrust and upgrading its magnitude) and its tsunami through 
-forecast models and direct observation with DART sensors and coastal sea-level gauges 
-PTWC would eventually issue tsunami warnings to the State of Hawaii and all 43 countries 
-and territories participating the Pacific Tsunami Warning System, keeping warnings in 
-some areas in effect for more than a day. PTWC's sister office, the West Coast and Alaska 
-Tsunami Warning Center (now known as the National Tsunami Warning Center), also issued 
-tsunami advisories for Alaska and the Pacific coasts of the United States and Canada. The 
-tsunami caused the greatest devastation and 124 deaths in Chile, where waves reached as 
-high as 29 m or 95 ft. on the mainland, over 18 m or 60 ft. in its Juan Fernandez 
-Islands, and over 4 m or 14 ft. at Rapa Nui (Easter Island). Outside of Chile tsunami 
-wave heights exceeded 1 m or 3 ft. in the Marquesas Islands (French Polynesia), New 
-Zealand, the Kuril Islands (Russia), and in the United States in California and Hawaii, 
+local Description = [[At 3:34 on the morning of February 27, 2010 (06:34 UTC), an 8.8
+moment magnitude earthquake struck near the coastline of central Chile. The Pacific
+Tsunami Warning Center (PTWC) quickly determined that the large magnitude of this
+earthquake, its location near the coastline, its relatively shallow depth within the
+earth, and a history of megathrust earthquakes in the region meant that it could have
+moved the seafloor and thus posed a significant tsunami risk and PTWC issued their first
+tsunami warning several minutes later for Chile and Peru. The earthquake did in fact
+cause a tsunami, and over the following hours as PTWC learned more about the earthquake
+(confirming it was a megathrust and upgrading its magnitude) and its tsunami through
+forecast models and direct observation with DART sensors and coastal sea-level gauges
+PTWC would eventually issue tsunami warnings to the State of Hawaii and all 43 countries
+and territories participating the Pacific Tsunami Warning System, keeping warnings in
+some areas in effect for more than a day. PTWC's sister office, the West Coast and Alaska
+Tsunami Warning Center (now known as the National Tsunami Warning Center), also issued
+tsunami advisories for Alaska and the Pacific coasts of the United States and Canada. The
+tsunami caused the greatest devastation and 124 deaths in Chile, where waves reached as
+high as 29 m or 95 ft. on the mainland, over 18 m or 60 ft. in its Juan Fernandez
+Islands, and over 4 m or 14 ft. at Rapa Nui (Easter Island). Outside of Chile tsunami
+wave heights exceeded 1 m or 3 ft. in the Marquesas Islands (French Polynesia), New
+Zealand, the Kuril Islands (Russia), and in the United States in California and Hawaii,
 and caused minor damage in San Diego, California and in Japan]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-chile-2010/"
 
@@ -63,7 +63,7 @@ local layer_null = {
 }
 
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_coastal)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy_coastal)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy)

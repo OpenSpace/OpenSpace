@@ -28,11 +28,11 @@ local MercuryTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MercuryTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MercuryTrail)
 end)
-  
+
 asset.export(MercuryTrail)
 
 

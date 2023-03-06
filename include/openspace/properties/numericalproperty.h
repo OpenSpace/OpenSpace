@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@ public:
     NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
         T maximumValue, T steppingValue, float exponent = 1.f);
 
-    virtual std::string className() const override = 0;
+    virtual std::string_view className() const override = 0;
     virtual int typeLua() const override = 0;
 
     T minValue() const;

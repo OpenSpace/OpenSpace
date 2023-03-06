@@ -8,13 +8,14 @@ local kernel375 = kernels.sat375
 
 local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_norse", "moon_minor" }
+local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_norse", "moon_minor", "moon_minor_saturn" }
 local trailColor = { 0.5, 0.3, 0.3 }
-local trailTags = { 
+local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_saturn",
-  "moonTrail_minor"
+  "moonTrail_minor",
+  "moonTrail_minor_saturn"
 }
 
 local norseGroup = {
@@ -521,20 +522,59 @@ local norseGroup = {
   }
 }
 
+-- Generate all moon labels
+local moon_labels = {}
+
+for i, moon in ipairs(norseGroup) do
+  local moonName = moon.GUI.Name or moon.Identifier
+  moon_labels[i] = {
+    Identifier = moon.Identifier .. "Label",
+    Parent = moon.Identifier,
+    Renderable = {
+      Enabled = false,
+      Type = "RenderableLabel",
+      Text = moonName,
+      FontSize = 70.0,
+      Size = 7.1,
+      MinMaxSize = { 1, 25 },
+      OrientationOption = "Camera View Direction",
+      BlendMode = "Additive",
+      EnableFading = true,
+      FadeUnit = "Gm",
+      FadeDistances = { 1.25, 90.0 },
+      FadeWidths = { 0.25, 90.0 }
+    },
+    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+    GUI = {
+      Name = moonName .. " Label",
+      Path = "/Solar System/Planets/Saturn/Moons",
+      Description = "Label for Saturn's moon " .. moonName .. " (Norse group)"
+    }
+  }
+end
+
 local nodes = proceduralGlobes.createGlobes(norseGroup)
 
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
+
+  for _, moon in ipairs(moon_labels) do
+    openspace.addSceneGraphNode(moon)
+  end
 end)
-  
+
 asset.onDeinitialize(function()
+  for i = #moon_labels, 1, -1 do
+    openspace.removeSceneGraphNode(moon_labels[i])
+  end
+
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end
 end)
-  
+
 for _, node in ipairs(nodes) do
   asset.export(node)
 end

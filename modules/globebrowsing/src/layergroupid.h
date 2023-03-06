@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,11 +47,31 @@ struct Group {
 };
 
 constexpr std::array<Group, 5> Groups = {
-    Group{ Group::ID::HeightLayers, "HeightLayers", "Height Layers" },
-    Group{ Group::ID::ColorLayers, "ColorLayers", "Color Layers" },
-    Group{ Group::ID::Overlays, "Overlays", "Overlays" },
-    Group{ Group::ID::NightLayers, "NightLayers", "Night Layers" },
-    Group{ Group::ID::WaterMasks, "WaterMasks", "Water Masks" }
+    Group {
+        .id = Group::ID::HeightLayers,
+        .identifier = "HeightLayers",
+        .name = "Height Layers"
+    },
+    Group {
+        .id = Group::ID::ColorLayers,
+        .identifier = "ColorLayers",
+        .name = "Color Layers"
+    },
+    Group {
+        .id = Group::ID::Overlays,
+        .identifier = "Overlays",
+        .name = "Overlays"
+    },
+    Group {
+        .id = Group::ID::NightLayers,
+        .identifier = "NightLayers",
+        .name = "Night Layers"
+    },
+    Group {
+        .id = Group::ID::WaterMasks,
+        .identifier = "WaterMasks",
+        .name = "Water Masks"
+    }
 };
 
 
@@ -76,16 +96,46 @@ struct Layer {
 };
 
 constexpr std::array<Layer, 10> Layers = {
-    Layer{ Layer::ID::DefaultTileLayer, "DefaultTileLayer" },
-    Layer{ Layer::ID::SingleImageTileLayer, "SingleImageTileLayer" },
-    Layer{ Layer::ID::ImageSequenceTileLayer, "ImageSequenceTileLayer" },
-    Layer{ Layer::ID::SizeReferenceTileLayer, "SizeReferenceTileLayer" },
-    Layer{ Layer::ID::TemporalTileLayer, "TemporalTileLayer" },
-    Layer{ Layer::ID::TileIndexTileLayer, "TileIndexTileLayer" },
-    Layer{ Layer::ID::ByIndexTileLayer, "ByIndexTileLayer" },
-    Layer{ Layer::ID::ByLevelTileLayer, "ByLevelTileLayer" },
-    Layer{ Layer::ID::SolidColor, "SolidColor" },
-    Layer{ Layer::ID::SpoutImageTileLayer, "SpoutImageTileLayer" }
+    Layer {
+        .id = Layer::ID::DefaultTileLayer,
+        .identifier = "DefaultTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::SingleImageTileLayer,
+        .identifier = "SingleImageTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::ImageSequenceTileLayer,
+        .identifier = "ImageSequenceTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::SizeReferenceTileLayer,
+        .identifier = "SizeReferenceTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::TemporalTileLayer,
+        .identifier = "TemporalTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::TileIndexTileLayer,
+        .identifier = "TileIndexTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::ByIndexTileLayer,
+        .identifier = "ByIndexTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::ByLevelTileLayer,
+        .identifier = "ByLevelTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::SolidColor,
+        .identifier = "SolidColor"
+    },
+    Layer {
+        .id = Layer::ID::SpoutImageTileLayer,
+        .identifier = "SpoutImageTileLayer"
+    }
 };
 
 
@@ -102,9 +152,18 @@ struct Adjustment {
 };
 
 constexpr std::array<Adjustment, 3> Adjustments = {
-    Adjustment{ Adjustment::ID::None, "None" },
-    Adjustment{ Adjustment::ID::ChromaKey, "ChromaKey" },
-    Adjustment{ Adjustment::ID::TransferFunction, "TransferFunction" }
+    Adjustment {
+        .id = Adjustment::ID::None,
+        .identifier = "None"
+    },
+    Adjustment {
+        .id = Adjustment::ID::ChromaKey,
+        .identifier = "ChromaKey"
+    },
+    Adjustment {
+        .id = Adjustment::ID::TransferFunction,
+        .identifier = "TransferFunction"
+    }
 };
 
 
@@ -123,11 +182,11 @@ struct Blend {
 };
 
 constexpr std::array<Blend, 5> Blends = {
-    Blend{ Blend::ID::Normal, "Normal" },
-    Blend{ Blend::ID::Multiply, "Multiply" },
-    Blend{ Blend::ID::Add, "Add" },
-    Blend{ Blend::ID::Subtract, "Subtract" },
-    Blend{ Blend::ID::Color, "Color" }
+    Blend { .id = Blend::ID::Normal, .identifier = "Normal" },
+    Blend { .id = Blend::ID::Multiply, .identifier = "Multiply" },
+    Blend { .id = Blend::ID::Add, .identifier = "Add" },
+    Blend { .id = Blend::ID::Subtract, .identifier = "Subtract" },
+    Blend { .id = Blend::ID::Color, .identifier = "Color" }
 };
 
 } // namespace openspace::globebrowsing::layers
@@ -137,54 +196,62 @@ namespace ghoul {
 template <>
 constexpr openspace::globebrowsing::layers::Layer::ID from_string(std::string_view string)
 {
-    using namespace openspace::globebrowsing::layers;
-
     auto it = std::find_if(
-        Layers.begin(),
-        Layers.end(),
-        [&string](const Layer& li) { return li.identifier == string; }
+        openspace::globebrowsing::layers::Layers.begin(),
+        openspace::globebrowsing::layers::Layers.end(),
+        [&string](const openspace::globebrowsing::layers::Layer& li) {
+            return li.identifier == string;
+        }
     );
-    return it != Layers.end() ? it->id : Layer::ID::Unknown;
+    return it != openspace::globebrowsing::layers::Layers.end() ?
+        it->id :
+        openspace::globebrowsing::layers::Layer::ID::Unknown;
 }
 
 template <>
 constexpr openspace::globebrowsing::layers::Group::ID from_string(std::string_view string)
 {
-    using namespace openspace::globebrowsing::layers;
-
     auto it = std::find_if(
-        Groups.begin(),
-        Groups.end(),
-        [&string](const Group& gi) { return gi.identifier == string; }
+        openspace::globebrowsing::layers::Groups.begin(),
+        openspace::globebrowsing::layers::Groups.end(),
+        [&string](const openspace::globebrowsing::layers::Group& gi) {
+            return gi.identifier == string;
+        }
     );
-    return it != Groups.end() ? it->id: Group::ID::Unknown;
+    return it != openspace::globebrowsing::layers::Groups.end() ?
+        it->id :
+        openspace::globebrowsing::layers::Group::ID::Unknown;
 }
 
 template <>
 constexpr openspace::globebrowsing::layers::Adjustment::ID from_string(
                                                                   std::string_view string)
 {
-    using namespace openspace::globebrowsing::layers;
-
     auto it = std::find_if(
-        Adjustments.begin(),
-        Adjustments.end(),
-        [&string](const Adjustment& ai) { return ai.identifier == string; }
+        openspace::globebrowsing::layers::Adjustments.begin(),
+        openspace::globebrowsing::layers::Adjustments.end(),
+        [&string](const openspace::globebrowsing::layers::Adjustment& ai) {
+            return ai.identifier == string;
+        }
     );
-    return it != Adjustments.end() ? it->id : Adjustment::ID::None;
+    return it != openspace::globebrowsing::layers::Adjustments.end() ?
+        it->id :
+        openspace::globebrowsing::layers::Adjustment::ID::None;
 }
 
 template <>
 constexpr openspace::globebrowsing::layers::Blend::ID from_string(std::string_view string)
 {
-    using namespace openspace::globebrowsing::layers;
-
     auto it = std::find_if(
-        Blends.begin(),
-        Blends.end(),
-        [&string](const Blend& bi) { return bi.identifier == string; }
+        openspace::globebrowsing::layers::Blends.begin(),
+        openspace::globebrowsing::layers::Blends.end(),
+        [&string](const openspace::globebrowsing::layers::Blend& bi) {
+            return bi.identifier == string;
+        }
     );
-    return it != Blends.end() ? it->id : Blend::ID::Normal;
+    return it != openspace::globebrowsing::layers::Blends.end() ?
+        it->id :
+        openspace::globebrowsing::layers::Blend::ID::Normal;
 }
 
 } // ghoul

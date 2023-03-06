@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -66,14 +66,14 @@ DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)
 }
 
 void DashboardItemText::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     RenderFont(*_font, penPosition, _text.value());
     penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemText::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     return _font->boundingBox(_text.value());
 }

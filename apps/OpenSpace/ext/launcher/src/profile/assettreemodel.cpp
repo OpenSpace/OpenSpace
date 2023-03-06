@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -156,7 +156,10 @@ void AssetTreeModel::importModelData(const std::string& assetBasePath,
     std::string assetList = assets.useQtFileSystemModelToTraverseDir(assetBasePath);
     assetList += assets.useQtFileSystemModelToTraverseDir(userAssetBasePath, true);
     std::istringstream iss(assetList);
-    ImportElement rootElem = { "", 0, false };
+    ImportElement rootElem = {
+        .line = "",
+        .level = 0,
+    };
 
     if (importGetNextLine(rootElem, iss)) {
         importInsertItem(iss, _rootItem.get(), rootElem, 0);

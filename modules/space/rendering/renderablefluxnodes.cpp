@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,8 +63,8 @@ namespace {
         "GoesEnergy",
         "GOES Energy",
         "Select which energy bin you want to show. GOES = Geostationary Operational "
-        "Environmental Satellites. Emin01 is values > 10 MeV, "
-        "Default is Emin03 where values > 100 MeV"
+        "Environmental Satellites. Emin01 is values > 10 MeV, Default is Emin03 where "
+        "values > 100 MeV"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorModeInfo = {
@@ -189,13 +189,13 @@ namespace {
         "Max Node Distance Size",
         "The maximum size of the nodes at a certin distance"
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo
                                                           CameraPerspectiveEnabledInfo = {
         "CameraPerspectiveEnabled",
         "Use Camera perspective",
-        "Camera perspective changes the size of the nodes dependent on the "
-        "distance from camera"
+        "Camera perspective changes the size of the nodes dependent on the distance from "
+        "camera"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawingCirclesInfo = {
@@ -214,15 +214,14 @@ namespace {
         "RenderingGaussianAlphaFilter",
         "Alpha by Gaussian",
         "Using fragment shader to draw nodes with Gaussian filter for alpha value"
-
     };
 
     constexpr openspace::properties::Property::PropertyInfo
                                                          PerspectiveDistanceFactorInfo = {
         "PerspectiveDistanceFactor",
         "Perspective Distance factor",
-        "This value decides how far away the camera must be to start "
-        "impacting the node size"
+        "This value decides how far away the camera must be to start impacting the node "
+        "size"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxNodeSizeInfo = {

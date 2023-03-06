@@ -99,7 +99,7 @@ local PlutoProjection = {
             DetectorType = "Scanner",
             StopCommand = "END_NOM",
             Spice = { "NH_RALPH_LEISA" }
-          },    
+          },
           RALPH_MVIC_PAN1 = {
             DetectorType = "Scanner",
             StopCommand = "END_NOM",
@@ -109,7 +109,7 @@ local PlutoProjection = {
             DetectorType = "Scanner",
             StopCommand = "END_NOM",
             Spice = { "NH_RALPH_MVIC_PAN2" }
-          }, 
+          },
           ALICE_Use_AIRGLOW = {
             DetectorType = "Scanner",
             StopCommand = "ALICE_END_PIXELLIST",
@@ -136,7 +136,7 @@ local PlutoProjection = {
             Spice = { "NH_REX" }
           }
         },
-        Target ={ 
+        Target ={
           Read  = {
             "TARGET_NAME",
             "INSTRUMENT_HOST_NAME",
@@ -153,7 +153,6 @@ local PlutoProjection = {
           }
         }
       },
-
       Instrument = {
         Name       = "NH_LORRI",
         Method     = "ELLIPSOID",
@@ -163,7 +162,6 @@ local PlutoProjection = {
         Near       = 0.2,
         Far        = 10000
       },
-      
       PotentialTargets = {
         "PLUTO",
         "CHARON",
@@ -225,7 +223,7 @@ local PlutoShadow = {
   Renderable = {
     Type = "RenderableShadowCylinder",
     Opacity = 0.25,
-    TerminatorType = "PENUMBRAL", 
+    TerminatorType = "PENUMBRAL",
     LightSource = "SUN",
     Observer = "NEW HORIZONS",
     Body = "PLUTO",
@@ -244,14 +242,14 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(PlutoText)
   openspace.addSceneGraphNode(PlutoShadow)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoShadow)
   openspace.removeSceneGraphNode(PlutoText)
   openspace.removeSceneGraphNode(PlutoBarycenterLabel)
   openspace.removeSceneGraphNode(PlutoProjection)
 end)
-    
+
 asset.export(PlutoProjection)
 asset.export(PlutoBarycenterLabel)
 asset.export(PlutoText)

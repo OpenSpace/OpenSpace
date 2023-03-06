@@ -3,9 +3,9 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Wave Power 2012"
 local Identifier = "noaa-sos-oceans-waves-wave_power_2012"
-local Description = [[Meteorological offices worldwide forecast ocean wave heights for 
-the shipping and fisheries industry. In the United States, NOAA's National Weather 
-Service provides the wave forecasts. Just like in weather forecasting, scientists run 
+local Description = [[Meteorological offices worldwide forecast ocean wave heights for
+the shipping and fisheries industry. In the United States, NOAA's National Weather
+Service provides the wave forecasts. Just like in weather forecasting, scientists run
 numerical models to make these predictions]]
 local URL = "https://sos.noaa.gov/catalog/datasets/wave-power-2012/"
 
@@ -14,17 +14,16 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
   Type = "ImageSequenceTileLayer",
-  FolderPath = imagesDestination,
+  FolderPath = syncedDirectory .. "4096",
   Description = Description
 }
 
@@ -39,13 +38,8 @@ local colorbar = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "4096.zip", imagesDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

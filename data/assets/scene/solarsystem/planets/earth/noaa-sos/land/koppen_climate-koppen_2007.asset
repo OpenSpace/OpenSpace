@@ -3,12 +3,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Koppen-Geiger Climate Classification - 2007"
 local Identifier = "noaa-sos-land-koppen_climate-koppen_2007"
-local Description = [[Köppen climate classification is a widely used vegetation-based 
-empirical climate classification system developed by German botanist-climatologist 
-Wladimir Köppen. It's based on the idea that climate is best defined by native 
-vegetation. The formulas used in the classification correspond to those of the vegetation 
-zones (biomes) that were being mapped for the first time in the late 19th century. It was 
-first published in 1884 and was revised until 1940 with collaboration by German 
+local Description = [[Köppen climate classification is a widely used vegetation-based
+empirical climate classification system developed by German botanist-climatologist
+Wladimir Köppen. It's based on the idea that climate is best defined by native
+vegetation. The formulas used in the classification correspond to those of the vegetation
+zones (biomes) that were being mapped for the first time in the late 19th century. It was
+first published in 1884 and was revised until 1940 with collaboration by German
 climatologist Rudolf Geiger.This particular revision is from 2007]]
 local URL = "https://sos.noaa.gov/catalog/datasets/koppen-geiger-climate-classification-2007/"
 
@@ -49,10 +49,10 @@ local legend1 = {
   CartesianPosition = { 0.75, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(legend);  
-  openspace.addScreenSpaceRenderable(legend1);  
+  openspace.addScreenSpaceRenderable(legend)
+  openspace.addScreenSpaceRenderable(legend1)
 end)
 
 asset.onDeinitialize(function()

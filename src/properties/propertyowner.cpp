@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ namespace {
     constexpr std::string_view _loggerCat = "PropertyOwner";
 
     void createJson(openspace::properties::PropertyOwner* owner, std::vector<char>& buf) {
-        ZoneScoped
+        ZoneScoped;
 
         using namespace openspace;
 
@@ -125,7 +125,7 @@ PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
     );
     ghoul_precondition(
         _identifier.find_first_of('.') == std::string::npos,
-        "Identifier must contain any whitespaces"
+        "Identifier must contain any dots"
     );
 }
 
@@ -377,15 +377,9 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner&
 }
 
 void PropertyOwner::setIdentifier(std::string identifier) {
-    ghoul_precondition(
-        _identifier.find_first_of("\t\n ") == std::string::npos,
-        "Identifier must not contain any whitespaces"
-    );
-    ghoul_precondition(
-        _identifier.find_first_of('.') == std::string::npos,
-        "Identifier must not contain any dots"
-    );
-
+    if (identifier.find_first_of(". \t\n") != std::string::npos) {
+        throw ghoul::RuntimeError("Identifier must not contain any dots or whitespaces");
+    }
     _identifier = std::move(identifier);
 }
 
@@ -422,7 +416,7 @@ void PropertyOwner::removeTag(const std::string& tag) {
 }
 
 std::string PropertyOwner::generateJson() const {
-    ZoneScoped
+    ZoneScoped;
 
     std::vector<char> res;
     res.reserve(5 * 51024 * 1024); // 5 MB

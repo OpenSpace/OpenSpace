@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -91,7 +91,7 @@ Fragment getFragment() {
     normalizedShadowCoords.z = normalizeFloat(zFightingPercentage * normalizedShadowCoords.w);
     normalizedShadowCoords.xy = normalizedShadowCoords.xy / normalizedShadowCoords.w;
     normalizedShadowCoords.w = 1.0;
-    
+
     float sum = 0;
     #for i in 0..#{nShadowSamples}
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i}, -NSSamples + #{i}));
@@ -116,7 +116,7 @@ Fragment getFragment() {
   // Reduce the color of the fragment by the user factor
   // if we are facing away from the Sun
   if (dot(sunPosition, normal) < 0.0) {
-    diffuse.xyz = 
+    diffuse.xyz =
       vec3(1.0, 0.97075, 0.952) *  texture(ringTextureUnlit, texCoord).xyz * nightFactor;
   }
 

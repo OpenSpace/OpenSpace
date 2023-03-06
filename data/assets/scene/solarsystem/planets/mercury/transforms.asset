@@ -22,11 +22,11 @@ local MercuryBarycenter = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MercuryBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MercuryBarycenter)
 end)
-  
+
 asset.export(MercuryBarycenter)
 
 

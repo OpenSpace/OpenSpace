@@ -132,14 +132,14 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(multiverse_planck_3)
   openspace.addSceneGraphNode(multiverse_planck_4)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(multiverse_planck_4)
   openspace.removeSceneGraphNode(multiverse_planck_3)
   openspace.removeSceneGraphNode(multiverse_planck_2)
   openspace.removeSceneGraphNode(multiverse_planck_1)
 end)
-  
+
 asset.export(multiverse_planck_1)
 asset.export(multiverse_planck_2)
 asset.export(multiverse_planck_3)

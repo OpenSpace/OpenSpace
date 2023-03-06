@@ -53,6 +53,7 @@ local OrionNebulaModel = {
       Scale = 0.67500000
     }
   },
+  InteractionSphere = 0.8,
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = sync .. "orion_nebula.obj",
@@ -91,7 +92,7 @@ local OrionNebulaShocksModel = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = sync .. "orishocks.obj",
-    Opacity = 1.0, 
+    Opacity = 1.0,
     DisableFaceCulling = false,
     SpecularIntensity = 0.0,
     AmbientIntensity = 0.0,
@@ -127,7 +128,7 @@ local OrionNebulaProplydsModel = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = sync .. "proplyds.obj",
-    Opacity = 1.0, 
+    Opacity = 1.0,
     DisableFaceCulling = false,
     SpecularIntensity = 0.0,
     AmbientIntensity = 0.0,
@@ -157,14 +158,14 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(OrionNebulaShocksModel)
   openspace.addSceneGraphNode(OrionNebulaProplydsModel)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(OrionNebulaProplydsModel)
   openspace.removeSceneGraphNode(OrionNebulaShocksModel)
   openspace.removeSceneGraphNode(OrionNebulaModel)
   openspace.removeSceneGraphNode(NebulaHolder)
 end)
-  
+
 asset.export(NebulaHolder)
 asset.export(OrionNebulaModel)
 asset.export(OrionNebulaShocksModel)

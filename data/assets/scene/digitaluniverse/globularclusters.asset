@@ -46,7 +46,7 @@ local object = {
       abundance of stars brighter than the Sun. The globular clusters form one of
       the most complete data sets in the Atlas. Data for the clusters represent
       almost all the clusters in our Galaxy—several on the opposite side of Galactic
-      center may be invisible to us. The clusters orbit the Milky Way in random 
+      center may be invisible to us. The clusters orbit the Milky Way in random
       orientations, as comets orbit the Sun.(Description from URL) <br><br> Data
       Reference: Properties of Galactic Globular Clusters, C. Francis+
       (U Cambridge)]],
@@ -69,16 +69,16 @@ asset.meta = {
   Name = "Globular Clusters",
   Version = "2.1",
   Description = [[Census: 157 globular clusters. DU Version 2.6. Globular star clusters
-  are gravitationally bound groups of 100,000 to 1 million stars. They are compact,
-  spherical "balls" of stars with very high stellar densities in their centers (stars
-  near their center are within a light year of one another). These clusters are
-  typically 30 to 100 light years in diameter. If Earth were located inside one of these
-  clusters, our sky would be lit by an abundance of stars brighter than the Sun. The
-  globular clusters form one of the most complete data sets in the Atlas. Data for the
-  clusters represent almost all the clusters in our Galaxy—several on the opposite side
-  of Galactic center may be invisible to us. The clusters orbit the Milky Way in random
-  orientations, as comets orbit the Sun.(Description from URL) <br><br> Data Reference:
-  Properties of Galactic Globular Clusters, C. Francis+ (U Cambridge)]],
+    are gravitationally bound groups of 100,000 to 1 million stars. They are compact,
+    spherical "balls" of stars with very high stellar densities in their centers (stars
+    near their center are within a light year of one another). These clusters are
+    typically 30 to 100 light years in diameter. If Earth were located inside one of these
+    clusters, our sky would be lit by an abundance of stars brighter than the Sun. The
+    globular clusters form one of the most complete data sets in the Atlas. Data for the
+    clusters represent almost all the clusters in our Galaxy—several on the opposite side
+    of Galactic center may be invisible to us. The clusters orbit the Milky Way in random
+    orientations, as comets orbit the Sun.(Description from URL) <br><br> Data Reference:
+    Properties of Galactic Globular Clusters, C. Francis+ (U Cambridge)]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

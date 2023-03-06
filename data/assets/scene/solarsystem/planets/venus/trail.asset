@@ -29,11 +29,11 @@ local VenusTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(VenusTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VenusTrail)
 end)
-  
+
 asset.export(VenusTrail)
 
 

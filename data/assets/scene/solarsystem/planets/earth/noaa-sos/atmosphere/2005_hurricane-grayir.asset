@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Hurricane Season - 2005"
 local Identifier = "noaa-sos-atmosphere-2005_hurricane-grayir"
-local Description = [["This hurricane season shattered records that have stood for 
-decades - most named storms, most hurricanes and most category five storms. Arguably, it 
-was the most devastating hurricane season the country has experienced in modern times," 
-said retired Navy Vice Adm. Conrad C. Lautenbacher, Jr., Ph.D., undersecretary of 
+local Description = [["This hurricane season shattered records that have stood for
+decades - most named storms, most hurricanes and most category five storms. Arguably, it
+was the most devastating hurricane season the country has experienced in modern times,"
+said retired Navy Vice Adm. Conrad C. Lautenbacher, Jr., Ph.D., undersecretary of
 commerce for oceans and atmosphere and NOAA administrator]]
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-season-2005/"
 
@@ -15,10 +15,10 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true,
+  UnzipFilesDestination = "images"
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
@@ -27,7 +27,7 @@ local layer = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = imagesDestination,
+    Folder = syncedDirectory .. "images",
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "ir_combined_%Y%m%d_%H%M.jpg"
@@ -36,27 +36,6 @@ local layer = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "4096-1.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-2.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-3.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-4.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-5.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-6.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-7.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-8.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-9.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-10.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-11.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-12.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-13.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-14.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-15.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-16.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "4096-17.zip", imagesDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

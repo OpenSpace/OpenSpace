@@ -67,7 +67,7 @@ asset.meta = {
   Version = "1.0",
   Description = [[
     The model of the JUICE spacecraft. The model file was taken from
-    https://www.cosmos.esa.int/web/esac-cmso/scifleet. 
+    https://www.cosmos.esa.int/web/esac-cmso/scifleet.
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

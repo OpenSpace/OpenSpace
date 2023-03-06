@@ -3,24 +3,24 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Tsunami Historical Series: Cascadia - 1700"
 local Identifier = "noaa-sos-oceans-tsunami_historical_series-cascadia"
-local Description = [[Just before midnight on January 27, 1700 a tsunami struck the 
-coasts of Japan without warning since no one in Japan felt the earthquake that must have 
-caused it. Nearly 300 years later scientists and historians in Japan and the United 
-States solved the mystery of what caused this "orphan tsunami" through careful analysis 
-of historical records in Japan as well as oral histories of Native Americans, sediment 
-deposits, and ghost forests of drowned trees in the Pacific Northwest of North America, 
-a region also known as Cascadia. They learned that this geologically active region, the 
-Cascadia Subduction Zone, not only hosts erupting volcanoes but also produces megathrust 
-earthquakes capable of generating devastating, ocean-crossing tsunamis. By comparing the 
-tree rings of dead trees with those still living they could tell when the last of these 
-great earthquakes struck the region. The trees all died in the winter of 1699 - 1700 when 
-the coasts of northern California, Oregon, and Washington suddenly dropped 1- 2 m (3.3 - 
-6.6 ft.), flooding them with seawater. That much motion over such a large area requires a 
-very large earthquake to explain it - perhaps as large as 9.2 magnitude, comparable to 
-the Great Alaska Earthquake of 1964. Such an earthquake would have ruptured the earth 
-along the entire length of the 1000 km (~600 mi) long fault of the Cascadia Subduction 
-Zone and severe shaking could have lasted for 5 minutes or longer. Its tsunami would 
-cross the Pacific Ocean and reach Japan in about 9 hours, so the earthquake must have 
+local Description = [[Just before midnight on January 27, 1700 a tsunami struck the
+coasts of Japan without warning since no one in Japan felt the earthquake that must have
+caused it. Nearly 300 years later scientists and historians in Japan and the United
+States solved the mystery of what caused this "orphan tsunami" through careful analysis
+of historical records in Japan as well as oral histories of Native Americans, sediment
+deposits, and ghost forests of drowned trees in the Pacific Northwest of North America,
+a region also known as Cascadia. They learned that this geologically active region, the
+Cascadia Subduction Zone, not only hosts erupting volcanoes but also produces megathrust
+earthquakes capable of generating devastating, ocean-crossing tsunamis. By comparing the
+tree rings of dead trees with those still living they could tell when the last of these
+great earthquakes struck the region. The trees all died in the winter of 1699 - 1700 when
+the coasts of northern California, Oregon, and Washington suddenly dropped 1- 2 m (3.3 -
+6.6 ft.), flooding them with seawater. That much motion over such a large area requires a
+very large earthquake to explain it - perhaps as large as 9.2 magnitude, comparable to
+the Great Alaska Earthquake of 1964. Such an earthquake would have ruptured the earth
+along the entire length of the 1000 km (~600 mi) long fault of the Cascadia Subduction
+Zone and severe shaking could have lasted for 5 minutes or longer. Its tsunami would
+cross the Pacific Ocean and reach Japan in about 9 hours, so the earthquake must have
 occurred around 9:00 at night in Cascadia on January 26, 1700 (05:00 January 27 UTC)]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-cascadia-1700/"
 
@@ -61,7 +61,7 @@ local layer_null = {
 }
 
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_coastal)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy_coastal)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy)

@@ -1,0 +1,34 @@
+-- This file was automatically generated using a script found at
+-- https://github.com/OpenSpace/scripts/treks-to-openspace. See the README.md file
+-- in that repository for more information on how to run the script to update these
+-- files. In particular in the case of errors, prefer to change that script rather
+-- than the individual files
+
+local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
+
+local treks_ldam_10 = {
+  Identifier = "ldam_10",
+  Name = [[LRO Laser Altimeter, Albedo Global]],
+  FilePath = asset.localResource("LRO_Laser_Altimeter/Albedo_Global.vrt"),
+  Description = [[The Lunar Orbiter Laser Altimeter (LOLA) experiment on Lunar Reconnaissance Orbiter (LRO) is a laser altimeter that also measures the strength of the return pulse from the lunar surface. These data have been used to estimate the reflectance (albedo) of the lunar surface, including regions lacking direct solar illumination. A new calibration of these data was used to generate a 2016 albedo map that features lower uncertainties overall and more consistent results in the polar regions than the previous 2014 version. (Improved calibration of reflectance data from the LRO Lunar Orbiter Laser Altimeter (LOLA) and implications for space weathering; M. Lemelin, P.G. Lucey, G.A. Neumann, E.M. Mazarico, M.K. Barker, A. Kakazu, D. Trang, D.E. Smith, M.T. Zuber; Icarus, Volume 273, 15 July 2016, Pages 315-328)]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_ldam_10)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_ldam_10")
+end)
+
+asset.export("ldam_10", treks_ldam_10)
+
+
+asset.meta = {
+  Name = [[NASA Treks Layers for Moon LRO_Laser_Altimeter],
+  Version = "1.0",
+  Author = "NASA/Treks",
+  URL = "https://trek.nasa.gov/moon",
+  License = "NASA/Treks",
+  Description = [[LRO_Laser_Altimeter layers from NASA/Treks for Moon]]
+}

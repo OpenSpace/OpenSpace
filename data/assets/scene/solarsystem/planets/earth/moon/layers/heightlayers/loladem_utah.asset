@@ -7,11 +7,11 @@ local layer = {
   FilePath = asset.localResource("loladem_utah.wms"),
   TilePixelSize = 64,
   Settings = { Multiplier = 0.5 },
-  Description = [[This digital elevation model (DEM) is based on data from the Lunar 
-    Orbiter Laser Altimeter (LOLA; Smith et al., 2010), an instrument on the National 
-    Aeronautics and Space Agency (NASA) Lunar Reconnaissance Orbiter (LRO) spacecraft 
-    (Tooley et al., 2010). The created DEM represents more than 6.5 billion measurements 
-    gathered between July 2009 and July 2013, adjusted for consistency in the coordinate 
+  Description = [[This digital elevation model (DEM) is based on data from the Lunar
+    Orbiter Laser Altimeter (LOLA; Smith et al., 2010), an instrument on the National
+    Aeronautics and Space Agency (NASA) Lunar Reconnaissance Orbiter (LRO) spacecraft
+    (Tooley et al., 2010). The created DEM represents more than 6.5 billion measurements
+    gathered between July 2009 and July 2013, adjusted for consistency in the coordinate
     system described below, and then converted to lunar radii (Mazarico et al., 2012)]]
 }
 

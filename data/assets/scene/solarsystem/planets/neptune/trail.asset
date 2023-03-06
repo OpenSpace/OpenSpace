@@ -39,11 +39,11 @@ local NeptuneTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NeptuneTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneTrail)
 end)
-  
+
 asset.export(NeptuneTrail)
 
 

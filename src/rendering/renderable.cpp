@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -161,7 +161,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     , _renderableType(RenderableTypeInfo, "Renderable")
     , _dimInAtmosphere(DimInAtmosphereInfo, false)
 {
-    ZoneScoped
+    ZoneScoped;
 
     // I can't come up with a good reason not to do this for all renderables
     registerUpdateRenderBinFromOpacity();
@@ -240,6 +240,10 @@ double Renderable::interactionSphere() const {
     return _interactionSphere;
 }
 
+std::string_view Renderable::typeAsString() const {
+    return _renderableType;
+}
+
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
                                                  const glm::dvec3& targetModelSpace) const
 {
@@ -315,8 +319,10 @@ void Renderable::registerUpdateRenderBinFromOpacity() {
 float Renderable::opacity() const {
     // Rendering should depend on if camera is in the atmosphere and if camera is at the
     // dark part of the globe
-    return _dimInAtmosphere ?
-        _opacity * _fade * global::navigationHandler->camera()->atmosphereDimmingFactor() :
-        _opacity * _fade;
+    const float dimming = _dimInAtmosphere ?
+        global::navigationHandler->camera()->atmosphereDimmingFactor() :
+        1.f;
+    return _opacity * _fade * dimming;
 }
+
 }  // namespace openspace

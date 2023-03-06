@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Ocean Acidification: Surface pH"
 local Identifier = "noaa-sos-oceans-ocean_acid-ph"
-local Description = [[Ranging from 0 to 14, pH is a scale that describes the acid and 
-base properties of a solution. The ocean's surface has an average pH of around 8.1, which 
-is slightly basic. The pH of the open ocean is relatively stable in both time and space; 
-however, the uptake of CO2 by the ocean has caused measurable changes in seawater. The 
-imagery here shows the output of a computer model that makes predictions of how the pH 
-will change over time based on best estimates of likely CO2 emissions (RCP 8.5) used in 
-the United Nations Intergovernmental Panel on Climate Change's AR5 assessment. The 
+local Description = [[Ranging from 0 to 14, pH is a scale that describes the acid and
+base properties of a solution. The ocean's surface has an average pH of around 8.1, which
+is slightly basic. The pH of the open ocean is relatively stable in both time and space;
+however, the uptake of CO2 by the ocean has caused measurable changes in seawater. The
+imagery here shows the output of a computer model that makes predictions of how the pH
+will change over time based on best estimates of likely CO2 emissions (RCP 8.5) used in
+the United Nations Intergovernmental Panel on Climate Change's AR5 assessment. The
 dataset starts in 1861 and runs through 2100]]
 local URL = "https://sos.noaa.gov/catalog/datasets/ocean-acidification-surface-ph/"
 
@@ -18,10 +18,9 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
@@ -30,7 +29,7 @@ local layer = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = imagesDestination,
+    Folder = syncedDirectory .. "images",
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "ACID.yearly.%Y.color.png"
@@ -49,13 +48,8 @@ local colorbar = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "images.zip", imagesDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

@@ -47,11 +47,11 @@ local Atmosphere = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Atmosphere)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Atmosphere)
 end)
-  
+
 asset.export(Atmosphere)
 
 

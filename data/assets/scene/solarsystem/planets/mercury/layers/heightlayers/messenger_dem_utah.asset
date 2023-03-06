@@ -12,7 +12,7 @@ local layer = {
   TilePixelSize = 64
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
 end)
 

@@ -32,11 +32,11 @@ local SunGlare = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SunGlare)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SunGlare)
 end)
-  
+
 asset.export(SunGlare)
 
 

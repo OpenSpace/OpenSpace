@@ -64,10 +64,14 @@ local VenusLabel = {
     Type = "RenderableLabel",
     Text = "Venus",
     FontSize = 70.0,
-    Size = 8.54,
-    MinMaxSize = { 1, 100 },
+    Size = 8.5,
+    MinMaxSize = { 1, 40 },
     OrientationOption = "Camera View Direction",
-    BlendMode = "Additive"
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 25.0 },
+    FadeWidths = { 1.0, 35.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
@@ -81,12 +85,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Venus)
   openspace.addSceneGraphNode(VenusLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VenusLabel)
   openspace.removeSceneGraphNode(Venus)
 end)
-    
+
 asset.export(Venus)
 asset.export(VenusLabel)
 

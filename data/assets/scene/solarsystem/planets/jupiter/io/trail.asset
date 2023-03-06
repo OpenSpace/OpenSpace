@@ -29,11 +29,11 @@ local IoTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(IoTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(IoTrail)
 end)
-  
+
 asset.export(IoTrail)
 
 

@@ -3,8 +3,8 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Ocean Currents"
 local Identifier = "noaa-sos-overlays-currents"
-local Description = [[Overlays are datasets with transparent backgrounds that contain 
-foreground data used to augment other SOS datasets.This particular dataset is an overlay 
+local Description = [[Overlays are datasets with transparent backgrounds that contain
+foreground data used to augment other SOS datasets.This particular dataset is an overlay
 of ocean currents, taken from the Ocean Circulation dataset]]
 local URL = "https://sos.noaa.gov/catalog/datasets/ocean-currents/"
 
@@ -37,7 +37,7 @@ local layer_labels = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer_combined)
   openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer_currents)
   openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer_labels)

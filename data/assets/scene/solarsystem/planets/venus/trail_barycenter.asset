@@ -28,11 +28,11 @@ local VenusBarycenterTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(VenusBarycenterTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VenusBarycenterTrail)
 end)
-  
+
 asset.export(VenusBarycenterTrail)
 
 

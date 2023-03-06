@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,12 +61,6 @@ void openspace::properties::TemplateProperty<T>::setValue(T val) {
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const TemplateProperty<T>& obj) {
-    os << obj.value();
-    return os;
-}
-
-template <typename T>
 std::any TemplateProperty<T>::get() const {
     return std::any(_value);
 }
@@ -99,9 +93,8 @@ bool TemplateProperty<T>::setLuaValue(lua_State* state) {
 }
 
 template <typename T>
-bool TemplateProperty<T>::getStringValue(std::string& outValue) const {
-    outValue = toStringConversion();
-    return true;
+std::string TemplateProperty<T>::stringValue() const {
+    return toStringConversion();
 }
 
 }  // namespace openspace::properties

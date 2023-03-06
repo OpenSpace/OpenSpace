@@ -28,11 +28,11 @@ local EarthBarycenterTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthBarycenterTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthBarycenterTrail)
 end)
-  
+
 asset.export(EarthBarycenterTrail)
 
 

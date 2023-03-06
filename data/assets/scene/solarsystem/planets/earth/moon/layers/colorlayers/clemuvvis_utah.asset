@@ -9,9 +9,9 @@ local layer = {
     Gamma = 1.14,
     Multiplier = 1.4
   },
-  Description = [[The Clementine Ultraviolet/Visible (UVVIS) Version 2 mosaic is a 
-    grayscale data set representing the albedo (brightness of the lunar surface) as 
-    measured at the 750 nanometer (nm) wavelength by the UVVIS camera (Lee, et al., 2009). 
+  Description = [[The Clementine Ultraviolet/Visible (UVVIS) Version 2 mosaic is a
+    grayscale data set representing the albedo (brightness of the lunar surface) as
+    measured at the 750 nanometer (nm) wavelength by the UVVIS camera (Lee, et al., 2009).
     Resolution of this mosaic is 118 meters per pixel (m)]]
 }
 

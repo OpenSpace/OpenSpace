@@ -90,14 +90,14 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(SunIAU)
   openspace.addSceneGraphNode(SunECLIPJ2000)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SunECLIPJ2000)
   openspace.removeSceneGraphNode(SunIAU)
   openspace.removeSceneGraphNode(SunCenter)
   openspace.removeSceneGraphNode(SolarSystemBarycenter)
 end)
-    
+
 asset.export(SolarSystemBarycenter)
 asset.export(SunCenter)
 asset.export(SunIAU)

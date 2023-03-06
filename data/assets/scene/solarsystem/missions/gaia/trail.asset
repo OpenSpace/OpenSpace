@@ -66,12 +66,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(GaiaTrail)
   openspace.addSceneGraphNode(GaiaTrailEclip)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GaiaTrailEclip)
   openspace.removeSceneGraphNode(GaiaTrail)
 end)
-    
+
 asset.export(GaiaTrail)
 asset.export(GaiaTrailEclip)
 

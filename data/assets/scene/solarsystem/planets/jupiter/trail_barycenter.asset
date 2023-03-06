@@ -28,11 +28,11 @@ local JupiterBarycenterTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JupiterBarycenterTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JupiterBarycenterTrail)
 end)
-  
+
 asset.export(JupiterBarycenterTrail)
 
 

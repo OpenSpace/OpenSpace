@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Climate Model: Temperature Change (RCP 4.5) - 2006 - 2100"
 local Identifier = "noaa-sos-models-rcp-ga45"
-local Description = [[Climate models are used for a variety of purposes from the study 
+local Description = [[Climate models are used for a variety of purposes from the study
 of dynamics of the weather and climate system to projections of future climate]]
 local URL = "https://sos.noaa.gov/catalog/datasets/climate-model-temperature-change-rcp-45-2006-2100/"
 
@@ -12,10 +12,9 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
@@ -24,7 +23,7 @@ local layer = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = imagesDestination,
+    Folder = syncedDirectory .. "4096",
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "GA45.yearly.%Y.color.png"
@@ -44,13 +43,8 @@ local colorbar = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "4096.zip", imagesDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

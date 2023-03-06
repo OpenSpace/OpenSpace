@@ -29,11 +29,11 @@ local IapetusTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(IapetusTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(IapetusTrail)
 end)
-  
+
 asset.export(IapetusTrail)
 
 

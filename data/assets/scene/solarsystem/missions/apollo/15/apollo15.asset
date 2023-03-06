@@ -1,6 +1,7 @@
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local sun = asset.require("scene/solarsystem/sun/sun")
 asset.require("spice/base")
+asset.require("../actions")
 
 local models = asset.syncedResource({
   Name = "Apollo Models",
@@ -84,11 +85,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo15)
   openspace.addSceneGraphNode(Apollo15Trail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo15Trail)
   openspace.removeSceneGraphNode(Apollo15)
 end)
-    
+
 asset.export(Apollo15)
 asset.export(Apollo15Trail)

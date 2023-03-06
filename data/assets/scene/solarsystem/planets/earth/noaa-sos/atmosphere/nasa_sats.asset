@@ -3,16 +3,16 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Polar Orbiting: NASA A-Train Satellites"
 local Identifier = "noaa-sos-atmosphere-nasa_sats"
-local Description = [[In order to enable coordinated science observations, the Earth 
-Observations System has created the A-Train. When finally completed in 2008, the A-Train 
-will consist of 6 polar-orbiting satellites that travel just minutes apart in a line. 
-Four of the satellites are NASA satellites, one is a French Centre National d'Etudes 
-Spatiales (CNES) satellite, and the other is a joint satellite between NASA and CNES. The 
-satellites have low polar orbits 438 miles (705 km) above Earth at an inclination of 98 
-degrees. Together, their overlapping science instruments give a comprehensive picture of 
-Earth weather and climate. The "A" in the A-Train is for "afternoon" because the lead 
-satellite, Aqua, crosses the equator at the mean local time of approximately 1:30pm. Five 
-of the satellites are currently in orbit, and the sixth satellite is scheduled to be 
+local Description = [[In order to enable coordinated science observations, the Earth
+Observations System has created the A-Train. When finally completed in 2008, the A-Train
+will consist of 6 polar-orbiting satellites that travel just minutes apart in a line.
+Four of the satellites are NASA satellites, one is a French Centre National d'Etudes
+Spatiales (CNES) satellite, and the other is a joint satellite between NASA and CNES. The
+satellites have low polar orbits 438 miles (705 km) above Earth at an inclination of 98
+degrees. Together, their overlapping science instruments give a comprehensive picture of
+Earth weather and climate. The "A" in the A-Train is for "afternoon" because the lead
+satellite, Aqua, crosses the equator at the mean local time of approximately 1:30pm. Five
+of the satellites are currently in orbit, and the sixth satellite is scheduled to be
 launched in 2008]]
 local URL = "https://sos.noaa.gov/catalog/datasets/polar-orbiting-nasa-a-train-satellites/"
 
@@ -20,26 +20,21 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
 
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
   Type = "ImageSequenceTileLayer",
-  FolderPath = imagesDestination,
+  FolderPath = syncedDirectory .. "2048",
   Description = Description
 }
 
-asset.onInitialize(function() 
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "2048.zip", imagesDestination, true)
-  end
-
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

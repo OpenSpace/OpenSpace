@@ -3,15 +3,15 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Greenland Melting Trends"
 local Identifier = "noaa-sos-oceans-greenland_melt"
-local Description = [[Changes in the climate around Greenland can have a world-wide 
-effect. According to Dr. Konrad Steffen, professor of geography at the University of 
-Colorado and director of the NOAA joint institute CIRES, "For every degree (F) increase 
-in the mean annual temperature near Greenland, the rate of sea level rise increases by 
-about 10 percent." As Greenland warms, the ice that covers it melts and flows into the 
-oceans. In order to study melting trends on Greenland, researchers at NASA developed a 
-"melt index" which is the number of days that melting occurred multiplied by the melting 
-area. There is a steady increase in the melt index from 1988 through present. In fact, 
-in 2006 Greenland experienced more days of melting snow and at higher altitudes than the 
+local Description = [[Changes in the climate around Greenland can have a world-wide
+effect. According to Dr. Konrad Steffen, professor of geography at the University of
+Colorado and director of the NOAA joint institute CIRES, "For every degree (F) increase
+in the mean annual temperature near Greenland, the rate of sea level rise increases by
+about 10 percent." As Greenland warms, the ice that covers it melts and flows into the
+oceans. In order to study melting trends on Greenland, researchers at NASA developed a
+"melt index" which is the number of days that melting occurred multiplied by the melting
+area. There is a steady increase in the melt index from 1988 through present. In fact,
+in 2006 Greenland experienced more days of melting snow and at higher altitudes than the
 average over the past 18 years that have been studied]]
 local URL = "https://sos.noaa.gov/catalog/datasets/greenland-melting-trends/"
 
@@ -20,10 +20,9 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
@@ -32,7 +31,7 @@ local layer = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = imagesDestination,
+    Folder = syncedDirectory .. "2048",
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "dav19_%Y.jpg"
@@ -41,11 +40,6 @@ local layer = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "2048.zip", imagesDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

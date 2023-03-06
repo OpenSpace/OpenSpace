@@ -3,17 +3,17 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Carbon Monoxide - 2008 - 2011"
 local Identifier = "noaa-sos-atmosphere-co_gmd"
-local Description = [[Carbon Monoxide (CO) is a colorless, odorless gas existing in the 
-atmosphere at levels between 40 and 150 parts per billion (ppb). About 40% of that is 
-produced by burning (combustion) of fossil fuels (coal, oil and natural gas) and biomass 
-(for example, wood in forest fires). CO is the primary consumer of oxidant OH, the 
-"cleansing agent" of the atmosphere. For example, OH "cleanses the air" by converting 
-atmospheric methane (CH4) to CO2, which reduces its global warming potential because 
-methane is a stronger greenhouse gas. OH also breaks down a whole host of other compounds 
-such as benzene, isoprene and halocarbons, which would otherwise give rise to smog and 
-reduce air quality. Therefore, an excess of atmospheric CO leads to a reduction of OH's 
-cleansing capacity. Another reason for measuring CO concentrations is that it is an 
-indicator of combustion, such as forest fires and urban emissions. A large forest fire or 
+local Description = [[Carbon Monoxide (CO) is a colorless, odorless gas existing in the
+atmosphere at levels between 40 and 150 parts per billion (ppb). About 40% of that is
+produced by burning (combustion) of fossil fuels (coal, oil and natural gas) and biomass
+(for example, wood in forest fires). CO is the primary consumer of oxidant OH, the
+"cleansing agent" of the atmosphere. For example, OH "cleanses the air" by converting
+atmospheric methane (CH4) to CO2, which reduces its global warming potential because
+methane is a stronger greenhouse gas. OH also breaks down a whole host of other compounds
+such as benzene, isoprene and halocarbons, which would otherwise give rise to smog and
+reduce air quality. Therefore, an excess of atmospheric CO leads to a reduction of OH's
+cleansing capacity. Another reason for measuring CO concentrations is that it is an
+indicator of combustion, such as forest fires and urban emissions. A large forest fire or
 emissions from heavy traffic can produce CO concentrations of 200 - 5000 ppb]]
 local URL = "https://sos.noaa.gov/catalog/datasets/carbon-monoxide-2008-2011/"
 
@@ -22,10 +22,10 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true,
+  UnzipFilesDestination = "images"
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
@@ -34,11 +34,11 @@ local layer = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = imagesDestination,
+    Folder = syncedDirectory .. "images",
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "co_field_extended_%Y%m%d%H%M.png"
-  },   
+  },
   Description = Description
 }
 
@@ -53,19 +53,9 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "3600-1.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "3600-2.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "3600-3.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "3600-4.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "3600-5.zip", imagesDestination, true)
-    openspace.unzipFile(syncedDirectory .. "3600-6.zip", imagesDestination, true)
-  end
-  
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

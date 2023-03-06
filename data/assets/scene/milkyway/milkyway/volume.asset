@@ -53,11 +53,11 @@ local MilkyWayVolumeGalaxy = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MilkyWayVolumeGalaxy)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MilkyWayVolumeGalaxy)
 end)
-  
+
 asset.export(MilkyWayVolumeGalaxy)
 
 

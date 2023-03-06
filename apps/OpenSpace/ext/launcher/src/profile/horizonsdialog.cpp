@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -457,8 +457,8 @@ bool HorizonsDialog::isValidInput() {
     // Range 1 to 2147483647 (max of 32 bit int).
     // Horizons read the step size into a 32 bit int, but verifies the input on their
     // website as a uint32_t. If step size over 32 bit int is sent, this error message is
-    // recived: Cannot read numeric value -- re-enter
-    if (step < 1 || step > std::numeric_limits<int32_t>::max()) {
+    // received: Cannot read numeric value -- re-enter
+    if (step < 1) {
         _errorMsg->setText(QString::fromStdString(fmt::format(
             "Step size is outside valid range 1 to '{}'",
             std::numeric_limits<int32_t>::max()

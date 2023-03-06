@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   skybrowsermodule.h
@@ -33,7 +33,6 @@ set(HEADER_FILES
   include/wwtcommunicator.h
   include/browser.h
   include/screenspaceskybrowser.h
-  ext/tinyxml2/tinyxml2.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -47,7 +46,6 @@ set(SOURCE_FILES
   src/wwtcommunicator.cpp
   src/browser.cpp
   src/screenspaceskybrowser.cpp
-  ext/tinyxml2/tinyxml2.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
@@ -67,3 +65,8 @@ target_precompile_headers(${skybrowser_module} PRIVATE
   [["include/cef_accessibility_handler.h"]]
   [["include/cef_render_handler.h"]]
 )
+
+# This introduces a dependency into SGCT, but the way it is handled is not great right now
+# This will break when we remove tinyxml2 from SGCT and then we can move the submodule
+# over into this ext folder and fix it well
+target_link_libraries(${skybrowser_module} PRIVATE tinyxml2)

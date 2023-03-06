@@ -2,10 +2,10 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 local kernels = asset.syncedResource({
-  Name = "Dawn Kernels",
+  Name = "Vesta Kernels",
   Type = "HttpSynchronization",
-  Identifier = "dawn_kernels",
-  Version = 2
+  Identifier = "vesta_kernels",
+  Version = 1
 })
 
 local textures = asset.syncedResource({
@@ -38,7 +38,7 @@ local Vesta = {
       Target = "VESTA",
       Observer = "SSB",
       Kernels = {
-        --kernels .. "dawn_vesta_v06.tpc",
+        --kernels .. "vesta_v06.tpc",
         kernels .. "sb_vesta_071107.bsp"
       }
     },
@@ -51,14 +51,14 @@ local Vesta = {
   Renderable = {
     Type = "RenderableModelProjection",
     GeometryFile = models .. "VestaComet_5000.obj",
-    BoundingSphereRadius = 10.0,
+    BoundingSphereRadius = 262000,
     Projection = {
       Sequence   = images,
       SequenceType = "image-sequence",
       Observer   = "DAWN",
       Target     = "VESTA",
       Aberration = "NONE",
-      
+
       DataInputTranslation = {
         Instrument = {
           -- FC1 = {
@@ -70,7 +70,7 @@ local Vesta = {
             Spice = { "DAWN_FC2" }
           }
         },
-        Target = { 
+        Target = {
           Read  = {
             "TARGET_NAME",
             "INSTRUMENT_HOST_NAME",
@@ -97,7 +97,7 @@ local Vesta = {
         Fovy       = 5.46,
         Aspect     = 1
       },
-      
+
       --[[ Instrument = {
           Name       = "DAWN_FC1",
           Method     = "ELLIPSOID",
@@ -141,11 +141,20 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Vesta)
   openspace.addSceneGraphNode(VestaTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VestaTrail.Identifier)
   openspace.removeSceneGraphNode(Vesta.Identifier)
 end)
-    
+
 asset.export(Vesta)
 asset.export(VestaTrail)
+
+asset.meta = {
+  Name = "Vesta",
+  Version = "1.0",
+  Description = "Vesta model projection and trail",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

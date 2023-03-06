@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ DVec3Property::DVec3Property(Property::PropertyInfo info, glm::dvec3 value,
     )
 {}
 
-std::string DVec3Property::className() const {
+std::string_view DVec3Property::className() const {
     return "DVec3Property";
 }
 

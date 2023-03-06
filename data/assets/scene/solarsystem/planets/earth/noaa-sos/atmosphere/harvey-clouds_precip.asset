@@ -3,12 +3,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Hurricane Harvey: Clouds with Precipitation - 2017"
 local Identifier = "noaa-sos-atmosphere-harvey-clouds_precip"
-local Description = [[Hurricane Harvey was an extremely destructive Atlantic hurricane 
-  which became the first major hurricane to make landfall in the U.S. since Wilma in 2005. 
-  In a four-day period, many areas of eastern Texas received over 40 inches of rain as the 
-  system meandered along the gulf coast causing catastrophic flooding. With a record of 
-  51.88 inches, Harvey is the wettest tropical hurricane on record in the contiguous U.S. 
-  The resulting floods inundated hundreds of thousands of homes, displaces more than 
+local Description = [[Hurricane Harvey was an extremely destructive Atlantic hurricane
+  which became the first major hurricane to make landfall in the U.S. since Wilma in 2005.
+  In a four-day period, many areas of eastern Texas received over 40 inches of rain as the
+  system meandered along the gulf coast causing catastrophic flooding. With a record of
+  51.88 inches, Harvey is the wettest tropical hurricane on record in the contiguous U.S.
+  The resulting floods inundated hundreds of thousands of homes, displaces more than
   30,000 people, and prompted more than 17,000 rescues]]
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-harvey-clouds-with-precipitation-2017/"
 
@@ -17,10 +17,9 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
-
-local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
@@ -29,11 +28,11 @@ local layer = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = imagesDestination,
+    Folder = syncedDirectory .. "4096",
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "combined_image_%Y%m%d_%H%M.jpg"
-  },    
+  },
   Description = Description
 }
 
@@ -56,15 +55,10 @@ local colorbar_snow = {
   CartesianPosition = { 0.5, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "4096.zip", imagesDestination, true)
-  end
-
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar_rain);  
-  openspace.addScreenSpaceRenderable(colorbar_snow);  
+  openspace.addScreenSpaceRenderable(colorbar_rain)
+  openspace.addScreenSpaceRenderable(colorbar_snow)
 end)
 
 asset.onDeinitialize(function()
