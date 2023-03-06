@@ -39,8 +39,8 @@ namespace openspace::scripting {
 struct LuaLibrary {
     /**
     * This structure represents a Lua function with its #name, #function pointer
-    * #argumentText describing the arguments this function takes, and the the #helpText
-    * describing the function.
+    * #arguments describe the arguments this function takes, and the #helpText describing
+    * the function.
     */
     struct Function {
         /// The name of the function

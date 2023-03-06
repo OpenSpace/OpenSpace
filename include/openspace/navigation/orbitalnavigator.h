@@ -233,7 +233,7 @@ private:
      * camera points towards the reference node in the direction opposite to the direction
      * out from the surface of the object. The local rotation defines the differential
      * from the global to the current total rotation so that
-     * <code>cameraRotation = globalRotation * localRotation</code>.
+     * `cameraRotation = globalRotation * localRotation`.
      */
     CameraRotationDecomposition decomposeCameraRotationSurface(const CameraPose pose,
         const SceneGraphNode& reference);
@@ -243,7 +243,7 @@ private:
      * CameraRotationDecomposition. The global rotation defines the rotation so that the
      * camera points towards the reference position.
      * The local rotation defines the differential from the global to the current total
-     * rotation so that <code>cameraRotation = globalRotation * localRotation</code>.
+     * rotation so that `cameraRotation = globalRotation * localRotation`.
      */
     CameraRotationDecomposition decomposeCameraRotation(const CameraPose pose,
         glm::dvec3 reference);

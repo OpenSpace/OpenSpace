@@ -25,26 +25,15 @@
 #ifndef __OPENSPACE_CORE___ULONGPROPERTY___H__
 #define __OPENSPACE_CORE___ULONGPROPERTY___H__
 
- /**
- * \file ulongproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class ULongProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>unsigned long</code>.
-
- * @} @}
- */
-
 #include <openspace/properties/numericalproperty.h>
 #include <limits>
 
 namespace openspace::properties {
 
+/**
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type `unsigned long`.
+ */
 class ULongProperty : public NumericalProperty<unsigned long> {
 public:
     ULongProperty(Property::PropertyInfo info, unsigned long value = 0ul,

@@ -36,18 +36,16 @@ namespace documentation { struct Documentation; }
 
 /**
  * This function provides the capabilities to create a new ghoul::logging::Log from the
- * provided ghoul::Dictionary%. The Dictionary must at least contain a <code>Type</code>
- * value that determines the type of the created Log. Currently the types
- * <code>HTML</code> and <code>Text</code> are supported which create a
- * ghoul::logging::TextLog%, and ghoul::logging::HTMLLog respectively with both also
- * require the <code>FileName</code> value for the location at which the logfile should be
- * created . Both logs can be customized using the <code>Append</code>,
- * <code>TimeStamping</code>, <code>DateStamping</code>, <code>CategoryStamping</code>,
- * and <code>LogLevelStamping</code> values.
+ * provided ghoul::Dictionary%. The Dictionary must at least contain a `Type` value that
+ * determines the type of the created Log. Currently the types `HTML` and `Text` are
+ * supported which create a ghoul::logging::TextLog%, and ghoul::logging::HTMLLog
+ * respectively with both also require the `FileName` value for the location at which the
+ * logfile should be created. Both logs can be customized using the `Append`,
+ * `TimeStamping`, `DateStamping`, `CategoryStamping`, and `LogLevelStamping` values.
  *
  * \param  dictionary The dictionary from which the ghoul::logging::Log should be created
  * \return The created ghoul::logging::Log
- * \post   The return value will not be <code>nullptr</code>
+ * \post   The return value will not be `nullptr`
  * \throw  ghoul::RuntimeError If there was an error creating the ghoul::logging::Log
  * \sa     ghoul::logging::TextLog
  * \sa     ghoul::logging::HTMLLog

@@ -109,7 +109,7 @@ Window* FirstOpenVRWindow = nullptr;
 /**
  * This struct stores all information about a single render window. Depending on the
  * frame setup, each window can be mono or stereo, the information of which is stored in
- * the \c leftOrMain and \c right members respectively.
+ * the `leftOrMain` and `right` members respectively.
  */
 struct SpoutWindow {
     /// The left framebuffer (or main, if there is no stereo rendering)
