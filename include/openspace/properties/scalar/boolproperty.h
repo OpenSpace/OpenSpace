@@ -43,7 +43,7 @@ public:
     using TemplateProperty<bool>::operator=;
 
 protected:
-    bool fromLuaConversion(lua_State* state, bool& success) const override;
+    bool fromLuaConversion(lua_State* state) const override;
     void toLuaConversion(lua_State* state) const override;
     std::string toStringConversion() const override;
 };
