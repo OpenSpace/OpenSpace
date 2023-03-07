@@ -706,6 +706,18 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
         try {
             sgct::config::GeneratorVersion previewGenVersion =
                 sgct::readConfigGenerator(winCfg);
+            sgct::validateConfigAgainstSchema(
+                winCfg,
+                _configPath + "/schema/sgct.schema.json",
+                "This configuration file is unable to generate a proper display"
+            );
+            sgct::validateConfigAgainstSchema(
+                winCfg,
+                _configPath + "/schema/sgcteditor.schema.json",
+                "This configuration file is valid for generating a display, but "
+                "its format does not match the window editor requirements and "
+                "cannot be opened in the editor"
+            );
             if (previewGenVersion.versionCheck(minimumVersion)) {
                 try {
                     preview = sgct::readConfig(
@@ -726,18 +738,6 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                         )
                     );
                 }
-                sgct::validateConfigAgainstSchema(
-                    winCfg,
-                    _configPath + "/schema/sgct.schema.json",
-                    "This configuration file is unable to generate a proper display"
-                );
-                sgct::validateConfigAgainstSchema(
-                    winCfg,
-                    _configPath + "/schema/sgcteditor.schema.json",
-                    "This configuration file is valid for generating a display, but "
-                    "its format does not match the window editor requirements and "
-                    "cannot be opened in the editor"
-                );
                 SgctEdit editor(
                     preview,
                     winCfg,
