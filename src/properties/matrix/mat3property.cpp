@@ -49,8 +49,4 @@ int Mat3Property::typeLua() const {
     return LUA_TTABLE;
 }
 
-glm::mat3x3 Mat3Property::fromLuaConversion(lua_State* state, bool& success) const {
-    return ghoul::lua::value<glm::mat3x3>(state);
-}
-
 }  // namespace openspace::properties

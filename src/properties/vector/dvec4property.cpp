@@ -49,8 +49,4 @@ int DVec4Property::typeLua() const {
     return LUA_TTABLE;
 }
 
-glm::dvec4 DVec4Property::fromLuaConversion(lua_State* state, bool& success) const {
-    return ghoul::lua::value<glm::dvec4>(state);
-}
-
 } // namespace openspace::properties

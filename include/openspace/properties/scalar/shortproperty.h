@@ -58,9 +58,6 @@ public:
     int typeLua() const override;
 
     using TemplateProperty<short>::operator=;
-
-protected:
-    short fromLuaConversion(lua_State* state, bool& success) const override;
 };
 
 } // namespace openspace::properties

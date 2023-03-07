@@ -188,10 +188,9 @@ protected:
      * and returns it. This method has to be specialized for each new type.
      *
      * \param state The Lua state from which the value will be decoded
-     * \param success Set to true `true` if the decoding succeeded; `false` otherwise
      * \return the decoded value
      */
-    virtual T fromLuaConversion(lua_State* state, bool& success) const = 0;
+    virtual T fromLuaConversion(lua_State* state) const = 0;
 
     /**
      * Encodes the stored value into a Lua object and pushes that object onto

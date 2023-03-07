@@ -41,10 +41,9 @@ int TransferFunctionProperty::typeLua() const {
 }
 
 openspace::volume::TransferFunction
-TransferFunctionProperty::fromLuaConversion(lua_State* state, bool& success) const
-{
+TransferFunctionProperty::fromLuaConversion(lua_State* state) const {
     openspace::volume::TransferFunction tf;
-    success = tf.setEnvelopesFromLua(state);
+    tf.setEnvelopesFromLua(state);
     return tf;
 }
 

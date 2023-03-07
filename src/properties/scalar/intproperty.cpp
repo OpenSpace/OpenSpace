@@ -41,15 +41,4 @@ int IntProperty::typeLua() const {
     return LUA_TNUMBER;
 }
 
-int IntProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        int val = static_cast<int>(lua_tonumber(state, -1));
-        return val;
-    }
-    else {
-        return 0;
-    }
-}
-
 } // namespace openspace::properties

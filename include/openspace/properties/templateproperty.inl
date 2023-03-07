@@ -87,11 +87,7 @@ bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
 template <typename T>
 bool TemplateProperty<T>::setLuaValue(lua_State* state) {
     try {
-        bool success;
-        T thisValue = fromLuaConversion(state, success);
-        if (!success) {
-            return false;
-        }
+        T thisValue = fromLuaConversion(state);
         set(std::any(thisValue));
         return true;
     }

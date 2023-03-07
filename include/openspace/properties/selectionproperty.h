@@ -114,8 +114,7 @@ public:
     using TemplateProperty<std::set<std::string>>::operator=;
 
 protected:
-    std::set<std::string> fromLuaConversion(lua_State* state,
-        bool& success) const override;
+    std::set<std::string> fromLuaConversion(lua_State* state) const override;
 
     void toLuaConversion(lua_State* state) const override;
 

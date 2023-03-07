@@ -48,8 +48,4 @@ int Vec2Property::typeLua() const {
     return LUA_TTABLE;
 }
 
-glm::vec2 Vec2Property::fromLuaConversion(lua_State* state, bool& success) const {
-    return ghoul::lua::value<glm::vec2>(state);
-}
-
 } // namespace openspace::properties
