@@ -64,7 +64,7 @@ private:
     /// Reset some variables to default state
     void reset();
 
-    /// The number of vertices that we do calculations for during each frame of the full sweep pass
+    /// The number of vertices that we calculate during each frame of the full sweep pass
     unsigned int _sweepChunkSize = 200;
 
     /// The start time of the trail
@@ -92,10 +92,11 @@ private:
     /// The conversion of the _endTime into the internal time format
     double _end = 0.0;
 
-    /// Keeps track of the sweep iteration and is used to calculate which vertices we work on each frame.
+    /// Tracks sweep iteration, is used to calculate which vertices to work on per frame
     int _sweepIteration = 0;
 
-    /// How many values do we need to compute given the distance between the start and end date and the desired sample interval
+    /// How many points do we need to compute given the distance between the 
+    /// start and end date and the desired sample interval
     unsigned int _numberOfVertices = 0;
 
     double _totalSampleInterval = 0.0;

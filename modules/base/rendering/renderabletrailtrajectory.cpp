@@ -86,7 +86,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SweepChunkSizeInfo = {
         "SweepChunkSize",
         "Sweep Chunk Size",
-        "The number of vertices that will be calculated each frame whenever the trail needs to be recalculated. "
+        "The number of vertices that will be calculated each frame whenever the trail "
+        "needs to be recalculated. "
         "A greater value will result in more calculations per frame."
     };
 
@@ -206,12 +207,18 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
             _totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
 
-            // Cap _numberOfVertices in order to prevent overflow and extreme performance degredation/RAM usage 
-            _numberOfVertices = std::min(static_cast<unsigned int>(timespan / _totalSampleInterval), maxNumberOfVertices);
+            // Cap _numberOfVertices in order to prevent overflow and extreme performance
+            // degredation/RAM usage 
+            _numberOfVertices = std::min(
+                static_cast<unsigned int>(timespan / _totalSampleInterval),
+                maxNumberOfVertices
+            );
 
-            // We need to recalcuate the _totalSampleInterval if _numberOfVertices eqals maxNumberOfVertices
-            // If we don't do this the position for each vertex will not be correct for the number of vertices we are doing along the trail.
-            _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ? (timespan / _numberOfVertices) : _totalSampleInterval;
+            // We need to recalcuate the _totalSampleInterval if _numberOfVertices eqals
+            // maxNumberOfVertices. If we don't do this the position for each vertex 
+            // will not be correct for the number of vertices we are doing along the trail.
+            _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ? 
+                (timespan / _numberOfVertices) : _totalSampleInterval;
 
             // Make space for the vertices
             _vertexArray.clear();
@@ -243,7 +250,8 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.f);
         }
         else { 
-            // Early return as we don't need to render if we are still doing full sweep calculations
+            // Early return as we don't need to render if we are still 
+            // doing full sweep calculations
             return;
         }
         
