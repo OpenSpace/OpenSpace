@@ -696,7 +696,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         
         { // postprocessing
             postprocessing::Settings settings;
-            settings.background.intensity = {{ 0, 0, 0 }};
+            settings.background_intensity = { 0, 0, 0 };
             settings.ambient_occlusion.enabled = _ssaoEnabled;
             settings.ambient_occlusion.intensity = _ssaoIntensity;
             settings.ambient_occlusion.radius = _ssaoRadius;
@@ -755,8 +755,7 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol, std::string_vie
         return;
     }
 
-    // We don't really append per-se, we use this to perform a deep copy of the molecule from the manager so we can modify its state (coordinates).
-    md_molecule_append(&mol.molecule, molecule, default_allocator);
+    md_molecule_copy(&mol.molecule, molecule, default_allocator);
 
     if (!trajFile.empty() && trajFile != "") {
         LDEBUG(fmt::format("Loading trajectory file '{}'", trajFile));

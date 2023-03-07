@@ -156,10 +156,10 @@ namespace {
         "Ensure Periodic Boundry Constraints (Ensures post interpolation that structures remain within the simulation volume)"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AnimationFrameInfo = {
-        "AnimationFrame",
-        "Animation Frame",
-        "Local simulation time, unit in frames"
+    constexpr openspace::properties::Property::PropertyInfo AnimationBaseScaleInfo = {
+        "AnimationBaseScale",
+        "Animation Base Scale",
+        "Base scale for the animation, tune this from its implicit value of 1.0 to sync up its animation with other trajectories"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
@@ -229,8 +229,8 @@ namespace {
         // [[codegen::verbatim(EnsurePbcInfo.description)]]
         std::optional<bool> ensurePbc;
 
-        // [[codegen::verbatim(AnimationFrameInfo.description)]]
-        std::optional<double> animationFrame;
+        // [[codegen::verbatim(AnimationBaseScaleInfo.description)]]
+        std::optional<double> animationBaseScale;
 
         // [[codegen::verbatim(AnimationSpeedInfo.description)]]
         std::optional<double> animationSpeed;
@@ -339,49 +339,34 @@ namespace openspace {
         }
     }
 
-    void RenderableMolecule::setAnimationFrame(double t) {
+    void RenderableMolecule::updateTrajectoryFrame(double current_time) {
         if (_trajectory) {
+            const double scl = _animationBaseScale * _animationSpeed;
+            double time = (current_time - _localEpoch) * scl;
+            double frame = 0;
+
+            const int64_t num_frames = md_trajectory_num_frames(_trajectory);
+            
             switch (static_cast<AnimationRepeatMode>(_animationRepeatMode.value())) {
             case AnimationRepeatMode::PingPong:
-                if (t < _animationFrame.minValue()) {
-                    t = 0;
-                    _animationDir = -_animationDir;
-                } else if (t > _animationFrame.maxValue()) {
-                    t = _animationFrame.maxValue();
-                    _animationDir = -_animationDir;
+                frame = std::fmod(time, 2 * num_frames);
+                if (frame >= num_frames) {
+                    frame = 2 * num_frames - frame;
                 }
                 break;
             case AnimationRepeatMode::Wrap:
-                if (t < _animationFrame.minValue()) {
-                    t = _animationFrame.maxValue();
-                } else if (t > _animationFrame.maxValue()) {
-                    t = _animationFrame.minValue();
-                }
+                frame = std::fmod(time, num_frames);
                 break;
             default:
                 ghoul_assert(false, "Don't end up here!");
             }
 
-            mol::util::interpolate_coords(_molecule, _trajectory, mol::util::InterpolationType::Cubic, t, _ensurePbc);
-            md_gl_molecule_set_atom_position(&_gl_molecule, 0, (uint32_t)_molecule.atom.count, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
-        }
-    }
-
-    double RenderableMolecule::getAnimationFrame() {
-        if (_trajectory) {
-            const double duration = (double)md_trajectory_num_frames(_trajectory);
-            switch (static_cast<AnimationRepeatMode>(_animationRepeatMode.value())) {
-            case AnimationRepeatMode::PingPong:
-
-                break;
-            case AnimationRepeatMode::Wrap:
-
-                break;
-            default:
-                ghoul_assert(false, "Don't end up here!");
+            if (frame != _frame) {
+                _frame = frame;
+                mol::util::interpolate_coords(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame, _ensurePbc);
+                md_gl_molecule_set_atom_position(&_gl_molecule, 0, (uint32_t)_molecule.atom.count, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
             }
         }
-        return 0;
     }
 
     documentation::Documentation RenderableMolecule::Documentation() {
@@ -399,10 +384,9 @@ namespace openspace {
         _ssaoBias(SSAOBiasInfo, 0.1f, 0.0f, 1.0f),
         _exposure(ExposureInfo, 0.3f, 0.1f, 10.f),
         _ensurePbc(EnsurePbcInfo, false),
-        _animationFrame(AnimationFrameInfo, 0.0, 0.0),
+        _animationBaseScale(AnimationBaseScaleInfo, 1.0, 0.0, 1e20),
         _animationSpeed(AnimationSpeedInfo, 1.f, -100.f, 100.f),
-        _animationRepeatMode(AnimationRepeatModeInfo),
-        _animationDir(1.0)
+        _animationRepeatMode(AnimationRepeatModeInfo)
     {
         
         _localEpoch = openspace::global::timeManager->time().j2000Seconds();
@@ -437,7 +421,7 @@ namespace openspace {
             addRepresentation(mol::rep::Type::SpaceFill, mol::rep::Color::Cpk, "", 1.0f);
         }
 
-        _animationFrame = p.animationFrame.value_or(0.0);
+        _animationBaseScale = p.animationBaseScale.value_or(1.0);
         _animationSpeed = p.animationSpeed.value_or(1.0);
         _animationRepeatMode.addOptions({
             { static_cast<int>(AnimationRepeatMode::PingPong), "PingPong" },
@@ -451,7 +435,6 @@ namespace openspace {
         }
 
         // Remove read only if we have a valid trajectory
-        _animationFrame.setReadOnly(true);
         _animationSpeed.setReadOnly(true);
         _animationRepeatMode.setReadOnly(true);
     
@@ -462,13 +445,8 @@ namespace openspace {
         addProperty(_ssaoBias);
         addProperty(_exposure);
         addProperty(_ensurePbc);
-        addProperty(_animationFrame);
         addProperty(_animationSpeed);
         addProperty(_animationRepeatMode);
-
-        _animationFrame.onChange([this]() mutable {
-            setAnimationFrame(_animationFrame);
-        });
     }
 
     RenderableMolecule::~RenderableMolecule() {
@@ -566,20 +544,7 @@ namespace openspace {
 
         // update animation
         if (_trajectory) {
-            // Delta time progression between frames in seconds
-            double dt = data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds();
-            
-
-            //double traj_dur = static_cast<double>(MAX(0, md_trajectory_num_frames(_trajectory) - 1));
-            //double t = fract(data.time.j2000Seconds() / traj_dur) * traj_dur;
-            //double t = _animationFrame + dt * _animationSpeed * _animationDir;
-
-            /*
-            global::scriptEngine->queueScript(
-                fmt::format("openspace.setPropertyValueSingle('{}', {});", _animationFrame.fullyQualifiedIdentifier(), t),
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
-            */
+            updateTrajectoryFrame(data.time.j2000Seconds());
         }
     }
 
@@ -654,11 +619,10 @@ namespace openspace {
             drawOps.data(),
         };
 
-        { // draw molecule offscreen
+        { // draw into mdlib shared fbo
             GLint defaultFbo;
             glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
             glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-            // shading rendering of mold
             const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
             glDrawBuffers(2, bufs);
 
@@ -691,7 +655,7 @@ namespace openspace {
 
             { // postprocessing
                 postprocessing::Settings settings;
-                settings.background.intensity = { { 0, 0, 0 } };
+                settings.background_intensity = { 0, 0, 0 };
                 settings.ambient_occlusion.enabled = _ssaoEnabled;
                 settings.ambient_occlusion.intensity = _ssaoIntensity;
                 settings.ambient_occlusion.radius = _ssaoRadius;
@@ -769,11 +733,7 @@ namespace openspace {
                 LERROR("failed to initialize trajectory: failed to load file");
                 return;
             }
-
-            double last_frame = static_cast<double>(MAX(0, md_trajectory_num_frames(_trajectory) - 1));
-            _animationFrame.setMaxValue(last_frame);
-
-            _animationFrame.setReadOnly(false);
+            
             _animationSpeed.setReadOnly(false);
             _animationRepeatMode.setReadOnly(false);
         }

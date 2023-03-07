@@ -36,6 +36,7 @@
 #include <core/md_str.h>
 #include <core/md_log.h>
 #include <core/md_str_builder.h>
+#include <core/md_vec_math.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -267,15 +268,16 @@ static uint32_t compile_shader_from_source(str_t src, GLenum type, str_t defines
                 MD_LOG_ERROR("Failed to extract version string!");
                 return 0;
             }
-            md_strb_str(&builder, version_str);
-            md_strb_str(&builder, defines);
-            md_strb_char(&builder, '\n');
+            md_strb_push_str(&builder, version_str);
+            md_strb_push_char(&builder, '\n');
+            md_strb_push_str(&builder, defines);
+            md_strb_push_char(&builder, '\n');
         }
         else {
-            md_strb_str(&builder, defines);
-            md_strb_char(&builder, '\n');
+            md_strb_push_str(&builder, defines);
+            md_strb_push_char(&builder, '\n');
         }
-        md_strb_str(&builder, src);
+        md_strb_push_str(&builder, src);
         final_src = md_strb_to_str(&builder);
     }
 
@@ -1398,6 +1400,7 @@ void blit_color(vec4_t color) {
 }
 
 void postprocess(const Settings& settings, const mat4_t& P) {
+    ASSERT(p);
     ASSERT(glIsTexture(settings.input_textures.depth));
     ASSERT(glIsTexture(settings.input_textures.color));
     ASSERT(glIsTexture(settings.input_textures.normal));
@@ -1492,7 +1495,7 @@ void postprocess(const Settings& settings, const mat4_t& P) {
     glViewport(0, 0, width, height);
 
     PUSH_GPU_SECTION("Clear HDR")
-    glClearColor(settings.background.intensity.x, settings.background.intensity.y, settings.background.intensity.z, 1.f);
+    glClearColor(settings.background_intensity.r, settings.background_intensity.g, settings.background_intensity.b, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     POP_GPU_SECTION()
 

@@ -59,8 +59,7 @@ public:
 private:
     void addRepresentation(mol::rep::Type type = mol::rep::Type::SpaceFill, mol::rep::Color color = mol::rep::Color::Cpk, std::string filter = "all", float scale = 1.0f);
     
-    void setAnimationFrame(double t);
-    double getAnimationFrame();
+    void updateTrajectoryFrame(double current_time);
 
     void initMolecule(std::string_view mol_file, std::string_view traj_file = {});
     void freeMolecule();
@@ -68,8 +67,8 @@ private:
 
     bool _renderableInView; // indicates whether the molecule is in view in any camera's viewpoint
 
-    // This represents the epoch which we derive our local frame time from
-    double _localEpoch;
+    double _localEpoch; // This represents the epoch which we derive our local frame time from
+    double _frame;      // This is the current frame of the trajectory
 
     md_molecule_t _molecule;
     const md_trajectory_i* _trajectory;
@@ -89,11 +88,9 @@ private:
     properties::FloatProperty   _ssaoBias;
     properties::FloatProperty   _exposure;
     properties::BoolProperty    _ensurePbc;
-    properties::DoubleProperty  _animationFrame;
+    properties::DoubleProperty  _animationBaseScale;
     properties::DoubleProperty  _animationSpeed;
     properties::OptionProperty  _animationRepeatMode;
-
-    double _animationDir;
 };
 
 } // namespace openspace

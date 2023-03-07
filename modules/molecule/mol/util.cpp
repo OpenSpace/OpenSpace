@@ -161,7 +161,7 @@ void interpolate_coords(md_molecule_t& mol, const md_trajectory_i* traj, Interpo
         const int64_t nearest_frame = CLAMP((int64_t)(time + 0.5), 0LL, last_frame);
         md_trajectory_frame_header_t header = {0};
         md_trajectory_load_frame(traj, nearest_frame, &header, mol.atom.x, mol.atom.y, mol.atom.z);
-        box_ext = header.box * vec3_set1(1);
+        box_ext = header.cell.basis * vec3_set1(1);
         break;
     }
     case InterpolationType::Linear:
@@ -169,7 +169,7 @@ void interpolate_coords(md_molecule_t& mol, const md_trajectory_i* traj, Interpo
         md_trajectory_frame_header_t header[2] = {0};
         md_trajectory_load_frame(traj, frames[1], &header[0], src[0].x, src[0].y, src[0].z);
         md_trajectory_load_frame(traj, frames[2], &header[1], src[1].x, src[1].y, src[1].z);
-        box_ext = vec3_lerp(header[0].box * vec3_set1(1), header[1].box * vec3_set1(1), t);
+        box_ext = vec3_lerp(header[0].cell.basis * vec3_set1(1), header[1].cell.basis * vec3_set1(1), t);
         md_util_linear_interpolation(dst, src, mol.atom.count, box_ext, t);
         break;
     }
@@ -180,7 +180,7 @@ void interpolate_coords(md_molecule_t& mol, const md_trajectory_i* traj, Interpo
         md_trajectory_load_frame(traj, frames[1], &header[1], src[1].x, src[1].y, src[1].z);
         md_trajectory_load_frame(traj, frames[2], &header[2], src[2].x, src[2].y, src[2].z);
         md_trajectory_load_frame(traj, frames[3], &header[3], src[3].x, src[3].y, src[3].z);
-        box_ext = cubic_spline(header[0].box * vec3_set1(1), header[1].box * vec3_set1(1), header[2].box * vec3_set1(1), header[3].box * vec3_set1(1), t, tension);
+        box_ext = cubic_spline(header[0].cell.basis * vec3_set1(1), header[1].cell.basis * vec3_set1(1), header[2].cell.basis * vec3_set1(1), header[3].cell.basis * vec3_set1(1), t, tension);
         md_util_cubic_spline_interpolation(dst, src, mol.atom.count, box_ext, t, 1.0f);
         break;
     }
@@ -189,8 +189,7 @@ void interpolate_coords(md_molecule_t& mol, const md_trajectory_i* traj, Interpo
     }
 
     if (ensure_pbc) {
-        md_util_pbc_ortho(dst.x, dst.y, dst.z, mol.atom.count, box_ext);
-        md_util_unwrap_ortho(dst.x, dst.y, dst.z, &mol.covalent.structures, box_ext);
+        md_util_deperiodize_system(mol.atom.x, mol.atom.y, mol.atom.z, &mol.cell, &mol);
     }
 }
 

@@ -22,8 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   moleculemodule.h
@@ -61,6 +60,9 @@ create_new_module(
 )
 
 option(MD_USE_RELATIVE_RESOURCE_PATH OFF)
+option(MD_UNITTEST OFF)
+option(MD_BENCHMARK OFF)
 
-include_external_library(${molecule_module} PRIVATE mdlib ${CMAKE_CURRENT_SOURCE_DIR}/ext/mold)
-disable_external_warnings(mdlib)
+add_subdirectory(ext/mold SYSTEM)
+target_link_libraries(${molecule_module} PRIVATE mdlib)
+set_target_properties(mdlib PROPERTIES FOLDER "External")

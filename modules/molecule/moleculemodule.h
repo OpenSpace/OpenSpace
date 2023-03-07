@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_MOLECULE___MOLECULEMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
 
@@ -35,10 +37,32 @@ public:
 
     MoleculeModule();
 
+    GLuint fbo() const { return _fbo; }
+    GLuint colorTexture()  const { return _colorTex; }
+    GLuint normalTexture() const { return _normalTex; }
+    GLuint depthTexture()  const { return _depthTex; }
+
+    void internalInitializeGL() final;
+    void internalDeinitializeGL() final;
+
     std::vector<documentation::Documentation> documentations() const override;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
+    void preDraw();
+    void postDraw();
+    
+    GLuint _fbo = 0;
+    GLuint _colorTex  = 0;
+    GLuint _normalTex = 0;
+    GLuint _depthTex  = 0;
+    md_gl_shaders_t shaders;
+
+    properties::BoolProperty    _ssaoEnabled;
+    properties::FloatProperty   _ssaoIntensity;
+    properties::FloatProperty   _ssaoRadius;
+    properties::FloatProperty   _ssaoBias;
+    properties::FloatProperty   _exposure;
 };
 
 } // namespace openspace

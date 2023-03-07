@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/md_vec_math.h>
+struct mat4_t;
 
 namespace postprocessing {
 
@@ -16,8 +16,10 @@ enum class Tonemapping {
 
 struct Settings {
     struct {
-        vec3_t intensity = {20.f, 20.f, 20.f};
-    } background;
+        float r = 20.0f;
+        float g = 20.0f;
+        float b = 20.0f;
+    } background_intensity;
 
     struct {
         bool enabled = true;
