@@ -1126,10 +1126,16 @@ int main(int argc, char* argv[]) {
         { argv, argv + argc }
     );
 
-    bool showHelp = parser.execute();
-    if (showHelp) {
-        std::cout << parser.helpText();
-        exit(EXIT_SUCCESS);
+    try {
+        bool showHelp = parser.execute();
+        if (showHelp) {
+            std::cout << parser.helpText();
+            exit(EXIT_SUCCESS);
+        }
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LFATALC(e.component, e.message);
+        exit(EXIT_FAILURE);
     }
     // Take an actual copy of the arguments
     std::vector<std::string> arguments = sgctArguments;
