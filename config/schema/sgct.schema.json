@@ -167,6 +167,11 @@
       "title": "Tags",
       "description": "A comma-separated list of tags that are associated with this window. The tags themselves don't have any meaning inside of SGCT, but can be used by the application code as a filter. One common use-case is to tag one of the windows as a “GUI” window, to restrict input to only that window, for example. The default value for this attribute is an empty string"
     },
+    "monitor": {
+      "type": "integer",
+      "title": "Monitor",
+      "description": "Determines which monitor should be used for the exclusive fullscreen in case fullscreen is set to true. The list of monitors on the system are zero-based and range between 0 and the number of monitors - 1. For this attribute, the special value -1 can be used to denote that the primary monitor as defined by the operating system should be used, regardless of its index. The default value is -1"
+    },
     "tracked": {
       "type": "boolean",
       "title": "Tracked",
@@ -607,7 +612,7 @@
           "title": "Rotation",
           "description": "Provides a rotation angle (in radians) why which the cylindrical projection is offset into the resulting image"
         },
-        "heightOffset": {
+        "heightoffset": {
           "type": "number",
           "title": "Height Offset",
           "description": "Offsets the height from which the cylindrical projection is generated. This is, in general, only necessary if the user position is offset and you want to counter that offset to continue producing a “standard” cylindrical projection"
@@ -848,10 +853,8 @@
           "description": "If this value is specified, the 3D contents of a different window are blitted (=copied) into this window before calling its own rendering. A common use-case for this are GUI windows that want to show the 3D rendering but not take the performance impact of rendering an expensive scene twice. Instead of rendering the 3D scene, a GUI window would set draw3D to false and this attribute to the id of the main window, meaning that the contents of that other window are copied and then the 2D UI will be rendered on top of the blitted content. Unless specified otherwise, a window’s id is its position in the XML file inside a node, starting at 0. So the first window of a node will have the id 0, the second 1, etc. The default value is -1 which means taht not blitting is performed"
         },
         "monitor": {
-          "type": "integer",
-          "title": "Monitor",
-          "description": "Determines which monitor should be used for the exclusive fullscreen in case fullscreen is set to true. The list of monitors on the system are zero-based and range between 0 and the number of monitors - 1. For this attribute, the special value -1 can be used to denote that the primary monitor as defined by the operating system should be used, regardless of its index. The default value is -1"
-        },
+          "$ref": "#/$defs/monitor"
+	},
         "mpcdi": {
           "type": "string",
           "title": "MPCDI",

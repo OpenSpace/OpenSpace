@@ -89,6 +89,12 @@ private:
     void createWidgets(const std::vector<QRect>& monitorSizes, unsigned int nWindows,
         bool setToDefaults);
     void generateConfiguration();
+    void generateConfigSetupVsync();
+    void generateConfigUsers();
+    void generateConfigAddresses(sgct::config::Node& node);
+    void generateConfigResizeWindowsAccordingToSelected(sgct::config::Node& node);
+    void generateConfigIndividualWindowSettings(sgct::config::Node& node);
+
     void setupProjectionTypeInGui(sgct::config::Viewport& vPort, WindowControl* wCtrl);
 
     void save();
