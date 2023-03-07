@@ -41,6 +41,15 @@ int BoolProperty::typeLua() const {
     return LUA_TBOOLEAN;
 }
 
+bool BoolProperty::fromLuaConversion(lua_State* state, bool& success) const {
+    success = (lua_isboolean(state, -1) == 1);
+    return success ? (lua_toboolean(state, -1) == 1) : false;
+}
+
+void BoolProperty::toLuaConversion(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
 std::string BoolProperty::toStringConversion() const {
     return _value ? "true" : "false";
 }
