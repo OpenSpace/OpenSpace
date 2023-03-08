@@ -73,12 +73,12 @@ namespace {
        GL_COLOR_ATTACHMENT2,
     };
 
-    constexpr std::array<const char*, 14> UniformNames = {
+    constexpr std::array<const char*, 13> UniformNames = {
         "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",
         "specularIntensity", "performManualDepthTest", "gBufferDepthTexture",
-        "viewport", "resolution"
+        "resolution"
     };
 
     constexpr std::array<const char*, 3> UniformOpacityNames = {
@@ -833,22 +833,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             gBufferDepthTextureUnit
         );
 
-        // Will also need the resolution and viewport to get a texture coordinate for the
-        // G-buffer depth texture
+        // Will also need the resolution to get a texture coordinate for the G-buffer
+        // depth texture
         _program->setUniform(
             _uniformCache.resolution,
             glm::vec2(global::windowDelegate->currentDrawBufferResolution())
-        );
-
-        GLint vp[4] = { 0 };
-        global::renderEngine->openglStateCache().viewport(vp);
-        glm::ivec4 viewport = glm::ivec4(vp[0], vp[1], vp[2], vp[3]);
-        _program->setUniform(
-            _uniformCache.viewport,
-            static_cast<float>(viewport[0]),
-            static_cast<float>(viewport[1]),
-            static_cast<float>(viewport[2]),
-            static_cast<float>(viewport[3])
         );
 
         // Render Pass 1

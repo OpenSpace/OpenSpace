@@ -55,7 +55,6 @@ uniform float lightIntensities[8];
 uniform bool performManualDepthTest = false;
 uniform sampler2D gBufferDepthTexture;
 
-uniform vec4 viewport;
 uniform vec2 resolution;
 
 Fragment getFragment() {
@@ -73,20 +72,8 @@ Fragment getFragment() {
     texCoord.x = texCoord.x / resolution.x;
     texCoord.y = texCoord.y / resolution.y;
 
-    // Modify the texCoord based on the Viewport and Resolution. This modification is
-    // necessary in case of side-by-side stereo as we only want to access the part of the
-    // feeding texture that we are currently responsible for.  Otherwise we would map the
-    // entire feeding texture into our half of the result texture, leading to a doubling
-    // of the "missing" half. If you don't believe me, load a configuration file with the
-    // side_by_side stereo mode enabled, disable FXAA, and remove this modification.
-    // The same calculation is done in the FXAA shader, the HDR resolving and the
-    // atmosphere shader
-    vec2 st = texCoord;
-    st.x = st.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
-    st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
-
     // Manual depth test
-    float gBufferDepth = denormalizeFloat(texture(gBufferDepthTexture, st).x);
+    float gBufferDepth = denormalizeFloat(texture(gBufferDepthTexture, texCoord).x);
     if (vs_screenSpaceDepth > gBufferDepth) {
       frag.color = vec4(0.0);
       frag.depth = gBufferDepth;

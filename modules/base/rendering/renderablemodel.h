@@ -106,7 +106,7 @@ private:
         modelViewTransform, normalTransform, projectionTransform,
         performShading, ambientIntensity, diffuseIntensity,
         specularIntensity, performManualDepthTest, gBufferDepthTexture,
-        viewport, resolution) _uniformCache;
+        resolution) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
 
