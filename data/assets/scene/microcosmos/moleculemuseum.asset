@@ -126,7 +126,7 @@ for i, info in ipairs(moleculeInfos) do
             Type = "RenderableMolecule",
             MoleculeFile = moleculeFiles .. info.file,
             TrajectoryFile = info.traj and (moleculeFiles .. info.traj) or "",
-            AnimSpeed = info.speed or animSpeed,
+            AnimationSpeed = info.speed or animSpeed,
             RepType = info.repr or "SpaceFill",
             ViamdFilter = info.filter or "",
         },
