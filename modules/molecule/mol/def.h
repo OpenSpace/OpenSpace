@@ -10,7 +10,6 @@ enum class Type {
 };
 
 enum class Color {
-    // Uniform,
     Cpk,
     AtomIndex,
     ResId,
@@ -18,6 +17,7 @@ enum class Color {
     ChainId,
     ChainIndex,
     SecondaryStructure,
+    Uniform
     // Property
 };
 

@@ -30,7 +30,6 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
 
 #include <md_gl.h>
 #include <md_molecule.h>
@@ -40,7 +39,6 @@
 namespace openspace {
 
 struct RenderData;
-class HttpMemoryDownload;
 
 class RenderableMolecule : public Renderable {
 public:
@@ -57,9 +55,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void addRepresentation(mol::rep::Type type = mol::rep::Type::SpaceFill, mol::rep::Color color = mol::rep::Color::Cpk, std::string filter = "all", float scale = 1.0f);
+    void addRepresentation(mol::rep::Type type = mol::rep::Type::SpaceFill, mol::rep::Color color = mol::rep::Color::Cpk, std::string filter = "all", float scale = 1.0f, glm::vec4 uniform_color = glm::vec4(1.0f));
     
-    void updateTrajectoryFrame(double current_time);
+    void updateTrajectoryFrame(const UpdateData& data);
 
     void initMolecule(std::string_view mol_file, std::string_view traj_file = {});
     void freeMolecule();
@@ -82,12 +80,9 @@ private:
     
     properties::StringProperty  _moleculeFile;
     properties::StringProperty  _trajectoryFile;
-    properties::BoolProperty    _ssaoEnabled;
-    properties::FloatProperty   _ssaoIntensity;
-    properties::FloatProperty   _ssaoRadius;
-    properties::FloatProperty   _ssaoBias;
-    properties::FloatProperty   _exposure;
-    properties::BoolProperty    _ensurePbc;
+    properties::BoolProperty    _coarseGrained;
+    properties::BoolProperty    _applyPbcOnLoad;
+    properties::BoolProperty    _applyPbcPerFrame;
     properties::DoubleProperty  _animationBaseScale;
     properties::DoubleProperty  _animationSpeed;
     properties::OptionProperty  _animationRepeatMode;

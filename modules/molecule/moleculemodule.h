@@ -28,6 +28,10 @@
 #include <openspace/util/openspacemodule.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/util/threadpool.h>
+#include <glm/mat4x4.hpp>
+
+struct md_gl_shaders_t;
 
 namespace openspace {
 
@@ -36,14 +40,23 @@ public:
     constexpr static const char* Name = "Molecule";
 
     MoleculeModule();
+    ~MoleculeModule();
 
     GLuint fbo() const { return _fbo; }
     GLuint colorTexture()  const { return _colorTex; }
     GLuint normalTexture() const { return _normalTex; }
     GLuint depthTexture()  const { return _depthTex; }
+    
+    const md_gl_shaders_t& shaders() const { return *_shaders; }
+
+    ThreadPool& threadPool() { return _threadPool; }
 
     void internalInitializeGL() final;
     void internalDeinitializeGL() final;
+    
+    void setProjectionMatrix(const glm::mat4& P) {
+        _P = P;
+    }
 
     std::vector<documentation::Documentation> documentations() const override;
 
@@ -56,13 +69,23 @@ private:
     GLuint _colorTex  = 0;
     GLuint _normalTex = 0;
     GLuint _depthTex  = 0;
-    md_gl_shaders_t shaders;
+    int _width = 0;
+    int _height = 0;
+    
+    std::unique_ptr<md_gl_shaders_t> _shaders = nullptr;
+    glm::mat4 _P;
 
     properties::BoolProperty    _ssaoEnabled;
     properties::FloatProperty   _ssaoIntensity;
     properties::FloatProperty   _ssaoRadius;
     properties::FloatProperty   _ssaoBias;
     properties::FloatProperty   _exposure;
+
+    properties::BoolProperty    _dofEnabled;
+    properties::FloatProperty   _dofFocusDistance;
+    properties::FloatProperty   _dofFocusRange;
+
+    ThreadPool _threadPool;
 };
 
 } // namespace openspace

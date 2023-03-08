@@ -647,10 +647,30 @@ void shutdown() {}
 }  // namespace dof
 
 namespace blit {
+static uint32_t program_tex_depth = 0;
 static uint32_t program_tex = 0;
 static uint32_t program_col = 0;
+static int uniform_loc_tex_color = -1;
+static int uniform_loc_tex_depth = -1;
 static int uniform_loc_texture = -1;
 static int uniform_loc_color = -1;
+
+constexpr str_t f_shader_src_tex_depth = STR(R"(
+#version 150 core
+
+uniform sampler2D u_tex_color;
+uniform sampler2D u_tex_depth;
+
+out vec4 out_frag;
+
+void main() {
+    float depth = texelFetch(u_tex_depth, ivec2(gl_FragCoord.xy), 0).x;
+    if (depth == 1.0) {
+        discard;
+    }
+    out_frag = texelFetch(u_tex_color, ivec2(gl_FragCoord.xy), 0);
+}
+)");
 
 constexpr str_t f_shader_src_tex = STR(R"(
 #version 150 core
@@ -678,6 +698,10 @@ void main() {
 void initialize() {
     program_tex = setup_program_from_source(STR("blit texture"), f_shader_src_tex);
     uniform_loc_texture = glGetUniformLocation(program_tex, "u_texture");
+
+    program_tex_depth = setup_program_from_source(STR("blit texture with depth"), f_shader_src_tex_depth);
+    uniform_loc_tex_color = glGetUniformLocation(program_tex_depth, "u_tex_color");
+    uniform_loc_tex_depth = glGetUniformLocation(program_tex_depth, "u_tex_depth");
 
     program_col = setup_program_from_source(STR("blit color"), f_shader_src_col);
     uniform_loc_color = glGetUniformLocation(program_col, "u_color");
@@ -1378,16 +1402,28 @@ void apply_temporal_aa(uint32_t linear_depth_tex, uint32_t color_tex, uint32_t v
     glUseProgram(0);
 }
 
-void blit_texture(uint32_t tex) {
+void blit_texture(uint32_t tex, uint32_t depth) {
     ASSERT(glIsTexture(tex));
-    glUseProgram(blit::program_tex);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex);
-    glUniform1i(blit::uniform_loc_texture, 0);
+
+    if (depth) {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, depth);
+        glUseProgram(blit::program_tex_depth);
+        glUniform1i(blit::uniform_loc_tex_color, 0);
+        glUniform1i(blit::uniform_loc_tex_depth, 1);
+    }
+    else {
+        glUseProgram(blit::program_tex);
+        glUniform1i(blit::uniform_loc_texture, 0);
+    }
+
     glBindVertexArray(gl.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
     glUseProgram(0);
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void blit_color(vec4_t color) {
@@ -1490,14 +1526,15 @@ void postprocess(const Settings& settings, const mat4_t& P) {
     };
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.targets.fbo);
-    glDrawBuffer(dst_buffer);
-    //glViewport(0, 0, gl.tex_width, gl.tex_height);
     glViewport(0, 0, width, height);
 
-    PUSH_GPU_SECTION("Clear HDR")
-    glClearColor(settings.background_intensity.r, settings.background_intensity.g, settings.background_intensity.b, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    POP_GPU_SECTION()
+    glDrawBuffer(dst_buffer);
+    if (settings.background.enabled) {
+        PUSH_GPU_SECTION("Clear HDR")
+        glClearColor(settings.background.r, settings.background.g, settings.background.b, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        POP_GPU_SECTION()
+    }
 
     PUSH_GPU_SECTION("Shade")
     shade_deferred(settings.input_textures.depth, settings.input_textures.color, settings.input_textures.normal, inv_P, time);
@@ -1548,7 +1585,7 @@ void postprocess(const Settings& settings, const mat4_t& P) {
         PUSH_GPU_SECTION("Add Emissive")
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
-        blit_texture(settings.input_textures.emissive);
+        blit_texture(settings.input_textures.emissive, 0);
         glDisable(GL_BLEND);
         POP_GPU_SECTION()
     }
@@ -1574,7 +1611,7 @@ void postprocess(const Settings& settings, const mat4_t& P) {
         glEnable(GL_BLEND);
         glColorMask(1, 1, 1, 1);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        blit_texture(settings.input_textures.post_tonemap);
+        blit_texture(settings.input_textures.post_tonemap, 0);
         glDisable(GL_BLEND);
         POP_GPU_SECTION()
     }
@@ -1582,13 +1619,23 @@ void postprocess(const Settings& settings, const mat4_t& P) {
     prev_jitter = jitter;
 
     // Activate backbuffer or whatever was bound before
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, last_fbo);
-    glViewport(last_viewport[0], last_viewport[1], last_viewport[2], last_viewport[3]);
-    glDrawBuffer((GLenum)last_draw_buffer);
+    {
+        PUSH_GPU_SECTION("PostProcess Blit Result")
+    
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, last_fbo);
+        glViewport(last_viewport[0], last_viewport[1], last_viewport[2], last_viewport[3]);
+        glDrawBuffer((GLenum)last_draw_buffer);
 
-    swap_target();
-    glDepthMask(0);
-    blit_texture(src_texture);
+        swap_target();
+        glDepthMask(0);
+        glEnable(GL_BLEND);
+        glColorMask(1, 1, 1, 1);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        blit_texture(src_texture, settings.input_textures.depth);
+        glDisable(GL_BLEND);
+        
+        POP_GPU_SECTION();
+    }
 
     // Reset rest of state
     glBlendFunc(GL_ONE, GL_ZERO);

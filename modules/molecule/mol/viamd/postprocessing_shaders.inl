@@ -363,7 +363,8 @@ vec3 shade(vec3 color, vec3 V, vec3 N) {
 void main() {
     float depth = texelFetch(u_texture_depth, ivec2(gl_FragCoord.xy), 0).x;
     if (depth == 1.0) {
-        discard;
+        out_frag = vec4(0);
+        return;
     }
     vec4 color = texelFetch(u_texture_color, ivec2(gl_FragCoord.xy), 0);
     vec3 normal = decode_normal(texelFetch(u_texture_normal, ivec2(gl_FragCoord.xy), 0).xy);

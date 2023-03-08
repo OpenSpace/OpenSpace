@@ -237,8 +237,8 @@ bool load_frame(struct md_trajectory_o* inst, int64_t idx, md_trajectory_frame_h
 }
 
 md_trajectory_i* open_file(str_t filename, const md_molecule_t* mol, md_allocator_i* alloc, bool deperiodize_on_load) {
-    ASSERT(mol);
     ASSERT(alloc);
+    ASSERT(mol);
 
     md_trajectory_api* api = get_api(filename);
     if (!api) {
@@ -248,12 +248,6 @@ md_trajectory_i* open_file(str_t filename, const md_molecule_t* mol, md_allocato
 
     md_trajectory_i* internal_traj = api->create(filename, alloc);
     if (!internal_traj) {
-        return NULL;
-    }
-    
-    if (md_trajectory_num_atoms(internal_traj) != mol->atom.count) {
-        MD_LOG_ERROR("Trajectory is not compatible with the loaded molecule.");
-        api->destroy(internal_traj);
         return NULL;
     }
 

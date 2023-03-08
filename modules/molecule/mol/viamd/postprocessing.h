@@ -16,10 +16,11 @@ enum class Tonemapping {
 
 struct Settings {
     struct {
+        bool enabled = true;
         float r = 20.0f;
         float g = 20.0f;
         float b = 20.0f;
-    } background_intensity;
+    } background;
 
     struct {
         bool enabled = true;

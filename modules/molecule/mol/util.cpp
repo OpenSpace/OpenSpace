@@ -46,7 +46,7 @@ void update_rep_type(md_gl_representation_t& rep, mol::rep::Type type, float sca
     md_gl_representation_set_type_and_args(&rep, rep_type, rep_args);
 }
 
-void update_rep_color(md_gl_representation_t& rep, const md_molecule_t& mol, mol::rep::Color color, std::string_view filter) {
+void update_rep_color(md_gl_representation_t& rep, const md_molecule_t& mol, mol::rep::Color color, std::string_view filter, const glm::vec4& uniform_color) {
     uint32_t count = static_cast<uint32_t>(mol.atom.count);
 
     uint32_t* colors = (uint32_t*)md_alloc(default_allocator, sizeof(uint32_t) * count);
@@ -81,6 +81,15 @@ void update_rep_color(md_gl_representation_t& rep, const md_molecule_t& mol, mol
     case mol::rep::Color::SecondaryStructure:
         color_atoms_secondary_structure(colors, count, mol);
         break;
+    case mol::rep::Color::Uniform:
+    {
+        uint32_t rgba = 0;
+        rgba |= ((uint32_t)(CLAMP(uniform_color.x, 0.0f, 1.0f) * 255.0f + 0.5f)) << 0;
+        rgba |= ((uint32_t)(CLAMP(uniform_color.y, 0.0f, 1.0f) * 255.0f + 0.5f)) << 8;
+        rgba |= ((uint32_t)(CLAMP(uniform_color.z, 0.0f, 1.0f) * 255.0f + 0.5f)) << 16;
+        rgba |= ((uint32_t)(CLAMP(uniform_color.w, 0.0f, 1.0f) * 255.0f + 0.5f)) << 24;
+        color_atoms_uniform(colors, count, rgba, nullptr);
+    }
     default:
         ghoul_assert(false, "unexpected molecule color");
         break;

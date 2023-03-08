@@ -229,9 +229,23 @@ void color_atoms_uniform(uint32_t* colors, int64_t count, uint32_t rgba, const m
 }
 
 void color_atoms_cpk(uint32_t* colors, int64_t count, const md_molecule_t& mol) {
-    for (int64_t i = 0; i < count; i++) {
-        colors[i] = md_util_element_cpk_color(mol.atom.element[i]);
+    // In the case of coarsegrained molecules, CPK is a bit illdefined as it operates on elements.
+    // What we do instead is to try and ad-hoc guess elements from the atom names.
+    md_element_t* elements = 0;
+
+    const md_element_t* elem = mol.atom.element;
+    
+    if (!elem) {
+        elements = md_array_create(md_element_t, count, default_temp_allocator);
+        md_util_element_decode(elements, md_array_size(elements), &mol);
+        elem = elements;
     }
+    
+    for (int64_t i = 0; i < count; i++) {
+        colors[i] = md_util_element_cpk_color(elem[i]);
+    }
+    
+    md_array_free(elements, default_temp_allocator);
 }
 
 void color_atoms_idx(uint32_t* colors, int64_t count, const md_molecule_t&) {

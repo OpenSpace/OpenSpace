@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include "renderablemolecule.h"
+#include "moleculemodule.h"
 
 #include "billboard.h"
 
@@ -40,6 +41,7 @@
 
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
@@ -96,6 +98,24 @@ namespace {
         "Trajectory file path"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo CoarseGrainedInfo = {
+        "CoarseGrained",
+        "Coarse Grained",
+        "Enable if the dataset should be interpreted as coarse grained"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ApplyPbcOnLoadInfo = {
+        "ApplyPbcOnLoad",
+        "Apply PBC On Load",
+        "Applies Periodic Boundary Constraints upon loading trajectory frames"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ApplyPbcPerFrameInfo = {
+        "ApplyPbcPerFrame",
+        "Apply PBC Per Frame",
+        "Applies Periodic Boundary Constraints for each interpolated frame (Can be CPU-intensive!)"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Representation Type",
@@ -108,6 +128,12 @@ namespace {
         "Select a color mapping for the atoms"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UniformColorInfo = {
+        "UniformColor",
+        "Uniform Color",
+        "The uniform color to apply for the representation"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo FilterInfo = {
         "Filter",
         "Representation Filter",
@@ -118,42 +144,6 @@ namespace {
         "Scale",
         "Representation Scale",
         "Scale for the Geometric representation of atoms"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SSAOEnabledInfo = {
-        "SSAOEnabled",
-        "Enable SSAO",
-        "Enable SSAO"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SSAOIntensityInfo = {
-        "SSAOIntensity",
-        "SSAO Intensity",
-        "SSAO Intensity"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SSAORadiusInfo = {
-        "SSAORadius",
-        "SSAO Radius",
-        "SSAO Radius"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SSAOBiasInfo = {
-        "SSAOBias",
-        "SSAO Bias",
-        "SSAO Bias"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ExposureInfo = {
-        "Exposure",
-        "Exposure",
-        "Exposure, Controls the Exposure setting for the tonemap"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo EnsurePbcInfo = {
-        "EnsurePbc",
-        "Ensure PBC",
-        "Ensure Periodic Boundry Constraints (Ensures post interpolation that structures remain within the simulation volume)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AnimationBaseScaleInfo = {
@@ -194,6 +184,7 @@ namespace {
                 ChainId,
                 ChainIndex,
                 SecondaryStructure,
+                Uniform,
                 // Property
             };
 
@@ -201,6 +192,7 @@ namespace {
             std::optional<Color> color;
             std::optional<std::string> filter;
             std::optional<float> scale;
+            std::optional<glm::vec4> uniformColor;
         };
 
         std::optional<std::vector<Representation>> representations;
@@ -211,23 +203,14 @@ namespace {
         // [[codegen::verbatim(TrajectoryFileInfo.description)]]
         std::string trajectoryFile;
 
-        // [[codegen::verbatim(SSAOEnabledInfo.description)]]
-        std::optional<bool> ssaoEnabled;
+        // [[codegen::verbatim(CoarseGrainedInfo.description)]]
+        std::optional<bool> coarseGrained;
 
-        // [[codegen::verbatim(SSAOIntensityInfo.description)]]
-        std::optional<float> ssaoIntensity;
+        // [[codegen::verbatim(ApplyPbcOnLoadInfo.description)]]
+        std::optional<bool> applyPbcOnLoad;
 
-        // [[codegen::verbatim(SSAORadiusInfo.description)]]
-        std::optional<float> ssaoRadius;
-
-        // [[codegen::verbatim(SSAOBiasInfo.description)]]
-        std::optional<float> ssaoBias;
-
-        // [[codegen::verbatim(ExposureInfo.description)]]
-        std::optional<float> exposure;
-
-        // [[codegen::verbatim(EnsurePbcInfo.description)]]
-        std::optional<bool> ensurePbc;
+        // [[codegen::verbatim(ApplyPbcPerFrameInfo.description)]]
+        std::optional<bool> applyPbcPerFrame;
 
         // [[codegen::verbatim(AnimationBaseScaleInfo.description)]]
         std::optional<double> animationBaseScale;
@@ -247,16 +230,9 @@ namespace {
 #include "renderablemolecule_codegen.cpp"
 }
 
-static GLuint fbo = 0;
-static GLuint colorTex = 0;
-static GLuint normalTex = 0;
-static GLuint depthTex = 0;
-static int glUseCount = 0;
-static md_gl_shaders_t shaders;
-
 namespace openspace {
 
-    void RenderableMolecule::addRepresentation(mol::rep::Type type, mol::rep::Color color, std::string filter, float scale) {
+    void RenderableMolecule::addRepresentation(mol::rep::Type type, mol::rep::Color color, std::string filter, float scale, glm::vec4 uniform_color) {
         properties::OptionProperty* pType = new properties::OptionProperty(TypeInfo);
         pType->addOptions({
             { static_cast<int>(mol::rep::Type::SpaceFill), "SpaceFill" },
@@ -275,8 +251,13 @@ namespace openspace {
             { static_cast<int>(mol::rep::Color::ChainId), "Chain ID" },
             { static_cast<int>(mol::rep::Color::ChainIndex), "Chain Index" },
             { static_cast<int>(mol::rep::Color::SecondaryStructure), "Secondary Structure" },
+            { static_cast<int>(mol::rep::Color::Uniform), "Uniform" },
             });
         pColor->setValue(static_cast<int>(color));
+
+        properties::Vec4Property* pUniformColor = new properties::Vec4Property(UniformColorInfo);
+        pUniformColor->setViewOption(openspace::properties::Property::ViewOptions::Color);
+        pUniformColor->setValue(uniform_color);
 
         properties::StringProperty* pFilter = new properties::StringProperty(FilterInfo);
         pFilter->setValue(filter);
@@ -290,6 +271,8 @@ namespace openspace {
         prop->addProperty(pColor);
         prop->addProperty(pFilter);
         prop->addProperty(pScale);
+        prop->addProperty(pUniformColor);
+        
         _representations.addPropertySubOwner(prop);
 
         auto updateRep = [this, i, pType, pScale]() mutable {
@@ -299,11 +282,17 @@ namespace openspace {
             mol::util::update_rep_type(_gl_representations[i], static_cast<mol::rep::Type>(pType->value()), pScale->value());
         };
 
-        auto updateCol = [this, i, pColor, pFilter]() mutable {
+        auto updateCol = [this, i, pColor, pFilter, pUniformColor]() mutable {
             if (i >= _gl_representations.size()) {
                 return;
             }
-            mol::util::update_rep_color(_gl_representations[i], _molecule, static_cast<mol::rep::Color>(pColor->value()), pFilter->value());
+            mol::rep::Color color = static_cast<mol::rep::Color>(pColor->value());
+            if (color == mol::rep::Color::Uniform) {
+                pUniformColor->setVisibility(openspace::properties::Property::Visibility::Always);
+            } else {
+                pUniformColor->setVisibility(openspace::properties::Property::Visibility::Hidden);
+            }
+            mol::util::update_rep_color(_gl_representations[i], _molecule, color, pFilter->value(), pUniformColor->value());
         };
 
         pType->onChange(updateRep);
@@ -326,46 +315,64 @@ namespace openspace {
             auto pColor  = rep->property("Color");
             auto pFilter = rep->property("Filter");
             auto pScale  = rep->property("Scale");
+            auto pUniformColor = rep->property("UniformColor");
 
-            if (pType && pColor && pFilter && pScale) {
+            if (pType && pColor && pFilter && pScale && pUniformColor) {
                 auto type   = static_cast<mol::rep::Type> (std::any_cast<int>(pType->get()));
                 auto color  = static_cast<mol::rep::Color>(std::any_cast<int>(pColor->get()));
                 auto filter = std::any_cast<std::string>(pFilter->get());
                 auto scale  = std::any_cast<float>(pScale->get());
+                auto uniform_color = std::any_cast<glm::vec4>(pUniformColor->get());
 
                 mol::util::update_rep_type (_gl_representations[i], type, scale);
-                mol::util::update_rep_color(_gl_representations[i], _molecule, color, filter);
+                mol::util::update_rep_color(_gl_representations[i], _molecule, color, filter, uniform_color);
             }
         }
     }
 
-    void RenderableMolecule::updateTrajectoryFrame(double current_time) {
+    static double time_to_frame(double time, int64_t num_frames, AnimationRepeatMode mode) {
+        double frame = 0;
+        switch (static_cast<AnimationRepeatMode>(mode)) {
+        case AnimationRepeatMode::PingPong:
+            frame = std::fmod(time, 2 * num_frames);
+            if (frame >= num_frames) {
+                frame = 2 * num_frames - frame;
+            }
+            break;
+        case AnimationRepeatMode::Wrap:
+            frame = std::fmod(time, num_frames);
+            break;
+        default:
+            ghoul_assert(false, "Don't end up here!");
+        }
+        return frame;
+    }
+
+    void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
         if (_trajectory) {
+            double dt = data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds();
+            double curr_t = data.time.j2000Seconds();
+            double next_t = data.time.j2000Seconds() + dt;
+            
             const double scl = _animationBaseScale * _animationSpeed;
-            double time = (current_time - _localEpoch) * scl;
-            double frame = 0;
+            double curr_time = (curr_t - _localEpoch) * scl;
+            double next_time = (next_t - _localEpoch) * scl;
 
             const int64_t num_frames = md_trajectory_num_frames(_trajectory);
+            AnimationRepeatMode mode = static_cast<AnimationRepeatMode>(_animationRepeatMode.value());
+            double frame = time_to_frame(curr_time, num_frames, mode);
             
-            switch (static_cast<AnimationRepeatMode>(_animationRepeatMode.value())) {
-            case AnimationRepeatMode::PingPong:
-                frame = std::fmod(time, 2 * num_frames);
-                if (frame >= num_frames) {
-                    frame = 2 * num_frames - frame;
-                }
-                break;
-            case AnimationRepeatMode::Wrap:
-                frame = std::fmod(time, num_frames);
-                break;
-            default:
-                ghoul_assert(false, "Don't end up here!");
-            }
-
             if (frame != _frame) {
                 _frame = frame;
-                mol::util::interpolate_coords(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame, _ensurePbc);
+                mol::util::interpolate_coords(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame, _applyPbcPerFrame);
                 md_gl_molecule_set_atom_position(&_gl_molecule, 0, (uint32_t)_molecule.atom.count, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
             }
+            
+            // Prefetch next frames
+            const int64_t frame_idx = static_cast<int64_t>(time_to_frame(next_time, num_frames, mode));
+            const int64_t beg_idx = std::max(0LL, frame_idx - 1);
+            const int64_t end_idx = std::min(num_frames - 1, frame_idx + 2);
+            mol_manager::prefetch_frame_range(_trajectory, beg_idx, end_idx);
         }
     }
 
@@ -378,12 +385,9 @@ namespace openspace {
         _representations({"Representations"}),
         _moleculeFile(MoleculeFileInfo),
         _trajectoryFile(TrajectoryFileInfo),
-        _ssaoEnabled(SSAOEnabledInfo),
-        _ssaoIntensity(SSAOIntensityInfo, 12.f, 0.f, 100.f),
-        _ssaoRadius(SSAORadiusInfo, 6.f, 0.f, 100.f),
-        _ssaoBias(SSAOBiasInfo, 0.1f, 0.0f, 1.0f),
-        _exposure(ExposureInfo, 0.3f, 0.1f, 10.f),
-        _ensurePbc(EnsurePbcInfo, false),
+        _coarseGrained(CoarseGrainedInfo, false),
+        _applyPbcOnLoad(ApplyPbcOnLoadInfo, true),
+        _applyPbcPerFrame(ApplyPbcPerFrameInfo, false),
         _animationBaseScale(AnimationBaseScaleInfo, 1.0, 0.0, 1e20),
         _animationSpeed(AnimationSpeedInfo, 1.f, -100.f, 100.f),
         _animationRepeatMode(AnimationRepeatModeInfo)
@@ -392,14 +396,11 @@ namespace openspace {
         _localEpoch = openspace::global::timeManager->time().j2000Seconds();
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
-        _moleculeFile = p.moleculeFile;
-        _trajectoryFile = p.trajectoryFile;
-        _ssaoEnabled = p.ssaoEnabled.value_or(true);
-        _ssaoIntensity = p.ssaoIntensity.value_or(12.f);
-        _ssaoRadius = p.ssaoRadius.value_or(12.f);
-        _ssaoBias = p.ssaoBias.value_or(0.1f);
-        _exposure = p.exposure.value_or(0.3f);
-        _ensurePbc = p.ensurePbc.value_or(false);
+        _moleculeFile     = p.moleculeFile;
+        _trajectoryFile   = p.trajectoryFile;
+        _coarseGrained    = p.coarseGrained.value_or(false);
+        _applyPbcOnLoad   = p.applyPbcOnLoad.value_or(true);
+        _applyPbcPerFrame = p.applyPbcPerFrame.value_or(false);
 
         if (p.representations.has_value()) {
             const auto& reps = p.representations.value();
@@ -413,12 +414,13 @@ namespace openspace {
                 mol::rep::Color color = rep.color.has_value() ? codegen::map<mol::rep::Color>(rep.color.value()) : mol::rep::Color::Cpk;
                 std::string filter = rep.filter.value_or("");
                 float scale = rep.scale.value_or(1.0f);
+                glm::vec4 uniform_color = rep.uniformColor.value_or(glm::vec4(1.0f));
 
-                addRepresentation(type, color, filter, scale);
+                addRepresentation(type, color, filter, scale, uniform_color);
             }
         } else {
             // Add a default representation if none were supplied
-            addRepresentation(mol::rep::Type::SpaceFill, mol::rep::Color::Cpk, "", 1.0f);
+            addRepresentation(mol::rep::Type::SpaceFill, mol::rep::Color::Cpk, "", 1.0f, glm::vec4(1.0f));
         }
 
         _animationBaseScale = p.animationBaseScale.value_or(1.0);
@@ -439,12 +441,8 @@ namespace openspace {
         _animationRepeatMode.setReadOnly(true);
     
         addPropertySubOwner(_representations);
-        addProperty(_ssaoEnabled);
-        addProperty(_ssaoIntensity);
-        addProperty(_ssaoRadius);
-        addProperty(_ssaoBias);
-        addProperty(_exposure);
-        addProperty(_ensurePbc);
+        //addProperty(_applyPbcOnLoad);
+        addProperty(_applyPbcPerFrame);
         addProperty(_animationSpeed);
         addProperty(_animationRepeatMode);
     }
@@ -459,76 +457,10 @@ namespace openspace {
 
     void RenderableMolecule::initializeGL() {
         ZoneScoped
-
-            if (!fbo) { // initialize static gl things (common to all renderable instances)
-                glGenFramebuffers(1, &fbo);
-                glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-                ivec2 size = global::windowDelegate->currentWindowSize();
-
-                glGenTextures(1, &colorTex);
-                glBindTexture(GL_TEXTURE_2D, colorTex);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex, 0);
-                glBindTexture(GL_TEXTURE_2D, 0);
-
-                glGenTextures(1, &normalTex);
-                glBindTexture(GL_TEXTURE_2D, normalTex);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, size.x, size.y, 0, GL_RG, GL_UNSIGNED_SHORT, nullptr);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTex, 0);
-                glBindTexture(GL_TEXTURE_2D, 0);
-
-                glGenTextures(1, &depthTex);
-                glBindTexture(GL_TEXTURE_2D, depthTex);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTex, 0);
-                glBindTexture(GL_TEXTURE_2D, 0);
-
-                if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-                    LERROR("Mold Framebuffer is not complete");
-
-                md_gl_initialize();
-                md_gl_shaders_init(&shaders, shader_output_snippet);
-
-                postprocessing::initialize(size.x, size.y);
-
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-                billboardGlInit();
-            }
-
         initMolecule(_moleculeFile.value(), _trajectoryFile.value());
-
-        glUseCount++;
     }
 
     void RenderableMolecule::deinitializeGL() {
-        glUseCount--;
-        if (glUseCount == 0 && fbo) {
-            glDeleteTextures(1, &depthTex);
-            glDeleteTextures(1, &normalTex);
-            glDeleteTextures(1, &colorTex);
-            glDeleteFramebuffers(1, &fbo);
-            depthTex = 0;
-            colorTex = 0;
-            fbo = 0;
-            postprocessing::shutdown();
-        }
-
-        billboardGlDeinit();
-        md_gl_shaders_free(&shaders);
-        md_gl_shutdown();
     }
 
     bool RenderableMolecule::isReady() const {
@@ -536,6 +468,10 @@ namespace openspace {
     }
 
     void RenderableMolecule::update(const UpdateData& data) {
+        if (!this->isEnabled()) {
+            return;
+        }
+        
         // avoid updating if not in view, as it can be quite expensive.
         if (!_renderableInView)
             return;
@@ -544,30 +480,15 @@ namespace openspace {
 
         // update animation
         if (_trajectory) {
-            updateTrajectoryFrame(data.time.j2000Seconds());
+            updateTrajectoryFrame(data);
         }
-    }
-
-    static double normalizeDouble(double input) {
-        if (input > 1.0) {
-            return input / pow(10, 30);
-        }
-        else {
-            return input - 1.0;
-        }
-    }
-
-    static mat4_t mat4_from_glm(glm::mat4 const& src) {
-        mat4_t dst;
-        memcpy(&dst, &src, 4 * 4 * sizeof(float));
-        return dst;
     }
 
     void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
-        global::renderEngine->openglStateCache().loadCurrentGLState();
-
-        using namespace glm;
-        const dmat4 I(1.0);
+        GLuint fbo = global::moduleEngine->module<MoleculeModule>()->fbo();
+        const md_gl_shaders_t& shaders = global::moduleEngine->module<MoleculeModule>()->shaders();
+        
+        const glm::dmat4 I(1.0);
 
         // compute distance from camera to molecule
         dvec3 forward = data.modelTransform.translation - data.camera.positionVec3();
@@ -585,19 +506,19 @@ namespace openspace {
         Camera camCopy = data.camera;
         camCopy.setScaling(0.1f);
 
-        mat4 viewMatrix =
+        glm::mat4 viewMatrix =
             camCopy.combinedViewMatrix() *
             translate(I, data.modelTransform.translation) *
             scale(I, data.modelTransform.scale) *
             dmat4(data.modelTransform.rotation) *
-            translate(I, dvec3(-_center)) *
+            translate(I, glm::dvec3(-_center)) *
             I;
 
-        mat4 projMatrix =
-            dmat4(camCopy.sgctInternal.projectionMatrix()) *
+        glm::mat4 projMatrix =
+            glm::dmat4(camCopy.sgctInternal.projectionMatrix()) *
             I;
-
-        mat4_t model_mat = mat4_ident();
+        
+        const mat4_t model_mat = mat4_ident();
         std::vector<md_gl_draw_op_t> drawOps(_gl_representations.size());
         if (_molecule.atom.count) {
             for (size_t i = 0; i < _gl_representations.size(); ++i) {
@@ -619,88 +540,31 @@ namespace openspace {
             drawOps.data(),
         };
 
-        { // draw into mdlib shared fbo
-            GLint defaultFbo;
-            glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
-            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-            const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-            glDrawBuffers(2, bufs);
-
-            glClearColor(0.f, 0.f, 0.f, 1.f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glEnable(GL_DEPTH_TEST);
-            glDisable(GL_CULL_FACE);
-            glDisable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-            // resize the fbo if needed
-            if (global::windowDelegate->windowHasResized()) {
-                ivec2 size = global::windowDelegate->currentWindowSize();
-                glBindTexture(GL_TEXTURE_2D, colorTex);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-                glBindTexture(GL_TEXTURE_2D, 0);
-
-                glBindTexture(GL_TEXTURE_2D, normalTex);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, size.x, size.y, 0, GL_RG, GL_UNSIGNED_SHORT, nullptr);
-                glBindTexture(GL_TEXTURE_2D, 0);
-
-                glBindTexture(GL_TEXTURE_2D, depthTex);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-                glBindTexture(GL_TEXTURE_2D, 0);
+        GLint last_fbo;
+        GLint  last_draw_buffer_count = 0;
+        GLenum last_draw_buffers[8];
+        glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo);
+        for (int i = 0; i < ARRAY_SIZE(last_draw_buffers); ++i) {
+            GLint draw_buf;
+            glGetIntegerv(GL_DRAW_BUFFER0+i, &draw_buf);
+            if (!draw_buf) {
+                break;
             }
-
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_BACK);
-            md_gl_draw(&args);
-
-            { // postprocessing
-                postprocessing::Settings settings;
-                settings.background_intensity = { 0, 0, 0 };
-                settings.ambient_occlusion.enabled = _ssaoEnabled;
-                settings.ambient_occlusion.intensity = _ssaoIntensity;
-                settings.ambient_occlusion.radius = _ssaoRadius;
-                settings.ambient_occlusion.bias = _ssaoBias;
-                settings.bloom.enabled = false;
-                settings.depth_of_field.enabled = false;
-                settings.temporal_reprojection.enabled = false;
-                settings.tonemapping.enabled = true;
-                settings.tonemapping.mode = postprocessing::Tonemapping::ACES;
-                settings.tonemapping.exposure = _exposure;
-                settings.input_textures.depth = depthTex;
-                settings.input_textures.color = colorTex;
-                settings.input_textures.normal = normalTex;
-
-                postprocessing::postprocess(settings, mat4_from_glm(projMatrix));
-
-                // restore state after postprocess
-                glEnable(GL_DEPTH_TEST); 
-                glDisable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            }
-
-            glDrawBuffer(GL_FRONT_AND_BACK);
-            glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+            last_draw_buffers[last_draw_buffer_count++] = (GLenum)draw_buf;
         }
+            
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+        glDrawBuffers(2, bufs);
 
-        { // draw billboard pre-rendered with molecule inside
-            const double pad = 2.0f; // This should represent the additional space when applying scaling within representations
-            dvec3 sca = data.modelTransform.scale + dvec3(_radius * 2.f + pad);
-            sca *= 2.0; // COMBAK: why? molecule is sometimes slightly out of view otherwise
-            dmat4 billboardModel =
-                camCopy.combinedViewMatrix() *
-                translate(I, data.modelTransform.translation) *
-                scale(I, sca) *
-                I;
-            mat4 faceCamera = inverse(camCopy.viewRotationMatrix());
-            mat4 transform = projMatrix * mat4(billboardModel) * faceCamera;
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        md_gl_draw(&args);
 
-            dvec4 depth_ = dmat4(data.camera.sgctInternal.projectionMatrix()) * billboardModel * dvec4(0.0, 0.0, 0.0, 1.0);
-            double depth = normalizeDouble(depth_.w);
-
-            billboardDraw(transform, colorTex, depthTex, vec4(1.0), 0.0, static_cast<float>(depth));
-        }
-
-        global::renderEngine->openglStateCache().resetBlendState();
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, last_fbo);
+        glDrawBuffers(last_draw_buffer_count, last_draw_buffers);
+        
+        global::moduleEngine->module<MoleculeModule>()->setProjectionMatrix(projMatrix);
     }
 
     void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view trajFile) {
@@ -709,7 +573,7 @@ namespace openspace {
         // free previously loaded molecule
         freeMolecule();
 
-        const md_molecule_t* molecule = mol_manager::get_molecule(molFile);
+        const md_molecule_t* molecule = mol_manager::load_molecule(molFile, _coarseGrained);
         if (molecule) {
             // We deep copy the contents, so we can freely modify the fields (coordinates etc)
             md_molecule_copy(&_molecule, molecule, default_allocator);
@@ -723,11 +587,14 @@ namespace openspace {
             _center = {c.x, c.y, c.z};
             _radius = vec3_distance(aabb_min, aabb_max) * 0.5f;
             setBoundingSphere(_radius * 2.f);
+        } else {
+            LERROR("failed to initialize molecule: failed to load file");
+            return;
         }
 
         if (!trajFile.empty() && trajFile != "") {
             LDEBUG(fmt::format("Loading trajectory file '{}'", trajFile));
-            _trajectory = mol_manager::get_trajectory(trajFile);
+            _trajectory = mol_manager::load_trajectory(trajFile, _applyPbcOnLoad, molecule);
 
             if (!_trajectory) {
                 LERROR("failed to initialize trajectory: failed to load file");

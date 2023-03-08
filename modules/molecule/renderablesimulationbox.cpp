@@ -696,7 +696,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         
         { // postprocessing
             postprocessing::Settings settings;
-            settings.background_intensity = { 0, 0, 0 };
+            settings.background.enabled = false;
             settings.ambient_occlusion.enabled = _ssaoEnabled;
             settings.ambient_occlusion.intensity = _ssaoIntensity;
             settings.ambient_occlusion.radius = _ssaoRadius;
@@ -750,7 +750,7 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol, std::string_vie
     // free previously loaded molecule
     freeMolecule(mol);
 
-    const md_molecule_t* molecule = mol_manager::get_molecule(molFile);
+    const md_molecule_t* molecule = mol_manager::load_molecule(molFile);
     if (!molecule) {
         return;
     }
@@ -759,7 +759,7 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol, std::string_vie
 
     if (!trajFile.empty() && trajFile != "") {
         LDEBUG(fmt::format("Loading trajectory file '{}'", trajFile));
-        mol.trajectory = mol_manager::get_trajectory(trajFile);
+        mol.trajectory = mol_manager::load_trajectory(trajFile);
 
         if (!mol.trajectory) {
             LERROR("failed to initialize trajectory: failed to load file");
