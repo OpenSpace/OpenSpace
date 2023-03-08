@@ -34,19 +34,24 @@ uniform float ambientIntensity = 0.2;
 uniform float diffuseIntensity = 1.0;
 uniform float specularIntensity = 1.0;
 uniform bool performShading = true;
+
 uniform bool use_forced_color = false;
 uniform bool has_texture_diffuse;
 uniform bool has_texture_normal;
 uniform bool has_texture_specular;
 uniform bool has_color_specular;
+
 uniform sampler2D texture_diffuse;
 uniform sampler2D texture_normal;
 uniform sampler2D texture_specular;
+
 uniform vec4 color_diffuse;
 uniform vec4 color_specular;
+
 uniform int nLightSources;
 uniform vec3 lightDirectionsViewSpace[8];
 uniform float lightIntensities[8];
+
 uniform bool performManualDepthTest = false;
 uniform sampler2D gBufferDepthTexture;
 
@@ -81,8 +86,7 @@ Fragment getFragment() {
     st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
 
     // Manual depth test
-    float gBufferDepth =
-      denormalizeFloat(texture(gBufferDepthTexture, st).x);
+    float gBufferDepth = denormalizeFloat(texture(gBufferDepthTexture, st).x);
     if (vs_screenSpaceDepth > gBufferDepth) {
       frag.color = vec4(0.0);
       frag.depth = gBufferDepth;
@@ -136,6 +140,7 @@ Fragment getFragment() {
     else {
       normal = normalize(vs_normalViewSpace);
     }
+    frag.gNormal = vec4(normal, 0.0);
 
     // Could be seperated into ambinet, diffuse and specular and passed in as uniforms
     const vec3 lightColor = vec3(1.0);
