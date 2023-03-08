@@ -48,7 +48,6 @@ local apollo8State = {
   ]],
   Exit = [[
     openspace.scriptScheduler.clear()
-    openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false);
     openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
     ]] .. util.fadeOutNodes({ "Apollo8EarthBarycenterTrail" }) .. [[

@@ -1,30 +1,5 @@
 local textImagefolder = asset.localResource("screenspacetexts")
 
-local Title = {
-  Type = "ScreenSpaceImageLocal",
-  Identifier = "Installation-OnScreen-Title",
-  Enabled = false,
-  Name = "OnScreen Title",
-  FaceCamera = false,
-  Scale = 0.4,
-  CartesianPosition = { 0.0, -0.54, -2.0 },
-  TexturePath = textImagefolder .. "/text-cassini-dagjamningsuppdraget.png", -- just a random default text
-  Tag = { "installation_onscreen_text" }
-}
-
-local SimulationSpeed = {
-  Type = "ScreenSpaceImageLocal",
-  Identifier = "Installation-Time-Speed-Description",
-  Enabled = false,
-  Name = "Time Speed Description",
-  FaceCamera = false,
-  Scale = 0.3,
-  MultiplyColor = { 0.8, 0.8, 0.8 },
-  CartesianPosition = { 0.0, -0.7, -2.0 },
-  TexturePath = textImagefolder .. "/text-simspeed-10days.png", -- just a random default text
-  Tag = { "installation_onscreen_text" }
-}
-
 local InactiveWarning = {
   Type = "ScreenSpaceImageLocal",
   Identifier = "Installation-Inactive-Warning",
@@ -38,13 +13,9 @@ local InactiveWarning = {
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(Title)
-  openspace.addScreenSpaceRenderable(SimulationSpeed)
   openspace.addScreenSpaceRenderable(InactiveWarning)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Title.Identifier)
-  openspace.removeScreenSpaceRenderable(SimulationSpeed.Identifier)
   openspace.removeScreenSpaceRenderable(InactiveWarning.Identifier)
 end)
