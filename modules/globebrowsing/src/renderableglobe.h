@@ -103,6 +103,7 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void renderSecondary(const RenderData& data, RendererTasks&) override;
     void update(const UpdateData& data) override;
 
     SurfacePositionHandle calculateSurfacePositionHandle(

@@ -64,6 +64,8 @@ namespace std {
 #endif
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderableGlobe";
+
     // Global flags to modify the RenderableGlobe
     constexpr bool LimitLevelByAvailableData = true;
     constexpr bool PerformFrustumCulling = true;
@@ -664,6 +666,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _generalProperties.shadowMapping = true;
     }
     _generalProperties.shadowMapping.onChange(notifyShaderRecompilation);
+
+    // Use a secondary renderbin for labels, and other things that we want to be able to
+    // render with transparency, on top of the globe, after the atmosphere step
+    _secondaryRenderBin = RenderBin::PostDeferredTransparent;
 }
 
 void RenderableGlobe::initializeGL() {
@@ -735,9 +741,6 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
     if ((distanceToCamera < distance) || (_generalProperties.renderAtDistance)) {
         try {
-            // Before Shadows
-            _globeLabelsComponent.draw(data);
-
             if (_hasShadows && _shadowComponent.isEnabled()) {
                 // Set matrices and other GL states
                 RenderData lightRenderData(_shadowComponent.begin(data));
@@ -804,6 +807,15 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     }
 
     _lastChangedLayer = nullptr;
+}
+
+void RenderableGlobe::renderSecondary(const RenderData& data, RendererTasks&) {
+    try {
+        _globeLabelsComponent.draw(data);
+    }
+    catch (const ghoul::opengl::TextureUnit::TextureUnitError& e) {
+        LERROR(fmt::format("Error on drawing globe labels: '{}'", e.message));
+    }
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
