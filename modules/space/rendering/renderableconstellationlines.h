@@ -77,8 +77,7 @@ private:
     bool readSpeckFile();
 
     /**
-     * Callback method that gets triggered when <code>_constellationSelection</code>
-     * changes
+     * Callback method that gets triggered when `_constellationSelection` changes
      */
     void selectionPropertyHasChanged() override;
 

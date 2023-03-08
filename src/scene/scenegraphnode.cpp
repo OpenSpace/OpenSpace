@@ -737,7 +737,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     }
 
     const bool visible = _renderable && _renderable->isVisible() &&
-        _renderable->isReady() && _renderable->matchesRenderBinMask(data.renderBinMask);
+        _renderable->isReady();
 
     if (!visible) {
         return;
@@ -747,21 +747,31 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         return;
     }
 
+    RenderData newData = {
+        .camera = data.camera,
+        .time = data.time,
+        .renderBinMask = data.renderBinMask,
+        .modelTransform = {
+            .translation = _worldPositionCached,
+            .rotation = _worldRotationCached,
+            .scale = _worldScaleCached
+        }
+    };
+
+    if (_renderable->matchesSecondaryRenderBin(data.renderBinMask)) {
+        TracyGpuZone("Render Secondary Bin")
+        _renderable->renderSecondary(newData, tasks);
+    }
+
+    if (!_renderable->matchesRenderBinMask(data.renderBinMask)) {
+        return;
+    }
+
     {
         TracyGpuZone("Render")
 
-        RenderData newData = {
-            .camera = data.camera,
-            .time = data.time,
-            .renderBinMask = data.renderBinMask,
-            .modelTransform = {
-                .translation = _worldPositionCached,
-                .rotation = _worldRotationCached,
-                .scale = _worldScaleCached
-            }
-        };
-
         _renderable->render(newData, tasks);
+
         if (_computeScreenSpaceValues) {
             computeScreenSpaceData(newData);
         }

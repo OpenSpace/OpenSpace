@@ -32,7 +32,7 @@ class SyncBuffer;
 /**
  * Interface for synchronizable data
  *
- * Used by <code>SyncEngine</code>
+ * Used by `SyncEngine`
  */
 class Syncable {
 public:

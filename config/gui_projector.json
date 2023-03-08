@@ -30,11 +30,10 @@
         },
         {
           "fullscreen": true,
-          "monitor": 1,
           "name": "OpenSpace",
           "draw2d": false,
           "stereo": "none",
-          "pos": { "x": 0, "y": 0 },
+          "pos": { "x": 1920, "y": 1080 },
           "size": { "x": 1920, "y": 1080 },
           "viewports": [
             {

@@ -41,8 +41,7 @@ public:
     using TemplateProperty<volume::TransferFunction>::operator=;
 
 protected:
-    volume::TransferFunction fromLuaConversion(lua_State* state,
-        bool& success) const override;
+    volume::TransferFunction fromLuaConversion(lua_State* state) const override;
     void toLuaConversion(lua_State* state) const override;
     std::string toStringConversion() const override;
 };

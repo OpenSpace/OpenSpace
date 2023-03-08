@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/lua/lua_helper.h>
+
 namespace openspace::properties {
 
 template <typename T>
@@ -84,12 +86,14 @@ bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
 
 template <typename T>
 bool TemplateProperty<T>::setLuaValue(lua_State* state) {
-    bool success = false;
-    T thisValue = fromLuaConversion(state, success);
-    if (success) {
+    try {
+        T thisValue = fromLuaConversion(state);
         set(std::any(thisValue));
+        return true;
     }
-    return success;
+    catch (const ghoul::lua::LuaFormatException&) {
+        return false;
+    }
 }
 
 template <typename T>
