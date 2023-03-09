@@ -72,6 +72,16 @@ namespace {
 
 namespace openspace {
 
+// Initialize singleton
+SonificationModule* SonificationModule::_instance = nullptr;
+
+SonificationModule* SonificationModule::instance() {
+    if (_instance == nullptr) {
+        _instance = new SonificationModule();
+    }
+    return _instance;
+}
+
 SonificationModule::SonificationModule()
     : OpenSpaceModule("Sonification")
     , _enabled(EnabledInfo, false)
@@ -91,6 +101,7 @@ SonificationModule::~SonificationModule() {
     for (SonificationBase* sonification : _sonifications) {
         delete sonification;
     }
+    _instance = nullptr;
 }
 
 void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary) {

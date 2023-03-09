@@ -41,13 +41,16 @@ class SonificationModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "SonificationModule";
 
-    SonificationModule();
+    static SonificationModule* instance();
     ~SonificationModule();
 
     virtual void internalInitialize(const ghoul::Dictionary& dictionary) override;
     virtual void internalDeinitialize() override;
 
 private:
+    SonificationModule();
+    static SonificationModule* _instance;
+
     void update(std::atomic<bool>& isRunning);
 
     properties::BoolProperty _enabled;
