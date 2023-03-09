@@ -53,6 +53,7 @@
 
 #include <core/md_array.h>
 #include <core/md_allocator.h>
+#include <md_filter.h>
 #include <md_util.h>
 
 // COMBAK: because my ide complains
@@ -230,6 +231,20 @@ namespace {
 #include "renderablemolecule_codegen.cpp"
 }
 
+static void compute_mask(md_bitfield_t& mask, std::string_view filter, const md_molecule_t& mol) {
+    if (!filter.empty() && filter != "" && filter != "all") {
+        str_t str = {filter.data(), (int64_t)filter.length()};
+        char err_buf[1024];
+
+        if (md_filter(&mask, str, &mol, NULL, NULL, err_buf, sizeof(err_buf))) {
+            return;
+        }
+        LERROR(fmt::format("Invalid filter expression '{}': {}", filter, err_buf));
+    }
+    md_bitfield_clear(&mask);
+    md_bitfield_set_range(&mask, 0, mol.atom.count);
+}
+
 namespace openspace {
 
     void RenderableMolecule::addRepresentation(mol::rep::Type type, mol::rep::Color color, std::string filter, float scale, glm::vec4 uniform_color) {
@@ -275,6 +290,8 @@ namespace openspace {
         
         _representations.addPropertySubOwner(prop);
 
+        _representation_mask.emplace_back(md_bitfield_create(default_allocator));
+
         auto updateRep = [this, i, pType, pScale]() mutable {
             if (i >= _gl_representations.size()) {
                 return;
@@ -282,23 +299,39 @@ namespace openspace {
             mol::util::update_rep_type(_gl_representations[i], static_cast<mol::rep::Type>(pType->value()), pScale->value());
         };
 
-        auto updateCol = [this, i, pColor, pFilter, pUniformColor]() mutable {
+        auto updateFilt = [this, i, pFilter]() mutable {
+            if (i >= _representation_mask.size()) {
+                return;
+            }
+            const auto& filter = pFilter->value();
+            compute_mask(_representation_mask[i], filter, _molecule);
+            mol::util::update_rep_color(_gl_representations[i], _molecule, mol::rep::Color::Cpk, _representation_mask[i], glm::vec4(1.0f));
+        };
+
+        auto updateCol = [this, i, pColor, pUniformColor]() mutable {
             if (i >= _gl_representations.size()) {
                 return;
             }
+            if (i >= _representation_mask.size()) {
+                return;
+            }
+                
             mol::rep::Color color = static_cast<mol::rep::Color>(pColor->value());
+            const md_bitfield_t& mask = _representation_mask[i];
+
             if (color == mol::rep::Color::Uniform) {
                 pUniformColor->setVisibility(openspace::properties::Property::Visibility::Always);
             } else {
                 pUniformColor->setVisibility(openspace::properties::Property::Visibility::Hidden);
             }
-            mol::util::update_rep_color(_gl_representations[i], _molecule, color, pFilter->value(), pUniformColor->value());
+            mol::util::update_rep_color(_gl_representations[i], _molecule, color, mask, pUniformColor->value());
         };
 
         pType->onChange(updateRep);
         pScale->onChange(updateRep);
         pColor->onChange(updateCol);
         pFilter->onChange(updateCol);
+        pUniformColor->onChange(updateCol);
     }
 
     void RenderableMolecule::updateRepresentationsGL() {
@@ -324,8 +357,10 @@ namespace openspace {
                 auto scale  = std::any_cast<float>(pScale->get());
                 auto uniform_color = std::any_cast<glm::vec4>(pUniformColor->get());
 
+                compute_mask(_representation_mask[i], filter, _molecule);
+
                 mol::util::update_rep_type (_gl_representations[i], type, scale);
-                mol::util::update_rep_color(_gl_representations[i], _molecule, color, filter, uniform_color);
+                mol::util::update_rep_color(_gl_representations[i], _molecule, color, _representation_mask[i], uniform_color);
             }
         }
     }
@@ -366,6 +401,27 @@ namespace openspace {
                 _frame = frame;
                 mol::util::interpolate_coords(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame, _applyPbcPerFrame);
                 md_gl_molecule_set_atom_position(&_gl_molecule, 0, (uint32_t)_molecule.atom.count, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
+                
+                std::vector<int64_t> indices;
+                
+                for (int64_t i = 0; i < _representations.propertySubOwners().size(); ++i) {
+                    auto pColor  = _representations.propertySubOwners()[i]->property("Color");
+                    if (pColor) {
+                        auto color  = static_cast<mol::rep::Color>(std::any_cast<int>(pColor->get()));
+                        if (color == mol::rep::Color::SecondaryStructure) {
+                            indices.push_back(i);
+                        }
+                    }
+                }
+                
+                if (!indices.empty()) {
+                    mol::util::interpolate_secondary_structure(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame);
+                    md_gl_molecule_set_backbone_secondary_structure(&_gl_molecule, 0, (uint32_t)_molecule.backbone.count, _molecule.backbone.secondary_structure, 0);
+                    
+                    for (int64_t i : indices) {
+                        mol::util::update_rep_color(_gl_representations[i], _molecule, mol::rep::Color::SecondaryStructure, _representation_mask[i]);
+                    }
+                }
             }
             
             // Prefetch next frames
@@ -449,6 +505,9 @@ namespace openspace {
 
     RenderableMolecule::~RenderableMolecule() {
         freeMolecule();
+        for (auto& mask : _representation_mask) {
+            md_bitfield_free(&mask);
+        }
     }
 
     void RenderableMolecule::initialize() {
@@ -461,6 +520,9 @@ namespace openspace {
     }
 
     void RenderableMolecule::deinitializeGL() {
+        for (auto& rep : _gl_representations) {
+            md_gl_representation_free(&rep);
+        }
     }
 
     bool RenderableMolecule::isReady() const {
@@ -594,7 +656,7 @@ namespace openspace {
 
         if (!trajFile.empty() && trajFile != "") {
             LDEBUG(fmt::format("Loading trajectory file '{}'", trajFile));
-            _trajectory = mol_manager::load_trajectory(trajFile, _applyPbcOnLoad, molecule);
+            _trajectory = mol_manager::load_trajectory(trajFile, molecule, _applyPbcOnLoad);
 
             if (!_trajectory) {
                 LERROR("failed to initialize trajectory: failed to load file");

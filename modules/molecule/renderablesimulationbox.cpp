@@ -32,6 +32,7 @@
 
 #include <core/md_allocator.h>
 #include <core/md_array.h>
+#include <core/md_bitfield.h>
 #include <md_util.h>
 #include <md_script.h>
 #include <md_filter.h>
@@ -381,7 +382,24 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
 
     auto onUpdateCol = [this]() {
         for (molecule_data_t& mol: _molecules) {
-            mol::util::update_rep_color(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
+            const auto& filter = _viamdFilter.value();
+
+            md_bitfield_t mask = md_bitfield_create(default_allocator);
+            if (!filter.empty() && filter != "" && filter != "all") {
+                str_t str = {filter.data(), (int64_t)filter.length()};
+                char err_buf[1024];
+
+                if (!md_filter(&mask, str, &mol.molecule, NULL, NULL, err_buf, sizeof(err_buf))) {
+                    LERROR(fmt::format("Invalid filter expression: {}", err_buf));
+                    md_bitfield_clear(&mask);
+                    md_bitfield_set_range(&mask, 0, mol.molecule.atom.count);
+                }
+            } else {
+                md_bitfield_set_range(&mask, 0, mol.molecule.atom.count);
+            }
+
+            mol::util::update_rep_type(mol.drawRep, static_cast<mol::rep::Type>(_repType.value()), _repScale);
+            mol::util::update_rep_color(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), mask);
         }
     };
     
@@ -469,7 +487,24 @@ void RenderableSimulationBox::initializeGL() {
     size_t i = 0;
     for (molecule_data_t& mol : _molecules) {
         initMolecule(mol, _moleculeFiles.value().at(i), _trajectoryFiles.value().at(i));
-        mol::util::update_rep_color(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
+        const auto& filter = _viamdFilter.value();
+
+        md_bitfield_t mask = md_bitfield_create(default_allocator);
+        if (!filter.empty() && filter != "" && filter != "all") {
+            str_t str = {filter.data(), (int64_t)filter.length()};
+            char err_buf[1024];
+
+            if (!md_filter(&mask, str, &mol.molecule, NULL, NULL, err_buf, sizeof(err_buf))) {
+                LERROR(fmt::format("Invalid filter expression: {}", err_buf));
+                md_bitfield_clear(&mask);
+                md_bitfield_set_range(&mask, 0, mol.molecule.atom.count);
+            }
+        } else {
+            md_bitfield_set_range(&mask, 0, mol.molecule.atom.count);
+        }
+
+        mol::util::update_rep_type(mol.drawRep, static_cast<mol::rep::Type>(_repType.value()), _repScale);
+        mol::util::update_rep_color(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), mask);
         i++;
     }
     
@@ -772,9 +807,6 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol, std::string_vie
 
     md_gl_molecule_init(&mol.drawMol, &mol.molecule);
     md_gl_representation_init(&mol.drawRep, &mol.drawMol);
-    
-    mol::util::update_rep_type(mol.drawRep, static_cast<mol::rep::Type>(_repType.value()), _repScale);
-    mol::util::update_rep_color(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
 }
 
 void RenderableSimulationBox::freeMolecule(molecule_data_t& mol) {

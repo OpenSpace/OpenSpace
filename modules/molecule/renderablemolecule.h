@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
+#include <core/md_bitfield.h>
 #include <md_gl.h>
 #include <md_molecule.h>
 #include <md_trajectory.h>
@@ -48,6 +49,7 @@ public:
     void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
+    
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
@@ -76,6 +78,7 @@ private:
     double      _radius;
 
     std::vector<md_gl_representation_t> _gl_representations;
+    std::vector<md_bitfield_t> _representation_mask;
     properties::PropertyOwner  _representations;
     
     properties::StringProperty  _moleculeFile;

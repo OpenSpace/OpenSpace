@@ -1,13 +1,15 @@
+#include "cache.h"
+
 #include <md_molecule.h>
 #include <md_trajectory.h>
 #include <md_util.h>
+#include <md_frame_cache.h>
 #include <core/md_allocator.h>
 #include "viamd/loader.h"
 
 #include <string>
 #include <unordered_map>
 #include <ghoul/logging/logmanager.h>
-#include <md_frame_cache.h>
 
 #include <openspace/util/threadpool.h>
 #include <openspace/engine/globals.h>
@@ -29,8 +31,14 @@ struct string_hash {
     size_t operator()(const char* txt) const        { return hash_type{}(txt); }
 };
 
+struct ss_data {
+    md_array(md_secondary_structure_t) ss = 0;
+    uint64_t stride = 0;
+};
+
 static std::unordered_map<std::string, md_molecule_t,    string_hash, std::equal_to<>> molecules;
 static std::unordered_map<std::string, md_trajectory_i*, string_hash, std::equal_to<>> trajectories;
+static std::unordered_map<const md_trajectory_i*, ss_data> ss_table;
 
 namespace mol_manager {
 
@@ -280,7 +288,43 @@ md_trajectory_i* cached_trajectory_create(md_trajectory_i* backing_traj, md_allo
     return traj;
 }
 
-const md_trajectory_i* load_trajectory(std::string_view path_to_file, bool deperiodize_on_load, const md_molecule_t* mol) {
+static void load_secondary_structure_data(md_trajectory_i* traj, const md_molecule_t* mol) {
+    ASSERT(traj);
+    ASSERT(mol);
+
+    if (mol->backbone.range_count) {
+        ss_data data{};
+        
+        md_array_resize(data.ss, mol->backbone.count * md_trajectory_num_frames(traj), default_allocator);
+        MEMSET(data.ss, 0, md_array_bytes(data.ss));
+        data.stride = mol->backbone.count;
+        
+        ss_table[traj] = data;
+        
+        openspace::ThreadPool& threadPool = openspace::global::moduleEngine->module<openspace::MoleculeModule>()->threadPool();
+        threadPool.enqueue([ss_data = data.ss, ss_stride = data.stride, traj, old_mol = mol](){
+            // @TODO(Robin) This is stupid and the interface to compute secondary structure should be changed
+            md_molecule_t mol = *old_mol;
+            const int64_t num_frames = md_trajectory_num_frames(traj);
+            const int64_t stride = ALIGN_TO(mol.atom.count, 16);
+            const int64_t bytes = stride * sizeof(float) * 3;
+            float* coords = (float*)md_alloc(default_allocator, bytes);
+            defer { md_free(default_allocator, coords, bytes); };
+            
+            // Overwrite the coordinate section, since we will load trajectory frame data into these
+            mol.atom.x = coords + stride * 0;
+            mol.atom.y = coords + stride * 1;
+            mol.atom.z = coords + stride * 2;
+            
+            for (int64_t i = 0; i < num_frames; ++i) {
+                md_trajectory_load_frame(traj, i, NULL, mol.atom.x, mol.atom.y, mol.atom.z);
+                md_util_backbone_secondary_structure_compute(ss_data + ss_stride * i, ss_stride, &mol);
+            }
+        });
+    }
+}
+
+const md_trajectory_i* load_trajectory(std::string_view path_to_file, const md_molecule_t* mol, bool deperiodize_on_load) {
 
     // @TODO: Remove string when C++ 20 is supported
     std::string path(path_to_file);
@@ -324,6 +368,10 @@ const md_trajectory_i* load_trajectory(std::string_view path_to_file, bool deper
         traj = cached_traj;
     }
 
+    if (traj && mol) {
+        load_secondary_structure_data(traj, mol);
+    }
+
     trajectories[path] = traj;
     return traj;
 }
@@ -345,6 +393,24 @@ void prefetch_frame_range(const md_trajectory_i* traj, int64_t beg, int64_t end)
             }
         }
     }
+}
+
+std::span<const md_secondary_structure_t> get_secondary_structure_frame_data(const md_trajectory_i* traj, int64_t frame) {
+    if (frame < 0) {
+        return {};
+    }
+    if (frame >= md_trajectory_num_frames(traj)) {
+        return {};
+    }
+    auto it = ss_table.find(traj);
+    if (it != ss_table.end()) {
+        const ss_data& data = it->second;
+        const uint64_t ss_stride = data.stride;
+        const md_secondary_structure_t* ss_src = data.ss + frame * ss_stride;
+        return {ss_src, ss_stride};
+    }
+
+    return {};
 }
 
 }

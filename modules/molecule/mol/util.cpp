@@ -11,6 +11,8 @@
 #include <md_util.h>
 #include "viamd/coloring.h"
 
+#include "cache.h"
+
 namespace {
     constexpr const char* _loggerCat = "MolUtil";
 };
@@ -46,16 +48,11 @@ void update_rep_type(md_gl_representation_t& rep, mol::rep::Type type, float sca
     md_gl_representation_set_type_and_args(&rep, rep_type, rep_args);
 }
 
-void update_rep_color(md_gl_representation_t& rep, const md_molecule_t& mol, mol::rep::Color color, std::string_view filter, const glm::vec4& uniform_color) {
+void update_rep_color(md_gl_representation_t& rep, const md_molecule_t& mol, mol::rep::Color color, const md_bitfield_t& mask, const glm::vec4& uniform_color) {
     uint32_t count = static_cast<uint32_t>(mol.atom.count);
 
     uint32_t* colors = (uint32_t*)md_alloc(default_allocator, sizeof(uint32_t) * count);
-    md_bitfield_t mask = {0};
-    md_bitfield_init(&mask, default_allocator);
-    md_bitfield_reserve_range(&mask, 0, count);
-
     defer {
-        md_bitfield_free(&mask);
         if (colors) md_free(default_allocator, colors, sizeof(md_flags_t) * count);
     };
 
@@ -95,19 +92,9 @@ void update_rep_color(md_gl_representation_t& rep, const md_molecule_t& mol, mol
         break;
     }
 
-    if (!filter.empty() && filter != "" && filter != "all") {
-        str_t str = {filter.data(), (int64_t)filter.length()};
-        char err_buf[1024];
-
-        if (!md_filter(&mask, str, &mol, NULL, NULL, err_buf, sizeof(err_buf))) {
-            LERROR(fmt::format("Invalid filter expression: {}", err_buf));
-            return;
-        }
-
-        for (uint32_t i = 0; i < count; ++i) {
-            uint32_t bitmask = md_bitfield_test_bit(&mask, i) ? 0xFFFFFFFF : 0x00FFFFFF;
-            colors[i] &= bitmask;
-        }
+    for (uint32_t i = 0; i < count; ++i) {
+        uint32_t bitmask = md_bitfield_test_bit(&mask, i) ? 0xFFFFFFFF : 0x00FFFFFF;
+        colors[i] &= bitmask;
     }
 
     md_gl_representation_set_color(&rep, 0, count, colors, 0);
@@ -206,6 +193,80 @@ void interpolate_coords(md_molecule_t& mol, const md_trajectory_i* traj, Interpo
 
     if (ensure_pbc) {
         md_util_deperiodize_system(mol.atom.x, mol.atom.y, mol.atom.z, &mol.cell, &mol);
+    }
+}
+
+constexpr inline vec4_t convert_color(uint32_t rgba) {
+    return { (float)((rgba >> 0) & 0xFF) / 255.f, (float)((rgba >> 8) & 0xFF) / 255.f, (float)((rgba >> 16) & 0xFF) / 255.f, (float)((rgba >> 24) & 0xFF) / 255.f };
+}
+
+constexpr inline uint32_t convert_color(vec4_t color) {
+    uint32_t out = 0;
+    out |= ((uint32_t)(CLAMP(color.x, 0.0f, 1.0f) * 255.0f + 0.5f)) << 0;
+    out |= ((uint32_t)(CLAMP(color.y, 0.0f, 1.0f) * 255.0f + 0.5f)) << 8;
+    out |= ((uint32_t)(CLAMP(color.z, 0.0f, 1.0f) * 255.0f + 0.5f)) << 16;
+    out |= ((uint32_t)(CLAMP(color.w, 0.0f, 1.0f) * 255.0f + 0.5f)) << 24;
+    return out;
+}
+
+void interpolate_secondary_structure(md_molecule_t &mol, const md_trajectory_i* traj, InterpolationType interp, double time) {
+    if (mol.backbone.secondary_structure) {
+
+        const float t = (float)fract(time);
+        const int64_t frame = (int64_t)time;
+        const int64_t last_frame = md_trajectory_num_frames(traj) - 1;
+
+        const int64_t frames[4] = {
+            MAX(0LL, frame - 1),
+            MAX(0LL, frame),
+            MIN(frame + 1, last_frame),
+            MIN(frame + 2, last_frame)
+        };
+        
+        std::span<const md_secondary_structure_t> src_ss[4] = {
+            mol_manager::get_secondary_structure_frame_data(traj, frames[0]),
+            mol_manager::get_secondary_structure_frame_data(traj, frames[1]),
+            mol_manager::get_secondary_structure_frame_data(traj, frames[2]),
+            mol_manager::get_secondary_structure_frame_data(traj, frames[3]),
+        };
+
+        if (src_ss[0].empty() || src_ss[1].empty() || src_ss[2].empty() || src_ss[3].empty()) {
+            return;
+        }
+
+        switch (interp) {
+        case InterpolationType::Nearest: {
+            std::span<const md_secondary_structure_t> ss = t < 0.5f ? src_ss[1] : src_ss[2];
+            MEMCPY(mol.backbone.secondary_structure, ss.data(), mol.backbone.count * sizeof(md_secondary_structure_t));
+            break;
+        }
+        case InterpolationType::Linear: {
+            for (int64_t i = 0; i < mol.backbone.count; ++i) {
+                const vec4_t ss_f[2] = {
+                    convert_color((uint32_t)src_ss[0][i]),
+                    convert_color((uint32_t)src_ss[1][i]),
+                };
+                const vec4_t ss_res = vec4_lerp(ss_f[0], ss_f[1], t);
+                mol.backbone.secondary_structure[i] = (md_secondary_structure_t)convert_color(ss_res);
+            }
+            break;
+        }
+        case InterpolationType::Cubic: {
+            for (int64_t i = 0; i < mol.backbone.count; ++i) {
+                const vec4_t ss_f[4] = {
+                    convert_color((uint32_t)src_ss[0][i]),
+                    convert_color((uint32_t)src_ss[1][i]),
+                    convert_color((uint32_t)src_ss[2][i]),
+                    convert_color((uint32_t)src_ss[3][i]),
+                };
+                const vec4_t ss_res = cubic_spline(ss_f[0], ss_f[1], ss_f[2], ss_f[3], t, 1.0f);
+                mol.backbone.secondary_structure[i] = (md_secondary_structure_t)convert_color(ss_res);
+            }
+            break;
+        }
+        default:
+            ASSERT(false);
+        }
     }
 }
 
