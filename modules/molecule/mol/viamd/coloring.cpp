@@ -237,7 +237,7 @@ void color_atoms_cpk(uint32_t* colors, int64_t count, const md_molecule_t& mol) 
     
     if (!elem) {
         elements = md_array_create(md_element_t, count, default_temp_allocator);
-        md_util_element_decode(elements, md_array_size(elements), &mol);
+        md_util_element_guess(elements, md_array_size(elements), &mol);
         elem = elements;
     }
     
