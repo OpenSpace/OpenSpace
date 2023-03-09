@@ -81,8 +81,8 @@ namespace {
         "resolution"
     };
 
-    constexpr std::array<const char*, 3> UniformOpacityNames = {
-        "opacity", "colorTexture", "depthTexture"
+    constexpr std::array<const char*, 5> UniformOpacityNames = {
+        "opacity", "colorTexture", "depthTexture", "viewport", "resolution"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
@@ -874,6 +874,23 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             global::renderEngine->renderer()->additionalDepthTexture()
         );
         _quadProgram->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
+
+        // Will also need the resolution and viewport to get a texture coordinate
+        _quadProgram->setUniform(
+            _uniformOpacityCache.resolution,
+            glm::vec2(global::windowDelegate->currentDrawBufferResolution())
+        );
+
+        GLint vp[4] = { 0 };
+        global::renderEngine->openglStateCache().viewport(vp);
+        glm::ivec4 viewport = glm::ivec4(vp[0], vp[1], vp[2], vp[3]);
+        _quadProgram->setUniform(
+            _uniformOpacityCache.viewport,
+            static_cast<float>(viewport[0]),
+            static_cast<float>(viewport[1]),
+            static_cast<float>(viewport[2]),
+            static_cast<float>(viewport[3])
+        );
 
         // Draw
         glBindVertexArray(_quadVao);

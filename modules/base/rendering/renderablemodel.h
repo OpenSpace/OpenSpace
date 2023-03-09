@@ -123,7 +123,8 @@ private:
 
     // Opacity program
     ghoul::opengl::ProgramObject* _quadProgram = nullptr;
-    UniformCache(opacity, colorTexture, depthTexture) _uniformOpacityCache;
+    UniformCache(opacity, colorTexture, depthTexture, viewport,
+        resolution) _uniformOpacityCache;
 
     // Store the original RenderBin
     Renderable::RenderBin _originalRenderBin;

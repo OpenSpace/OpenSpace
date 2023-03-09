@@ -32,10 +32,24 @@ uniform float opacity = 1.0;
 uniform sampler2D colorTexture;
 uniform sampler2D depthTexture;
 
+uniform vec4 viewport;
+uniform vec2 resolution;
+
 Fragment getFragment() {
   Fragment frag;
 
-  vec4 textureColor = texture(colorTexture, vs_st);
+  // Modify the texCoord based on the Viewport and Resolution. This modification is
+  // necessary in case of side-by-side stereo as we only want to access the part of the
+  // feeding texture that we are currently responsible for.  Otherwise we would map the
+  // entire feeding texture into our half of the result texture, leading to a doubling of
+  // the "missing" half.  If you don't believe me, load a configuration file with the
+  // side_by_side stereo mode enabled, disable FXAA, and remove this modification.
+  // The same calculation is done in the HDR resolving shader
+  vec2 st = vs_st;
+  st.x = st.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
+  st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
+
+  vec4 textureColor = texture(colorTexture, st);
   if (textureColor.a == 0.0 || opacity == 0.0) {
     discard;
   }
