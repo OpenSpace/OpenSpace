@@ -112,6 +112,34 @@ namespace {
         );
     };
 
+    void setDefaultValueOrbitVisuals(bool shouldShowIfDefault) {
+        const std::string appearanceUri = "{defaultvalues_shape}.Renderable";
+        if (shouldShowIfDefault) {
+            // Draw using points
+            openspace::global::scriptEngine->queueScript(
+                fmt::format(
+                    "openspace.setPropertyValue('{0}.Appearance.Rendering', 1.0);"
+                    "openspace.setPropertyValue('{0}.Appearance.PointSize', 64.0);"
+                    "openspace.setPropertyValue('{0}.Appearance.EnableFade', false);"
+                    "openspace.setPropertyValue('{0}.Resolution', 100);",
+                    appearanceUri
+                ),
+                openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+        else {
+            // Draw using lines
+            openspace::global::scriptEngine->queueScript(
+                fmt::format(
+                    "openspace.setPropertyValue('{0}.Appearance.Rendering', 0.0);"
+                    "openspace.setPropertyValue('{0}.Appearance.EnableFade', true);",
+                    appearanceUri
+                ),
+                openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+    };
+
     // Set increased reach factors of all exoplanet renderables, to trigger fading out of
     // glyph cloud
     void setIncreasedReachfactors() {
@@ -2342,11 +2370,14 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
 
     std::vector<size_t>& planetIndices = _hostIdToPlanetsMap[createIdentifier(host)];
 
+    static bool changeDefaultValueOrbitAppearance = false;
+
     ImGui::BeginGroup();
     {
         if (!systemIsAdded) {
             if (ImGui::Button("Add system")) {
                 addExoplanetSystem(host);
+                setDefaultValueOrbitVisuals(changeDefaultValueOrbitAppearance);
             }
         }
         else {
@@ -2459,6 +2490,20 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                     );
                 }
             }
+
+            if (ImGui::Checkbox(
+                    "Point orbit for default values",
+                    &changeDefaultValueOrbitAppearance
+                ))
+            {
+                setDefaultValueOrbitVisuals(changeDefaultValueOrbitAppearance);
+            }
+            ImGui::SameLine();
+            renderHelpMarker(
+                "Orbits whose shape/inclination is set using default values will be "
+                "rendered as points instead of lines. This setting is applied globally "
+                "across all rendered systems"
+            );
         }
 
         ImGui::EndGroup();

@@ -240,8 +240,12 @@ void createExoplanetSystem(const std::string& starName) {
         ExoplanetDataEntry& planet = system.planetsData[i];
         const std::string planetName = system.planetNames[i];
 
+        bool hasDefaultValuesForOrbitShape = false;
+        bool hasDefaultValuesForOrbitTime = false;
+
         if (std::isnan(planet.ecc)) {
             planet.ecc = 0.f;
+            hasDefaultValuesForOrbitShape = true;
         }
 
         // KeplerTranslation requires angles in range [0, 360]
@@ -252,6 +256,10 @@ void createExoplanetSystem(const std::string& starName) {
             return angle;
         };
 
+        if (std::isnan(planet.i)) {
+            hasDefaultValuesForOrbitShape = true;
+        }
+
         planet.i = validAngle(planet.i, 90.f);
         planet.bigOmega = validAngle(planet.bigOmega, 180.f);
         planet.omega = validAngle(planet.omega, 90.f);
@@ -261,6 +269,7 @@ void createExoplanetSystem(const std::string& starName) {
         if (!std::isnan(planet.tt)) {
             epoch.setTime("JD " + std::to_string(planet.tt));
             sEpoch = std::string(epoch.ISO8601());
+            hasDefaultValuesForOrbitTime = true;
         }
         else {
             sEpoch = "2009-05-19T07:11:34.080";
@@ -314,7 +323,7 @@ void createExoplanetSystem(const std::string& starName) {
             "Transform = { "
                 "Translation = " + planetKeplerTranslation + ""
             "},"
-            "Tag = {'exoplanet'},"
+            "Tag = {'exoplanet', 'exoplanet_globe'},"
             "GUI = {"
                 "Name = '" + planetName + "',"
                 "Path = '" + guiPath + "'"
@@ -329,6 +338,14 @@ void createExoplanetSystem(const std::string& starName) {
             trailResolution *= 2;
         }
 
+        std::string extraTags = "";
+        if (hasDefaultValuesForOrbitShape) {
+            extraTags += ", 'defaultvalues_shape'";
+        }
+        if (hasDefaultValuesForOrbitTime) {
+            extraTags += ", 'defaultvalues_time'";
+        }
+
         const std::string planetTrailNode = "{"
             "Identifier = '" + planetIdentifier + "_Trail',"
             "Parent = '" + starIdentifier + "',"
@@ -339,7 +356,7 @@ void createExoplanetSystem(const std::string& starName) {
                 "Translation = " + planetKeplerTranslation + ","
                 "Color = { 1, 1, 1 }"
             "},"
-            "Tag = {'exoplanet'},"
+            "Tag = {'exoplanet', 'exoplanet_orbit'" + extraTags + "},"
             "GUI = {"
                 "Name = '" + planetName + " Trail',"
                 "Path = '" + guiPath + "'"
@@ -390,7 +407,7 @@ void createExoplanetSystem(const std::string& starName) {
                         "Rotation = " + ghoul::to_string(rotationMat3) + ""
                     "}"
                 "},"
-                "Tag = {'exoplanet'},"
+                "Tag = {'exoplanet', 'exoplanet_orbit_disc'},"
                 "GUI = {"
                     "Name = '" + planetName + " Disc',"
                     "Path = '" + guiPath + "'"
