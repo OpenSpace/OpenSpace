@@ -231,12 +231,12 @@ namespace {
 #include "renderablemolecule_codegen.cpp"
 }
 
-static void compute_mask(md_bitfield_t& mask, std::string_view filter, const md_molecule_t& mol) {
+static void compute_mask(md_bitfield_t& mask, std::string_view filter, const md_molecule_t& mol, bool& is_dynamic) {
     if (!filter.empty() && filter != "" && filter != "all") {
         str_t str = {filter.data(), (int64_t)filter.length()};
         char err_buf[1024];
 
-        if (md_filter(&mask, str, &mol, NULL, NULL, err_buf, sizeof(err_buf))) {
+        if (md_filter(&mask, str, &mol, NULL, &is_dynamic, err_buf, sizeof(err_buf))) {
             return;
         }
         LERROR(fmt::format("Invalid filter expression '{}': {}", filter, err_buf));
@@ -280,51 +280,53 @@ namespace openspace {
         properties::FloatProperty* pScale = new properties::FloatProperty(ScaleInfo, 1.0f, 0.0f, 10.0f);
         pScale->setValue(scale);
 
-        size_t i = _representations.propertySubOwners().size();
-        PropertyOwner* prop = new PropertyOwner({std::to_string(i + 1)});
+        size_t i = _repProps.propertySubOwners().size();
+
+        PropertyOwnerInfo prop_info {
+            fmt::format("rep{}", i),
+            fmt::format("Representation {}", i),
+            fmt::format("Visual representation of molecule", i),
+        };
+
+        PropertyOwner* prop = new PropertyOwner(prop_info);
         prop->addProperty(pType);
         prop->addProperty(pColor);
         prop->addProperty(pFilter);
         prop->addProperty(pScale);
         prop->addProperty(pUniformColor);
         
-        _representations.addPropertySubOwner(prop);
+        _repProps.addPropertySubOwner(prop);
 
-        _representation_mask.emplace_back(md_bitfield_create(default_allocator));
+        _repData.emplace_back();
 
         auto updateRep = [this, i, pType, pScale]() mutable {
-            if (i >= _gl_representations.size()) {
+            if (i >= _repData.size()) {
                 return;
             }
-            mol::util::update_rep_type(_gl_representations[i], static_cast<mol::rep::Type>(pType->value()), pScale->value());
+            mol::util::update_rep_type(_repData[i].gl_rep, static_cast<mol::rep::Type>(pType->value()), pScale->value());
         };
 
         auto updateFilt = [this, i, pFilter]() mutable {
-            if (i >= _representation_mask.size()) {
+            if (i >= _repData.size()) {
                 return;
             }
             const auto& filter = pFilter->value();
-            compute_mask(_representation_mask[i], filter, _molecule);
-            mol::util::update_rep_color(_gl_representations[i], _molecule, mol::rep::Color::Cpk, _representation_mask[i], glm::vec4(1.0f));
+            compute_mask(_repData[i].mask, filter, _molecule, _repData[i].dynamic);
+            mol::util::update_rep_color(_repData[i].gl_rep, _molecule, mol::rep::Color::Cpk, _repData[i].mask, glm::vec4(1.0f));
         };
 
         auto updateCol = [this, i, pColor, pUniformColor]() mutable {
-            if (i >= _gl_representations.size()) {
-                return;
-            }
-            if (i >= _representation_mask.size()) {
+            if (i >= _repData.size()) {
                 return;
             }
                 
-            mol::rep::Color color = static_cast<mol::rep::Color>(pColor->value());
-            const md_bitfield_t& mask = _representation_mask[i];
-
+            const mol::rep::Color color = static_cast<mol::rep::Color>(pColor->value());
             if (color == mol::rep::Color::Uniform) {
                 pUniformColor->setVisibility(openspace::properties::Property::Visibility::Always);
             } else {
                 pUniformColor->setVisibility(openspace::properties::Property::Visibility::Hidden);
             }
-            mol::util::update_rep_color(_gl_representations[i], _molecule, color, mask, pUniformColor->value());
+            mol::util::update_rep_color(_repData[i].gl_rep, _molecule, color, _repData[i].mask, pUniformColor->value());
         };
 
         pType->onChange(updateRep);
@@ -334,21 +336,23 @@ namespace openspace {
         pUniformColor->onChange(updateCol);
     }
 
-    void RenderableMolecule::updateRepresentationsGL() {
-        for (size_t i = 0; i < _gl_representations.size(); ++i) {
-            md_gl_representation_free(&_gl_representations[i]);
+    void RenderableMolecule::updateRepresentations() {
+        for (auto& rep : _repData) {
+            md_gl_representation_free(&rep.gl_rep);
         }
-        _gl_representations.resize(_representations.propertySubOwners().size());
-        for (size_t i = 0; i < _gl_representations.size(); ++i) {
-            _gl_representations[i] = {0};
-            md_gl_representation_init(&_gl_representations[i], &_gl_molecule);
+        
+        _repData.resize(_repProps.propertySubOwners().size());
+        for (size_t i = 0; i < _repData.size(); ++i) {
+            auto& rep = _repData[i];
+            rep.gl_rep = {0};
+            md_gl_representation_init(&rep.gl_rep, &_gl_molecule);
             
-            auto rep = _representations.propertySubOwners()[i];
-            auto pType   = rep->property("Type");
-            auto pColor  = rep->property("Color");
-            auto pFilter = rep->property("Filter");
-            auto pScale  = rep->property("Scale");
-            auto pUniformColor = rep->property("UniformColor");
+            auto pRep    = _repProps.propertySubOwners()[i];
+            auto pType   = pRep->property("Type");
+            auto pColor  = pRep->property("Color");
+            auto pFilter = pRep->property("Filter");
+            auto pScale  = pRep->property("Scale");
+            auto pUniformColor = pRep->property("UniformColor");
 
             if (pType && pColor && pFilter && pScale && pUniformColor) {
                 auto type   = static_cast<mol::rep::Type> (std::any_cast<int>(pType->get()));
@@ -357,10 +361,10 @@ namespace openspace {
                 auto scale  = std::any_cast<float>(pScale->get());
                 auto uniform_color = std::any_cast<glm::vec4>(pUniformColor->get());
 
-                compute_mask(_representation_mask[i], filter, _molecule);
+                compute_mask(rep.mask, filter, _molecule, rep.dynamic);
 
-                mol::util::update_rep_type (_gl_representations[i], type, scale);
-                mol::util::update_rep_color(_gl_representations[i], _molecule, color, _representation_mask[i], uniform_color);
+                mol::util::update_rep_type (rep.gl_rep, type, scale);
+                mol::util::update_rep_color(rep.gl_rep, _molecule, color, rep.mask, uniform_color);
             }
         }
     }
@@ -369,9 +373,9 @@ namespace openspace {
         double frame = 0;
         switch (static_cast<AnimationRepeatMode>(mode)) {
         case AnimationRepeatMode::PingPong:
-            frame = std::fmod(time, 2 * num_frames);
-            if (frame >= num_frames) {
-                frame = 2 * num_frames - frame;
+            frame = std::fmod(time, 2.0 * num_frames);
+            if (frame > num_frames) {
+                frame = 2.0 * num_frames - frame;
             }
             break;
         case AnimationRepeatMode::Wrap:
@@ -402,24 +406,31 @@ namespace openspace {
                 mol::util::interpolate_coords(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame, _applyPbcPerFrame);
                 md_gl_molecule_set_atom_position(&_gl_molecule, 0, (uint32_t)_molecule.atom.count, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
                 
-                std::vector<int64_t> indices;
+                std::vector<size_t> ss_rep_indices;
                 
-                for (int64_t i = 0; i < _representations.propertySubOwners().size(); ++i) {
-                    auto pColor  = _representations.propertySubOwners()[i]->property("Color");
+                for (size_t i = 0; i < _repProps.propertySubOwners().size(); ++i) {
+                    auto pColor  = _repProps.propertySubOwners()[i]->property("Color");
+                    auto pFilter = _repProps.propertySubOwners()[i]->property("Filter");
                     if (pColor) {
                         auto color  = static_cast<mol::rep::Color>(std::any_cast<int>(pColor->get()));
                         if (color == mol::rep::Color::SecondaryStructure) {
-                            indices.push_back(i);
+                            ss_rep_indices.push_back(i);
+                        }
+                    }
+                    if (pFilter) {
+                        auto filter = std::any_cast<std::string>(pFilter->get());
+                        if (_repData[i].dynamic) {
+                            compute_mask(_repData[i].mask, filter, _molecule, _repData[i].dynamic);
                         }
                     }
                 }
                 
-                if (!indices.empty()) {
+                if (!ss_rep_indices.empty()) {
                     mol::util::interpolate_secondary_structure(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame);
                     md_gl_molecule_set_backbone_secondary_structure(&_gl_molecule, 0, (uint32_t)_molecule.backbone.count, _molecule.backbone.secondary_structure, 0);
                     
-                    for (int64_t i : indices) {
-                        mol::util::update_rep_color(_gl_representations[i], _molecule, mol::rep::Color::SecondaryStructure, _representation_mask[i]);
+                    for (int64_t i : ss_rep_indices) {
+                        mol::util::update_rep_color(_repData[i].gl_rep, _molecule, mol::rep::Color::SecondaryStructure, _repData[i].mask);
                     }
                 }
             }
@@ -438,7 +449,7 @@ namespace openspace {
 
     RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary),
-        _representations({"Representations"}),
+        _repProps({"Representations"}),
         _moleculeFile(MoleculeFileInfo),
         _trajectoryFile(TrajectoryFileInfo),
         _coarseGrained(CoarseGrainedInfo, false),
@@ -460,7 +471,7 @@ namespace openspace {
 
         if (p.representations.has_value()) {
             const auto& reps = p.representations.value();
-            _gl_representations.reserve(reps.size());
+            _repData.reserve(reps.size());
 
             for (size_t i = 0; i < reps.size(); ++i) {
                 const auto& rep = reps[i];
@@ -496,7 +507,7 @@ namespace openspace {
         _animationSpeed.setReadOnly(true);
         _animationRepeatMode.setReadOnly(true);
     
-        addPropertySubOwner(_representations);
+        addPropertySubOwner(_repProps);
         //addProperty(_applyPbcOnLoad);
         addProperty(_applyPbcPerFrame);
         addProperty(_animationSpeed);
@@ -505,9 +516,6 @@ namespace openspace {
 
     RenderableMolecule::~RenderableMolecule() {
         freeMolecule();
-        for (auto& mask : _representation_mask) {
-            md_bitfield_free(&mask);
-        }
     }
 
     void RenderableMolecule::initialize() {
@@ -520,8 +528,8 @@ namespace openspace {
     }
 
     void RenderableMolecule::deinitializeGL() {
-        for (auto& rep : _gl_representations) {
-            md_gl_representation_free(&rep);
+        for (auto& rep : _repData) {
+            md_gl_representation_free(&rep.gl_rep);
         }
     }
 
@@ -581,10 +589,10 @@ namespace openspace {
             I;
         
         const mat4_t model_mat = mat4_ident();
-        std::vector<md_gl_draw_op_t> drawOps(_gl_representations.size());
+        std::vector<md_gl_draw_op_t> drawOps(_repData.size());
         if (_molecule.atom.count) {
-            for (size_t i = 0; i < _gl_representations.size(); ++i) {
-                drawOps[i] = {&_gl_representations[i], &model_mat[0][0]};
+            for (size_t i = 0; i < _repData.size(); ++i) {
+                drawOps[i] = {&_repData[i].gl_rep, &model_mat[0][0]};
             }
         }
 
@@ -641,7 +649,7 @@ namespace openspace {
             md_molecule_copy(&_molecule, molecule, default_allocator);
 
             md_gl_molecule_init(&_gl_molecule, &_molecule);
-            updateRepresentationsGL();
+            updateRepresentations();
 
             vec3_t aabb_min, aabb_max;
             md_util_compute_aabb_xyzr(&aabb_min, &aabb_max, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, _molecule.atom.radius, _molecule.atom.count);
@@ -669,10 +677,7 @@ namespace openspace {
     }
 
     void RenderableMolecule::freeMolecule() {
-        for (auto& rep : _gl_representations) {
-            md_gl_representation_free(&rep);
-        }
-        _gl_representations.clear();
+        _repData.clear();
 
         md_gl_molecule_free(&_gl_molecule);
         md_molecule_free(&_molecule, default_allocator);
@@ -680,7 +685,16 @@ namespace openspace {
         _molecule = {};
         _trajectory = nullptr;
         _gl_molecule = {};
-        _gl_representations.clear();
+    }
+
+    RenderableMolecule::RepData::RepData() {
+        //md_gl_representation_init(&gl_rep, &mol);
+        mask = md_bitfield_create(default_allocator);
+    }
+
+    RenderableMolecule::RepData::~RepData() {
+        //md_gl_representation_free(&gl_rep);
+        md_bitfield_free(&mask);
     }
 
 } // namespace openspace

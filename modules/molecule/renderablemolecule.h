@@ -63,7 +63,7 @@ private:
 
     void initMolecule(std::string_view mol_file, std::string_view traj_file = {});
     void freeMolecule();
-    void updateRepresentationsGL();
+    void updateRepresentations();
 
     bool _renderableInView; // indicates whether the molecule is in view in any camera's viewpoint
 
@@ -77,9 +77,18 @@ private:
     glm::dvec3  _center;
     double      _radius;
 
-    std::vector<md_gl_representation_t> _gl_representations;
-    std::vector<md_bitfield_t> _representation_mask;
-    properties::PropertyOwner  _representations;
+    struct RepData {
+        RepData();
+        ~RepData();
+        md_gl_representation_t gl_rep;
+        md_bitfield_t mask;
+        bool dynamic;
+    };
+
+    std::vector<RepData> _repData;
+    //std::vector<md_gl_representation_t> _gl_representations;
+    //std::vector<md_bitfield_t> _representation_mask;
+    properties::PropertyOwner  _repProps;
     
     properties::StringProperty  _moleculeFile;
     properties::StringProperty  _trajectoryFile;

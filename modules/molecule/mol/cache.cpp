@@ -20,24 +20,23 @@
 #define MD_CACHED_TRAJ_MAGIC    0x234236423674DBA2
 #define MD_MEM_TRAJ_MAGIC       0x1289371265F17256
 
-// We have to do this dance since the type stored is std:string and we want to
-// do lookups with std::string_view
-struct string_hash {
-    using is_transparent = void;
-    using hash_type = std::hash<std::string_view>;  // just a helper local type
-
-    size_t operator()(std::string_view txt) const   { return hash_type{}(txt); }
-    size_t operator()(const std::string& txt) const { return hash_type{}(txt); }
-    size_t operator()(const char* txt) const        { return hash_type{}(txt); }
-};
-
 struct ss_data {
     md_array(md_secondary_structure_t) ss = 0;
     uint64_t stride = 0;
 };
 
-static std::unordered_map<std::string, md_molecule_t,    string_hash, std::equal_to<>> molecules;
-static std::unordered_map<std::string, md_trajectory_i*, string_hash, std::equal_to<>> trajectories;
+static size_t mol_hash(std::string_view path_to_file, bool coarse_grained) {
+    size_t hash = std::hash<std::string_view>{}(path_to_file);
+    return (hash << 1) | (size_t)coarse_grained;
+}
+
+static uint64_t traj_hash(std::string_view path_to_file, bool deperiodize) {
+    size_t hash = std::hash<std::string_view>{}(path_to_file);
+    return (hash << 1) | (size_t)deperiodize;
+}
+
+static std::unordered_map<size_t, md_molecule_t> molecules;
+static std::unordered_map<size_t, md_trajectory_i*> trajectories;
 static std::unordered_map<const md_trajectory_i*, ss_data> ss_table;
 
 namespace mol_manager {
@@ -46,9 +45,8 @@ constexpr const char* _loggerCat = "MoleculeManager";
 
 const md_molecule_t* load_molecule(std::string_view path_to_file, bool coarse_grained) {
 
-    // @TODO: Remove string when C++ 20 is supported
-    std::string path(path_to_file);
-    auto entry = molecules.find(path);
+    const uint64_t hash = mol_hash(path_to_file, coarse_grained);
+    auto entry = molecules.find(hash);
     if (entry != molecules.end()) {
         return &entry->second;
     }
@@ -73,7 +71,7 @@ const md_molecule_t* load_molecule(std::string_view path_to_file, bool coarse_gr
     const md_util_postprocess_flags_t flags = coarse_grained ? MD_UTIL_POSTPROCESS_COARSE_GRAINED : MD_UTIL_POSTPROCESS_ALL;
     md_util_postprocess_molecule(&mol, default_allocator, flags);
 
-    return &(molecules[path] = mol);
+    return &(molecules[hash] = mol);
 }
 
 struct md_mem_trajectory_t {
@@ -325,10 +323,8 @@ static void load_secondary_structure_data(md_trajectory_i* traj, const md_molecu
 }
 
 const md_trajectory_i* load_trajectory(std::string_view path_to_file, const md_molecule_t* mol, bool deperiodize_on_load) {
-
-    // @TODO: Remove string when C++ 20 is supported
-    std::string path(path_to_file);
-    auto entry = trajectories.find(path);
+    const size_t hash = traj_hash(path_to_file, deperiodize_on_load);
+    auto entry = trajectories.find(hash);
     if (entry != trajectories.end()) {
         return entry->second;
     }
@@ -372,7 +368,7 @@ const md_trajectory_i* load_trajectory(std::string_view path_to_file, const md_m
         load_secondary_structure_data(traj, mol);
     }
 
-    trajectories[path] = traj;
+    trajectories[hash] = traj;
     return traj;
 }
 

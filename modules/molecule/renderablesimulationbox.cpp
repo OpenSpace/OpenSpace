@@ -56,6 +56,8 @@
 #include <openspace/util/httprequest.h>
 #include <openspace/util/updatestructures.h>
 
+#include <cmath>
+
 // COMBAK: because my ide complains
 #ifndef ZoneScoped
 #define ZoneScoped
@@ -582,18 +584,25 @@ void RenderableSimulationBox::update(const UpdateData& data) {
     else
         _renderableInView = false;
 
-    double t_cur= data.time.j2000Seconds();
+    double t_cur = data.time.j2000Seconds();
     double dt = t_cur - data.previousFrameTime.j2000Seconds();
     
     for (molecule_data_t& mol : _molecules) {
         // update animation
         if (mol.trajectory) {
             // Emulate PingPong animation by manipulating the local time t_local per trajectory
-            const double t_dur = static_cast<double>(MAX(0, md_trajectory_num_frames(mol.trajectory) - 1));
+            const int64_t num_frames = md_trajectory_num_frames(mol.trajectory);
+            double frame = std::fmod(t_cur * _animationSpeed, 2.0 * num_frames);
+            if (frame > num_frames) {
+                frame = 2.0 * num_frames - frame;
+            }
+            /*
+            const double t_dur = static_cast<double>(MAX(0,  - 1));
             double t_loc = fract(t_cur / (2.0 * t_dur));
             double t = t_loc < 0.5 ? (t_loc * 2.0) : (1.0 - t_loc * 2.0);
+            */
 
-            mol::util::interpolate_coords(mol.molecule, mol.trajectory, mol::util::InterpolationType::Cubic, t);
+            mol::util::interpolate_coords(mol.molecule, mol.trajectory, mol::util::InterpolationType::Cubic, frame);
             md_gl_molecule_set_atom_position(&mol.drawMol, 0, uint32_t(mol.molecule.atom.count), mol.molecule.atom.x, mol.molecule.atom.y, mol.molecule.atom.z, 0);
         }
     
