@@ -111,24 +111,16 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
     _port = p.port.value_or(_port);
 
     // Fill sonification list
-    _sonifications.push_back(
-        new CompareSonification(_ipAddress, _port)
-    );
+    _sonifications.push_back(new CompareSonification(_ipAddress, _port));
     addPropertySubOwner(_sonifications.back());
 
-    _sonifications.push_back(
-        new PlanetsSonification(_ipAddress, _port)
-    );
+    _sonifications.push_back(new PlanetsSonification(_ipAddress, _port));
     addPropertySubOwner(_sonifications.back());
 
-    _sonifications.push_back(
-        new SolarSonification(_ipAddress, _port)
-    );
+    _sonifications.push_back(new SolarSonification(_ipAddress, _port));
     addPropertySubOwner(_sonifications.back());
 
-    _sonifications.push_back(
-        new TimeSonification(_ipAddress, _port)
-    );
+    _sonifications.push_back(new TimeSonification(_ipAddress, _port));
     addPropertySubOwner(_sonifications.back());
 
     // Only the master runs the SonificationModule
