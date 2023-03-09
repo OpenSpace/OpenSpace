@@ -169,6 +169,7 @@ private:
     void refocusView() const;
     void flyToOverview() const;
     void flyToInsideView() const;
+    void flyToStar(std::string_view hostIdentifier) const;
 
     DataLoader _dataLoader;
     std::vector<ExoplanetItem> _data;

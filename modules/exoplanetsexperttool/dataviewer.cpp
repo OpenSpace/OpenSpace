@@ -1371,6 +1371,18 @@ void DataViewer::renderTable(const std::string& tableId,
                                 ImGui::TextDisabled("A system view is already opened for this system");
                             }
 
+                            bool systemIsAdded = !systemCanBeAdded(item.hostName);
+                            if (systemIsAdded) {
+                                if (ImGui::Button("Zoom to star")) {
+                                    flyToStar(createIdentifier(item.hostName));
+                                }
+                            }
+                            else {
+                                if (ImGui::Button("+ Add system")) {
+                                    addExoplanetSystem(item.hostName);
+                                }
+                            }
+
                             ImGui::EndPopup();
                             ImGui::PopID();
                         }
@@ -2397,15 +2409,7 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
 
             ImGui::SameLine();
             if (ImGui::Button("Zoom to star")) {
-                // Ugly: Always set reach factors when targetting object;
-                // we can't do it until the system is added to the scene
-                setIncreasedReachfactors();
-
-                openspace::global::scriptEngine->queueScript(
-                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '" + hostIdentifier + "');"
-                    "openspace.pathnavigation.zoomToDistanceRelative(100.0, 5.0);",
-                    scripting::ScriptEngine::RemoteScripting::Yes
-                );
+                flyToStar(hostIdentifier);
             }
 
             // Buttons to enable/disable helper renderables
@@ -2993,6 +2997,21 @@ void DataViewer::flyToInsideView() const {
             "Duration = 4, "
             "PathType = 'Linear'"
         "});",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+}
+
+void DataViewer::flyToStar(std::string_view hostIdentifier) const {
+    // Ugly: Always set reach factors when targetting object;
+    // we can't do it until the system is added to the scene
+    setIncreasedReachfactors();
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.setPropertyValueSingle("
+            "'NavigationHandler.OrbitalNavigator.Anchor',"
+            "'" + std::string(hostIdentifier) + 
+        "')"
+        "openspace.pathnavigation.zoomToDistanceRelative(100.0, 5.0);",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
