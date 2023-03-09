@@ -539,7 +539,7 @@ void ParallelPeer::resetTimeOffset() {
 }
 
 void ParallelPeer::preSynchronization() {
-    ZoneScoped
+    ZoneScoped;
 
     std::unique_lock<std::mutex> unlock(_receiveBufferMutex);
     while (!_receiveBuffer.empty()) {

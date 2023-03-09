@@ -51,7 +51,7 @@ public:
     double edgeLatitudeNearestEquator() const;
 
     /**
-     * Returns \c true if the center above the equator
+     * Returns `true` if the center above the equator
      */
     double isNorthern() const;
 
@@ -63,7 +63,7 @@ public:
     double maxLon() const;
 
     /**
-     * Returns \c true if the specified coordinate is contained within the patch
+     * Returns `true` if the specified coordinate is contained within the patch
      */
     bool contains(const Geodetic2& p) const;
 

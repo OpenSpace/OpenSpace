@@ -120,7 +120,7 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
 }
 
 void DashboardItemVelocity::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     const glm::dvec3 currentPos = global::renderEngine->scene()->camera()->positionVec3();
     const glm::dvec3 dt = currentPos - _prevPosition;
@@ -153,7 +153,7 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemVelocity::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     const double d = glm::length(1e20);
     std::pair<double, std::string_view> dist;

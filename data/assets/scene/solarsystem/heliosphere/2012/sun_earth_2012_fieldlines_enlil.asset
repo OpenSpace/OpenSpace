@@ -8,11 +8,12 @@ local transferFunctions = asset.syncedResource({
   Version = 1
 })
 
-local fieldlineData  = asset.syncedResource({
+local fieldlineData = asset.syncedResource({
   Name = "Fieldlines Data ENLIL",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-enlil",
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
 
 local loop = {
@@ -186,31 +187,6 @@ local ENLILStereoA = {
 
 asset.onInitialize(function ()
   openspace.action.registerAction(loop)
-
-  if not openspace.directoryExists(unzippedDataDestination.EqPlane011AU1) then
-    openspace.printInfo("Extracting " .. "Fieldlines from ENLIL model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "011AU_eq_plane_1.zip", unzippedDataDestination.EqPlane011AU1, true)
-  end
-  if not openspace.directoryExists(unzippedDataDestination.EqPlane011AU2) then
-    openspace.printInfo("Extracting " .. "Fieldlines from ENLIL model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "011AU_eq_plane_2.zip", unzippedDataDestination.EqPlane011AU2, true)
-  end
-  if not openspace.directoryExists(unzippedDataDestination.Lat4011AU1) then
-    openspace.printInfo("Extracting " .. "Fieldlines from ENLIL model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "011AU_lat4_1.zip", unzippedDataDestination.Lat4011AU1, true)
-  end
-  if not openspace.directoryExists(unzippedDataDestination.Lat4011AU2) then
-    openspace.printInfo("Extracting " .. "Fieldlines from ENLIL model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "011AU_lat4_2.zip", unzippedDataDestination.Lat4011AU2, true)
-  end
-  if not openspace.directoryExists(unzippedDataDestination.Earth) then
-    openspace.printInfo("Extracting " .. "Fieldlines from ENLIL model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "earth.zip", unzippedDataDestination.Earth, true)
-  end
-  if not openspace.directoryExists(unzippedDataDestination.StereoA) then
-    openspace.printInfo("Extracting " .. "Fieldlines from ENLIL model of 2012 event")
-    openspace.unzipFile(fieldlineData .. "stereoa.zip", unzippedDataDestination.StereoA, true)
-  end
 
   openspace.addSceneGraphNode(ENLILSliceEqPlane11AU1)
   openspace.addSceneGraphNode(ENLILSliceEqPlane11AU2)

@@ -45,7 +45,7 @@ public:
     };
 
     /**
-     * This function returns the first event stored in the EventEngine, or \c nullptr if
+     * This function returns the first event stored in the EventEngine, or `nullptr` if
      * no event exists. To navigate the full list of events, you can access the returned
      * Event's next function. If the end of the list is reached, the next pointer will be
      * a nullptr
@@ -57,8 +57,8 @@ public:
     /**
      * Publish a new event of type T by providing optional arguments Args to the Event's
      * constructor. An example of usage is
-     * <code>engine.publishEvent<MyEvent>("a", 2.0);</code> which would call the
-     * constructor of \c MyEvent with a <code>const char*</code> and \c double parameter.
+     * `engine.publishEvent<MyEvent>("a", 2.0);` which would call the
+     * constructor of `MyEvent` with a `const char*` and `double` parameter.
      *
      * \param args The arguments that are passed to the constructor of T
      * \tparam T The subclass of Event that is to be published
@@ -77,7 +77,7 @@ public:
      * Registers a new action for a specific event type.
      *
      * \param type The type for which a new action is registered
-     * \param actionIdentifier The identifier of the action that will be triggered the
+     * \param identifier The identifier of the action that will be triggered the
      *        identifier must not exist at this moment, but must exist by the time the
      *        event is encountered next
      * \param filter If the filter is provided, it describes the event parameters that are
@@ -91,7 +91,7 @@ public:
      * Removing registration for a type/action combination.
      *
      * \param type The type of the action that should be unregistered
-     * \param actionIdentifier The identifier of the action that should be unregistered
+     * \param identifier The identifier of the action that should be unregistered
      * \param filter The optional filter applied to the event-action combination
      */
     void unregisterEventAction(events::Event::Type type,

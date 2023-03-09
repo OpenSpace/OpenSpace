@@ -21,10 +21,11 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
 
-local imagesDestination = syncedDirectory .. "images"
+local imagesDestination = syncedDirectory .. "3600"
 
 local layers_names = {
   "Map01a_PALEOMAP_PaleoAtlas_000",
@@ -144,11 +145,6 @@ local legend = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "3600.zip", imagesDestination, true)
-  end
-
   for i,v in ipairs(layers) do
     openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", v)
   end

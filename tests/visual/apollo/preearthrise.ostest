@@ -1,10 +1,10 @@
 [ 
     { "type": "pause", 
       "value": "true"},
-    { "type": "keys", 
-      "value": "e"},
+    { "type": "action", 
+      "value": "os.missions.apollo8.setup.earthrise"},
     { "type": "wait", 
       "value": "60"}, 
     { "type": "screenshot", 
       "value": ""}
-] 
+]

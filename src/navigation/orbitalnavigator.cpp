@@ -272,7 +272,16 @@ namespace {
         "SpeedFactor",
         "Speed Factor",
         "A factor that can be used to increase or slow down the speed of an applied "
-        "idle behavior"
+        "idle behavior. A negative value will invert the direction. Note that a speed "
+        "of exactly 0 leads to no movement at all"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InvertIdleBehaviorInfo = {
+        "Invert",
+        "Invert",
+        "If true, the direction of the idle behavior motion will be inverted compared "
+        "to the default. For example, the 'Orbit' option rotates to the right per "
+        "default, and will rotate to the left when inverted"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AbortOnCameraInteractionInfo =
@@ -321,12 +330,13 @@ OrbitalNavigator::Friction::Friction()
 }
 
 OrbitalNavigator::IdleBehavior::IdleBehavior()
-    : properties::PropertyOwner({ "IdleBehavior" })
+    : properties::PropertyOwner({ "IdleBehavior", "Idle Behavior" })
     , apply(ApplyIdleBehaviorInfo, false)
     , shouldTriggerWhenIdle(ShouldTriggerIdleBehaviorWhenIdleInfo, false)
     , idleWaitTime(IdleWaitTimeInfo, 5.f, 0.f, 3600.f)
     , abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
-    , speedScale(IdleBehaviorSpeedInfo, 1.f, 0.01f, 5.f)
+    , invert(InvertIdleBehaviorInfo, false)
+    , speedScaleFactor(IdleBehaviorSpeedInfo, 1.f, -5.f, 5.f)
     , dampenInterpolationTime(IdleBehaviorDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
     , defaultBehavior(IdleBehaviorInfo)
 {
@@ -350,7 +360,8 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     addProperty(shouldTriggerWhenIdle);
     addProperty(idleWaitTime);
     idleWaitTime.setExponent(2.2f);
-    addProperty(speedScale);
+    addProperty(invert);
+    addProperty(speedScaleFactor);
     addProperty(abortOnCameraInteraction);
     addProperty(dampenInterpolationTime);
 }
@@ -371,7 +382,7 @@ OrbitalNavigator::LimitZoomOut::LimitZoomOut()
 }
 
 OrbitalNavigator::OrbitalNavigator()
-    : properties::PropertyOwner({ "OrbitalNavigator" })
+    : properties::PropertyOwner({ "OrbitalNavigator", "Orbital Navigator" })
     , _anchor(AnchorInfo)
     , _aim(AimInfo)
     , _retargetAnchor(RetargetAnchorInfo)
@@ -589,6 +600,20 @@ glm::quat OrbitalNavigator::anchorNodeToCameraRotation() const {
     return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
 }
 
+
+glm::dvec3 OrbitalNavigator::pushToSurfaceOfAnchor(
+                                                  const glm::dvec3& cameraPosition) const
+{
+    const SurfacePositionHandle posHandle =
+        calculateSurfacePositionHandle(*_anchorNode, cameraPosition);
+
+     return pushToSurface(
+         cameraPosition,
+         _anchorNode->worldPosition(),
+         posHandle
+    );
+}
+
 void OrbitalNavigator::resetVelocities() {
     _mouseStates.resetVelocities();
     _joystickStates.resetVelocities();
@@ -754,18 +779,10 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         // Perform the vertical movements based on user input
         pose.position = translateVertically(deltaTime, pose.position, anchorPos, posHandle);
 
-        std::optional<double> maxHeight = _limitZoomOut.isEnabled ?
-            static_cast<double>(_limitZoomOut.maximumAllowedDistance) : std::optional<double>();
-
-        double minHeight = _enableMinimumAllowedDistanceLimit ?
-            static_cast<double>(_minimumAllowedDistance) : 0.0;
-
         pose.position = pushToSurface(
-            minHeight,
             pose.position,
             anchorPos,
-            posHandle,
-            maxHeight
+            posHandle
         );
     }
 
@@ -1073,6 +1090,10 @@ bool OrbitalNavigator::hasZoomFriction() const {
 
 bool OrbitalNavigator::hasRollFriction() const {
     return _friction.roll;
+}
+
+double OrbitalNavigator::minAllowedDistance() const {
+    return _minimumAllowedDistance;
 }
 
 OrbitalNavigator::CameraRotationDecomposition
@@ -1556,14 +1577,17 @@ glm::dquat OrbitalNavigator::rotateHorizontally(double deltaTime,
     return mouseCameraRollRotation * globalCameraRotation;
 }
 
-glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
-                                           const glm::dvec3& cameraPosition,
+glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
                                            const glm::dvec3& objectPosition,
-                                           const SurfacePositionHandle& positionHandle,
-                                         std::optional<double> maxHeightAboveGround) const
+                                        const SurfacePositionHandle& positionHandle) const
 {
-    if (maxHeightAboveGround.has_value() && minHeightAboveGround > *maxHeightAboveGround)
-    {
+    double minHeight =_enableMinimumAllowedDistanceLimit ?
+        static_cast<double>(_minimumAllowedDistance) : 0.0;
+
+    double maxHeight = _limitZoomOut.isEnabled ?
+        static_cast<double>(_limitZoomOut.maximumAllowedDistance) : -1.0;
+
+    if (maxHeight > 0 && minHeight > maxHeight) {
         LWARNING("Minimum allowed distance is larger than maximum allowed distance");
     }
 
@@ -1585,16 +1609,14 @@ glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
 
     // Adjustment for if the camera is inside the min distance
     double adjustment = 0.0;
-    if (std::abs(minHeightAboveGround) > std::numeric_limits<double>::epsilon()) {
-        adjustment = glm::max(minHeightAboveGround - surfaceToCameraSigned, 0.0);
+    if (std::abs(minHeight) > std::numeric_limits<double>::epsilon()) {
+        adjustment = glm::max(minHeight - surfaceToCameraSigned, 0.0);
     }
 
     // Adjustment for if the camera is outside the max distance
     // Only apply if the min adjustment not already applied
-    if (maxHeightAboveGround.has_value() &&
-        adjustment < std::numeric_limits<double>::epsilon())
-    {
-        adjustment = glm::min(*maxHeightAboveGround - surfaceToCameraSigned, 0.0);
+    if (maxHeight > 0 && adjustment < std::numeric_limits<double>::epsilon()) {
+        adjustment = glm::min(maxHeight - surfaceToCameraSigned, 0.0);
     }
 
     return cameraPosition + referenceSurfaceOutDirection * adjustment;
@@ -1622,7 +1644,7 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
 
 SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
                                                 const SceneGraphNode& node,
-                                                const glm::dvec3 cameraPositionWorldSpace)
+                                        const glm::dvec3& cameraPositionWorldSpace) const
 {
     ghoul_assert(
         glm::length(cameraPositionWorldSpace) > 0.0,
@@ -1736,8 +1758,12 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
         glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
         1.0; // same as horizontal translation
 
-    speedScale *= _idleBehavior.speedScale;
+    speedScale *= _idleBehavior.speedScaleFactor;
     speedScale *= 0.05; // without this scaling, the motion is way too fast
+
+    if (_idleBehavior.invert) {
+        speedScale *= -1.0;
+    }
 
     // Interpolate so that the start and end are smooth
     double s = _idleBehaviorDampenInterpolator.value();

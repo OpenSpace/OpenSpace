@@ -69,7 +69,7 @@ void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
 }
 
 void LayerGroup::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     for (const std::unique_ptr<Layer>& l : _layers) {
         l->initialize();
@@ -77,7 +77,7 @@ void LayerGroup::initialize() {
 }
 
 void LayerGroup::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     for (const std::unique_ptr<Layer>& l : _layers) {
         l->deinitialize();
@@ -85,7 +85,7 @@ void LayerGroup::deinitialize() {
 }
 
 void LayerGroup::update() {
-    ZoneScoped
+    ZoneScoped;
 
     _activeLayers.clear();
 
@@ -98,7 +98,7 @@ void LayerGroup::update() {
 }
 
 Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
-    ZoneScoped
+    ZoneScoped;
 
     documentation::TestResult res = documentation::testSpecification(
         Layer::Documentation(),

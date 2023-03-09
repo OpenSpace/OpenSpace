@@ -70,17 +70,6 @@ namespace {
 [[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState) {
     using namespace openspace;
 
-    documentation::TestResult r = documentation::testSpecification(
-        interaction::NavigationState::Documentation(),
-        navigationState
-    );
-
-    if (!r.success) {
-        throw ghoul::lua::LuaError(
-            fmt::format("Could not set camera state: {}", ghoul::to_string(r))
-        );
-    }
-
     global::navigationHandler->setNavigationStateNextFrame(
         interaction::NavigationState(navigationState)
     );

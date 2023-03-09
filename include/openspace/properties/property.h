@@ -41,7 +41,7 @@ class PropertyOwner;
 /**
  * A property encapsulates a value which should be user-changeable. A property almost
  * always belongs to a PropertyOwner who has taken ownership (setPropertyOwner) of the
- * Property. Per PropertyOwner, the <code>identifier</code> needs to be unique and can be
+ * Property. Per PropertyOwner, the `identifier` needs to be unique and can be
  * used as a URI. This class is an abstract base class and each subclass (most notable
  * TemplateProperty) needs to implement the methods Property::className, Property::get,
  * Property::set, Property::type(), Property::getLuaValue, Property::setLuaValue,
@@ -119,12 +119,12 @@ public:
         std::numeric_limits<OnChangeHandle>::max();
 
     /**
-     * The constructor for the property. The \p info (see #PropertyInfo) contains
-     * necessary information for this Property. #PropertyInfo::identifier needs to be
-     * unique for each PropertyOwner. The #PropertyInfo::guiName will be stored in the
-     * metaData to be accessed by the GUI elements using the #PropertyInfo::guiName key.
+     * The constructor for the property. The \p info (see PropertyInfo) contains
+     * necessary information for this Property. PropertyInfo::identifier needs to be
+     * unique for each PropertyOwner. The PropertyInfo::guiName will be stored in the
+     * metaData to be accessed by the GUI elements using the PropertyInfo::guiName key.
      * The default visibility settings is Visibility::Always, whereas the default
-     * read-only state is \c false.
+     * read-only state is `false`.
      *
      * \param info The PropertyInfo structure that contains all the required static
      *        information for initializing this Property.
@@ -172,7 +172,7 @@ public:
 
     /**
      * This method returns the type that is requested by this Property for the set method.
-     * The default implementation returns the type of \c void.
+     * The default implementation returns the type of `void`.
      *
      * \return The type that is requested by this Property's Property::set method
      */
@@ -186,7 +186,7 @@ public:
      * no-op.
      *
      * \param state The Lua state to which the value will be encoded
-     * \return \c true if the encoding succeeded, \c false otherwise
+     * \return `true` if the encoding succeeded, `false` otherwise
      */
     virtual bool getLuaValue(lua_State* state) const;
 
@@ -199,7 +199,7 @@ public:
      * no-op.
      *
      * \param state The Lua state from which the value will be decoded
-     * \return \c true if the decoding and setting of the value succeeded, \c false
+     * \return `true` if the decoding and setting of the value succeeded, `false`
      *         otherwise
      */
     virtual bool setLuaValue(lua_State* state);
@@ -207,10 +207,10 @@ public:
     /**
      * Returns the Lua type that will be put onto the stack in the Property::getLua method
      * and which will be consumed by the Property::setLuaValue method. The returned value
-     * can belong to the set of Lua types: \c LUA_TNONE, \c LUA_TNIL, \c LUA_TBOOLEAN,
-     * \c LUA_TLIGHTUSERDATA, \c LUA_TNUMBER, \c LUA_TSTRING, \c LUA_TTABLE,
-     * \c LUA_TFUNCTION, \c LUA_TUSERDATA, or \c LUA_TTHREAD. The default implementation
-     * will return \c LUA_TNONE.
+     * can belong to the set of Lua types: `LUA_TNONE`, `LUA_TNIL`, `LUA_TBOOLEAN`,
+     * `LUA_TLIGHTUSERDATA`, `LUA_TNUMBER`, `LUA_TSTRING`, `LUA_TTABLE`,
+     * `LUA_TFUNCTION`, `LUA_TUSERDATA`, or `LUA_TTHREAD`. The default implementation
+     * will return `LUA_TNONE`.
      *
      * \return The Lua type that will be consumed or produced by the Property::getLuaValue
      *         and Property::setLuaValue methods.
@@ -218,12 +218,11 @@ public:
     virtual int typeLua() const;
 
     /**
-     * This method encodes the encapsulated \p value of this Property as a
-     * <code>std::string</code>. The specific details of this serialization is up to the
-     * property developer. The default implementation is a no-op.
+     * This method encodes the encapsulated \p value of this Property as a `std::string`.
+     * The specific details of this serialization is up to the property developer. The
+     * default implementation is a no-op.
      *
-     * \param value The value to which the Property will be encoded
-     * \return \p true if the encoding succeeded, \p false otherwise
+     * \return The string representation of the stored property value
      */
     virtual std::string stringValue() const;
 
@@ -287,15 +286,14 @@ public:
     /**
      * Returns the fully qualified name for this Property that uniquely identifies this
      * Property within OpenSpace. It consists of the identifier preceded by all levels of
-     * PropertyOwner%s separated with <code>.</code>; for example:
-     * <code>owner1.owner2.identifier</code>.
+     * PropertyOwner%s separated with `.`; for example: `owner1.owner2.identifier`.
      *
      * \return The fully qualified identifier for this Property
      */
     std::string fullyQualifiedIdentifier() const;
 
     /**
-     * Returns the PropertyOwner of this Property or \c nullptr, if it does not have an
+     * Returns the PropertyOwner of this Property or `nullptr`, if it does not have an
      * owner.
      *
      * \return The Property of this Property
@@ -313,8 +311,7 @@ public:
     /**
      * Returns the human-readable GUI name for this Property that has been set in the
      * constructor. This method returns the same value as accessing the metaData object
-     * and requesting the <code>std::string</code> stored for the <code>guiName</code>
-     * key.
+     * and requesting the `std::string` stored for the `guiName` key.
      *
      * \return The human-readable GUI name for this Property
      */
@@ -333,14 +330,14 @@ public:
      * Sets the identifier of the group that this Property belongs to. Property groups can
      * be used, for example, by GUI application to visually group different properties,
      * but it has no impact on the Property itself. The default value for the \p groupID
-     * is <code>""</code>.
+     * is `""`.
      *
      * \param groupId The group id that this property should belong to
      */
     void setGroupIdentifier(std::string groupId);
 
     /**
-     * Returns the group idenfier that this Property belongs to, or <code>""</code> if it
+     * Returns the group idenfier that this Property belongs to, or `""` if it
      * belongs to no group.
      * \return The group identifier that this Property belongs to
      */
@@ -349,7 +346,7 @@ public:
     /**
      * Sets a hint about the visibility of the Property. Each application accessing the
      * properties is free to ignore this hint. It is stored in the metaData Dictionary
-     * with the key: <code>Visibility</code>.
+     * with the key: `Visibility`.
      *
      * \param visibility The new visibility of the Property
      */
@@ -367,17 +364,17 @@ public:
      * applications. This setting is only a hint and does not need to be followed by GUI
      * applications and does not have any effect on the Property::set or
      * Property::setLuaValue methods. The value is stored in the metaData Dictionary
-     * with the key: \c isReadOnly. The default value is \c false.
+     * with the key: `isReadOnly`. The default value is `false`.
      *
-     * \param state \c true if the Property should be read only, \c false otherwise
+     * \param state `true` if the Property should be read only, `false` otherwise
      */
     void setReadOnly(bool state);
 
     /**
      * Default view options that can be used in the Property::setViewOption method. The
      * values are:
-     * - Property::ViewOptions::Color = \c Color (Intended for Vec3 and Vec4),
-     * - Property::ViewOptions::MinMaxRange = \c MinMaxRange (Intended for Vec2)
+     * - Property::ViewOptions::Color = `Color` (Intended for Vec3 and Vec4),
+     * - Property::ViewOptions::MinMaxRange = `MinMaxRange` (Intended for Vec2)
      */
     struct ViewOptions {
         static const char* Color;
@@ -388,12 +385,12 @@ public:
      * This method allows the developer to give hints to the GUI about different
      * representations for the GUI. The same Property (for example Vec4Property) can be
      * used in different ways, each requiring a different input method. These values are
-     * stored in the metaData object under <code>ViewOptions</code>.
+     * stored in the metaData object under `ViewOptions`.
      * See Property::ViewOptions for a default list of possible options. As these are
      * only hints, the GUI is free to ignore any suggestion by the developer.
      * \param option The view option that should be modified
-     * \param value Determines if the view option should be active (<code>true</code>) or
-     * deactivated (<code>false</code>)
+     * \param value Determines if the view option should be active (`true`) or
+     *        deactivated (`false`)
      */
     void setViewOption(std::string option, bool value = true);
 
@@ -434,8 +431,8 @@ public:
 
     /**
      * Creates the information that is general to every Property and adds the
-     * \c Identifier, \c Name, \c Type, and \c MetaData keys and their values. The meta
-     * data is handles by the generateMetaDataDescription method, which has to be
+     * `Identifier`, `Name`, `Type`, and `MetaData` keys and their values. The meta
+     * data is handles by the generateMetaDataJsonDescription method, which has to be
      * overloaded if a concrete base class wants to add meta data that is not curated by
      * the Property class.
      *
@@ -444,7 +441,7 @@ public:
     std::string generateJsonDescription() const;
 
     /**
-     * Creates the information for the \c MetaData key-part of the JSON description for
+     * Creates the information for the `MetaData` key-part of the JSON description for
      * the Property. The result can be included as one key-value pair in the description
      * text generated by subclasses. Only the metadata curated by the Property class is
      * used in this method.
@@ -459,9 +456,15 @@ public:
      * override this method and return the string containing all of the additional
      * information. The base implementation of the #description method will return the Lua
      * script:
-     * <code>return { generateBaseDescription(), generateMetaDataDescription(),</code>
-     * <code>generateAdditionalDescription()}</code>, which #generateMetaDataDescription
-     * and this method being the override points to customize the behavior.
+     * ```
+     * return {
+     *     generateBaseDescription(),
+     *     generateMetaDataJsonDescription(),
+     *     generateAdditionalDescription()
+     * }
+     * ```
+     * #generateMetaDataJsonDescription and this method being the override points to
+     * customize the behavior.
      *
      * \return The information specific to each subclass of Property
      */
@@ -486,7 +489,7 @@ protected:
      */
     void notifyChangeListeners();
 
-    /// The PropetyOwner this Property belongs to, or <code>nullptr</code>
+    /// The PropetyOwner this Property belongs to, or `nullptr`
     PropertyOwner* _owner = nullptr;
 
     /// The identifier for this Property

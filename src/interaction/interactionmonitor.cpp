@@ -46,7 +46,7 @@ namespace {
 namespace openspace::interaction {
 
 InteractionMonitor::InteractionMonitor()
-    : properties::PropertyOwner({ "InteractionMonitor" })
+    : properties::PropertyOwner({ "InteractionMonitor", "Interaction Monitor" })
     , _isInActiveState(IsInActiveStateInfo, false)
     , _idleTime(IdleTimeInfo, 120.f, 0.f, 300.f)
 {

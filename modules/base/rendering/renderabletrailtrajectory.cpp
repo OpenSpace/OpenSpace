@@ -83,6 +83,14 @@ namespace {
         "'false', only the trail until the current time in the application will be shown"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SweepChunkSizeInfo = {
+        "SweepChunkSize",
+        "Sweep Chunk Size",
+        "The number of vertices that will be calculated each frame whenever the trail "
+        "needs to be recalculated. "
+        "A greater value will result in more calculations per frame."
+    };
+
     struct [[codegen::Dictionary(RenderableTrailTrajectory)]] Parameters {
         // [[codegen::verbatim(StartTimeInfo.description)]]
         std::string startTime [[codegen::annotation("A valid date in ISO 8601 format")]];
@@ -98,6 +106,9 @@ namespace {
 
         // [[codegen::verbatim(RenderFullPathInfo.description)]]
         std::optional<bool> showFullTrail;
+
+        // [[codegen::verbatim(SweepChunkSizeInfo.description)]]
+        std::optional<int> sweepChunkSize;
     };
 #include "renderabletrailtrajectory_codegen.cpp"
 } // namespace
@@ -118,21 +129,23 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     , _sampleInterval(SampleIntervalInfo, 2.0, 2.0, 1e6)
     , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 1000000000)
     , _renderFullTrail(RenderFullPathInfo, false)
+    , _maxVertex(glm::vec3(-std::numeric_limits<float>::max()))
+    , _minVertex(glm::vec3(std::numeric_limits<float>::max()))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _translation->onParameterChange([this]() { _needsFullSweep = true; });
+    _translation->onParameterChange([this]() { reset(); });
 
     _startTime = p.startTime;
-    _startTime.onChange([this] { _needsFullSweep = true; });
+    _startTime.onChange([this] { reset(); });
     addProperty(_startTime);
 
     _endTime = p.endTime;
-    _endTime.onChange([this] { _needsFullSweep = true; });
+    _endTime.onChange([this] { reset(); });
     addProperty(_endTime);
 
     _sampleInterval = p.sampleInterval;
-    _sampleInterval.onChange([this] { _needsFullSweep = true; });
+    _sampleInterval.onChange([this] { reset(); });
     addProperty(_sampleInterval);
 
     _timeStampSubsamplingFactor =
@@ -142,6 +155,8 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
 
     _renderFullTrail = p.showFullTrail.value_or(_renderFullTrail);
     addProperty(_renderFullTrail);
+
+    _sweepChunkSize = p.sweepChunkSize.value_or(_sweepChunkSize);
 
     // We store the vertices with ascending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
@@ -171,32 +186,76 @@ void RenderableTrailTrajectory::deinitializeGL() {
     RenderableTrail::deinitializeGL();
 }
 
+void RenderableTrailTrajectory::reset() {
+    _needsFullSweep = true;
+    _sweepIteration = 0;
+    _maxVertex = glm::vec3(-std::numeric_limits<float>::max());
+    _minVertex = glm::vec3(std::numeric_limits<float>::max());
+}
+
 void RenderableTrailTrajectory::update(const UpdateData& data) {
     if (_needsFullSweep) {
-        // Convert the start and end time from string representations to J2000 seconds
-        _start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
-        _end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
 
-        const double totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
-        // How many values do we need to compute given the distance between the start and
-        // end date and the desired sample interval
-        const int nValues = static_cast<int>((_end - _start) / totalSampleInterval);
+        if (_sweepIteration == 0) {
+            // Max number of vertices
+            constexpr unsigned int maxNumberOfVertices = 1000000;
 
-        // Make space for the vertices
-        _vertexArray.clear();
-        _vertexArray.resize(nValues);
+            // Convert the start and end time from string representations to J2000 seconds
+            _start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
+            _end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
+            double timespan = _end - _start;
 
-        // ... fill all of the values
-        for (int i = 0; i < nValues; ++i) {
+            _totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
+
+            // Cap _numberOfVertices in order to prevent overflow and extreme performance
+            // degredation/RAM usage 
+            _numberOfVertices = std::min(
+                static_cast<unsigned int>(timespan / _totalSampleInterval),
+                maxNumberOfVertices
+            );
+
+            // We need to recalcuate the _totalSampleInterval if _numberOfVertices eqals
+            // maxNumberOfVertices. If we don't do this the position for each vertex 
+            // will not be correct for the number of vertices we are doing along the trail.
+            _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ? 
+                (timespan / _numberOfVertices) : _totalSampleInterval;
+
+            // Make space for the vertices
+            _vertexArray.clear();
+            _vertexArray.resize(_numberOfVertices);
+        }
+        
+        // Calculate sweeping range for this iteration
+        unsigned int startIndex = _sweepIteration * _sweepChunkSize;
+        unsigned int nextIndex = (_sweepIteration + 1) * _sweepChunkSize;
+        unsigned int stopIndex = std::min(nextIndex, _numberOfVertices);
+
+        // Calculate all vertex positions
+        for (int i = startIndex; i < stopIndex; ++i) {
             const glm::vec3 p = _translation->position({
                 {},
-                Time(_start + i * totalSampleInterval),
+                Time(_start + i * _totalSampleInterval),
                 Time(0.0)
             });
             _vertexArray[i] = { p.x, p.y, p.z };
-        }
 
-        // ... and upload them to the GPU
+            // Set max and min vertex for bounding sphere calculations
+            _maxVertex = glm::max(_maxVertex, p);
+            _minVertex = glm::min(_minVertex, p);
+        }
+        ++_sweepIteration;
+
+        if (stopIndex == _numberOfVertices) {
+            _sweepIteration = 0;
+            setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.f);
+        }
+        else { 
+            // Early return as we don't need to render if we are still 
+            // doing full sweep calculations
+            return;
+        }
+        
+        // Upload vertices to the GPU
         glBindVertexArray(_primaryRenderInformation._vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
         glBufferData(
@@ -240,9 +299,11 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
     // If we are inside the valid time, we additionally want to draw a line from the last
     // correct point to the current location of the object
-    if (data.time.j2000Seconds() >= _start &&
+    if (data.time.j2000Seconds() > _start &&
         data.time.j2000Seconds() <= _end && !_renderFullTrail)
     {
+        ghoul_assert(_primaryRenderInformation.count > 0, "No vertices available");
+
         // Copy the last valid location
         glm::dvec3 v0(
             _vertexArray[_primaryRenderInformation.count - 1].x,
@@ -296,24 +357,6 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
     }
 
     glBindVertexArray(0);
-
-    // Updating bounding sphere
-    glm::vec3 maxVertex(-std::numeric_limits<float>::max());
-    glm::vec3 minVertex(std::numeric_limits<float>::max());
-
-    auto setMax = [&maxVertex, &minVertex](const TrailVBOLayout& vertexData) {
-        maxVertex.x = std::max(maxVertex.x, vertexData.x);
-        maxVertex.y = std::max(maxVertex.y, vertexData.y);
-        maxVertex.z = std::max(maxVertex.z, vertexData.z);
-
-        minVertex.x = std::min(minVertex.x, vertexData.x);
-        minVertex.y = std::min(minVertex.y, vertexData.y);
-        minVertex.z = std::min(minVertex.z, vertexData.z);
-    };
-
-    std::for_each(_vertexArray.begin(), _vertexArray.end(), setMax);
-
-    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.f);
 
 }
 

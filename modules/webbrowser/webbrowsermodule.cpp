@@ -78,7 +78,7 @@ WebBrowserModule::WebBrowserModule()
     , _eventHandler(new EventHandler)
 {
     global::callback::deinitialize->emplace_back([this]() {
-        ZoneScopedN("WebBrowserModule")
+        ZoneScopedN("WebBrowserModule");
 
         deinitialize();
     });
@@ -103,7 +103,7 @@ WebBrowserModule::WebBrowserModule()
 }
 
 void WebBrowserModule::internalDeinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_enabled) {
         return;
@@ -128,7 +128,7 @@ std::filesystem::path WebBrowserModule::findHelperExecutable() {
 }
 
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
-    ZoneScoped
+    ZoneScoped;
 
     if (dictionary.hasValue<bool>("WebHelperLocation")) {
         _webHelperLocation = absPath(dictionary.value<std::string>("WebHelperLocation"));
@@ -166,7 +166,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 }
 
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_enabled) {
         _browsers.push_back(browser);

@@ -116,18 +116,34 @@ local IssLabel = {
   }
 }
 
+local focus_iss = {
+  Identifier = "os.solarsystem.earth.iss.focus",
+  Name = "Focus on ISS",
+  Command = [[
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+  ]],
+  Documentation = "Refocuses the camera on the ISS",
+  GuiPath = "/Solar System/Earth",
+  isLocal = false
+}
+
 asset.onInitialize(function ()
   local i = openspace.space.readKeplerFile(omm .. "ISS.txt", "OMM")
-  issTrail.Renderable.Period = i[0].Period / (60 * 60 * 24)
+  issTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
 
   openspace.addSceneGraphNode(iss)
   openspace.addSceneGraphNode(parentNode)
   openspace.setPropertyValueSingle("Scene.ISSModel.Rotation.yAxisInvertObject", true)
   openspace.addSceneGraphNode(issTrail)
 
+  openspace.action.registerAction(focus_iss)
 end)
 
 asset.onDeinitialize(function ()
+  openspace.action.removeAction(focus_iss)
+
   openspace.removeSceneGraphNode(issTrail)
   openspace.removeSceneGraphNode(parentNode)
   openspace.removeSceneGraphNode(iss)
@@ -140,7 +156,7 @@ asset.export(iss)
 
 asset.meta = {
   Name = "ISS",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Model and Trail for ISS. Model from NASA 3D models, trail from
     Celestrak]],
   Author = "OpenSpace Team",

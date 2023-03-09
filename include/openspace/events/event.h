@@ -118,7 +118,7 @@ struct EventSceneGraphNodeAdded : public Event {
     /**
      * Creates an instance of an EventSceneGraphNodeAdded event.
      *
-     * \param Node The identifier of the node that was added
+     * \param node_ The identifier of the node that was added
      *
      * \pre node_ must not be nullptr
      */
@@ -136,7 +136,7 @@ struct EventSceneGraphNodeRemoved : public Event {
     /**
      * Creates an instance of an EventSceneGraphNodeRemoved event.
      *
-     * \param Node The identifier of the node that was removed
+     * \param node_ The identifier of the node that was removed
      *
      * \pre node_ must not be nullptr
      */
@@ -161,7 +161,7 @@ struct EventParallelConnection : public Event {
     /**
      * Creates an instance of an EventParallelConnection event.
      *
-     * \param State The new state of the parallel connection system;  is one of
+     * \param state_ The new state of the parallel connection system;  is one of
      *        `Established`, `Lost`, `HostshipGained`, or `HostshipLost`
      */
     explicit EventParallelConnection(State state_);
@@ -198,7 +198,7 @@ struct EventApplicationShutdown : public Event {
     /**
      * Creates an instance of an EventApplicationShutdown event.
      *
-     * \param State The next state of the application shutdown sequence;  is one of
+     * \param state_ The next state of the application shutdown sequence;  is one of
      *        `Started`, `Aborted`,  or `Finished`
      */
     explicit EventApplicationShutdown(State state_);
@@ -352,7 +352,7 @@ struct EventInterpolationFinished : public Event {
     /**
      * Creates an instance of an EventInterpolationFinished event.
      *
-     * \param Property The property whose interpolation has finished
+     * \param property_ The property whose interpolation has finished
      *
      * \pre property_ must not be nullptr
      */

@@ -47,7 +47,7 @@ documentation::Documentation SizeReferenceTileProvider::Documentation() {
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
     : TextTileProvider(tileTextureInitData(layers::Group::ID::ColorLayers, false))
 {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -65,7 +65,7 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
 }
 
 Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
 
     const GeodeticPatch patch(tileIndex);
     const bool aboveEquator = patch.isNorthern();

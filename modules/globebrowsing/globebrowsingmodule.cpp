@@ -147,7 +147,7 @@ namespace {
             std::fill(IdentifierBuffer.begin(), IdentifierBuffer.end(), '\0');
             int ret = sscanf(
                 subDatasets[i],
-                "SUBDATASET_%i_%256[^=]",
+                "SUBDATASET_%i_%255[^=]",
                 &iDataset,
                 IdentifierBuffer.data()
             );
@@ -250,7 +250,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     // Initialize
     global::callback::initializeGL->emplace_back([&]() {
-        ZoneScopedN("GlobeBrowsingModule")
+        ZoneScopedN("GlobeBrowsingModule");
 
         _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
         addPropertySubOwner(_tileCache.get());
@@ -266,21 +266,21 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     });
 
     global::callback::deinitializeGL->emplace_back([]() {
-        ZoneScopedN("GlobeBrowsingModule")
+        ZoneScopedN("GlobeBrowsingModule");
 
         TileProvider::deinitializeDefaultTile();
     });
 
     // Render
     global::callback::render->emplace_back([&]() {
-        ZoneScopedN("GlobeBrowsingModule")
+        ZoneScopedN("GlobeBrowsingModule");
 
         _tileCache->update();
     });
 
     // Deinitialize
     global::callback::deinitialize->emplace_back([&]() {
-        ZoneScopedN("GlobeBrowsingModule")
+        ZoneScopedN("GlobeBrowsingModule");
 
         GdalWrapper::destroy();
     });

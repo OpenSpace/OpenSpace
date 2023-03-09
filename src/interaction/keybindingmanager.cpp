@@ -55,10 +55,11 @@ void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
         auto ret = _keyLua.equal_range({ key, modifier });
         for (auto it = ret.first; it != ret.second; ++it) {
             ghoul_assert(!it->second.empty(), "Action must not be empty");
-            ghoul_assert(
-                global::actionManager->hasAction(it->second),
-                "Action must be registered"
-            );
+            if (!global::actionManager->hasAction(it->second)) {
+                // Silently ignoring the unknown action as the user might have intended to
+                // bind a key to multiple actions, only one of which could be defined
+                continue;
+            }
             global::actionManager->triggerAction(it->second, ghoul::Dictionary());
         }
     }
@@ -119,7 +120,7 @@ const std::multimap<KeyWithModifier, std::string>& KeybindingManager::keyBinding
 }
 
 std::string KeybindingManager::generateJson() const {
-    ZoneScoped
+    ZoneScoped;
 
     std::stringstream json;
     json << "[";

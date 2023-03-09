@@ -928,7 +928,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
 
     // Wait until camera has stabilized before we traverse the Octree/stream from files.
-    const double rotationDiff = abs(length(_previousCameraRotation) -
+    const double rotationDiff = std::abs(length(_previousCameraRotation) -
                                 length(data.camera.rotationQuaternion()));
     if (_firstDrawCalls && rotationDiff > 1e-10) {
         _previousCameraRotation = data.camera.rotationQuaternion();
@@ -986,6 +986,13 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
         // Update vector with accumulated indices.
         for (const auto& [offset, subData] : updateData) {
+            if (offset >= _accumulatedIndices.size() - 1) {
+                // @TODO(2023-03-08, alebo) We want to redo the whole rendering pipeline
+                // anyway, so right now we just bail out early if we get an invalid index
+                // that would trigger a crash
+                continue;
+            }
+
             int newValue = static_cast<int>(subData.size() / _nRenderValuesPerStar) +
                            _accumulatedIndices[offset];
             int changeInValue = newValue - _accumulatedIndices[offset + 1];

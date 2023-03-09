@@ -1,0 +1,36 @@
+asset.require("../apollo_globebrowsing")
+
+local apollo11_setup_landingsite = {
+    Identifier = "os.missions.apollo11.setup.landingsite",
+    Name = "Setup Apollo 11 landing site",
+    Command = [[
+      openspace.time.setTime('1969 JUL 20 20:17:40'); 
+      openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', true); 
+      openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', true); 
+      openspace.setPropertyValueSingle('Scene.Moon.Renderable.TargetLodScaleFactor', 20.11); 
+      openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo11LemPosition'); 
+      openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil); 
+      openspace.setPropertyValueSingle('Scene.Apollo11MoonTrail.Renderable.Enabled', true); 
+      openspace.setPropertyValueSingle('Scene.Apollo11LemTrail.Renderable.Enabled', true);
+    ]],
+    Documentation = "Setup for Apollo 11 landing site",
+    GuiPath = "/Missions/Apollo/11",
+    IsLocal = false
+  }
+
+asset.onInitialize(function()
+  openspace.action.registerAction(apollo11_setup_landingsite)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(apollo11_setup_landingsite)
+end)
+
+asset.meta = {
+  Name = "Apollo 11 Actions",
+  Version = "1.0",
+  Description = "Asset with actions related to the Apollo 11 mission",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

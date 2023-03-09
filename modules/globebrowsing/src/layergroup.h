@@ -36,7 +36,7 @@ class Layer;
 struct TileProvider;
 
 /**
- * Convenience class for dealing with multiple <code>Layer</code>s.
+ * Convenience class for dealing with multiple `Layer`s.
  */
 struct LayerGroup : public properties::PropertyOwner {
     LayerGroup(layers::Group group);

@@ -45,47 +45,6 @@ int DoubleListProperty::typeLua() const {
     return LUA_TTABLE;
 }
 
-std::vector<double> DoubleListProperty::fromLuaConversion(lua_State* state,
-                                                          bool& success) const
-{
-    if (!lua_istable(state, -1)) {
-        success = false;
-        LERRORC(className(), "Conversion from Lua failed. The input was not a table");
-        return {};
-    }
-
-    std::vector<double> result;
-    lua_pushnil(state);
-    while (lua_next(state, -2) != 0) {
-        if (lua_isnumber(state, -1)) {
-            result.emplace_back(lua_tonumber(state, -1));
-        }
-        else {
-            success = false;
-            LERRORC(
-                className(),
-                "Conversion from Lua failed. The input table contains non-number values"
-            );
-            return {};
-        }
-        lua_pop(state, 1);
-    }
-    success = true;
-    return result;
-}
-
-void DoubleListProperty::toLuaConversion(lua_State* state) const {
-    lua_createtable(state, static_cast<int>(_value.size()), 0);
-
-    int i = 1;
-    for (double v : _value) {
-        ghoul::lua::push(state, i);
-        ghoul::lua::push(state, v);
-        lua_settable(state, -3);
-        ++i;
-    }
-}
-
 std::string DoubleListProperty::toStringConversion() const {
     nlohmann::json json(_value);
     return json.dump();

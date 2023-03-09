@@ -41,15 +41,4 @@ int FloatProperty::typeLua() const {
     return LUA_TNUMBER;
 }
 
-float FloatProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        float val = static_cast<float>(lua_tonumber(state, -1));
-        return val;
-    }
-    else {
-        return 0.f;
-    }
-}
-
 } // namespace openspace::properties

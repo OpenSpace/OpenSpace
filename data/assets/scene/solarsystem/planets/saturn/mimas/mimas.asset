@@ -51,11 +51,40 @@ local Mimas = {
   }
 }
 
+
+local MimasLabel = {
+  Identifier = "MimasLabel",
+  Parent = Mimas.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Mimas",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.3, 10.0 },
+    FadeWidths = { 0.15, 10.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Mimas Label",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = "Label for Saturn's moon Mimas"
+  }
+}
+
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mimas)
+  openspace.addSceneGraphNode(MimasLabel)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MimasLabel)
   openspace.removeSceneGraphNode(Mimas)
 end)
 

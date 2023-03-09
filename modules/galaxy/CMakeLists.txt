@@ -22,10 +22,10 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-  galaxymodule.h  
+  galaxymodule.h
   rendering/galaxyraycaster.h
   rendering/renderablegalaxy.h
   tasks/milkywayconversiontask.h
@@ -34,7 +34,7 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  galaxymodule.cpp  
+  galaxymodule.cpp
   rendering/galaxyraycaster.cpp
   rendering/renderablegalaxy.cpp
   tasks/milkywayconversiontask.cpp

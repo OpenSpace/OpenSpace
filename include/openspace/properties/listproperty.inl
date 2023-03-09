@@ -32,5 +32,15 @@ ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values
 template <typename T>
 ListProperty<T>::~ListProperty() {}
 
+template <typename T>
+std::vector<T> ListProperty<T>::fromLuaConversion(lua_State* state) const {
+    return ghoul::lua::value<std::vector<T>>(state);
+}
+
+template <typename T>
+void ListProperty<T>::toLuaConversion(lua_State* state) const {
+    ghoul::lua::push(state, TemplateProperty<std::vector<T>>::_value);
+}
+
 } // namespace openspace::properties
 

@@ -1,3 +1,7 @@
+asset.require("spice/base")
+asset.require("../actions")
+asset.require("./actions")
+
 local sun = asset.require("scene/solarsystem/sun/sun")
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
@@ -5,7 +9,6 @@ local descentKeyframes = asset.require("./lem_descent.asset")
 local descentRotationKeyframes = asset.require("./lem_descent_rotation.asset")
 
 local kernels = asset.require("./kernels").kernels
-asset.require("spice/base")
 
 local models = asset.syncedResource({
   Name = "Apollo Models",
