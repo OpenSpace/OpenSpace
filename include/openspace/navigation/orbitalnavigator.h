@@ -196,6 +196,8 @@ private:
     properties::FloatProperty _stereoscopicDepthOfFocusSurface;
     properties::FloatProperty _staticViewScaleExponent;
 
+    properties::BoolProperty _constantVelocityFlight;
+
     properties::FloatProperty _retargetInterpolationTime;
     properties::FloatProperty _stereoInterpolationTime;
     properties::FloatProperty _followRotationInterpolationTime;
