@@ -332,7 +332,7 @@ namespace openspace {
         pType->onChange(updateRep);
         pScale->onChange(updateRep);
         pColor->onChange(updateCol);
-        pFilter->onChange(updateCol);
+        pFilter->onChange(updateFilt);
         pUniformColor->onChange(updateCol);
     }
 
@@ -406,7 +406,8 @@ namespace openspace {
                 mol::util::interpolate_coords(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame, _applyPbcPerFrame);
                 md_gl_molecule_set_atom_position(&_gl_molecule, 0, (uint32_t)_molecule.atom.count, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
                 
-                std::vector<size_t> ss_rep_indices;
+                std::vector<size_t> rep_has_ss_indices;
+                std::vector<size_t> rep_update_col_indices;
                 
                 for (size_t i = 0; i < _repProps.propertySubOwners().size(); ++i) {
                     auto pColor  = _repProps.propertySubOwners()[i]->property("Color");
@@ -414,24 +415,31 @@ namespace openspace {
                     if (pColor) {
                         auto color  = static_cast<mol::rep::Color>(std::any_cast<int>(pColor->get()));
                         if (color == mol::rep::Color::SecondaryStructure) {
-                            ss_rep_indices.push_back(i);
+                            rep_has_ss_indices.push_back(i);
                         }
                     }
                     if (pFilter) {
                         auto filter = std::any_cast<std::string>(pFilter->get());
                         if (_repData[i].dynamic) {
                             compute_mask(_repData[i].mask, filter, _molecule, _repData[i].dynamic);
+                            rep_update_col_indices.push_back(i);
                         }
                     }
                 }
                 
-                if (!ss_rep_indices.empty()) {
+                if (!rep_has_ss_indices.empty()) {
                     mol::util::interpolate_secondary_structure(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame);
                     md_gl_molecule_set_backbone_secondary_structure(&_gl_molecule, 0, (uint32_t)_molecule.backbone.count, _molecule.backbone.secondary_structure, 0);
                     
-                    for (int64_t i : ss_rep_indices) {
-                        mol::util::update_rep_color(_repData[i].gl_rep, _molecule, mol::rep::Color::SecondaryStructure, _repData[i].mask);
+                    for (size_t i : rep_has_ss_indices) {
+                        rep_update_col_indices.push_back(i);
                     }
+                }
+
+                for (size_t i : rep_update_col_indices) {
+                    auto pColor = _repProps.propertySubOwners()[i]->property("Color");
+                    auto color = static_cast<mol::rep::Color>(std::any_cast<int>(pColor->get()));
+                    mol::util::update_rep_color(_repData[i].gl_rep, _molecule, color, _repData[i].mask);
                 }
             }
             
