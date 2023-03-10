@@ -294,7 +294,9 @@ static void load_secondary_structure_data(md_trajectory_i* traj, const md_molecu
         ss_data data{};
         
         md_array_resize(data.ss, mol->backbone.count * md_trajectory_num_frames(traj), default_allocator);
-        MEMSET(data.ss, 0, md_array_bytes(data.ss));
+        for (int64_t i = 0; i < md_array_size(data.ss); ++i) {
+            data.ss[i] = MD_SECONDARY_STRUCTURE_COIL;
+        }
         data.stride = mol->backbone.count;
         
         ss_table[traj] = data;
