@@ -40,7 +40,7 @@
 #include <chrono>
 #include <memory>
 
-//#define TOUCH_DEBUG_PROPERTIES
+// #define TOUCH_DEBUG_PROPERTIES
 
 namespace openspace {
 
@@ -98,6 +98,8 @@ public:
 
     void updateStateFromInput(const std::vector<TouchInputHolder>& list,
         std::vector<TouchInput>& lastProcessed);
+
+    bool hasNonZeroVelocities() const;
 
     // Calculates the new camera state with velocities and time since last frame
     void step(double dt, bool directTouch = false);
