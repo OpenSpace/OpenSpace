@@ -44,6 +44,9 @@ public:
     int typeLua() const override;
 
     using TemplateProperty<int>::operator=;
+
+private:
+    int fromLuaConversion(lua_State* state) const override;
 };
 
 } // namespace openspace::properties
