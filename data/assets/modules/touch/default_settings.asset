@@ -1,6 +1,6 @@
 asset.onInitialize(function ()
   -- Avoid errors for developers when building without the touch module
-  if not openspace.modules.isLoaded("touch") then
+  if not openspace.modules.isLoaded("Touch") then
     return
   end
 
