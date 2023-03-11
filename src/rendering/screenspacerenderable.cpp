@@ -175,9 +175,8 @@ namespace {
 
         // This is the unique identifier for this screenspace renderable. It has to be
         // unique amongst all existing screenspace nodes that already have been added to
-        // the scene. The identifier is not allowed to have any whitespace or '.' and must
-        // not be empty
-        std::optional<std::string> identifier;
+        // the scene.
+        std::optional<std::string> identifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;

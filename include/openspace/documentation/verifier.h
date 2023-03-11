@@ -169,6 +169,21 @@ private:
 };
 
 /**
+ * A Verifier that checks whether a given string is a valid identifier, meaning that is
+ * does not contain any whitespaces or dots
+ */
+struct IdentifierVerifier : public StringVerifier {
+    IdentifierVerifier();
+
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
+
+    std::string documentation() const override;
+
+    std::string type() const override;
+};
+
+/**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
  * refers to an existing file on disk.
  */

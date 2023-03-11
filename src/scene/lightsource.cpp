@@ -48,7 +48,7 @@ namespace {
         std::string type [[codegen::annotation("Must name a valid LightSource type")]];
 
         // The identifier of the light source
-        std::string identifier;
+        std::string identifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
