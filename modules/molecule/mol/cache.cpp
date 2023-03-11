@@ -81,6 +81,8 @@ struct md_mem_trajectory_t {
     md_array(float) y;
     md_array(float) z;
     md_array(md_trajectory_frame_header_t) frame_headers;
+    md_array(md_secondary_structure_t) secondary_structures;
+    size_t secondary_structure_stride;
     md_allocator_i* alloc;
 };
 
@@ -157,12 +159,20 @@ static md_trajectory_i* mem_trajectory_create(const md_trajectory_i* backing_tra
     md_array_resize(mem->y, num_atoms * num_frames, alloc);
     md_array_resize(mem->z, num_atoms * num_frames, alloc);
 
+    if (mol && mol->backbone.count) {
+        md_array_resize(mem->secondary_structures, mol->backbone.count * num_frames, alloc);
+        mem->secondary_structure_stride = mol->backbone.count;
+        for (int64_t i = 0; i < md_array_size(mem->secondary_structures); ++i) {
+            mem->secondary_structures[i] = MD_SECONDARY_STRUCTURE_COIL;
+        }
+    }
+
     for (int64_t i = 0; i < num_frames; ++i) {
         float* x = &mem->x[i * num_atoms];
         float* y = &mem->y[i * num_atoms];
         float* z = &mem->z[i * num_atoms];
         md_trajectory_load_frame(backing_traj, i, &mem->frame_headers[i], x, y, z);
-        if (deperiodize_on_load) {
+        if (deperiodize_on_load && mol) {
             const md_unit_cell_t* cell = &mem->frame_headers[i].cell;
             md_util_deperiodize_system(x, y, z, cell, mol);
         }
@@ -187,10 +197,32 @@ static void mem_trajectory_destroy(md_trajectory_i* traj) {
     memset(traj, 0, sizeof(md_trajectory_i));
 }
 
+static bool load_cache_frame_data(md_frame_data_t* frame_data, const md_trajectory_i* traj, int64_t frame, const md_molecule_t* mol, bool deperiodize_on_load) {
+    md_allocator_i* alloc = default_allocator;
+    const int64_t frame_data_size = md_trajectory_fetch_frame_data(traj, frame, 0);
+    void* frame_data_ptr = md_alloc(alloc, frame_data_size);
+    md_trajectory_fetch_frame_data(traj, frame, frame_data_ptr);
+    bool result = md_trajectory_decode_frame_data(traj, frame_data_ptr, frame_data_size, &frame_data->header, frame_data->x, frame_data->y, frame_data->z);
+
+    if (result) {
+        const md_unit_cell_t* cell = &frame_data->header.cell;
+        const bool have_cell = cell->flags != 0;
+
+        if (deperiodize_on_load && have_cell) {
+            md_util_deperiodize_system(frame_data->x, frame_data->y, frame_data->z, cell, mol);
+        }
+    }
+
+    md_free(alloc, frame_data_ptr, frame_data_size);
+    return result;
+}
+
 struct md_cached_trajectory_t {
     uint64_t magic;
     md_trajectory_header_t header;
     md_frame_cache_t cache;
+    md_array(md_secondary_structure_t) secondary_structures;
+    size_t secondary_structure_stride;
     const md_molecule_t* mol;
     bool deperiodize_on_load;
 };
@@ -221,23 +253,7 @@ bool cached_trajectory_decode_frame(struct md_trajectory_o* inst, const void* da
     bool result = true;
     bool in_cache = md_frame_cache_find_or_reserve(&cached_traj->cache, idx, &frame_data, &lock);
     if (!in_cache) {
-        md_allocator_i* alloc = default_allocator;
-        const md_trajectory_i* backing_traj = cached_traj->cache.traj;
-        const int64_t frame_data_size = md_trajectory_fetch_frame_data(backing_traj, idx, 0);
-        void* frame_data_ptr = md_alloc(alloc, frame_data_size);
-        md_trajectory_fetch_frame_data(backing_traj, idx, frame_data_ptr);
-        result = md_trajectory_decode_frame_data(backing_traj, frame_data_ptr, frame_data_size, &frame_data->header, frame_data->x, frame_data->y, frame_data->z);
-
-        if (result) {
-            const md_unit_cell_t* cell = &frame_data->header.cell;
-            const bool have_cell = cell->flags != 0;
-
-            if (cached_traj->deperiodize_on_load && have_cell) {
-                md_util_deperiodize_system(frame_data->x, frame_data->y, frame_data->z, cell, cached_traj->mol);
-            }
-        }
-
-        md_free(alloc, frame_data_ptr, frame_data_size);
+        result = load_cache_frame_data(frame_data, cached_traj->cache.traj, idx, cached_traj->mol, cached_traj->deperiodize_on_load);
     }
 
     if (result) {
@@ -269,11 +285,19 @@ md_trajectory_i* cached_trajectory_create(md_trajectory_i* backing_traj, md_allo
     md_trajectory_i* traj = (md_trajectory_i*)data;
     md_cached_trajectory_t* cached_traj = (md_cached_trajectory_t*)(traj + 1);
 
-    const int64_t num_cache_frames = MIN(32, md_trajectory_num_frames(backing_traj));
+    const int64_t num_frames = md_trajectory_num_frames(backing_traj);
+    const int64_t num_cache_frames = MIN(32, num_frames);
     
     cached_traj->magic = MD_CACHED_TRAJ_MAGIC;
     cached_traj->deperiodize_on_load = deperiodize_on_load;
     cached_traj->mol = mol;
+    if (mol && mol->backbone.count) {
+        md_array_resize(cached_traj->secondary_structures, num_frames * mol->backbone.count, alloc);
+        cached_traj->secondary_structure_stride = mol->backbone.count;
+        for (int64_t i = 0; i < md_array_size(cached_traj->secondary_structures); ++i) {
+            cached_traj->secondary_structures[i] = MD_SECONDARY_STRUCTURE_COIL;
+        }
+    }
     md_trajectory_get_header(backing_traj, &cached_traj->header);
     md_frame_cache_init(&cached_traj->cache, backing_traj, alloc, num_cache_frames);
     
@@ -288,9 +312,11 @@ md_trajectory_i* cached_trajectory_create(md_trajectory_i* backing_traj, md_allo
 
 static void load_secondary_structure_data(md_trajectory_i* traj, const md_molecule_t* mol) {
     ASSERT(traj);
+    ASSERT(traj->inst);
     ASSERT(mol);
 
     if (mol->backbone.range_count) {
+        /*
         ss_data data{};
         
         md_array_resize(data.ss, mol->backbone.count * md_trajectory_num_frames(traj), default_allocator);
@@ -298,11 +324,24 @@ static void load_secondary_structure_data(md_trajectory_i* traj, const md_molecu
             data.ss[i] = MD_SECONDARY_STRUCTURE_COIL;
         }
         data.stride = mol->backbone.count;
-        
         ss_table[traj] = data;
+        */
+
+        uint64_t ss_stride = mol->backbone.count;
+        md_secondary_structure_t* ss_data = nullptr;
+
+        const uint64_t magic = *(uint64_t*)(traj->inst);
+        switch (magic) {
+        case MD_CACHED_TRAJ_MAGIC:
+            ss_data = ((md_cached_trajectory_t*)traj->inst)->secondary_structures;
+            break;
+        case MD_MEM_TRAJ_MAGIC:
+            ss_data = ((md_mem_trajectory_t*)traj->inst)->secondary_structures;
+            break;
+        }
         
         openspace::ThreadPool& threadPool = openspace::global::moduleEngine->module<openspace::MoleculeModule>()->threadPool();
-        threadPool.enqueue([ss_data = data.ss, ss_stride = data.stride, traj, old_mol = mol](){
+        threadPool.enqueue([ss_data, ss_stride, traj, old_mol = mol](){
             // @TODO(Robin) This is stupid and the interface to compute secondary structure should be changed
             md_molecule_t mol = *old_mol;
             const int64_t num_frames = md_trajectory_num_frames(traj);
@@ -393,22 +432,76 @@ void prefetch_frame_range(const md_trajectory_i* traj, int64_t beg, int64_t end)
     }
 }
 
+
+
+FrameData get_frame_data(const md_trajectory_i* traj, int64_t frame) {
+    FrameData data = {};
+    if (!traj || !traj->inst) {
+        LERROR("Invalid trajectory");
+        return data;
+    }
+    
+    if (0 <= frame && frame < md_trajectory_num_frames(traj)) {
+        uint64_t magic = *(const uint64_t*)(traj->inst);
+        switch (magic) {
+        case MD_MEM_TRAJ_MAGIC:
+        {
+            const md_mem_trajectory_t* inst = (const md_mem_trajectory_t*)traj->inst;
+            const size_t stride = inst->header.num_atoms;
+            data.header = inst->frame_headers + frame;
+            data.x = {inst->x + frame * stride, stride};
+            data.y = {inst->y + frame * stride, stride};
+            data.z = {inst->z + frame * stride, stride};
+            data.ss = {inst->secondary_structures + frame * inst->secondary_structure_stride, inst->secondary_structure_stride};
+            break;
+        }
+        case MD_CACHED_TRAJ_MAGIC:
+        {
+            md_cached_trajectory_t* inst = (md_cached_trajectory_t*)traj->inst;
+            md_frame_data_t* frame_data;
+            md_frame_cache_lock_t* lock = nullptr;
+            bool result = true;
+            bool in_cache = md_frame_cache_find_or_reserve(&inst->cache, frame, &frame_data, &lock);
+            if (!in_cache) {
+                result = load_cache_frame_data(frame_data, inst->cache.traj, frame, inst->mol, inst->deperiodize_on_load);
+            }
+            if (result) {
+                data.header = &frame_data->header;
+                data.x = {frame_data->x, (size_t)frame_data->header.num_atoms};
+                data.y = {frame_data->y, (size_t)frame_data->header.num_atoms};
+                data.z = {frame_data->z, (size_t)frame_data->header.num_atoms};
+                data.ss = {inst->secondary_structures + frame * inst->secondary_structure_stride, inst->secondary_structure_stride};
+                data.lock = lock;
+            }
+            break;
+        }
+        default:
+            LERROR("Invalid trajectory");
+        }
+    } else {
+        LERROR(fmt::format("Invalid trajectory index: {}, valid range: [0,{}]", frame, md_trajectory_num_frames(traj)));
+    }
+    return data;
+}
+
 std::span<const md_secondary_structure_t> get_secondary_structure_frame_data(const md_trajectory_i* traj, int64_t frame) {
-    if (frame < 0) {
-        return {};
-    }
-    if (frame >= md_trajectory_num_frames(traj)) {
-        return {};
-    }
-    auto it = ss_table.find(traj);
-    if (it != ss_table.end()) {
-        const ss_data& data = it->second;
-        const uint64_t ss_stride = data.stride;
-        const md_secondary_structure_t* ss_src = data.ss + frame * ss_stride;
-        return {ss_src, ss_stride};
+    if (0 < frame && frame < md_trajectory_num_frames(traj)) {
+        auto it = ss_table.find(traj);
+        if (it != ss_table.end()) {
+            const ss_data& data = it->second;
+            const uint64_t ss_stride = data.stride;
+            const md_secondary_structure_t* ss_src = data.ss + frame * ss_stride;
+            return {ss_src, ss_stride};
+        }
     }
 
     return {};
 }
 
+}
+
+FrameData::~FrameData() {
+    if (lock) {
+        md_frame_cache_frame_lock_release(lock);
+    }
 }

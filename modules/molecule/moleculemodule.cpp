@@ -116,7 +116,7 @@ MoleculeModule::MoleculeModule() :
     _dofEnabled(DOFEnabledInfo, false),
     _dofFocusDistance(DOFFocusDistanceInfo, 0.5f, 0.f, 1.f),
     _dofFocusRange(DOFFocusRangeInfo, 0.1f, 0.f, 10.f),
-    _threadPool(4)
+    _threadPool(std::max(1U, std::thread::hardware_concurrency() - 1))
 {
     _shaders.reset(new md_gl_shaders_t());
     addProperty(_ssaoEnabled);

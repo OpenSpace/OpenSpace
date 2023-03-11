@@ -596,13 +596,8 @@ void RenderableSimulationBox::update(const UpdateData& data) {
             if (frame > num_frames) {
                 frame = 2.0 * num_frames - frame;
             }
-            /*
-            const double t_dur = static_cast<double>(MAX(0,  - 1));
-            double t_loc = fract(t_cur / (2.0 * t_dur));
-            double t = t_loc < 0.5 ? (t_loc * 2.0) : (1.0 - t_loc * 2.0);
-            */
 
-            mol::util::interpolate_coords(mol.molecule, mol.trajectory, mol::util::InterpolationType::Cubic, frame);
+            mol::util::interpolate_frame(mol.molecule, mol.trajectory, mol::util::InterpolationType::Cubic, frame);
             md_gl_molecule_set_atom_position(&mol.drawMol, 0, uint32_t(mol.molecule.atom.count), mol.molecule.atom.x, mol.molecule.atom.y, mol.molecule.atom.z, 0);
         }
     

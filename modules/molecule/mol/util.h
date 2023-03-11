@@ -23,7 +23,7 @@ void update_rep_color(md_gl_representation_t& rep, const md_molecule_t& mol, mol
 // ensure_pbc enforces that atoms are wrapped properly within the given simulation box after interpolation.
 // This operation can be quite heavy as it attempts to keep residues and chains within the same period
 
-void interpolate_coords(md_molecule_t& mol, const md_trajectory_i* traj, InterpolationType interp, double time, bool ensure_pbc = false);
-void interpolate_secondary_structure(md_molecule_t&mol, const md_trajectory_i* traj, InterpolationType interp, double time);
+void interpolate_frame(md_molecule_t& mol, const md_trajectory_i* traj, InterpolationType interp, double frame, bool ensure_pbc = false);
+//void interpolate_secondary_structure(md_molecule_t&mol, const md_trajectory_i* traj, InterpolationType interp, double time);
 
 }

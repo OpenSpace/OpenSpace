@@ -403,7 +403,7 @@ namespace openspace {
             
             if (frame != _frame) {
                 _frame = frame;
-                mol::util::interpolate_coords(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame, _applyPbcPerFrame);
+                mol::util::interpolate_frame(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame, _applyPbcPerFrame);
                 md_gl_molecule_set_atom_position(&_gl_molecule, 0, (uint32_t)_molecule.atom.count, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
                 
                 std::vector<size_t> rep_has_ss_indices;
@@ -428,7 +428,7 @@ namespace openspace {
                 }
                 
                 if (!rep_has_ss_indices.empty()) {
-                    mol::util::interpolate_secondary_structure(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame);
+                    //mol::util::interpolate_secondary_structure(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame);
                     md_gl_molecule_set_backbone_secondary_structure(&_gl_molecule, 0, (uint32_t)_molecule.backbone.count, _molecule.backbone.secondary_structure, 0);
                     
                     for (size_t i : rep_has_ss_indices) {
