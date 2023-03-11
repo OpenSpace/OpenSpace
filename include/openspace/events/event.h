@@ -77,6 +77,8 @@ struct Event {
         PointSpacecraft,
         RenderableEnabled,
         RenderableDisabled,
+        CameraPathStarted,
+        CameraPathFinished,
         Custom
     };
     constexpr explicit Event(Type type_) : type(type_) {}
@@ -518,6 +520,30 @@ struct EventRenderableDisabled : public Event {
     explicit EventRenderableDisabled(const SceneGraphNode* node_);
 
   const tstring node;
+};
+
+/**
+ * This event is created when the a camera path is started
+ */
+struct EventCameraPathStarted : public Event {
+    static constexpr Type Type = Event::Type::CameraPathStarted;
+
+    /**
+     * Creates an instance of an EventCameraPathStarted event.
+     */
+    EventCameraPathStarted();
+};
+
+/**
+ * This event is created when the a camera path is finished
+ */
+struct EventCameraPathFinished : public Event {
+    static constexpr Type Type = Event::Type::CameraPathFinished;
+
+    /**
+     * Creates an instance of an EventCameraPathStarted event.
+     */
+    EventCameraPathFinished();
 };
 
 /**
