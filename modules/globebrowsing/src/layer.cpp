@@ -96,8 +96,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(Layer), codegen::noexhaustive()]] Parameters {
-        // The unique identifier for this layer. May not contain '.' or spaces
-        std::string identifier;
+        // The unique identifier for this layer.
+        std::string identifier [[codegen::identifier()]];
 
         // A human-readable name for the user interface. If this is omitted, the
         // identifier is used instead
