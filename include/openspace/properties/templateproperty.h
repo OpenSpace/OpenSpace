@@ -115,7 +115,7 @@ public:
      * \param state The Lua state from which the value will be decoded
      * \return `true` if the decoding succeeded; `false` otherwise
      */
-    virtual bool setLuaValue(lua_State* state) override;
+    virtual void setLuaValue(lua_State* state) override;
 
     /// \see Property::typeLua
     virtual int typeLua() const override = 0;
