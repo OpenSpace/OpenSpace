@@ -300,22 +300,14 @@ void AssetManager::update() {
 void AssetManager::add(const std::string& path) {
     ghoul_precondition(!path.empty(), "Path must not be empty");
     // First check if the path is already in the remove queue. If so, remove it from there
-    _assetRemoveQueue.remove_if(
-        [&path](const std::string& value) {
-            return (path == value);
-        }
-    );
+    _assetRemoveQueue.remove(path);
     _assetAddQueue.push_back(path);
 }
 
 void AssetManager::remove(const std::string& path) {
     ghoul_precondition(!path.empty(), "Path must not be empty");
     // First check if the path is already in the add queue. If so, remove it from there
-    _assetAddQueue.remove_if(
-        [&path](const std::string& value) {
-            return (path == value);
-        }
-    );
+    _assetAddQueue.remove(path);
     _assetRemoveQueue.push_back(path);
 }
 
