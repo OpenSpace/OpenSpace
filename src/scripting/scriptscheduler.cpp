@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ namespace {
         "Enabled",
         "This enables or disables the ScriptScheduler. If disabled, no scheduled scripts "
         "will be executed. If enabled, scheduled scripts will be executed at their given "
-        "time as normal."
+        "time as normal"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
@@ -47,7 +47,7 @@ namespace {
         "Should Run All Time Jump",
         "If 'true': In a time jump, all scheduled scripts between the old time and the "
         "new time is executed. If 'false': In a time jump, no scripts scheduled between "
-        "the new time and the old time is executed."
+        "the new time and the old time is executed"
     };
 
     struct [[codegen::Dictionary(ScheduledScript)]] Parameters {
@@ -142,7 +142,7 @@ void ScriptScheduler::rewind() {
 
 void ScriptScheduler::clearSchedule(std::optional<int> group) {
     if (group.has_value()) {
-        for (auto it = _scripts.begin(); it < _scripts.end(); ) {
+        for (auto it = _scripts.begin(); it < _scripts.end();) {
             if (it->group == *group) {
                 it = _scripts.erase(it);
             }

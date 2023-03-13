@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,10 +61,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AltitudeInfo = {
         "Altitude",
         "Altitude",
-        "The altitude in meters. "
-        "If the 'UseHeightmap' property is 'true', this is an offset from the actual "
-        "surface of the globe. If not, this is an offset from the reference ellipsoid."
-        "The default value is 0.0"
+        "The altitude in meters. If the 'UseHeightmap' property is 'true', this is an "
+        "offset from the actual surface of the globe. If not, this is an offset from the "
+        "reference ellipsoid. The default value is 0.0"
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseHeightmapInfo = {
@@ -72,7 +71,7 @@ namespace {
         "Use Heightmap",
         "If this value is 'true', the altitude specified in 'Altitude' will be treated "
         "as an offset from the heightmap. Otherwise, it will be an offset from the "
-        "globe's reference ellipsoid. The default value is 'false'."
+        "globe's reference ellipsoid. The default value is 'false'"
     };
 
     struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {

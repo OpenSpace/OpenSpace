@@ -2,7 +2,7 @@
     *                                                                                       *
     * OpenSpace                                                                             *
     *                                                                                       *
-    * Copyright (c) 2014-2022                                                               *
+    * Copyright (c) 2014-2023                                                               *
     *                                                                                       *
     * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
     * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,6 +55,7 @@ uniform vec3 lightDirectionCameraSpace;
 
 #if PERFORM_SHADING
 uniform float orenNayarRoughness;
+uniform float ambientIntensity;
 #endif // PERFORM_SHADING
 
 #if SHADOW_MAPPING_ENABLED
@@ -125,7 +126,7 @@ vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[NSEclipseShadows],
       }
       else if (length_d < r_p_pi) {// penumbra
 #if USE_ECLIPSE_HARD_SHADOWS
-        return vec4(0.5, 0.5, 0.5, 1.0); 
+        return vec4(0.5, 0.5, 0.5, 1.0);
 #else
         return vec4(vec3(length_d / r_p_pi), 1.0);
 #endif
@@ -152,6 +153,7 @@ in vec3 positionWorldSpace;
 #endif // USE_ECLIPSE_SHADOWS
 
 uniform float opacity;
+
 
 Fragment getFragment() {
   Fragment frag;
@@ -204,7 +206,8 @@ Fragment getFragment() {
     normal,
     lightDirectionCameraSpace,
     normalize(positionCameraSpace),
-    orenNayarRoughness
+    orenNayarRoughness,
+    ambientIntensity
   );
 #endif // PERFORM_SHADING
 
@@ -277,8 +280,8 @@ Fragment getFragment() {
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i}, -NSSamples + #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  0));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  NSSamples - #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0               , -NSSamples + #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0               ,  NSSamples - #{i}));
+      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(                0, -NSSamples + #{i}));
+      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(                0,  NSSamples - #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i}, -NSSamples + #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  0));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  NSSamples - #{i}));

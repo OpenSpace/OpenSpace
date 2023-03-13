@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@ flat in vec3 ge_color;
 flat in float ge_screenSpaceDepth;
 
 uniform sampler2D psfTexture;
+
 
 Fragment getFragment() {
   vec4 textureColor = texture(psfTexture, 0.5 * psfCoords + 0.5);

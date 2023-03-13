@@ -55,7 +55,7 @@ end
 local unbindRoll = function(name, axis)
   return [[
     -- Reset previous state
-    if(Joystick.State.Axis.Type == "Property") then
+    if (Joystick.State.Axis.Type == "Property") then
       openspace.navigation.bindJoystickAxisProperty("]] .. name .. "\", " .. axis .. [[, Joystick.State.Axis.PropertyUri, Joystick.State.Axis.MinValue, Joystick.State.Axis.MaxValue, Joystick.State.Axis.Inverted, Joystick.State.Axis.IsRemote);
     else
       openspace.navigation.bindJoystickAxis("]] .. name .. "\", " .. axis .. [[, Joystick.State.Axis.Type, Joystick.State.Axis.Inverted, Joystick.State.Axis.JoystickType, Joystick.State.Axis.Sticky, Joystick.State.Axis.Sensitivity);

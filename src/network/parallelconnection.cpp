@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,13 +32,10 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ParallelConnection";
+    constexpr std::string_view _loggerCat = "ParallelConnection";
 } // namespace
 
 namespace openspace {
-
-// Gonna do some UTF-like magic once we reach 255 to introduce a second byte or something
-const uint8_t ParallelConnection::ProtocolVersion = 6;
 
 ParallelConnection::Message::Message(MessageType t, std::vector<char> c)
     : type(t)

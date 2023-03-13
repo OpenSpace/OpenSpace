@@ -14,7 +14,7 @@
   },
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Profile set up to load /touch path from the gui, which contains an alternate gui with stories for a touch screen.",
+    "description": "Profile set up to load /touch path from the gui, which contains an alternate gui with stories for a touch screen",
     "license": "MIT License",
     "name": "Touch",
     "url": "https://www.openspaceproject.com",

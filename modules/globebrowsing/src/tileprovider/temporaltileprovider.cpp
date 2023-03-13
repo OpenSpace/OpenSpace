@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +44,7 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* TimePlaceholder = "${OpenSpaceTimeId}";
+    constexpr std::string_view TimePlaceholder = "${OpenSpaceTimeId}";
 
     constexpr openspace::properties::Property::PropertyInfo UseFixedTimeInfo = {
         "UseFixedTime",
@@ -58,7 +58,7 @@ namespace {
         "FixedTime",
         "Fixed Time",
         "If the 'UseFixedTime' is enabled, this time will be used instead of the actual "
-        "time taken from OpenSpace for the displayed tiles."
+        "time taken from OpenSpace for the displayed tiles"
     };
 
     struct [[codegen::Dictionary(TemporalTileProvider)]] Parameters {
@@ -132,9 +132,9 @@ namespace {
 #include "temporaltileprovider_codegen.cpp"
 
     std::string_view timeStringify(const std::string& format, const openspace::Time& t) {
-        ZoneScoped
+        ZoneScoped;
 
-        constexpr const int BufferSize = 64;
+        constexpr int BufferSize = 64;
         ghoul_assert(format.size() < BufferSize, "Format string too long");
 
         using namespace openspace;
@@ -165,7 +165,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     , _useFixedTime(UseFixedTimeInfo, false)
     , _fixedTime(FixedTimeInfo)
 {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -314,7 +314,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 }
 
 Tile TemporalTileProvider::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
     if (!_currentTileProvider) {
         update();
     }
@@ -389,7 +389,7 @@ float TemporalTileProvider::noDataValueAsFloat() {
 DefaultTileProvider TemporalTileProvider::createTileProvider(
                                                            std::string_view timekey) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     std::string value;
     switch (_mode) {
@@ -414,10 +414,9 @@ DefaultTileProvider TemporalTileProvider::createTileProvider(
             value = FileSys.expandPathTokens(std::move(value), IgnoredTokens).string();
             break;
         }
-        case Mode::Folder: {
+        case Mode::Folder:
             value = std::string(timekey);
             break;
-        }
     }
 
     ghoul::Dictionary dict = _initDict;
@@ -426,7 +425,7 @@ DefaultTileProvider TemporalTileProvider::createTileProvider(
 }
 
 DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(const Time& t) {
-    ZoneScoped
+    ZoneScoped;
 
     const double time = t.j2000Seconds();
     if (const auto it = _tileProviderMap.find(time);  it != _tileProviderMap.end()) {
@@ -562,7 +561,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, true>(
 
     // if the images are for each hour
     if (_prototyped.temporalResolution == "1h") {
-        constexpr const int Hour = 60 * 60;
+        constexpr int Hour = 60 * 60;
         // the second tile to interpolate between
         nextTile.advanceTime(Hour);
         // the tile after the second tile
@@ -576,7 +575,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, true>(
     }
     // if the images are for each month
     if (_prototyped.temporalResolution == "1M") {
-        constexpr const int Day = 24 * 60 * 60;
+        constexpr int Day = 24 * 60 * 60;
 
         // the second tile to interpolate between
         nextTile.advanceTime(32 * Day);
@@ -666,7 +665,7 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
 TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
                                                                  const ghoul::Dictionary&)
 {
-    ZoneScoped
+    ZoneScoped;
 
     glGenFramebuffers(1, &fbo);
     glGenVertexArrays(1, &vaoQuad);
@@ -713,7 +712,7 @@ TemporalTileProvider::InterpolateTileProvider::~InterpolateTileProvider() {
 }
 
 Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
     TracyGpuZone("tile");
 
     // prev and next are the two tiles to interpolate between

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -103,10 +103,11 @@ public:
 
         Type type;
         std::string value;
+        bool startPaused = false;
     };
 
     struct CameraNavState {
-        static constexpr const char* Type = "setNavigationState";
+        static constexpr std::string_view Type = "setNavigationState";
 
         std::string anchor;
         std::optional<std::string> aim;
@@ -118,7 +119,7 @@ public:
     };
 
     struct CameraGoToGeo {
-        static constexpr const char* Type = "goToGeo";
+        static constexpr std::string_view Type = "goToGeo";
 
         std::string anchor;
         double latitude;
@@ -146,7 +147,7 @@ public:
     /// Removes an asset unless the `ignoreUpdates` member is set to `true`
     void removeAsset(const std::string& path);
 
-    static constexpr const Version CurrentVersion = Version{ 1, 1 };
+    static constexpr Version CurrentVersion = Version{ 1, 2 };
 
     Version version = CurrentVersion;
     std::vector<Module> modules;

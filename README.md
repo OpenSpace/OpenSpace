@@ -14,7 +14,7 @@
 ![Image](https://github.com/OpenSpace/openspace.github.io/raw/master/assets/images/collection.jpg)
 
 # Background
-OpenSpace started as a collaboration between Sweden's [Linköping University](https://scivis.github.io) (LiU) and the [American Museum of Natural History](https://www.amnh.org) (AMNH).  Development of the software began several years ago through a close collaboration with NASA Goddard's [Community Coordinated Modeling Center](https://ccmc.gsfc.nasa.gov) (CCMC) to model space weather forecasting and continued with visualizations of NASA's New Horizons mission to Pluto and ESA's Rosetta mission to 67P/Churyumov–Gerasimenko.  This promising set of preliminary work provided a foundation for continued funding from NASA, the Swedish eScience Research Centre, and the Knut and Alice Wallenberg foundation, which has extended the collaboration to include the University of Utah's [Scientific Computing and Imaging](https://www.sci.utah.edu) (SCI) Institute, [New York University](https://www.nyu.edu)'s Tandon School of Engineering, multiple informal science institutions across the world, and multiple, international vendors.
+OpenSpace started as a collaboration between Sweden's [Linköping University](https://scivis.github.io) (LiU) and the [American Museum of Natural History](https://www.amnh.org) (AMNH).  Development of the software began several years ago through a close collaboration with NASA Goddard's [Community Coordinated Modeling Center](https://ccmc.gsfc.nasa.gov) (CCMC) to model space weather forecasting and continued with visualizations of NASA's New Horizons mission to Pluto and ESA's Rosetta mission to 67P/Churyumov-Gerasimenko.  This promising set of preliminary work provided a foundation for continued funding from NASA, the Swedish eScience Research Centre, and the Knut and Alice Wallenberg foundation, which has extended the collaboration to include the University of Utah's [Scientific Computing and Imaging](https://www.sci.utah.edu) (SCI) Institute, [New York University](https://www.nyu.edu)'s Tandon School of Engineering, multiple informal science institutions across the world, and multiple, international vendors.
 
 ![Image](https://github.com/OpenSpace/openspace.github.io/raw/master/assets/images/presentation.jpg)
 
@@ -37,11 +37,14 @@ OpenSpace requires at least support for [OpenGL](https://www.opengl.org/) versio
 This repository contains the source code and example profiles for OpenSpace, but does not contain any data.  To build and install the application, please check out the [GitHub Wiki](https://github.com/OpenSpace/OpenSpace/wiki).  Here, you will find two pages, a [build instruction](https://github.com/OpenSpace/OpenSpace/wiki/Compiling) for all operating systems and then additional instructions for [Windows](https://github.com/OpenSpace/OpenSpace/wiki/Compiling-Windows), [Linux (Ubuntu)](https://github.com/OpenSpace/OpenSpace/wiki/Compiling-Ubuntu), and [MacOS](https://github.com/OpenSpace/OpenSpace/wiki/Compiling-MacOS). Please note that the Apple Silicon series of chips do not support OpenGL natively and Metal 2 does not support `double` precision accuracy (see [here](https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf) Section 2.1), therefore only the Intel processors for MacOS are supported and maintained.
 
 Requirements for compiling are:
- - CMake version 3.10 or above
- - C++ compiler supporting C++17 (MSVC 16.10, GCC9, Clang10)
+ - CMake version 3.25 or above
+ - C++ compiler supporting C++20 (MSVC 19.31, GCC11, Clang14, AppleClang 13.1.6)
  - [Boost](http://www.boost.org/)
  - [Qt](http://www.qt.io/download)
 
 Feel free to create issues for missing features, bug reports, or compile problems or contact us via [email](mailto:openspace@amnh.org?subject=OpenSpace:).  Regarding any issues, you are very welcome on our [Slack support channel](https://openspacesupport.slack.com) to which you can freely [sign-up](https://join.slack.com/t/openspacesupport/shared_invite/zt-37niq6y9-T0JaCIk4UoFLI4VF5U9Vsw).
 
 ![Image](https://github.com/OpenSpace/openspace.github.io/raw/master/assets/images/himalaya-nkpg-dome.jpg)
+
+# License
+The contents of this repository is under an [MIT license](https://github.com/OpenSpace/OpenSpace/blob/master/LICENSE.md).

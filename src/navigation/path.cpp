@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,17 +36,16 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
-#include <openspace/util/collisionhelper.h>
 #include <openspace/util/universalhelpers.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
 #include <glm/ext/quaternion_relational.hpp>
 
 namespace {
-    constexpr const char _loggerCat[] = "Path";
-    constexpr const float LengthEpsilon = 1e-5f;
+    constexpr std::string_view _loggerCat = "Path";
+    constexpr float LengthEpsilon = 1e-5f;
 
-    constexpr const char SunIdentifier[] = "Sun";
+    constexpr const char* SunIdentifier = "Sun";
 
     // TODO: where should this documentation be?
     // It's nice to have these to interpret the dictionary when creating the path, but
@@ -115,7 +114,7 @@ Path::Path(Waypoint start, Waypoint end, Type type,
             _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
             break;
         default:
-            LERROR("Could not create curve. Type does not exist!");
+            LERROR("Could not create curve. Type does not exist");
             throw ghoul::MissingCaseException();
     }
 
@@ -125,7 +124,7 @@ Path::Path(Waypoint start, Waypoint end, Type type,
     // computing how much faster/slower it should be
     _speedFactorFromDuration = 1.0;
     if (duration.has_value()) {
-        constexpr const double dt = 0.05; // 20 fps
+        constexpr double dt = 0.05; // 20 fps
         while (!hasReachedEnd()) {
             traversePath(dt);
         }
@@ -178,6 +177,11 @@ CameraPose Path::traversePath(double dt, float speedScale) {
     return newPose;
 }
 
+void Path::quitPath() {
+    _traveledDistance = pathLength();
+    _shouldQuit = true;
+}
+
 std::string Path::currentAnchor() const {
     bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
     return (pastHalfway) ? _end.nodeIdentifier() : _start.nodeIdentifier();
@@ -188,9 +192,12 @@ bool Path::hasReachedEnd() const {
         return true;
     }
 
+    // @TODO (emmbr, 2022-11-07) Handle linear paths separately, as they might 
+    // abort prematurely due to the "isPositionFinished" condition
+
     bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
 
-    constexpr const double RotationEpsilon = 0.0001;
+    constexpr double RotationEpsilon = 0.0001;
     bool isRotationFinished = ghoul::isSameOrientation(
         _prevPose.rotation,
         _end.rotation(),
@@ -210,6 +217,7 @@ void Path::resetPlaybackVariables() {
 CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
     ghoul_assert(_type == Type::Linear, "Path type must be linear");
     const double relativeDistance = distance / pathLength();
+
     const glm::dvec3 prevPosToEnd = _prevPose.position - _end.position();
     const double remainingDistance = glm::length(prevPosToEnd);
     CameraPose pose;
@@ -223,9 +231,27 @@ CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
         // Just move along line from the current position to the target
         const glm::dvec3 lineDir = glm::normalize(prevPosToEnd);
         pose.position = _prevPose.position - displacement * lineDir;
+
+        double newRemainingDistance = glm::length(pose.position - _end.position());
+        double diff = remainingDistance - newRemainingDistance;
+        // Avoid remaining distances close to zero, or even negative
+        if (relativeDistance > 0.5 && diff < LengthEpsilon) {
+            // The positions are too large, so we are not making progress because of
+            // insufficient precision
+            LWARNING("Quit camera path prematurely due to insufficient precision");
+            _shouldQuit = true;
+            return _prevPose;
+        }
     }
 
     pose.rotation = linearPathRotation(relativeDistance);
+
+    if (glm::any(glm::isnan(pose.rotation)) || glm::any(glm::isnan(pose.position))) {
+        // This should not happen, but guard for it anyways
+        _shouldQuit = true;
+        return _prevPose;
+    }
+
     return pose;
 }
 
@@ -316,6 +342,7 @@ glm::dquat Path::linearPathRotation(double t) const {
 }
 
 glm::dquat Path::lookAtTargetsRotation(double t) const {
+    t = glm::clamp(t, 0.0, 1.0);
     const double t1 = 0.2;
     const double t2 = 0.8;
 
@@ -331,13 +358,15 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
         const glm::dvec3 viewDir = ghoul::viewDirection(_start.rotation());
         const glm::dvec3 inFrontOfStart = startPos + inFrontDistance * viewDir;
 
-        const double tScaled = ghoul::cubicEaseInOut(t / t1);
+        const double tScaled = glm::clamp(t / t1, 0.0, 1.0);
+        const double tEased = ghoul::cubicEaseInOut(tScaled);
         lookAtPos =
-            ghoul::interpolateLinear(tScaled, inFrontOfStart, startNodePos);
+            ghoul::interpolateLinear(tEased, inFrontOfStart, startNodePos);
     }
     else if (t <= t2) {
-        const double tScaled = ghoul::cubicEaseInOut((t - t1) / (t2 - t1));
-        lookAtPos = ghoul::interpolateLinear(tScaled, startNodePos, endNodePos);
+        const double tScaled = glm::clamp((t - t1) / (t2 - t1), 0.0, 1.0);
+        const double tEased = ghoul::cubicEaseInOut(tScaled);
+        lookAtPos = ghoul::interpolateLinear(tEased, startNodePos, endNodePos);
     }
     else {
         // (t > t2)
@@ -346,8 +375,9 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
         const glm::dvec3 viewDir = ghoul::viewDirection(_end.rotation());
         const glm::dvec3 inFrontOfEnd = endPos + inFrontDistance * viewDir;
 
-        const double tScaled = ghoul::cubicEaseInOut((t - t2) / (1.0 - t2));
-        lookAtPos = ghoul::interpolateLinear(tScaled, endNodePos, inFrontOfEnd);
+        const double tScaled = glm::clamp((t - t2) / (1.0 - t2), 0.0, 1.0);
+        const double tEased = ghoul::cubicEaseInOut(tScaled);
+        lookAtPos = ghoul::interpolateLinear(tEased, endNodePos, inFrontOfEnd);
     }
 
     // Handle up vector separately
@@ -378,7 +408,7 @@ double Path::speedAlongPath(double traveledDistance) const {
     const double speed = distanceToClosestNode;
 
     // Dampen at the start and end
-    constexpr const double DampenDistanceFactor = 3.0;
+    constexpr double DampenDistanceFactor = 3.0;
     double startUpDistance = DampenDistanceFactor * _start.validBoundingSphere();
     double closeUpDistance = DampenDistanceFactor * _end.validBoundingSphere();
 
@@ -387,7 +417,7 @@ double Path::speedAlongPath(double traveledDistance) const {
     // based on the order of magnitude of the solar system, which ofc is very specific to
     // our space content...
     // @TODO (2022-03-22, emmbr) Come up with a better more general solution
-    constexpr const double MaxDistance = 1E12;
+    constexpr double MaxDistance = 1E12;
     startUpDistance = glm::min(MaxDistance, startUpDistance);
     closeUpDistance = glm::min(MaxDistance, closeUpDistance);
 
@@ -416,6 +446,7 @@ double Path::speedAlongPath(double traveledDistance) const {
         const double remainingDistance = pathLength() - traveledDistance;
         dampeningFactor = remainingDistance / closeUpDistance;
     }
+    dampeningFactor = glm::clamp(dampeningFactor, 0.0, 1.0);
     dampeningFactor = ghoul::sineEaseOut(dampeningFactor);
 
     // Prevent multiplying with 0 (and hence a speed of 0.0 => no movement)
@@ -435,50 +466,14 @@ Waypoint waypointFromCamera() {
     return Waypoint{ pos, rot, node };
 }
 
-SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
-    const std::vector<SceneGraphNode*>& relevantNodes =
-        global::navigationHandler->pathNavigator().relevantNodes();
-
-    for (SceneGraphNode* n : relevantNodes) {
-        bool isSame = (n->identifier() == node->identifier());
-        // If the nodes are in the very same position, they are probably representing
-        // the same object
-        isSame |=
-            glm::distance(n->worldPosition(), node->worldPosition()) < LengthEpsilon;
-
-        if (isSame) {
-            continue;
-        }
-
-        constexpr const float proximityRadiusFactor = 3.f;
-
-        const float bs = static_cast<float>(n->boundingSphere());
-        const float proximityRadius = proximityRadiusFactor * bs;
-        const glm::dvec3 posInModelCoords =
-            glm::inverse(n->modelTransform()) * glm::dvec4(node->worldPosition(), 1.0);
-
-        bool isClose = collision::isPointInsideSphere(
-            posInModelCoords,
-            glm::dvec3(0.0, 0.0, 0.0),
-            proximityRadius
-        );
-
-        if (isClose) {
-            return n;
-        }
-    }
-
-    return nullptr;
-}
-
 // Compute a target position close to the specified target node, using knowledge of
 // the start point and a desired distance from the node's center
 glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
                                     const Waypoint& startPoint)
 {
     const glm::dvec3 nodePos = targetNode->worldPosition();
-    const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
     const SceneGraphNode* sun = sceneGraphNode(SunIdentifier);
+    const SceneGraphNode* closeNode = PathNavigator::findNodeNearTarget(targetNode);
 
     // @TODO (2021-07-09, emmbr): Not nice to depend on a specific scene graph node,
     // as it might not exist. Ideally, each SGN could know about their preferred
@@ -515,8 +510,8 @@ glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
             return glm::dvec3(0.0, 0.0, 1.0);
         }
 
-        constexpr const float defaultPositionOffsetAngle = -30.f; // degrees
-        constexpr const float angle = glm::radians(defaultPositionOffsetAngle);
+        constexpr float defaultPositionOffsetAngle = -30.f; // degrees
+        constexpr float angle = glm::radians(defaultPositionOffsetAngle);
         const glm::dvec3 axis = glm::normalize(glm::cross(targetToPrev, targetToSun));
         const glm::dquat offsetRotation = angleAxis(static_cast<double>(angle), axis);
 
@@ -540,6 +535,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         return Waypoint();
     }
 
+    glm::dvec3 stepDir;
     glm::dvec3 targetPos;
     if (info.position.has_value()) {
         // The position in instruction is given in the targetNode's local coordinates.
@@ -556,7 +552,6 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         const double height = info.height.value_or(defaultHeight);
         const double distanceFromNodeCenter = radius + height;
 
-        glm::dvec3 stepDir;
         if (type == Path::Type::Linear) {
             // If linear path, compute position along line form start to end point
             glm::dvec3 endNodePos = targetNode->worldPosition();
@@ -578,7 +573,18 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
     }
 
     // Compute rotation so the camera is looking at the targetted node
-    const glm::dvec3 lookAtPos = targetNode->worldPosition();
+    glm::dvec3 lookAtPos = targetNode->worldPosition();
+
+    // Check if we can distinguish between targetpos and lookAt pos. Otherwise, move it further away
+    const glm::dvec3 diff = targetPos - lookAtPos;
+    double distSquared = glm::dot(diff, diff);
+    if (std::isnan(distSquared) || distSquared < LengthEpsilon) {
+        double startToEndDist = glm::length(
+            startPoint.position() - targetNode->worldPosition()
+        );
+        lookAtPos = targetPos - stepDir * 0.1 * startToEndDist;
+    }
+
     const glm::dquat targetRot = ghoul::lookAtQuaternion(targetPos, lookAtPos, up);
 
     return Waypoint(targetPos, targetRot, info.identifier);
@@ -689,9 +695,8 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             waypoints = { computeWaypointFromNodeInfo(info, startPoint, type) };
             break;
         }
-        default: {
+        default:
             throw ghoul::MissingCaseException();
-        }
     }
 
     // @TODO (emmbr) Allow for an instruction to represent a list of multiple waypoints
@@ -699,7 +704,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
     if (glm::distance(startPoint.position(), waypointToAdd.position()) < LengthEpsilon) {
         LINFO("Already at the requested target");
-        throw PathCurve::TooShortPathError("Path too short!");
+        throw PathCurve::TooShortPathError("Path too short");
     }
 
     checkVisibilityAndShowMessage(waypointToAdd.node());
@@ -707,7 +712,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     try {
         return Path(startPoint, waypointToAdd, type, duration);
     }
-    catch (const PathCurve::TooShortPathError& e) {
+    catch (const PathCurve::TooShortPathError&) {
         LINFO("Already at the requested target");
         // Rethrow e, so the pathnavigator can handle it as well
         throw;
@@ -719,7 +724,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
         LINFO(
             "Switching to a linear path, to avoid problems with precision due to "
-            "immense path length."
+            "immense path length or precision problems"
         );
 
         return createPathFromDictionary(dictionary, Path::Type::Linear);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,10 +51,8 @@ namespace {
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = ghoul::from_string<layergroupid::GroupID>(
-        layerGroupName
-        );
-    if (groupID == layergroupid::GroupID::Unknown) {
+    layers::Group::ID groupID = ghoul::from_string<layers::Group::ID>(layerGroupName);
+    if (groupID == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError("Unknown layer group: " + layerGroupName);
     }
 
@@ -91,10 +89,8 @@ namespace {
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = ghoul::from_string<layergroupid::GroupID>(
-        layerGroupName
-        );
-    if (groupID == layergroupid::GroupID::Unknown) {
+    layers::Group::ID groupID = ghoul::from_string<layers::Group::ID>(layerGroupName);
+    if (groupID == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError("Unknown layer group: " + layerGroupName);
     }
 
@@ -135,18 +131,17 @@ namespace {
         throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
     }
 
-    globebrowsing::layergroupid::GroupID group =
-        ghoul::from_string<globebrowsing::layergroupid::GroupID>(layer);
-    if (group == globebrowsing::layergroupid::GroupID::Unknown) {
+    layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layer);
+    if (group == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError("Unknown layer groupd: " + layer);
     }
 
-    const globebrowsing::LayerGroup& lg = globe->layerManager().layerGroup(group);
-    std::vector<globebrowsing::Layer*> layers = lg.layers();
+    const LayerGroup& lg = globe->layerManager().layerGroup(group);
+    std::vector<Layer*> layers = lg.layers();
 
     std::vector<std::string> res;
     res.reserve(layers.size());
-    for (globebrowsing::Layer* l : layers) {
+    for (Layer* l : layers) {
         res.push_back(l->identifier());
     }
     return res;
@@ -156,24 +151,26 @@ namespace {
  * Rearranges the order of a single layer on a globe. The first parameter is the
  * identifier of the globe, the second parameter specifies the name of the layer group,
  * the third parameter is the original position of the layer that should be moved and the
- * last parameter is the new position in the list. The first position in the list has
- * index 0, and the last position is given by the number of layers minus one. The new
- * position may be -1 to place the layer at the top or any number bigger than the number
- * of layers to place it at the bottom.
+ * last parameter is the new position in the list. The third and fourth parameters can
+ * also acccept names, in which case these refer to identifiers of the layer to be moved.
+ * If the last parameter is a name, the source layer is moved below that destination
+ * layer. The first position in the list has index 0, and the last position is given by
+ * the number of layers minus one.
  */
-[[codegen::luawrap]] void moveLayer(std::string globeIdentifier, std::string layer,
-                                    int oldPosition, int newPosition)
+[[codegen::luawrap]] void moveLayer(std::string globeIdentifier, std::string layerGroup,
+                                    std::variant<int, std::string> source,
+                                    std::variant<int, std::string> destination)
 {
     using namespace openspace;
     using namespace globebrowsing;
 
-    if (oldPosition == newPosition) {
+    if (source == destination) {
         return;
     }
 
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
+        throw ghoul::lua::LuaError(fmt::format("Unknown globe: {}", globeIdentifier));
     }
 
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
@@ -181,14 +178,62 @@ namespace {
         throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
     }
 
-    globebrowsing::layergroupid::GroupID group =
-        ghoul::from_string<globebrowsing::layergroupid::GroupID>(layer);
-    if (group == globebrowsing::layergroupid::GroupID::Unknown) {
-        throw ghoul::lua::LuaError("Unknown layer groupd: " + layer);
+    layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layerGroup);
+    if (group == layers::Group::ID::Unknown) {
+        throw ghoul::lua::LuaError(fmt::format("Unknown layer group: {}", layerGroup));
+    }
+    
+    LayerGroup& lg = globe->layerManager().layerGroup(group);
+    if (std::holds_alternative<int>(source) && std::holds_alternative<int>(destination)) {
+        // Short circut here, no need to get the layers
+        lg.moveLayer(std::get<int>(source), std::get<int>(destination));
+        return;
     }
 
-    globebrowsing::LayerGroup& lg = globe->layerManager().layerGroup(group);
-    lg.moveLayer(oldPosition, newPosition);
+    std::vector<Layer*> layers = lg.layers();
+
+    int sourceIdx = 0;
+    if (std::holds_alternative<int>(source)) {
+        sourceIdx = std::get<int>(source);
+    }
+    else {
+        auto it = std::find_if(
+            layers.cbegin(), layers.cend(),
+            [s = std::get<std::string>(source)](Layer* l) {
+                return l->identifier() == s;
+            }
+        );
+        if (it == layers.cend()) {
+            throw ghoul::lua::LuaError(fmt::format(
+                "Could not find source layer '{}'", std::get<std::string>(source)
+            ));
+        }
+
+        sourceIdx = static_cast<int>(std::distance(layers.cbegin(), it));
+    }
+
+    int destinationIdx = 0;
+    if (std::holds_alternative<int>(destination)) {
+        destinationIdx = std::get<int>(destination);
+    }
+    else {
+        auto it = std::find_if(
+            layers.cbegin(), layers.cend(),
+            [d = std::get<std::string>(destination)](Layer* l) {
+                return l->identifier() == d;
+            }
+        );
+        if (it == layers.cend()) {
+            throw ghoul::lua::LuaError(fmt::format(
+                "Could not find destination layer '{}'", std::get<std::string>(source)
+            ));
+        }
+
+        // +1 since we want to move the layer _below_ the specified layer
+        destinationIdx = static_cast<int>(std::distance(layers.cbegin(), it));
+    }
+
+    lg.moveLayer(sourceIdx, destinationIdx);
 }
 
 /**
@@ -236,7 +281,7 @@ namespace {
     else {
         n = global::navigationHandler->orbitalNavigator().anchorNode();
         if (!n) {
-            throw ghoul::lua::LuaError("No anchor node is set.");
+            throw ghoul::lua::LuaError("No anchor node is set");
         }
     }
 
@@ -292,7 +337,7 @@ namespace {
     else {
         n = global::navigationHandler->orbitalNavigator().anchorNode();
         if (!n) {
-            throw ghoul::lua::LuaError("No anchor node is set.");
+            throw ghoul::lua::LuaError("No anchor node is set");
         }
     }
 
@@ -313,7 +358,7 @@ namespace {
     const glm::dvec3 currentPosModelCoords =
         glm::inverse(gl->modelTransform()) * glm::dvec4(currentPosW, 1.0);
 
-    constexpr const double LengthEpsilon = 10.0; // meters
+    constexpr double LengthEpsilon = 10.0; // meters
     if (glm::distance(currentPosModelCoords, positionModelCoords) < LengthEpsilon) {
         LINFOC("GlobeBrowsing", "flyToGeo: Already at the requested position");
         return;
@@ -326,7 +371,7 @@ namespace {
     instruction.setValue("PathType", std::string("ZoomOutOverview"));
 
     if (duration.has_value()) {
-        constexpr const double Epsilon = 1e-5;
+        constexpr double Epsilon = 1e-5;
         if (*duration <= Epsilon) {
             throw ghoul::lua::LuaError("Duration must be larger than zero");
         }

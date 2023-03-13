@@ -2,7 +2,7 @@ local earth_transforms = asset.require("scene/solarsystem/planets/earth/transfor
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local kernels = asset.require("./kernels").kernels
 
-local apolloSpiceId = "-908"
+local apolloSpiceId = -908
 
 
 local LaunchTrail = {
@@ -82,13 +82,13 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(MoonTrail)
   openspace.addSceneGraphNode(EarthBarycenterTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthBarycenterTrail)
   openspace.removeSceneGraphNode(MoonTrail)
   openspace.removeSceneGraphNode(LaunchTrail)
 end)
-    
+
 asset.export(LaunchTrail)
 asset.export(MoonTrail)
 asset.export(EarthBarycenterTrail)

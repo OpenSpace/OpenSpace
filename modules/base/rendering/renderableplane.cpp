@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,8 +43,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "Plane";
-
     enum BlendMode {
         Normal = 0,
         Additive
@@ -55,7 +53,7 @@ namespace {
         "Billboard mode",
         "This value specifies whether the plane is a billboard, which means that it is "
         "always facing the camera. If this is false, it can be oriented using other "
-        "transformations."
+        "transformations"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorBacksideInfo = {
@@ -63,26 +61,26 @@ namespace {
         "Mirror backside of image plane",
         "If this value is set to false, the image plane will not be mirrored when "
         "looking from the backside. This is usually desirable when the image shows "
-        "data at a specific location, but not if it is displaying text for example."
+        "data at a specific location, but not if it is displaying text for example"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
-        "This value specifies the size of the plane in meters."
+        "This value specifies the size of the plane in meters"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to this plane."
+        "This determines the blending mode that is applied to this plane"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply Color",
-        "If set, the plane's texture is multiplied with this color. "
-        "Useful for applying a color grayscale images."
+        "If set, the plane's texture is multiplied with this color. Useful for applying "
+        "a color grayscale images"
     };
 
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {
@@ -177,17 +175,17 @@ bool RenderablePlane::isReady() const {
 }
 
 void RenderablePlane::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
 
     _shader = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "Plane",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "Plane",
                 absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
             );
@@ -196,7 +194,7 @@ void RenderablePlane::initializeGL() {
 }
 
 void RenderablePlane::deinitializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
@@ -205,7 +203,7 @@ void RenderablePlane::deinitializeGL() {
     _vertexPositionBuffer = 0;
 
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "Plane",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -214,7 +212,7 @@ void RenderablePlane::deinitializeGL() {
 }
 
 void RenderablePlane::render(const RenderData& data, RendererTasks&) {
-    ZoneScoped
+    ZoneScoped;
 
     _shader->activate();
     _shader->setUniform("opacity", opacity());
@@ -289,7 +287,7 @@ void RenderablePlane::bindTexture() {}
 void RenderablePlane::unbindTexture() {}
 
 void RenderablePlane::update(const UpdateData&) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();

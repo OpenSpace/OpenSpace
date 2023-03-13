@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -48,9 +47,9 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderablePoints";
+    constexpr std::string_view _loggerCat = "RenderablePoints";
 
-    constexpr const std::array<const char*, 7> UniformNames = {
+    constexpr std::array<const char*, 7> UniformNames = {
         "modelViewProjectionTransform", "color", "sides", "alphaValue", "scaleFactor",
         "spriteTexture", "hasColorMap"
     };
@@ -58,26 +57,26 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
-        "The path to the texture that should be used as the point sprite."
+        "The path to the texture that should be used as the point sprite"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point."
+        "size of each point"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value is used to define the color of the astronomical object."
+        "This value is used to define the color of the astronomical object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
-        "The path to the color map file of the astronomical object."
+        "The path to the color map file of the astronomical object"
     };
 
     struct [[codegen::Dictionary(RenderablePoints)]] Parameters {
@@ -173,7 +172,7 @@ bool RenderablePoints::isReady() const {
 }
 
 void RenderablePoints::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     _dataset = speck::data::loadFileWithCache(_speckFile);
 
@@ -183,7 +182,7 @@ void RenderablePoints::initialize() {
 }
 
 void RenderablePoints::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_hasSpriteTexture) {
         _program = DigitalUniverseModule::ProgramObjectManager.request(

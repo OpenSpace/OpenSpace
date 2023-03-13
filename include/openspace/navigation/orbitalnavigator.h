@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,11 +70,12 @@ public:
         properties::BoolProperty shouldTriggerWhenIdle;
         properties::FloatProperty idleWaitTime;
         properties::BoolProperty abortOnCameraInteraction;
-        properties::FloatProperty speedScale;
+        properties::BoolProperty invert;
+        properties::FloatProperty speedScaleFactor;
         properties::FloatProperty dampenInterpolationTime;
 
         properties::OptionProperty defaultBehavior;
-        std::optional<Behavior> chosenBehavior = std::nullopt;
+        std::optional<Behavior> chosenBehavior;
     };
 
     OrbitalNavigator();
@@ -129,8 +130,17 @@ public:
     bool hasZoomFriction() const;
     bool hasRollFriction() const;
 
+    double minAllowedDistance() const;
+
     glm::dvec3 anchorNodeToCameraVector() const;
     glm::quat anchorNodeToCameraRotation() const;
+
+    /**
+     * Compute a camera position that pushed the camera position to
+     * a valid position over the anchor node, accounting for the
+     * minimal allowed distance
+     */
+    glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
 
 private:
     struct CameraRotationDecomposition {
@@ -186,6 +196,8 @@ private:
     properties::FloatProperty _stereoscopicDepthOfFocusSurface;
     properties::FloatProperty _staticViewScaleExponent;
 
+    properties::BoolProperty _constantVelocityFlight;
+
     properties::FloatProperty _retargetInterpolationTime;
     properties::FloatProperty _stereoInterpolationTime;
     properties::FloatProperty _followRotationInterpolationTime;
@@ -223,7 +235,7 @@ private:
      * camera points towards the reference node in the direction opposite to the direction
      * out from the surface of the object. The local rotation defines the differential
      * from the global to the current total rotation so that
-     * <code>cameraRotation = globalRotation * localRotation</code>.
+     * `cameraRotation = globalRotation * localRotation`.
      */
     CameraRotationDecomposition decomposeCameraRotationSurface(const CameraPose pose,
         const SceneGraphNode& reference);
@@ -233,7 +245,7 @@ private:
      * CameraRotationDecomposition. The global rotation defines the rotation so that the
      * camera points towards the reference position.
      * The local rotation defines the differential from the global to the current total
-     * rotation so that <code>cameraRotation = globalRotation * localRotation</code>.
+     * rotation so that `cameraRotation = globalRotation * localRotation`.
      */
     CameraRotationDecomposition decomposeCameraRotation(const CameraPose pose,
         glm::dvec3 reference);
@@ -328,11 +340,11 @@ private:
     /**
      * Push the camera out to the surface of the object.
      *
-     * \return a position vector adjusted to be at least minHeightAboveGround meters
+     * \return a position vector adjusted to be at least _minimumAllowedDistance meters
      *         above the actual surface of the object
      */
-    glm::dvec3 pushToSurface(double minHeightAboveGround,
-        const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,
+    glm::dvec3 pushToSurface(const glm::dvec3& cameraPosition,
+        const glm::dvec3& objectPosition,
         const SurfacePositionHandle& positionHandle) const;
 
     /**
@@ -351,7 +363,7 @@ private:
      * Calculates a SurfacePositionHandle given a camera position in world space.
      */
     SurfacePositionHandle calculateSurfacePositionHandle(const SceneGraphNode& node,
-        const glm::dvec3 cameraPositionWorldSpace);
+        const glm::dvec3& cameraPositionWorldSpace) const;
 
     void resetIdleBehavior();
 
@@ -382,8 +394,8 @@ private:
      * vector coincides with the axis, and should be used with care.
      *
      * Used for:
-     * IdleBehavior::Behavior::OrbitAtConstantLat ( axis = north = z-axis ) and
-     * IdleBehavior::Behavior::OrbitAroundUp ( axis = up = y-axis )
+     * IdleBehavior::Behavior::OrbitAtConstantLat (axis = north = z-axis) and
+     * IdleBehavior::Behavior::OrbitAroundUp (axis = up = y-axis)
      *
      * \param axis The axis to arbit around, given in model coordinates of the anchor
      * \param deltaTime The time step to use for the motion. Controls the rotation angle

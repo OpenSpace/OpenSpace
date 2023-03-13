@@ -1,6 +1,8 @@
 asset.require("spice/base")
+asset.require("./actions")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local mars = asset.require("scene/solarsystem/planets/mars/mars")
+asset.require("scene/solarsystem/planets/mars/default_layers")
 
 local models = asset.syncedResource({
   Name = "Insight Models Chutes",
@@ -104,7 +106,7 @@ local TranslationKeyframes = {
       Frame = "IAU_MARS",
       Kernels = iKernels,
       FixedDate = "2018 NOV 26 19:45:34"
-  },
+  }
 }
 
 local RotationKeyframes = {
@@ -770,7 +772,7 @@ local Insight_Trail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "-189",
+      Target = -189,
       Observer = "MARS",
       Frame = "IAU_MARS",
       Kernels = iKernels
@@ -810,7 +812,7 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-    
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])

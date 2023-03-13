@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,6 +41,7 @@ uniform ivec2 TRANSMITTANCE;
 
 const int TRANSMITTANCE_STEPS = 500;
 
+
 // Optical depth by integration, from ray starting at point vec(x), i.e, height r and
 // angle mu (cosine of vec(v)) until top of atmosphere or planet's ground.
 // r := height of starting point vect(x)
@@ -78,6 +79,7 @@ float opticalDepth(float r, float mu, float H) {
   }
   return accumulation * (b_a / (2.0 * TRANSMITTANCE_STEPS));
 }
+
 
 void main() {
   float u_mu  = gl_FragCoord.x / float(TRANSMITTANCE.x);

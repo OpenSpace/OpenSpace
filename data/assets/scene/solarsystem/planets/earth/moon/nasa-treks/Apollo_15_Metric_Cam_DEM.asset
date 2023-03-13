@@ -1,0 +1,64 @@
+-- This file was automatically generated using a script found at
+-- https://github.com/OpenSpace/scripts/treks-to-openspace. See the README.md file
+-- in that repository for more information on how to run the script to update these
+-- files. In particular in the case of errors, prefer to change that script rather
+-- than the individual files
+
+local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
+
+local treks_Apollo15_MetricCam_ClrShade_Global_1024ppd = {
+  Identifier = "Apollo15_MetricCam_ClrShade_Global_1024ppd",
+  Name = [[Apollo 15 Metric Cam DEM, ColorHillshade]],
+  FilePath = asset.localResource("Apollo_15_Metric_Cam_DEM/ColorHillshade.vrt"),
+  Description = [[]]
+}
+
+local treks_Apollo15_MetricCam_ClrConf_Global_1024ppd = {
+  Identifier = "Apollo15_MetricCam_ClrConf_Global_1024ppd",
+  Name = [[Apollo 15 Metric Cam DEM, Colorized Confidence]],
+  FilePath = asset.localResource("Apollo_15_Metric_Cam_DEM/Colorized_Confidence.vrt"),
+  Description = [[]]
+}
+
+local treks_Apollo15_MetricCam_Gray_Global_1024ppd = {
+  Identifier = "Apollo15_MetricCam_Gray_Global_1024ppd",
+  Name = [[Apollo 15 Metric Cam DEM, Grayscale]],
+  FilePath = asset.localResource("Apollo_15_Metric_Cam_DEM/Grayscale.vrt"),
+  Description = [[]]
+}
+
+local treks_Apollo15_MetricCam_Shade_Global_1024ppd = {
+  Identifier = "Apollo15_MetricCam_Shade_Global_1024ppd",
+  Name = [[Apollo 15 Metric Cam DEM, Hillshade]],
+  FilePath = asset.localResource("Apollo_15_Metric_Cam_DEM/Hillshade.vrt"),
+  Description = [[]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo15_MetricCam_ClrShade_Global_1024ppd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo15_MetricCam_ClrConf_Global_1024ppd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo15_MetricCam_Gray_Global_1024ppd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo15_MetricCam_Shade_Global_1024ppd)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Apollo15_MetricCam_ClrShade_Global_1024ppd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Apollo15_MetricCam_ClrConf_Global_1024ppd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Apollo15_MetricCam_Gray_Global_1024ppd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Apollo15_MetricCam_Shade_Global_1024ppd")
+end)
+
+asset.export("Apollo15_MetricCam_ClrShade_Global_1024ppd", treks_Apollo15_MetricCam_ClrShade_Global_1024ppd)
+asset.export("Apollo15_MetricCam_ClrConf_Global_1024ppd", treks_Apollo15_MetricCam_ClrConf_Global_1024ppd)
+asset.export("Apollo15_MetricCam_Gray_Global_1024ppd", treks_Apollo15_MetricCam_Gray_Global_1024ppd)
+asset.export("Apollo15_MetricCam_Shade_Global_1024ppd", treks_Apollo15_MetricCam_Shade_Global_1024ppd)
+
+
+asset.meta = {
+  Name = [[NASA Treks Layers for Moon Apollo_15_Metric_Cam_DEM],
+  Version = "1.0",
+  Author = "NASA/Treks",
+  URL = "https://trek.nasa.gov/moon",
+  License = "NASA/Treks",
+  Description = [[Apollo_15_Metric_Cam_DEM layers from NASA/Treks for Moon]]
+}

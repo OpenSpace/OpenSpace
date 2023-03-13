@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,49 +57,57 @@ namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-    constexpr const char* _loggerCat = "NavigationHandler";
+    constexpr std::string_view _loggerCat = "NavigationHandler";
 
-    using namespace openspace;
-    constexpr const properties::Property::PropertyInfo KeyDisableMouseInputInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DisableKeybindingsInfo = {
+        "DisableKeybindings",
+        "Disable all Keybindings",
+        "Disables all keybindings without removing them. Please note that this does not "
+        "apply to the key to open the console"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
         "Disable all mouse inputs",
         "Disables all mouse inputs and prevents them from affecting the camera"
     };
 
-    constexpr const properties::Property::PropertyInfo KeyDisableJoystickInputInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DisableJoystickInputInfo = {
         "DisableJoystickInputs",
         "Disable all joystick inputs",
         "Disables all joystick inputs and prevents them from affecting the camera"
     };
 
-    constexpr const properties::Property::PropertyInfo KeyFrameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "
-        "than using the mouse interaction."
+        "than using the mouse interaction"
     };
 } // namespace
 
 namespace openspace::interaction {
 
 NavigationHandler::NavigationHandler()
-    : properties::PropertyOwner({ "NavigationHandler" })
-    , _disableMouseInputs(KeyDisableMouseInputInfo, false)
-    , _disableJoystickInputs(KeyDisableJoystickInputInfo, false)
-    , _useKeyFrameInteraction(KeyFrameInfo, false)
+    : properties::PropertyOwner({ "NavigationHandler", "Navigation Handler" })
+    , _disableKeybindings(DisableKeybindingsInfo, false)
+    , _disableMouseInputs(DisableMouseInputInfo, false)
+    , _disableJoystickInputs(DisableJoystickInputInfo, false)
+    , _useKeyFrameInteraction(FrameInfo, false)
 {
     addPropertySubOwner(_orbitalNavigator);
     addPropertySubOwner(_pathNavigator);
 
+    addProperty(_disableKeybindings);
     addProperty(_disableMouseInputs);
     addProperty(_disableJoystickInputs);
     addProperty(_useKeyFrameInteraction);
 }
 
-NavigationHandler::~NavigationHandler() {} // NOLINT
+NavigationHandler::~NavigationHandler() {}
 
 void NavigationHandler::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     global::parallelPeer->connectionEvent().subscribe(
         "NavigationHandler",
@@ -112,7 +120,7 @@ void NavigationHandler::initialize() {
 }
 
 void NavigationHandler::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     global::parallelPeer->connectionEvent().unsubscribe("NavigationHandler");
 }
@@ -368,6 +376,18 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
     _keyboardInputState.keyboardCallback(key, modifier, action);
 }
 
+bool NavigationHandler::disabledKeybindings() const {
+    return _disableKeybindings;
+}
+
+bool NavigationHandler::disabledMouse() const {
+    return _disableMouseInputs;
+}
+
+bool NavigationHandler::disabledJoystick() const {
+    return _disableJoystickInputs;
+}
+
 NavigationState NavigationHandler::navigationState() const {
     const SceneGraphNode* referenceFrame = _orbitalNavigator.followingAnchorRotation() ?
         _orbitalNavigator.anchorNode() :
@@ -422,9 +442,11 @@ NavigationState NavigationHandler::navigationState(
     );
 }
 
-void NavigationHandler::saveNavigationState(const std::string& filepath,
+void NavigationHandler::saveNavigationState(const std::filesystem::path& filepath,
                                             const std::string& referenceFrameIdentifier)
 {
+    ghoul_precondition(!filepath.empty(), "File path must not be empty");
+
     NavigationState state;
     if (!referenceFrameIdentifier.empty()) {
         const SceneGraphNode* referenceFrame = sceneGraphNode(referenceFrameIdentifier);
@@ -441,14 +463,18 @@ void NavigationHandler::saveNavigationState(const std::string& filepath,
         state = navigationState();
     }
 
-    if (!filepath.empty()) {
-        std::filesystem::path absolutePath = absPath(filepath);
-        LINFO(fmt::format("Saving camera position: {}", absolutePath));
+    std::filesystem::path absolutePath = absPath(filepath);
+    LINFO(fmt::format("Saving camera position: {}", absolutePath));
 
-        std::ofstream ofs(absolutePath);
-        ofs << "return " << ghoul::formatLua(state.dictionary());
-        ofs.close();
+    std::ofstream ofs(absolutePath);
+
+    if (!ofs.good()) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Error saving navigation state to {}", filepath
+        ));
     }
+
+    ofs << "return " << ghoul::formatLua(state.dictionary());
 }
 
 void NavigationHandler::loadNavigationState(const std::string& filepath) {
@@ -618,7 +644,11 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::AddGlobalRoll,
             codegen::lua::TriggerIdleBehavior,
             codegen::lua::ListAllJoysticks,
-            codegen::lua::TargetNextInterestingAnchor
+            codegen::lua::TargetNextInterestingAnchor,
+            codegen::lua::TargetPreviousInterestingAnchor,
+            codegen::lua::DistanceToFocus,
+            codegen::lua::DistanceToFocusBoundingSphere,
+            codegen::lua::DistanceToFocusInteractionSphere
         }
     };
 }

@@ -11,8 +11,7 @@ asset.require("./satellites_weather")
 asset.meta = {
   Name = "Satellites All",
   Version = "1.0",
-  Description = [[ Meta asset for all satellites of Earth. Containing all other meta
-  assets.]],
+  Description = "Meta asset for all satellites of Earth. Containing other meta assets",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

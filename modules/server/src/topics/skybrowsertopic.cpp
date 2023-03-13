@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,9 +35,8 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* EventKey = "event";
-    constexpr const char* SubscribeEvent = "start_subscription";
-    constexpr const char* UnsubscribeEvent = "stop_subscription";
+    constexpr std::string_view SubscribeEvent = "start_subscription";
+    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
 } // namespace
 
 using nlohmann::json;
@@ -55,7 +54,7 @@ SkyBrowserTopic::SkyBrowserTopic()
 
 SkyBrowserTopic::~SkyBrowserTopic() {
     if (_targetDataCallbackHandle != UnsetOnChangeHandle) {
-        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        ServerModule* module = global::moduleEngine->module<ServerModule>();
         if (module) {
             module->removePreSyncCallback(_targetDataCallbackHandle);
         }
@@ -67,7 +66,7 @@ bool SkyBrowserTopic::isDone() const {
 }
 
 void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
-    std::string event = json.at(EventKey).get<std::string>();
+    std::string event = json.at("event").get<std::string>();
     if (event == UnsubscribeEvent) {
         _isDone = true;
         return;
@@ -78,7 +77,7 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    ServerModule* module = global::moduleEngine->module<ServerModule>();
     _targetDataCallbackHandle = module->addPreSyncCallback(
         [this]() {
             std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
@@ -102,7 +101,7 @@ void SkyBrowserTopic::sendBrowserData() {
 
     // Pass data for all the browsers and the corresponding targets
     if (module->isCameraInSolarSystem()) {
-        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->getPairs();
+        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
         ghoul::Dictionary targets;
         for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
             std::string id = pair->browserId();

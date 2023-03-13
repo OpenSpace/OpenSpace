@@ -40,7 +40,7 @@ local toggle_trail = {
   ]],
   Documentation = [[Toggles the visibility of the associated trail of a scene graph node.
     This action takes optional arguments to 1) determine which trail to hide (as the
-    'Node') and 2) the transition direction (as 'After' and 'Before').]],
+    'Node') and 2) the transition direction (as 'After' and 'Before')]],
   GuiPath = "/Trails",
   IsLocal = true
 }
@@ -56,7 +56,7 @@ local hide_trail = {
     else
       node = openspace.navigation.getNavigationState().Anchor
     end
-    
+
     if openspace.hasSceneGraphNode(node .. "Trail") then
       openspace.setPropertyValueSingle("Scene." .. node .. "Trail.Renderable.Fade", 0.0, 1.0)
     elseif openspace.hasSceneGraphNode(node .. "_trail") then
@@ -81,7 +81,7 @@ local show_trail = {
     else
       node = openspace.navigation.getNavigationState().Anchor
     end
-    
+
     if openspace.hasSceneGraphNode(node .. "Trail") then
       openspace.setPropertyValueSingle("Scene." .. node .. "Trail.Renderable.Fade", 1.0, 1.0)
     elseif openspace.hasSceneGraphNode(node .. "_trail") then
@@ -112,7 +112,7 @@ end)
 asset.meta = {
   Name = "Actions - Toggle current Trails",
   Version = "1.0",
-  Description = [[ Asset providing actions to toggle trails]],
+  Description = "Asset providing actions to toggle trails",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

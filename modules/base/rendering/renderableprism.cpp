@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,53 +36,52 @@
 #include <optional>
 
 namespace {
-    constexpr const std::array<const char*, 2> UniformNames = {
+    constexpr std::array<const char*, 2> UniformNames = {
         "modelViewProjectionTransform", "vs_color"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
-        "The number of segments the shape of the prism should have."
+        "The number of segments the shape of the prism should have"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LinesInfo = {
         "NumLines",
         "Number of Lines",
-        "The number of lines connecting the two shapes of the prism. "
-        "They will be evenly distributed around the bounding circle that makes "
-        "up the shape of the prism."
+        "The number of lines connecting the two shapes of the prism. They will be evenly "
+        "distributed around the bounding circle that makes up the shape of the prism"
     };
 
-    static const openspace::properties::Property::PropertyInfo RadiusInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
-        "The radius of the prism's shape in meters."
+        "The radius of the prism's shape in meters"
     };
 
-    static const openspace::properties::Property::PropertyInfo BaseRadiusInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BaseRadiusInfo = {
         "BaseRadius",
         "Base Radius",
-        "The radius of the base of the prism's shape, in meters. By default it is "
-        "given the same radius as the outer shape."
+        "The radius of the base of the prism's shape, in meters. By default it is given "
+        "the same radius as the outer shape"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width."
+        "This value specifies the line width"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line."
+        "This value determines the RGB color for the line"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LengthInfo = {
         "Length",
         "Length",
-        "The length of the prism in meters."
+        "The length of the prism in meters"
     };
 
     // Generate vertices around the unit circle on the XY-plane

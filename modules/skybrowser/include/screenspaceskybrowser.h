@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,9 +29,9 @@
 #include <modules/skybrowser/include/wwtcommunicator.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
 
 namespace openspace {
 
@@ -49,12 +49,13 @@ public:
     float opacity() const;
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     bool isInitialized() const;
+    bool isPointingSpacecraft() const;
 
-    void setVerticalFovWithScroll(float scroll);
+    double setVerticalFovWithScroll(float scroll);
     void setOpacity(float opacity);
-    void setRatio(float ratio);
     void setIdInBrowser() const;
     void setIsInitialized(bool isInitialized);
+    void setPointSpaceCraft(bool shouldPoint);
 
     void updateTextureResolution();
 
@@ -67,20 +68,21 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    static constexpr int RadiusTimeOut = 25;
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
+    properties::BoolProperty _isPointingSpacecraft;
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
     std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 
     void bindTexture() override;
 
     // Flags
-    bool _isSyncedWithWwt = false;
-    bool _textureDimensionsIsDirty = false;
-    bool _ratioIsDirty = false;
     bool _isInitialized = false;
+    bool _radiusIsDirty = false;
+    int _borderRadiusTimer = -1;
 
-    float _ratio = 1.f;
+    float _lastTextureQuality = 1.f;
 };
 
 } // namespace openspace

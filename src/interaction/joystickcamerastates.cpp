@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,14 +25,16 @@
 #include <openspace/interaction/joystickcamerastates.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
+#include <algorithm>
 #include <cmath>
 #include <utility>
 
 namespace {
-    constexpr const char* _loggerCat = "JoystickCameraStates";
+    constexpr std::string_view _loggerCat = "JoystickCameraStates";
 } // namespace
 
 namespace openspace::interaction {
@@ -45,11 +47,18 @@ void JoystickCameraStates::updateStateFromInput(
                                            const JoystickInputStates& joystickInputStates,
                                                 double deltaTime)
 {
-    std::pair<bool, glm::dvec2> globalRotation = { false, glm::dvec2(0.0) };
-    std::pair<bool, double> zoom = { false, 0.0 };
-    std::pair<bool, glm::dvec2> localRoll = { false, glm::dvec2(0.0) };
-    std::pair<bool, glm::dvec2> globalRoll = { false, glm::dvec2(0.0) };
-    std::pair<bool, glm::dvec2> localRotation = { false, glm::dvec2(0.0) };
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode == OpenSpaceEngine::Mode::CameraPath ||
+        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+    {
+        return;
+    }
+
+    std::pair<bool, glm::dvec2> globalRotation = std::pair(false, glm::dvec2(0.0));
+    std::pair<bool, double> zoom = std::pair(false, 0.0);
+    std::pair<bool, glm::dvec2> localRoll = std::pair(false, glm::dvec2(0.0));
+    std::pair<bool, glm::dvec2> globalRoll = std::pair(false, glm::dvec2(0.0));
+    std::pair<bool, glm::dvec2> localRotation = std::pair(false, glm::dvec2(0.0));
 
     for (const JoystickInputState& joystickInputState : joystickInputStates) {
         if (joystickInputState.name.empty()) {
@@ -63,7 +72,10 @@ void JoystickCameraStates::updateStateFromInput(
         }
 
         int nAxes = joystickInputStates.numAxes(joystickInputState.name);
-        for (int i = 0; i < nAxes; ++i) {
+        for (int i = 0;
+             i < std::min(nAxes, static_cast<int>(joystick->axisMapping.size()));
+             ++i)
+        {
             AxisInformation t = joystick->axisMapping[i];
             if (t.type == AxisType::None) {
                 continue;
@@ -356,7 +368,7 @@ void JoystickCameraStates::clearButtonCommand(const std::string& joystickName,
     }
 
     for (auto it = joystick->buttonMapping.begin();
-         it != joystick->buttonMapping.end(); )
+         it != joystick->buttonMapping.end();)
     {
         // If the current iterator is the button that we are looking for, delete it
         // (std::multimap::erase will return the iterator to the next element for us)

@@ -43,7 +43,7 @@ local Pluto = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "planet_solarSystem", "planet_terrestrial" },
+  Tag = { "planet_solarSystem", "planet_terrestrial", "dwarf_planet" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto"
   }
@@ -54,13 +54,17 @@ local PlutoLabel = {
   Parent = Pluto.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "Pluto",
     FontSize = 70.0,
-    Size = 9.05,
+    Size = 9.10,
     MinMaxSize = { 1, 100 },
     BlendMode = "Additive",
-    OrientationOption = "Camera View Direction"
+    OrientationOption = "Camera View Direction",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.0, 120.0 },
+    FadeWidths = { 1.0, 150.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
@@ -74,12 +78,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Pluto)
   openspace.addSceneGraphNode(PlutoLabel)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoLabel)
   openspace.removeSceneGraphNode(Pluto)
 end)
-  
+
 asset.export(Pluto)
 asset.export(PlutoLabel)
 
@@ -88,7 +92,7 @@ asset.export(PlutoLabel)
 asset.meta = {
   Name = "Pluto",
   Version = "1.0",
-  Description = [[ Pluto globe, and main planet label.]],
+  Description = "Pluto globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

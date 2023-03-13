@@ -54,12 +54,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(C2019Y4AtlasPosition)
   openspace.addSceneGraphNode(C2019Y4AtlasTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(C2019Y4AtlasTrail)
   openspace.removeSceneGraphNode(C2019Y4AtlasPosition)
 end)
-    
+
 asset.export(C2019Y4AtlasPosition)
 asset.export(C2019Y4AtlasTrail)
 
@@ -68,7 +68,7 @@ asset.export(C2019Y4AtlasTrail)
 asset.meta = {
   Name = "C/2019 Y4 Atlas",
   Version = "1.2",
-  Description = [[ This asset contains the trail  and position of C/2019 Y4 Atlas from
+  Description = [[This asset contains the trail and position of C/2019 Y4 Atlas from
     1950 JAN 01 00:00:00 to 2100 JAN 01 00:00:00. Data from JPL Horizons]],
   Author = "OpenSpace Team",
   URL = "https://ssd.jpl.nasa.gov/horizons.cgi",

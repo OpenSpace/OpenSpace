@@ -27,7 +27,7 @@ local volume = {
   },
   Transform = {
     Scale = {
-      Type = "StaticScale",   
+      Type = "StaticScale",
       Scale = maxApogee     -- do not multiply this. That will not show real representation.
     }
   }
@@ -36,11 +36,11 @@ local volume = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(volume)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(volume)
 end)
-  
+
 asset.export(volume)
 
 
@@ -48,7 +48,7 @@ asset.export(volume)
 asset.meta = {
   Name = "Satellites Debris - Volume Cartesian",
   Version = "1.0",
-  Description = [[ Satellites asset for Debris - Volume Cartesian. Example asset.]],
+  Description = "Satellites asset for Debris - Volume Cartesian. Example asset",
   Author = "OpenSpace Team",
   URL = "",
   License = "MIT"

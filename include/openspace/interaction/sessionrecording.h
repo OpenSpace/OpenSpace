@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -174,9 +174,7 @@ public:
      * Starts a recording session, which will save data to the provided filename
      * in ASCII data format until recording is stopped using stopRecording() method.
      *
-     * \param filename file saved with recorded keyframes.
-     *
-     * \return \c true if recording to file starts without errors
+     * \param dataMode The format in which the session recording is stored
      */
     void setRecordDataFormat(DataMode dataMode);
 
@@ -206,7 +204,7 @@ public:
      * \param loop if true then the file will playback in loop mode, continuously
      *             looping back to the beginning until it is manually stopped
      *
-     * \return \c true if recording to file starts without errors
+     * \return `true` if recording to file starts without errors
      */
     bool startPlayback(std::string& filename, KeyframeTimeRef timeMode,
         bool forceSimTimeAtStart, bool loop);
@@ -220,7 +218,7 @@ public:
     /**
      * Returns playback pause status.
      *
-     * \return \c true if playback is paused
+     * \return `true` if playback is paused
      */
     bool isPlaybackPaused();
 
@@ -303,7 +301,7 @@ public:
      *
      * \param callback function handle for the callback
      */
-    void removeStateChangeCallback(CallbackHandle handle);
+    void removeStateChangeCallback(CallbackHandle callback);
 
     /**
      * Provides list of available playback files.
@@ -492,7 +490,7 @@ public:
     /**
      * Reads header information from a session recording file
      *
-     * \param stringstream reference to ifstream that contains the session recording file
+     * \param stream reference to ifstream that contains the session recording file
      *        data
      * \param readLen_chars number of characters to be read, which may be the expected
      *        length of the header line, or an arbitrary number of characters within it
@@ -549,6 +547,16 @@ public:
      *         the output of the previous.
      */
     std::string convertFile(std::string filename, int depth = 0);
+
+    /**
+     * Converts file format of a session recording file to the current format version
+     * (will determine the file format conversion to convert from based on the file's
+     * header version number). Accepts a relative path (currently from task runner dir)
+     * rather than a path assumed to be relative to ${RECORDINGS}.
+     *
+     * \param filenameRelative name of the file to convert
+     */
+    void convertFileRelativePath(std::string filenameRelative);
 
     /**
      * Goes to legacy session recording inherited class, and calls its convertFile()
@@ -617,7 +625,6 @@ protected:
     bool handleRecordingFile(std::string filenameIn);
     static bool isPath(std::string& filename);
     void removeTrailingPathSlashes(std::string& filename);
-    void extractFilenameFromPath(std::string& filename);
     bool playbackCamera();
     bool playbackTimeChange();
     bool playbackScript();
@@ -854,7 +861,7 @@ public:
             //Read string length from file
             in->read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
             if (strLen > saveBufferStringSize_max) {
-                throw ConversionError("Invalid script size for conversion read.");
+                throw ConversionError("Invalid script size for conversion read");
             }
             //Read back full string
             std::vector<char> temp(strLen + 1);

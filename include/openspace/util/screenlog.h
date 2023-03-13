@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -97,9 +97,9 @@ public:
 
     /**
      * This method removes all the stored LogEntry%s that have expired, calculated by
-     * their <code>timeStamp</code> and the #_timeToLive value.
+     * their `timeStamp` and the #_timeToLive value.
      *
-     * \post All entries retrieved by the #entries function have a <code>timeStamp</code>
+     * \post All entries retrieved by the #entries function have a `timeStamp`
      *       that is lower than the current time + #_timeToLive. The current time used is
      *       the time when this method was last called
      */

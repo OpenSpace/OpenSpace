@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,12 +37,12 @@
 #include <optional>
 
 namespace {
-    constexpr const std::array<const char*, 2> UniformNames = {"lineColor", "opacity"};
+    constexpr std::array<const char*, 2> UniformNames = { "lineColor", "opacity" };
 
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",
         "Speed of travel",
-        "The speed of light is the default value."
+        "The speed of light is the default value"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
@@ -54,26 +54,26 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line."
+        "This value determines the RGB color for the line"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width."
+        "This value specifies the line width"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IndicatorLengthInfo = {
         "IndicatorLength",
         "Indicator Length",
-        "This value specifies the length of the light indicator set in light seconds."
+        "This value specifies the length of the light indicator set in light seconds"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeLengthInfo = {
         "FadeLength",
         "Fade Length",
         "This value specifies the length of the faded tail of the light indicator "
-        "set in light seconds."
+        "set in light seconds"
     };
 
     struct [[codegen::Dictionary(RenderableLightTravel)]] Parameters {
@@ -90,10 +90,10 @@ namespace {
         std::optional<float> lineWidth;
 
         // [[codegen::verbatim(IndicatorLengthInfo.description)]]
-        std::optional<int> indicatorLength;
+        std::optional<float> indicatorLength;
 
         // [[codegen::verbatim(FadeLengthInfo.description)]]
-        std::optional<int> fadeLength;
+        std::optional<float> fadeLength;
     };
 #include "renderabletravelspeed_codegen.cpp"
 } // namespace
@@ -113,8 +113,8 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
         1.0,
         distanceconstants::LightSecond
       )
-    , _indicatorLength(IndicatorLengthInfo, 1, 1, 360)
-    , _fadeLength(FadeLengthInfo, 1, 0, 360)
+    , _indicatorLength(IndicatorLengthInfo, 1.f, 0.f, 360.f)
+    , _fadeLength(FadeLengthInfo, 1.f, 0.f, 360.f)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
@@ -283,7 +283,7 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     _shaderProgram->setUniform("opacity", opacity());
 }
 
-void RenderableTravelSpeed::render(const RenderData& data, RendererTasks& ) {
+void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
     if (!_enabled) {
         return;
     }

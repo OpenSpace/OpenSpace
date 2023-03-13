@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,35 +38,43 @@
 #include <random>
 
 namespace {
-    constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
+    constexpr std::string_view _loggerCat = "ScreenSpaceSkyBrowser";
 
-    constexpr const openspace::properties::Property::PropertyInfo TextureQualityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureQualityInfo = {
         "TextureQuality",
         "Quality of Texture",
         "A parameter to set the resolution of the texture. 1 is full resolution and "
         "slower frame rate. Lower value means lower resolution of texture and faster "
-        "frame rate."
+        "frame rate"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo DisplayCopyInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DisplayCopyInfo = {
         "DisplayCopy",
         "Display Copy Position",
-        "Display a copy of this sky browser at an additional position. This copy will not "
-        "be interactive. The position is in RAE (Radius, Azimuth, Elevation) coordinates "
-        "or Cartesian, depending on if the browser uses RAE or Cartesian coordinates."
+        "Display a copy of this sky browser at an additional position. This copy will "
+        "not be interactive. The position is in RAE (Radius, Azimuth, Elevation) "
+        "coordinates or Cartesian, depending on if the browser uses RAE or Cartesian "
+        "coordinates"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {
         "ShowDisplayCopy",
         "Show Display Copy",
-        "Show the display copy."
+        "Show the display copy"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo IsHiddenInfo = {
+    constexpr openspace::properties::Property::PropertyInfo IsHiddenInfo = {
         "IsHidden",
         "Is Hidden",
         "If checked, the browser will be not be displayed. If it is not checked, it will "
-        "be."
+        "be"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PointSpacecraftInfo = {
+        "PointSpacecraft",
+        "Point Spacecraft",
+        "If checked, spacecrafts will point towards the coordinate of an image upon "
+        "selection."
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
@@ -75,6 +83,9 @@ namespace {
 
         // [[codegen::verbatim(IsHiddenInfo.description)]]
         std::optional<bool> isHidden;
+
+        // [[codegen::verbatim(PointSpacecraftInfo.description)]]
+        std::optional<bool> pointSpacecraft;
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
@@ -104,8 +115,9 @@ documentation::Documentation ScreenSpaceSkyBrowser::Documentation() {
 ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , WwtCommunicator(dictionary)
-    , _textureQuality(TextureQualityInfo, 0.5f, 0.25f, 1.f)
+    , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
     , _isHidden(IsHiddenInfo, true)
+    , _isPointingSpacecraft(PointSpacecraftInfo, false)
 {
     _identifier = makeUniqueIdentifier(_identifier);
 
@@ -113,22 +125,21 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _textureQuality = p.textureQuality.value_or(_textureQuality);
     _isHidden = p.isHidden.value_or(_isHidden);
+    _isPointingSpacecraft = p.pointSpacecraft.value_or(_isPointingSpacecraft);
 
     addProperty(_isHidden);
     addProperty(_url);
-    addProperty(_browserPixeldimensions);
+    addProperty(_browserDimensions);
     addProperty(_reload);
     addProperty(_textureQuality);
+    addProperty(_verticalFov);
+    addProperty(_isPointingSpacecraft);
 
-    _textureQuality.onChange([this]() { _textureDimensionsIsDirty = true; });
+    _textureQuality.onChange([this]() { _isDimensionsDirty = true; });
 
     if (global::windowDelegate->isMaster()) {
         _borderColor = randomBorderColor();
     }
-
-    _scale.onChange([this]() {
-        updateTextureResolution();
-        });
 
     _useRadiusAzimuthElevation.onChange(
         [this]() {
@@ -157,7 +168,6 @@ ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
 bool ScreenSpaceSkyBrowser::initializeGL() {
     WwtCommunicator::initializeGL();
     ScreenSpaceRenderable::initializeGL();
-    updateTextureResolution();
     return true;
 }
 
@@ -180,27 +190,36 @@ bool ScreenSpaceSkyBrowser::isInitialized() const {
     return _isInitialized;
 }
 
+bool ScreenSpaceSkyBrowser::isPointingSpacecraft() const {
+    return _isPointingSpacecraft;
+}
+
 void ScreenSpaceSkyBrowser::setIdInBrowser() const {
-    WwtCommunicator::setIdInBrowser(identifier());
+    int currentNode = global::windowDelegate->currentNode();
+    WwtCommunicator::setIdInBrowser(fmt::format("{}_{}", identifier(), currentNode));
 }
 
 void ScreenSpaceSkyBrowser::setIsInitialized(bool isInitialized) {
     _isInitialized = isInitialized;
 }
 
+void ScreenSpaceSkyBrowser::setPointSpaceCraft(bool shouldPoint) {
+    _isPointingSpacecraft = shouldPoint;
+}
+
 void ScreenSpaceSkyBrowser::updateTextureResolution() {
-    // Scale texture depending on the height of the window
-    // Set texture size to the actual pixel size it covers
-    glm::vec2 pixels = glm::vec2(global::windowDelegate->currentSubwindowSize());
+    // Check if texture quality has changed. If it has, adjust accordingly
+    if (std::abs(_textureQuality.value() - _lastTextureQuality) > glm::epsilon<float>()) {
+        float diffTextureQuality = _textureQuality / _lastTextureQuality;
+        glm::vec2 newRes = glm::vec2(_browserDimensions.value()) * diffTextureQuality;
+        _browserDimensions = glm::ivec2(newRes);
+        _lastTextureQuality = _textureQuality.value();
+    }
+    _objectSize = glm::ivec3(_browserDimensions.value(), 1);
 
-    // If the scale is 1, it covers half the window. Hence multiplication with 2
-    float newResY = pixels.y * 2.f * _scale;
-    float newResX = newResY * _ratio;
-    glm::vec2 newSize = glm::vec2(newResX , newResY) * _textureQuality.value();
-
-    _browserPixeldimensions = glm::ivec2(newSize);
-    _texture->setDimensions(glm::ivec3(newSize, 1));
-    _objectSize = glm::ivec3(_texture->dimensions());
+    // The radius has to be updated when the texture resolution has changed
+    _radiusIsDirty = true;
+    _borderRadiusTimer = 0;
 }
 
 void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCopies) {
@@ -236,7 +255,9 @@ void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCo
 void ScreenSpaceSkyBrowser::removeDisplayCopy() {
     if (!_displayCopies.empty()) {
         removeProperty(_displayCopies.back().get());
+        removeProperty(_showDisplayCopies.back().get());
         _displayCopies.pop_back();
+        _showDisplayCopies.pop_back();
     }
 }
 
@@ -307,31 +328,33 @@ void ScreenSpaceSkyBrowser::render() {
 }
 
 void ScreenSpaceSkyBrowser::update() {
-    // Texture of window is 1x1 when minimized
-    bool isWindow = global::windowDelegate->currentSubwindowSize() != glm::ivec2(1);
-    bool isWindowResized = global::windowDelegate->windowHasResized();
-    if ((isWindowResized && isWindow) || _textureDimensionsIsDirty) {
+    // Check for dirty flags
+    if (_isDimensionsDirty) {
         updateTextureResolution();
-        _textureDimensionsIsDirty = false;
-    }
-    if (_ratioIsDirty) {
-        updateTextureResolution();
-        _ratioIsDirty = false;
     }
     if (_shouldReload) {
         _isInitialized = false;
     }
+    // After the texture has been updated, wait a little bit before updating the border
+    // radius so the browser has time to update its size
+    if (_radiusIsDirty && _isInitialized && _borderRadiusTimer == RadiusTimeOut) {
+        setBorderRadius(_borderRadius);
+        _radiusIsDirty = false;
+        _borderRadiusTimer = -1;
+    }
+    _borderRadiusTimer++;
 
-    WwtCommunicator::update();
     ScreenSpaceRenderable::update();
+    WwtCommunicator::update();
 }
 
-void ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
+double ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
     // Make scroll more sensitive the smaller the FOV
     double x = _verticalFov;
     double zoomFactor = atan(x / 50.0) + exp(x / 40.0) - 0.99999999999999999999999999999;
     double zoom = scroll > 0.0 ? zoomFactor : -zoomFactor;
     _verticalFov = std::clamp(_verticalFov + zoom, 0.0, 70.0);
+    return _verticalFov;
 }
 
 void ScreenSpaceSkyBrowser::bindTexture() {
@@ -352,11 +375,6 @@ glm::mat4 ScreenSpaceSkyBrowser::scaleMatrix() {
 
 void ScreenSpaceSkyBrowser::setOpacity(float opacity) {
     _opacity = opacity;
-}
-
-void ScreenSpaceSkyBrowser::setRatio(float ratio) {
-    _ratio = ratio;
-    _ratioIsDirty = true;
 }
 
 float ScreenSpaceSkyBrowser::opacity() const {

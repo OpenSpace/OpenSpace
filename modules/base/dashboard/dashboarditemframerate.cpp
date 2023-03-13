@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,14 +48,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FrametimeInfo = {
         "FrametimeType",
         "Type of the frame time display",
-        "This value determines the units in which the frame time is displayed."
+        "This value determines the units in which the frame time is displayed"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ClearCacheInfo = {
         "ClearCache",
         "Clear Cache",
         "Clears the cache of this DashboardItemFramerate item. If the selected option "
-        "does not use any caching, this trigger does not do anything."
+        "does not use any caching, this trigger does not do anything"
     };
 
     [[ nodiscard ]] char* formatDt(std::vector<char>& buffer) {
@@ -203,7 +203,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
 }
 
 void DashboardItemFramerate::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_shouldClearCache) {
         _minDeltaTimeCache = 1.0;
@@ -243,7 +243,7 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemFramerate::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     const FrametimeType t = FrametimeType(_frametimeType.value());
     char* end = format(_buffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);

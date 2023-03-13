@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,7 +71,7 @@ ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& di
     , _folderPath(FolderPathInfo)
     , _initDict(dictionary)
 {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -90,7 +90,7 @@ ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& di
 }
 
 Tile ImageSequenceTileProvider::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
 
     return _currentTileProvider ? _currentTileProvider->tile(tileIndex) : Tile();
 }
@@ -140,6 +140,7 @@ void ImageSequenceTileProvider::reset() {
             _imagePaths.push_back(p.path());
         }
     }
+    std::sort(_imagePaths.begin(), _imagePaths.end());
 
     _index = 0;
     _index.setMaxValue(static_cast<int>(_imagePaths.size() - 1));

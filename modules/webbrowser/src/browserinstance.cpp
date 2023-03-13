@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@
 #include <filesystem>
 
 namespace {
-    constexpr const char* _loggerCat = "CEF BrowserInstance";
+    constexpr std::string_view _loggerCat = "CEF BrowserInstance";
 } // namespace
 
 namespace openspace {
@@ -110,14 +110,14 @@ bool BrowserInstance::loadLocalPath(std::string path) {
 }
 
 void BrowserInstance::reshape(const glm::ivec2& windowSize) {
-    ZoneScoped
+    ZoneScoped;
 
     _renderHandler->reshape(windowSize.x, windowSize.y);
     _browser->GetHost()->WasResized();
 }
 
 void BrowserInstance::draw() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_zoomLevel != _browser->GetHost()->GetZoomLevel()) {
         _browser->GetHost()->SetZoomLevel(_zoomLevel);
@@ -159,7 +159,7 @@ void BrowserInstance::sendTouchEvent(const CefTouchEvent& event) const{
 #endif // WIN32
 
 bool BrowserInstance::sendMouseMoveEvent(const CefMouseEvent& event) {
-    constexpr const bool DidNotLeaveWindow = false;
+    constexpr bool DidNotLeaveWindow = false;
 
     _browser->GetHost()->SendMouseMoveEvent(event, DidNotLeaveWindow);
     return false;

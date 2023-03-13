@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +34,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "Waypoint";
+    constexpr std::string_view _loggerCat = "Waypoint";
 } // namespace
 
 namespace openspace::interaction {
@@ -42,7 +42,7 @@ namespace openspace::interaction {
 Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref)
     : _nodeIdentifier(ref)
 {
-    _pose = { pos, rot };
+    _pose = { .position = pos, .rotation = rot };
 
     const SceneGraphNode* node = sceneGraphNode(_nodeIdentifier);
     if (!node) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,7 +47,7 @@ SceneLicenseWriter::SceneLicenseWriter()
 {}
 
 std::string SceneLicenseWriter::generateJson() const {
-    ZoneScoped
+    ZoneScoped;
 
     std::stringstream json;
     json << "[";
@@ -67,8 +67,8 @@ std::string SceneLicenseWriter::generateJson() const {
 
     if (global::profile->meta.has_value()) {
         metaTotal++;
-        constexpr const char* replStr = R"("{}": "{}", )";
-        constexpr const char* replStr2 = R"("{}": "{}")";
+        constexpr std::string_view replStr = R"("{}": "{}", )";
+        constexpr std::string_view replStr2 = R"("{}": "{}")";
         json << "{";
         json << fmt::format(
             replStr,
@@ -108,17 +108,14 @@ std::string SceneLicenseWriter::generateJson() const {
             continue;
         }
 
-        constexpr const char* replStr = R"("{}": "{}", )";
-        constexpr const char* replStr2 = R"("{}": "{}")";
+        constexpr std::string_view replStr = R"("{}": "{}", )";
+        constexpr std::string_view replStr2 = R"("{}": "{}")";
         json << "{";
-        //json << fmt::format(replStr, "module", escapedJson(license.module));
         json << fmt::format(replStr, "name", escapedJson(meta->name));
         json << fmt::format(replStr, "version", escapedJson(meta->version));
         json << fmt::format(replStr, "description", escapedJson(meta->description));
-        //json << fmt::format(replStr, "attribution", escapedJson(license.attribution));
         json << fmt::format(replStr, "author", escapedJson(meta->author));
         json << fmt::format(replStr, "url", escapedJson(meta->url));
-        //json << fmt::format(replStr2, "licenseText", escapedJson(license.licenseText));
         json << fmt::format(replStr, "license", escapedJson(meta->license));
         json << fmt::format(replStr, "identifiers", escapedJson(meta->identifiers));
         json << fmt::format(replStr2, "path", escapedJson(asset->path().string()));

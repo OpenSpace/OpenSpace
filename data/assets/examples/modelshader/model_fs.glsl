@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,8 +68,8 @@ Fragment getFragment() {
     frag.color.rgb = normalize(vs_normalViewSpace);
   }
   frag.color.a = 1.0;
-  frag.gPosition      = vs_positionCameraSpace;
-  frag.gNormal        = vec4(vs_normalViewSpace, 0.0);
+  frag.gPosition = vs_positionCameraSpace;
+  frag.gNormal = vec4(vs_normalViewSpace, 0.0);
   frag.disableLDR2HDR = true;
   return frag;
 }

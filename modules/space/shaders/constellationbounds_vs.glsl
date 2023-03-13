@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,13 +24,14 @@
 
 #version __CONTEXT__
 
+#include "PowerScaling/powerScaling_vs.hglsl"
+
 layout(location = 0) in vec3 in_position;
 out vec4 vs_position;
 
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
   vec4 tmp = vec4(in_position, 0.0);
