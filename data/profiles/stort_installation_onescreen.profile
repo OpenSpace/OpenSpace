@@ -2,7 +2,7 @@
   "actions": [],
   "additional_scripts": [
     "openspace.setPropertyValueSingle(\"Modules.CefWebGui.GuiScale\", 1.5) -- Suitable for 55 inch touch screen",
-    "local guiPath = \"${BASE}/../stort-2021/homeOneScreen/index.html\"; openspace.setPropertyValueSingle(\"Modules.CefWebGui.GuiUrl\", openspace.absPath(guiPath))"
+    "openspace.setPropertyValueSingle(\"Modules.CefWebGui.GuiUrl\", \"http://localhost:8000/homeOneScreen/\")"
   ],
   "assets": [
     "installationspecific/stort_installation_base"
