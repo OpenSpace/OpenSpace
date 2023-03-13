@@ -1566,12 +1566,18 @@ void postprocess(const Settings& settings, const mat4_t& P) {
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.targets.fbo);
     glViewport(0, 0, width, height);
 
-    glDrawBuffer(dst_buffer);
     if (settings.background.enabled) {
         PUSH_GPU_SECTION("Clear HDR")
+        glDrawBuffer(dst_buffer);
         glClearColor(settings.background.r, settings.background.g, settings.background.b, 0.f);
         glClear(GL_COLOR_BUFFER_BIT);
         POP_GPU_SECTION()
+    } else {
+        GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+        glDrawBuffers(2, draw_buffers);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDrawBuffer(dst_buffer);
     }
 
     PUSH_GPU_SECTION("Shade")
@@ -1658,6 +1664,7 @@ void postprocess(const Settings& settings, const mat4_t& P) {
 
     if (settings.fxaa.enabled) {
         swap_target();
+        glDrawBuffer(dst_buffer);
         PUSH_GPU_SECTION("FXAA");
         fxaa::apply_fxaa(src_texture, width, height);
         POP_GPU_SECTION();
