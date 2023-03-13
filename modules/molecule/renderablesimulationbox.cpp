@@ -192,6 +192,24 @@ namespace {
         "Exposure, Controls the Exposure setting for the tonemap"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo CircleColorInfo = {
+        "CircleColor",
+        "Circle Color",
+        "Color of the circle outlining the simulation"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CircleWidthInfo = {
+        "CircleWidth",
+        "Circle Width",
+        "Width of the circle outlining the simulation"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CircleFalloffInfo = {
+        "CircleFalloff",
+        "Circle Falloff",
+        "Falloff exponent of the circle outlining the simulation"
+    };
+
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
         enum class [[codegen::map(mol::rep::Type)]] RepresentationType {
             SpaceFill,
@@ -265,6 +283,15 @@ namespace {
 
         // [[codegen::verbatim(ExposureInfo.description)]]
         std::optional<float> exposure;
+
+        // [[codegen::verbatim(CircleColorInfo.description)]]
+        std::optional<glm::vec4> circleColor;
+        
+        // [[codegen::verbatim(CircleWidthInfo.description)]]
+        std::optional<float> circleWidth;
+
+        // [[codegen::verbatim(CircleFalloffInfo.description)]]
+        std::optional<float> circleFalloff;
     };
 
 #include "renderablesimulationbox_codegen.cpp"
@@ -302,7 +329,10 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _ssaoIntensity(SSAOIntensityInfo, 12.f, 0.f, 100.f),
     _ssaoRadius(SSAORadiusInfo, 12.f, 0.1f, 100.f),
     _ssaoBias(SSAOBiasInfo, 0.1f, 0.0f, 1.0f),
-    _exposure(ExposureInfo, 0.3f, 0.1f, 10.f)
+    _exposure(ExposureInfo, 0.3f, 0.1f, 10.f),
+    _circleColor(CircleColorInfo, glm::vec4(1.f, 1.f, 1.f, 0.25f), glm::vec4(0.f), glm::vec4(1.f)),
+    _circleWidth(CircleWidthInfo, 0.0f, 0.0f, 10.0f),
+    _circleFalloff(CircleFalloffInfo, 10.0f, 1.0f, 20.0f)
 {
     _repType.addOptions({
         { static_cast<int>(mol::rep::Type::SpaceFill), "Space Fill" },
@@ -339,6 +369,10 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _ssaoRadius = p.ssaoRadius.value_or(12.f);
     _ssaoBias = p.ssaoBias.value_or(0.1f);
     _exposure = p.exposure.value_or(0.3f);
+    _circleColor = p.circleColor.value_or(glm::vec4(1.f));
+    _circleColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
+    _circleWidth = p.circleWidth.value_or(1.f);
+    _circleFalloff = p.circleFalloff.value_or(5.f);
 
     if (p.repType.has_value()) {
         _repType = static_cast<int>(codegen::map<mol::rep::Type>(*p.repType));
@@ -422,6 +456,10 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     addProperty(_ssaoRadius);
     addProperty(_ssaoBias);
 
+    addProperty(_circleColor);
+    addProperty(_circleWidth);
+    addProperty(_circleFalloff);
+
     setRenderBin(RenderBin::PostDeferredTransparent);
 }
 
@@ -445,7 +483,7 @@ void RenderableSimulationBox::initializeGL() {
         
         glGenTextures(1, &colorTex);
         glBindTexture(GL_TEXTURE_2D, colorTex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -465,12 +503,12 @@ void RenderableSimulationBox::initializeGL() {
 
         glGenTextures(1, &depthTex);
         glBindTexture(GL_TEXTURE_2D, depthTex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTex, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -707,17 +745,11 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
         glDrawBuffers(2, bufs);
 
-        glClearColor(0.f, 0.f, 0.f, 1.f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
-        glDisable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
         // resize the fbo if needed
         if (global::windowDelegate->windowHasResized()) {
             ivec2 size = global::windowDelegate->currentWindowSize();
             glBindTexture(GL_TEXTURE_2D, colorTex);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
             glBindTexture(GL_TEXTURE_2D, 0);
 
             glBindTexture(GL_TEXTURE_2D, normalTex);
@@ -725,9 +757,14 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             glBindTexture(GL_TEXTURE_2D, 0);
 
             glBindTexture(GL_TEXTURE_2D, depthTex);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
+
+        glClearColor(0.f, 0.f, 0.f, 0.f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
         
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -753,8 +790,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             postprocessing::postprocess(settings, mat4_from_glm(projMatrix));
 
             glEnable(GL_DEPTH_TEST); // restore state after postprocess
-            glDisable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
 
         glDrawBuffer(GL_FRONT_AND_BACK);
@@ -772,12 +807,14 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             I;
         mat4 faceCamera = inverse(camCopy.viewRotationMatrix());
         mat4 transform = projMatrix * mat4(billboardModel) * faceCamera;
-        double circleWidth = distance / compMax(_simulationBox.value() * data.modelTransform.scale) * 1E-2;
+        double width = distance / compMax(_simulationBox.value() * data.modelTransform.scale) * 1E-2 * _circleWidth;
 
         dvec4 depth_ = dmat4(data.camera.sgctInternal.projectionMatrix()) * billboardModel * dvec4(0.0, 0.0, 0.0, 1.0);
         double depth = normalizeDouble(depth_.w);
 
-        billboardDraw(transform, colorTex, depthTex, vec4(1.0), static_cast<float>(circleWidth), static_cast<float>(depth));
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        billboardDraw(transform, colorTex, depthTex, _circleColor, static_cast<float>(width), static_cast<float>(depth), _circleFalloff);
     }
 
     global::renderEngine->openglStateCache().resetBlendState();

@@ -16,17 +16,18 @@ out vec2 pos;
 
 void main() {
   gl_Position = uTransform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
-  // gl_Position /= gl_Position.w;
-  gl_Position.z = 0.0; // always visible
+  gl_Position.z = -1.0; // always visible
   pos = aPos.xy;
 }
 )";
 
 constexpr const char* fragShader = R"(
 #version 330 core
-out vec4 color;
-in vec2 pos;
+out vec4 out_color;
+in  vec2 pos;
+
 uniform float uStrokeWidth;
+uniform float uStrokeFalloffExp;
 uniform float uFragDepth;
 uniform vec4 uStrokeColor;
 uniform sampler2D uColorTex;
@@ -38,24 +39,17 @@ void main() {
   if (len > 1) {
     discard;
   }
-  else if (len < 1.0 - uStrokeWidth) {
-    float depth = texelFetch(uDepthTex, ivec2(gl_FragCoord.xy), 0).r;
 
-    // TODO: should convert depth from the range used by Mold to the one used by OpenSpace.
-    if (depth > 1 - 1E-5) {
-      discard;
-      return;
-    }
-    else {
-      gl_FragDepth = uFragDepth;
-    }
+  float depth = texelFetch(uDepthTex, ivec2(gl_FragCoord.xy), 0).r;
+  vec4  tex = texelFetch(uColorTex, ivec2(gl_FragCoord.xy), 0);
 
-    color = texelFetch(uColorTex, ivec2(gl_FragCoord.xy), 0);
-  }
-  else {
-    gl_FragDepth = uFragDepth;
-    color = uStrokeColor;
-  }
+  if (depth == 1.0)
+	tex.a = 0.0;
+    
+  float falloff = clamp(1.0 - pow(len / (1.0 - uStrokeWidth), uStrokeFalloffExp), 0.0, 1.0);
+    
+  gl_FragDepth = uFragDepth;
+  out_color = mix(uStrokeColor, tex, falloff);
 }
 )";
 
@@ -110,7 +104,7 @@ void billboardGlDeinit() {
   }
 }
 
-void billboardDraw(glm::mat4 const& transform, GLuint colorTex, GLuint depthTex, glm::vec4 const& stroke, float width, float depth) {
+void billboardDraw(glm::mat4 const& transform, GLuint colorTex, GLuint depthTex, glm::vec4 const& stroke, float width, float depth, float falloffExp) {
   glUseProgram(prog);
   glBindVertexArray(vao);
   glDisable(GL_CULL_FACE);
@@ -122,6 +116,7 @@ void billboardDraw(glm::mat4 const& transform, GLuint colorTex, GLuint depthTex,
   glUniform1i(glGetUniformLocation(prog, "uDepthTex"), 1);
   glUniformMatrix4fv(glGetUniformLocation(prog, "uTransform"), 1, false, glm::value_ptr(transform));
   glUniform1f(glGetUniformLocation(prog, "uStrokeWidth"), width);
+  glUniform1f(glGetUniformLocation(prog, "uStrokeFalloffExp"), falloffExp);
   glUniform1f(glGetUniformLocation(prog, "uFragDepth"), depth);
   glUniform4fv(glGetUniformLocation(prog, "uStrokeColor"), 1, glm::value_ptr(stroke));
   glDrawArrays(GL_TRIANGLES, 0, 6);

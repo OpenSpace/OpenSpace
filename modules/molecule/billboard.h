@@ -13,4 +13,5 @@ void billboardGlDeinit();
 /// stroke: Color of the billboard outline.
 /// width: Width of the billboard outline.
 /// depth: Depth of the billboard outline.
-void billboardDraw(glm::mat4 const& transform, gl::GLuint colorTex, gl::GLuint depthTex, glm::vec4 const& stroke, float width, float depth);
+/// falloffExp: Fall-off exponent of the billboard outline.
+void billboardDraw(glm::mat4 const& transform, gl::GLuint colorTex, gl::GLuint depthTex, glm::vec4 const& stroke, float width, float depth, float falloffExp = 2.0f);

@@ -179,11 +179,12 @@ static struct {
     } temporal;
 
     struct {
-        uint32_t program_edge_detection;
-        uint32_t program_blending_weight_calculation;
-        uint32_t program_neighborhood_blending;
-    } smaa;
-
+        uint32_t program = 0;
+        struct {
+            int tex = -1;
+            int inverseScreenSize = -1;
+        } uniform_loc;
+    } fxaa;
 } gl;
 
 static inline float halton(int index, int base) {
@@ -666,9 +667,10 @@ out vec4 out_frag;
 void main() {
     float depth = texelFetch(u_tex_depth, ivec2(gl_FragCoord.xy), 0).x;
     if (depth == 1.0) {
-        discard;
+        out_frag = vec4(0,0,0,0);
+    } else {
+        out_frag = texelFetch(u_tex_color, ivec2(gl_FragCoord.xy), 0);
     }
-    out_frag = texelFetch(u_tex_color, ivec2(gl_FragCoord.xy), 0);
 }
 )");
 
@@ -887,7 +889,41 @@ void sharpen(uint32_t in_texture) {
 void shutdown() {
     if (program) glDeleteProgram(program);
 }
-}
+}   // namespace sharpen
+
+namespace fxaa {
+    void initialize() {
+        gl.fxaa.program = setup_program_from_source(STR("fxaa"), f_shader_src_fxaa);
+
+        if (gl.fxaa.program) {
+            gl.fxaa.uniform_loc.tex = glGetUniformLocation(gl.fxaa.program, "tex");
+            gl.fxaa.uniform_loc.inverseScreenSize = glGetUniformLocation(gl.fxaa.program, "inverseScreenSize");
+        }
+    }
+
+    void apply_fxaa(uint32_t in_texture, int width, int height) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, in_texture);
+
+        glUseProgram(gl.fxaa.program);
+        glUniform1i(gl.fxaa.uniform_loc.tex, 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, in_texture);
+
+        vec2_t inv_screen_size = { 1.0f / (float)width, 1.0f / (float)height };
+        glUniform2fv(gl.fxaa.uniform_loc.inverseScreenSize, 1, inv_screen_size.elem);
+
+        glBindVertexArray(gl.vao);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+
+        glUseProgram(0);
+    }
+
+    void shutdown() {
+        if (gl.fxaa.program) glDeleteProgram(gl.fxaa.program);
+    }
+}   // namespace fxaa
 
 void initialize(int width, int height) {
     if (!gl.vao) glGenVertexArrays(1, &gl.vao);
@@ -997,6 +1033,7 @@ void initialize(int width, int height) {
     temporal::initialize();
     blit::initialize();
     sharpen::initialize();
+    fxaa::initialize();
 }
 
 void shutdown() {
@@ -1008,6 +1045,7 @@ void shutdown() {
     temporal::shutdown();
     blit::shutdown();
     sharpen::shutdown();
+    fxaa::shutdown();
 
     if (gl.vao) glDeleteVertexArrays(1, &gl.vao);
     if (gl.v_shader_fs_quad) glDeleteShader(gl.v_shader_fs_quad);
@@ -1531,7 +1569,7 @@ void postprocess(const Settings& settings, const mat4_t& P) {
     glDrawBuffer(dst_buffer);
     if (settings.background.enabled) {
         PUSH_GPU_SECTION("Clear HDR")
-        glClearColor(settings.background.r, settings.background.g, settings.background.b, 1.f);
+        glClearColor(settings.background.r, settings.background.g, settings.background.b, 0.f);
         glClear(GL_COLOR_BUFFER_BIT);
         POP_GPU_SECTION()
     }
@@ -1617,6 +1655,13 @@ void postprocess(const Settings& settings, const mat4_t& P) {
     }
 
     prev_jitter = jitter;
+
+    if (settings.fxaa.enabled) {
+        swap_target();
+        PUSH_GPU_SECTION("FXAA");
+        fxaa::apply_fxaa(src_texture, width, height);
+        POP_GPU_SECTION();
+    }
 
     // Activate backbuffer or whatever was bound before
     {

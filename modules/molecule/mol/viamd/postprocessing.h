@@ -58,6 +58,10 @@ struct Settings {
     } temporal_reprojection;
 
     struct {
+        bool enabled = true;
+    } fxaa;
+
+    struct {
         unsigned int depth = 0;
         unsigned int color = 0;
         unsigned int normal = 0;

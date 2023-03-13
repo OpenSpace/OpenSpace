@@ -81,7 +81,8 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 
 enum class AnimationRepeatMode {
     PingPong,
-    Wrap
+    Wrap,
+    Once
 };
 
 namespace {
@@ -221,7 +222,8 @@ namespace {
 
         enum class [[codegen::map(AnimationRepeatMode)]] AnimationRepeatMode {
             PingPong,
-            Wrap
+            Wrap,
+            Once
         };
 
         // [[codegen::verbatim(AnimationRepeatModeInfo.description)]]
@@ -371,16 +373,19 @@ namespace openspace {
 
     static double time_to_frame(double time, int64_t num_frames, AnimationRepeatMode mode) {
         double frame = 0;
+        const double last_frame = num_frames - 1.0;
         switch (static_cast<AnimationRepeatMode>(mode)) {
         case AnimationRepeatMode::PingPong:
-            frame = std::fmod(time, 2.0 * num_frames);
-            if (frame > num_frames) {
-                frame = 2.0 * num_frames - frame;
+            frame = std::fmod(time, 2.0 * last_frame);
+            if (frame > last_frame) {
+                frame = 2.0 * last_frame - frame;
             }
             break;
         case AnimationRepeatMode::Wrap:
             frame = std::fmod(time, num_frames);
             break;
+        case AnimationRepeatMode::Once:
+            frame = std::clamp(time, 0.0, last_frame - 1.0);
         default:
             ghoul_assert(false, "Don't end up here!");
         }
@@ -404,7 +409,17 @@ namespace openspace {
             if (frame != _frame) {
                 _frame = frame;
                 mol::util::interpolate_frame(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame, _applyPbcPerFrame);
-                md_gl_molecule_set_atom_position(&_gl_molecule, 0, (uint32_t)_molecule.atom.count, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
+
+                const uint64_t size = _molecule.atom.count * sizeof(vec3_t);
+                md_allocator_i* alloc = default_temp_allocator_max_allocation_size() < size ? default_allocator : default_temp_allocator;
+                vec3_t* xyz = (vec3_t*)md_alloc(alloc, size);
+                
+                for (int64_t i = 0; i < _molecule.atom.count; ++i) {
+                    xyz[i] = { _molecule.atom.x[i], _molecule.atom.y[i], _molecule.atom.z[i] };
+                }
+                md_gl_molecule_set_atom_position_xyz(&_gl_molecule, 0, (uint32_t)_molecule.atom.count, xyz);
+                
+                md_free(alloc, xyz, size);
                 
                 std::vector<size_t> rep_has_ss_indices;
                 std::vector<size_t> rep_update_col_indices;

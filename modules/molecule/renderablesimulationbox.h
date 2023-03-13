@@ -33,7 +33,7 @@
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/list/doublelistproperty.h>
 #include <openspace/properties/vector/dvec3property.h>
-
+#include <openspace/properties/vector/vec4property.h>
 
 #include <md_gl.h>
 #include <md_molecule.h>
@@ -103,6 +103,10 @@ private:
     properties::FloatProperty _ssaoRadius;
     properties::FloatProperty _ssaoBias;
     properties::FloatProperty _exposure;
+    
+    properties::Vec4Property  _circleColor;
+    properties::FloatProperty _circleWidth;
+    properties::FloatProperty _circleFalloff;
 };
 
 } // namespace openspace

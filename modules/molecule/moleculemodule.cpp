@@ -252,6 +252,7 @@ void MoleculeModule::postDraw() {
     settings.tonemapping.enabled = true;
     settings.tonemapping.mode = postprocessing::Tonemapping::ACES;
     settings.tonemapping.exposure = _exposure;
+    settings.fxaa.enabled = false;
     settings.input_textures.depth = _depthTex;
     settings.input_textures.color = _colorTex;
     settings.input_textures.normal = _normalTex;
