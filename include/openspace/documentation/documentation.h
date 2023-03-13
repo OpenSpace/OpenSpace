@@ -92,10 +92,10 @@ struct TestResult {
     };
 
 
-    /// Is \c true if the TestResult is positive, \c false otherwise
+    /// Is `true` if the TestResult is positive, `false` otherwise
     bool success = false;
     /// Contains a list of offenses that were found in the test. Is empty if
-    /// TestResult::Success is \c true
+    /// TestResult::Success `true`
     std::vector<Offense> offenses;
     /// Contains a list of warnings that were found in the test
     std::vector<Warning> warnings;
@@ -113,7 +113,7 @@ struct SpecificationError : public ghoul::RuntimeError {
      * \param res The offending TestResult that is passed on
      * \param comp The component that initiated the specification test
      *
-     * \pre \p res%'s TestResult::success must be \c false
+     * \pre \p res%'s TestResult::success must be `false`
      */
     SpecificationError(TestResult res, std::string comp);
 
@@ -138,7 +138,7 @@ DocumentationEntry e = { "key", new IntVerifier, "Documentation text", Optional:
 \endverbatim
 
  * Furthermore, these initializer lists can be crated all at once for a Documentation.
- * Even if the Verifier%s are specified using the \c new operators, they will not leak
+ * Even if the Verifier%s are specified using the `new` operators, they will not leak
  * memory as the DocumentationEntry takes ownership of them in the constructor.
  */
 struct DocumentationEntry {
@@ -212,7 +212,7 @@ struct DocumentationEntry {
  * used to impose restrictions on keys and values and determine whether a given
  * ghoul::Dictionary adheres to these specifications (see #testSpecification and
  * #testSpecificationAndThrow methods). Each Documentation consists of a human-readable
- * \c name, and a list of DocumentationEntry%s that each describe a single key value. The
+ * `name`, and a list of DocumentationEntry%s that each describe a single key value. The
  * most convenient way of creating a Documentation is by using nested initializer lists:
  *\verbatim
 Documentation doc = {

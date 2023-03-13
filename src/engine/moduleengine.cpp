@@ -59,7 +59,7 @@ ModuleEngine::ModuleEngine()
 void ModuleEngine::initialize(
                      const std::map<std::string, ghoul::Dictionary>& moduleConfigurations)
 {
-    ZoneScoped
+    ZoneScoped;
 
     std::vector<OpenSpaceModule*> modules = AllModules();
 
@@ -91,7 +91,7 @@ void ModuleEngine::initialize(
 }
 
 void ModuleEngine::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Initializing OpenGL of modules");
     for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
@@ -102,7 +102,7 @@ void ModuleEngine::initializeGL() {
 }
 
 void ModuleEngine::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Deinitializing modules");
 
@@ -122,7 +122,7 @@ void ModuleEngine::deinitialize() {
 }
 
 void ModuleEngine::deinitializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Deinitializing OpenGL of modules");
     for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
@@ -134,7 +134,7 @@ void ModuleEngine::deinitializeGL() {
 }
 
 void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(mod, "Module must not be nullptr");
 

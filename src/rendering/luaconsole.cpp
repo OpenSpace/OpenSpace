@@ -169,7 +169,7 @@ LuaConsole::LuaConsole()
 LuaConsole::~LuaConsole() {}
 
 void LuaConsole::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
@@ -234,7 +234,7 @@ void LuaConsole::initialize() {
 }
 
 void LuaConsole::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
@@ -603,7 +603,7 @@ void LuaConsole::charCallback(unsigned int codepoint,
 }
 
 void LuaConsole::update() {
-    ZoneScoped
+    ZoneScoped;
 
     // Compute the height by simulating _historyFont number of lines and checking
     // what the bounding box for that text would be.
@@ -639,7 +639,7 @@ void LuaConsole::update() {
 }
 
 void LuaConsole::render() {
-    ZoneScoped
+    ZoneScoped;
 
     using namespace ghoul::fontrendering;
 

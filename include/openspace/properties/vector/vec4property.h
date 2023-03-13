@@ -43,9 +43,6 @@ public:
     int typeLua() const override;
 
     using TemplateProperty<glm::vec4>::operator=;
-
-protected:
-    glm::vec4 fromLuaConversion(lua_State* state, bool& success) const override;
 };
 
 } // namespace openspace::properties

@@ -197,7 +197,7 @@ namespace {
  * be a valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS. Note: providing
  * time zone using the Z format is not supported. UTC is assumed.
  */
-[[codegen::luawrap]] void setTime(std::variant<std::string, double> time) {
+[[codegen::luawrap]] void setTime(std::variant<double, std::string> time) {
     using namespace openspace;
 
     double t;

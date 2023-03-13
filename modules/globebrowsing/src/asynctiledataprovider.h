@@ -39,7 +39,7 @@ struct RawTile;
 
 /**
  * The responsibility of this class is to enqueue tile requests and fetching finished
- * <code>RawTile</code>s that has been asynchronously loaded.
+ * `RawTile`s that has been asynchronously loaded.
  */
 class AsyncTileDataProvider {
 public:
@@ -80,7 +80,7 @@ protected:
     };
 
     /**
-     * \returns true if tile of index <code>tileIndex</code> is not already enqueued.
+     * \returns true if tile of index `tileIndex` is not already enqueued.
      */
     bool satisfiesEnqueueCriteria(const TileIndex& tileIndex);
 

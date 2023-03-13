@@ -25,6 +25,7 @@
 #include "profile/timedialog.h"
 
 #include "profile/line.h"
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
@@ -63,6 +64,8 @@ TimeDialog::TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>*
         _timeData.type = Profile::Time::Type::Relative;
         _timeData.value = "0d";
     }
+    _startPaused->setChecked(_timeData.startPaused);
+
     _initializedAsAbsolute = (_timeData.type == Profile::Time::Type::Absolute);
     enableAccordingToType(static_cast<int>(_timeData.type));
 }
@@ -97,6 +100,14 @@ void TimeDialog::createWidgets() {
             "String for relative time to actual (e.g. \"-1d\" for back 1 day)"
         );
         layout->addWidget(_relativeEdit);
+    }
+    {
+        _startPaused = new QCheckBox("Start with time paused");
+        _startPaused->setChecked(false);
+        _startPaused->setToolTip(
+            "If this is checked, the profile will start with the delta time paused"
+        );
+        layout->addWidget(_startPaused);
     }
     layout->addWidget(new Line);
     {
@@ -153,6 +164,7 @@ void TimeDialog::approved() {
             Profile::Time t;
             t.type = Profile::Time::Type::Relative;
             t.value = _relativeEdit->text().toStdString();
+            t.startPaused = _startPaused->isChecked();
             *_time = t;
         }
     }
@@ -164,6 +176,7 @@ void TimeDialog::approved() {
             _absoluteEdit->date().toString("yyyy-MM-dd").toStdString(),
             _absoluteEdit->time().toString().toStdString()
         );
+        t.startPaused = _startPaused->isChecked();
         *_time = t;
     }
     accept();

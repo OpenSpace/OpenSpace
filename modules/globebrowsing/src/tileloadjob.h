@@ -36,8 +36,8 @@ class RawTileDataReader;
 
 struct TileLoadJob : public Job<RawTile> {
     /**
-     * Allocates enough data for one tile. When calling <code>product()</code>, the
-     * ownership of this data will be released. If <code>product()</code> has not been
+     * Allocates enough data for one tile. When calling `product()`, the
+     * ownership of this data will be released. If `product()` has not been
      * called before the TileLoadJob is finished, the data will be deleted as it has not
      * been exposed outside of this object.
      */

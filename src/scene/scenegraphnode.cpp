@@ -578,8 +578,8 @@ SceneGraphNode::SceneGraphNode()
 SceneGraphNode::~SceneGraphNode() {}
 
 void SceneGraphNode::initialize() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     LDEBUG(fmt::format("Initializing: {}", identifier()));
 
@@ -602,8 +602,8 @@ void SceneGraphNode::initialize() {
 }
 
 void SceneGraphNode::initializeGL() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     LDEBUG(fmt::format("Initializing GL: {}", identifier()));
 
@@ -635,8 +635,8 @@ void SceneGraphNode::initializeGL() {
 }
 
 void SceneGraphNode::deinitialize() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     LDEBUG(fmt::format("Deinitializing: {}", identifier()));
 
@@ -652,8 +652,8 @@ void SceneGraphNode::deinitialize() {
 }
 
 void SceneGraphNode::deinitializeGL() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     LDEBUG(fmt::format("Deinitializing GL: {}", identifier()));
 
@@ -679,8 +679,8 @@ void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     State s = _state;
     if (s != State::Initialized && _state != State::GLInitialized) {
@@ -729,15 +729,15 @@ void SceneGraphNode::update(const UpdateData& data) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     if (_state != State::GLInitialized) {
         return;
     }
 
     const bool visible = _renderable && _renderable->isVisible() &&
-        _renderable->isReady() && _renderable->matchesRenderBinMask(data.renderBinMask);
+        _renderable->isReady();
 
     if (!visible) {
         return;
@@ -747,21 +747,31 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         return;
     }
 
+    RenderData newData = {
+        .camera = data.camera,
+        .time = data.time,
+        .renderBinMask = data.renderBinMask,
+        .modelTransform = {
+            .translation = _worldPositionCached,
+            .rotation = _worldRotationCached,
+            .scale = _worldScaleCached
+        }
+    };
+
+    if (_renderable->matchesSecondaryRenderBin(data.renderBinMask)) {
+        TracyGpuZone("Render Secondary Bin")
+        _renderable->renderSecondary(newData, tasks);
+    }
+
+    if (!_renderable->matchesRenderBinMask(data.renderBinMask)) {
+        return;
+    }
+
     {
         TracyGpuZone("Render")
 
-        RenderData newData = {
-            .camera = data.camera,
-            .time = data.time,
-            .renderBinMask = data.renderBinMask,
-            .modelTransform = {
-                .translation = _worldPositionCached,
-                .rotation = _worldRotationCached,
-                .scale = _worldScaleCached
-            }
-        };
-
         _renderable->render(newData, tasks);
+
         if (_computeScreenSpaceValues) {
             computeScreenSpaceData(newData);
         }
@@ -1147,7 +1157,7 @@ Scene* SceneGraphNode::scene() {
 }
 
 void SceneGraphNode::setScene(Scene* scene) {
-    ZoneScoped
+    ZoneScoped;
 
     // Unregister from previous scene, bottom up
     traversePostOrder([](SceneGraphNode* node) {

@@ -973,7 +973,7 @@ bool SessionRecording::isPropertyAllowedForBaseline(const std::string& propStrin
 }
 
 void SessionRecording::preSynchronization() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_state == SessionState::Recording) {
         saveCameraKeyframeToTimeline();
@@ -1003,7 +1003,7 @@ void SessionRecording::preSynchronization() {
 }
 
 void SessionRecording::render() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!(_renderPlaybackInformation && isPlayingBack())) {
         return;

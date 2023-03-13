@@ -29,6 +29,7 @@
 
 #include <openspace/scene/profile.h>
 
+class QCheckBox;
 class QComboBox;
 class QDateTimeEdit;
 class QLabel;
@@ -63,6 +64,7 @@ private:
     QDateTimeEdit* _absoluteEdit = nullptr;
     QLabel* _relativeLabel = nullptr;
     QLineEdit* _relativeEdit = nullptr;
+    QCheckBox* _startPaused = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___TIMEDIALOG___H__

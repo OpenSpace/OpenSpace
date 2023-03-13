@@ -87,7 +87,7 @@ CefWebGuiModule::CefWebGuiModule()
 }
 
 void CefWebGuiModule::startOrStopGui() {
-    ZoneScoped
+    ZoneScoped;
 
     WebBrowserModule* webBrowserModule = global::moduleEngine->module<WebBrowserModule>();
 
@@ -127,7 +127,7 @@ void CefWebGuiModule::startOrStopGui() {
 }
 
 void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
-    ZoneScoped
+    ZoneScoped;
 
     WebBrowserModule* webBrowserModule =
         global::moduleEngine->module<WebBrowserModule>();
@@ -139,13 +139,13 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     }
 
     _enabled.onChange([this]() {
-        ZoneScopedN("CefWebGuiModule::enabled")
+        ZoneScopedN("CefWebGuiModule::enabled");
 
         startOrStopGui();
     });
 
     _url.onChange([this]() {
-        ZoneScopedN("CefWebGuiModule::url")
+        ZoneScopedN("CefWebGuiModule::url");
 
         if (_instance) {
             _instance->loadUrl(_url);
@@ -153,7 +153,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     _reload.onChange([this]() {
-        ZoneScopedN("CefWebGuiModule::reload")
+        ZoneScopedN("CefWebGuiModule::reload");
 
         if (_instance) {
             _instance->reloadBrowser();
@@ -161,7 +161,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     _guiScale.onChange([this]() {
-        ZoneScopedN("CefWebGuiModule::guiScale")
+        ZoneScopedN("CefWebGuiModule::guiScale");
 
         if (_instance) {
             _instance->setZoom(_guiScale);
@@ -169,7 +169,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     _visible.onChange([this, webBrowserModule]() {
-        ZoneScopedN("CefWebGuiModule::visible")
+        ZoneScopedN("CefWebGuiModule::visible");
 
         if (_visible && _instance) {
             webBrowserModule->attachEventHandler(_instance.get());
@@ -189,7 +189,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
     _endpointCallback = webGuiModule->addEndpointChangeCallback(
         [this](const std::string& endpoint, bool exists) {
-            ZoneScopedN("CefWebGuiModule::endpointCallback")
+            ZoneScopedN("CefWebGuiModule::endpointCallback");
             if (exists && endpoint == "frontend" && _instance) {
                 _instance->reloadBrowser();
             }
@@ -213,7 +213,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     global::callback::draw2D->emplace_back([this](){
-        ZoneScopedN("CefWebGuiModule")
+        ZoneScopedN("CefWebGuiModule");
 
         const bool isGuiWindow =
             global::windowDelegate->hasGuiWindow() ?
@@ -236,7 +236,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     global::callback::deinitializeGL->emplace_back([this]() {
-        ZoneScopedN("CefWebGuiModule")
+        ZoneScopedN("CefWebGuiModule");
 
         if (_endpointCallback != -1) {
             WebGuiModule* m = global::moduleEngine->module<WebGuiModule>();

@@ -17,6 +17,7 @@
           "tags": [ "GUI" ],
           "fullscreen": false,
           "draw3d": false,
+          "blitwindowid": 1,
           "stereo": "none",
           "pos": { "x": 50, "y": 50 },
           "size": { "x": 1280, "y": 720 },
@@ -36,13 +37,12 @@
           ]
         },
         {
-          "fullscreen": true,
           "name": "OpenSpace",
           "fullscreen": false,
           "draw2d": false,
           "stereo": "none",
-          "pos": { "x": 1920, "y": 1080 },
-          "size": { "x": 1920, "y": 1080 },
+          "pos": { "x": 50, "y": 50 },
+          "size": { "x": 1280, "y": 720 },
           "viewports": [
             {
               "tracked": true,

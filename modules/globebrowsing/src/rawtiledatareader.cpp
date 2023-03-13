@@ -426,7 +426,7 @@ RawTileDataReader::RawTileDataReader(std::string filePath,
     , _initData(std::move(initData))
     , _preprocess(preprocess)
 {
-    ZoneScoped
+    ZoneScoped;
 
     initialize();
 }
@@ -440,7 +440,7 @@ RawTileDataReader::~RawTileDataReader() {
 }
 
 void RawTileDataReader::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_datasetFilePath.empty()) {
         throw ghoul::RuntimeError("File path must not be empty");
@@ -450,7 +450,7 @@ void RawTileDataReader::initialize() {
 
     std::string content = _datasetFilePath;
     if (module.isWMSCachingEnabled()) {
-        ZoneScopedN("WMS Caching")
+        ZoneScopedN("WMS Caching");
         std::string c;
         if (std::filesystem::is_regular_file(_datasetFilePath)) {
             // Only replace the 'content' if the dataset is an XML file and we want to do
@@ -520,7 +520,7 @@ void RawTileDataReader::initialize() {
     }
 
     {
-        ZoneScopedN("GDALOpen")
+        ZoneScopedN("GDALOpen");
         _dataset = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
         if (!_dataset) {
             throw ghoul::RuntimeError(fmt::format(
