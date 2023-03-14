@@ -48,15 +48,4 @@ int UIntProperty::typeLua() const {
     return LUA_TNUMBER;
 }
 
-unsigned int UIntProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        unsigned int val = static_cast<unsigned int>(lua_tonumber(state, -1));
-        return val;
-    }
-    else {
-        return 0;
-    }
-}
-
 } // namespace openspace::properties

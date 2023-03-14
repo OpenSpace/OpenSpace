@@ -37,7 +37,7 @@ SyncBuffer::SyncBuffer(size_t n)
 SyncBuffer::~SyncBuffer() {}
 
 void SyncBuffer::encode(const std::string& s) {
-    ZoneScoped
+    ZoneScoped;
 
     int32_t anticpatedBufferSize = static_cast<int32_t>(
         _encodeOffset + (sizeof(char) * s.size()) + sizeof(int32_t)
@@ -58,7 +58,7 @@ void SyncBuffer::encode(const std::string& s) {
 }
 
 std::string SyncBuffer::decode() {
-    ZoneScoped
+    ZoneScoped;
 
     int32_t length;
     memcpy(

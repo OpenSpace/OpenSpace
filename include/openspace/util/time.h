@@ -34,8 +34,8 @@ namespace scripting { struct LuaLibrary; }
 /**
  * This singleton class represents the current simulation time in OpenSpace. It
  * internally stores the time and provides methods to set the time directly
- * (setTime(double), setTime(std::string)) using a <code>double</code> value using the
- * number of seconds passed since the J2000 epoch or a <code>string</code> that denotes
+ * (setTime(double), setTime(std::string)) using a `double` value using the
+ * number of seconds passed since the J2000 epoch or a `string` that denotes
  * a valid date string in accordance to the Spice library
  * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html). The time can
  * be retrieved as the number of seconds since the J2000 epoch with currentTime() or as a
@@ -44,10 +44,10 @@ namespace scripting { struct LuaLibrary; }
  * In addition to the time itself, it also stores a delta time value. This value denotes
  * the number of seconds that pass for each real-time second. This value is set with
  * setDeltaTime(double), retrieved with deltaTime() and solely used in the
- * advanceTime(double), which takes a <code>tickTime</code> parameter. The value of the
+ * advanceTime(double), which takes a `tickTime` parameter. The value of the
  * parameter is dependent on the usage of the class and must be equal to the real-world
  * time that has passed since the last call to the method. For example, if the
- * advanceTime(double) method is called each frame, the <code>tickTime</code> has to be
+ * advanceTime(double) method is called each frame, the `tickTime` has to be
  * equal to the frame time.
  *
  * The synchronization of the simulation time requires
@@ -58,12 +58,16 @@ public:
      * Converts the \p timeString representing a date to a double precision
      * value representing the ephemeris time; that is the number of TDB
      * seconds past the J2000 epoch.
-     * \param timeString A string representing the time to be converted
+     *
+     * \param time A string representing the time to be converted
      * \return The converted time; the number of TDB seconds past the J2000 epoch,
      * representing the passed \p timeString
+     *
      * \pre \p timeString must not be empty
      */
     static double convertTime(const std::string& time);
+
+    /// \overload static double convertTime(const std::string& time)
     static double convertTime(const char* time);
 
     explicit Time(double secondsJ2000 = -1);
@@ -72,8 +76,7 @@ public:
 
     /**
      * Initializes the Time singleton.
-     * \return <code>true</code> if the initialization succeeded, <code>false</code>
-     * otherwise
+     *
      * \pre The Time singleton must not have been initialized
      */
     static void initialize();
@@ -90,7 +93,8 @@ public:
     /**
      * Sets the current time to the specified value in seconds past the J2000 epoch. This
      * value can be negative to represent dates before the epoch.
-     * \param value The number of seconds after the J2000 epoch
+     *
+     * \param j2000Seconds The number of seconds after the J2000 epoch
      */
     void setTime(double j2000Seconds);
 
@@ -98,9 +102,18 @@ public:
      * Sets the current time to the specified value given as a Spice compliant string as
      * described in the Spice documentation
      * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html)
+     *
      * \param time The time to be set as a date string
      */
     void setTime(const std::string& time);
+
+    /**
+     * Sets the current time to the specified value given as a Spice compliant string as
+     * described in the Spice documentation
+     * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html)
+     *
+     * \param time The time to be set as a date string
+     */
     void setTime(const char* time);
 
     /**
@@ -130,13 +143,13 @@ public:
     void ISO8601(char* buffer) const;
 
     /**
-     * Advances the simulation time using the deltaTime() and the <code>tickTime</code>.
+     * Advances the simulation time using the deltaTime() and the `tickTime`.
      * The deltaTime() is the number of simulation seconds that pass for each real-time
-     * second. <code>tickTime</code> is the number of real-time seconds that passed since
+     * second. `tickTime` is the number of real-time seconds that passed since
      * the last call to this method. If this method is called in the render loop, the
-     * <code>tickTime</code> should be equivalent to the frame time.
+     * \p tickTime should be equivalent to the frame time.
      * \param tickTime The number of real-time seconds that passed since the last call
-     * to this method
+     *        to this method
      * \return The new time value after advancing the time
      */
     double advanceTime(double tickTime);

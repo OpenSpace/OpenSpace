@@ -50,7 +50,7 @@ GalaxyRaycaster::GalaxyRaycaster(ghoul::opengl::Texture& texture)
 {}
 
 void GalaxyRaycaster::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     _boundingBox.initialize();
 }

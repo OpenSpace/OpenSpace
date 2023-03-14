@@ -1,4 +1,9 @@
 asset.onInitialize(function ()
+  -- Avoid errors for developers when building without the touch module
+  if not openspace.modules.isLoaded("Touch") then
+    return
+  end
+
   openspace.setPropertyValueSingle("Modules.Touch.EnableTouchInteraction", true)
 
   -- A list of renderable types that apply the "direct manipulation". Works best for

@@ -59,7 +59,7 @@ void SyncEngine::decodeSyncables(std::vector<std::byte> data) {
 }
 
 void SyncEngine::preSynchronization(IsMaster isMaster) {
-    ZoneScoped
+    ZoneScoped;
 
     for (Syncable* syncable : _syncables) {
         syncable->preSync(isMaster);
@@ -67,7 +67,7 @@ void SyncEngine::preSynchronization(IsMaster isMaster) {
 }
 
 void SyncEngine::postSynchronization(IsMaster isMaster) {
-    ZoneScoped
+    ZoneScoped;
 
     for (Syncable* syncable : _syncables) {
         syncable->postSync(isMaster);

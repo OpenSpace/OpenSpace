@@ -103,6 +103,7 @@ public:
 
         Type type;
         std::string value;
+        bool startPaused = false;
     };
 
     struct CameraNavState {
@@ -146,7 +147,7 @@ public:
     /// Removes an asset unless the `ignoreUpdates` member is set to `true`
     void removeAsset(const std::string& path);
 
-    static constexpr Version CurrentVersion = Version{ 1, 1 };
+    static constexpr Version CurrentVersion = Version{ 1, 2 };
 
     Version version = CurrentVersion;
     std::vector<Module> modules;

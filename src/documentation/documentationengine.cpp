@@ -194,7 +194,7 @@ std::vector<Documentation> DocumentationEngine::documentations() const {
 void DocumentationEngine::writeDocumentationHtml(const std::string& path,
                                                  std::string data)
 {
-    ZoneScoped
+    ZoneScoped;
 
     std::ifstream handlebarsInput;
     handlebarsInput.exceptions(~std::ofstream::goodbit);

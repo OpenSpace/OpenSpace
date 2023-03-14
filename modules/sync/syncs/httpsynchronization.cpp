@@ -39,7 +39,7 @@ namespace {
     struct [[codegen::Dictionary(HttpSynchronization)]] Parameters {
         // The unique identifier for this resource that is used to request a set of files
         // from the synchronization servers
-        std::string identifier;
+        std::string identifier [[codegen::identifier()]];
 
         // The version of this resource that should be requested
         int version;

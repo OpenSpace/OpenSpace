@@ -215,7 +215,6 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     // end of the loop, the property name regex was probably misspelled.
     bool foundMatching = false;
     for (properties::Property* prop : matchingProps) {
-
         // Check that the types match
         if (type != prop->typeLua()) {
             LERRORC(
@@ -232,6 +231,10 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
             // If the fully qualified id matches the regular expression, we queue the
             // value change if the types agree
             foundMatching = true;
+
+            // The setLuaInterpolationTarget and setLuaValue functions will remove the
+            // value from the stack, so we need to push it to the end
+            lua_pushvalue(L, -1);
 
             if (global::sessionRecording->isRecording()) {
                 global::sessionRecording->savePropertyBaseline(*prop);

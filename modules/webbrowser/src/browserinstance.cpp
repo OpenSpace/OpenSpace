@@ -110,14 +110,14 @@ bool BrowserInstance::loadLocalPath(std::string path) {
 }
 
 void BrowserInstance::reshape(const glm::ivec2& windowSize) {
-    ZoneScoped
+    ZoneScoped;
 
     _renderHandler->reshape(windowSize.x, windowSize.y);
     _browser->GetHost()->WasResized();
 }
 
 void BrowserInstance::draw() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_zoomLevel != _browser->GetHost()->GetZoomLevel()) {
         _browser->GetHost()->SetZoomLevel(_zoomLevel);

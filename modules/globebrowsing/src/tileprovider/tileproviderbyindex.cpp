@@ -65,7 +65,7 @@ documentation::Documentation TileProviderByIndex::Documentation() {
 }
 
 TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -108,7 +108,7 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
 }
 
 Tile TileProviderByIndex::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
     const auto it = _providers.find(tileIndex.hashKey());
     const bool hasProvider = it != _providers.end();
     return hasProvider ? it->second->tile(tileIndex) : Tile();
