@@ -30,9 +30,7 @@
     "events/toggle_sun",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
-    "scene/solarsystem/missions/artemis/artemis",
-    "scene/solarsystem/missions/artemis/trail",
-    "scene/solarsystem/missions/artemis/frame"
+    "scene/solarsystem/missions/artemis/artemis"
   ],
   "camera": {
     "altitude": 17000000.0,
@@ -97,6 +95,16 @@
       "name": "{earth_satellites}.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
+    },
+    {
+      "name": "Scene.MoonTrail.Renderable.Appearance.Color",
+      "type": "setPropertyValueSingle",
+      "value": "{0.5, 0.5, 0.5}"
+    },
+    {
+      "name": "Scene.MoonTrail.Renderable.Appearance.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "4.0"
     }
   ],
   "time": {

@@ -1,0 +1,54 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
+local transforms = asset.require("./transforms")
+
+local models = asset.syncedResource({
+  Name = "Artemis Models",
+  Type = "HttpSynchronization",
+  Identifier = "artemis_models",
+  Version = 1
+})
+
+local OrionModel = {
+  Identifier = "OrionModel",
+  Parent = transforms.ArtemisPosition.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "artemis.glb",
+    ModelScale = "Meter",
+    InvertModelScale = false,
+    PerformShading = true,
+    DisableFaceCulling = true,
+    LightSources = {
+      sun.LightSource
+    },
+    AmbientIntensity = 0.03
+  },
+  GUI = {
+    Name = "Orion Model",
+    Path = "/Solar System/Missions/Artemis",
+    Description = [[
+      Model of the Orion capsule.
+    ]],
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OrionModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OrionModel)
+end)
+
+asset.export(OrionModel)
+
+asset.meta = {
+  Name = "Artemis",
+  Version = "1.0",
+  Description = [[
+    Orion capsule model.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
