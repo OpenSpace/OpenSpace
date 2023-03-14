@@ -32,6 +32,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/framebufferobject.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "VideoPlayer";
@@ -136,7 +137,7 @@ void* getOpenGLProcAddress(void*, const char* name) {
 }
 
 void VideoPlayer::on_mpv_render_update(void* ctx) {
-    // The wakeup flag is set here to enable the mpv_render_context_render 
+    // The wakeup flag is set here to enable the mpv_render_context_render
     // path in the main loop.
     // The pattern here with a static function and a void pointer to the the class
     // instance is a common pattern where C++ integrates a C library
@@ -145,8 +146,8 @@ void VideoPlayer::on_mpv_render_update(void* ctx) {
 
 void VideoPlayer::observePropertyMpv(MpvKey key) {
     mpv_observe_property(
-        _mpvHandle, 
-        static_cast<uint64_t>(key), 
+        _mpvHandle,
+        static_cast<uint64_t>(key),
         keys[key],
         formats[key]
     );
@@ -237,7 +238,7 @@ documentation::Documentation VideoPlayer::Documentation() {
     return codegen::doc<Parameters>("video_videoplayer");
 }
 
-VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary) 
+VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     : PropertyOwner({ "VideoPlayer" })
     , _play(PlayInfo)
     , _pause(PauseInfo)
@@ -295,9 +296,9 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
             seekToTime(correctVideoPlaybackTime());
         });
     }
-    
+
     global::callback::postSyncPreDraw->emplace_back([this]() {
-        
+
     });
 
     global::callback::postDraw->emplace_back([this]() {
@@ -375,7 +376,7 @@ void VideoPlayer::initializeMpv() {
         LINFO("LibMpv: mpv context init failed");
     }
 
-    // Set libmpv flags before initializing 
+    // Set libmpv flags before initializing
     // See order at https://github.com/mpv-player/mpv/blob/master/libmpv/client.h#L420
     // Avoiding async calls in uninitialized state
 
@@ -391,8 +392,8 @@ void VideoPlayer::initializeMpv() {
     // https://mpv.io/manual/master/#options-hwdec
     setPropertyStringMpv("hwdec", "auto");
 
-    // Enable direct rendering (default: auto). If this is set to yes, the video will be 
-    // decoded directly to GPU video memory (or staging buffers). 
+    // Enable direct rendering (default: auto). If this is set to yes, the video will be
+    // decoded directly to GPU video memory (or staging buffers).
     // https://mpv.io/manual/master/#options-vd-lavc-dr
     setPropertyStringMpv("vd-lavc-dr", "yes");
 
@@ -413,11 +414,11 @@ void VideoPlayer::initializeMpv() {
     //setPropertyStringMpv("load-stats-overlay", "");
 
     //mpv_set_property_string(_mpvHandle, "script-opts", "autoload-disabled=yes");
-    
+
     // Verbose mode
     mpv_set_property_string(_mpvHandle, "msg-level", "all=v");
     //mpv_request_log_messages(_mpvHandle, "debug");
-    
+
     if (mpv_initialize(_mpvHandle) < 0) {
         LINFO("mpv init failed");
     }
@@ -447,8 +448,8 @@ void VideoPlayer::initializeMpv() {
     // (Separate from the normal event handling mechanism for the sake of
     //  users which run OpenGL on a different thread.)
     mpv_render_context_set_update_callback(
-        _mpvRenderContext, 
-        on_mpv_render_update, 
+        _mpvRenderContext,
+        on_mpv_render_update,
         this
     );
 
@@ -498,7 +499,7 @@ void VideoPlayer::update() {
     if (_isDestroying) {
         return;
     }
-    // Initialize mpv here to ensure that the opengl context is the same as in for 
+    // Initialize mpv here to ensure that the opengl context is the same as in for
     // the rendering
     if (!_isInitialized) {
         initializeMpv();
@@ -513,14 +514,18 @@ void VideoPlayer::renderMpv() {
 
     if (_wakeup) {
         if ((mpv_render_context_update(_mpvRenderContext) & MPV_RENDER_UPDATE_FRAME)) {
-            // See render_gl.h on what OpenGL environment mpv expects, and other API 
-            // details. This function fills the fbo and texture with data, after it 
+            // Save the currently bound fbo
+            GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+
+            // See render_gl.h on what OpenGL environment mpv expects, and other API
+            // details. This function fills the fbo and texture with data, after it
             // we can get the data on the GPU, not the CPU
             int fboInt = static_cast<int>(_fbo);
-            mpv_opengl_fbo mpfbo{ 
-                fboInt , 
-                _videoResolution.x, 
-                _videoResolution.y, 0 
+            mpv_opengl_fbo mpfbo{
+                fboInt,
+                _videoResolution.x,
+                _videoResolution.y,
+                0
             };
             int flip_y{ 1 };
 
@@ -534,10 +539,14 @@ void VideoPlayer::renderMpv() {
             mpv_render_context_render(_mpvRenderContext, params);
 
             /* TODO: remove this comment in case we never encounter this issue again */
-            // We have to set the Viewport on every cycle because 
+            // We have to set the Viewport on every cycle because
             // mpv_render_context_render internally rescales the fb of the context(?!)...
             glm::ivec2 window = global::windowDelegate->currentDrawBufferResolution();
             glViewport(0, 0, window.x, window.y);
+
+            // We also need to reset the render target
+            glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+
             _didRender = true;
         }
     }
@@ -546,7 +555,7 @@ void VideoPlayer::renderMpv() {
 void VideoPlayer::handleMpvEvents() {
     while (_mpvHandle) {
         mpv_event* event = mpv_wait_event(_mpvHandle, 0.0);
-        
+
         // Validate event
         if (event->event_id == MPV_EVENT_NONE) {
             break;
@@ -578,7 +587,7 @@ void VideoPlayer::handleMpvEvents() {
                     LINFO(fmt::format("Wrong format for property {}", keys[key]));
                     break;
                 }
-                getPropertyAsyncMpv(key); 
+                getPropertyAsyncMpv(key);
                 break;
             }
             case MPV_EVENT_GET_PROPERTY_REPLY: {
@@ -586,7 +595,7 @@ void VideoPlayer::handleMpvEvents() {
                 break;
             }
             case MPV_EVENT_LOG_MESSAGE: {
-                mpv_event_log_message* msg = 
+                mpv_event_log_message* msg =
                     reinterpret_cast<mpv_event_log_message*>(event->data);
                 std::stringstream ss;
                 ss << "[" << msg->prefix << "] " << msg->level << ": " << msg->text;
@@ -598,7 +607,7 @@ void VideoPlayer::handleMpvEvents() {
 
                 switch (key) {
                     case MpvKey::Command: {
-                    
+
                         break;
                     }
                     case MpvKey::Seek: {
@@ -620,7 +629,7 @@ void VideoPlayer::handleMpvEvents() {
 
 void VideoPlayer::handleMpvProperties(mpv_event* event) {
     MpvKey key = static_cast<MpvKey>(event->reply_userdata);
-    
+
     if (!event->data) {
         LERROR(fmt::format("Could not find data for property: {}", keys[key]));
         return;
@@ -695,7 +704,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             if (*width > 0 && _videoResolution.y > 0 && _fbo > 0) {
                 resizeFBO(*width, _videoResolution.y);
             }
-        
+
             break;
         }
         case MpvKey::Time: {
@@ -801,7 +810,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
             break;
         }
-    
+
         default: {
             throw ghoul::MissingCaseException();
             break;
@@ -837,7 +846,7 @@ void VideoPlayer::preSync(bool isMaster) {
             _deltaTime = now - _timeAtLastRender;
         }
         else if (_playbackMode == PlaybackMode::RealTimeLoop) {
-            _correctPlaybackTime = _currentVideoTime; 
+            _correctPlaybackTime = _currentVideoTime;
         }
     }
 }
@@ -934,7 +943,7 @@ void VideoPlayer::createFBO(int width, int height) {
 
     glGenFramebuffers(1, &_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-    
+
     _frameTexture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(width, height, 1),
         GL_TEXTURE_2D
