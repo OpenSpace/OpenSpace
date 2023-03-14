@@ -1018,7 +1018,7 @@ void OpenSpaceEngine::writeDocumentation() {
     path = absPath(path).string() + '/';
 
     // Start the async requests as soon as possible so they are finished when we need them
-    std::future<nlohmann::json> root = std::async(
+    std::future<nlohmann::json> settings = std::async(
         &properties::PropertyOwner::generateJsonJson,
         global::rootPropertyOwner
     );
@@ -1034,14 +1034,12 @@ void OpenSpaceEngine::writeDocumentation() {
     DocEng.addHandlebarTemplates(DocEng.templatesToRegister());
 
     nlohmann::json scripting;
-    scripting["name"] = "Scripting API";
-    scripting["identifier"] = global::scriptEngine->jsonName();
-    scripting["data"] = global::scriptEngine->generateJsonJson();
+    scripting["Name"] = "Scripting API";
+    scripting["Data"] = global::scriptEngine->generateJsonJson();
 
     nlohmann::json factory;
-    factory["name"] = "Asset Types";
-    factory["identifier"] = FactoryManager::ref().jsonName();
-    factory["data"] = FactoryManager::ref().generateJsonJson();
+    factory["Name"] = "Asset Types";
+    factory["Data"] = FactoryManager::ref().generateJsonJson();
 
     /* t(
         R"({{"name":"{}","identifier":"{}","data":{}}},)",
@@ -1053,19 +1051,16 @@ void OpenSpaceEngine::writeDocumentation() {
 
     SceneLicenseWriter writer;
     nlohmann::json license;
-    license["name"] = "Licenses";
-    license["identifier"] = writer.jsonName();
-    license["data"] = writer.generateJsonJson();
+    license["Name"] = "Licenses";
+    license["Data"] = writer.generateJsonJson();
 
     nlohmann::json sceneProperties;
-    sceneProperties["name"] = "Settings";
-    sceneProperties["identifier"] = "settings";
-    sceneProperties["data"] = root.get();
+    sceneProperties["Name"] = "Settings";
+    sceneProperties["Data"] = settings.get();
 
     nlohmann::json sceneGraph;
-    sceneGraph["name"] = "Scene";
-    sceneGraph["identifier"] = "scene";
-    sceneGraph["data"] = scene.get();
+    sceneGraph["Name"] = "Scene";
+    sceneGraph["Data"] = scene.get();
 
     nlohmann::json documentation;
     documentation["documentation"].push_back(sceneGraph);

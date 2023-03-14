@@ -85,19 +85,19 @@ namespace {
         using namespace openspace;
         using namespace openspace::scripting;
         nlohmann::json function;
-        function["name"] = f.name;
-        function["arguments"] = nlohmann::json::array();
+        function["Name"] = f.name;
+        function["Arguments"] = nlohmann::json::array();
 
         for (const LuaLibrary::Function::Argument& arg : f.arguments) {
             nlohmann::json argument;
-            argument["name"] = arg.name;
-            argument["type"] = arg.type;
-            argument["defaultValue"] = arg.defaultValue.value_or("");
+            argument["Name"] = arg.name;
+            argument["Type"] = arg.type;
+            argument["Default Value"] = arg.defaultValue.value_or("");
 
-            function["arguments"].push_back(argument);
+            function["Arguments"].push_back(argument);
         }
-        function["returnType"] = f.returnType;
-        function["help"] = f.helpText;
+        function["Return Type"] = f.returnType;
+        function["Help"] = f.helpText;
 
         return function;
     }
@@ -463,14 +463,14 @@ nlohmann::json ScriptEngine::generateJsonJson() const {
 
         nlohmann::json library;
         std::string libraryName = l.name == "" ? "openspace" : "openspace." + l.name;
-        library["name"] = libraryName;
+        library["Name"] = libraryName;
 
         for (const LuaLibrary::Function& f : l.functions) {
-            library["functions"].push_back(toJson(f));
+            library["Functions"].push_back(toJson(f));
         }
 
         for (const LuaLibrary::Function& f : l.documentations) {
-            library["functions"].push_back(toJson(f));
+            library["Functions"].push_back(toJson(f));
         }
         json.push_back(library);
     }
