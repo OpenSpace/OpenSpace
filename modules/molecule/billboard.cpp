@@ -116,7 +116,7 @@ void billboardDraw(glm::mat4 const& transform, GLuint colorTex, GLuint depthTex,
   glUniform1i(glGetUniformLocation(prog, "uDepthTex"), 1);
   glUniformMatrix4fv(glGetUniformLocation(prog, "uTransform"), 1, false, glm::value_ptr(transform));
   glUniform1f(glGetUniformLocation(prog, "uStrokeWidth"), width);
-  glUniform1f(glGetUniformLocation(prog, "uStrokeFalloffExp"), falloffExp);
+  glUniform1f(glGetUniformLocation(prog, "uStrokeFalloffExp"), falloffExp == 0.0f ? FLT_MAX : 1.0f / falloffExp);
   glUniform1f(glGetUniformLocation(prog, "uFragDepth"), depth);
   glUniform4fv(glGetUniformLocation(prog, "uStrokeColor"), 1, glm::value_ptr(stroke));
   glDrawArrays(GL_TRIANGLES, 0, 6);

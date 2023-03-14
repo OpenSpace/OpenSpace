@@ -332,7 +332,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _exposure(ExposureInfo, 0.3f, 0.1f, 10.f),
     _circleColor(CircleColorInfo, glm::vec4(1.f, 1.f, 1.f, 0.25f), glm::vec4(0.f), glm::vec4(1.f)),
     _circleWidth(CircleWidthInfo, 0.0f, 0.0f, 10.0f),
-    _circleFalloff(CircleFalloffInfo, 10.0f, 1.0f, 20.0f)
+    _circleFalloff(CircleFalloffInfo, 0.0f, 0.0f, 1.0f)
 {
     _repType.addOptions({
         { static_cast<int>(mol::rep::Type::SpaceFill), "Space Fill" },
@@ -372,7 +372,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _circleColor = p.circleColor.value_or(glm::vec4(1.f));
     _circleColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
     _circleWidth = p.circleWidth.value_or(1.f);
-    _circleFalloff = p.circleFalloff.value_or(5.f);
+    _circleFalloff = p.circleFalloff.value_or(1.f);
 
     if (p.repType.has_value()) {
         _repType = static_cast<int>(codegen::map<mol::rep::Type>(*p.repType));
