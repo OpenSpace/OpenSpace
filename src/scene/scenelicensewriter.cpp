@@ -80,21 +80,33 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
     for (const Asset* asset : assets) {
         std::optional<Asset::MetaInformation> meta = asset->metaInformation();
 
+        nlohmann::json assetJson;
         if (!meta.has_value()) {
+
+            assetJson["name"] = "";
+            assetJson["version"] = "";
+            assetJson["description"] = "";
+            assetJson["author"] = "";
+            assetJson["url"] = "";
+            assetJson["license"] = "No license";
+            assetJson["identifiers"] = "";
+            assetJson["path"] = asset->path().string();
+
+            assetLicenses["No license"].push_back(assetJson);
             continue;
         }
 
-        nlohmann::json assetJson;
+        std::string license = meta->license == "" ? "No license" : meta->license;
         assetJson["name"] = meta->name;
         assetJson["version"] = meta->version;
         assetJson["description"] = meta->description;
         assetJson["author"] = meta->author;
         assetJson["url"] = meta->url;
-        assetJson["license"] = meta->license;
+        assetJson["license"] = license;
         assetJson["identifiers"] = meta->identifiers;
         assetJson["path"] = asset->path().string();
 
-        assetLicenses[meta->license].push_back(assetJson);
+        assetLicenses[license].push_back(assetJson);
     }
     nlohmann::json assetsJson;
     assetsJson["name"] = "Assets";
