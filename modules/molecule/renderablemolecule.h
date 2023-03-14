@@ -57,7 +57,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void addRepresentation(mol::rep::Type type = mol::rep::Type::SpaceFill, mol::rep::Color color = mol::rep::Color::Cpk, std::string filter = "all", float scale = 1.0f, glm::vec4 uniform_color = glm::vec4(1.0f));
+    void addRepresentation(bool enabled, mol::rep::Type type = mol::rep::Type::SpaceFill, mol::rep::Color color = mol::rep::Color::Cpk, std::string filter = "all", float scale = 1.0f, glm::vec4 uniform_color = glm::vec4(1.0f));
     
     void updateTrajectoryFrame(const UpdateData& data);
 
@@ -83,6 +83,7 @@ private:
         md_gl_representation_t gl_rep;
         md_bitfield_t mask;
         bool dynamic;
+        bool enabled;
     };
 
     std::vector<RepData> _repData;

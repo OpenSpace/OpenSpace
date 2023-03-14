@@ -82,7 +82,7 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 enum class AnimationRepeatMode {
     PingPong,
     Wrap,
-    Once
+    Clamp
 };
 
 namespace {
@@ -118,10 +118,16 @@ namespace {
         "Applies Periodic Boundary Constraints for each interpolated frame (Can be CPU-intensive!)"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Representation Enabled",
+        "Enable the representation"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Representation Type",
-        "How to draw the molecule"
+        "Visual representation type of the molecule"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -190,6 +196,7 @@ namespace {
                 // Property
             };
 
+            std::optional<bool> enabled;
             std::optional<Type> type;
             std::optional<Color> color;
             std::optional<std::string> filter;
@@ -223,7 +230,7 @@ namespace {
         enum class [[codegen::map(AnimationRepeatMode)]] AnimationRepeatMode {
             PingPong,
             Wrap,
-            Once
+            Clamp
         };
 
         // [[codegen::verbatim(AnimationRepeatModeInfo.description)]]
@@ -249,7 +256,10 @@ static void compute_mask(md_bitfield_t& mask, std::string_view filter, const md_
 
 namespace openspace {
 
-    void RenderableMolecule::addRepresentation(mol::rep::Type type, mol::rep::Color color, std::string filter, float scale, glm::vec4 uniform_color) {
+    void RenderableMolecule::addRepresentation(bool enabled, mol::rep::Type type, mol::rep::Color color, std::string filter, float scale, glm::vec4 uniform_color) {
+        properties::BoolProperty* pEnabled = new properties::BoolProperty(EnabledInfo);
+        pEnabled->set(enabled);
+
         properties::OptionProperty* pType = new properties::OptionProperty(TypeInfo);
         pType->addOptions({
             { static_cast<int>(mol::rep::Type::SpaceFill), "SpaceFill" },
@@ -291,6 +301,7 @@ namespace openspace {
         };
 
         PropertyOwner* prop = new PropertyOwner(prop_info);
+        prop->addProperty(pEnabled);
         prop->addProperty(pType);
         prop->addProperty(pColor);
         prop->addProperty(pFilter);
@@ -300,6 +311,13 @@ namespace openspace {
         _repProps.addPropertySubOwner(prop);
 
         _repData.emplace_back();
+        
+        auto enableRep = [this, i, pEnabled]() mutable {
+            if (i >= _repData.size()) {
+                return;
+            }
+            _repData[i].enabled = pEnabled->value();
+        };
 
         auto updateRep = [this, i, pType, pScale]() mutable {
             if (i >= _repData.size()) {
@@ -331,6 +349,7 @@ namespace openspace {
             mol::util::update_rep_color(_repData[i].gl_rep, _molecule, color, _repData[i].mask, pUniformColor->value());
         };
 
+        pEnabled->onChange(enableRep);
         pType->onChange(updateRep);
         pScale->onChange(updateRep);
         pColor->onChange(updateCol);
@@ -349,24 +368,28 @@ namespace openspace {
             rep.gl_rep = {0};
             md_gl_representation_init(&rep.gl_rep, &_gl_molecule);
             
-            auto pRep    = _repProps.propertySubOwners()[i];
-            auto pType   = pRep->property("Type");
-            auto pColor  = pRep->property("Color");
-            auto pFilter = pRep->property("Filter");
-            auto pScale  = pRep->property("Scale");
-            auto pUniformColor = pRep->property("UniformColor");
+            auto pRep           = _repProps.propertySubOwners()[i];
+            auto pEnabled       = pRep->property("Enabled");
+            auto pType          = pRep->property("Type");
+            auto pColor         = pRep->property("Color");
+            auto pFilter        = pRep->property("Filter");
+            auto pScale         = pRep->property("Scale");
+            auto pUniformColor  = pRep->property("UniformColor");
 
-            if (pType && pColor && pFilter && pScale && pUniformColor) {
-                auto type   = static_cast<mol::rep::Type> (std::any_cast<int>(pType->get()));
-                auto color  = static_cast<mol::rep::Color>(std::any_cast<int>(pColor->get()));
-                auto filter = std::any_cast<std::string>(pFilter->get());
-                auto scale  = std::any_cast<float>(pScale->get());
-                auto uniform_color = std::any_cast<glm::vec4>(pUniformColor->get());
+            if (pEnabled && pType && pColor && pFilter && pScale && pUniformColor) {
+                auto enabled        = std::any_cast<bool>(pEnabled->get());
+                auto type           = static_cast<mol::rep::Type> (std::any_cast<int>(pType->get()));
+                auto color          = static_cast<mol::rep::Color>(std::any_cast<int>(pColor->get()));
+                auto filter         = std::any_cast<std::string>(pFilter->get());
+                auto scale          = std::any_cast<float>(pScale->get());
+                auto uniform_color  = std::any_cast<glm::vec4>(pUniformColor->get());
 
-                compute_mask(rep.mask, filter, _molecule, rep.dynamic);
+                if (enabled) {
+                    compute_mask(rep.mask, filter, _molecule, rep.dynamic);
 
-                mol::util::update_rep_type (rep.gl_rep, type, scale);
-                mol::util::update_rep_color(rep.gl_rep, _molecule, color, rep.mask, uniform_color);
+                    mol::util::update_rep_type(rep.gl_rep, type, scale);
+                    mol::util::update_rep_color(rep.gl_rep, _molecule, color, rep.mask, uniform_color);
+                }
             }
         }
     }
@@ -384,7 +407,7 @@ namespace openspace {
         case AnimationRepeatMode::Wrap:
             frame = std::fmod(time, num_frames);
             break;
-        case AnimationRepeatMode::Once:
+        case AnimationRepeatMode::Clamp:
             frame = std::clamp(time, 0.0, last_frame - 1.0);
         default:
             ghoul_assert(false, "Don't end up here!");
@@ -425,6 +448,8 @@ namespace openspace {
                 std::vector<size_t> rep_update_col_indices;
                 
                 for (size_t i = 0; i < _repProps.propertySubOwners().size(); ++i) {
+                    if (!_repData[i].enabled) continue;
+                    
                     auto pColor  = _repProps.propertySubOwners()[i]->property("Color");
                     auto pFilter = _repProps.propertySubOwners()[i]->property("Filter");
                     if (pColor) {
@@ -500,17 +525,18 @@ namespace openspace {
                 const auto& rep = reps[i];
 
                 // @NOTE: (Robin) value_or does not seem to cut it when we map it
+                bool enabled = rep.enabled.value_or(true);
                 mol::rep::Type type = rep.type.has_value() ? codegen::map<mol::rep::Type>(rep.type.value()) : mol::rep::Type::SpaceFill;
                 mol::rep::Color color = rep.color.has_value() ? codegen::map<mol::rep::Color>(rep.color.value()) : mol::rep::Color::Cpk;
                 std::string filter = rep.filter.value_or("");
                 float scale = rep.scale.value_or(1.0f);
                 glm::vec4 uniform_color = rep.uniformColor.value_or(glm::vec4(1.0f));
 
-                addRepresentation(type, color, filter, scale, uniform_color);
+                addRepresentation(enabled, type, color, filter, scale, uniform_color);
             }
         } else {
             // Add a default representation if none were supplied
-            addRepresentation(mol::rep::Type::SpaceFill, mol::rep::Color::Cpk, "", 1.0f, glm::vec4(1.0f));
+            addRepresentation(true, mol::rep::Type::SpaceFill, mol::rep::Color::Cpk, "", 1.0f, glm::vec4(1.0f));
         }
 
         _animationBaseScale = p.animationBaseScale.value_or(1.0);
@@ -531,7 +557,6 @@ namespace openspace {
         _animationRepeatMode.setReadOnly(true);
     
         addPropertySubOwner(_repProps);
-        //addProperty(_applyPbcOnLoad);
         addProperty(_applyPbcPerFrame);
         addProperty(_animationSpeed);
         addProperty(_animationRepeatMode);
@@ -612,10 +637,14 @@ namespace openspace {
             I;
         
         const mat4_t model_mat = mat4_ident();
-        std::vector<md_gl_draw_op_t> drawOps(_repData.size());
+        std::vector<md_gl_draw_op_t> drawOps;
+        drawOps.reserve((_repData.size()));
+        
         if (_molecule.atom.count) {
             for (size_t i = 0; i < _repData.size(); ++i) {
-                drawOps[i] = {&_repData[i].gl_rep, &model_mat[0][0]};
+                if (_repData[i].enabled) {
+                    drawOps.emplace_back(&_repData[i].gl_rep, &model_mat[0][0]);
+                }
             }
         }
 
@@ -712,6 +741,7 @@ namespace openspace {
 
     RenderableMolecule::RepData::RepData() {
         //md_gl_representation_init(&gl_rep, &mol);
+        enabled = true;
         mask = md_bitfield_create(default_allocator);
     }
 
