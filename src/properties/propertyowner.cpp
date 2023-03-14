@@ -54,7 +54,7 @@ namespace {
         const std::vector<properties::Property*>& properties = owner->properties();
         for (properties::Property* p : properties) {
             nlohmann::json propertyJson;
-            propertyJson["id"] = p->identifier();
+            propertyJson["name"] = p->identifier();
             propertyJson["type"] = p->className();
             propertyJson["fullyQualifiedId"] = p->fullyQualifiedIdentifier();
             propertyJson["guiName"] = p->guiName();
