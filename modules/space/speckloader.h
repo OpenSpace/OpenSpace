@@ -70,6 +70,7 @@ struct Labelset {
         glm::vec3 position = glm::vec3(0.f);
         std::string identifier;
         std::string text;
+        bool isEnabled = true;
     };
     std::vector<Entry> entries;
 };
