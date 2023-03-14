@@ -1039,7 +1039,7 @@ void OpenSpaceEngine::writeDocumentation() {
     scripting["data"] = global::scriptEngine->generateJsonJson();
 
     nlohmann::json factory;
-    factory["name"] = "Classes";
+    factory["name"] = "Asset Types";
     factory["identifier"] = FactoryManager::ref().jsonName();
     factory["data"] = FactoryManager::ref().generateJsonJson();
 
@@ -1068,11 +1068,11 @@ void OpenSpaceEngine::writeDocumentation() {
     sceneGraph["data"] = scene.get();
 
     nlohmann::json documentation;
+    documentation["documentation"].push_back(sceneGraph);
+    documentation["documentation"].push_back(sceneProperties);
+    documentation["documentation"].push_back(license);
     documentation["documentation"].push_back(scripting);
     documentation["documentation"].push_back(factory);
-    documentation["documentation"].push_back(license);
-    documentation["documentation"].push_back(sceneProperties);
-    documentation["documentation"].push_back(sceneGraph);
 
     std::ofstream out("documentationData.js");
     out << "export const data = " << documentation.dump();
