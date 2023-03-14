@@ -368,11 +368,12 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _ssaoIntensity = p.ssaoIntensity.value_or(12.f);
     _ssaoRadius = p.ssaoRadius.value_or(12.f);
     _ssaoBias = p.ssaoBias.value_or(0.1f);
-    _exposure = p.exposure.value_or(0.3f);
+    _exposure = p.exposure.value_or(0.2f);
     _circleColor = p.circleColor.value_or(glm::vec4(1.f));
     _circleColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
     _circleWidth = p.circleWidth.value_or(1.f);
     _circleFalloff = p.circleFalloff.value_or(1.f);
+
 
     if (p.repType.has_value()) {
         _repType = static_cast<int>(codegen::map<mol::rep::Type>(*p.repType));
@@ -455,12 +456,13 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     addProperty(_ssaoIntensity);
     addProperty(_ssaoRadius);
     addProperty(_ssaoBias);
+    addProperty(_exposure);
 
     addProperty(_circleColor);
     addProperty(_circleWidth);
     addProperty(_circleFalloff);
 
-    setRenderBin(RenderBin::PostDeferredTransparent);
+    setRenderBin(RenderBin::Overlay);
 }
 
 RenderableSimulationBox::~RenderableSimulationBox() {

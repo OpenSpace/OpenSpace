@@ -341,25 +341,31 @@ static void load_secondary_structure_data(md_trajectory_i* traj, const md_molecu
         }
         
         openspace::ThreadPool& threadPool = openspace::global::moduleEngine->module<openspace::MoleculeModule>()->threadPool();
-        threadPool.enqueue([ss_data, ss_stride, traj, old_mol = mol](){
-            // @TODO(Robin) This is stupid and the interface to compute secondary structure should be changed
-            md_molecule_t mol = *old_mol;
-            const int64_t num_frames = md_trajectory_num_frames(traj);
-            const int64_t stride = ALIGN_TO(mol.atom.count, 16);
-            const int64_t bytes = stride * sizeof(float) * 3;
-            float* coords = (float*)md_alloc(default_allocator, bytes);
-            defer { md_free(default_allocator, coords, bytes); };
-            
-            // Overwrite the coordinate section, since we will load trajectory frame data into these
-            mol.atom.x = coords + stride * 0;
-            mol.atom.y = coords + stride * 1;
-            mol.atom.z = coords + stride * 2;
-            
-            for (int64_t i = 0; i < num_frames; ++i) {
-                md_trajectory_load_frame(traj, i, NULL, mol.atom.x, mol.atom.y, mol.atom.z);
-                md_util_backbone_secondary_structure_compute(ss_data + ss_stride * i, ss_stride, &mol);
-            }
-        });
+        
+        const int64_t num_chunks = 8;
+        const int64_t num_frames = md_trajectory_num_frames(traj);
+        for (int64_t i = 0; i < num_chunks; ++i) {
+            const int64_t beg = i * num_frames / num_chunks;
+            const int64_t end = (i == num_chunks - 1) ? num_frames : (i + 1) * num_frames / num_chunks;
+            threadPool.enqueue([ss_data, ss_stride, traj, old_mol = mol, beg, end](){
+                // @TODO(Robin) This is stupid and the interface to compute secondary structure should be changed
+                md_molecule_t mol = *old_mol;
+                const int64_t stride = ALIGN_TO(mol.atom.count, 16);
+                const int64_t bytes = stride * sizeof(float) * 3;
+                float* coords = (float*)md_alloc(default_allocator, bytes);
+                defer { md_free(default_allocator, coords, bytes); };
+
+                // Overwrite the coordinate section, since we will load trajectory frame data into these
+                mol.atom.x = coords + stride * 0;
+                mol.atom.y = coords + stride * 1;
+                mol.atom.z = coords + stride * 2;
+
+                for (int64_t i = beg; i < end; ++i) {
+                    md_trajectory_load_frame(traj, i, NULL, mol.atom.x, mol.atom.y, mol.atom.z);
+                    md_util_backbone_secondary_structure_compute(ss_data + ss_stride * i, ss_stride, &mol);
+                }
+            });
+        }
     }
 }
 
@@ -413,17 +419,17 @@ const md_trajectory_i* load_trajectory(std::string_view path_to_file, const md_m
     return traj;
 }
 
-void prefetch_frame_range(const md_trajectory_i* traj, int64_t beg, int64_t end) {
+void prefetch_frames(const md_trajectory_i* traj, std::span<int64_t> frames) {
     ASSERT(traj);
-    beg = MAX(beg, 0);
-    end = MIN(end, md_trajectory_num_frames(traj));
     
     if (traj->inst) {
         md_cached_trajectory_t* cached_traj = (md_cached_trajectory_t*)traj->inst;
         if (cached_traj->magic == MD_CACHED_TRAJ_MAGIC) {
             openspace::ThreadPool& threadPool = openspace::global::moduleEngine->module<openspace::MoleculeModule>()->threadPool();
             
-            for (int64_t i = beg; i < end; ++i) {
+            const int64_t num_frames = md_trajectory_num_frames(traj);
+            for (int64_t i : frames) {
+                if (i < 0 || num_frames <= i) continue;
                 threadPool.enqueue([traj, i](){
                     md_trajectory_load_frame(traj, i, nullptr, nullptr, nullptr, nullptr);
                 });

@@ -416,14 +416,13 @@ namespace openspace {
     }
 
     void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
-        if (_trajectory) {
+        if (_trajectory) {           
             double dt = data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds();
             double curr_t = data.time.j2000Seconds();
-            double next_t = data.time.j2000Seconds() + dt;
             
             const double scl = _animationBaseScale * _animationSpeed;
             double curr_time = (curr_t - _localEpoch) * scl;
-            double next_time = (next_t - _localEpoch) * scl;
+            double next_time = (curr_t + dt - _localEpoch) * scl;
 
             const int64_t num_frames = md_trajectory_num_frames(_trajectory);
             AnimationRepeatMode mode = static_cast<AnimationRepeatMode>(_animationRepeatMode.value());
@@ -482,12 +481,44 @@ namespace openspace {
                     mol::util::update_rep_color(_repData[i].gl_rep, _molecule, color, _repData[i].mask);
                 }
             }
+
+            using FrameSet = std::array<int64_t, 4>;
+
+            auto frame_set = [num_frames, mode](double time) -> FrameSet {
+                const int64_t frame_idx = static_cast<int64_t>(time_to_frame(time, num_frames, mode));
+                FrameSet set;
+
+                auto wrap = [num_frames](int64_t idx) -> int64_t {
+                    idx = idx < 0 ? num_frames - 1 : idx;
+                    idx = idx >= num_frames ? 0 : idx;
+                    return idx;
+                };
+                
+                set[0] = wrap(frame_idx - 1);
+                set[1] = wrap(frame_idx + 0);
+                set[2] = wrap(frame_idx + 1);
+                set[3] = wrap(frame_idx + 2);
+                
+                return set;
+            };
+
+            // Prefetch next set of frames
+            FrameSet curr = frame_set(curr_time);
+            FrameSet nxt1 = frame_set(next_time);
+
+            std::set<int64_t> unique_frames;
+            unique_frames.insert(nxt1.begin(), nxt1.end());
+            for (int64_t i : curr) {
+                unique_frames.erase(i);
+            }
             
-            // Prefetch next frames
-            const int64_t frame_idx = static_cast<int64_t>(time_to_frame(next_time, num_frames, mode));
-            const int64_t beg_idx = std::max(0LL, frame_idx - 1);
-            const int64_t end_idx = std::min(num_frames - 1, frame_idx + 2);
-            mol_manager::prefetch_frame_range(_trajectory, beg_idx, end_idx);
+            std::vector<int64_t> frames;
+            frames.reserve(unique_frames.size());
+            for (int64_t i : unique_frames) {
+                frames.push_back(i);
+            }
+            
+            mol_manager::prefetch_frames(_trajectory, frames);
         }
     }
 
@@ -544,6 +575,7 @@ namespace openspace {
         _animationRepeatMode.addOptions({
             { static_cast<int>(AnimationRepeatMode::PingPong), "PingPong" },
             { static_cast<int>(AnimationRepeatMode::Wrap), "Wrap" },
+            { static_cast<int>(AnimationRepeatMode::Clamp), "Clamp" },
         });
 
         if (p.animationRepeatMode.has_value()) {
@@ -629,17 +661,19 @@ namespace openspace {
             translate(I, data.modelTransform.translation) *
             scale(I, data.modelTransform.scale) *
             dmat4(data.modelTransform.rotation) *
-            translate(I, glm::dvec3(-_center)) *
             I;
 
         glm::mat4 projMatrix =
             glm::dmat4(camCopy.sgctInternal.projectionMatrix()) *
             I;
         
-        const mat4_t model_mat = mat4_ident();
+        // Center the molecule with respect to its cell
+        const vec3_t trans = _molecule.cell.basis * vec3_set1(0.5f);
+        const mat4_t model_mat = mat4_translate(-trans.x, -trans.y, -trans.z);
+
         std::vector<md_gl_draw_op_t> drawOps;
         drawOps.reserve((_repData.size()));
-        
+
         if (_molecule.atom.count) {
             for (size_t i = 0; i < _repData.size(); ++i) {
                 if (_repData[i].enabled) {

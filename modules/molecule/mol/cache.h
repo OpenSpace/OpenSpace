@@ -27,7 +27,7 @@ namespace mol_manager {
     const md_trajectory_i* load_trajectory(std::string_view path_to_file, const md_molecule_t* mol = nullptr, bool deperiodize_on_load = false);
     
     // This will kick of work into worker threads and thus not stall the calling thread
-    void prefetch_frame_range(const md_trajectory_i* traj, int64_t beg, int64_t end);
+    void prefetch_frames(const md_trajectory_i* traj, std::span<int64_t> frames);
     
     // FrameCoords also holds an optional lock for the frame if it is a cached trajectory.
     // This is released upon destruction of the object.
