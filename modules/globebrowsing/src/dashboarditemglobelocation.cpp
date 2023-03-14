@@ -138,7 +138,7 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
 }
 
 void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
 
@@ -200,7 +200,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemGlobeLocation::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     return _font->boundingBox(
         fmt::format("Position: {}, {}  Altitude: {}", 1.f, 1.f, 1.f)

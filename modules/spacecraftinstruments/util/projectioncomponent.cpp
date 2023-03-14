@@ -166,7 +166,7 @@ documentation::Documentation ProjectionComponent::Documentation() {
 }
 
 ProjectionComponent::ProjectionComponent()
-    : properties::PropertyOwner({ "ProjectionComponent" })
+    : properties::PropertyOwner({ "ProjectionComponent", "Projection Component" })
     , _performProjection(ProjectionInfo, true)
     , _clearAllProjections(ClearProjectionInfo, false)
     , _projectionFading(FadingInfo, 1.f, 0.f, 1.f)

@@ -47,7 +47,7 @@ SceneLicenseWriter::SceneLicenseWriter()
 {}
 
 std::string SceneLicenseWriter::generateJson() const {
-    ZoneScoped
+    ZoneScoped;
 
     std::stringstream json;
     json << "[";

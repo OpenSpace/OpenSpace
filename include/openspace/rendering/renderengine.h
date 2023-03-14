@@ -138,6 +138,11 @@ public:
     void takeScreenshot();
 
     /**
+     * Resets the screenshot index to 0
+     */
+    void resetScreenshotNumber();
+
+    /**
      * Get the filename of the latest screenshot
      */
     unsigned int latestScreenshotNumber() const;

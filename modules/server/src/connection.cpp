@@ -99,7 +99,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
 }
 
 void Connection::handleMessage(const std::string& message) {
-    ZoneScoped
+    ZoneScoped;
 
     try {
         nlohmann::json j = nlohmann::json::parse(message.c_str());
@@ -140,7 +140,7 @@ void Connection::handleMessage(const std::string& message) {
 }
 
 void Connection::handleJson(const nlohmann::json& json) {
-    ZoneScoped
+    ZoneScoped;
 
     auto topicJson = json.find(MessageKeyTopic);
     auto payloadJson = json.find(MessageKeyPayload);
@@ -196,13 +196,13 @@ void Connection::handleJson(const nlohmann::json& json) {
 }
 
 void Connection::sendMessage(const std::string& message) {
-    ZoneScoped
+    ZoneScoped;
 
     _socket->putMessage(message);
 }
 
 void Connection::sendJson(const nlohmann::json& json) {
-    ZoneScoped
+    ZoneScoped;
 
     sendMessage(json.dump());
 }

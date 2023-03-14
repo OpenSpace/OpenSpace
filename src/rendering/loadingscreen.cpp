@@ -153,8 +153,8 @@ LoadingScreen::~LoadingScreen() {
 }
 
 void LoadingScreen::render() {
-    ZoneScoped
-    FrameMarkStart("Loading")
+    ZoneScoped;
+    FrameMarkStart("Loading");
 
     if (_phase == Phase::PreStart) {
         return;
@@ -479,7 +479,7 @@ void LoadingScreen::render() {
 
     std::this_thread::sleep_for(RefreshRate);
     global::windowDelegate->swapBuffer();
-    FrameMarkEnd("Loading")
+    FrameMarkEnd("Loading");
 }
 
 void LoadingScreen::postMessage(std::string message) {

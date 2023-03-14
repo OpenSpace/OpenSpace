@@ -120,7 +120,7 @@ const std::multimap<KeyWithModifier, std::string>& KeybindingManager::keyBinding
 }
 
 std::string KeybindingManager::generateJson() const {
-    ZoneScoped
+    ZoneScoped;
 
     std::stringstream json;
     json << "[";

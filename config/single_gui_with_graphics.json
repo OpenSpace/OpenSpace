@@ -13,28 +13,36 @@
       "port": 20401,
       "windows": [
         {
-          "fullscreen": false,
-          "border": false,
           "name": "GUI",
           "tags": [ "GUI" ],
+          "fullscreen": false,
           "draw3d": false,
+          "blitwindowid": 1,
           "stereo": "none",
-          "pos": { "x": 0, "y": 0 },
-          "size": { "x": 1920, "y": 1080 },
+          "pos": { "x": 50, "y": 50 },
+          "size": { "x": 1280, "y": 720 },
           "viewports": [
             {
               "pos": { "x": 0.0, "y": 0.0 },
-              "size": { "x": 1.0, "y": 1.0 }
+              "size": { "x": 1.0, "y": 1.0 },
+              "projection": {
+                "type": "PlanarProjection",
+                "fov": {
+                  "hfov": 80.0,
+                  "vfov": 50.534015846724
+                },
+                "orientation": { "yaw": 0.0, "pitch": 0.0, "roll": 0.0 }
+              }
             }
           ]
         },
         {
-          "fullscreen": true,
           "name": "OpenSpace",
+          "fullscreen": false,
           "draw2d": false,
           "stereo": "none",
-          "pos": { "x": 1920, "y": 1080 },
-          "size": { "x": 1920, "y": 1080 },
+          "pos": { "x": 50, "y": 50 },
+          "size": { "x": 1280, "y": 720 },
           "viewports": [
             {
               "tracked": true,

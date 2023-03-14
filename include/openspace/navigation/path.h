@@ -76,7 +76,7 @@ public:
     CameraPose traversePath(double dt, float speedScale = 1.f);
 
     /**
-     * Function that can be used to permaturely quit a path ,for example when skipping
+     * Function that can be used to permaturely quit a path, for example when skipping
      * to the end
      */
     void quitPath();

@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/openspace.h>
+#include <ghoul/misc/csvreader.h>
 
 namespace {
 
@@ -183,6 +184,7 @@ namespace {
 /**
  * This function returns information about the current OpenSpace version. The resulting
  * table has the structure:
+ * \code
  * Version = {
  *   Major = <number>
  *   Minor = <number>
@@ -190,6 +192,7 @@ namespace {
  * },
  * Commit = <string>
  * Branch = <string>
+ * \endcode
  */
 [[codegen::luawrap]] ghoul::Dictionary version() {
     ghoul::Dictionary res;
@@ -203,6 +206,25 @@ namespace {
     res.setValue("Commit", std::string(openspace::OPENSPACE_GIT_COMMIT));
     res.setValue("Branch", std::string(openspace::OPENSPACE_GIT_BRANCH));
 
+    return res;
+}
+
+/**
+ * Loads the CSV file provided as a parameter and returns it as a vector containing the
+ * values of the each row. The inner vector has the same number of values as the CSV has
+ * columns. The second parameter controls whether the first entry in the returned outer
+ * vector is containing the names of the columns
+ */
+[[codegen::luawrap]] std::vector<std::vector<std::string>> readCSVFile(
+                                                               std::filesystem::path file,
+                                                            bool includeFirstLine = false)
+{
+    if (!std::filesystem::exists(file) || !std::filesystem::is_regular_file(file)) {
+        throw ghoul::lua::LuaError(fmt::format("Could not find file {}", file));
+    }
+
+    std::vector<std::vector<std::string>> res =
+        ghoul::loadCSVFile(file.string(), includeFirstLine);
     return res;
 }
 

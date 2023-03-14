@@ -36,7 +36,7 @@ namespace openspace {
 class Syncable;
 
 /**
- * Manages a collection of <code>Syncable</code>s and ensures they are synchronized
+ * Manages a collection of `Syncable`s and ensures they are synchronized
  * over SGCT nodes. Encoding/Decoding order is handles internally.
  */
 class SyncEngine {
@@ -50,13 +50,13 @@ public:
     SyncEngine(unsigned int syncBufferSize);
 
     /**
-     * Encodes all added Syncables in the injected <code>SyncBuffer</code>.
+     * Encodes all added Syncables in the injected `SyncBuffer`.
      * This method is only called on the SGCT master node
      */
     std::vector<std::byte> encodeSyncables();
 
     /**
-     * Decodes the <code>SyncBuffer</code> into the added Syncables.
+     * Decodes the `SyncBuffer` into the added Syncables.
      * This method is only called on the SGCT client nodes
      */
     void decodeSyncables(std::vector<std::byte> data);

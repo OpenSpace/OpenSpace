@@ -133,7 +133,7 @@ local focus_iss = {
 
 asset.onInitialize(function ()
   local i = openspace.space.readKeplerFile(omm .. "ISS.txt", "OMM")
-  issTrail.Renderable.Period = i[0].Period / (60 * 60 * 24)
+  issTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
 
   openspace.addSceneGraphNode(issPosition)
   openspace.addSceneGraphNode(issModel)

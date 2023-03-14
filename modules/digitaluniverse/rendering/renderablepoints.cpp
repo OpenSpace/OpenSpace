@@ -172,7 +172,7 @@ bool RenderablePoints::isReady() const {
 }
 
 void RenderablePoints::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     _dataset = speck::data::loadFileWithCache(_speckFile);
 
@@ -182,7 +182,7 @@ void RenderablePoints::initialize() {
 }
 
 void RenderablePoints::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_hasSpriteTexture) {
         _program = DigitalUniverseModule::ProgramObjectManager.request(

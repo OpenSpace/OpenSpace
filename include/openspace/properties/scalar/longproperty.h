@@ -25,26 +25,15 @@
 #ifndef __OPENSPACE_CORE___LONGPROPERTY___H__
 #define __OPENSPACE_CORE___LONGPROPERTY___H__
 
- /**
- * \file longproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class LongProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>long</code>.
-
- * @} @}
- */
-
 #include <openspace/properties/numericalproperty.h>
 #include <limits>
 
 namespace openspace::properties {
 
+/**
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type `long`.
+ */
 class LongProperty : public NumericalProperty<long> {
 public:
     LongProperty(Property::PropertyInfo info, long value = long(0),
@@ -56,9 +45,6 @@ public:
     int typeLua() const override;
 
     using TemplateProperty<long>::operator=;
-
-protected:
-    long fromLuaConversion(lua_State* state, bool& success) const override;
 };
 
 } // namespace openspace::properties
