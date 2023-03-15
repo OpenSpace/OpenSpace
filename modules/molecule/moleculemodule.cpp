@@ -257,9 +257,10 @@ void MoleculeModule::postDraw() {
     settings.input_textures.color = _colorTex;
     settings.input_textures.normal = _normalTex;
 
-    mat4_t P;
+    mat4_t V, P;
+    MEMCPY(&V, &_V, sizeof(mat4_t));
     MEMCPY(&P, &_P, sizeof(mat4_t));
-    postprocessing::postprocess(settings, P);
+    postprocessing::postprocess(settings, V, P);
     
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
     const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };

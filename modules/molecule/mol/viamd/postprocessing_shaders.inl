@@ -293,7 +293,7 @@ struct HBAOData {
     float   radius_to_screen;
     float   neg_inv_r2;
     float   n_dot_v_bias;
-    float   time;
+    float   normal_bias;
 
     float   ao_multiplier;
     float   pow_exponent;
@@ -418,6 +418,8 @@ float compute_ao(vec2 full_res_uv, float radius_pixels, vec4 jitter, vec3 view_p
     //vec2 noise = srand2(full_res_uv + vec2(control.time) + 0.2765672);
     //vec2 cos_sin = vec2(cos(noise.x * 3.1415926535), sin(noise.x * 3.1415026535));
 
+    vec3 normal = mix(vec3(0,0,1), view_normal, control.normal_bias);
+
     for (int i = 0; i < AO_NUM_SAMPLES; i++) {
         vec4 sample = control.sample_pattern[i];
         vec2 uv = rotate_sample(sample.xy, jitter.xy) * jitter.z;
@@ -516,6 +518,8 @@ uniform sampler2D u_texture_color;
 uniform sampler2D u_texture_normal;
 
 uniform mat4 u_inv_proj_mat;
+uniform vec3 u_light_dir;
+uniform vec3 u_light_col;
 uniform float u_time;
 
 in vec2 tc;
@@ -557,8 +561,8 @@ vec4 srand4(vec2 n) {
 }
 
 const vec3 env_radiance = vec3(5.0);
-const vec3 dir_radiance = vec3(10.0);
-const vec3 L = normalize(vec3(1,1,1));
+const vec3 dir_radiance = u_light_col;
+const vec3 L = u_light_dir;
 const float spec_exp = 100.0;
 
 vec3 lambert(in vec3 radiance) {

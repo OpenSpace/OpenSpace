@@ -23,6 +23,20 @@ struct Settings {
     } background;
 
     struct {
+        struct {
+            float x = 0;
+            float y = 0;
+            float z = 0;
+        } light_dir; // World space
+
+        struct {
+            float r;
+            float g;
+            float b;
+        } light_intensity;
+    } shading;
+
+    struct {
         bool enabled = true;
         float clip_point = 1.0f;
     } bloom;
@@ -71,6 +85,6 @@ struct Settings {
     } input_textures;
 };
 
-void postprocess(const Settings& settings, const mat4_t& persp_matrix);
+void postprocess(const Settings& settings, const mat4_t& view_mat, const mat4_t& proj_mat);
 
 }  // namespace postprocessing

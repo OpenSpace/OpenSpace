@@ -53,6 +53,10 @@ public:
 
     void internalInitializeGL() final;
     void internalDeinitializeGL() final;
+
+    void setViewMatrix(const glm::mat4& V) {
+        _V = V;
+    }
     
     void setProjectionMatrix(const glm::mat4& P) {
         _P = P;
@@ -73,6 +77,7 @@ private:
     int _height = 0;
     
     std::unique_ptr<md_gl_shaders_t> _shaders = nullptr;
+    glm::mat4 _V;
     glm::mat4 _P;
 
     properties::BoolProperty    _ssaoEnabled;

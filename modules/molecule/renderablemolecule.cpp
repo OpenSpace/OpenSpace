@@ -720,6 +720,7 @@ namespace openspace {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, last_fbo);
         glDrawBuffers(last_draw_buffer_count, last_draw_buffers);
         
+        global::moduleEngine->module<MoleculeModule>()->setViewMatrix(viewMatrix);
         global::moduleEngine->module<MoleculeModule>()->setProjectionMatrix(projMatrix);
     }
 

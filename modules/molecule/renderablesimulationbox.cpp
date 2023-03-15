@@ -789,7 +789,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             settings.input_textures.color = colorTex;
             settings.input_textures.normal = normalTex;
 
-            postprocessing::postprocess(settings, mat4_from_glm(projMatrix));
+            postprocessing::postprocess(settings, mat4_from_glm(viewMatrix), mat4_from_glm(projMatrix));
 
             glEnable(GL_DEPTH_TEST); // restore state after postprocess
         }
