@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@
 #include <thread>
 
 namespace {
-    constexpr const char* _loggerCat = "OctreeManager";
+    constexpr std::string_view _loggerCat = "OctreeManager";
 } // namespace
 
 namespace openspace {
@@ -333,7 +333,7 @@ void OctreeManager::findAndFetchNeighborNode(unsigned long long firstParentId, i
     parentId /= 10;
 
     //--------- Change all indices until we find a common parent --------------//
-    while (parentId != 8 && (needToSwitchX || needToSwitchY || needToSwitchZ) ) {
+    while (parentId != 8 && (needToSwitchX || needToSwitchY || needToSwitchZ)) {
         nodeIndex = parentId % 10;
 
         dx = (nodeIndex % 2 == 0) ? 1 : -1;
@@ -627,7 +627,7 @@ int OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData,
     }
 
     if (_valuesPerStar != (POS_SIZE + COL_SIZE + VEL_SIZE)) {
-        LERROR("Read file doesn't have the same structure of render parameters!");
+        LERROR("Read file doesn't have the same structure of render parameters");
     }
 
     // Use the same technique to construct octree from file.
@@ -723,7 +723,7 @@ void OctreeManager::writeNodeToMultipleFiles(const std::string& outFilePrefix,
             outFileStream.close();
         }
         else {
-            LERROR(fmt::format("Error opening file: {} as output data file.", outPath));
+            LERROR(fmt::format("Error opening file: {} as output data file", outPath));
         }
     }
 
@@ -825,7 +825,7 @@ void OctreeManager::fetchNodeDataFromFile(OctreeNode& node) {
 void OctreeManager::removeNodesFromRam(
                                      const std::vector<unsigned long long>& nodesToRemove)
 {
-    // LINFO("Removed " + std::to_string(nodesToRemove.size()) + " nodes from RAM.");
+    // LINFO("Removed " + std::to_string(nodesToRemove.size()) + " nodes from RAM");
 
     for (unsigned long long nodePosIndex : nodesToRemove) {
         std::stack<int> indexStack;
@@ -1105,7 +1105,6 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
                                                                     gaia::RenderMode mode)
 {
     std::map<int, std::vector<float>> fetchedData;
-    //int depth  = static_cast<int>(log2( MAX_DIST / node->halfDimension ));
 
     // Calculate the corners of the node.
     std::vector<glm::dvec4> corners(8);

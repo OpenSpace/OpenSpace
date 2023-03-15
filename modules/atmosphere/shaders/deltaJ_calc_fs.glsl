@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,6 +53,7 @@ const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 16;
 // -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI]
 const float stepPhi = (2.0 * M_PI) / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 const float stepTheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
+
 
 // Given the irradiance texture table, the cosine of zenith sun vector and the height of
 // the observer (ray's stating point x), calculates the mapping for u_r and u_muSun and
@@ -224,6 +225,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
 
   return radianceJAcc;
 }
+
 
 void main() {
   // InScattering Radiance to be calculated at different points in the ray path

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@ uniform int SAMPLES_NU;
 uniform int layer;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
+
 
 void main() {
   // First we convert the window's fragment coordinate to texel coordinates

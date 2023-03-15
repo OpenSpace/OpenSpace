@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ namespace {
         "Texture",
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this plane. This image has to be square."
+        "that is applied to this plane. This image has to be square"
     };
 
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
@@ -119,7 +119,7 @@ void RenderablePlaneImageLocal::bindTexture() {
 }
 
 void RenderablePlaneImageLocal::update(const UpdateData& data) {
-    ZoneScoped
+    ZoneScoped;
 
     RenderablePlane::update(data);
 
@@ -130,7 +130,7 @@ void RenderablePlaneImageLocal::update(const UpdateData& data) {
 }
 
 void RenderablePlaneImageLocal::loadTexture() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_texturePath.value().empty()) {
         ghoul::opengl::Texture* t = _texture;

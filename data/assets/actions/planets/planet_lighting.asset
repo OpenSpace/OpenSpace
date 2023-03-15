@@ -1,16 +1,16 @@
 local function getIlluminationCommand(node, global)
   local commandString = "local node = \"" .. node .. "\"\n"
-  if (node == "Current Focus") then 
+  if (node == "Current Focus") then
     commandString = "local node = openspace.navigation.getNavigationState().Anchor\n"
   end
   if (global) then
     commandString = commandString .. [[
-if (openspace.hasProperty("Scene."..node..".Renderable.UseAccurateNormals")) then    
+if (openspace.hasProperty("Scene."..node..".Renderable.UseAccurateNormals")) then
   local list = openspace.getProperty("Scene." .. node .. ".Renderable.Layers.NightLayers.*.Enabled")
   if (#list > 0) then
     openspace.setPropertyValue("Scene." .. node .. ".Renderable.Layers.NightLayers.*.Enabled", false)
   else
-    openspace.setPropertyValueSingle("Scene." .. node .. ".Renderable.PerformShading", false) 
+    openspace.setPropertyValueSingle("Scene." .. node .. ".Renderable.PerformShading", false)
   end
   if openspace.hasSceneGraphNode(node .. "Atmosphere") then
     openspace.setPropertyValueSingle("Scene." .. node .. "Atmosphere.Renderable.SunFollowingCamera", true)

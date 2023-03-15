@@ -49,7 +49,7 @@ asset.export(earthMagnetosphere)
 asset.meta = {
   Name = "Static generic magnetosphere of fieldlines",
   Version = "1.1",
-  Description = "Magnetic fieldlines for the bastille day CME event",
+  Description = "Generic static magnetosphere fieldlines. Actual timestep 2012-07-14T00-00-00-000. Defaultly colored by speed; 50-300 km/s",
   Author = "CCMC",
   URL = "",
   License = "CC-BY"

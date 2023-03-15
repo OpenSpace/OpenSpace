@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,7 +57,7 @@ struct Action {
     /// This variable defines a subdivision of where this action is placed in a user
     /// interface. The individual path components are separated by '/' with a leading '/'
     /// for the root path
-    std::string guiPath;
+    std::string guiPath = "/";
 
     /// If this value is set to `Yes`, the execution of this action is synchronized to
     /// other OpenSpace instances, for example other nodes in a cluster environment, or

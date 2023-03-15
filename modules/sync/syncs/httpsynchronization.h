@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/util/resourcesynchronization.h>
 
 #include <thread>
+#include <optional>
 #include <vector>
 
 namespace openspace {
@@ -49,7 +50,7 @@ class HttpSynchronization : public ResourceSynchronization {
 public:
     /**
      * The constructor for this synchronization object. The \p dict contains information
-     * about the \c identifier and the \version (which is the file version), the
+     * about the `identifier` and the \version (which is the file version), the
      * \p synchronizationRoot is the path to the root folder where the downloaded files
      * will be placed, and the \p synchronizationRepositories is a list of the URLs which
      * will be asked to resolve the (identifier, version) pair. The first URL in the list
@@ -67,7 +68,7 @@ public:
         std::vector<std::string> synchronizationRepositories);
 
     /// Destructor that will close the asynchronous file transfer, if it is still ongoing
-    virtual ~HttpSynchronization();
+    ~HttpSynchronization() override;
 
     /**
      * Returns the location to which files downloaded through this ResourceSynchronization
@@ -100,6 +101,9 @@ private:
 
     /// The file version for the requested files
     int _version = -1;
+
+    bool _unzipFiles = false;
+    std::optional<std::string> _unzipFilesDestination = std::nullopt;
 
     // The list of all repositories that we'll try to sync from
     const std::vector<std::string> _syncRepositories;

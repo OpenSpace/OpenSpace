@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@ layout(triangle_strip, max_vertices = 63) out;
 uniform int sides;
 
 const float PI = 3.1415926;
+
 
 void main() {
   vec4 v0 = gl_in[0].gl_Position;

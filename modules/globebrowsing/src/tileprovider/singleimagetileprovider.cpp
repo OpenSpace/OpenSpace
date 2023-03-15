@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@ namespace {
         "FilePath",
         "File Path",
         "The file path that is used for this image provider. The file must point to an "
-        "image that is then loaded and used for all tiles."
+        "image that is then loaded and used for all tiles"
     };
 
     struct [[codegen::Dictionary(SingleImageProvider)]] Parameters {
@@ -51,7 +51,7 @@ documentation::Documentation SingleImageProvider::Documentation() {
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
     : _filePath(FilePathInfo)
 {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -62,7 +62,7 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 }
 
 Tile SingleImageProvider::tile(const TileIndex&) {
-    ZoneScoped
+    ZoneScoped;
     return _tile;
 }
 

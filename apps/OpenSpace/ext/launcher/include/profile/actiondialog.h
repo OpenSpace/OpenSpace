@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@ class QCheckBox;
 class QComboBox;
 class QDialogButtonBox;
 class QGridLayout;
+class QLabel;
 class QLineEdit;
 class QListWidget;
 class QPushButton;
@@ -58,7 +59,7 @@ private:
     void clearActionFields();
     void actionRejected();
     void chooseScripts();
-    void appendScriptsToTextfield(std::string scripts);
+    void appendScriptsToTextfield(std::vector<std::string> scripts);
 
     openspace::Profile::Keybinding* selectedKeybinding();
     void keybindingAdd();
@@ -77,6 +78,7 @@ private:
     struct {
         QListWidget* list = nullptr;
         QLineEdit* identifier = nullptr;
+        QLabel* infoText = nullptr;
         QLineEdit* name = nullptr;
         QLineEdit* guiPath = nullptr;
         QLineEdit* documentation = nullptr;
@@ -100,6 +102,8 @@ private:
         QPushButton* removeButton = nullptr;
         QDialogButtonBox* saveButtons = nullptr;
     } _keybindingWidgets;
+
+    QDialogButtonBox* _mainButton = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ACTIONDIALOG___H__

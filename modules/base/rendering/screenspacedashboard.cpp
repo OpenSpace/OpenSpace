@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ namespace {
         "UseMainDashboard",
         "Use main dashboard",
         "If this value is set to 'true', this ScreenSpaceDashboard will use the "
-        "main dashboard instead of creating an independent one."
+        "main dashboard instead of creating an independent one"
     };
 
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
@@ -91,7 +91,7 @@ bool ScreenSpaceDashboard::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
-        glm::vec2 penPosition = glm::vec2(10.f, _size.value().w );
+        glm::vec2 penPosition = glm::vec2(10.f, _size.value().w);
 
         if (_useMainDashboard) {
             global::dashboard->render(penPosition);
@@ -119,7 +119,7 @@ bool ScreenSpaceDashboard::isReady() const {
 void ScreenSpaceDashboard::update() {
     if (global::windowDelegate->windowHasResized()) {
         const glm::ivec2 size = global::windowDelegate->currentDrawBufferResolution();
-        _size = { 0.f, 0.f, size.x, size.y };
+        _size = glm::vec4(0.f, 0.f, size.x, size.y);
         createFramebuffer();
     }
 }

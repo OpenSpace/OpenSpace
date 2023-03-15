@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -66,7 +66,7 @@ struct ShutdownInformation;
 class RenderEngine : public properties::PropertyOwner {
 public:
     RenderEngine();
-    ~RenderEngine();
+    virtual ~RenderEngine() override;
 
     void initialize();
     void initializeGL();
@@ -90,7 +90,7 @@ public:
     void renderEndscreen();
     void postDraw();
 
-    float globalBlackOutFactor();
+    float globalBlackOutFactor() const;
     void setGlobalBlackOutFactor(float opacity);
 
     float hdrExposure() const;
@@ -98,8 +98,8 @@ public:
 
     void addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s);
     void removeScreenSpaceRenderable(ScreenSpaceRenderable* s);
-    void removeScreenSpaceRenderable(const std::string& identifier);
-    ScreenSpaceRenderable* screenSpaceRenderable(const std::string& identifier);
+    void removeScreenSpaceRenderable(std::string_view identifier);
+    ScreenSpaceRenderable* screenSpaceRenderable(std::string_view identifier);
     std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
@@ -134,6 +134,11 @@ public:
      * Take a screenshot and store in the ${SCREENSHOTS} directory
      */
     void takeScreenshot();
+
+    /**
+     * Resets the screenshot index to 0
+     */
+    void resetScreenshotNumber();
 
     /**
      * Get the filename of the latest screenshot
@@ -180,6 +185,7 @@ private:
 
     properties::IntListProperty _screenshotWindowIds;
     properties::BoolProperty _applyWarping;
+    properties::BoolProperty _showStatistics;
     properties::BoolProperty _screenshotUseDate;
     properties::BoolProperty _showFrameInformation;
     properties::BoolProperty _disableMasterRendering;

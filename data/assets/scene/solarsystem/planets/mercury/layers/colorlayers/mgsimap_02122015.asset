@@ -10,8 +10,9 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Name = "Magnesium Abundance",
   Identifier = "mgsimap_02122015",
+  Enabled = asset.enabled,
   FilePath = texturesPath .. "mgsimap_02122015.png",
-  Settings = { 
+  Settings = {
     Gamma = 1.33,
     Multiplier = 1.15
   },
@@ -33,7 +34,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Mercury Magnesium Abundance",
   Version = "1.0",
-  Description = [[ Magnesium Abundance layer for Mercury globe]],
+  Description = "Magnesium Abundance layer for Mercury globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

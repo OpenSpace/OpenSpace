@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,9 +35,9 @@
 #include <optional>
 
 namespace {
-    constexpr const char* BootstrapPath = "${WEB}/common/bootstrap.min.css";
-    constexpr const char* CssPath = "${WEB}/log/style.css";
-    constexpr const char* JsPath = "${WEB}/log/script.js";
+    constexpr std::string_view BootstrapPath = "${WEB}/common/bootstrap.min.css";
+    constexpr std::string_view CssPath = "${WEB}/log/style.css";
+    constexpr std::string_view JsPath = "${WEB}/log/script.js";
 
     struct [[codegen::Dictionary(LogFactory)]] Parameters {
         enum class Type {

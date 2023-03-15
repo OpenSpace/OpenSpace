@@ -4,7 +4,7 @@ local deck = nil
 asset.onInitialize(function ()
   deck = helper.createDeck("example", {
     UseRadiusAzimuthElevation = true,
-    RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
+    RadiusAzimuthElevation = { 1.0, 0.0, 0.0 }, -- use for dome
     UsePerspectiveProjection = true,
     FaceCamera = true,
     Scale = 0.7
@@ -17,7 +17,7 @@ asset.onInitialize(function ()
 
   -- Add global functions for controlling slide deck and bind to keys
   rawset(_G, "nextSlide", function()
-    helper.goToNextSlide(deck, interpolationDuration) 
+    helper.goToNextSlide(deck, interpolationDuration)
   end)
 
   rawset(_G, "previousSlide", function()

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,15 +38,14 @@ uniform sampler1D ringTextureBckwrd;
 uniform sampler1D ringTextureUnlit;
 uniform sampler1D ringTextureColor;
 uniform sampler1D ringTextureTransparency;
-
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
-
 uniform vec3 sunPosition;
 uniform vec3 sunPositionObj;
 uniform vec3 camPositionObj;
 uniform float nightFactor;
 uniform float zFightingPercentage;
+
 
 Fragment getFragment() {
   // Moving the origin to the center
@@ -92,14 +91,14 @@ Fragment getFragment() {
     normalizedShadowCoords.z = normalizeFloat(zFightingPercentage * normalizedShadowCoords.w);
     normalizedShadowCoords.xy = normalizedShadowCoords.xy / normalizedShadowCoords.w;
     normalizedShadowCoords.w = 1.0;
-    
+
     float sum = 0;
     #for i in 0..#{nShadowSamples}
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i}, -NSSamples + #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  0));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  NSSamples - #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0               , -NSSamples + #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0               ,  NSSamples - #{i}));
+      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(                0, -NSSamples + #{i}));
+      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(                0,  NSSamples - #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i}, -NSSamples + #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  0));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  NSSamples - #{i}));
@@ -117,7 +116,7 @@ Fragment getFragment() {
   // Reduce the color of the fragment by the user factor
   // if we are facing away from the Sun
   if (dot(sunPosition, normal) < 0.0) {
-    diffuse.xyz = 
+    diffuse.xyz =
       vec3(1.0, 0.97075, 0.952) *  texture(ringTextureUnlit, texCoord).xyz * nightFactor;
   }
 

@@ -31,7 +31,7 @@ local EUVLayer = {
 }
 
 local toggle_EUV_layer = {
-  Identifier = "euv_layer.toggle_EUV",
+  Identifier = "os.solarsystem.sun.toggleeuv",
   Name = "Toggle EUV Layer",
   Command = propertyHelper.invert("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled"),
   Documentation = "Toggle EUV layer of sun",
@@ -54,7 +54,7 @@ asset.export(EUVLayer)
 
 asset.meta = {
   Name = "Predictive Science Inc. EUV texture sequence Bastille Days",
-  Version = "1.1",
+  Version = "1.2",
   Description = [[Texture sequence of an extreme ultraviolet (EUV) simulation during, 
     the CME]],
   Author = "CCMC, OpenSpace team",

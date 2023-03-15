@@ -1,0 +1,107 @@
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+local orbit = asset.syncedResource({
+  Name = "Itokawa Orbit",
+  Type = "HttpSynchronization",
+  Identifier = "itokawa_horizons",
+  Version = 1
+})
+
+local model = asset.syncedResource({
+  Name = "Itokawa Model",
+  Type = "HttpSynchronization",
+  Identifier = "itokawa_model",
+  Version = 1
+})
+
+local ItokawaTrail = {
+  Identifier = "ItokawaTrail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = orbit .. "horizons_itokawa.hrz"
+      -- Target: 25143 Itokawa (1998 SF36)
+      -- Observer: SSB
+      -- Start time: 1950-Jan-01 00:00:00 (first data point)
+      -- End time: 2050-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
+    },
+    Color = { 0.0, 0.9, 0.9 },
+    Period = 557, -- Orbit time 557 days
+    Resolution = 557 -- Step size 1 day
+  },
+  GUI = {
+    Name = "Itokawa Trail",
+    Path = "/Solar System/SSSB/Itokawa",
+    Description = [[Trail of asteroid 25143 Itokawa from 1950 JAN 1 00:00:00
+      to 2050 JAN 1 00:00:00. Data from JPL Horizons]]
+  }
+}
+
+local ItokawaPosition = {
+  Identifier = "ItokawaPosition",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = orbit .. "horizons_itokawa.hrz"
+    }
+  },
+  GUI = {
+    Name = "Itokawa Position",
+    Path = "/Solar System/SSSB/Itokawa",
+    Description = [[Position of asteroid 25143 Itokawa from 1950 JAN 1 00:00:00
+      to 2050 JAN 1 00:00:00. Data from JPL Horizons]]
+  }
+}
+
+local ItokawaModel = {
+  Identifier = "ItokawaModel",
+  Parent = ItokawaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "itokawa.glb",
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true,
+    DisableFaceCulling = true,
+    SpecularIntensity = 0.0
+  },
+  GUI = {
+    Name = "Itokawa Model",
+    Path = "/Solar System/SSSB/Itokawa",
+    Description = [[Model of asteroid 25143 Itokawa. 3D model from
+      https://solarsystem.nasa.gov/resources/2377/asteroid-itokawa-3d-model]]
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(ItokawaPosition)
+  openspace.addSceneGraphNode(ItokawaTrail)
+  openspace.addSceneGraphNode(ItokawaModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ItokawaModel)
+  openspace.removeSceneGraphNode(ItokawaTrail)
+  openspace.removeSceneGraphNode(ItokawaPosition)
+end)
+
+asset.export(ItokawaPosition)
+asset.export(ItokawaTrail)
+asset.export(ItokawaModel)
+
+
+asset.meta = {
+  Name = "Itokawa Asteroid",
+  Version = "1.0",
+  Description = [[Position, trail and model of asteroid 25143 Itokawa from
+    1950 JAN 1 00:00:00 to 2050 JAN 1 00:00:00. Data from JPL Horizons]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

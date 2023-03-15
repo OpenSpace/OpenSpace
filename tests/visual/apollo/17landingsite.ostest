@@ -1,8 +1,8 @@
 [ 
     { "type": "pause", 
       "value": "true"},
-    { "type": "keys", 
-      "value": "F7"},
+    { "type": "action", 
+      "value": "os.missions.apollo17.setup.landingsite"},
     { "type": "navigationstate", 
       "value": "{Anchor='Moon',Pitch=0.191313E0,Position={1.403983E6,8.358961E5,6.005625E5},Up={-0.316846E0,-0.141630E0,0.937843E0},Yaw=-0.143901E0}"},
     { "type": "wait", 

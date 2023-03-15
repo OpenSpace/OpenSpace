@@ -4,10 +4,6 @@
 
 asset.require("./base_blank")
 
--- Modules and component settings
-asset.require("modules/exoplanets/exoplanets")
-asset.require("modules/skybrowser/skybrowser")
-
 -- Specifying which other assets should be loaded in this scene
 asset.require("scene/solarsystem/sun/sun")
 asset.require("scene/solarsystem/sun/glare")
@@ -67,7 +63,7 @@ local toggle_trails = {
   Command = [[
     local list = openspace.getProperty("{planetTrail_solarSystem}.Renderable.Enabled");
     for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
-    
+
     local moonlist = openspace.getProperty("{moonTrail_solarSystem}.Renderable.Enabled");
     for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
   ]],

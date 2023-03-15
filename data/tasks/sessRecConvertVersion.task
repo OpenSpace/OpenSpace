@@ -1,0 +1,6 @@
+return {
+  {
+    Type = "ConvertRecFileVersionTask",
+    InputFilePath = "../../user/recordings/input.osrec"
+  }
+}

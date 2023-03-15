@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +28,8 @@ constexpr const char RenderedPathIdentifier[] = "CurrentCameraPath";
 constexpr const char RenderedPointsIdentifier[] = "CurrentPathControlPoints";
 constexpr const char DebuggingGuiPath[] = "/Debugging";
 
-constexpr const glm::vec3 PathColor = { 1.0, 1.0, 0.0 };
-constexpr const glm::vec3 OrientationLineColor = { 0.0, 1.0, 1.0 };
+constexpr glm::vec3 PathColor = glm::vec3(1.0, 1.0, 0.0);
+constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
 // Conver the input string to a format that is valid as an identifier
 std::string makeIdentifier(std::string s) {
@@ -69,7 +69,7 @@ std::string makeIdentifier(std::string s) {
         "if openspace.hasSceneGraphNode('{0}') then "
             "openspace.removeSceneGraphNode('{0}') "
         "end "
-        "openspace.addSceneGraphNode( {{ Identifier = '{0}' }} )",
+        "openspace.addSceneGraphNode({{ Identifier = '{0}' }})",
         RenderedPathIdentifier
     );
 
@@ -192,7 +192,7 @@ std::string makeIdentifier(std::string s) {
         "if openspace.hasSceneGraphNode('{0}') then "
         "openspace.removeSceneGraphNode('{0}') "
         "end "
-        "openspace.addSceneGraphNode( {{ Identifier = '{0}' }} )",
+        "openspace.addSceneGraphNode({{ Identifier = '{0}' }})",
         RenderedPointsIdentifier
     );
 

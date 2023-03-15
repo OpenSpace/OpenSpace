@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -109,6 +109,8 @@ void AdditionalScriptsDialog::chooseScripts() {
     d.exec();
 }
 
-void AdditionalScriptsDialog::appendScriptsToTextfield(std::string scripts) {
-    _textScripts->append(QString::fromStdString(std::move(scripts)));
+void AdditionalScriptsDialog::appendScriptsToTextfield(std::vector<std::string> scripts) {
+    for (std::string script : scripts) {
+        _textScripts->append(QString::fromStdString(std::move(script)));
+    }
 }

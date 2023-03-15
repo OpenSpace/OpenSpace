@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,11 @@
 #version __CONTEXT__
 
 layout(location = 0) in vec2 position;
+
 out vec2 vs_st;
 
 uniform mat4 ortho;
+
 
 void main() {
   vs_st = vec2(position.x + 1.0, position.y + 1.0) * 0.5;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,7 +70,7 @@ namespace {
     // allocation works on Linux, but it fails on Windows in some SGCT function and on Mac
     // in some random global randoms
 #ifdef WIN32
-    constexpr const int TotalSize =
+    constexpr int TotalSize =
         sizeof(MemoryManager) +
         sizeof(EventEngine) +
         sizeof(ghoul::fontrendering::FontManager) +
@@ -111,7 +111,7 @@ namespace {
 namespace openspace::global {
 
 void create() {
-    ZoneScoped
+    ZoneScoped;
 
     callback::create();
 
@@ -380,7 +380,7 @@ void create() {
 }
 
 void initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     rootPropertyOwner->addPropertySubOwner(global::moduleEngine);
 
@@ -399,13 +399,13 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::dashboard);
 
     rootPropertyOwner->addPropertySubOwner(global::userPropertyOwner);
+    rootPropertyOwner->addPropertySubOwner(global::openSpaceEngine);
 
     syncEngine->addSyncable(global::scriptEngine);
 }
 
 void initializeGL() {
-    ZoneScoped
-
+    ZoneScoped;
 }
 
 void destroy() {
@@ -630,13 +630,13 @@ void destroy() {
 }
 
 void deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *screenSpaceRenderables) {
         ssr->deinitialize();
     }
 
-    syncEngine->removeSyncables(timeManager->getSyncables());
+    syncEngine->removeSyncables(timeManager->syncables());
 
     moduleEngine->deinitialize();
     luaConsole->deinitialize();
@@ -645,7 +645,7 @@ void deinitialize() {
 }
 
 void deinitializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *screenSpaceRenderables) {
         ssr->deinitializeGL();

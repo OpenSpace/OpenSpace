@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -332,15 +332,18 @@ void from_json(const nlohmann::json& j, Profile::Time::Type& v) {
 void to_json(nlohmann::json& j, const Profile::Time& v) {
     j["type"] = v.type;
     j["value"] = v.value;
+    j["is_paused"] = v.startPaused;
 }
 
 void from_json(const nlohmann::json& j, Profile::Time& v) {
     checkValue(j, "type", &nlohmann::json::is_string, "time", false);
     checkValue(j, "value", &nlohmann::json::is_string, "time", false);
-    checkExtraKeys(j, "time", { "type", "value" });
+    checkValue(j, "is_paused", &nlohmann::json::is_boolean, "time", false);
+    checkExtraKeys(j, "time", { "type", "value", "is_paused" });
 
     j["type"].get_to(v.type);
     j["value"].get_to(v.value);
+    j["is_paused"].get_to(v.startPaused);
 }
 
 void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
@@ -490,7 +493,39 @@ void from_json(const nlohmann::json& j, version10::Keybinding& v) {
         { "key", "documentation", "name", "gui_path", "is_local", "script" }
     );
 
-    v.key = stringToKey(j.at("key").get<std::string>());
+    std::string key = j.at("key").get<std::string>();
+    if (key == "KP0") {
+        key = "KP_0";
+    }
+    else if (key == "KP1") {
+        key = "KP_1";
+    }
+    else if (key == "KP2") {
+        key = "KP_2";
+    }
+    else if (key == "KP3") {
+        key = "KP_3";
+    }
+    else if (key == "KP4") {
+        key = "KP_4";
+    }
+    else if (key == "KP5") {
+        key = "KP_5";
+    }
+    else if (key == "KP6") {
+        key = "KP_6";
+    }
+    else if (key == "KP7") {
+        key = "KP_7";
+    }
+    else if (key == "KP8") {
+        key = "KP_8";
+    }
+    else if (key == "KP9") {
+        key = "KP_9";
+    }
+
+    v.key = stringToKey(key);
     j["documentation"].get_to(v.documentation);
     j["name"].get_to(v.name);
     j["gui_path"].get_to(v.guiPath);
@@ -537,6 +572,19 @@ void convertVersion10to11(nlohmann::json& profile) {
 
 } // namespace version10
 
+namespace version11 {
+
+void convertVersion11to12(nlohmann::json& profile) {
+    // Version 1.2 introduced a state whether the delta time starts out as paused
+    profile["version"] = Profile::Version{ 1, 2 };
+
+    // The default value is that we don't start out as paused
+    if (profile.find("time") != profile.end()) {
+        profile["time"]["is_paused"] = false;
+    }
+}
+
+} // namespace version11
 
 
 Profile::ParsingError::ParsingError(Severity severity_, std::string msg)
@@ -557,7 +605,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
         Property p;
         p.setType = Property::SetType::SetPropertyValueSingle;
         p.name = prop->fullyQualifiedIdentifier();
-        p.value = prop->getStringValue();
+        p.value = prop->stringValue();
         properties.push_back(std::move(p));
     }
 
@@ -584,7 +632,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
 }
 
 void Profile::addAsset(const std::string& path) {
-    ZoneScoped
+    ZoneScoped;
 
     if (ignoreUpdates) {
         return;
@@ -597,7 +645,7 @@ void Profile::addAsset(const std::string& path) {
 }
 
 void Profile::removeAsset(const std::string& path) {
-    ZoneScoped
+    ZoneScoped;
 
     if (ignoreUpdates) {
         return;
@@ -664,7 +712,12 @@ Profile::Profile(const std::string& content) {
         // Update the file format in steps
         if (version.major == 1 && version.minor == 0) {
             version10::convertVersion10to11(profile);
-            profile.at("version").get_to(version);
+            profile["version"].get_to(version);
+        }
+
+        if (version.major == 1 && version.minor == 1) {
+            version11::convertVersion11to12(profile);
+            profile["version"].get_to(version);
         }
 
 
@@ -687,17 +740,19 @@ Profile::Profile(const std::string& content) {
             profile["keybindings"].get_to(keybindings);
         }
         if (profile.find("time") != profile.end()) {
-            time = profile["time"].get<Time>();
+            Profile::Time t;
+            profile["time"].get_to(t);
+            time = t;
         }
         if (profile.find("delta_times") != profile.end()) {
             profile["delta_times"].get_to(deltaTimes);
         }
         if (profile.find("camera") != profile.end()) {
             nlohmann::json c = profile.at("camera");
-            if (c["type"] == CameraNavState::Type) {
+            if (c["type"].get<std::string>() == CameraNavState::Type) {
                 camera = c.get<CameraNavState>();
             }
-            else if (c["type"] == CameraGoToGeo::Type) {
+            else if (c["type"].get<std::string>() == CameraGoToGeo::Type) {
                 camera = c.get<CameraGoToGeo>();
             }
             else {

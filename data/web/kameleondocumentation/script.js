@@ -2,7 +2,7 @@ window.onload = function () {
   var mainTemplateElement = document.getElementById('mainTemplate');
   var mainTemplate = Handlebars.compile(mainTemplateElement.innerHTML);
 
-  Handlebars.registerHelper('urlify', function(options, context) {  
+  Handlebars.registerHelper('urlify', function(options, context) {
     var data = context.data;
     var identifier = options.replace(" ", "-").toLowerCase();
 

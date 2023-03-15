@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,10 +55,11 @@ void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
         auto ret = _keyLua.equal_range({ key, modifier });
         for (auto it = ret.first; it != ret.second; ++it) {
             ghoul_assert(!it->second.empty(), "Action must not be empty");
-            ghoul_assert(
-                global::actionManager->hasAction(it->second),
-                "Action must be registered"
-            );
+            if (!global::actionManager->hasAction(it->second)) {
+                // Silently ignoring the unknown action as the user might have intended to
+                // bind a key to multiple actions, only one of which could be defined
+                continue;
+            }
             global::actionManager->triggerAction(it->second, ghoul::Dictionary());
         }
     }
@@ -75,7 +76,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string actio
         LWARNINGC(
             "bindKey",
             "Windows does not support binding keys to Shift + Keypad as it will "
-            "internally convert these into Home, End, etc, keys."
+            "internally convert these into Home, End, etc, keys"
         );
     }
 #endif // WIN32
@@ -88,7 +89,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string actio
 void KeybindingManager::removeKeyBinding(const KeyWithModifier& key) {
     // Erase-remove idiom does not work for std::multimap so we have to do this on foot
 
-    for (auto it = _keyLua.begin(); it != _keyLua.end(); ) {
+    for (auto it = _keyLua.begin(); it != _keyLua.end();) {
         // If the current iterator is the key that we are looking for, delete it
         // (std::multimap::erase will return the iterator to the next element for us)
         if (it->first == key) {
@@ -119,7 +120,7 @@ const std::multimap<KeyWithModifier, std::string>& KeybindingManager::keyBinding
 }
 
 std::string KeybindingManager::generateJson() const {
-    ZoneScoped
+    ZoneScoped;
 
     std::stringstream json;
     json << "[";

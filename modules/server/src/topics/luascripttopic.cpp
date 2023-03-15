@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,11 +33,11 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr const char* KeyScript = "script";
-    constexpr const char* KeyFunction = "function";
-    constexpr const char* KeyArguments = "arguments";
-    constexpr const char* KeyReturn = "return";
-    constexpr const char* _loggerCat = "LuaScriptTopic";
+    constexpr std::string_view KeyScript = "script";
+    constexpr std::string_view KeyFunction = "function";
+    constexpr std::string_view KeyArguments = "arguments";
+    constexpr std::string_view KeyReturn = "return";
+    constexpr std::string_view _loggerCat = "LuaScriptTopic";
 
     std::string formatLua(const nlohmann::json::const_iterator& it);
 
@@ -112,7 +112,7 @@ namespace {
         if (it->is_null()) {
             return "nil";
         }
-        throw ghoul::lua::LuaFormatException("Format error.");
+        throw ghoul::lua::LuaFormatException("Format error");
     }
 
     std::string generateScript(const std::string& function,

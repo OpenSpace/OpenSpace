@@ -32,18 +32,18 @@ local travelSpeedIndicator = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(travelSpeedIndicator)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(travelSpeedIndicator)
 end)
-  
+
 asset.export(travelSpeedIndicator)
 
 
 asset.meta = {
   Name = "Light travel from sun to earth",
   Version = "1.0",
-  Description = [[Speed of light indicator from sun to earth]],
+  Description = "Speed of light indicator from sun to earth",
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "",
   License = "MIT"

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,29 +34,29 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "Browser";
+    constexpr std::string_view _loggerCat = "Browser";
 
-    const openspace::properties::Property::PropertyInfo DimensionsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser Dimensions",
-        "Set the dimensions of the web browser window."
+        "Set the dimensions of the web browser window"
     };
 
-    const openspace::properties::Property::PropertyInfo UrlInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
-        "The URL to load."
+        "The URL to load"
     };
 
-    const openspace::properties::Property::PropertyInfo ReloadInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
-        "Reload the web browser."
+        "Reload the web browser"
     };
 
     struct [[codegen::Dictionary(Browser)]] Parameters {
         // [[codegen::verbatim(DimensionsInfo.description)]]
-        std::optional<glm::vec2> dimensions;
+        std::optional<glm::ivec2> dimensions;
 
         // [[codegen::verbatim(UrlInfo.description)]]
         std::optional<std::string> url;
@@ -66,7 +66,6 @@ namespace {
     };
 
 #include "browser_codegen.cpp"
-
 } // namespace
 
 namespace openspace {
@@ -80,29 +79,23 @@ void Browser::RenderHandler::setTexture(GLuint t) {
 }
 
 Browser::Browser(const ghoul::Dictionary& dictionary)
-    : _url(UrlInfo)
-    , _browserPixeldimensions(
+    : _browserDimensions(
         DimensionsInfo,
-        glm::vec2(500.f),
+        glm::vec2(1000.f),
         glm::vec2(10.f),
         glm::vec2(3000.f)
     )
+    , _url(UrlInfo)
     , _reload(ReloadInfo)
 {
-    if (dictionary.hasValue<std::string>(UrlInfo.identifier)) {
-        _url = dictionary.value<std::string>(UrlInfo.identifier);
-    }
-
-    // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
     _url = p.url.value_or(_url);
-    _browserPixeldimensions = p.dimensions.value_or(_browserPixeldimensions);
-
-    glm::vec2 windowDimensions = global::windowDelegate->currentSubwindowSize();
-    _browserPixeldimensions = windowDimensions;
-
     _url.onChange([this]() { _isUrlDirty = true; });
-    _browserPixeldimensions.onChange([this]() { _isDimensionsDirty = true; });
+
+    _browserDimensions = p.dimensions.value_or(_browserDimensions);
+    _browserDimensions.onChange([this]() { _isDimensionsDirty = true; });
+
     _reload.onChange([this]() { _shouldReload = true; });
 
     // Create browser and render handler
@@ -121,9 +114,9 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
 
 Browser::~Browser() {}
 
-bool Browser::initializeGL() {
+void Browser::initializeGL() {
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(glm::ivec2(_browserPixeldimensions.value()), 1),
+        glm::uvec3(glm::ivec2(_browserDimensions.value()), 1),
         GL_TEXTURE_2D
     );
 
@@ -131,7 +124,9 @@ bool Browser::initializeGL() {
 
     _browserInstance->initialize();
     _browserInstance->loadUrl(_url);
-    return isReady();
+    // Update the dimensions upon initialization. Do this with flag as it affects 
+    // derived classes as well
+    _isDimensionsDirty = true;
 }
 
 void Browser::deinitializeGL() {
@@ -164,13 +159,9 @@ void Browser::update() {
         _browserInstance->loadUrl(_url);
         _isUrlDirty = false;
     }
+
     if (_isDimensionsDirty) {
-        if (_browserPixeldimensions.value().x > 0 &&
-            _browserPixeldimensions.value().y > 0)
-        {
-            _browserInstance->reshape(_browserPixeldimensions.value());
-            _isDimensionsDirty = false;
-        }
+        updateBrowserDimensions();
     }
 
     if (_shouldReload) {
@@ -183,13 +174,21 @@ bool Browser::isReady() const {
     return _texture.get();
 }
 
-glm::vec2 Browser::browserPixelDimensions() const {
-    return _browserPixeldimensions;
-}
-
 // Updates the browser size to match the size of the texture
 void Browser::updateBrowserSize() {
-    _browserPixeldimensions = _texture->dimensions();
+    _browserDimensions = _texture->dimensions();
+}
+
+void Browser::reload() {
+    _reload.set(true);
+}
+
+void Browser::setRatio(float ratio) {
+    float relativeRatio = ratio / browserRatio();
+    float newX = static_cast<float>(_browserDimensions.value().x) * relativeRatio;
+    glm::ivec2 newDims = { static_cast<int>(floor(newX)), _browserDimensions.value().y };
+    _browserDimensions = newDims;
+    _isDimensionsDirty = true;
 }
 
 float Browser::browserRatio() const {
@@ -197,24 +196,23 @@ float Browser::browserRatio() const {
            static_cast<float>(_texture->dimensions().y);
 }
 
-void Browser::setCallbackDimensions(const std::function<void(const glm::dvec2&)>& func) {
-    _browserPixeldimensions.onChange([&]() {
-        func(_browserPixeldimensions.value());
-    });
+void Browser::updateBrowserDimensions() {
+    glm::ivec2 dim = _browserDimensions;
+    if (dim.x > 0 && dim.y > 0) {
+        _texture->setDimensions(glm::uvec3(_browserDimensions.value(), 1));
+        _browserInstance->reshape(dim);
+        _isDimensionsDirty = false;
+    }
 }
 
 void Browser::executeJavascript(const std::string& script) const {
     // Make sure that the browser has a main frame
-    const bool browserExists = _browserInstance && _browserInstance->getBrowser();
-    const bool frameIsLoaded = browserExists &&
-        _browserInstance->getBrowser()->GetMainFrame();
+    bool browserExists = _browserInstance && _browserInstance->getBrowser();
+    bool frameIsLoaded = browserExists && _browserInstance->getBrowser()->GetMainFrame();
 
     if (frameIsLoaded) {
-        _browserInstance->getBrowser()->GetMainFrame()->ExecuteJavaScript(
-            script,
-            _browserInstance->getBrowser()->GetMainFrame()->GetURL(),
-            0
-        );
+        CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
+        frame->ExecuteJavaScript(script, frame->GetURL(), 0);
     }
 }
 

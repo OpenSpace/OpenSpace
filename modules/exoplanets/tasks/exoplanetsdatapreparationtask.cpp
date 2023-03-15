@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "ExoplanetsDataPreparationTask";
+    constexpr std::string_view _loggerCat = "ExoplanetsDataPreparationTask";
 
     struct [[codegen::Dictionary(ExoplanetsDataPreparationTask)]] Parameters {
         // The csv file to extract data from
@@ -82,7 +82,7 @@ std::string ExoplanetsDataPreparationTask::description() {
     return fmt::format(
         "Extract data about exoplanets from file {} and write as bin to {}. The data "
         "file should be a csv version of the Planetary Systems Composite Data from the "
-        "NASA exoplanets archive (https://exoplanetarchive.ipac.caltech.edu/).",
+        "NASA exoplanets archive (https://exoplanetarchive.ipac.caltech.edu/)",
         _inputDataPath, _outputBinPath
     );
 }
@@ -98,6 +98,22 @@ void ExoplanetsDataPreparationTask::perform(
 
     std::ofstream binFile(_outputBinPath, std::ios::out | std::ios::binary);
     std::ofstream lutFile(_outputLutPath);
+
+    if (!binFile.good()) {
+        LERROR(fmt::format("Error when writing to {}",_outputBinPath));
+        if (!std::filesystem::is_directory(_outputBinPath.parent_path())) {
+            LERROR("Output directory does not exist");
+        }
+        return;
+    }
+
+    if (!lutFile.good()) {
+        LERROR(fmt::format("Error when writing to {}", _outputLutPath));
+        if (!std::filesystem::is_directory(_outputLutPath.parent_path())) {
+            LERROR("Output directory does not exist");
+        }
+        return;
+    }
 
     int version = 1;
     binFile.write(reinterpret_cast<char*>(&version), sizeof(int));
