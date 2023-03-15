@@ -326,27 +326,22 @@ namespace openspace {
             mol::util::update_rep_type(_repData[i].gl_rep, static_cast<mol::rep::Type>(pType->value()), pScale->value());
         };
 
-        auto updateFilt = [this, i, pFilter]() mutable {
+        auto updateCol = [this, i, pColor, pUniformColor]() mutable {
+            if (i >= _repData.size()) {
+                return;
+            }
+
+            const mol::rep::Color color = static_cast<mol::rep::Color>(pColor->value());
+            mol::util::update_rep_color(_repData[i].gl_rep, _molecule, color, _repData[i].mask, pUniformColor->value());
+        };
+
+        auto updateFilt = [this, i, pFilter, updateCol]() mutable {
             if (i >= _repData.size()) {
                 return;
             }
             const auto& filter = pFilter->value();
             compute_mask(_repData[i].mask, filter, _molecule, _repData[i].dynamic);
-            mol::util::update_rep_color(_repData[i].gl_rep, _molecule, mol::rep::Color::Cpk, _repData[i].mask, glm::vec4(1.0f));
-        };
-
-        auto updateCol = [this, i, pColor, pUniformColor]() mutable {
-            if (i >= _repData.size()) {
-                return;
-            }
-                
-            const mol::rep::Color color = static_cast<mol::rep::Color>(pColor->value());
-            if (color == mol::rep::Color::Uniform) {
-                pUniformColor->setVisibility(openspace::properties::Property::Visibility::Always);
-            } else {
-                pUniformColor->setVisibility(openspace::properties::Property::Visibility::Hidden);
-            }
-            mol::util::update_rep_color(_repData[i].gl_rep, _molecule, color, _repData[i].mask, pUniformColor->value());
+            updateCol();
         };
 
         pEnabled->onChange(enableRep);
@@ -478,7 +473,9 @@ namespace openspace {
                 for (size_t i : rep_update_col_indices) {
                     auto pColor = _repProps.propertySubOwners()[i]->property("Color");
                     auto color = static_cast<mol::rep::Color>(std::any_cast<int>(pColor->get()));
-                    mol::util::update_rep_color(_repData[i].gl_rep, _molecule, color, _repData[i].mask);
+                    auto pUniformColor = _repProps.propertySubOwners()[i]->property("UniformColor");
+                    auto uniform_color  = std::any_cast<glm::vec4>(pUniformColor->get());
+                    mol::util::update_rep_color(_repData[i].gl_rep, _molecule, color, _repData[i].mask, uniform_color);
                 }
             }
 
