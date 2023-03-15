@@ -1,10 +1,5 @@
 {
   "actions": [],
-  "additional_scripts": [
-    "openspace.setPropertyValueSingle(\"Modules.CefWebGui.GuiScale\", 1.5) -- Suitable for 55 inch touch screen",
-    "openspace.setPropertyValueSingle(\"Modules.CefWebGui.GuiUrl\", \"http://localhost:8000/homeOneScreen/\")",
-    "openspace.setPropertyValueSingle(\"OpenSpaceEngine.DisableMouseInputs\", true);"
-  ],
   "assets": [
     "installationspecific/stort_installation_base"
   ],
@@ -73,6 +68,21 @@
   "properties": [
     {
       "name": "Modules.CefWebGui.Visible",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "Modules.CefWebGui.GuiScale",
+      "type": "setPropertyValueSingle",
+      "value": "1.5"
+    },
+    {
+      "name": "Modules.CefWebGui.GuiUrl",
+      "type": "setPropertyValueSingle",
+      "value": "http://localhost:8000/homeOneScreen/"
+    },
+    {
+      "name": "OpenSpaceEngine.DisableMouseInputs",
       "type": "setPropertyValueSingle",
       "value": "true"
     }
