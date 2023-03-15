@@ -109,7 +109,7 @@ Window* FirstOpenVRWindow = nullptr;
 /**
  * This struct stores all information about a single render window. Depending on the
  * frame setup, each window can be mono or stereo, the information of which is stored in
- * the \c leftOrMain and \c right members respectively.
+ * the `leftOrMain` and `right` members respectively.
  */
 struct SpoutWindow {
     /// The left framebuffer (or main, if there is no stereo rendering)
@@ -1118,7 +1118,9 @@ int main(int argc, char* argv[]) {
         "configuration file without editing the file on disk, for example in a "
         "planetarium environment. Please not that the Lua script must not contain any - "
         "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
-        "evaluated before it is passed to OpenSpace"
+        "evaluated before it is passed to OpenSpace. Windows does not approve of using \""
+        "either, so it is recommended to deliniate strings with [[ ]] instead. For "
+        "example:  OpenSpace --config Profile=[[jwst]]"
     ));
 
     // setCommandLine returns a reference to the vector that will be filled later
@@ -1126,10 +1128,16 @@ int main(int argc, char* argv[]) {
         { argv, argv + argc }
     );
 
-    bool showHelp = parser.execute();
-    if (showHelp) {
-        std::cout << parser.helpText();
-        exit(EXIT_SUCCESS);
+    try {
+        bool showHelp = parser.execute();
+        if (showHelp) {
+            std::cout << parser.helpText();
+            exit(EXIT_SUCCESS);
+        }
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LFATALC(e.component, e.message);
+        exit(EXIT_FAILURE);
     }
     // Take an actual copy of the arguments
     std::vector<std::string> arguments = sgctArguments;

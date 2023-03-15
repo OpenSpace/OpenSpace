@@ -51,7 +51,7 @@ namespace {
         std::optional<float> intensity;
 
         // [[codegen::verbatim(NodeInfo.description)]]
-        std::string node;
+        std::string node [[codegen::identifier()]];
     };
 #include "scenegraphlightsource_codegen.cpp"
 } // namespace

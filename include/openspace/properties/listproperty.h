@@ -36,6 +36,10 @@ public:
     ListProperty(Property::PropertyInfo info, std::vector<T> values);
 
     virtual ~ListProperty() override = 0;
+
+protected:
+    std::vector<T> fromLuaConversion(lua_State* state) const override;
+    void toLuaConversion(lua_State* state) const override;
 };
 
 } // namespace openspace::properties

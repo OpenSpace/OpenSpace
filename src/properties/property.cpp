@@ -98,9 +98,7 @@ bool Property::getLuaValue(lua_State*) const {
 
 void Property::set(std::any) {}
 
-bool Property::setLuaValue(lua_State*) {
-    return false;
-}
+void Property::setLuaValue(lua_State*) {}
 
 const std::type_info& Property::type() const {
     return typeid(void);
