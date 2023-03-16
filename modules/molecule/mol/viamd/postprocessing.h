@@ -38,8 +38,9 @@ struct Settings {
         bool enabled = true;
         float radius = 6.0f;
         float intensity = 3.0f;
-        float bias = 0.1f;
-    } ambient_occlusion;
+        float horizon_bias = 0.1f;
+        float normal_bias = 1.0f;
+    } ambient_occlusion[2];
 
     struct {
         bool enabled = true;
@@ -71,6 +72,6 @@ struct Settings {
     } input_textures;
 };
 
-void postprocess(const Settings& settings, const mat4_t& persp_matrix);
+void postprocess(const Settings& settings, const mat4_t& view_mat, const mat4_t& proj_mat);
 
 }  // namespace postprocessing

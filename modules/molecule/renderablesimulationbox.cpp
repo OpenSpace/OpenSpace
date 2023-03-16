@@ -372,7 +372,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _circleColor = p.circleColor.value_or(glm::vec4(1.f));
     _circleColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
     _circleWidth = p.circleWidth.value_or(1.f);
-    _circleFalloff = p.circleFalloff.value_or(1.f);
+    _circleFalloff = p.circleFalloff.value_or(0.f);
 
 
     if (p.repType.has_value()) {
@@ -775,10 +775,11 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         { // postprocessing
             postprocessing::Settings settings;
             settings.background.enabled = false;
-            settings.ambient_occlusion.enabled = _ssaoEnabled;
-            settings.ambient_occlusion.intensity = _ssaoIntensity;
-            settings.ambient_occlusion.radius = _ssaoRadius;
-            settings.ambient_occlusion.bias = _ssaoBias;
+            settings.ambient_occlusion[0].enabled = _ssaoEnabled;
+            settings.ambient_occlusion[0].intensity = _ssaoIntensity;
+            settings.ambient_occlusion[0].radius = _ssaoRadius;
+            settings.ambient_occlusion[0].horizon_bias = _ssaoBias;
+            settings.ambient_occlusion[1].enabled = false;
             settings.bloom.enabled = false;
             settings.depth_of_field.enabled = false;
             settings.temporal_reprojection.enabled = false;
@@ -789,7 +790,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             settings.input_textures.color = colorTex;
             settings.input_textures.normal = normalTex;
 
-            postprocessing::postprocess(settings, mat4_from_glm(projMatrix));
+            postprocessing::postprocess(settings, mat4_from_glm(data.camera.combinedViewMatrix()), mat4_from_glm(projMatrix));
 
             glEnable(GL_DEPTH_TEST); // restore state after postprocess
         }

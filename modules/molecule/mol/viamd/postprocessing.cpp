@@ -331,7 +331,7 @@ struct HBAOData {
     float radius_to_screen;
     float neg_inv_r2;
     float n_dot_v_bias;
-    float time;
+    float n_influence;
 
     float ao_multiplier;
     float pow_exponent;
@@ -342,7 +342,7 @@ struct HBAOData {
     vec4_t sample_pattern[32];
 };
 
-void setup_ubo_hbao_data(uint32_t ubo, int width, int height, const mat4_t& proj_mat, float intensity, float radius, float bias, float time) {
+void setup_ubo_hbao_data(uint32_t ubo, int width, int height, const mat4_t& proj_mat, float intensity, float radius, float n_dot_v_bias, float normal_bias) {
     ASSERT(ubo);
 
     // From intel ASSAO
@@ -385,8 +385,8 @@ void setup_ubo_hbao_data(uint32_t ubo, int width, int height, const mat4_t& proj
     HBAOData data;
     data.radius_to_screen = r * 0.5f * proj_scl;
     data.neg_inv_r2 = -1.f / (r * r);
-    data.n_dot_v_bias = CLAMP(bias, 0.f, 1.f - FLT_EPSILON);
-    data.time = time;
+    data.n_dot_v_bias = CLAMP(n_dot_v_bias, 0.f, 1.f - FLT_EPSILON);
+    data.n_influence = CLAMP(normal_bias, 0.0f, 1.0f);
     data.ao_multiplier = 1.f / (1.f - data.n_dot_v_bias);
     data.pow_exponent = MAX(intensity, 0.f);
     data.inv_full_res = {1.f / float(width), 1.f / float(height)};
@@ -494,6 +494,8 @@ static struct {
         int texture_color = -1;
         int texture_normal = -1;
         int inv_proj_mat = -1;
+        int light_dir = -1;
+        int light_col = -1;
         int time = -1;
     } uniform_loc;
 } shading;
@@ -504,6 +506,8 @@ void initialize() {
     shading.uniform_loc.texture_color = glGetUniformLocation(shading.program, "u_texture_color");
     shading.uniform_loc.texture_normal = glGetUniformLocation(shading.program, "u_texture_normal");
     shading.uniform_loc.inv_proj_mat = glGetUniformLocation(shading.program, "u_inv_proj_mat");
+    shading.uniform_loc.light_dir   = glGetUniformLocation(shading.program, "u_light_dir");
+    shading.uniform_loc.light_col   = glGetUniformLocation(shading.program, "u_light_col");
     shading.uniform_loc.time = glGetUniformLocation(shading.program, "u_time");
 }
 
@@ -1072,7 +1076,7 @@ void compute_linear_depth(uint32_t depth_tex, float near_plane, float far_plane,
     glBindVertexArray(0);
 }
 
-void apply_ssao(uint32_t linear_depth_tex, uint32_t normal_tex, const mat4_t& proj_matrix, float intensity, float radius, float bias, float time) {
+void apply_ssao(uint32_t linear_depth_tex, uint32_t normal_tex, const mat4_t& proj_matrix, float intensity, float radius, float bias, float normal_bias) {
     ASSERT(glIsTexture(linear_depth_tex));
     ASSERT(glIsTexture(normal_tex));
 
@@ -1091,7 +1095,7 @@ void apply_ssao(uint32_t linear_depth_tex, uint32_t normal_tex, const mat4_t& pr
 
     glBindVertexArray(gl.vao);
 
-    ssao::setup_ubo_hbao_data(gl.ssao.ubo_hbao_data, width, height, proj_matrix, intensity, radius, bias, time);
+    ssao::setup_ubo_hbao_data(gl.ssao.ubo_hbao_data, width, height, proj_matrix, intensity, radius, bias, normal_bias);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.ssao.hbao.fbo);
     glViewport(0, 0, gl.tex_width, gl.tex_height);
@@ -1168,7 +1172,7 @@ void apply_ssao(uint32_t linear_depth_tex, uint32_t normal_tex, const mat4_t& pr
     POP_GPU_SECTION()
 }
 
-void shade_deferred(uint32_t depth_tex, uint32_t color_tex, uint32_t normal_tex, const mat4_t& inv_proj_matrix, float time) {
+void shade_deferred(uint32_t depth_tex, uint32_t color_tex, uint32_t normal_tex, const mat4_t& inv_proj_matrix, const vec3_t& light_dir, const vec3_t& light_col, float time) {
     ASSERT(glIsTexture(depth_tex));
     ASSERT(glIsTexture(color_tex));
     ASSERT(glIsTexture(normal_tex));
@@ -1185,6 +1189,8 @@ void shade_deferred(uint32_t depth_tex, uint32_t color_tex, uint32_t normal_tex,
     glUniform1i(shading::shading.uniform_loc.texture_color, 1);
     glUniform1i(shading::shading.uniform_loc.texture_normal, 2);
     glUniformMatrix4fv(shading::shading.uniform_loc.inv_proj_mat, 1, GL_FALSE, &inv_proj_matrix.elem[0][0]);
+    glUniform3f(shading::shading.uniform_loc.light_dir, light_dir.x, light_dir.y, light_dir.z);
+    glUniform3f(shading::shading.uniform_loc.light_col, light_col.x, light_col.y, light_col.z);
     glUniform1f(shading::shading.uniform_loc.time, time);
     glBindVertexArray(gl.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -1473,7 +1479,7 @@ void blit_color(vec4_t color) {
     glUseProgram(0);
 }
 
-void postprocess(const Settings& settings, const mat4_t& P) {
+void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     ASSERT(p);
     ASSERT(glIsTexture(settings.input_textures.depth));
     ASSERT(glIsTexture(settings.input_textures.color));
@@ -1488,6 +1494,9 @@ void postprocess(const Settings& settings, const mat4_t& P) {
     if (time > 100.f) time -= 100.f;
 
     static vec2_t prev_jitter = {0,0};
+    vec3_t L = mat4_mul_vec3(V, vec3_set(0, 0, 0), 1.0f);
+    vec3_t light_dir = vec3_normalize(L);
+    vec3_t light_col = vec3_set1(5.0f);
     mat4_t inv_P = mat4_inverse(P);
     vec2_t near_far = extract_near_far(P);
     vec2_t jitter = extract_jitter_uv(P);
@@ -1581,14 +1590,17 @@ void postprocess(const Settings& settings, const mat4_t& P) {
     }
 
     PUSH_GPU_SECTION("Shade")
-    shade_deferred(settings.input_textures.depth, settings.input_textures.color, settings.input_textures.normal, inv_P, time);
+    shade_deferred(settings.input_textures.depth, settings.input_textures.color, settings.input_textures.normal, inv_P, light_dir, light_col, time);
     POP_GPU_SECTION()
 
-    if (settings.ambient_occlusion.enabled) {
-        PUSH_GPU_SECTION("SSAO")
-        apply_ssao(gl.linear_depth.texture, settings.input_textures.normal, P, settings.ambient_occlusion.intensity, settings.ambient_occlusion.radius, settings.ambient_occlusion.bias, time);
-        POP_GPU_SECTION()
+    PUSH_GPU_SECTION("SSAO")
+    if (settings.ambient_occlusion[0].enabled) {
+        apply_ssao(gl.linear_depth.texture, settings.input_textures.normal, P, settings.ambient_occlusion[0].intensity, settings.ambient_occlusion[0].radius, settings.ambient_occlusion[0].horizon_bias, settings.ambient_occlusion[0].normal_bias);
     }
+    if (settings.ambient_occlusion[1].enabled) {
+        apply_ssao(gl.linear_depth.texture, settings.input_textures.normal, P, settings.ambient_occlusion[1].intensity, settings.ambient_occlusion[1].radius, settings.ambient_occlusion[1].horizon_bias, settings.ambient_occlusion[1].normal_bias);
+    }
+    POP_GPU_SECTION()
 
     if (settings.temporal_reprojection.enabled) {
 #if 0
