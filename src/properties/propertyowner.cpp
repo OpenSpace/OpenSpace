@@ -48,30 +48,27 @@ namespace {
         nlohmann::json json;
         json["Name"] = owner->identifier();
 
-        if (dynamic_cast<SceneGraphNode*>(owner)) {
-            json["Description"] = owner->description();
+        json["Description"] = owner->description();
+        json["Properties"] = nlohmann::json::array();
+        json["PropertyOwners"] = nlohmann::json::array();
+        json["Type"] = owner->type();
+
+        const std::vector<properties::Property*>& properties = owner->properties();
+        for (properties::Property* p : properties) {
+            nlohmann::json propertyJson;
+            propertyJson["Name"] = p->identifier();
+            propertyJson["Type"] = p->className();
+            propertyJson["URI"] = p->fullyQualifiedIdentifier();
+            propertyJson["Gui Name"] = p->guiName();
+            propertyJson["Description"] = p->description();
+
+            json["Properties"].push_back(propertyJson);
         }
-        else {
-            json["Properties"] = nlohmann::json::array();
-            json["PropertyOwners"] = nlohmann::json::array();
 
-            const std::vector<properties::Property*>& properties = owner->properties();
-            for (properties::Property* p : properties) {
-                nlohmann::json propertyJson;
-                propertyJson["Name"] = p->identifier();
-                propertyJson["Type"] = p->className();
-                propertyJson["URI"] = p->fullyQualifiedIdentifier();
-                propertyJson["Gui Name"] = p->guiName();
-                propertyJson["Description"] = p->description();
-
-                json["Properties"].push_back(propertyJson);
-            }
-
-            auto propertyOwners = owner->propertySubOwners();
-            for (properties::PropertyOwner* o : propertyOwners) {
-                nlohmann::json propertyOwner;
-                json["PropertyOwners"].push_back(createJson(o));
-            }
+        auto propertyOwners = owner->propertySubOwners();
+        for (properties::PropertyOwner* o : propertyOwners) {
+            nlohmann::json propertyOwner;
+            json["PropertyOwners"].push_back(createJson(o));
         }
 
         return json;
@@ -360,6 +357,10 @@ void PropertyOwner::setIdentifier(std::string identifier) {
 
 const std::string& PropertyOwner::identifier() const {
     return _identifier;
+}
+
+const std::string& PropertyOwner::type() const {
+    return _type;
 }
 
 void PropertyOwner::setGuiName(std::string guiName) {

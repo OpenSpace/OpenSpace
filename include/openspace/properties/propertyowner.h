@@ -103,6 +103,13 @@ public:
     const std::string& identifier() const;
 
     /**
+     * Returns the type of this PropertyOwner.
+     *
+     * \return The type of this PropertyOwner
+     */
+    const std::string& type() const;
+
+    /**
      * Sets the user-facing name of this PropertyOwner. This name does not have to be
      * unique, but it is recommended to be.
      *
@@ -304,6 +311,8 @@ protected:
     std::string _guiName;
     /// The description for this PropertyOwner
     std::string _description;
+    /// The type for this PropertyOwner
+    std::string _type;
 
     /// The owner of this PropertyOwner
     PropertyOwner* _owner = nullptr;

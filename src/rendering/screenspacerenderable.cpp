@@ -236,6 +236,7 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
             p.type,
             dictionary
         );
+    ssr->_type = p.type;
     return std::unique_ptr<ScreenSpaceRenderable>(ssr);
 }
 

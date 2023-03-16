@@ -494,6 +494,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
 
     result->_lastScreenSpaceUpdateTime = std::chrono::high_resolution_clock::now();
+    result->_type = "SceneGraphNode";
     return result;
 }
 

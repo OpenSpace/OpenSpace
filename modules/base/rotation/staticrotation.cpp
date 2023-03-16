@@ -83,6 +83,7 @@ StaticRotation::StaticRotation()
         _matrixIsDirty = true;
         requireUpdate();
     });
+    _type = "StaticRotation";
 }
 
 StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRotation() {
@@ -101,6 +102,7 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRota
         _eulerRotation = rotationMatrixToEulerAngles(std::get<glm::dmat3>(p.rotation));
     }
     _matrixIsDirty = true;
+    _type = "StaticRotation";
 }
 
 glm::dmat3 StaticRotation::matrix(const UpdateData&) const {
