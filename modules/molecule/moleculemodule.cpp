@@ -73,9 +73,45 @@ constexpr openspace::properties::Property::PropertyInfo SSAORadiusInfo = {
 };
 
 constexpr openspace::properties::Property::PropertyInfo SSAOBiasInfo = {
-    "SSAOBias",
-    "SSAO Bias",
-    "SSAO Bias"
+    "SSAOHorizonBias",
+    "SSAO Horizon Bias",
+    "SSAO Horizon Bias"
+};
+
+constexpr openspace::properties::Property::PropertyInfo SSAONormalBiasInfo = {
+    "SSAONormalBias",
+    "SSAO Normal Bias",
+    "SSAO Normal Bias"
+};
+
+constexpr openspace::properties::Property::PropertyInfo SSAO2EnabledInfo = {
+    "SSAO2Enabled",
+    "Enable SSAO",
+    "Enable SSAO"
+};
+
+constexpr openspace::properties::Property::PropertyInfo SSAO2IntensityInfo = {
+    "SSAO2Intensity",
+    "SSAO Intensity",
+    "SSAO Intensity"
+};
+
+constexpr openspace::properties::Property::PropertyInfo SSAO2RadiusInfo = {
+    "SSAO2Radius",
+    "SSAO Radius",
+    "SSAO Radius"
+};
+
+constexpr openspace::properties::Property::PropertyInfo SSAO2BiasInfo = {
+    "SSAO2HorizonBias",
+    "SSAO Horizon Bias",
+    "SSAO Horizon Bias"
+};
+
+constexpr openspace::properties::Property::PropertyInfo SSAO2NormalBiasInfo = {
+    "SSAO2NormalBias",
+    "SSAO Normal Bias",
+    "SSAO Normal Bias"
 };
 
 constexpr openspace::properties::Property::PropertyInfo ExposureInfo = {
@@ -110,8 +146,14 @@ MoleculeModule::MoleculeModule() :
     OpenSpaceModule(Name),
     _ssaoEnabled(SSAOEnabledInfo, true),
     _ssaoIntensity(SSAOIntensityInfo, 4.f, 0.f, 100.f),
-    _ssaoRadius(SSAORadiusInfo, 1.f, 0.1f, 100.f),
-    _ssaoBias(SSAOBiasInfo, 0.1f, 0.0f, 1.0f),
+    _ssaoRadius(SSAORadiusInfo, 1.f, 0.1f, 10.f),
+    _ssaoHorizonBias(SSAOBiasInfo, 0.1f, 0.0f, 1.0f),
+    _ssaoNormalBias(SSAOBiasInfo, 1.0f, 0.0f, 1.0f),
+    _ssao2Enabled(SSAOEnabledInfo, true),
+    _ssao2Intensity(SSAOIntensityInfo, 4.f, 0.f, 100.f),
+    _ssao2Radius(SSAORadiusInfo, 10.f, 10.f, 1000.f),
+    _ssao2HorizonBias(SSAOBiasInfo, 0.0f, 0.0f, 1.0f),
+    _ssao2NormalBias(SSAOBiasInfo, 1.0f, 0.0f, 0.0f),
     _exposure(ExposureInfo, 0.3f, 0.1f, 10.f),
     _dofEnabled(DOFEnabledInfo, false),
     _dofFocusDistance(DOFFocusDistanceInfo, 0.5f, 0.f, 1.f),
@@ -122,7 +164,13 @@ MoleculeModule::MoleculeModule() :
     addProperty(_ssaoEnabled);
     addProperty(_ssaoIntensity);
     addProperty(_ssaoRadius);
-    addProperty(_ssaoBias);
+    addProperty(_ssaoHorizonBias);
+    addProperty(_ssaoNormalBias);
+    addProperty(_ssao2Enabled);
+    addProperty(_ssao2Intensity);
+    addProperty(_ssao2Radius);
+    addProperty(_ssao2HorizonBias);
+    addProperty(_ssao2NormalBias);
     addProperty(_exposure);
     addProperty(_dofEnabled);
     addProperty(_dofFocusDistance);
@@ -236,14 +284,23 @@ void MoleculeModule::postDraw() {
         }
         last_draw_buffers[last_draw_buffer_count++] = (GLenum)draw_buf;
     }
+
+
+
     
     postprocessing::Settings settings;
     settings.background.enabled = false;
-    settings.background = { 0, 0, 0 };
-    settings.ambient_occlusion.enabled = _ssaoEnabled;
-    settings.ambient_occlusion.intensity = _ssaoIntensity;
-    settings.ambient_occlusion.radius = _ssaoRadius;
-    settings.ambient_occlusion.bias = _ssaoBias;
+    settings.background = { 0, 0, 0 };    
+    settings.ambient_occlusion[0].enabled = _ssaoEnabled;
+    settings.ambient_occlusion[0].intensity = _ssaoIntensity;
+    settings.ambient_occlusion[0].radius = _ssaoRadius;
+    settings.ambient_occlusion[0].horizon_bias = _ssaoHorizonBias;
+    settings.ambient_occlusion[0].normal_bias = _ssaoNormalBias;
+    settings.ambient_occlusion[1].enabled = _ssao2Enabled;
+    settings.ambient_occlusion[1].intensity = _ssao2Intensity;
+    settings.ambient_occlusion[1].radius = _ssao2Radius;
+    settings.ambient_occlusion[1].horizon_bias = _ssao2HorizonBias;
+    settings.ambient_occlusion[1].normal_bias = _ssao2NormalBias;
     settings.bloom.enabled = false;
     settings.depth_of_field.enabled = _dofEnabled;
     settings.depth_of_field.focus_depth = _dofFocusDistance;
@@ -260,6 +317,7 @@ void MoleculeModule::postDraw() {
     mat4_t V, P;
     MEMCPY(&V, &_V, sizeof(mat4_t));
     MEMCPY(&P, &_P, sizeof(mat4_t));
+
     postprocessing::postprocess(settings, V, P);
     
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);

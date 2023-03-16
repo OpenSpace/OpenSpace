@@ -560,10 +560,10 @@ vec4 srand4(vec2 n) {
     return rand4(n) * 2.0 - 1.0;
 }
 
-const vec3 env_radiance = vec3(5.0);
-const vec3 dir_radiance = u_light_col;
-const vec3 L = u_light_dir;
 const float spec_exp = 100.0;
+const vec3 env_radiance = vec3(5.0);
+vec3 dir_radiance = u_light_col;
+vec3 L = u_light_dir;
 
 vec3 lambert(in vec3 radiance) {
     const float ONE_OVER_PI = 1.0 / 3.1415926535;

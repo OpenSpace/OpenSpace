@@ -23,20 +23,6 @@ struct Settings {
     } background;
 
     struct {
-        struct {
-            float x = 0;
-            float y = 0;
-            float z = 0;
-        } light_dir; // World space
-
-        struct {
-            float r;
-            float g;
-            float b;
-        } light_intensity;
-    } shading;
-
-    struct {
         bool enabled = true;
         float clip_point = 1.0f;
     } bloom;
@@ -52,8 +38,9 @@ struct Settings {
         bool enabled = true;
         float radius = 6.0f;
         float intensity = 3.0f;
-        float bias = 0.1f;
-    } ambient_occlusion;
+        float horizon_bias = 0.1f;
+        float normal_bias = 1.0f;
+    } ambient_occlusion[2];
 
     struct {
         bool enabled = true;

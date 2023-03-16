@@ -83,7 +83,15 @@ private:
     properties::BoolProperty    _ssaoEnabled;
     properties::FloatProperty   _ssaoIntensity;
     properties::FloatProperty   _ssaoRadius;
-    properties::FloatProperty   _ssaoBias;
+    properties::FloatProperty   _ssaoHorizonBias;
+    properties::FloatProperty   _ssaoNormalBias;
+
+    properties::BoolProperty    _ssao2Enabled;
+    properties::FloatProperty   _ssao2Intensity;
+    properties::FloatProperty   _ssao2Radius;
+    properties::FloatProperty   _ssao2HorizonBias;
+    properties::FloatProperty   _ssao2NormalBias;
+    
     properties::FloatProperty   _exposure;
 
     properties::BoolProperty    _dofEnabled;

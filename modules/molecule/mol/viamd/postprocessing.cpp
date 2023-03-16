@@ -1494,7 +1494,8 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     if (time > 100.f) time -= 100.f;
 
     static vec2_t prev_jitter = {0,0};
-    vec3_t light_dir = vec3_normalize(mat4_mul_vec3(V, vec3_set(0, 0, 0), 1.0f));
+    vec3_t L = mat4_mul_vec3(V, vec3_set(0, 0, 0), 1.0f);
+    vec3_t light_dir = vec3_normalize(L);
     vec3_t light_col = vec3_set1(5.0f);
     mat4_t inv_P = mat4_inverse(P);
     vec2_t near_far = extract_near_far(P);
@@ -1592,12 +1593,14 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     shade_deferred(settings.input_textures.depth, settings.input_textures.color, settings.input_textures.normal, inv_P, light_dir, light_col, time);
     POP_GPU_SECTION()
 
-    if (settings.ambient_occlusion.enabled) {
-        PUSH_GPU_SECTION("SSAO")
-        apply_ssao(gl.linear_depth.texture, settings.input_textures.normal, P, settings.ambient_occlusion.intensity, settings.ambient_occlusion.radius, settings.ambient_occlusion.bias, 1.0f);
-        apply_ssao(gl.linear_depth.texture, settings.input_textures.normal, P, settings.ambient_occlusion.intensity, settings.ambient_occlusion.radius * 100, settings.ambient_occlusion.bias * 0.0f, 0.0f);
-        POP_GPU_SECTION()
+    PUSH_GPU_SECTION("SSAO")
+    if (settings.ambient_occlusion[0].enabled) {
+        apply_ssao(gl.linear_depth.texture, settings.input_textures.normal, P, settings.ambient_occlusion[0].intensity, settings.ambient_occlusion[0].radius, settings.ambient_occlusion[0].horizon_bias, settings.ambient_occlusion[0].normal_bias);
     }
+    if (settings.ambient_occlusion[1].enabled) {
+        apply_ssao(gl.linear_depth.texture, settings.input_textures.normal, P, settings.ambient_occlusion[1].intensity, settings.ambient_occlusion[1].radius, settings.ambient_occlusion[1].horizon_bias, settings.ambient_occlusion[1].normal_bias);
+    }
+    POP_GPU_SECTION()
 
     if (settings.temporal_reprojection.enabled) {
 #if 0
