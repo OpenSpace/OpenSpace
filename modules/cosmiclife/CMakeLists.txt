@@ -26,10 +26,12 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   rendering/renderablecosmicpoints.h
+  rendering/renderableinterpolation.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+  rendering/renderableinterpolation.cpp
   rendering/renderablecosmicpoints.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

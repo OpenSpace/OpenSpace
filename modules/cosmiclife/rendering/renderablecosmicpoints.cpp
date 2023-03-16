@@ -57,7 +57,7 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableCosmicPoints";
     constexpr const char* ProgramObjectName = "RenderableCosmicPoints";
-    constexpr const char* RenderToPolygonProgram = "RenderableCosmicPoints_Polygon";
+
 
     constexpr const std::array<const char*, 20> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
@@ -282,9 +282,6 @@ namespace {
         // entrered value
         std::optional<bool> exactColorMap;
 
-        // The number of sides for the polygon used to represent the astronomical object
-        std::optional<int> polygonSides;
-
         // [[codegen::verbatim(DrawLabelInfo.description)]]
         std::optional<bool> drawLabels;
 
@@ -502,9 +499,6 @@ RenderableCosmicPoints::RenderableCosmicPoints(const ghoul::Dictionary& dictiona
         _hasDatavarSize = true;
     }
 
-    _polygonSides = p.polygonSides.value_or(_polygonSides);
-    _hasPolygon = p.polygonSides.has_value();
-
     if (p.labelFile.has_value()) {
         _drawLabels = p.drawLabels.value_or(_drawLabels);
         addProperty(_drawLabels);
@@ -636,23 +630,10 @@ void RenderableCosmicPoints::initializeGL() {
         }
     );
 
-    _renderToPolygonProgram = CosmicLifeModule::ProgramObjectManager.request(
-        RenderToPolygonProgram,
-        []() {
-            return ghoul::opengl::ProgramObject::Build(
-                RenderToPolygonProgram,
-                absPath("${MODULE_COSMICLIFE}/shaders/points_polygon_vs.glsl"),
-                absPath("${MODULE_COSMICLIFE}/shaders/points_polygon_fs.glsl"),
-                absPath("${MODULE_COSMICLIFE}/shaders/points_polygon_gs.glsl")
-            );
-        }
-    );
+
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    if (_hasPolygon) {
-        createPolygonTexture();
-    }
 
     if (_hasLabel) {
         if (!_font) {
@@ -683,16 +664,10 @@ void RenderableCosmicPoints::deinitializeGL() {
     );
     _program = nullptr;
 
-    CosmicLifeModule::ProgramObjectManager.release(RenderToPolygonProgram);
-    _renderToPolygonProgram = nullptr;
+
 
     CosmicLifeModule::TextureManager.release(_spriteTexture);
     _spriteTexture = nullptr;
-
-    if (_hasPolygon) {
-        _polygonTexture = nullptr;
-        glDeleteTextures(1, &_pTexture);
-    }
 }
 
 void RenderableCosmicPoints::renderPoints(const RenderData& data,
@@ -756,10 +731,7 @@ void RenderableCosmicPoints::renderPoints(const RenderData& data,
 
     ghoul::opengl::TextureUnit textureUnit;
     textureUnit.activate();
-    if (_hasPolygon) {
-        glBindTexture(GL_TEXTURE_2D, _pTexture);
-    }
-    else if (_spriteTexture) {
+    if (_spriteTexture) {
         _spriteTexture->bind();
     }
     _program->setUniform(_uniformCache.spriteTexture, textureUnit);
@@ -1184,74 +1156,6 @@ std::vector<float> RenderableCosmicPoints::createDataSlice() {
     return result;
 }
 
-void RenderableCosmicPoints::createPolygonTexture() {
-
-    LDEBUG("Creating Polygon Texture");
-
-    glGenTextures(1, &_pTexture);
-    glBindTexture(GL_TEXTURE_2D, _pTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0, GL_RGBA, GL_BYTE, nullptr);
-
-    renderToTexture(_pTexture, 256, 256);
-}
-
-
-void RenderableCosmicPoints::renderToTexture(GLuint textureToRenderTo,
-                                                GLuint textureWidth, GLuint textureHeight)
-{
-    LDEBUG("Rendering to Texture");
-
-    // Saves initial Application's OpenGL State
-    GLint defaultFBO;
-    GLint viewport[4];
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
-    GLuint textureFBO;
-    glGenFramebuffers(1, &textureFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
-    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, drawBuffers);
-
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
-
-    glViewport(viewport[0], viewport[1], textureWidth, textureHeight);
-
-    loadPolygonGeometryForRendering();
-    renderPolygonGeometry(_polygonVao);
-
-    // Restores Applications' OpenGL State
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
-    glDeleteBuffers(1, &_polygonVbo);
-    glDeleteVertexArrays(1, &_polygonVao);
-    glDeleteFramebuffers(1, &textureFBO);
-}
-
-void RenderableCosmicPoints::loadPolygonGeometryForRendering() {
-    glGenVertexArrays(1, &_polygonVao);
-    glGenBuffers(1, &_polygonVbo);
-    glBindVertexArray(_polygonVao);
-    glBindBuffer(GL_ARRAY_BUFFER, _polygonVbo);
-
-    constexpr const std::array<GLfloat, 4> VertexData = {
-        //      x      y     z     w
-        0.f, 0.f, 0.f, 1.f,
-    };
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-}
-
 float RenderableCosmicPoints::computeFadeFactor(float distanceNodeToCamera) const {
     float distanceUnit = toMeter(_unit);
 
@@ -1276,28 +1180,7 @@ float RenderableCosmicPoints::computeFadeFactor(float distanceNodeToCamera) cons
     }
 }
 
-void RenderableCosmicPoints::renderPolygonGeometry(GLuint vao) {
-    std::unique_ptr<ghoul::opengl::ProgramObject> program =
-        ghoul::opengl::ProgramObject::Build(
-            "RenderableCosmicPoints_Polygon",
-            absPath("${MODULE_COSMICLIFE}/shaders/points_polygon_vs.glsl"),
-            absPath("${MODULE_COSMICLIFE}/shaders/points_polygon_fs.glsl"),
-            absPath("${MODULE_COSMICLIFE}/shaders/points_polygon_gs.glsl")
-        );
 
-    program->activate();
-    constexpr const glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
-    glClearBufferfv(GL_COLOR, 0, glm::value_ptr(Black));
-
-    program->setUniform("sides", _polygonSides);
-    program->setUniform("polygonColor", _pointColor);
-
-    glBindVertexArray(vao);
-    glDrawArrays(GL_POINTS, 0, 1);
-    glBindVertexArray(0);
-
-    program->deactivate();
-}
 
 } // namespace openspace
 

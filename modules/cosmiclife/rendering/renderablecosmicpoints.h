@@ -74,19 +74,11 @@ public:
 
 private:
     std::vector<float> createDataSlice();
-    void createPolygonTexture();
-    void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
-        GLuint textureHeight);
-    void loadPolygonGeometryForRendering();
-    void renderPolygonGeometry(GLuint vao);
     void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
     float computeFadeFactor(float distanceNodeToCamera) const;
-
-
-  //  void readColorMapFile();
 
     // bool variables
     bool _hasSpeckFile = false;
@@ -97,10 +89,9 @@ private:
     bool _hasColorMapFile = false;
     bool _isColorMapExact = false;
     bool _hasDatavarSize = false;
-    bool _hasPolygon = false;
     bool _hasLabel = false;
 
-    int _polygonSides = 0;
+   
 
     GLuint _pTexture = 0;
 
@@ -129,10 +120,10 @@ private:
     properties::Vec2Property _fadeLabelDistances;
     properties::Vec2Property _fadeLabelWidths;
 
-    ghoul::opengl::Texture* _polygonTexture = nullptr;
+
     ghoul::opengl::Texture* _spriteTexture = nullptr;
     ghoul::opengl::ProgramObject* _program = nullptr;
-    ghoul::opengl::ProgramObject* _renderToPolygonProgram = nullptr;
+
 
     // variables that are sent to the shaders
     UniformCache(
@@ -169,9 +160,6 @@ private:
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
-    // For polygons -- needed?
-    GLuint _polygonVao = 0;
-    GLuint _polygonVbo = 0;
 };
 
 } // namespace openspace
