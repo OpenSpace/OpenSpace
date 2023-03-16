@@ -72,16 +72,6 @@ namespace {
 
 namespace openspace {
 
-// Initialize singleton
-SonificationModule* SonificationModule::_instance = nullptr;
-
-SonificationModule* SonificationModule::instance() {
-    if (_instance == nullptr) {
-        _instance = new SonificationModule();
-    }
-    return _instance;
-}
-
 SonificationModule::SonificationModule()
     : OpenSpaceModule("Sonification")
     , _enabled(EnabledInfo, false)
@@ -101,7 +91,6 @@ SonificationModule::~SonificationModule() {
     for (SonificationBase* sonification : _sonifications) {
         delete sonification;
     }
-    _instance = nullptr;
 }
 
 void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary) {
@@ -111,23 +100,28 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
     _port = p.port.value_or(_port);
 
     // Fill sonification list
-    _sonifications.push_back(new CompareSonification(_ipAddress, _port));
-    addPropertySubOwner(_sonifications.back());
+    SonificationBase* sonification = new CompareSonification(_ipAddress, _port);
+    addSonification(sonification);
 
-    _sonifications.push_back(new PlanetsSonification(_ipAddress, _port));
-    addPropertySubOwner(_sonifications.back());
+    sonification = new PlanetsSonification(_ipAddress, _port);
+    addSonification(sonification);
 
-    _sonifications.push_back(new SolarSonification(_ipAddress, _port));
-    addPropertySubOwner(_sonifications.back());
+    sonification = new SolarSonification(_ipAddress, _port);
+    addSonification(sonification);
 
-    _sonifications.push_back(new TimeSonification(_ipAddress, _port));
-    addPropertySubOwner(_sonifications.back());
+    sonification = new TimeSonification(_ipAddress, _port);
+    addSonification(sonification);
 
     // Only the master runs the SonificationModule
     if (global::windowDelegate->isMaster()) {
         _isRunning = true;
         _updateThread = std::thread([this]() { update(std::ref(_isRunning)); });
     }
+}
+
+void SonificationModule::addSonification(SonificationBase* sonification) {
+    _sonifications.push_back(sonification);
+    addPropertySubOwner(sonification);
 }
 
 void SonificationModule::internalDeinitialize() {
