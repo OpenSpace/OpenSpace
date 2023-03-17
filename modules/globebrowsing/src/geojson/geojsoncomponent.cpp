@@ -250,10 +250,6 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         }
     }
     addPropertySubOwner(_lightSourcePropertyOwner);
-
-    // TODO Revive rendering
-    // Render after atmosphere
-    //setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
 }
 
 bool GeoJsonComponent::enabled() const {
@@ -264,7 +260,7 @@ void GeoJsonComponent::fillSelectionProperty() {
     _featureSelection.clearOptions();
     for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
         const GlobeGeometryFeature& f = _geometryFeatures[i];
-        _featureSelection.addOption(f.key()); // TODO: use name from properties, if there is one
+        _featureSelection.addOption(f.key());
     }
 }
 
