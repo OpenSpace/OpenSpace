@@ -111,7 +111,6 @@ namespace {
         }
         function["Return Type"] = f.returnType;
         function["Help"] = f.helpText;
-        sortJson(function["Arguments"]);
 
         return function;
     }
