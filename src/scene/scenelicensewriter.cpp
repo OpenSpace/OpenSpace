@@ -46,6 +46,19 @@ SceneLicenseWriter::SceneLicenseWriter()
     )
 {}
 
+void sortJson(nlohmann::json& json) {
+    std::sort(json.begin(), json.end(), []
+    (const nlohmann::json& lhs, const nlohmann::json& rhs) {
+            std::string lhsString = lhs["Name"];
+            std::string rhsString = rhs["Name"];
+            std::transform(lhsString.begin(), lhsString.end(), lhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); });
+            std::transform(rhsString.begin(), rhsString.end(), rhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); });
+            return rhsString > lhsString;
+        });
+}
+
 nlohmann::json SceneLicenseWriter::generateJsonJson() const {
     nlohmann::json json;
 
@@ -108,6 +121,7 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
 
         assetLicenses[license].push_back(assetJson);
     }
+    
     nlohmann::json assetsJson;
     assetsJson["Name"] = "Assets";
     assetsJson["Type"] = "Licenses";
@@ -116,10 +130,10 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
         nlohmann::json entry;
         entry["Name"] = assetLicense.first;
         entry["Assets"] = assetLicense.second;
+        sortJson(entry["Assets"]);
         assetsJson["Licenses"].push_back(entry);
     }
     json.push_back(assetsJson);
- 
     return json;
 }
 

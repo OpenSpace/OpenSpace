@@ -81,6 +81,19 @@ namespace {
         return result;
     }
 
+    void sortJson(nlohmann::json& json) {
+        std::sort(json.begin(), json.end(), []
+        (const nlohmann::json& lhs, const nlohmann::json& rhs) {
+                std::string lhsString = lhs["Name"];
+                std::string rhsString = rhs["Name"];
+                std::transform(lhsString.begin(), lhsString.end(), lhsString.begin(),
+                    [](unsigned char c) { return std::tolower(c); });
+                std::transform(rhsString.begin(), rhsString.end(), rhsString.begin(),
+                    [](unsigned char c) { return std::tolower(c); });
+                return rhsString > lhsString;
+            });
+    }
+
     nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f) {
         using namespace openspace;
         using namespace openspace::scripting;
@@ -98,6 +111,7 @@ namespace {
         }
         function["Return Type"] = f.returnType;
         function["Help"] = f.helpText;
+        sortJson(function["Arguments"]);
 
         return function;
     }
@@ -472,7 +486,10 @@ nlohmann::json ScriptEngine::generateJsonJson() const {
         for (const LuaLibrary::Function& f : l.documentations) {
             library["Functions"].push_back(toJson(f));
         }
+        sortJson(library["Functions"]);
         json.push_back(library);
+
+        sortJson(json);
     }
     return json;
 }
