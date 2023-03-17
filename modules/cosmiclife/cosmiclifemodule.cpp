@@ -24,7 +24,7 @@
 
 #include <modules/cosmiclife/cosmiclifemodule.h>
 
-#include <modules/cosmiclife/rendering/renderablecosmicpoints.h>
+#include <modules/cosmiclife/rendering/renderableinterpolation.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>

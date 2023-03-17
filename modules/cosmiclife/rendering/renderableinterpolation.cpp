@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/cosmiclife/rendering/renderablecosmicpoints.h>
+#include <modules/cosmiclife/rendering/renderableinterpolation.h>
 #include <modules/cosmiclife/cosmiclifemodule.h>
 
 #include <openspace/documentation/documentation.h>
@@ -97,44 +97,6 @@ namespace {
         "The path to the color map file of the object."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
-        "TextColor",
-        "Text Color",
-        "The text color for the object."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
-        "TextOpacity",
-        "Text Opacity",
-        "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
-        "TextSize",
-        "Text Size",
-        "The text size for the object labels."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
-        "TextMinMaxSize",
-        "Text Min/Max Size",
-        "The minimal and maximal size (in pixels) of the text for the labels for the "
-        "objects being rendered."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
-        "DrawElements",
-        "Draw Elements",
-        "Enables/Disables the drawing of the objects."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
-        "DrawLabels",
-        "Draw Labels",
-        "Determines whether labels should be drawn or hidden."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
@@ -158,7 +120,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Debug option for rendering of billboards and texts."
+        "Debug option for rendering of billboards."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
@@ -215,30 +177,7 @@ namespace {
         "Set the data range based on the available data"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableLabelFadingEffectInfo = {
-    "EnableLabelFading",
-    "Enable/Disable Fade-in Effect for Labels",
-    "Enable/Disable the Fade-in effect for Labels."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FadeLabelDistancesInfo = {
-    "FadeLabelDistances",
-    "Fade Label Distances",
-    "The distance range in which the labels should be fully opaque. "
-    "The distance from the position of the label to the camera in meter."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FadeLabelWidthsInfo = {
-    "FadelabelWidths",
-    "Fade Label Widths",
-    "The distances over which the fading of the labels takes place, given in the meter unit. "
-    "The first value is the distance before the closest distance and the second "
-    "the one after the furthest distance. For example, with the unit Km, "
-    "a value of {1, 2} will make the label being fully faded out 1 km before "
-    "the closest distance and 2 km away from the furthest distance."
-    };
-
-    struct [[codegen::Dictionary(RenderableCosmicPoints)]] Parameters {
+    struct [[codegen::Dictionary(RenderableInterpolation)]] Parameters {
         // The path to the SPECK file that contains information about the astronomical
         // object being rendered
         std::optional<std::string> file;
@@ -248,9 +187,6 @@ namespace {
 
         // [[codegen::verbatim(SpriteTextureInfo.description)]]
         std::optional<std::string> texture;
-
-        // [[codegen::verbatim(DrawElementsInfo.description)]]
-        std::optional<bool> drawElements;
 
         enum class [[codegen::map(RenderOption)]] RenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
@@ -281,25 +217,6 @@ namespace {
         // Set a 1 to 1 relationship between the color index variable and the colormap
         // entrered value
         std::optional<bool> exactColorMap;
-
-        // [[codegen::verbatim(DrawLabelInfo.description)]]
-        std::optional<bool> drawLabels;
-
-        // [[codegen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor [[codegen::color()]];
-
-        // [[codegen::verbatim(TextOpacityInfo.description)]]
-        std::optional<float> textOpacity;
-
-        // [[codegen::verbatim(TextSizeInfo.description)]]
-        std::optional<float> textSize;
-
-        // The path to the label file that contains information about the astronomical
-        // objects being rendered
-        std::optional<std::string> labelFile;
-
-        // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
-        std::optional<glm::ivec2> textMinMaxSize;
 
         // [[codegen::verbatim(ColorOptionInfo.description)]]
         std::optional<std::vector<std::string>> colorOption;
@@ -335,16 +252,8 @@ namespace {
         // [[codegen::verbatim(UseLinearFiltering.description)]]
         std::optional<bool> useLinearFiltering;
 
-        // [[codegen::verbatim(EnableLabelFadingEffectInfo.description)]]
-        std::optional<bool> enableLabelFading;
-
-        // [[codegen::verbatim(FadeLabelDistancesInfo.description)]]
-        std::optional<glm::vec2> fadeLabelDistances;
-
-        // [[codegen::verbatim(FadeLabelWidthsInfo.description)]]
-        std::optional<glm::vec2> fadeLabelWidths;
     };
-#include "renderablecosmicpoints_codegen.cpp"
+#include "renderableinterpolation_codegen.cpp"
 }  // namespace
 
 namespace openspace {
@@ -358,17 +267,6 @@ namespace openspace {
         , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
         , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
         , _spriteTexturePath(SpriteTextureInfo)
-        , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-        , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
-        , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
-        , _textMinMaxSize(
-            LabelMinMaxSizeInfo,
-            glm::ivec2(8, 20),
-            glm::ivec2(0),
-            glm::ivec2(100)
-        )
-        , _drawElements(DrawElementsInfo, true)
-        , _drawLabels(DrawLabelInfo, false)
         , _pixelSizeControl(PixelSizeControlInfo, false)
         , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _optionColorRangeData(OptionColorRangeInfo, glm::vec2(0.f))
@@ -393,10 +291,7 @@ namespace openspace {
         , _correctionSizeFactor(CorrectionSizeFactorInfo, 8.f, 0.f, 20.f)
         , _useLinearFiltering(UseLinearFiltering, false)
         , _setRangeFromData(SetRangeFromData)
-        , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-        , _enableLabelFadingEffect(EnableLabelFadingEffectInfo, true)
-        , _fadeLabelDistances(FadeLabelDistancesInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(100.f))
-        , _fadeLabelWidths(FadeLabelWidthsInfo, glm::vec2(2.f), glm::vec2(0.f), glm::vec2(100.f))
+        , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)  
     {
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -404,10 +299,6 @@ namespace openspace {
             _speckFile = absPath(*p.file).string();
         }
         _hasSpeckFile = p.file.has_value();
-
-        _drawElements = p.drawElements.value_or(_drawElements);
-        _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
-        addProperty(_drawElements);
 
         _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
         _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
@@ -426,6 +317,7 @@ namespace openspace {
         else {
             _unit = DistanceUnit::Meter;
         }
+
 
         if (p.texture.has_value()) {
             _spriteTexturePath = absPath(*p.texture).string();
@@ -499,43 +391,6 @@ namespace openspace {
             _hasDatavarSize = true;
         }
 
-        if (p.labelFile.has_value()) {
-            _drawLabels = p.drawLabels.value_or(_drawLabels);
-            addProperty(_drawLabels);
-
-            _enableLabelFadingEffect = p.enableLabelFading.value_or(_enableLabelFadingEffect);
-            addProperty(_enableLabelFadingEffect);
-
-            _labelFile = absPath(*p.labelFile).string();
-            _hasLabel = true;
-
-            _textColor = p.textColor.value_or(_textColor);
-            _hasLabel = p.textColor.has_value();
-            _textColor.setViewOption(properties::Property::ViewOptions::Color);
-            addProperty(_textColor);
-            _textColor.onChange([&]() { _textColorIsDirty = true; });
-
-            _textOpacity = p.textOpacity.value_or(_textOpacity);
-            addProperty(_textOpacity);
-
-            _textSize = p.textSize.value_or(_textSize);
-            addProperty(_textSize);
-
-            _textMinMaxSize = p.textMinMaxSize.value_or(_textMinMaxSize);
-            _textMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-            addProperty(_textMinMaxSize);
-
-            _fadeLabelDistances = p.fadeLabelDistances.value_or(_fadeLabelDistances);
-            _fadeLabelDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-            addProperty(_fadeLabelDistances);
-
-            _fadeLabelWidths = p.fadeLabelWidths.value_or(_fadeLabelWidths);
-            addProperty(_fadeLabelWidths);
-
-
-        }
-
-        _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
         if (p.fadeInDistances.has_value()) {
             _fadeInDistances = *p.fadeInDistances;
@@ -588,7 +443,7 @@ namespace openspace {
     }
 
     bool RenderableCosmicPoints::isReady() const {
-        return (_program && (!_dataset.entries.empty())) || (!_labelset.entries.empty());
+        return (_program && (!_dataset.entries.empty()));
     }
 
     void RenderableCosmicPoints::initialize() {
@@ -600,12 +455,7 @@ namespace openspace {
             _colorMap = speck::color::loadFileWithCache(_colorMapFile);
         }
 
-        if (!_labelFile.empty()) {
-            _labelset = speck::label::loadFileWithCache(_labelFile);
-            for (speck::Labelset::Entry& e : _labelset.entries) {
-                e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
-            }
-        }
+
 
         if (!_colorOptionString.empty() && (_colorRangeData.size() > 1)) {
             // Following DU behavior here. The last colormap variable
@@ -630,22 +480,8 @@ namespace openspace {
             }
         );
 
-
-
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-
-        if (_hasLabel) {
-            if (!_font) {
-                size_t _fontSize = 8;
-                _font = global::fontManager->font(
-                    "Mono",
-                    static_cast<float>(_fontSize),
-                    ghoul::fontrendering::FontManager::Outline::Yes,
-                    ghoul::fontrendering::FontManager::LoadGlyphs::No
-                );
-            }
-        }
     }
 
     // vao = vertex array object
@@ -746,42 +582,6 @@ namespace openspace {
         global::renderEngine->openglStateCache().resetDepthState();
     }
 
-    void RenderableCosmicPoints::renderLabels(const RenderData& data,
-        const glm::dmat4& modelViewProjectionMatrix,
-        const glm::dvec3& orthoRight,
-        const glm::dvec3& orthoUp,
-        float fadeInVariable)
-    {
-        glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), 1.f);
-
-        textColor.a *= fadeInVariable;
-        textColor.a *= _textOpacity;
-
-        ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
-        labelInfo.orthoRight = orthoRight;
-        labelInfo.orthoUp = orthoUp;
-        labelInfo.minSize = _textMinMaxSize.value().x;
-        labelInfo.maxSize = _textMinMaxSize.value().y;
-        labelInfo.cameraPos = data.camera.positionVec3();
-        labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
-        labelInfo.renderType = _renderOption;
-        labelInfo.mvpMatrix = modelViewProjectionMatrix;
-        labelInfo.scale = pow(10.f, _textSize);
-        labelInfo.enableDepth = true;
-        labelInfo.enableFalseDepth = true;
-
-        for (const speck::Labelset::Entry& e : _labelset.entries) {
-            glm::vec3 scaledPos(e.position);
-            scaledPos *= toMeter(_unit);
-            ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
-                *_font,
-                scaledPos,
-                e.text,
-                textColor,
-                labelInfo
-            );
-        }
-    }
 
     void RenderableCosmicPoints::render(const RenderData& data, RendererTasks&) {
         float fadeInVar = 1.f;
@@ -825,19 +625,8 @@ namespace openspace {
         }
         glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
-        if (_hasSpeckFile && _drawElements) {
+        if (_hasSpeckFile) {
             renderPoints(data, modelMatrix, orthoRight, orthoUp, fadeInVar);
-        }
-
-        if (_drawLabels && _hasLabel) {
-            if (_enableLabelFadingEffect) {
-                float distanceNodeToCamera = static_cast<float>(
-                    glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
-                    );
-                fadeInVar = computeFadeFactor(distanceNodeToCamera);
-            }
-
-            renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVar);
         }
     }
 
@@ -1157,29 +946,7 @@ namespace openspace {
         return result;
     }
 
-    float RenderableCosmicPoints::computeFadeFactor(float distanceNodeToCamera) const {
-        float distanceUnit = toMeter(_unit);
 
-        float x = distanceNodeToCamera;
-        float startX = _fadeLabelDistances.value().x * distanceUnit;
-        float endX = _fadeLabelDistances.value().y * distanceUnit;
-
-        // The distances over which the fading should happen
-        float fadingStartDistance = _fadeLabelWidths.value().x * distanceUnit;
-        float fadingEndDistance = _fadeLabelWidths.value().y * distanceUnit;
-
-        if (x <= endX) {
-            float f1 = 1.f - (startX - x) / fadingStartDistance;
-            return std::clamp(f1, 0.f, 1.f);
-        }
-        else if (x > startX && x < endX) {
-            return 1.f;
-        }
-        else { // x >= endX
-            float f2 = 1.f - (x - endX) / fadingEndDistance;
-            return std::clamp(f2, 0.f, 1.f);
-        }
-    }
 
 
 

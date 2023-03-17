@@ -76,8 +76,6 @@ namespace openspace {
         std::vector<float> createDataSlice();
         void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
             const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
-        void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
         float computeFadeFactor(float distanceNodeToCamera) const;
 
         // bool variables
@@ -89,7 +87,6 @@ namespace openspace {
         bool _hasColorMapFile = false;
         bool _isColorMapExact = false;
         bool _hasDatavarSize = false;
-        bool _hasLabel = false;
 
 
 
@@ -98,12 +95,6 @@ namespace openspace {
         properties::FloatProperty _scaleFactor;
         properties::Vec3Property _pointColor;
         properties::StringProperty _spriteTexturePath;
-        properties::Vec3Property _textColor;
-        properties::FloatProperty _textOpacity;
-        properties::FloatProperty _textSize;
-        properties::IVec2Property _textMinMaxSize;
-        properties::BoolProperty _drawElements;
-        properties::BoolProperty _drawLabels;
         properties::BoolProperty _pixelSizeControl;
         properties::OptionProperty _colorOption;
         properties::Vec2Property _optionColorRangeData;
@@ -116,9 +107,7 @@ namespace openspace {
         properties::BoolProperty _useLinearFiltering;
         properties::TriggerProperty _setRangeFromData;
         properties::OptionProperty _renderOption;
-        properties::BoolProperty _enableLabelFadingEffect;
-        properties::Vec2Property _fadeLabelDistances;
-        properties::Vec2Property _fadeLabelWidths;
+
 
 
         ghoul::opengl::Texture* _spriteTexture = nullptr;
@@ -139,7 +128,6 @@ namespace openspace {
         // String variables
         std::string _speckFile;
         std::string _colorMapFile;
-        std::string _labelFile;
         std::string _colorOptionString;
         std::string _datavarSizeOptionString;
 
@@ -148,7 +136,6 @@ namespace openspace {
 
         // speck files
         speck::Dataset _dataset;
-        speck::Labelset _labelset;
         speck::ColorMap _colorMap;
 
         // range data, do we need conversion map?
