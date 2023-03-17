@@ -32,6 +32,7 @@
 
 #include <ccmc/Kameleon.h>
 #include <ccmc/KameleonInterpolator.h>
+#include <ccmc/Tracer.h>
 #include <modules/kameleon/include/kameleonhelper.h>
 
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
