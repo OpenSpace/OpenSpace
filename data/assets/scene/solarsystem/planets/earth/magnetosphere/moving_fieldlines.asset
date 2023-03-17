@@ -1,22 +1,24 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere')
+-- Deprecated: local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere') -- skapar en variabel som ar en asset
 
 -- Change to location on your machine
-local fieldlinesDirectory = 'C:/Users/HEM/Documents/Liu/Data_Fieldlines'
-local seedPointFile = 'C:/Users/HEM/Documents/Liu/Data_Fieldlines/seedpoint_dayside_nightside2.txt'
+
+
+local fieldlinesDirectory = 'C:/Dev/OpenSpaceLocalData/simonmans' --old: 'C:/Users/HEM/Documents/Liu/Data_Fieldlines'
+local seedPointFile = 'C:/Dev/OpenSpaceLocalData/simonmans/seedpoint_dayside_nightside2.txt' --old: 'C:/Users/HEM/Documents/Liu/Data_Fieldlines/seedpoint_dayside_nightside2.txt'
 
 local movingLines = {
-  Identifier = "MovingFieldlines",
-  Parent = transforms.GSMReferenceFrame.Identifier,
+  Identifier = "MovingFieldlines", -- important: needs to be unique
+  Parent = transforms.GSMReferenceFrame.Identifier, -- hiearchi parent/child where do i want to locate this scence graph node
   Renderable = {
     Type = "RenderableMovingFieldlines",
     SourceFolder = fieldlinesDirectory,
     SeedPointFile = seedPointFile,
-    TracingVariable = "u_perp_b",
-    NumberOfPointsOnPathLine = 200,
-    NumberOfPointsOnFieldlines = 500,
+    TracingVariable = "u_perp_b", -- u = velocity or similar, perp = perpendicular, b = magnetic field, ultimately our flowline = where our line is moving through time
+    NumberOfPointsOnPathLine = 200, -- flow line, our number of keyframes 
+    NumberOfPointsOnFieldlines = 500, -- on each keyframe, there's 500 points on our flowline
     LineWidth = 4,
-    RenderFlowLine = false
+    RenderFlowLine = true -- if we want to render the flowline - edit to true 
   },
   GUI = {
     Path = "/Solar System/Planets/Earth",
@@ -25,7 +27,17 @@ local movingLines = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { movingLines })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(movingLines)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(movingLines)
+end)
+
+asset.export(movingLines)
+
+-- Deprecated: assetHelper.registerSceneGraphNodesAndExport(asset, { movingLines })
 
 asset.meta = {
   Name = "M",

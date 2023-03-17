@@ -106,11 +106,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2000-01-01T04:00:00"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 2
   }
 }

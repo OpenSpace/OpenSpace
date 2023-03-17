@@ -6,9 +6,9 @@ local EarthBarycenter = {
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
-      Type = "SpiceTranslation",
-      Target = "EARTH BARYCENTER",
-      Observer = "SSB"
+      Type = "SpiceTranslation", -- like a function/package format that is used in several different occations, i.e. orientation of a coordinate system or trajectories of astroides, planets etc.
+      Target = "EARTH BARYCENTER", -- input 1
+      Observer = "SSB" -- input 2 solar system barycenter: the orientation of the vector (one of the three axis) 
     }
   },
   GUI = {
