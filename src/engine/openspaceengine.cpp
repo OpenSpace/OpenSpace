@@ -1069,8 +1069,8 @@ void OpenSpaceEngine::writeDocumentation() {
     documentation["documentation"].push_back(scripting);
     documentation["documentation"].push_back(factory);
 
-    std::ofstream out("documentationData.js");
-    out << "export const data = " << documentation.dump();
+    std::ofstream out(absPath("${DOCUMENTATION}/documentationData.js"));
+    out << "var data = " << documentation.dump();
     out.close();
 }
 
