@@ -52,6 +52,7 @@ namespace {
         json["Properties"] = nlohmann::json::array();
         json["PropertyOwners"] = nlohmann::json::array();
         json["Type"] = owner->type();
+        json["Tags"] = owner->tags();
 
         const std::vector<properties::Property*>& properties = owner->properties();
         for (properties::Property* p : properties) {
