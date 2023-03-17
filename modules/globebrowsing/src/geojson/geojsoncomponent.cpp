@@ -30,6 +30,7 @@
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/lightsource.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
@@ -110,6 +111,12 @@ namespace {
         "features." // TODO: clarify how this works with naming etc
     };
 
+    constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
+        "LightSources",
+        "Light Sources",
+        "A list of light sources that this object should accept light from"
+    };
+
     struct [[codegen::Dictionary(GeoJsonComponent)]] Parameters {
         // The unique identifier for this layer. May not contain '.' or spaces
         std::string identifier;
@@ -148,6 +155,10 @@ namespace {
         // individual geoJson features
         std::optional<ghoul::Dictionary> defaultProperties
             [[codegen::reference("globebrowsing_geojsonproperties")]];
+
+        // [[codegen::verbatim(LightSourcesInfo.description)]]
+        std::optional<std::vector<ghoul::Dictionary>> lightSources
+            [[codegen::reference("core_light_source")]];
     };
 #include "geojsoncomponent_codegen.cpp"
 } // namespace
@@ -179,6 +190,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     , _forceUpdateData(ForceUpdateDataInfo)
     , _drawWireframe(DrawWireframeInfo, false)
     , _featureSelection(SelectionInfo)
+    , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -227,6 +239,18 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     readFile();
     fillSelectionProperty();
 
+    if (p.lightSources.has_value()) {
+        std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
+
+        for (const ghoul::Dictionary& lsDictionary : lightsources) {
+            std::unique_ptr<LightSource> lightSource =
+                LightSource::createFromDictionary(lsDictionary);
+            _lightSourcePropertyOwner.addPropertySubOwner(lightSource.get());
+            _lightSources.push_back(std::move(lightSource));
+        }
+    }
+    addPropertySubOwner(_lightSourcePropertyOwner);
+
     // TODO Revive rendering
     // Render after atmosphere
     //setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
@@ -253,7 +277,17 @@ void GeoJsonComponent::selectionPropertyHasChanged() {
     }
 }
 
+void GeoJsonComponent::initialize() {
+    ZoneScoped;
+
+    for (const std::unique_ptr<LightSource>& ls : _lightSources) {
+        ls->initialize();
+    }
+}
+
 void GeoJsonComponent::initializeGL() {
+    ZoneScoped;
+
     _program = global::renderEngine->buildRenderProgram(
         "GeoJsonLinesProgram",
         absPath("${MODULE_GLOBEBROWSING}/shaders/geojson_vs.glsl"),
@@ -296,10 +330,30 @@ void GeoJsonComponent::render(const RenderData& data) {
 
     const glm::dmat4 projectionTransform = data.camera.projectionMatrix();
 
+    // @TODO (2023-03-17, emmbr): Once the light source for the globe can be configured,
+    // this code should use the same light source as the globe
+    int nLightSources = 0;
+    _lightIntensitiesBuffer.resize(_lightSources.size());
+    _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
+    for (const std::unique_ptr<LightSource>& lightSource : _lightSources) {
+        if (!lightSource->isEnabled()) {
+            continue;
+        }
+        _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
+        _lightDirectionsViewSpaceBuffer[nLightSources] =
+            lightSource->directionViewSpace(data);
+
+        ++nLightSources;
+    }
+
     _program->activate();
     _program->setUniform("modelViewTransform", modelViewTransform);
     _program->setUniform("projectionTransform", projectionTransform);
     _program->setUniform("normalTransform", normalTransform);
+
+    _program->setUniform("nLightSources", nLightSources);
+    _program->setUniform("lightIntensities", _lightIntensitiesBuffer);
+    _program->setUniform("lightDirectionsViewSpace", _lightDirectionsViewSpaceBuffer);
 
     // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

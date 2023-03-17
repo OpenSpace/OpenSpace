@@ -35,6 +35,10 @@ uniform float ambientIntensity = 0.2;
 uniform float diffuseIntensity = 0.8;
 uniform bool performShading = true;
 
+uniform int nLightSources;
+uniform vec3 lightDirectionsViewSpace[8];
+uniform float lightIntensities[8];
+
 const vec3 LightColor = vec3(1.0);
 
 Fragment getFragment() {
@@ -45,24 +49,23 @@ Fragment getFragment() {
   }
   frag.color = vec4(color, opacity);
 
-  // Simple phong shading (same color for diffuse and ambient. White specular)
-  if (performShading) {
-    // TODO: send from code and make configurable
-    const vec3 lightDirectionViewSpace = vec3(0.0, 0.0, -1.0);
-    const float lightIntensity = 1.0;
-
-    vec3 n = normalize(vs_normal);
-    vec3 l = lightDirectionViewSpace;
+  // Simple diffuse phong shading based on light sources
+  if (performShading && nLightSources > 0) {
+    // @TODO: Fix faulty triangle normals. This should not have to be inverted
+    vec3 n = -normalize(vs_normal);
 
     // Ambient color
     vec3 shadedColor = ambientIntensity  * color;
 
-    // Diffuse
-    shadedColor += diffuseIntensity * max(dot(n,l), 0.0) * color;
+    for (int i = 0; i < nLightSources; ++i) {
+      vec3 l = lightDirectionsViewSpace[i];
 
-    // Light contribution (one light soruce)
-    shadedColor *= lightIntensity * LightColor;
+        // Diffuse
+        vec3 diffuseColor = diffuseIntensity * max(dot(n,l), 0.0) * color;
 
+        // Light contribution
+        shadedColor += lightIntensities[i] * (LightColor * diffuseColor);
+    }
     frag.color.xyz = shadedColor;
   }
 

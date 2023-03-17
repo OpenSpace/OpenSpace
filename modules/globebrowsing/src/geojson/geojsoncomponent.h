@@ -40,7 +40,10 @@
 #include <ghoul/glm.h>
 #include <vector>
 
-namespace openspace { struct RenderData; }
+namespace openspace { 
+    struct RenderData;
+    class LightSource;
+}
 namespace openspace::documentation { struct Documentation; }
 namespace openspace::rendering::helper { struct VertexXYZNormal; }
 namespace ghoul::opengl { class ProgramObject; }
@@ -57,6 +60,7 @@ class GeoJsonComponent : public properties::PropertyOwner {
 public:
     GeoJsonComponent(const ghoul::Dictionary& dictionary, RenderableGlobe& globe);
 
+    void initialize();
     void initializeGL();
     void deinitializeGL();
 
@@ -99,6 +103,14 @@ private:
     bool _dataIsInitialized = false;
 
     size_t _nVerticesToDraw = 0;
+
+    std::vector<std::unique_ptr<LightSource>> _lightSources;
+
+    // Buffers for uniform uploading
+    std::vector<float> _lightIntensitiesBuffer;
+    std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
+
+    properties::PropertyOwner _lightSourcePropertyOwner;
 };
 
 } // namespace openspace::globebrowsing
