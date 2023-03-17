@@ -118,9 +118,21 @@ private:
     std::vector<glm::vec3> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
         double h0, double h1, double hOffset) const;
 
-    // Returns the created vertices, so we can use them for extrusion
+    /**
+     * Create the vertex information for the line and point parts of the feature.
+     * Returns the resulting vertex positions, so we can use them for extrusion
+     */
     std::vector<std::vector<glm::vec3>> createPointAndLineGeometry();
+
+    /**
+     * Create the triangle geometry for the extruded edges
+     */
     void createExtrudedGeometry(const std::vector<std::vector<glm::vec3>>& edgeVertices);
+
+    /**
+     * Create the triangle geometry for the polygon part of the feature (the area 
+     * contained by the shape)
+     */
     void createPolygonGeometry();
 
     /**

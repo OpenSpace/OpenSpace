@@ -474,16 +474,17 @@ void GlobeGeometryFeature::createExtrudedGeometry(
             glm::vec3 v1 = boundary[i ];
 
             // Vertices close to globe (Based on origin which is the zero point here)
-
             // TEST: use center of globe (TODO: allow setting the height)
             glm::vec3 vOrigin = glm::vec3(0.f);
 
+            // Outer boundary is the first one
             if (nBound == 0) {
                 glm::vec3 n = glm::vec3(glm::normalize(glm::cross(v1 - vOrigin, v0 - vOrigin)));
                 vertices.push_back({ vOrigin.x, vOrigin.y, vOrigin.z, n.x, n.y, n.z });
                 vertices.push_back({ v1.x, v1.y, v1.z, n.x, n.y, n.z });
                 vertices.push_back({ v0.x, v0.y, v0.z, n.x, n.y, n.z });
             }
+            // Inner boundary
             else {
                 // Flipped winding order and normal for inner rings
                 glm::vec3 n = glm::normalize(glm::cross(v0 - vOrigin, v1 - vOrigin));
