@@ -89,18 +89,26 @@ namespace {
         "renderings."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ForceUpdateDataInfo = {
-        "ForceUpdateData",
-        "Force Update Data",
-        "Triggering this leads to a recomputation of the geometry positions. Can "
-        "be used to for example update the poisition when the height map has loaded."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DrawWireframeInfo = {
         "DrawWireframe",
         "Wireframe",
         "If true, draw the wire frame of the polygons. Used for testing"
         // @TODO make debug/developer property
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PreventHeightUpdateInfo = {
+        "PreventHeightUpdate",
+        "Prevent Update From Heightmap",
+        "If true, the polygon mesh will not be automatically updated based on the "
+        "heightmap, even if the 'RelativeToGround' altitude option is set and the "
+        "heightmap updates. The data can still be force updated."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ForceUpdateDataInfo = {
+        "ForceUpdateData",
+        "Force Update Data",
+        "Triggering this leads to a recomputation of the geometry positions. Can "
+        "be used to for example update the poisition when the height map has loaded."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
@@ -187,8 +195,9 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         glm::vec2(-90.0),
         glm::vec2(90.f)
     )
-    , _forceUpdateData(ForceUpdateDataInfo)
     , _drawWireframe(DrawWireframeInfo, false)
+    , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
+    , _forceUpdateData(ForceUpdateDataInfo)
     , _featureSelection(SelectionInfo)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
@@ -229,6 +238,8 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     _forceUpdateData.onChange([this]() { _dataIsDirty = true; });
     addProperty(_forceUpdateData);
+
+    addProperty(_preventUpdatesFromHeightMap);
 
     _drawWireframe = p.drawWireframe.value_or(_drawWireframe);
     addProperty(_drawWireframe);
@@ -387,7 +398,7 @@ void GeoJsonComponent::update() {
         if (_dataIsDirty) {
             g.setOffsets(offsets);
         }
-        g.update(_dataIsDirty);
+        g.update(_dataIsDirty, _preventUpdatesFromHeightMap);
     }
 
     _dataIsDirty = false;

@@ -106,7 +106,7 @@ public:
 
     bool shouldUpdateDueToHeightMapChange() const;
 
-    void update(bool dataIsDirty);
+    void update(bool dataIsDirty, bool preventHeightUpdates);
     void updateGeometry();
 
 private:

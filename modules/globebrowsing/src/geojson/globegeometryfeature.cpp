@@ -331,8 +331,8 @@ bool GlobeGeometryFeature::shouldUpdateDueToHeightMapChange() const {
     return false;
 }
 
-void GlobeGeometryFeature::update(bool dataIsDirty) {
-    if (shouldUpdateDueToHeightMapChange()) {
+void GlobeGeometryFeature::update(bool dataIsDirty, bool preventHeightUpdates) {
+    if (!preventHeightUpdates && shouldUpdateDueToHeightMapChange()) {
         // TODO: should just update height, not entire geometry
         //LINFO("Update from height map change"); // TODO: remove
         updateGeometry();

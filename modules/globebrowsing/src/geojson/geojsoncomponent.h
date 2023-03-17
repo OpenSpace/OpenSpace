@@ -94,6 +94,7 @@ private:
     properties::SelectionProperty _featureSelection;
 
     properties::BoolProperty _drawWireframe;
+    properties::BoolProperty _preventUpdatesFromHeightMap;
     // Temporary property to get around height map update issues. TODO: remove
     properties::TriggerProperty _forceUpdateData;
 
