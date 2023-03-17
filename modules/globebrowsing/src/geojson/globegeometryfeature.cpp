@@ -132,14 +132,14 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
         case geos::geom::GEOS_MULTIPOINT: {
             std::vector<geos::geom::Coordinate> coords;
             geo->getCoordinates()->toVector(coords);
-            _coordinates.push_back(coordsToGeodetic(coords));
+            _geoCoordinates.push_back(coordsToGeodetic(coords));
             _type = GeometryType::Point;
             break;
         }
         case geos::geom::GEOS_LINESTRING: {
             std::vector<geos::geom::Coordinate> coords;
             geo->getCoordinates()->toVector(coords);
-            _coordinates.push_back(coordsToGeodetic(coords));
+            _geoCoordinates.push_back(coordsToGeodetic(coords));
             _type = GeometryType::LineString;
             break;
         }
@@ -176,16 +176,16 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
 
                 if (!outerBounds.empty()) {
                     int nHoles = static_cast<int>(pNormalized->getNumInteriorRing());
-                    _coordinates.reserve(nHoles + 1);
+                    _geoCoordinates.reserve(nHoles + 1);
 
                     // Outer bounds
-                    _coordinates.push_back(coordsToGeodetic(outerBounds));
+                    _geoCoordinates.push_back(coordsToGeodetic(outerBounds));
 
                     // Inner bounds (holes)
                     for (int i = 0; i < nHoles; ++i) {
                         std::vector<geos::geom::Coordinate> ringCoords;
                         pNormalized->getInteriorRingN(i)->getCoordinates()->toVector(ringCoords);
-                        _coordinates.push_back(coordsToGeodetic(ringCoords));
+                        _geoCoordinates.push_back(coordsToGeodetic(ringCoords));
                     }
                 }
 
@@ -397,17 +397,17 @@ GlobeGeometryFeature::createPointAndLineGeometry()
 {
     std::vector<std::vector<glm::vec3>> resultPositions;
 
-    for (int i = 0; i < _coordinates.size(); ++i) {
+    for (int i = 0; i < _geoCoordinates.size(); ++i) {
         std::vector<Vertex> vertices;
         std::vector<glm::vec3> positions;
-        vertices.reserve(_coordinates[i].size() * 3); // TODO: this is not correct anymore
-        positions.reserve(_coordinates[i].size() * 3); // TODO: this is not correct anymore
+        vertices.reserve(_geoCoordinates[i].size() * 3); // TODO: this is not correct anymore
+        positions.reserve(_geoCoordinates[i].size() * 3); // TODO: this is not correct anymore
 
         glm::dvec3 lastPos = glm::dvec3(0.0);
         double lastHeightValue = 0.0;
 
         bool isFirst = true;
-        for (const Geodetic3& geodetic : _coordinates[i]) {
+        for (const Geodetic3& geodetic : _geoCoordinates[i]) {
             glm::dvec3 v = computeOffsetedModelCoordinate(geodetic);
 
             // If we are drawing points, just add and continue

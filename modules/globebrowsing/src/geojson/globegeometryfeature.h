@@ -159,7 +159,7 @@ private:
 
     // Coordinates for geometry. For polygons, the first is always the outer ring
     // and any following are the inner rings (holes)
-    std::vector<std::vector<Geodetic3>> _coordinates;
+    std::vector<std::vector<Geodetic3>> _geoCoordinates;
 
     // Coordinates for any triangles representing the geometry (only relevant for polygons)
     std::vector<Geodetic3> _triangleCoordinates;
