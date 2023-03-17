@@ -38,6 +38,19 @@
 
 namespace openspace::interaction {
 
+void sortJson(nlohmann::json& json) {
+    std::sort(json.begin(), json.end(), []
+    (const nlohmann::json& lhs, const nlohmann::json& rhs) {
+            std::string lhsString = lhs["Name"];
+            std::string rhsString = rhs["Name"];
+            std::transform(lhsString.begin(), lhsString.end(), lhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); });
+            std::transform(rhsString.begin(), rhsString.end(), rhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); });
+            return rhsString > lhsString;
+        });
+}
+
 KeybindingManager::KeybindingManager()
     : DocumentationGenerator(
         "Keybindings",
@@ -138,6 +151,22 @@ std::string KeybindingManager::generateJson() const {
     json << "]";
 
     return json.str();
+}
+
+nlohmann::json KeybindingManager::generateJsonJson() const {
+    ZoneScoped;
+
+    nlohmann::json json;
+
+    for (const std::pair<const KeyWithModifier, std::string>& p : _keyLua) {
+        nlohmann::json keybind;
+        keybind["Name"] = ghoul::to_string(p.first);
+        keybind["Action"] = p.second;
+        json.push_back(keybind);
+    }
+    sortJson(json);
+
+    return json;
 }
 
 scripting::LuaLibrary KeybindingManager::luaLibrary() {

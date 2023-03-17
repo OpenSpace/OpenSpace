@@ -1041,13 +1041,9 @@ void OpenSpaceEngine::writeDocumentation() {
     factory["Name"] = "Asset Types";
     factory["Data"] = FactoryManager::ref().generateJsonJson();
 
-    /* t(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Keybindings",
-        global::keybindingManager->jsonName(),
-        global::keybindingManager->generateJson()
-    );
-    */
+    nlohmann::json keybindings;
+    keybindings["Name"] = "Keybindings";
+    keybindings["Keybindings"] = global::keybindingManager->generateJsonJson();
 
     SceneLicenseWriter writer;
     nlohmann::json license;
@@ -1065,6 +1061,7 @@ void OpenSpaceEngine::writeDocumentation() {
     nlohmann::json documentation;
     documentation["documentation"].push_back(sceneGraph);
     documentation["documentation"].push_back(sceneProperties);
+    documentation["documentation"].push_back(keybindings);
     documentation["documentation"].push_back(license);
     documentation["documentation"].push_back(scripting);
     documentation["documentation"].push_back(factory);
