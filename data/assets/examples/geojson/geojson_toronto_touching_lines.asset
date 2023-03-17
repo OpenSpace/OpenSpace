@@ -1,0 +1,30 @@
+local earth = asset.require('scene/solarsystem/planets/earth/earth')
+local earthIdentifier = earth.Earth.Identifier
+
+--[[
+  TODO: move to asset meta
+  Example of a more complex GeoJSON file, showing the neighborhoods of Toronto
+  From this source:
+  https://handsondataviz.org/geojsonio.html
+]]--
+
+local Example_Toronto = {
+  Identifier = "Toronto-Neighborhoods",
+  File = asset.localResource("./files/touching_lines_toronto_neighbourhood.geojson"),
+  HeightOffset = 100.0,
+  DefaultProperties = {
+    Color = { 0.0, 1.0, 0.0 },
+    LineWidth = 2.0,
+  },
+  Name = "Toronto Neighbourhoods" -- TODO: show in GUI (like layers)
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Toronto)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Toronto)
+end)
+
+asset.export(Example_Toronto)

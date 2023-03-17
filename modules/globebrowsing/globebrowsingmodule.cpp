@@ -28,6 +28,9 @@
 #include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 #include <modules/globebrowsing/src/gdalwrapper.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/geojson/geojsoncomponent.h>
+#include <modules/globebrowsing/src/geojson/geojsonmanager.h>
+#include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/globetranslation.h>
 #include <modules/globebrowsing/src/globerotation.h>
@@ -342,6 +345,9 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::TemporalTileProvider::Documentation(),
         globebrowsing::TileProviderByIndex::Documentation(),
         globebrowsing::TileProviderByLevel::Documentation(),
+        globebrowsing::GeoJsonManager::Documentation(),
+        globebrowsing::GeoJsonComponent::Documentation(),
+        globebrowsing::GeoJsonProperties::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
         ShadowComponent::Documentation()
@@ -704,7 +710,9 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             codegen::lua::GetGeoPositionForCamera,
             codegen::lua::LoadWMSCapabilities,
             codegen::lua::RemoveWMSServer,
-            codegen::lua::CapabilitiesWMS
+            codegen::lua::CapabilitiesWMS,
+            codegen::lua::AddGeoJson,
+            codegen::lua::DeleteGeoJson
         },
         .scripts = {
             absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")

@@ -651,6 +651,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     _labelsDictionary = p.labels.value_or(_labelsDictionary);
 
+    // Init geojson manager
+    _geoJsonManager.initialize(this);
+    addPropertySubOwner(_geoJsonManager);
 
     // Components
     _hasRings = p.rings.has_value();
@@ -709,6 +712,8 @@ void RenderableGlobe::deinitializeGL() {
         global::renderEngine->removeRenderProgram(_globalRenderer.program.get());
         _globalRenderer.program = nullptr;
     }
+
+    _geoJsonManager.deinitializeGL();
 
     _grid.deinitializeGL();
 
@@ -816,6 +821,10 @@ void RenderableGlobe::renderSecondary(const RenderData& data, RendererTasks&) {
     catch (const ghoul::opengl::TextureUnit::TextureUnitError& e) {
         LERROR(fmt::format("Error on drawing globe labels: '{}'", e.message));
     }
+
+    if (_geoJsonManager.isReady()) {
+        _geoJsonManager.render(data);
+    }
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
@@ -896,6 +905,8 @@ void RenderableGlobe::update(const UpdateData& data) {
     // RenderableGlobe::render() // rendering with the new number of layers but the
     //                           // LayerManager hasn't updated yet :o
     _layerManagerDirty = true;
+
+    _geoJsonManager.update();
 }
 
 bool RenderableGlobe::renderedWithDesiredData() const {
@@ -908,6 +919,14 @@ const LayerManager& RenderableGlobe::layerManager() const {
 
 LayerManager& RenderableGlobe::layerManager() {
     return _layerManager;
+}
+
+const GeoJsonManager& RenderableGlobe::geoJsonManager() const {
+    return _geoJsonManager;
+}
+
+GeoJsonManager& RenderableGlobe::geoJsonManager() {
+    return _geoJsonManager;
 }
 
 const Ellipsoid& RenderableGlobe::ellipsoid() const {

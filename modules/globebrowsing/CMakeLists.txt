@@ -59,6 +59,10 @@ set(HEADER_FILES
   src/tileloadjob.h
   src/tiletextureinitdata.h
   src/timequantizer.h
+  src/geojson/geojsoncomponent.h
+  src/geojson/geojsonmanager.h
+  src/geojson/geojsonproperties.h
+  src/geojson/globegeometryfeature.h
   src/tileprovider/defaulttileprovider.h
   src/tileprovider/imagesequencetileprovider.h
   src/tileprovider/singleimagetileprovider.h
@@ -100,6 +104,10 @@ set(SOURCE_FILES
   src/tileloadjob.cpp
   src/tiletextureinitdata.cpp
   src/timequantizer.cpp
+  src/geojson/geojsoncomponent.cpp
+  src/geojson/geojsonmanager.cpp
+  src/geojson/geojsonproperties.cpp
+  src/geojson/globegeometryfeature.cpp
   src/tileprovider/defaulttileprovider.cpp
   src/tileprovider/imagesequencetileprovider.cpp
   src/tileprovider/singleimagetileprovider.cpp
@@ -118,6 +126,8 @@ set(SHADER_FILES
   shaders/advanced_rings_vs.glsl
   shaders/advanced_rings_fs.glsl
   shaders/blending.glsl
+  shaders/geojson_fs.glsl
+  shaders/geojson_vs.glsl
   shaders/globalrenderer_vs.glsl
   shaders/localrenderer_vs.glsl
   shaders/renderer_fs.glsl
@@ -161,3 +171,8 @@ else (WIN32)
   target_link_libraries(openspace-module-globebrowsing PRIVATE ${GDAL_LIBRARY})
   mark_as_advanced(GDAL_CONFIG GDAL_INCLUDE_DIR GDAL_LIBRARY)
 endif () # WIN32
+
+begin_dependency("GEOS")
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/geos)
+target_link_libraries(openspace-module-globebrowsing PRIVATE geos)
+end_dependency("GEOS")

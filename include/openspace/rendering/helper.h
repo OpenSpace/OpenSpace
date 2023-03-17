@@ -109,6 +109,11 @@ struct VertexXYZ {
     GLfloat xyz[3];
 };
 
+struct VertexXYZNormal {
+    GLfloat xyz[3];
+    GLfloat normal[3];
+};
+
 VertexXYZ convertToXYZ(const Vertex& v);
 
 std::vector<VertexXYZ> convert(std::vector<Vertex> v);

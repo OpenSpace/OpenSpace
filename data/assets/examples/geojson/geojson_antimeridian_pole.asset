@@ -1,0 +1,23 @@
+local earth = asset.require('scene/solarsystem/planets/earth/earth')
+local earthIdentifier = earth.Earth.Identifier
+
+local Example_Polygon_Antimeridian = {
+  Identifier = "Earth-Polygon-Antimeridian",
+  File = asset.localResource("./files/polygon_antimeridian.geojson"),
+  HeightOffset = 20000.0,
+  DefaultProperties = {
+    Color = { 1.0, 1.0, 0.0 },
+    LineWidth = 2.0
+  },
+  Name = "Example Polygon (Antimeridian)"   -- TODO: show in GUI (like layers)
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Polygon_Antimeridian)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Polygon_Antimeridian)
+end)
+
+asset.export(Example_Polygon_Antimeridian)

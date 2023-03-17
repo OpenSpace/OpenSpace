@@ -1,0 +1,22 @@
+local earth = asset.require('scene/solarsystem/planets/earth/earth')
+local earthIdentifier = earth.Earth.Identifier
+
+local Example_Points = {
+  Identifier = "Points-Example",
+  File = asset.localResource("./files/points.geojson"),
+  HeightOffset = 20000.0,
+  DefaultProperties = {
+    PointSize = 10.0
+  },
+  Name = "Example Points (holes)"  -- TODO: show in GUI (like layers)
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Points)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Points)
+end)
+
+asset.export(Example_Points)
