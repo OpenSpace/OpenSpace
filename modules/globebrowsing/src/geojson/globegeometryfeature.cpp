@@ -410,6 +410,15 @@ GlobeGeometryFeature::createPointAndLineGeometry()
         for (const Geodetic3& geodetic : _coordinates[i]) {
             glm::dvec3 v = computeOffsetedModelCoordinate(geodetic);
 
+            // If we are drawing points, just add and continue
+            if (_type == GeometryType::Point) {
+                glm::vec3 vf = static_cast<glm::vec3>(v);
+                vertices.push_back({ vf.x, vf.y, vf.z, 0.f, 0.f, 0.f });
+                positions.push_back(vf);
+                continue;
+            }
+            // Else, we're rendering lines and need to subdivide
+
             if (isFirst) {
                 lastPos = v;
                 lastHeightValue = geodetic.height;
