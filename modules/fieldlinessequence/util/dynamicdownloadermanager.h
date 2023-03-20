@@ -128,9 +128,11 @@ struct FieldlineOption {
 struct File {
     std::unique_ptr<HttpFileDownload> download;
     std::string timestep;
+    //TODO: need both times?
     double time;
     std::string URL;
     double cadence;
+    //TODO: need Cadence?
     int availableIndex;
     enum class State {
         Available,
@@ -149,7 +151,7 @@ public:
         int dataID, const std::string infoURL, const std::string dataURL, int nOfFilesToQ
     );
     void requestDataInfo(std::string httpInfoRequest);
-    void requestAvailableFiles(std::string httpDataRequest);
+    void requestAvailableFiles(std::string httpDataRequest, std::filesystem::path syncdir);
     std::vector<File>::iterator closestFileToNow(const double time); //const File&
     void update(const double time, const double deltaTime);
     const std::vector<std::filesystem::path>& downloadedFiles();
@@ -160,7 +162,7 @@ private:
 
     void downloadFile();
     double calculateCadence();
-    void prioritizeQueue(const double& time);
+    //void prioritizeQueue(const double& time);
     void putOnQueue();
     bool _forward = true;
     bool _firstFrame = true;

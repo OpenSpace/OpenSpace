@@ -5,15 +5,12 @@ local fieldlines = {
   Parent = transforms.TransformGONG.Identifier,
   Renderable = {
     Type = "RenderableFieldlinesSequenceNew",
-
-    --SourceFolder = ,
-    --DynamicWebContent = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1178",
     InputFileType = "Osfls",
-
-    DynamicWebContent = true,
-    --LoadAtRuntime is redundant if using DynamicWebContent since it will have to be true
-    --LoadAtRuntime = true,
+    LoadingType = "DynamicDownloading",
+    InfoURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id=",
+    DataURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=",
     DataID = 1768,
+    ShowAtAllTimes = true,
   },
   GUI = {
     Path = "/Solar System/Heliosphere",

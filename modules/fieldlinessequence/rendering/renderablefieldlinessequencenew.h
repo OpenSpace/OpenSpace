@@ -82,9 +82,8 @@ public:
         //explicit File() = default;
         //explicit File(const File& file) = delete;
         enum class FileStatus {
-            Available = 0,
-            Downloaded = 1,
-            Loaded = 2
+            Downloaded,
+            Loaded
         };
         FileStatus status;
         std::filesystem::path path;
@@ -105,7 +104,7 @@ private:
     void setModelDependentConstants();
     void setupDynamicDownloading(const std::optional<int>& dataID,
                                  const std::optional<int>& numberOfFiles,
-                                 const std::optional<std::string>& baseURL,
+                                 const std::optional<std::string>& infoURL,
                                  const std::optional<std::string>& dataURL);
     //bool shouldUpdateColorBuffer();
     //bool shouldUpdateMaskingBuffer();
@@ -147,7 +146,7 @@ private:
     int _dataID;
     // number of files to queue up at a time
     int _nOfFilesToQueue = 10;
-    std::string _baseURL = "";
+    std::string _infoURL = "";
     std::string _dataURL = "";
     //  DynamicDownloaderManager downloads and updates renderable field lines with
     //  field lines downloaded from the web.
@@ -229,6 +228,8 @@ private:
     properties::OptionProperty _maskingQuantity;
     // used to save property for later initialization
     int _maskingQuantityTemp = 0;
+    // printing min and max of property
+    bool _havePrintedQuantityRange = false;
 
     // Whether or not to use Domain limits
     properties::BoolProperty _domainEnabled;

@@ -80,15 +80,16 @@ DynamicDownloaderManager::DynamicDownloaderManager(int dataID, const std::string
 
     std::string name = fieldlineOption.optionName(dataID);
     _syncDir = absPath(
-        "${CACHE}/dynamic_downloaded/" + std::to_string(dataID)
+        "${SYNC}/dynamic_downloaded/" + std::to_string(dataID)
     );
+
     _dataID = { dataID, name };
     std::string httpInfoRequest = _infoURL + std::to_string(_dataID.first);
     requestDataInfo(httpInfoRequest);
     std::string httpDataRequest = formulateDataHttpRequest(
         _dataMinTime, _dataMaxTime, _dataID, _dataURL
     );
-    requestAvailableFiles(httpDataRequest);
+    requestAvailableFiles(httpDataRequest, _syncDir);
 
 }
 
@@ -119,14 +120,15 @@ void DynamicDownloaderManager::requestDataInfo(std::string httpInfoRequest) {
 
 }
 
-void DynamicDownloaderManager::requestAvailableFiles(std::string httpDataRequest) {
+void DynamicDownloaderManager::requestAvailableFiles(std::string httpDataRequest,
+                                                            std::filesystem::path syncDir)
+{
     // Declaring big window. pair.first is timestep, pair.second is url to be downloaded
 
     // Get big window/ list of available files for the specified data set.
     // If it expands to more of a API call rather than a http-request, that code goes here
     // TODO: make_unique!
     HttpMemoryDownload respons(httpDataRequest);
-
     respons.start();
     respons.wait();
 
@@ -161,28 +163,35 @@ void DynamicDownloaderManager::requestAvailableFiles(std::string httpDataRequest
         std::string url = element["url"];
 
         //timestamp = "2022-11-13T16:14:00.000";
-        //url = "https://iswaA-webservice1.ccmc.gsfc.nasa.gov/iswa_data_tree/model/solar/WSA5.X/fieldlines/GONG_Z/trace_pfss_intoout/2022/11/2022-11-13T16-14-00.000.osfls";
+        //url =
+        //https://iswaA-webservice1.ccmc.gsfc.nasa.gov/
+        //...iswa_data_tree/model/solar/WSA5.X/fieldlines/
+        //...GONG_Z/trace_pfss_intoout/2022/11/2022-11-13T16-14-00.000.osfls";
 
-
-        std::string fileName = "/" + url.substr(url.find_last_of("//") + 1);
+        std::string fileName = url.substr(url.find_last_of("//"));
         std::filesystem::path destination = _syncDir;
         destination += fileName;
-        std::unique_ptr<HttpFileDownload> downloader =
-            std::make_unique<HttpFileDownload>(url, destination);
 
         double time = Time::convertTime(timestamp);
 
         File fileElement;
-        fileElement.download = std::move(downloader);
-        fileElement.state = File::State::Available;
         fileElement.timestep = timestamp;
         fileElement.time = time;
         fileElement.URL = url;
         fileElement.cadence = 0;
         fileElement.availableIndex = index;
+        if (std::filesystem::exists(destination)) {
+            fileElement.download = nullptr;
+            fileElement.state = File::State::Downloaded;
+            _downloadedFiles.push_back(destination);
+        }
+        else {
+            fileElement.download = std::make_unique<HttpFileDownload>(url, destination);
+            fileElement.state = File::State::Available;
+        }
+
         _availableData.push_back(std::move(fileElement));
         ++index;
-
     }
     //maybe sort vector if some data set is order in a different parameter.
 
@@ -192,10 +201,9 @@ void DynamicDownloaderManager::requestAvailableFiles(std::string httpDataRequest
 
     // TODO Shyam: add accurate cadence to each file here
     _tempCadence = calculateCadence();
-    for (auto& element : _availableData) {
+    for (File& element : _availableData) {
         element.cadence = _tempCadence;
     }
-
 }
 
 double DynamicDownloaderManager::calculateCadence() {
@@ -212,44 +220,44 @@ double DynamicDownloaderManager::calculateCadence() {
     return averageTime;
 }
 
-void DynamicDownloaderManager::prioritizeQueue(const double& time) {
-    //using Unq = std::unique_ptr<HttpFileDownload>;
-    //using Q = std::priority_queue<Unq>;
-    //using Vec = std::vector<Unq>;
-    //using VecIt = Vec::iterator;
-    // Delta time changed direction and priory of queue is not correct anymore
-    // Emptying queue
-    _queuedFilesToDownload.clear();
+//void DynamicDownloaderManager::prioritizeQueue(const double& time) {
+//    //using Unq = std::unique_ptr<HttpFileDownload>;
+//    //using Q = std::priority_queue<Unq>;
+//    //using Vec = std::vector<Unq>;
+//    //using VecIt = Vec::iterator;
+//    // Delta time changed direction and priory of queue is not correct anymore
+//    // Emptying queue
+//    _queuedFilesToDownload.clear();
+//
+//    //const File& closestFileToNow = DynamicDownloaderManager::closestFileToNow(time);
+//    std::vector<File>::iterator now = DynamicDownloaderManager::closestFileToNow(time);
+//    // priority 0 is highest. Higher number is lower priority.
+//
+//    //std::vector<File>::iterator now =
+//    //    _availableData.begin() + closestFileToNow.availableIndex;
+//
+//    std::vector<File>::iterator end;
+//    if (_forward) {
+//        end = _availableData.end();
+//    }
+//    else {
+//        end = _availableData.begin();
+//    }
+//
+//    // if forward iterate from now to end. else reverse from now to begin
+//    int notToMany = 0;
+//    for (std::vector<File>::iterator it = now; it != end; _forward ? ++it : --it) {
+//        if (it->state == File::State::Available) {
+//            _queuedFilesToDownload.push_back(&*it);
+//            it->state = File::State::OnQueue;
+//        }
+//        ++notToMany;
+//        // exit out early if enough files are queued / already downloaded
+//        if (notToMany == _nOfFilesToQueue) break;
+//    }
+//}
 
-    //const File& closestFileToNow = DynamicDownloaderManager::closestFileToNow(time);
-    std::vector<File>::iterator now = DynamicDownloaderManager::closestFileToNow(time);
-    // priority 0 is highest. Higher number is lower priority.
-
-    //std::vector<File>::iterator now =
-    //    _availableData.begin() + closestFileToNow.availableIndex;
-
-    std::vector<File>::iterator end;
-    if (_forward) {
-        end = _availableData.end();
-    }
-    else {
-        end = _availableData.begin();
-    }
-
-    // if forward iterate from now to end. else reverse from now to begin
-    int notToMany = 0;
-    for (std::vector<File>::iterator it = now; it != end; _forward ? ++it : --it) {
-        if (it->state == File::State::Available) {
-            _queuedFilesToDownload.push_back(&*it);
-            it->state = File::State::OnQueue;
-        }
-        ++notToMany;
-        // exit out early if enough files are queued / already downloaded
-        if (notToMany == _nOfFilesToQueue) break;
-    }
-}
-
-void DynamicDownloaderManager::downloadFile(){
+void DynamicDownloaderManager::downloadFile() {
     ZoneScoped
     if (_filesCurrentlyDownloading.size() < 4 && _queuedFilesToDownload.size() > 0) {
         File* dl = _queuedFilesToDownload.front();
@@ -370,8 +378,7 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
         _queuedFilesToDownload.clear();
     }
 
-    if (_forward)
-    {
+    if (_forward && _thisFile != _availableData.end()) {
         // if files are there and time is between next file (+1) and +2 file
         // (meaning the this file is active from now till next file,
         // kind of like forward finite difference in math)
@@ -385,7 +392,7 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
             ++_thisFile;
         }
         // if its beyond the +2 file, arguably that can mean delta time is to fast
-        // and files might be missed. But we also know we went past boyond the next so
+        // and files might be missed. But we also know we went past beyond the next so
         // we no longer know where we are so we reinitialize
         else if (_thisFile + 1 != _availableData.end() &&
                  _thisFile + 2 != _availableData.end() &&
@@ -394,7 +401,7 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
             _thisFile = closestFileToNow(time);
         }
     }
-    else if (!_forward) {
+    else if (!_forward && _thisFile != _availableData.begin()) {
         // if file is there and time is between prev and this file
         // then change this to be prev. Same goes here as if time is moving forward
         // we will use forward usage. File is active from now till next
@@ -425,10 +432,7 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
         checkForFinishedDownloads();
     }
 
-//////////////////////////////////////
     putOnQueue();
-
-///////////////////////////////////////
 
     downloadFile();
 
@@ -441,22 +445,19 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
 //     case, it wouldnt make sense to change id, and therefor dataset, for the same
 //     renderable. If they are all the same model, it could work.
 //
-// 3. add functionality for if the data is not a sequence,
-//     but just a few random files where order does not matter?
+// 3. Rename folder for where files are being downloaded to
 //
-// 4. Rename folder for where files are being downloaded to
+// 4. Move class into a different module
 //
-// 5. Move class into a different module
+// 5. recall data info every now and then to get new files
 //
-// 6. recall data info every now and then to get new files
+// 6. ultimet test: test with different data
 //
-// 7. ultimet test: test with different data
+// 7. optamize the closestFileToNow function
 //
-// 8. optamize the closestFileToNow function
+// 8. tracy
 //
-// 9. tracy
-//
-// 10. maybe make a copy of the once  that gets returned with downloadedFiles() so that
+// 9. maybe make a copy of the once that gets returned with downloadedFiles() so that
 //     the originals can be removed with clearDownloaded() before returning out of
 //     downloadedFiles()
 //

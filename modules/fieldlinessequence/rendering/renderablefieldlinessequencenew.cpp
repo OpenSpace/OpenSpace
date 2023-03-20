@@ -239,9 +239,9 @@ namespace {
         //1: dynamic loading and static downloading
         //2: dynamic loading and dynamic downloading
         enum class [[codegen::map(openspace::RenderableFieldlinesSequenceNew::LoadingType)]] LoadingType {
-            StaticLoading = 0,
-            DynamicLoading = 1,
-            DynamicDownloading = 2
+            StaticLoading,
+            DynamicLoading,
+            DynamicDownloading
         };
         std::optional<LoadingType> loadingType;
         // dataID that corresponds to what dataset to use if using dynamicWebContent
@@ -249,7 +249,7 @@ namespace {
         // number Of Files To Queue is a max value of the amount of files to queue up
         // so that not to big of a data set is downloaded nessesarily.
         std::optional<int> numberOfFilesToQueue;
-        std::optional<std::string> baseURL;
+        std::optional<std::string> infoURL;
         std::optional<std::string> dataURL;
 
         enum class [[codegen::map(openspace::RenderableFieldlinesSequenceNew::SourceFileType)]] SourceFileType {
@@ -386,7 +386,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
 
     if (_loadingType == LoadingType::DynamicDownloading) {
-        setupDynamicDownloading(p.dataID, p.numberOfFilesToQueue, p.baseURL, p.dataURL);
+        setupDynamicDownloading(p.dataID, p.numberOfFilesToQueue, p.infoURL, p.dataURL);
     }
     else {
         ghoul_assert(
@@ -471,7 +471,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
 void RenderableFieldlinesSequenceNew::setupDynamicDownloading(
                                            const std::optional<int>& dataID,
                                            const std::optional<int>& numberOfFilesToQueue,
-                                           const std::optional<std::string>& baseURL,
+                                           const std::optional<std::string>& infoURL,
                                            const std::optional<std::string>& dataURL)
 {
     _dataID = dataID.value_or(_dataID);
@@ -481,12 +481,12 @@ void RenderableFieldlinesSequenceNew::setupDynamicDownloading(
         );
     }
     _nOfFilesToQueue = numberOfFilesToQueue.value_or(_nOfFilesToQueue);
-    _baseURL = baseURL.value();
-    if (_baseURL.empty()) { throw ghoul::RuntimeError("baseURL has to be provided"); }
+    _infoURL = infoURL.value();
+    if (_infoURL.empty()) { throw ghoul::RuntimeError("InfoURL has to be provided"); }
     _dataURL = dataURL.value();
-    if (_dataURL.empty()) { throw ghoul::RuntimeError("dataURL has to be provided"); }
+    if (_dataURL.empty()) { throw ghoul::RuntimeError("DataURL has to be provided"); }
     _dynamicdownloaderManager = std::make_unique<DynamicDownloaderManager>(
-        _dataID, _baseURL, _dataURL, _nOfFilesToQueue
+        _dataID, _infoURL, _dataURL, _nOfFilesToQueue
     );
 }
 
@@ -731,6 +731,7 @@ void RenderableFieldlinesSequenceNew::definePropertyCallbackFunctions() {
 
     _maskingQuantity.onChange([this]() {
         _shouldUpdateMaskingBuffer = true;
+        _havePrintedQuantityRange = false;
     });
 
     _colorTablePath.onChange([this]() {
@@ -1144,6 +1145,8 @@ void RenderableFieldlinesSequenceNew::updateVertexPositionBuffer() {
     const FieldlinesState& state = _files[_activeIndex].state;
     const std::vector<glm::vec3>& vertPos = state.vertexPositions();
 
+
+
     glBufferData(
         GL_ARRAY_BUFFER,
         vertPos.size() * sizeof(glm::vec3),
@@ -1190,16 +1193,29 @@ void RenderableFieldlinesSequenceNew::updateVertexMaskingBuffer() {
 
     const FieldlinesState& state = _files[_activeIndex].state;
     bool success;
-    const std::vector<float>& maskings = state.extraQuantity(
+    const std::vector<float>& quantities = state.extraQuantity(
         _maskingQuantity,
         success
     );
 
+    if (!_havePrintedQuantityRange) {
+        float i = *std::min_element(quantities.begin(), quantities.end());
+        std::string min = std::to_string(i);
+        float a = *std::max_element(quantities.begin(), quantities.end());
+        std::string max = std::to_string(a);
+        LWARNING(fmt::format("min :{}", min));
+        LWARNING(fmt::format("max :{}", max));
+        const std::vector<std::string>& names = state.extraQuantityNames();
+        std::string name = names[_maskingQuantity];
+        LWARNING(fmt::format("name:{}", name));
+        _havePrintedQuantityRange = true;
+    }
+
     if (success) {
         glBufferData(
             GL_ARRAY_BUFFER,
-            maskings.size() * sizeof(float),
-            maskings.data(),
+            quantities.size() * sizeof(float),
+            quantities.data(),
             GL_STATIC_DRAW
         );
 

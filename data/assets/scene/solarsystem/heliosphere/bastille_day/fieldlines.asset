@@ -33,7 +33,7 @@ local fieldlines = {
     InputFileType = "Osfls",
     LineWidth = 1,
     ShowAtAllTimes = false,
-    ColorQuantity = 0, -- current
+    ColorQuantity = 0,
     ColorTablePath = asset.localResource("transferfunctions/density-fieldlines.txt"),
     ColorMinMaxRange = {
       0, 1000000,
