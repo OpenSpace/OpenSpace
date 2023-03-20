@@ -1,9 +1,6 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("./transforms")
-local kernels = asset.require("./kernels")
-local kernel081 = kernels.nep081
-local kernel087 = kernels.nep087
-local kernel088 = kernels.nep088
+local kernel = asset.require("./kernels").nep097
 
 
 
@@ -35,7 +32,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.294,
-    Kernels = kernel088
+    Kernels = kernel
   },
   {
     Identifier = "Thalassa",
@@ -52,7 +49,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.311,
-    Kernels = kernel088
+    Kernels = kernel
   },
   {
     Identifier = "Despina",
@@ -69,7 +66,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.335,
-    Kernels = kernel088
+    Kernels = kernel
   },
   {
     Identifier = "Galatea",
@@ -86,7 +83,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.429,
-    Kernels = kernel088
+    Kernels = kernel
   },
   {
     Identifier = "Larissa",
@@ -103,10 +100,10 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.555,
-    Kernels = kernel088
+    Kernels = kernel
   },
   {
-    Identifier = "S2004N1",
+    Identifier = "Hippocamp",
     Parent = {
       Identifier = parentIdentifier,
       Spice = parentSpice
@@ -116,12 +113,12 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Name = "S/2004 N 1",
+      Name = "Hippocamp",
       Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.936,
-    Kernels = kernel088
+    Kernels = kernel
   },
   {
     Identifier = "Proteus",
@@ -138,7 +135,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.122,
-    Kernels = kernel081
+    Kernels = kernel
   }
 }
 
