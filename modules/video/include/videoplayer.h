@@ -94,9 +94,8 @@ private:
 
     // Libmpv
     static void on_mpv_render_update(void*); // Has to be static because of C api
-    void initializeMpv(); // Called first time in postSyncPreDraw
-    void renderMpv(); // Called in postSyncPreDraw
-    void swapBuffersMpv(); // Called in postDraw
+    void initializeMpv(); // Called first time in update
+    void renderMpv(); // Called in update
     void commandAsyncMpv(const char* cmd[], MpvKey key = MpvKey::Command);
     void handleMpvEvents();
     // Libmpv properties
@@ -151,7 +150,6 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _frameTexture = nullptr;
     GLuint _fbo = 0; // Our opengl framebuffer where mpv renders to
     int _wakeup = 0; // Signals when libmpv has a new frame ready
-    bool _didRender = false; // To know when to swap buffers
     bool _isInitialized = false; // If libmpv has been inititalized
     bool _isSeeking = false; // Prevent seeking while already seeking
     bool _isDestroying = false;

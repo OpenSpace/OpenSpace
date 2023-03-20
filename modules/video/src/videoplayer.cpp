@@ -297,17 +297,6 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         });
     }
 
-    global::callback::postSyncPreDraw->emplace_back([this]() {
-
-    });
-
-    global::callback::postDraw->emplace_back([this]() {
-        if (_isDestroying) {
-            return;
-        }
-        swapBuffersMpv();
-    });
-
     global::syncEngine->addSyncable(this);
 
     keys = {
@@ -547,7 +536,7 @@ void VideoPlayer::renderMpv() {
             // We also need to reset the render target
             glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 
-            _didRender = true;
+            _wakeup = 0;
         }
     }
 }
@@ -815,15 +804,6 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             throw ghoul::MissingCaseException();
             break;
         }
-    }
-}
-
-void VideoPlayer::swapBuffersMpv() {
-    // Only swap buffers if there was a frame rendered and there is a new frame waiting
-    if (_wakeup && _didRender && _mpvRenderContext) {
-        mpv_render_context_report_swap(_mpvRenderContext);
-        _wakeup = 0;
-        _didRender = 0;
     }
 }
 
