@@ -1,0 +1,32 @@
+local sphere = {
+  Identifier = "Aurora",
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0, 0, 0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableVideoSphere",
+    Enabled = true,
+    Size = 100.0,
+    Segments = 80,
+    Opacity = 1,
+    Video = "C:/Users/ylvaselling/Documents/Work/Testmovies/aurora.mp4",
+    Orientation = "Both",
+  },
+  GUI = {
+    Name = "Aurora Sphere",
+    Path = "/Other/Spheres"
+  }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(sphere)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(sphere)
+end)
+
+asset.export(sphere)
