@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat375
+local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
 
 local labelsPath = asset.syncedResource({

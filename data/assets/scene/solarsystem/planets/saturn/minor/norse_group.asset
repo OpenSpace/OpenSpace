@@ -1,8 +1,8 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels")
-local kernel368 = kernels.sat368
-local kernel375 = kernels.sat375
+local kernel368 = kernels.sat452
+local kernel375 = kernels.sat441
 
 
 
