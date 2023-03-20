@@ -43,7 +43,7 @@ namespace {
 
         // This identifier will be part of the used folder structure and, can be used to
         // manually find the downloaded folder in the synchronization folder
-        std::string identifier;
+        std::string identifier [[codegen::identifier()]];
 
         // If this value is set to 'true' and it is not overwritten by the global
         // settings, the file(s) pointed to by this URLSynchronization will always be

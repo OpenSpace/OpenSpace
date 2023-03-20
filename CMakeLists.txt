@@ -163,7 +163,8 @@ add_custom_target(
 add_dependencies(run_codegen codegen)
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
-  COMMAND codegen ARGS "${PROJECT_SOURCE_DIR}/modules" "${PROJECT_SOURCE_DIR}/src"
+  COMMAND codegen ARGS "modules" "src"
+  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   VERBATIM
 )
 set_target_properties(codegen-lib PROPERTIES FOLDER "support")

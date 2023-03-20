@@ -44,7 +44,7 @@ ghoul::opengl::ProgramObjectManager SpacecraftInstrumentsModule::ProgramObjectMa
 SpacecraftInstrumentsModule::SpacecraftInstrumentsModule() : OpenSpaceModule(Name) {}
 
 void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
-    ZoneScoped
+    ZoneScoped;
 
     ImageSequencer::initialize();
 

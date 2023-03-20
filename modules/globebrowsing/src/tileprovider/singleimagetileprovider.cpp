@@ -51,7 +51,7 @@ documentation::Documentation SingleImageProvider::Documentation() {
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
     : _filePath(FilePathInfo)
 {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -62,7 +62,7 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 }
 
 Tile SingleImageProvider::tile(const TileIndex&) {
-    ZoneScoped
+    ZoneScoped;
     return _tile;
 }
 

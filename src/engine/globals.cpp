@@ -111,7 +111,7 @@ namespace {
 namespace openspace::global {
 
 void create() {
-    ZoneScoped
+    ZoneScoped;
 
     callback::create();
 
@@ -380,7 +380,7 @@ void create() {
 }
 
 void initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     rootPropertyOwner->addPropertySubOwner(global::moduleEngine);
 
@@ -405,8 +405,7 @@ void initialize() {
 }
 
 void initializeGL() {
-    ZoneScoped
-
+    ZoneScoped;
 }
 
 void destroy() {
@@ -631,7 +630,7 @@ void destroy() {
 }
 
 void deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *screenSpaceRenderables) {
         ssr->deinitialize();
@@ -646,7 +645,7 @@ void deinitialize() {
 }
 
 void deinitializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *screenSpaceRenderables) {
         ssr->deinitializeGL();

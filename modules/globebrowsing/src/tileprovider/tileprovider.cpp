@@ -73,7 +73,7 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
                                                             layers::Layer::ID layerTypeID,
                                                       const ghoul::Dictionary& dictionary)
 {
-    ZoneScoped
+    ZoneScoped;
 
     std::string_view type = layers::Layers[static_cast<int>(layerTypeID)].identifier;
 
@@ -86,7 +86,7 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
 }
 
 void TileProvider::initializeDefaultTile() {
-    ZoneScoped
+    ZoneScoped;
 
         ghoul_assert(!DefaultTile.texture, "Default tile should not have been created");
     using namespace ghoul::opengl;
@@ -118,10 +118,12 @@ void TileProvider::deinitializeDefaultTile() {
     DefaultTileTexture = nullptr;
 }
 
-TileProvider::TileProvider() : properties::PropertyOwner({ "TileProvider" }) {}
+TileProvider::TileProvider() : 
+    properties::PropertyOwner({ "TileProvider", "Tile Provider" }) 
+{}
 
 void TileProvider::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(!isInitialized, "TileProvider can only be initialized once");
 
@@ -145,7 +147,7 @@ void TileProvider::initialize() {
 }
 
 void TileProvider::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     internalDeinitialize();
 }
@@ -192,7 +194,7 @@ void TileProvider::internalInitialize() {}
 void TileProvider::internalDeinitialize() {}
 
 ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(isInitialized, "TileProvider was not initialized");
 
@@ -216,7 +218,7 @@ ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParen
 }
 
 ChunkTilePile TileProvider::chunkTilePile(TileIndex tileIndex, int pileSize) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(isInitialized, "TileProvider was not initialized");
     ghoul_assert(pileSize >= 0, "pileSize must be positive");

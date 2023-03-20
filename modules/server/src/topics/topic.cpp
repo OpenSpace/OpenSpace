@@ -36,7 +36,7 @@ void Topic::initialize(std::shared_ptr<Connection> connection, size_t topicId) {
 }
 
 nlohmann::json Topic::wrappedPayload(const nlohmann::json& payload) const {
-    ZoneScoped
+    ZoneScoped;
 
     // TODO: add message time
     nlohmann::json j = {
@@ -47,7 +47,7 @@ nlohmann::json Topic::wrappedPayload(const nlohmann::json& payload) const {
 }
 
 nlohmann::json Topic::wrappedError(std::string message, int code) {
-    ZoneScoped
+    ZoneScoped;
 
     nlohmann::json j = {
         { "topic", _topicId },

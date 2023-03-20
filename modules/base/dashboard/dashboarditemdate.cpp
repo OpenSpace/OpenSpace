@@ -83,7 +83,7 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
 }
 
 void DashboardItemDate::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     std::string time = SpiceManager::ref().dateFromEphemerisTime(
         global::timeManager->time().j2000Seconds(),
@@ -104,7 +104,7 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemDate::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     std::string_view time = global::timeManager->time().UTC();
     return _font->boundingBox(fmt::format(fmt::runtime(_formatString.value()), time));

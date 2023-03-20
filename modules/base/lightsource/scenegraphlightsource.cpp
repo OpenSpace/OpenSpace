@@ -51,7 +51,7 @@ namespace {
         std::optional<float> intensity;
 
         // [[codegen::verbatim(NodeInfo.description)]]
-        std::string node;
+        std::string node [[codegen::identifier()]];
     };
 #include "scenegraphlightsource_codegen.cpp"
 } // namespace
@@ -83,7 +83,7 @@ SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary
 }
 
 bool SceneGraphLightSource::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     _sceneGraphNode =
         global::renderEngine->scene()->sceneGraphNode(_sceneGraphNodeReference);

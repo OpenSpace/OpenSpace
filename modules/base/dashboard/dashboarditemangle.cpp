@@ -279,7 +279,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
 }
 
 void DashboardItemAngle::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(_source);
     std::pair<glm::dvec3, std::string> referenceInfo = positionAndLabel(_reference);
@@ -316,7 +316,7 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemAngle::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     constexpr double Angle = 120;
     return _font->boundingBox("Angle: " + std::to_string(Angle));

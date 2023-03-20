@@ -231,6 +231,37 @@ std::string StringVerifier::type() const {
     return "String";
 }
 
+IdentifierVerifier::IdentifierVerifier() : StringVerifier(true) {}
+
+TestResult IdentifierVerifier::operator()(const ghoul::Dictionary& dict,
+                                          const std::string& key) const
+{
+    TestResult res = StringVerifier::operator()(dict, key);
+    if (!res.success) {
+        return res;
+    }
+
+    std::string identifier = dict.value<std::string>(key);
+    size_t pos = identifier.find_first_of(" \t\n\r.");
+    if (pos != std::string::npos) {
+        res.success = false;
+        TestResult::Offense off;
+        off.offender = key;
+        off.reason = TestResult::Offense::Reason::Verification;
+        off.explanation = "Identifier contained illegal character";
+        res.offenses.push_back(off);
+    }
+    return res;
+}
+
+std::string IdentifierVerifier::documentation() const {
+    return "An identifier string. May not contain '.', spaces, newlines, or tabs";
+};
+
+std::string IdentifierVerifier::type() const {
+    return "Identifier";
+}
+
 FileVerifier::FileVerifier() : StringVerifier(true) {}
 
 TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,

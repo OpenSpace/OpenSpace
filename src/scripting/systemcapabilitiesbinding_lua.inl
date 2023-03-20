@@ -146,7 +146,7 @@ namespace {
 }
 
 /**
- * Returns the value of a call to <code>glGetString(GL_VENDOR)</code>. This will give
+ * Returns the value of a call to `glGetString(GL_VENDOR)`. This will give
  * detailed information about the vendor of the main graphics card. This string can be
  * used if the automatic Vendor detection failed.
  */
@@ -167,7 +167,7 @@ namespace {
     return extensions;
 }
 
-// Checks is a specific <code>extension</code> is supported or not.
+// Checks is a specific `extension` is supported or not.
 [[codegen::luawrap]] bool isExtensionSupported(std::string extension) {
     bool isSupported = OpenGLCap.isExtensionSupported(extension);
     return isSupported;

@@ -97,7 +97,7 @@ namespace openspace {
 IswaManager* IswaManager::_instance = nullptr;
 
 IswaManager::IswaManager()
-    : properties::PropertyOwner({ "IswaManager" })
+    : properties::PropertyOwner({ "IswaManager", "Iswa Manager" })
     , _baseUrl("https://iswa-demo-server.herokuapp.com/")
 {
     _type[CygnetType::Texture] = "Texture";

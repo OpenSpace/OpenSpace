@@ -52,7 +52,7 @@ documentation::Documentation SpoutImageProvider::Documentation() {
 SpoutImageProvider::SpoutImageProvider(
                                      [[maybe_unused]] const ghoul::Dictionary& dictionary)
 {
-    ZoneScoped
+    ZoneScoped;
 
 #ifdef OPENSPACE_HAS_SPOUT
     spoutReceiver = std::make_unique<spout::SpoutReceiverPropertyProxy>(
@@ -159,7 +159,7 @@ SpoutImageProvider::SpoutImageProvider(
 }
 
 void SpoutImageProvider::internalInitialize() {
-    ZoneScoped
+    ZoneScoped;
 
 #ifdef OPENSPACE_HAS_SPOUT
     spoutReceiver->updateReceiver();
@@ -173,7 +173,7 @@ void SpoutImageProvider::internalDeinitialize() {
 }
 
 Tile SpoutImageProvider::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
 
     spoutUpdate = true;
     return tiles[tileIndex.x];

@@ -60,7 +60,7 @@ public:
     std::vector<KeyType> keysToEnqueuedJobs();
 
     /**
-     * Bumps the job identified with <code>key</code> to the beginning of the queue.
+     * Bumps the job identified with `key` to the beginning of the queue.
      * In case the job was not already enqueued the function simply returns false and
      * no state is changed.
      * \param key is the identifier of the job to bump.

@@ -734,9 +734,8 @@ bool HorizonsDialog::handleRequest() {
         std::string newName = _horizonsFile.file().filename().stem().string();
 
         std::filesystem::path oldFile = _horizonsFile.file();
-        std::filesystem::path newFile = _horizonsFile.file().replace_filename(
-            newName + "_error.txt"
-        );
+        std::filesystem::path newFile = oldFile;
+        newFile.replace_filename(newName + "_error.txt");
 
         std::filesystem::rename(oldFile, newFile);
 

@@ -167,7 +167,7 @@ TEST_CASE("Minimal", "[profile]") {
 
     Profile ref;
     ref.version.major = 1;
-    ref.version.minor = 1;
+    ref.version.minor = 2;
     CHECK(profile == ref);
 }
 

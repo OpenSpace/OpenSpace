@@ -6,5 +6,5 @@
     { "type": "wait", 
       "value": "5"},        
     { "type": "screenshot", 
-      "value": "NewHorizionsModel"}
+      "value": "NewHorizonsModel"}
 ]
