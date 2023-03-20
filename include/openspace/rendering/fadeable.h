@@ -42,12 +42,12 @@ public:
 
     virtual bool isVisible() const;
 
+    /// Returns the full opacity constructed from the _opacity and _fade property values
+    virtual float opacity() const;
+
 protected:
     properties::FloatProperty _opacity;
     properties::FloatProperty _fade;
-
-    /// Returns the full opacity constructed from the _opacity and _fade property values
-    virtual float opacity() const;
 };
 
 } // namespace openspace

@@ -48,7 +48,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
         auto& galuc = gal.uniformCache;
         const Layer& al = *activeLayers[i];
 
-        program.setUniform(galuc.opacity, al.renderSettings().opacity);
+        program.setUniform(galuc.opacity, al.opacity());
         program.setUniform(galuc.gamma, al.renderSettings().gamma);
         program.setUniform(galuc.multiplier, al.renderSettings().multiplier);
         program.setUniform(galuc.offset, al.renderSettings().offset);
