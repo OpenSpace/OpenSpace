@@ -816,14 +816,22 @@ void WindowControl::onFovLockClicked() {
 }
 
 void WindowControl::updatePlanarLockedFov() {
-    const float aspectRatio = _windowDimensions.width() / _windowDimensions.height();
-    const float ratio = aspectRatio / IdealAspectRatio;
-    if (ratio >= 1.f) {
-        _planar.fovH->setValue(std::min(DefaultFovH * ratio, 180.f));
-        _planar.fovV->setValue(DefaultFovV);
+    bool landscapeOrientation = (_windowDimensions.width() >= _windowDimensions.height());
+    float aspectRatio;
+    if (landscapeOrientation) {
+        aspectRatio = _windowDimensions.width() / _windowDimensions.height();
     }
     else {
-        _planar.fovH->setValue(DefaultFovH);
-        _planar.fovV->setValue(std::min(DefaultFovV / ratio, 180.f));
+        aspectRatio = _windowDimensions.height() / _windowDimensions.width();
     }
+
+    const float lockedFov = DefaultFovV;
+    float adjustedFov =
+        2.f * atan(aspectRatio * tan(lockedFov * std::numbers::pi / 180.f / 2.f));
+    // Convert to degrees and limit to 180°
+    adjustedFov *= 180.f / std::numbers::pi;
+    adjustedFov = std::min(adjustedFov, 180.f);
+
+    _planar.fovH->setValue(landscapeOrientation ? adjustedFov : lockedFov);
+    _planar.fovV->setValue(landscapeOrientation ? lockedFov : adjustedFov);
 }
