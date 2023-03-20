@@ -48,25 +48,6 @@ namespace {
         "This setting determines whether this object will be visible or not"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
-        "Opacity",
-        "Opacity",
-        "This value determines the opacity of this renderable. A value of 0 means "
-        "completely transparent"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
-        "Fade",
-        "Fade",
-        "This value is used by the system to be able to fade out renderables "
-        "independently from the Opacity value selected by the user. This value should "
-        "not be directly manipulated through a user interface, but instead used by other "
-        "components of the system programmatically",
-        // The Developer mode should be used once the properties in the UI listen to this
-        // openspace::properties::Property::Visibility::Developer
-        openspace::properties::Property::Visibility::Hidden
-    };
-
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
         "Type",
         "Renderable Type",
@@ -95,7 +76,8 @@ namespace {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
 
-        // [[codegen::verbatim(OpacityInfo.description)]]
+        // This value determines the opacity of this renderable. A value of 0 means
+        // completely transparent
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
         // A single tag or a list of tags that this renderable will respond to when
@@ -155,9 +137,8 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Renderable" })
+    , Fadeable()
     , _enabled(EnabledInfo, true)
-    , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _renderableType(RenderableTypeInfo, "Renderable")
     , _dimInAtmosphere(DimInAtmosphereInfo, false)
 {
@@ -280,12 +261,8 @@ bool Renderable::matchesSecondaryRenderBin(int binMask) const noexcept {
     return binMask & static_cast<int>(*_secondaryRenderBin);
 }
 
-void Renderable::setFade(float fade) {
-    _fade = fade;
-}
-
 bool Renderable::isVisible() const {
-    return _enabled && _opacity > 0.f && _fade > 0.f;
+    return _enabled && Fadeable::isVisible();
 }
 
 bool Renderable::isReady() const {
@@ -331,7 +308,8 @@ float Renderable::opacity() const {
     const float dimming = _dimInAtmosphere ?
         global::navigationHandler->camera()->atmosphereDimmingFactor() :
         1.f;
-    return _opacity * _fade * dimming;
+    // @TODO (2023-03-20, emmbr) Should the dimming set the fade value instead?
+    return dimming * Fadeable::opacity();
 }
 
 }  // namespace openspace
