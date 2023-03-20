@@ -1,6 +1,7 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup341
+local kernel = asset.require("../kernels").jup344
+local kernel346 = asset.require("../kernels").jup346
 
 
 
@@ -273,6 +274,125 @@ local carmeGroup = {
     TrailColor = trailColor,
     OrbitPeriod = 758.34,
     Kernels = kernel
+  },
+  {
+    Identifier = "S2018J3",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55511",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 704.56,
+    Kernels = kernel346
+  },
+  {
+    Identifier = "S2021J4",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55515",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 710.13,
+    Kernels = kernel346
+  },
+  {
+    Identifier = "S2021J5",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55516",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 704.80,
+    Kernels = kernel346
+  },
+  {
+    Identifier = "S2021J6",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55517",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 732.55,
+    Kernels = kernel346
+  },
+  {
+    Identifier = "S2016J3",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55518",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 676.37,
+    Kernels = kernel346
+  },
+  {
+    Identifier = "S2022J1",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55521",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 667.34,
+    Kernels = kernel346
+  },
+  {
+    Identifier = "S2022J2",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55522",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 685.51,
+    Kernels = kernel346
   }
 }
 
