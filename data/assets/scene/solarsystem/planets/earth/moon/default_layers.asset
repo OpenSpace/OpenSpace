@@ -1,8 +1,6 @@
 -- Color layers
-asset.require("./layers/colorlayers/wac_utah", false)
-asset.require("./layers/colorlayers/wac_v3_utah", true)
+asset.require("./layers/colorlayers/wac_utah", true)
 asset.require("./layers/colorlayers/wac_sweden", false)
-asset.require("./layers/colorlayers/wac_v3_sweden", false)
 asset.require("./layers/colorlayers/clemuvvis_utah", false)
 asset.require("./layers/colorlayers/clemuvvis_sweden", false)
 asset.require("./layers/colorlayers/uvvishybrid_utah", false)
