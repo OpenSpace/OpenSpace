@@ -5,7 +5,6 @@ local Kernels = asset.syncedResource({
   Version = 2
 })
 
--- asset.export("jup341", Kernels .. "jup341.bsp")
 asset.export("jup344", Kernels .. "jup344.bsp")
 asset.export("jup346", Kernels .. "jup346.bsp")
 asset.export("jup365", Kernels .. "jup365.bsp")
