@@ -112,6 +112,7 @@ local eclipticLabels = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
     Labels = {
+      Enabled = true,
       File = speck .. "eclip.label",
       Color = { 0.5, 0.5, 0.5 },
       Size = 14.75,
@@ -121,7 +122,6 @@ local eclipticLabels = {
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "pc",
-    DrawLabels = true,
     TransformationMatrix = {
       -0.05487554,  0.4941095, -0.8676661,    0.0,
       -0.9938214 , -0.1109906, -0.0003515167, 0.0,
@@ -168,6 +168,7 @@ local equatorialLabels = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
     Labels = {
+      Enabled = true,
       File = speck .. "radec.label",
       Color = { 0.5, 0.5, 0.5 },
       Size = 14.5,
@@ -177,7 +178,6 @@ local equatorialLabels = {
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "pc",
-    DrawLabels = true,
     TransformationMatrix = {
       -0.05487554,  0.4941095, -0.8676661, 0.0,
       -0.8734371 , -0.4448296, -0.1980764, 0.0,
@@ -220,6 +220,7 @@ local galacticLabels = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
     Labels = {
+      Enabled = true,
       File = speck .. "galac.label",
       Color = { 0.5, 0.5, 0.5 },
       Size = 15.8,
@@ -228,8 +229,7 @@ local galacticLabels = {
     },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    Unit = "pc",
-    DrawLabels = true
+    Unit = "pc"
   },
   GUI = {
     Name = "Galactic Sphere Labels",

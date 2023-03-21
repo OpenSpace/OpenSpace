@@ -85,7 +85,6 @@ protected:
 
     // Labels
     bool _hasLabels = false;
-    properties::BoolProperty _drawLabels;
 
 private:
     // Map over the constellations names and their abbreviations
