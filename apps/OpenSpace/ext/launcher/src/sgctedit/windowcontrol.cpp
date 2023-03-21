@@ -36,6 +36,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSpinBox>
+#include <numbers>
 
 namespace {
     std::array<std::string, 4> MonitorNames = {
@@ -826,10 +827,10 @@ void WindowControl::updatePlanarLockedFov() {
     }
 
     const float lockedFov = DefaultFovV;
-    float adjustedFov =
-        2.f * atan(aspectRatio * tan(lockedFov * std::numbers::pi / 180.f / 2.f));
+    float adjustedFov = 2.f *
+        atan(aspectRatio * tan(lockedFov * std::numbers::pi_v<float> / 180.f / 2.f));
     // Convert to degrees and limit to 180°
-    adjustedFov *= 180.f / std::numbers::pi;
+    adjustedFov *= 180.f / std::numbers::pi_v<float>;
     adjustedFov = std::min(adjustedFov, 180.f);
 
     _planar.fovH->setValue(landscapeOrientation ? adjustedFov : lockedFov);
