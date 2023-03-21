@@ -63,12 +63,27 @@ void Fadeable::setFade(float fade) {
     _fade = fade;
 }
 
+void Fadeable::setParentFadeable(Fadeable* parent) {
+    _parentFadeable = parent;
+}
+
+float Fadeable::fade() const {
+    return _fade;
+}
+
 bool Fadeable::isVisible() const {
     return opacity() > 0.f;
 }
 
 float Fadeable::opacity() const {
-    return _opacity * _fade;
+    float fadeFromParent = 1.f;
+    if (_parentFadeable) {
+        // Note that we only care about the fade here, not the full opacity of the
+        // parent. A subowner might still be visible even if the opacity of the 
+        // parent is set to zero
+        fadeFromParent = _parentFadeable->fade();
+    }
+    return _opacity * _fade * fadeFromParent;
 }
 
 }  // namespace openspace

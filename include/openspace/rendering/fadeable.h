@@ -32,6 +32,9 @@ namespace openspace {
 /**
  * This class is an interface for all things fadeable in the software; things that need
  * a fade and opacity property, which will be combined into a final opacity value
+ * 
+ * A Fadeable can also be dependent on the fade value from a specified parent fadeable,
+ * so that it fades out together with the parent
  */
 class Fadeable {
 public:
@@ -39,7 +42,9 @@ public:
     virtual ~Fadeable() = default;
 
     void setFade(float fade);
+    void setParentFadeable(Fadeable* parent);
 
+    float fade() const;
     virtual bool isVisible() const;
 
     /// Returns the full opacity constructed from the _opacity and _fade property values
@@ -48,6 +53,8 @@ public:
 protected:
     properties::FloatProperty _opacity;
     properties::FloatProperty _fade;
+
+    Fadeable* _parentFadeable = nullptr;
 };
 
 } // namespace openspace
