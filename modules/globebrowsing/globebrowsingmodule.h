@@ -97,6 +97,9 @@ public:
     std::string wmsCacheLocation() const;
     uint64_t wmsCacheSize() const; // bytes
 
+    bool isMRFCachingEnabled() const;
+    std::string mrfCacheLocation() const;
+
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
@@ -118,6 +121,9 @@ private:
     properties::StringProperty _wmsCacheLocation;
     properties::UIntProperty _wmsCacheSizeMB;
     properties::UIntProperty _tileCacheSizeMB;
+
+    properties::BoolProperty _mrfCacheEnabled;
+    properties::StringProperty _mrfCacheLocation;
 
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 

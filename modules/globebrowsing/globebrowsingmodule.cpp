@@ -128,6 +128,18 @@ namespace {
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo MRFCacheEnabledInfo = {
+        "MRFCacheEnabled",
+        "MRF Cache Enabled",
+        "Determines whether MRF something something"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MRFCacheLocationInfo = {
+        "MRFCacheLocation",
+        "MRF Cache Location",
+        "The location of the cache folder for MRF something"
+    };
+
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
     {
@@ -200,6 +212,12 @@ namespace {
         // [[codegen::verbatim(TileCacheSizeInfo.description)]]
         std::optional<int> tileCacheSize;
 
+        // [[codegen::verbatim(WMSCacheEnabledInfo.description)]]
+        std::optional<bool> mrfCacheEnabled [[codegen::key("MRFCacheEnabled")]];
+
+        // [[codegen::verbatim(WMSCacheLocationInfo.description)]]
+        std::optional<std::string> mrfCacheLocation [[codegen::key("MRFCacheLocation")]];
+
         // If you know what you are doing and you have WMS caching *disabled* but offline
         // mode *enabled*, you can set this value to 'true' to silence a warning that you
         // would otherwise get at startup
@@ -217,12 +235,16 @@ GlobeBrowsingModule::GlobeBrowsingModule()
     , _wmsCacheLocation(WMSCacheLocationInfo, "${BASE}/cache_gdal")
     , _wmsCacheSizeMB(WMSCacheSizeInfo, 1024)
     , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
+    , _mrfCacheEnabled(MRFCacheEnabledInfo, false)
+    , _mrfCacheLocation(MRFCacheLocationInfo, "${BASE}/cache_mrf")
 {
     addProperty(_wmsCacheEnabled);
     addProperty(_offlineMode);
     addProperty(_wmsCacheLocation);
     addProperty(_wmsCacheSizeMB);
     addProperty(_tileCacheSizeMB);
+    addProperty(_mrfCacheEnabled);
+    addProperty(_mrfCacheLocation);
 }
 
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
@@ -234,6 +256,8 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     _wmsCacheLocation = p.cacheLocation.value_or(_wmsCacheLocation);
     _wmsCacheSizeMB = p.wmsCacheSize.value_or(_wmsCacheSizeMB);
     _tileCacheSizeMB = p.tileCacheSize.value_or(_tileCacheSizeMB);
+    _mrfCacheEnabled = p.mrfCacheEnabled.value_or(_mrfCacheEnabled);
+    _mrfCacheLocation = p.mrfCacheLocation.value_or(_mrfCacheLocation);
     const bool noWarning = p.noWarning.value_or(false);
 
     if (!_wmsCacheEnabled && _offlineMode && !noWarning) {
@@ -685,6 +709,14 @@ std::string GlobeBrowsingModule::wmsCacheLocation() const {
 uint64_t GlobeBrowsingModule::wmsCacheSize() const {
     uint64_t size = _wmsCacheSizeMB;
     return size * 1024 * 1024;
+}
+
+bool GlobeBrowsingModule::isMRFCachingEnabled() const {
+    return _mrfCacheEnabled;
+}
+
+std::string GlobeBrowsingModule::mrfCacheLocation() const {
+    return _mrfCacheLocation;
 }
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
