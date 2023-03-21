@@ -1,32 +1,13 @@
-local scene_helper = asset.require('util/scene_helper')
-
-local Keybindings = {
-  {
-    Key = "v",
-    Name = "Show Constellation Art",
-    Command = "openspace.setPropertyValue('Scene.ConstellationArt*.Renderable.Opacity', 0);" ..
-    "openspace.setPropertyValue('{zodiac}.Renderable.Enabled',true);" ..
-    "openspace.setPropertyValue('{zodiac}.Renderable.Opacity', 1, 2);",
-    Documentation = "Enables and fades up zodiac art work",
-    GuiPath = "/Rendering",
-    Local = false
-  },
-  {
-    Key = "Shift+v",
-    Name = "Show Constellation Art",
-    Command =  "openspace.setPropertyValue('{zodiac}.Renderable.Opacity', 0, 2);",
-    Documentation = "fades down zodiac art work",
-    GuiPath = "/Rendering",
-    Local = false
-  },
-}
+local mainAsset = asset.require("./constellation_art")
 
 asset.onInitialize(function ()
-  scene_helper.bindKeys(Keybindings)
+  openspace.bindKey("v", mainAsset.ShowZodiacArt.Identifier)
+  openspace.bindKey("Shift+v", mainAsset.HideZodiacArt.Identifier)
 end)
 
 asset.onDeinitialize(function ()
-  scene_helper.unbindKeys(Keybindings)
+  openspace.clearKey("v")
+  openspace.clearKey("Shift+v")
 end)
 
 asset.meta = {

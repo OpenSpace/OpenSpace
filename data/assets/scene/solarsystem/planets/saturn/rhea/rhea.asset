@@ -1,8 +1,13 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
-asset.require('./trail')
-local labelsPath = asset.require('../saturn_globelabels').LabelsPath
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").sat375
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
 
 local Rhea = {
   Identifier = "Rhea",
@@ -26,38 +31,71 @@ local Rhea = {
     SegmentsPerPatch = 64,
     Layers = {},
     Labels = {
-      Enable = false,
-      FileName = labelsPath .. "/rhea.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 40.0,
-      LabelsSize = 8.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 2500000.0,
-      FadeOutStartingDistance = 1000000.0,
-      LabelsForceDomeRendering = true,
-      LabelsDistanceEPS = 250000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      Enabled = false,
+      FileName = labelsPath .. "rhea.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 9.0,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 500000.0, 2500000.0 },
+      DistanceEPS = 250000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
   GUI = {
     Name = "Rhea",
     Path = "/Solar System/Planets/Saturn/Moons",
-    Description = [[Second largest moon of Saturn.]]
+    Description = "Second largest moon of Saturn"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Rhea })
+
+local RheaLabel = {
+  Identifier = "RheaLabel",
+  Parent = Rhea.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Rhea",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.3, 10.0 },
+    FadeWidths = { 0.15, 10.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Rhea Label",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = "Label for Saturn's moon Rhea"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Rhea)
+  openspace.addSceneGraphNode(RheaLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(RheaLabel)
+  openspace.removeSceneGraphNode(Rhea)
+end)
+
+asset.export(Rhea)
+
 
 
 asset.meta = {
   Name = "Rhea",
   Version = "1.0",
-  Description = [[ Rhea globe with labels.]],
+  Description = "Rhea globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

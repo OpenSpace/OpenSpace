@@ -1,15 +1,31 @@
-local moonAsset = asset.require("./../../moon").Moon
+local moonAsset = asset.require("../../moon").Moon
 local globeIdentifier = moonAsset.Identifier
 
 local layer = {
   Identifier = "Size_Reference",
   Name = "Size Reference",
+  Enabled = asset.enabled,
   Type = "SizeReferenceTileLayer",
   Radii = moonAsset.Renderable.Radii
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Moon Size Reference",
+  Version = "1.0",
+  Description = "Size reference layer for Moon globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

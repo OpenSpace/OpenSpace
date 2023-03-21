@@ -1,7 +1,6 @@
--- asset.require('../examples/volume/generated/cartesian.asset')
-
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local data = asset.syncedResource({
   Name = "Milkyway Volume Data",
@@ -29,38 +28,45 @@ local MilkyWayVolumeGalaxy = {
     StepSize = 0.01,
     AbsorptionMultiply = 200,
     EmissionMultiply = 250,
-    Rotation = { 3.1415926, 3.1248, 4.45741 },
+    Rotation = { math.pi, 3.1248, 4.45741 },
     Volume = {
       Type = "Volume",
-      Filename = openspace.absPath(data .. "/MilkyWayRGBAVolume1024x1024x128.raw"),
+      Filename = openspace.absPath(data .. "MilkyWayRGBAVolume1024x1024x128.raw"),
       Dimensions = { 1024, 1024, 128 },
       Size = { 1.2E21, 1.2E21, 0.15E21 },
       Downscale = 0.4,
     },
     Points = {
       Type = "Points",
-      Filename = openspace.absPath(data .. "/MilkyWayPoints.off"),
+      Filename = openspace.absPath(data .. "MilkyWayPoints.off"),
       EnabledPointsRatio = 0.3,
-      Texture = openspace.absPath(data .. "/halo.png")
+      Texture = openspace.absPath(data .. "halo.png")
     }
   },
   GUI = {
     Path = "/Milky Way",
-    Name = "Milky Way Volume"
+    Name = "Milky Way Volume",
+    Description = "Volumetric rendering of Milky Way galaxy based on simulation from NAOJ"
   }
 }
 
-local objects = { MilkyWayVolumeGalaxy }
-assetHelper.registerSceneGraphNodesAndExport(asset, objects)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MilkyWayVolumeGalaxy)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MilkyWayVolumeGalaxy)
+end)
+
+asset.export(MilkyWayVolumeGalaxy)
+
 
 
 asset.meta = {
   Name = "Milky Way Volume",
-  Version = "1.0",
-  Description = [[Volumetric rendering of Milky Way galaxy based on simulation from
-    NAOJ.]],
+  Version = "1.1",
+  Description = "Volumetric rendering of Milky Way galaxy based on simulations from NAOJ",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT License",
-  Identifiers = {"MilkyWayVolume"}
+  License = "MIT License"
 }

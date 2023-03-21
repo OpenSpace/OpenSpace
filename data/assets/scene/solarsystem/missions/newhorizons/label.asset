@@ -1,12 +1,14 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('./transforms')
-local NewHorizonsModel = asset.require('./model')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+local NewHorizonsModel = asset.require("./model")
 
 
-
-local textures = NewHorizonsModel.NewHorizonsTextures
-local models = NewHorizonsModel.NewHorizonsModels
+local models = asset.syncedResource({
+  Name = "New Horizons Model",
+  Type = "HttpSynchronization",
+  Identifier = "newhorizons_model",
+  Version = 2
+})
 
 local Labels = {
   Identifier = "Labels",
@@ -14,7 +16,7 @@ local Labels = {
   Renderable = {
     Type = "RenderableModel",
     Body = "NEW HORIZONS",
-    GeometryFile = models .. "/Labels.obj",
+    GeometryFile = models .. "Labels.obj",
     AmbientIntensity = 0.8
   },
   GUI = {
@@ -22,4 +24,12 @@ local Labels = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Labels })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Labels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Labels)
+end)
+
+asset.export(Labels)

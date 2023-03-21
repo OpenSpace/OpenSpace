@@ -1,10 +1,13 @@
--- a11_lem.asset
-local asset_helper = asset.require('util/asset_helper')
-local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
-local moon_asset = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local sun = asset.require("scene/solarsystem/sun/sun")
+local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
-local lem_model = asset.require('scene/solarsystem/missions/apollo/lem_model')
 
+local lem_model = asset.syncedResource({
+  Name = "Apollo Lem Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_lem_model",
+  Version = 4
+})
 
 local Apollo11Lem = {
   Identifier = "Apollo11Lem",
@@ -36,9 +39,16 @@ local Apollo11LemModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = lem_model.modelFolder .. "/LM-2_ver2clean.obj",
-    RotationVector = { 91.044090,171.229706,111.666664 },
-    LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
+    GeometryFile = lem_model .. "LM-2_ver2clean.obj",
+    RotationVector = { 91.044090, 171.229706, 111.666664 },
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Apollo 11 Lem",
@@ -46,4 +56,15 @@ local Apollo11LemModel = {
   }
 }
 
-asset_helper.registerSceneGraphNodesAndExport(asset, { Apollo11Lem, Apollo11LemModel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Apollo11Lem)
+  openspace.addSceneGraphNode(Apollo11LemModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Apollo11LemModel)
+  openspace.removeSceneGraphNode(Apollo11Lem)
+end)
+
+asset.export(Apollo11Lem)
+asset.export(Apollo11LemModel)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,23 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
 in vec2 vs_st;
-in vec4 vs_position;
+in float vs_depth;
 
 uniform sampler1D discTexture;
 uniform vec2 offset; // relative to semi major axis
 uniform float opacity;
 uniform float eccentricity;
 uniform float semiMajorAxis;
+uniform vec3 multiplyColor = vec3(1.0);
 
 const float Epsilon = 0.0000001;
 
+
 // Compute semi minor axis from major axis, a, and eccentricity, e
 float semiMinorAxis(float a, float e) {
-    return a * sqrt(1.0 - e * e);
+  return a * sqrt(1.0 - e * e);
 }
 
 // If returned value <= 1, the point is insdie or on the ellipse specified by the input:
@@ -46,84 +47,86 @@ float semiMinorAxis(float a, float e) {
 // cx is the displacement of the center of the ellipse along the x-axis (for an orbit,
 // the y-displacement is always zero)
 float ellipseTest(vec2 point, float a, float b, float cx) {
-    float x = point.x;
-    float y = point.y;
-    return (pow(x - cx, 2.0) / (a*a)) + ((y*y) / (b*b));
+  float x = point.x;
+  float y = point.y;
+  return (pow(x - cx, 2.0) / (a*a)) + ((y*y) / (b*b));
 }
 
+
 Fragment getFragment() {
-    // Moving the origin to the center
-    vec2 st = (vs_st - vec2(0.5)) * 2.0;
+  // Moving the origin to the center
+  vec2 st = (vs_st - vec2(0.5)) * 2.0;
 
-    float offsetLower = offset.x * semiMajorAxis;
-    float offsetUpper = offset.y * semiMajorAxis;
+  float offsetLower = offset.x * semiMajorAxis;
+  float offsetUpper = offset.y * semiMajorAxis;
 
-    float AUpper = semiMajorAxis + offsetUpper;
-    float BUpper = semiMinorAxis(AUpper, eccentricity);
-    float CUpper = sqrt(AUpper*AUpper - BUpper*BUpper);
-    float outerApoapsisDistance = AUpper * (1 + eccentricity);
+  float AUpper = semiMajorAxis + offsetUpper;
+  float BUpper = semiMinorAxis(AUpper, eccentricity);
+  float CUpper = sqrt(AUpper*AUpper - BUpper*BUpper);
+  float outerApoapsisDistance = AUpper * (1.0 + eccentricity);
 
-    float ALower = semiMajorAxis - offsetLower;
-    float BLower = semiMinorAxis(ALower, eccentricity);
-    float CLower = sqrt(ALower*ALower - BLower*BLower);
-    float innerApoapsisDistance = ALower * (1 + eccentricity);
+  float ALower = semiMajorAxis - offsetLower;
+  float BLower = semiMinorAxis(ALower, eccentricity);
+  float CLower = sqrt(ALower*ALower - BLower*BLower);
+  float innerApoapsisDistance = ALower * (1.0 + eccentricity);
 
-    // Normalize based on outer apoapsis distance (size of plane)
-    float AU_n = AUpper / outerApoapsisDistance;
-    float BU_n = BUpper / outerApoapsisDistance;
-    float CU_n = CUpper / outerApoapsisDistance;
-    float AL_n = ALower / outerApoapsisDistance;
-    float BL_n = BLower / outerApoapsisDistance;
-    float CL_n = CLower / outerApoapsisDistance;
+  // Normalize based on outer apoapsis distance (size of plane)
+  float AU_n = AUpper / outerApoapsisDistance;
+  float BU_n = BUpper / outerApoapsisDistance;
+  float CU_n = CUpper / outerApoapsisDistance;
+  float AL_n = ALower / outerApoapsisDistance;
+  float BL_n = BLower / outerApoapsisDistance;
+  float CL_n = CLower / outerApoapsisDistance;
 
-    if (eccentricity <= Epsilon) {
-        CU_n = 0.0;
-        CL_n = 0.0;
-    }
+  if (eccentricity <= Epsilon) {
+    CU_n = 0.0;
+    CL_n = 0.0;
+  }
 
-    float outer = ellipseTest(st, AU_n, BU_n, -CU_n);
-    float inner = ellipseTest(st, AL_n, BL_n, -CL_n);
-    if (outer > 1.0 || inner < 1.0) {
-        // point is outside outer ellipse or inside inner eliipse
-        discard;
-    }
+  float outer = ellipseTest(st, AU_n, BU_n, -CU_n);
+  float inner = ellipseTest(st, AL_n, BL_n, -CL_n);
+  if (outer > 1.0 || inner < 1.0) {
+    // Point is outside outer ellipse or inside inner ellipse
+    discard;
+  }
 
-    // Remapping the texture coordinates
-    vec2 dir = normalize(st);
+  // Remapping the texture coordinates
+  vec2 dir = normalize(st);
 
-    // Find outer ellipse: where along the direction does the equation == 1?
-    float denominator = pow(BU_n * dir.x, 2.0) + pow(AU_n * dir.y, 2.0);
-    float first = -(BU_n * BU_n * dir.x * CU_n) / denominator;
-    float second = pow((BU_n * BU_n * dir.x * CU_n)  /  denominator, 2.0);
-    float third = (pow(BU_n * CU_n, 2.0) - pow(AU_n * BU_n, 2.0)) / denominator;
+  // Find outer ellipse: where along the direction does the equation == 1?
+  float denominator = pow(BU_n * dir.x, 2.0) + pow(AU_n * dir.y, 2.0);
+  float first = -(BU_n * BU_n * dir.x * CU_n) / denominator;
+  float second = pow((BU_n * BU_n * dir.x * CU_n)  /  denominator, 2.0);
+  float third = (pow(BU_n * CU_n, 2.0) - pow(AU_n * BU_n, 2.0)) / denominator;
 
-    float scale = first + sqrt(second - third);
+  float scale = first + sqrt(second - third);
 
-    vec2 outerPoint = dir * scale;
-    vec2 innerPoint = outerPoint * (innerApoapsisDistance / outerApoapsisDistance);
+  vec2 outerPoint = dir * scale;
+  vec2 innerPoint = outerPoint * (innerApoapsisDistance / outerApoapsisDistance);
 
-    float discWidth = distance(outerPoint, innerPoint);
-    float distanceFromOuterEdge = distance(outerPoint, st);
-    float relativeDistance = distanceFromOuterEdge / discWidth;
+  float discWidth = distance(outerPoint, innerPoint);
+  float distanceFromOuterEdge = distance(outerPoint, st);
+  float relativeDistance = distanceFromOuterEdge / discWidth;
 
-    // Compute texture coordinate based on the distance to outer edge
-    float textureCoord = 0.0;
+  // Compute texture coordinate based on the distance to outer edge
+  float textureCoord = 0.0;
 
-    // The midpoint (textureCoord = 0.5) depends on the ratio between the offsets
-    // (Note that the texture goes from outer to inner edge of disc)
-    float midPoint = offsetUpper / (offsetUpper + offsetLower);
-    if(relativeDistance > midPoint) {
-        textureCoord = 0.5 + 0.5 * (relativeDistance - midPoint) / (1.0 - midPoint);
-    }
-    else {
-        textureCoord = 0.5 * (relativeDistance / midPoint);
-    }
+  // The midpoint (textureCoord = 0.5) depends on the ratio between the offsets
+  // (Note that the texture goes from outer to inner edge of disc)
+  float midPoint = offsetUpper / (offsetUpper + offsetLower);
+  if (relativeDistance > midPoint) {
+    textureCoord = 0.5 + 0.5 * (relativeDistance - midPoint) / (1.0 - midPoint);
+  }
+  else {
+    textureCoord = 0.5 * (relativeDistance / midPoint);
+  }
 
-    vec4 diffuse = texture(discTexture, textureCoord);
-    diffuse.a *= opacity;
+  vec4 diffuse = texture(discTexture, textureCoord);
+  diffuse.a *= opacity;
+  diffuse.rgb *= multiplyColor;
 
-    Fragment frag;
-    frag.color = diffuse;
-    frag.depth = vs_position.w;
-    return frag;
+  Fragment frag;
+  frag.color = diffuse;
+  frag.depth = vs_depth;
+  return frag;
 }

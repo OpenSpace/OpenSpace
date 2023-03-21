@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,15 +26,19 @@
 
 #include <ghoul/misc/dictionary.h>
 
+namespace {
+    std::string Type = "SCANNER";
+} // namespace
+
 namespace openspace {
 
-ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) : _type("SCANNER") {
+ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) {
     for (size_t k = 0; k < dictionary.size(); k++) {
         _spiceIDs.push_back(dictionary.value<std::string>(std::to_string(k + 1)));
     }
 }
 const std::string& ScannerDecoder::decoderType() const {
-    return _type;
+    return Type;
 }
 
 const std::vector<std::string>& ScannerDecoder::spiceIDs() const {

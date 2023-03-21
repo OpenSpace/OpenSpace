@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,12 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__
-#define __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___DELTATIMESDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___DELTATIMESDIALOG___H__
 
 #include <QDialog>
-
-namespace openspace { class Profile; }
 
 class QDialogButtonBox;
 class QLabel;
@@ -35,7 +33,7 @@ class QListWidget;
 class QLineEdit;
 class QPushButton;
 
-class DeltaTimesDialog : public QDialog {
+class DeltaTimesDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -45,7 +43,7 @@ public:
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    DeltaTimesDialog(openspace::Profile& profile, QWidget* parent);
+    DeltaTimesDialog(QWidget* parent, std::vector<double>* deltaTimes);
 
     /**
      * Returns a text summary of the delta time list for display purposes
@@ -63,8 +61,9 @@ public:
      */
     virtual void keyPressEvent(QKeyEvent* evt) override;
 
+private:
+    void createWidgets();
 
-private slots:
     void listItemSelected();
     void valueChanged(const QString& text);
     void saveDeltaTimeValue();
@@ -73,22 +72,19 @@ private slots:
     void removeDeltaTimeValue();
     void parseSelections();
 
-private:
-    void createWidgets();
-
     /**
      * Called to transition to editing a particular dt value (gui settings)
      *
      * \param index index in dt list
-     * \param state \c true if the edit mode should be turned on, \c false otherwise
+     * \param state `true` if the edit mode should be turned on, `false` otherwise
      */
     void transitionEditMode(int index, bool state);
 
     void setLabelForKey(int index, bool editMode, std::string color);
     bool isLineEmpty(int index);
 
-    openspace::Profile& _profile;
-    std::vector<double> _data;
+    std::vector<double>* _deltaTimes = nullptr;
+    std::vector<double> _deltaTimesData;
     bool _editModeNewItem = false;
 
     QListWidget* _listWidget = nullptr;
@@ -105,4 +101,4 @@ private:
     QLabel* _errorMsg = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__
+#endif // __OPENSPACE_UI_LAUNCHER___DELTATIMESDIALOG___H__

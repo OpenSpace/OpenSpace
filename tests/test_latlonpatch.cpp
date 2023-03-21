@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
@@ -48,8 +48,8 @@ TEST_CASE("LatLonPatch: Find Closest Corner", "[latlonpatch]") {
     Geodetic2 closestCorner = patch.closestCorner(point);
     Geodetic2 northEastCorner = patch.corner(NORTH_EAST);
 
-    REQUIRE(closestCorner.lat == northEastCorner.lat);
-    REQUIRE(closestCorner.lon == northEastCorner.lon);
+    CHECK(closestCorner.lat == northEastCorner.lat);
+    CHECK(closestCorner.lon == northEastCorner.lon);
 }
 
 TEST_CASE("LatLonPatch: Find Closest Corner 2", "[latlonpatch]") {
@@ -66,77 +66,6 @@ TEST_CASE("LatLonPatch: Find Closest Corner 2", "[latlonpatch]") {
     Geodetic2 closestCorner = patch.closestCorner(point);
     Geodetic2 expectedCorner = patch.corner(SOUTH_WEST);
 
-    REQUIRE(closestCorner.lat == expectedCorner.lat);
-    REQUIRE(closestCorner.lon == expectedCorner.lon);
-}
-
-TEST_CASE("LatLonPatch: Spherical Clamp 1", "[latlonpatch]") {
-    //using namespace openspace::globebrowsing;
-
-    //GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
-
-    //// inside patch latitude-wise, east of patch longitude-wise
-    //Geodetic2 point { glm::pi<double>() / 6.0, glm::pi<double>() / 4.0 - 0.01 };
-
-
-    //Geodetic2 clampedPoint = patch.closestPoint(point);
-    //Geodetic2 neCorner = patch.corner(NORTH_EAST);
-    //REQUIRE(clampedPoint.lat == neCorner.lat);
-    //REQUIRE(clampedPoint.lon == neCorner.lon);
-}
-
-TEST_CASE("LatLonPatch: Spherical Clamp 2", "[latlonpatch]") {
-    //using namespace openspace::globebrowsing;
-
-    //GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
-
-    //// inside patch latitude-wise, west of patch longitude-wise
-    //Geodetic2 point { glm::pi<double>() / 6.0, glm::pi<double>() / 4.0 + 0.01 };
-
-    //Geodetic2 clampedPoint = patch.closestPoint(point);
-    //Geodetic2 nwCorner = patch.corner(NORTH_WEST);
-    //REQUIRE(clampedPoint.lat == nwCorner.lat);
-    //REQUIRE(clampedPoint.lon == nwCorner.lon);
-}
-
-TEST_CASE("LatLonPatch: Spherical Clamp 3", "[latlonpatch]") {
-    //using namespace openspace::globebrowsing;
-
-    //GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
-
-    //// North east of patch
-    //Geodetic2 point { glm::pi<double>() / 3.0, glm::pi<double>() / 4.0 - 0.01 };
-
-    //Geodetic2 clampedPoint = patch.closestPoint(point);
-    //Geodetic2 neCorner = patch.corner(NORTH_EAST);
-    //REQUIRE(clampedPoint.lat == neCorner.lat);
-    //REQUIRE(clampedPoint.lon == neCorner.lon);
-}
-
-TEST_CASE("LatLonPatch: Spherical Clamp 4", "[latlonpatch]") {
-    //using namespace openspace::globebrowsing;
-
-    //GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
-
-    //// South east of patch
-    //Geodetic2 point { -glm::pi<double>() / 3.0, glm::pi<double>() / 4.0 - 0.01 };
-
-    //Geodetic2 clampedPoint = patch.closestPoint(point);
-    //Geodetic2 seCorner = patch.corner(SOUTH_EAST);
-    //REQUIRE(clampedPoint.lat == seCorner.lat);
-    //REQUIRE(clampedPoint.lon == seCorner.lon);
-}
-
-TEST_CASE("LatLonPatch: Spherical Clamp 5", "[latlonpatch]") {
-    //using namespace openspace::globebrowsing;
-
-    //GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
-
-    //// South west of patch
-    //Geodetic2 point { -glm::pi<double>() / 3.0, 3 * glm::pi<double>() / 4.0 + 0.01 };
-
-    //Geodetic2 clampedPoint = patch.closestPoint(point);
-    //Geodetic2 swCorner = patch.corner(SOUTH_WEST);
-    //REQUIRE(clampedPoint.lat == swCorner.lat);
-    //REQUIRE(clampedPoint.lon == swCorner.lon);
+    CHECK(closestCorner.lat == expectedCorner.lat);
+    CHECK(closestCorner.lon == expectedCorner.lon);
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,44 +28,87 @@
 #include <openspace/util/resourcesynchronization.h>
 
 #include <thread>
+#include <optional>
 #include <vector>
 
 namespace openspace {
 
+/**
+ * A concreate ResourceSynchronization that will request a list of files from a central
+ * server (the server list is provided in the constructor) by asking for a specific
+ * identifier and a file version and application version addition. The server is expected
+ * to return a flat list of files that can be then directly downloaded into the #directory
+ * of this synchronization. That list of files can have empty lines and commented out
+ * lines (starting with a #) that will be ignored. Every other line is URL that will be
+ * downloaded into the #directory.
+ * Each requested set of files is identified by a triplet of (identifier, file version,
+ * application version). The identifier is denoting the group of files that is requested,
+ * the file version is the specific version of this set of files, and the application
+ * version is reserved for changes in the data transfer format.
+ */
 class HttpSynchronization : public ResourceSynchronization {
 public:
-    HttpSynchronization(const ghoul::Dictionary& dict, std::string synchronizationRoot,
+    /**
+     * The constructor for this synchronization object. The \p dict contains information
+     * about the `identifier` and the \version (which is the file version), the
+     * \p synchronizationRoot is the path to the root folder where the downloaded files
+     * will be placed, and the \p synchronizationRepositories is a list of the URLs which
+     * will be asked to resolve the (identifier, version) pair. The first URL in the list
+     * that can successfully resolve the requested (identifier, version) pair is the one
+     * that will be used.
+     *
+     * \param dict The parameter dictionary (namely the identifier and version)
+     * \param synchronizationRoot The path to the root from which the complete #directory
+     *        path is constructed
+     * \param synchronizationRepositories The list of repositories that will be asked to
+     *        resolve the identifier request
+     */
+    HttpSynchronization(const ghoul::Dictionary& dict,
+        std::filesystem::path synchronizationRoot,
         std::vector<std::string> synchronizationRepositories);
 
-    virtual ~HttpSynchronization();
+    /// Destructor that will close the asynchronous file transfer, if it is still ongoing
+    ~HttpSynchronization() override;
 
+    /**
+     * Returns the location to which files downloaded through this ResourceSynchronization
+     * are saved.
+     *
+     * \return The location for files created by this class
+     */
+    std::filesystem::path directory() const override;
 
-    std::string directory() override;
+    /**
+     * Starts the synchronization for this ResourceSynchronization by first trying to find
+     * a synchronization respository that replies to the request, parsing the result and
+     * then downloading each of the files that are provided in that result.
+     */
     void start() override;
-    void cancel() override;
-    void clear() override;
 
-    size_t nSynchronizedBytes() override;
-    size_t nTotalBytes() override;
-    bool nTotalBytesIsKnown() override;
+    /// Cancels any ongoing synchronization of this ResourceSynchronization
+    void cancel() override;
+
+    std::string generateUid() override;
 
     static documentation::Documentation Documentation();
 
 private:
-    void createSyncFile();
-    bool hasSyncFile();
+    /// Tries to get a reply from the provided URL and returns that success to the caller
     bool trySyncFromUrl(std::string url);
 
-    std::atomic_bool _nTotalBytesKnown = false;
-    std::atomic_size_t _nTotalBytes = 0;
-    std::atomic_size_t _nSynchronizedBytes = 0;
+    /// Contains a flag whether the current transfer should be cancelled
     std::atomic_bool _shouldCancel = false;
 
-    std::string _identifier;
+    /// The file version for the requested files
     int _version = -1;
-    std::string _synchronizationRoot;
-    std::vector<std::string> _synchronizationRepositories;
 
+    bool _unzipFiles = false;
+    std::optional<std::string> _unzipFilesDestination = std::nullopt;
+
+    // The list of all repositories that we'll try to sync from
+    const std::vector<std::string> _syncRepositories;
+
+    // The thread that will be doing the synchronization
     std::thread _syncThread;
 };
 

@@ -6,7 +6,7 @@
 }
 
 QLabel#heading {
-    font-size: 12pt;
+  font-size: 12pt;
 }
 
 QLabel#error-message {
@@ -18,12 +18,12 @@ QLabel#error-message {
  */
 LauncherWindow  QLabel {
   font-family: Segoe UI;
-  font-weight:600;
+  font-weight: 600;
 }
 
 LauncherWindow  QLabel#label_choose, QLabel#label_options {
-  color: #ddd;
-  font-size:10pt;
+  color: #dddddd;
+  font-size: 10pt;
 }
 
 LauncherWindow  QLabel#clear {
@@ -36,7 +36,7 @@ LauncherWindow  QComboBox#config {
   border-radius: 3px;
   border-color: rgb(225, 225, 225);
   padding: 1px 18px 1px 3px;
-  min-width: 6em;
+  min-width: 14em;
   font-size: 10pt;
   font-family: Segoe UI;
   font-weight: bold;
@@ -115,13 +115,24 @@ PropertiesDialog  QListWidget {
  */
 AssetsDialog  QTreeView {
   min-width: 40em;
+  min-height: 40em;
 }
 
 /*
- * Keybindings
+ * ActionDialog
  */
-KeybindingsDialog  QListWidget {
+ActionDialog  QListWidget {
   min-width: 40em;
+}
+
+ActionDialog  QPushButton#add-button, QPushButton#remove-button {
+  font-weight: bold;
+
+  padding: 0px 0px 0px 0px;
+  min-width: 1.5em;
+  max-width: 1.5em;
+  min-height: 1.5em;
+  max-height: 1.5em;
 }
 
 /*
@@ -134,6 +145,45 @@ DeltaTimesDialog  QListWidget {
 /*
  * Camera
  */
- CameraDialog  QLabel#error-message {
+CameraDialog  QLabel#error-message {
   min-width: 10em;
+}
+
+/*
+ * ScriptlogDialog
+ */
+ScriptlogDialog  QListWidget {
+  min-width: 60em;
+}
+
+/*
+ * Horizons dialog
+ */
+HorizonsDialog  QPlainTextEdit#log {
+  font-family: Courier;
+}
+
+HorizonsDialog  QComboBox#mono {
+  font-family: Courier;
+}
+
+HorizonsDialog  QLabel#thin {
+  font-weight: normal;
+}
+
+HorizonsDialog  QLabel#error {
+  color: rgb(221, 17, 17);
+}
+
+HorizonsDialog  QLabel#normal {
+  color: rgb(0, 0, 0);
+}
+
+/*
+ * SGCT
+ */
+WindowControl QLabel#info {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 8pt;
 }

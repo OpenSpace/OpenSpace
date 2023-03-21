@@ -1,0 +1,83 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Tsunami Historical Series: Samoa - 2009"
+local Identifier = "noaa-sos-oceans-tsunami_historical_series-samoa"
+local Description = [[At 6:48 on the morning of September 29, 2009 (17:48 UTC), an 8.1
+moment magnitude earthquake struck near the Samoan Islands in the southwest Pacific
+Ocean. The Pacific Tsunami Warning Center (PTWC) quickly determined that the large
+magnitude of this earthquake, its location under the sea floor, its relatively shallow
+depth within the earth, and a history of tsunami-causing earthquakes in the region meant
+that it could have moved the seafloor and thus posed a significant tsunami risk. PTWC
+issued its first tsunami warning several minutes later for Samoa, American Samoa, Tonga,
+and other nearby island groups. The earthquake did in fact cause a dangerous tsunami, and
+over the following hours PTWC tracked it through the Pacific Ocean and updated its alerts
+with measured tsunami wave heights and recommended that additional areas consider coastal
+evacuation. PTWC canceled all tsunami alerts about four hours after the earthquake]]
+local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-samoa-2009/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+local layer_coastal = {
+  Identifier = Identifier .. "-coastal",
+  Name = Name .. " (Coastal)",
+  FilePath = syncedDirectory .. "Tsunami_Coastal_Map_Samoa_2009_4k.jpg",
+  Description = Description
+}
+
+local layer_energy_coastal = {
+  Identifier = Identifier .. "-energy_coastal",
+  Name = Name .. " (Energy Coastal)",
+  FilePath = syncedDirectory .. "Tsunami_Energy+Coastal_Map_Samoa_2009_4k.jpg",
+  Description = Description
+}
+
+local layer_energy = {
+  Identifier = Identifier .. "-energy",
+  Name = Name .. " (Energy)",
+  FilePath = syncedDirectory .. "Tsunami_Energy_Map_Samoa_2009_4k.jpg",
+  Description = Description
+}
+
+local layer_null = {
+  Identifier = Identifier .. "-null",
+  Name = Name .. " (Null)",
+  FilePath = syncedDirectory .. "Tsunami_Null_Coastal_Map_Samoa_2009_4k.jpg",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_coastal)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy_coastal)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_null)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_coastal)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_energy_coastal)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_energy)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_null)
+end)
+
+asset.export(layer_coastal)
+asset.export(layer_energy_coastal)
+asset.export(layer_energy)
+asset.export(layer_null)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

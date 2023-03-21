@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,9 @@
 #define __OPENSPACE_CORE___PROFILE___H__
 
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/keys.h>
+#include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
 #include <optional>
 #include <string>
@@ -36,6 +36,8 @@
 #include <vector>
 
 namespace openspace {
+
+namespace interaction { struct NavigationState; }
 
 namespace scripting { struct LuaLibrary; }
 
@@ -74,18 +76,25 @@ public:
             SetPropertyValueSingle
         };
 
-        SetType setType;
+        SetType setType = SetType::SetPropertyValue;
         std::string name;
         std::string value;
     };
-    struct Keybinding {
-        KeyWithModifier key;
+
+    struct Action {
+        std::string identifier;
         std::string documentation;
         std::string name;
         std::string guiPath;
-        bool isLocal;
+        bool isLocal = false;
         std::string script;
     };
+
+    struct Keybinding {
+        KeyWithModifier key;
+        std::string action;
+    };
+
     struct Time {
         enum class Type {
             Absolute,
@@ -94,9 +103,11 @@ public:
 
         Type type;
         std::string value;
+        bool startPaused = false;
     };
+
     struct CameraNavState {
-        static constexpr const char* Type = "setNavigationState";
+        static constexpr std::string_view Type = "setNavigationState";
 
         std::string anchor;
         std::optional<std::string> aim;
@@ -106,70 +117,52 @@ public:
         std::optional<double> yaw;
         std::optional<double> pitch;
     };
+
     struct CameraGoToGeo {
-        static constexpr const char* Type = "goToGeo";
+        static constexpr std::string_view Type = "goToGeo";
 
         std::string anchor;
         double latitude;
         double longitude;
         std::optional<double> altitude;
     };
+
     using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
 
     Profile() = default;
     explicit Profile(const std::string& content);
     std::string serialize() const;
 
-    std::string convertToScene() const;
-
     /**
      * Saves all current settings, starting from the profile that was loaded at startup,
      * and all of the property & asset changes that were made since startup.
      */
     void saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
-        std::string currentTime,
-        interaction::NavigationHandler::NavigationState navState);
+        std::string currentTime, interaction::NavigationState navState);
 
-    /// If the value passed to this function is 'true', the addAsset and removeAsset
-    /// functions will be no-ops instead
-    void setIgnoreUpdates(bool ignoreUpdates);
-
-    /// Adds a new asset and checks for duplicates
+    /// Adds a new asset and checks for duplicates unless the `ignoreUpdates` member is
+    /// set to `true`
     void addAsset(const std::string& path);
 
-    /// Removes an asset
+    /// Removes an asset unless the `ignoreUpdates` member is set to `true`
     void removeAsset(const std::string& path);
 
-    /// Removes all assets
-    void clearAssets();
+    static constexpr Version CurrentVersion = Version{ 1, 2 };
 
-    Version version() const;
-    std::vector<Module> modules() const;
-    std::optional<Meta> meta() const;
-    std::vector<std::string> assets() const;
-    std::vector<Property> properties() const;
-    std::vector<Keybinding> keybindings() const;
-    std::optional<Time> time() const;
-    std::vector<double> deltaTimes() const;
-    std::optional<CameraType> camera() const;
-    std::vector<std::string> markNodes() const;
-    std::vector<std::string> additionalScripts() const;
+    Version version = CurrentVersion;
+    std::vector<Module> modules;
+    std::optional<Meta> meta;
+    std::vector<std::string> assets;
+    std::vector<Property> properties;
+    std::vector<Action> actions;
+    std::vector<Keybinding> keybindings;
+    std::optional<Time> time;
+    std::vector<double> deltaTimes;
+    std::optional<CameraType> camera;
+    std::vector<std::string> markNodes;
+    std::vector<std::string> additionalScripts;
 
-    void clearMeta();
-    void clearTime();
-    void clearCamera();
-
-    void setVersion(Version v);
-    void setModules(std::vector<Module>& m);
-    void setMeta(Meta m);
-    void setProperties(std::vector<Property>& p);
-    void setKeybindings(std::vector<Keybinding>& k);
-    void setTime(Time t);
-    void setDeltaTimes(std::vector<double> dt);
-    void setCamera(CameraType c);
-    void setMarkNodes(std::vector<std::string>& n);
-    void setAdditionalScripts(std::vector<std::string>& s);
-
+    bool ignoreUpdates = false;
 
     /**
      * Returns the Lua library that contains all Lua functions available to provide
@@ -177,23 +170,6 @@ public:
      * \return The Lua library that contains all Lua functions available for profiles
      */
     static scripting::LuaLibrary luaLibrary();
-
-private:
-    static constexpr const Version CurrentVersion = Version { 1, 0 };
-
-    Version _version = CurrentVersion;
-    std::vector<Module> _modules;
-    std::optional<Meta> _meta;
-    std::vector<std::string> _assets;
-    std::vector<Property> _properties;
-    std::vector<Keybinding> _keybindings;
-    std::optional<Time> _time;
-    std::vector<double> _deltaTimes;
-    std::optional<CameraType> _camera;
-    std::vector<std::string> _markNodes;
-    std::vector<std::string> _additionalScripts;
-
-    bool _ignoreUpdates = false;
 };
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,38 +40,45 @@
 #include <optional>
 
 namespace {
-    constexpr const std::array<const char*, 6> UniformNames = {
+    constexpr std::array<const char*, 7> UniformNames = {
         "modelViewProjectionTransform", "offset", "opacity",
-        "discTexture", "eccentricity", "semiMajorAxis"
+        "discTexture", "eccentricity", "semiMajorAxis", "multiplyColor"
     };
 
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for the color."
+        "texture which is used for the color"
     };
 
-    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the semi-major axis of the orbit, in meter."
+        "This value specifies the semi-major axis of the orbit, in meter"
     };
 
-    static const openspace::properties::Property::PropertyInfo EccentricityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
         "This value determines the eccentricity, that is the deviation from a perfect "
-        "sphere, for this orbit."
+        "sphere, for this orbit"
     };
 
-    static const openspace::properties::Property::PropertyInfo OffsetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "This property determines the width of the disc. The values specify the lower "
         "and upper deviation from the semi major axis, respectively. The values are "
         "relative to the size of the semi-major axis. That is, 0 means no deviation "
-        "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation."
+        "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
+        "MultiplyColor",
+        "Multiply Color",
+        "If set, the disc's texture is multiplied with this color. Useful for applying a "
+        "color grayscale images"
     };
 
     struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {
@@ -86,6 +93,9 @@ namespace {
 
         // [[codegen::verbatim(OffsetInfo.description)]]
         std::optional<glm::vec2> offset;
+
+        // [[codegen::verbatim(MultiplyColorInfo.description)]]
+        std::optional<glm::vec3> multiplyColor [[codegen::color()]];
     };
 #include "renderableorbitdisc_codegen.cpp"
 } // namespace
@@ -93,9 +103,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableOrbitDisc::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "exoplanets_renderableorbitdisc";
-    return doc;
+    return codegen::doc<Parameters>("exoplanets_renderableorbitdisc");
 }
 
 RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
@@ -104,6 +112,7 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 3.0e12f)
     , _eccentricity(EccentricityInfo, 0.f, 0.f, 1.f)
     , _offset(OffsetInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -121,6 +130,10 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
 
+    _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
+    _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_multiplyColor);
+
     _eccentricity = p.eccentricity;
     _eccentricity.onChange([&]() { _planeIsDirty = true; });
     addProperty(_eccentricity);
@@ -133,7 +146,7 @@ bool RenderableOrbitDisc::isReady() const {
 }
 
 void RenderableOrbitDisc::initialize() {
-    _texture = std::make_unique<TextureComponent>();
+    _texture = std::make_unique<TextureComponent>(1);
     _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
     _plane = std::make_unique<PlaneGeometry>(planeSize());
@@ -178,9 +191,10 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _shader->setUniform(_uniformCache.offset, _offset);
-    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.opacity, opacity());
     _shader->setUniform(_uniformCache.eccentricity, _eccentricity);
     _shader->setUniform(_uniformCache.semiMajorAxis, _size);
+    _shader->setUniform(_uniformCache.multiplyColor, _multiplyColor);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();

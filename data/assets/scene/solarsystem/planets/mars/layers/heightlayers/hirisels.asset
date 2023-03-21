@@ -1,39 +1,43 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "HiRISE-LS-DEM",
   Name = "HiRISE Local Set DEM",
-  FilePath = mapServiceConfigs .. "/ESRI/HiRISE/HiRISE_DEM.dem",
-  Description = [[ HiRISE (High Resolution Imaging Science Experiment) is the most
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("hirisels.wms"),
+  Description = [[HiRISE (High Resolution Imaging Science Experiment) is the most
     powerful camera ever sent to another planet, one of six instruments onboard the
     Mars Reconnaissance Orbiter. We launched in 2005, arrived at Mars in 2006 and have
-    been imaging ever since. Our camera’s high resolution capability (imaging up to 30
+    been imaging ever since. Our camera's high resolution capability (imaging up to 30
     centimeters per pixel) remains unprecedented for any existing orbiter in the study
     of the Red Planet, as well as being an indispensable instrument for helping to
     select landing sites for robotic and future human exploration. In the past decade,
-    we’ve also imaged avalanches in progress, and discovered dark flows that may or
+    we've also imaged avalanches in progress, and discovered dark flows that may or
     may not be briny seeps. Hundreds of science papers have been published with our
     data. (Description from URL). This map contains a subet set of the HiRISE
-    DEM where available as of 2018.]],
+    DEM where available as of 2018]]
 }
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "HiRISE Local Set DEM",
-  Version = "1.0",
-  Description = [[HiRISE DEM layer for corresponding Local Set imager. This map is
-    hosted by ESRI.]],
+  Version = "1.1",
+  Description = [[HiRISE DEM layer for corresponding Local Set imager. This map is hosted
+    by ESRI]],
   Author = "USGS",
   URL = "https://www.uahirise.org",
-  License = "Esri Master License Agreement",
-  Identifiers = {"HiRISE-LS-DEM"}
+  License = "Esri Master License Agreement"
 }
 
 

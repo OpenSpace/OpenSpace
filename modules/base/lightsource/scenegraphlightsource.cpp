@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ namespace {
         std::optional<float> intensity;
 
         // [[codegen::verbatim(NodeInfo.description)]]
-        std::string node;
+        std::string node [[codegen::identifier()]];
     };
 #include "scenegraphlightsource_codegen.cpp"
 } // namespace
@@ -59,9 +59,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation SceneGraphLightSource::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_scene_graph_light_source";
-    return doc;
+    return codegen::doc<Parameters>("base_scene_graph_light_source");
 }
 
 SceneGraphLightSource::SceneGraphLightSource()
@@ -69,20 +67,6 @@ SceneGraphLightSource::SceneGraphLightSource()
     , _sceneGraphNodeReference(NodeInfo, "")
 {
     addProperty(_intensity);
-    addProperty(_sceneGraphNodeReference);
-}
-
-SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary)
-    : LightSource(dictionary)
-    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-    , _sceneGraphNodeReference(NodeInfo, "")
-{
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    _intensity = p.intensity.value_or(_intensity);
-    addProperty(_intensity);
-
-    _sceneGraphNodeReference = p.node;
     _sceneGraphNodeReference.onChange([this]() {
         _sceneGraphNode =
             global::renderEngine->scene()->sceneGraphNode(_sceneGraphNodeReference);
@@ -90,8 +74,16 @@ SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary
     addProperty(_sceneGraphNodeReference);
 }
 
+SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary)
+    : SceneGraphLightSource()
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _intensity = p.intensity.value_or(_intensity);
+    _sceneGraphNodeReference = p.node;
+}
+
 bool SceneGraphLightSource::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     _sceneGraphNode =
         global::renderEngine->scene()->sceneGraphNode(_sceneGraphNodeReference);

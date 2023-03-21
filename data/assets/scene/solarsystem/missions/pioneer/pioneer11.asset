@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local model = asset.require("scene/solarsystem/missions/pioneer/pioneermodel")
 
 
@@ -11,11 +10,11 @@ local kernelsFolder = asset.syncedResource({
 })
 
 local kernelsList = {
-  kernelsFolder .. '/p11-a.bsp',
-  kernelsFolder .. '/p11_sat336.bsp'
+  kernelsFolder .. "p11-a.bsp",
+  kernelsFolder .. "p11_sat336.bsp"
 }
 
-local Pioneer11NAIF = "-24"
+local Pioneer11NAIF = -24
 
 local Pioneer11 = {
   Identifier = "Pioneer_11",
@@ -24,7 +23,7 @@ local Pioneer11 = {
     Translation = {
       Type = "SpiceTranslation",
       Target = Pioneer11NAIF,
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = kernelsList
     }
   },
@@ -32,7 +31,7 @@ local Pioneer11 = {
   GUI = {
     Name = "Pioneer 11 Spacecraft",
     Path = "/Solar System/Missions/Pioneer",
-    Description = [[Pioneer 11 Spacecraft. Positioned by SPICE data.]]
+    Description = "Pioneer 11 Spacecraft. Positioned by SPICE data"
   }
 }
 
@@ -44,34 +43,45 @@ local Pioneer11Trail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = Pioneer11NAIF,
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = kernelsList
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1973 APR 06 02:25:00.000",
     EndTime = "1990 JAN 02 00:00:00.000",
     EnableFade = false,
-    SampleInterval = 6087 * 2  
+    SampleInterval = 6087 * 2
     --6087 is the number of days between the Start and End time (so sample every 2d)
   },
   GUI = {
     Name = "Pioneer 11 Trail (SPICE)",
     Path = "/Solar System/Missions/Pioneer",
     Description = [[Pioneer 11 Trail, spanning April 6th, 1973 to January 2nd, 1990.
-      Data from SPICE.]]
+      Data from SPICE]]
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Pioneer11, Pioneer11Trail, })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Pioneer11)
+  openspace.addSceneGraphNode(Pioneer11Trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Pioneer11Trail)
+  openspace.removeSceneGraphNode(Pioneer11)
+end)
+
+asset.export(Pioneer11)
+asset.export(Pioneer11Trail)
+
 
 
 asset.meta = {
   Name = "Pioneer 11",
   Version = "1.0",
-  Description = [[ Pioneer 11 Model and Trail. Driven by SPICE data for high accuracy
-  from April 6th, 1973 to January 2nd, 1990.]],
+  Description = [[Pioneer 11 Model and Trail. Driven by SPICE data for high accuracy from
+    April 6th, 1973 to January 2nd, 1990]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Pioneer_11", "Pioneer_11Trail"}
+  License = "MIT license"
 }

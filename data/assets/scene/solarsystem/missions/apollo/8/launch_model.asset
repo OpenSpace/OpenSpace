@@ -1,10 +1,15 @@
-local asset_helper = asset.require('util/asset_helper')
-local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('./kernels').kernels
-local models = asset.require('scene/solarsystem/missions/apollo/csm_model').models
+local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
+local kernels = asset.require("./kernels").kernels
 
-local apolloSpiceId = "-908"
+local models = asset.syncedResource({
+  Name = "Apollo Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_models",
+  Version = 4
+})
+
+local apolloSpiceId = -908
 
 local Apollo8Launch = {
   Identifier = "Apollo8Launch",
@@ -38,26 +43,17 @@ local Apollo8LaunchModel = {
     End = "1968 DEC 22"
   },
   Transform = {
-    Scale = {
-      Type = "StaticScale",
-      -- The scale of the model is in cm; OpenSpace is in m
-      Scale = 0.01
-    },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0.0, 0.0, -3.1415 / 2}
+      Rotation = {0.0, 0.0, -math.pi / 2}
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/ApolloCSM.fbx",
+    GeometryFile = models .. "ApolloCSM.osmodel",
+    ModelScale = 0.0001,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sun_transforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     },
     PerformShading = true,
     DisableFaceCulling = true
@@ -69,6 +65,15 @@ local Apollo8LaunchModel = {
   }
 }
 
-local list = { Apollo8Launch, Apollo8LaunchModel }
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Apollo8Launch)
+  openspace.addSceneGraphNode(Apollo8LaunchModel)
+end)
 
-asset_helper.registerSceneGraphNodesAndExport(asset, list)
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Apollo8LaunchModel)
+  openspace.removeSceneGraphNode(Apollo8Launch)
+end)
+
+asset.export(Apollo8Launch)
+asset.export(Apollo8LaunchModel)

@@ -1,5 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
 local scale = 149597870700 -- 1 AU
 
 local radialGrid = {
@@ -17,8 +15,7 @@ local radialGrid = {
     Color = { 0.6, 1.0, 0.7 },
     LineWidth = 3.0,
     GridSegments = { 3, 4 },
-    OuterRadius = 1.0,
-    InnerRadius = 0.2,
+    Radii = { 0.2, 1.0 },
     Enabled = false
   },
   GUI = {
@@ -39,9 +36,12 @@ local planarGrid = {
     Type = "RenderableGrid",
     Color = { 0.0, 1.0, 0.8 },
     LineWidth = 2.0,
-    Segments = { 5, 10 },
+    Segments = { 6, 10 },
     Size = { 1, 2 },
-    Enabled = false
+    Enabled = false,
+    HighlightColor =  {1.0, 0.8, 0.0 },
+    HighlightLineWidth = 3.2,
+    HighlightRate = { 3, 3 }
   },
   GUI = {
     Name = "Example Grid",
@@ -91,9 +91,21 @@ local boxGrid = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  radialGrid,
-  planarGrid,
-  sphericalGrid,
-  boxGrid
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(radialGrid)
+  openspace.addSceneGraphNode(planarGrid)
+  openspace.addSceneGraphNode(sphericalGrid)
+  openspace.addSceneGraphNode(boxGrid)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(boxGrid)
+  openspace.removeSceneGraphNode(sphericalGrid)
+  openspace.removeSceneGraphNode(planarGrid)
+  openspace.removeSceneGraphNode(radialGrid)
+end)
+
+asset.export(radialGrid)
+asset.export(sphericalGrid)
+asset.export(planarGrid)
+asset.export(boxGrid)

@@ -1,10 +1,10 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../venus").Venus.Identifier
+local globeIdentifier = asset.require("../../venus").Venus.Identifier
 
 local layer = {
   Identifier = "Magellan_Mosaic_Utah",
   Name = "Magellan Mosaic [Utah]",
-  Description = [[ Color layer for Venus. This mosaic was created from the Magellan
+  Enabled = asset.enabled,
+  Description = [[Color layer for Venus. This mosaic was created from the Magellan
     F-BIDRs, (Full resolution Basic Image Data Records), the highest resolution
     radar images of the Venus surface (~75 m/pixel). Because Venus is shrouded by a
     dense, opaque atmosphere, conventional optical cameras cannot be used to image
@@ -20,28 +20,32 @@ local layer = {
     the radar system was sending signals to the left of the spacecraft. The SAR
     operated in this left-looking mode during cycles 1 and 3 of the mission.
     (Description from USGS)]],
-  FilePath = mapServiceConfigs .. "/Utah/MagellanMosaic.vrt",
+  FilePath = asset.localResource("magellan_mosaic_utah.vrt"),
   BlendMode = "Color",
   Settings = {
     Gamma = 2.0
   }
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
 
 
 asset.meta = {
   Name = "Venus Magellan Mosaic",
   Version = "1.0",
   Description = [[Map layer for Venus containting Venus Magellan Mosaic from the USGS.
-    Hosted on the OpenSpace servers in Utah.]],
+    Hosted on the OpenSpace servers in Utah]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Venus/Magellan/" ..
     "Venus_Magellan_LeftLook_mosaic_global_75m",
-  License = "NASA/PDS",
-  Identifiers = {"Magellan_Mosaic_Utah"}
+  License = "NASA/PDS"
 }

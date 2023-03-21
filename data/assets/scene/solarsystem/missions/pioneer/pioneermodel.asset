@@ -1,23 +1,23 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 local modelFolder = asset.syncedResource({
   Name = "Pioneer 10/11 Models",
   Type = "HttpSynchronization",
   Identifier = "pioneer_10_11_model",
-  Version = 2
+  Version = 3
 })
 
 local ModelRenderable = {
   Type = "RenderableModel",
-  Geometry = {{
-    Type = "MultiModelGeometry",
-    GeometryFile = modelFolder .. "/Pioneer.obj",
-    ColorTexture = modelFolder .. "/gray.png"
-  }},
-  LightSources = assetHelper.getDefaultLightSources(
-    sunTransforms.SolarSystemBarycenter.Identifier
-  )
+  GeometryFile = modelFolder .. "pioneer.fbx",
+  LightSources = {
+    sun.LightSource,
+    {
+      Identifier = "Camera",
+      Type = "CameraLightSource",
+      Intensity = 0.5
+    }
+  }
 }
 
 asset.export("PioneerModel", ModelRenderable)
@@ -25,8 +25,8 @@ asset.export("PioneerModel", ModelRenderable)
 asset.meta = {
   Name = "Pioneer Model",
   Version = "1.0",
-  Description = [[ Pioneer model asset. Used by both pioneer 10 and pioneer 11 asset.
-  Untextured version of model from NASA 3D resources.]],
+  Description = [[Pioneer model asset. Used by both pioneer 10 and pioneer 11 asset.
+    Untextured version of model from NASA 3D resources]],
   Author = "NASA",
   URL = "https://nasa3d.arc.nasa.gov/detail/eoss-pioneer",
   License = "NASA"

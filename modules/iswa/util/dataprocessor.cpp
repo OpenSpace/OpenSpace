@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -83,11 +83,11 @@ float DataProcessor::normalizeWithStandardScore(float value, float mean, float s
 {
     float zScoreMin = normalizationValues.x;
     float zScoreMax = normalizationValues.y;
-    float standardScore = ( value - mean ) / sd;
+    float standardScore = (value - mean) / sd;
     // Clamp intresting values
     standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
     //return and normalize
-    return ( standardScore + zScoreMin ) / (zScoreMin + zScoreMax );
+    return (standardScore + zScoreMin) / (zScoreMin + zScoreMax);
 }
 
 float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mean,
@@ -232,7 +232,7 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
                 _histNormValues
             );
             //unnormalize histMin, histMax
-            std::unique_ptr<Histogram> newHist = std::make_unique<Histogram>(
+            auto newHist = std::make_unique<Histogram>(
                 std::min(min, normalizeWithStandardScore(
                     unNormHistMin,
                     mean,

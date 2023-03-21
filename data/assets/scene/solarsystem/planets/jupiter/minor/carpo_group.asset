@@ -1,19 +1,19 @@
-local assetHelper = asset.require('util/asset_helper')
-local proceduralGlobes = asset.require('util/procedural_globe')
-local transforms = asset.require('../transforms')
-local kernel = asset.require('../kernels').jup341
+local proceduralGlobes = asset.require("util/procedural_globe")
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").jup341
 
 
 
 local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_carpo" }
+local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_carpo", "moon_minor", "moon_minor_jupiter" }
 local trailColor = { 0.4, 0.3, 0.01 }
 local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_jupiter",
-  "moonTrail_minor"
+  "moonTrail_minor",
+  "moonTrail_minor_jupiter"
 }
 
 local carpoGroup = {
@@ -36,18 +36,96 @@ local carpoGroup = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(
-  asset,
-  proceduralGlobes.createGlobes(carpoGroup)
-)
+-- Generate labels for each moon
+local moon_labels = {}
+
+for i, moon in ipairs(carpoGroup) do
+  local moonName = moon.GUI.Name or moon.Identifier
+  moon_labels[i] = {
+    Identifier = moon.Identifier .. "Label",
+    Parent = moon.Identifier,
+    Renderable = {
+      Enabled = false,
+      Type = "RenderableLabel",
+      Text = moonName,
+      FontSize = 70.0,
+      Size = 7.1,
+      MinMaxSize = { 1, 25 },
+      OrientationOption = "Camera View Direction",
+      BlendMode = "Additive",
+      EnableFading = true,
+      FadeUnit = "Gm",
+      FadeDistances = { 1.0, 100.0 },
+      FadeWidths = { 0.0, 100.0 }
+    },
+    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+    GUI = {
+      Name = moonName .. " Label",
+      Path = "/Solar System/Planets/Jupiter/Moons",
+      Description = "Label for Jupiter's moon " .. moonName .. " (Carpo group)"
+    }
+  }
+
+  -- 'Hacky' solution to case where the main label gets culled on approach due to its onscreen size.
+  -- We need the size of the original label to be big as it needs to be legible from long distances when focusing on Jupiter. 
+  moon_labels[i+1] = {
+    Identifier = moon.Identifier .. "LabelNear",
+    Parent = moon.Identifier,
+    Renderable = {
+      Enabled = false,
+      Type = "RenderableLabel",
+      Text = moonName,
+      FontSize = 70.0,
+      Size = 5.5,
+      MinMaxSize = { 1, 25 },
+      OrientationOption = "Camera View Direction",
+      BlendMode = "Additive",
+      EnableFading = true,
+      FadeUnit = "Gm",
+      FadeDistances = { 0.2, 1.0 },
+      FadeWidths = { 0.1, 0.0 }
+    },
+    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+    GUI = {
+      Name = moonName .. " Label (Near)",
+      Path = "/Solar System/Planets/Jupiter/Moons",
+      Description = "Transitional Label for close-range viewing of " .. moonName .. " (Carpo group)"
+    }
+  }
+end
+
+local nodes = proceduralGlobes.createGlobes(carpoGroup)
+
+asset.onInitialize(function() 
+  for _, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+
+  for _, moonlabel in ipairs(moon_labels) do
+    openspace.addSceneGraphNode(moonlabel)
+  end
+end)
+
+asset.onDeinitialize(function()
+  for i = #moon_labels, 1, -1 do
+    openspace.removeSceneGraphNode(moon_labels[i])
+  end
+
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+
+for _, node in ipairs(nodes) do
+  asset.export(node)
+end
 
 
 asset.meta = {
   Name = "Jupiter Carpo Group Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Jupiter's Carpo Group
-    moons: Carpo. Blank globes and SPICE trails
-    are generated for each moon.]],
+  Description = [[Procedural Globe asset containing Jupiter's Carpo Group moons: Carpo.
+    Blank globes and SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -1,40 +1,15 @@
-local scene_helper = asset.require('util/scene_helper')
-
-local Keybindings = {
-  {
-    Key = "c",
-    Name = "Show Constellation Art",
-    Command = "openspace.setPropertyValue('Scene.ConstellationArt*.Renderable.Opacity', 0);" ..
-    "openspace.setPropertyValue('Scene.ConstellationArt*.Renderable.Enabled', true);" ..
-    "openspace.setPropertyValue('Scene.ConstellationArt*.Renderable.Opacity', 0.2, 2);", 
-    Documentation = "Enables and fades up constellation art work",
-    GuiPath = "/Rendering",
-    Local = false
-  },
-  {
-    Key = "SHIFT+c",
-    Name = "Hide Constellation Art",
-    Command = "openspace.setPropertyValue('Scene.ConstellationArt*.Renderable.Opacity', 0, 2);", 
-    Documentation = "Fades out constellation artwork",
-    GuiPath = "/Rendering",
-    Local = false
-  },
-  {
-    Key = "CTRL+c",
-    Name = "Disable Constellation Art",
-    Command = "openspace.setPropertyValue('Scene.ConstellationArt*.Renderable.Enabled', false);", 
-    Documentation = "Disable constellation artwork",
-    GuiPath = "/Rendering",
-    Local = false
-  }
-}
+local mainAsset = asset.require("./constellation_art")
 
 asset.onInitialize(function ()
-  scene_helper.bindKeys(Keybindings)
+  openspace.bindKey("c", mainAsset.ShowArtAction.Identifier)
+  openspace.bindKey("SHIFT+c", mainAsset.HideArtAction.Identifier)
+  openspace.bindKey("CTRL+c", mainAsset.DisableArtAction.Identifier)
 end)
 
 asset.onDeinitialize(function ()
-  scene_helper.unbindKeys(Keybindings)
+  openspace.clearKey("c")
+  openspace.clearKey("SHIFT+c")
+  openspace.clearKey("CTRL+c")
 end)
 
 

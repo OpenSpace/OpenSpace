@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@ struct RawTile {
     std::unique_ptr<std::byte[]> imageData;
     TileMetaData tileMetaData;
     std::optional<TileTextureInitData> textureInitData;
-    TileIndex tileIndex = { 0, 0, 0 };
+    TileIndex tileIndex = TileIndex(0, 0, 0);
     ReadError error = ReadError::None;
     GLuint pbo = 0;
 };

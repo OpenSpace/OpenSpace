@@ -1,10 +1,10 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "CTX_blended_01",
   Name = "CTX Blended beta01",
-  FilePath = mapServiceConfigs .. "/ESRI/CTX/CTXblended.vrt",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("ctx_blended_01.vrt"),
   BlendMode = "Color",
   Settings = {
     Gamma = 2.14,
@@ -24,23 +24,27 @@ local layer = {
     pixel-for-pixel spatial documentation of image seams, to prevent misinterpretation
     of seams as possible landforms and to provide instant access to original data. A
     completely seamless CTX mosaic is currently infeasible, so seam-maps are required
-    to prevent misinterpretation. (Description from URL)]],
+    to prevent misinterpretation. (Description from URL)]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "CTX Blended beta01",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[New blended CTX map for Mars from CalTech Murray lab. This map is
-    hosted by ESRI.]],
+    hosted by ESRI]],
   Author = "Caltech Murray Lab",
   URL = "http://murray-lab.caltech.edu/CTX/",
-  License = "Esri Master License Agreement",
-  Identifiers = {"CTX_blended_01"}
+  License = "Esri Master License Agreement"
 }

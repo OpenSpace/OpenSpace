@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,19 +28,20 @@
 
 in vec3 in_position;
 
-uniform dmat4 modelViewTransform;
-uniform dmat4 projectionTransform;
-
 out float vs_screenSpaceDepth;
 out vec4 vs_positionViewSpace;
 
+uniform dmat4 modelViewTransform;
+uniform dmat4 projectionTransform;
+
+
 void main() {
-    dvec4 positionViewSpace  = modelViewTransform * dvec4(in_position, 1.0);
-    vec4 positionClipSpace   = vec4(projectionTransform * positionViewSpace);
-    vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
+  dvec4 positionViewSpace  = modelViewTransform * dvec4(in_position, 1.0);
+  vec4 positionClipSpace   = vec4(projectionTransform * positionViewSpace);
+  vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
 
-    vs_screenSpaceDepth  = positionScreenSpace.w;
-    vs_positionViewSpace = vec4(positionViewSpace);
+  vs_screenSpaceDepth  = positionScreenSpace.w;
+  vs_positionViewSpace = vec4(positionViewSpace);
 
-    gl_Position = positionScreenSpace;
+  gl_Position = positionScreenSpace;
 }

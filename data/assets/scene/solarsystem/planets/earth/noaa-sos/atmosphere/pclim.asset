@@ -1,0 +1,62 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Temperature Anomaly: Yearly - 500 - 2006 (Paleoclimate Evidence)"
+local Identifier = "noaa-sos-atmosphere-pclim"
+local Description = [[This animation shows annual average temperature anomalies
+(departure from normal) over the globe for the past 1,500 years compared to the average
+temperature (normal) from 1961-1990. This data collected from over 1,000 paleoclimate
+proxies. Areas shaded red are warmer than normal while areas shaded blue are cooler than
+normal]]
+local URL = "https://sos.noaa.gov/catalog/datasets/temperature-anomaly-yearly-500-2006-paleoclimate-evidence/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ImageSequenceTileLayer",
+  FolderPath = syncedDirectory .. "raw",
+  Description = Description
+}
+
+local colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.jpg",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.removeScreenSpaceRenderable(colorbar)
+end)
+
+asset.export(layer)
+asset.export(colorbar)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

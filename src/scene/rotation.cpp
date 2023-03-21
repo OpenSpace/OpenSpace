@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,9 +48,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation Rotation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_transform_rotation";
-    return doc;
+    return codegen::doc<Parameters>("core_transform_rotation");
 }
 
 ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
@@ -67,12 +65,6 @@ ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
 }
 
 Rotation::Rotation() : properties::PropertyOwner({ "Rotation" }) {}
-
-// @TODO (abock, 2021-03-25)  This constructor can probably die since it doesn't do any
-// above the default constructor
-Rotation::Rotation(const ghoul::Dictionary&)
-    : properties::PropertyOwner({ "Rotation" })
-{}
 
 void Rotation::requireUpdate() {
     _needsUpdate = true;

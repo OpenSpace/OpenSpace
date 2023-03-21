@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,10 +38,10 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* GlslRaycastPath = "${MODULE_VOLUME}/shaders/raycast.glsl";
-    constexpr const char* GlslHelperPath = "${MODULE_VOLUME}/shaders/helper.glsl";
-    constexpr const char* GlslBoundsVsPath = "${MODULE_VOLUME}/shaders/boundsvs.glsl";
-    constexpr const char* GlslBoundsFsPath = "${MODULE_VOLUME}/shaders/boundsfs.glsl";
+    constexpr std::string_view GlslRaycast = "${MODULE_VOLUME}/shaders/raycast.glsl";
+    constexpr std::string_view GlslHelper = "${MODULE_VOLUME}/shaders/helper.glsl";
+    constexpr std::string_view GlslBoundsVs = "${MODULE_VOLUME}/shaders/bounds_vs.glsl";
+    constexpr std::string_view GlslBoundsFs = "${MODULE_VOLUME}/shaders/bounds_fs.glsl";
 } // namespace
 
 namespace openspace::volume {
@@ -137,7 +137,7 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
     program.setUniform("nClips_" + id, nClips);
     program.setUniform("clipNormals_" + id, clipNormals);
     program.setUniform("clipOffsets_" + id, clipOffsets);
-    program.setUniform("opacity_" + id, _opacity);
+    program.setUniform("brightness_" + id, brightness());
     program.setUniform("rNormalization_" + id, _rNormalization);
     program.setUniform("rUpperBound_" + id, _rUpperBound);
 }
@@ -162,19 +162,19 @@ bool BasicVolumeRaycaster::isCameraInside(const RenderData& data,
 }
 
 std::string BasicVolumeRaycaster::boundsVertexShaderPath() const {
-    return absPath(GlslBoundsVsPath).string();
+    return absPath(GlslBoundsVs).string();
 }
 
 std::string BasicVolumeRaycaster::boundsFragmentShaderPath() const {
-    return absPath(GlslBoundsFsPath).string();
+    return absPath(GlslBoundsFs).string();
 }
 
 std::string BasicVolumeRaycaster::raycasterPath() const {
-    return absPath(GlslRaycastPath).string();
+    return absPath(GlslRaycast).string();
 }
 
 std::string BasicVolumeRaycaster::helperPath() const {
-    return absPath(GlslHelperPath).string();
+    return absPath(GlslHelper).string();
 }
 
 void BasicVolumeRaycaster::setTransferFunction(
@@ -197,12 +197,12 @@ void BasicVolumeRaycaster::setStepSize(float stepSize) {
     _stepSize = stepSize;
 }
 
-void BasicVolumeRaycaster::setOpacity(float opacity) {
-    _opacity = opacity;
+void BasicVolumeRaycaster::setBrightness(float brightness) {
+    _brightness = brightness;
 }
 
-float BasicVolumeRaycaster::opacity() const {
-    return _opacity;
+float BasicVolumeRaycaster::brightness() const {
+    return _brightness;
 }
 
 void BasicVolumeRaycaster::setRNormalization(float rNormalization) {

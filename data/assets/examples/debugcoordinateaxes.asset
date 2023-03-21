@@ -1,6 +1,8 @@
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local debugHelper = asset.require('util/debug_helper')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local debugHelper = asset.require("util/debug_helper")
+local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
 
+local sunRadius = 6.957E8
 local earthRadius = 6.371E6
 
 debugHelper.registerCartesianAxes(asset, {
@@ -16,4 +18,14 @@ debugHelper.registerCartesianAxes(asset, {
 debugHelper.registerCartesianAxes(asset, {
   Parent = transforms.EarthIAU.Identifier,
   Scale = earthRadius * 1.5
+})
+
+debugHelper.registerCartesianAxes(asset, {
+    Parent = sun_transforms.SunIAU.Identifier,
+    Scale = sunRadius * 300
+})
+
+debugHelper.registerCartesianAxes(asset, {
+    Parent = sun_transforms.SolarSystemBarycenter.Identifier,
+    Scale = sunRadius * 300
 })

@@ -1,0 +1,52 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Starlink)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_starlink",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=starlink&FORMAT=kvn",
+  Filename = "starlink.txt",
+  Override = true
+})
+
+local satellites = {
+  Identifier = "starlink",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "starlink.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.65, 0.55, 0.55 },
+    Fade = 1.5,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Starlink",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Description = [[LEO satellite constellation launched by SpaceX to provide broadband
+      internet access.]]
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(satellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(satellites)
+end)
+
+asset.export(satellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Communications - Starlink",
+  Version = "1.0",
+  Description = "Satellites asset for Communications - Starlink. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

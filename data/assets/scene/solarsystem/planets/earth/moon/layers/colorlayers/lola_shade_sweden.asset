@@ -1,14 +1,38 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
 
 local layer = {
   Identifier = "Lola_Shade_Sweden",
   Name = "Lola Shade [Sweden]",
-  FilePath = mapServiceConfigs .. "/LiU/Lola_Shade.wms"
+  Enabled = asset.enabled,
+  Description = [[This is a shaded-relief of a original polar digital elevation model
+    (DEM) from the Lunar Orbiter Laser Altimeter (LOLA; Smith et al., 2010), an instrument
+    on the National Aeronautics and Space Agency (NASA) Lunar Reconnaissance Orbiter (LRO)
+    spacecraft (Tooley et al., 2010). The DEM is a shape map (radius) of the Moon at a
+    resolution 100 meters per pixel (m) based on altimetry data acquired through September,
+    2011 by the LOLA instrument. The ground tracks were interpolated using the Generic
+    Mapping Tools programs "surface" and "grdblend". Map values are referred to a radius
+    of 1,737,400 m]],
+  FilePath = asset.localResource("lola_shade_sweden.wms")
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Lola Shade [Sweden]",
+  Version = "1.1",
+  Description = [[Moon LRO LOLA Shaded Relief 237m v4 layer for Moon globe. This
+    map is hosted on the OpenSpace server in Sweden]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Moon/LMMP/LOLA-derived/Lunar_LRO_LOLA_Shade_Global_128ppd_v04",
+  License = "NASA/PDS"
+}

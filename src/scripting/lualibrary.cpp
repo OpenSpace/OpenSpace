@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,10 +24,60 @@
 
 #include <openspace/scripting/lualibrary.h>
 
+#include <ghoul/logging/logmanager.h>
+
 namespace openspace::scripting {
 
 bool LuaLibrary::operator<(const LuaLibrary& rhs) const {
     return name < rhs.name;
+}
+
+void LuaLibrary::merge(LuaLibrary rhs) {
+    for (const LuaLibrary::Function& fun : rhs.functions) {
+        const auto itf = std::find_if(
+            functions.begin(),
+            functions.end(),
+            [&fun](const LuaLibrary::Function& function) {
+                return fun.name == function.name;
+            }
+        );
+        if (itf != functions.end()) {
+            // the function with the desired name is already present, but we don't
+            // want to overwrite it
+            LERRORC(
+                "LuaLibrary",
+                fmt::format(
+                    "Lua function '{}' in library '{}' has been defined twice",
+                    fun.name, rhs.name
+                )
+            );
+            return;
+        }
+        else {
+            functions.push_back(fun);
+        }
+    }
+
+    for (LuaLibrary s : rhs.subLibraries) {
+        if (s.name.empty()) {
+            LERRORC("LuaLibrary", "Sublibraries must have a non-empty name");
+        }
+
+        auto it = std::find_if(
+            subLibraries.begin(), subLibraries.end(),
+            [&s](const LuaLibrary& lib) { return lib.name == s.name; }
+        );
+        if (it == subLibraries.end()) {
+            subLibraries.push_back(std::move(s));
+        }
+        else {
+            it->merge(std::move(s));
+        }
+    }
+
+    for (const std::filesystem::path& script : rhs.scripts) {
+        scripts.push_back(script);
+    }
 }
 
 } // namespace openspace::scripting

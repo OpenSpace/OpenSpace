@@ -1,6 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-local textures = asset.require('./backgroundradiation_textures').textures
-
 local speck = asset.syncedResource({
   Name = "Background Radiation Speck Files",
   Type = "HttpSynchronization",
@@ -8,12 +5,19 @@ local speck = asset.syncedResource({
   Version = 1
 })
 
+local textures = asset.syncedResource({
+  Name = "Background Radiation Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_backgroundradiation_textures",
+  Version = 2
+})
+
 local wmap = {
   Identifier = "WMAP",
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, 0, 3.14159265359 }
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {
@@ -22,10 +26,10 @@ local wmap = {
     Size = 3975.41417036064E23,
     Segments = 80,
     Opacity = 0.5,
-    Texture = textures .. "/wmap_ilc_7yr_v4_200uK_RGB_sos.png",
+    Texture = textures .. "wmap_ilc_7yr_v4_200uK_RGB_sos.png",
     Orientation = "Both",
     MirrorTexture = true,
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {
@@ -39,7 +43,7 @@ local cbe = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, 0, 3.14159265359 }
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {
@@ -48,10 +52,10 @@ local cbe = {
     Size = 3975.41417036064E23,
     Segments = 80,
     Opacity = 0.5,
-    Texture = textures .. "/COBErect.png",
+    Texture = textures .. "COBErect.png",
     Orientation = "Both",
     MirrorTexture = true,
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {
@@ -65,7 +69,7 @@ local planck = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, 0, 3.14159265359 }
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {
@@ -74,10 +78,10 @@ local planck = {
     Size = 3975.41417036064E23,
     Segments = 80,
     Opacity = 0.3,
-    Texture = textures .. "/cmb4k.jpg",
+    Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {
@@ -92,7 +96,7 @@ local Halpha = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0, 0, 3.14159265359}
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {
@@ -101,9 +105,9 @@ local Halpha = {
     Size = 9.2E21,
     Segments = 40,
     Opacity = 0.4,
-    Texture = textures .. "/mwHalpha-f.png",
+    Texture = textures .. "mwHalpha-f.png",
     Orientation = "Inside",
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
     MirrorTexture = true,
     FadeOutThreshold = 0.025,
     Background = true
@@ -115,14 +119,30 @@ local Halpha = {
 }
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  wmap, cbe, planck, Halpha
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(wmap)
+  openspace.addSceneGraphNode(cbe)
+  openspace.addSceneGraphNode(planck)
+  openspace.addSceneGraphNode(Halpha)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Halpha)
+  openspace.removeSceneGraphNode(planck)
+  openspace.removeSceneGraphNode(cbe)
+  openspace.removeSceneGraphNode(wmap)
+end)
+
+asset.export(wmap)
+asset.export(cbe)
+asset.export(planck)
+asset.export(Halpha)
+
 
 
 asset.meta = {
   Name = "Background Radiation",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[Various AllSky images for the Milky Way and observable Universe.
       Included: Wilkinson Microwave Anisotropy Probe (WMAP), Cosmic Background Explorer,
       Planck, and H Alpha <br><br> Data Reference: Planck/ESA and the Planck
@@ -130,6 +150,5 @@ asset.meta = {
       Finkbeiner (Princeton)]],
   Author = "Brian Abbott (AMNH), OpenSpace Team",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"WMAP", "CBE", "Planck", "HAlpha"}
+  License = "AMNH Digital Universe"
 }

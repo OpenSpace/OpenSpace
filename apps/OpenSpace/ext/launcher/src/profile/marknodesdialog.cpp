@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,10 +35,9 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-MarkNodesDialog::MarkNodesDialog(openspace::Profile& profile, QWidget* parent)
+MarkNodesDialog::MarkNodesDialog(QWidget* parent, std::vector<std::string>* markedNodes)
     : QDialog(parent)
-    , _profile(profile)
-    , _data(_profile.markNodes())
+    , _markedNodes(markedNodes)
 {
     setWindowTitle("Mark Interesting Nodes");
     createWidgets();
@@ -49,17 +48,19 @@ void MarkNodesDialog::createWidgets() {
     _list = new QListWidget;
     connect(
         _list, &QListWidget::itemSelectionChanged,
-        this, &MarkNodesDialog::listItemSelected
+        [this]() {
+            _removeButton->setEnabled(true);
+        }
     );
     _list->setAlternatingRowColors(true);
     _list->setMovement(QListView::Free);
+    _list->setDragDropMode(QListView::InternalMove);
     _list->setResizeMode(QListView::Adjust);
 
-    for (size_t i = 0; i < _data.size(); ++i) {
-        _markedNodesListItems.push_back(
-            new QListWidgetItem(QString::fromStdString(_data[i]))
-        );
-        _list->addItem(_markedNodesListItems[i]);
+    for (size_t i = 0; i < _markedNodes->size(); ++i) {
+        QListWidgetItem* item =
+            new QListWidgetItem(QString::fromStdString(_markedNodes->at(i)));
+        _list->addItem(item);
     }
     layout->addWidget(_list);
 
@@ -77,10 +78,7 @@ void MarkNodesDialog::createWidgets() {
         box->addWidget(_newNode);
 
         QPushButton* addButton = new QPushButton("Add new");
-        connect(
-            addButton, &QPushButton::clicked,
-            this, &MarkNodesDialog::listItemAdded
-        );
+        connect(addButton, &QPushButton::clicked, this, &MarkNodesDialog::listItemAdded);
         box->addWidget(addButton);
         layout->addLayout(box);
     }
@@ -88,20 +86,13 @@ void MarkNodesDialog::createWidgets() {
     {
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
-        QObject::connect(
+        connect(
             buttons, &QDialogButtonBox::accepted,
             this, &MarkNodesDialog::parseSelections
         );
-        QObject::connect(
-            buttons, &QDialogButtonBox::rejected,
-            this, &MarkNodesDialog::reject
-        );
+        connect(buttons, &QDialogButtonBox::rejected, this, &MarkNodesDialog::reject);
         layout->addWidget(buttons);
     }
-}
-
-void MarkNodesDialog::listItemSelected() {
-    _removeButton->setEnabled(true);
 }
 
 void MarkNodesDialog::listItemAdded() {
@@ -110,18 +101,11 @@ void MarkNodesDialog::listItemAdded() {
     }
 
     std::string itemToAdd = _newNode->text().toStdString();
-    const auto it = std::find(_data.cbegin(), _data.cend(), itemToAdd);
-    if (it != _data.end()) {
-        _list->setCurrentRow(static_cast<int>(std::distance(_data.cbegin(), it)));
-    }
-    else {
-        _data.push_back(itemToAdd);
-        _markedNodesListItems.push_back(new QListWidgetItem(_newNode->text()));
-        _list->addItem(_markedNodesListItems.back());
+    QListWidgetItem* item = new QListWidgetItem(_newNode->text());
+    _list->addItem(item);
 
-        // Scroll down to that blank line highlighted
-        _list->setCurrentItem(_markedNodesListItems.back());
-    }
+    // Scroll down to that blank line highlighted
+    _list->setCurrentItem(item);
 
     // Blank-out entry again
     _newNode->clear();
@@ -130,28 +114,25 @@ void MarkNodesDialog::listItemAdded() {
 void MarkNodesDialog::listItemRemove() {
     QListWidgetItem* item = _list->currentItem();
     int index = _list->row(item);
-
-    if (index < 0 || index >= static_cast<int>(_markedNodesListItems.size())) {
-        return;
-    }
-
     _list->takeItem(index);
-    _data.erase(_data.begin() + index);
-    _markedNodesListItems.erase(_markedNodesListItems.begin() + index);
 }
 
 void MarkNodesDialog::parseSelections() {
-    _profile.setMarkNodes(_data);
+    std::vector<std::string> nodes;
+    for (int i = 0; i < _list->count(); i++) {
+        QString node = _list->item(i)->text();
+        nodes.push_back(node.toStdString());
+    }
+    *_markedNodes = std::move(nodes);
     accept();
 }
 
 void MarkNodesDialog::keyPressEvent(QKeyEvent* evt) {
-   if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
-        if (_newNode->text().length() > 0 && _newNode->hasFocus()) {
-            listItemAdded();
-            return;
-        }
-    }
+   if ((evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) &&
+       (!_newNode->text().isEmpty() && _newNode->hasFocus()))
+   {
+        listItemAdded();
+        return;
+}
     QDialog::keyPressEvent(evt);
 }
-

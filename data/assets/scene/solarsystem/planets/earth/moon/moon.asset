@@ -1,9 +1,14 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
-local earthAsset = asset.require('../earth')
-asset.require('spice/base')
-local labelsPath = asset.require('./moon_labels').LabelsPath
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
+local earthAsset = asset.require("../earth")
+asset.require("spice/base")
+
+local labelsPath = asset.syncedResource({
+  Name = "Moon Labels",
+  Type = "HttpSynchronization",
+  Identifier = "moon_labels",
+  Version = 1
+})
 
 local Moon = {
   Identifier = "Moon",
@@ -32,23 +37,18 @@ local Moon = {
       Casters = {
         { Name = earthAsset.Earth.Identifier, Radius = 6.371E6 },
       }
-    },        
+    },
     Labels = {
-      Enable = false,
-      FileName = labelsPath .. "/moon.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 14.0,
-      LabelsSize = 8.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 500000.0,
-      FadeOutStartingDistance = 100000.0,
-      LabelsForceDomeRendering = true,
-      LabelsDistanceEPS = 1350000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      Enabled = false,
+      FileName = labelsPath .. "moon.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 7.6,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 100000.0, 500000.0 },
+      DistanceEPS = 1350000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   GUI = {
@@ -56,15 +56,80 @@ local Moon = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Moon })
+local MoonLabel = {
+  Identifier = "MoonLabel",
+  Parent = Moon.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Moon",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 40 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.4, 10.0 },
+    FadeWidths = { 0.1, 10.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Moon Label",
+    Path = "/Solar System/Planets/Earth/Moon",
+    Description = "Label for Earth's Moon"
+  }
+}
+
+local focus_moon = {
+  Identifier = "os.solarsystem.earth.moon.focus",
+  Name = "Focus on Moon",
+  Command = [[
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon'); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+  ]],
+  Documentation = "Set camera focus on the Moon",
+  GuiPath = "/Solar System/Earth/Moon",
+  isLocal = false
+}
+
+local toggle_moon_shading = {
+  Identifier = "os.solarsystem.earth.moon.toggleshading",
+  Name = "Toggle Moon shading",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.PerformShading', not openspace.getPropertyValue('Scene.Moon.Renderable.PerformShading'));
+  ]],
+  Documentation = "Toggles the shading of the Moon",
+  GuiPath = "/Solar System/Earth/Moon",
+  isLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Moon)
+  openspace.addSceneGraphNode(MoonLabel)
+
+  openspace.action.registerAction(focus_moon)
+  openspace.action.registerAction(toggle_moon_shading)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(toggle_moon_shading)
+  openspace.action.removeAction(focus_moon)
+
+  openspace.removeSceneGraphNode(MoonLabel)
+  openspace.removeSceneGraphNode(Moon)
+end)
+
+asset.export(Moon)
+
 
 
 asset.meta = {
   Name = "Moon",
-  Version = "1.0",
-  Description = [[ Moon globe with labels. ]],
+  Version = "1.2",
+  Description = "Moon globe with labels and actions",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Moon"}
+  License = "MIT license"
 }

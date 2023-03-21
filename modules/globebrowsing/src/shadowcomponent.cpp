@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,19 +26,15 @@
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/keyframenavigator.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -56,7 +52,7 @@
 #include <locale>
 
 namespace {
-    constexpr const char* _loggerCat = "ShadowComponent";
+    constexpr std::string_view _loggerCat = "ShadowComponent";
 
     constexpr openspace::properties::Property::PropertyInfo SaveDepthTextureInfo = {
         "SaveDepthTextureInfo",
@@ -68,16 +64,16 @@ namespace {
         "DistanceFraction",
         "Distance Fraction",
         "Distance fraction of original distance from light source to the globe to be "
-        "considered as the new light source distance."
+        "considered as the new light source distance"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DepthMapSizeInfo = {
         "DepthMapSize",
         "Depth Map Size",
-        "The depth map size in pixels. You must entry the width and height values."
+        "The depth map size in pixels. You must entry the width and height values"
     };
 
-    constexpr const GLfloat ShadowBorder[] = { 1.f, 1.f, 1.f, 1.f };
+    constexpr GLfloat ShadowBorder[] = { 1.f, 1.f, 1.f, 1.f };
 
     void checkFrameBufferState(const std::string& codePosition) {
         if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -85,30 +81,30 @@ namespace {
             GLenum fbErr = glCheckFramebufferStatus(GL_FRAMEBUFFER);
             switch (fbErr) {
             case GL_FRAMEBUFFER_UNDEFINED:
-                LERROR("Indefined framebuffer.");
+                LERROR("Indefined framebuffer");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                LERROR("Incomplete, missing attachement.");
+                LERROR("Incomplete, missing attachement");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-                LERROR("Framebuffer doesn't have at least one image attached to it.");
+                LERROR("Framebuffer doesn't have at least one image attached to it");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
                 LERROR(
                     "Returned if the value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is "
-                    "GL_NONE for any color attachment point(s) named by GL_DRAW_BUFFERi."
+                    "GL_NONE for any color attachment point(s) named by GL_DRAW_BUFFERi"
                 );
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
                 LERROR(
                     "Returned if GL_READ_BUFFER is not GL_NONE and the value of "
                     "GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for the color "
-                    "attachment point named by GL_READ_BUFFER.");
+                    "attachment point named by GL_READ_BUFFER");
                 break;
             case GL_FRAMEBUFFER_UNSUPPORTED:
                 LERROR(
                     "Returned if the combination of internal formats of the attached "
-                    "images violates an implementation - dependent set of restrictions."
+                    "images violates an implementation - dependent set of restrictions"
                 );
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
@@ -118,21 +114,21 @@ namespace {
                     "is the not same for all attached textures; or , if the attached "
                     "images are a mix of renderbuffers and textures, the value of "
                     "GL_RENDERBUFFE_r_samples does not match the value of "
-                    "GL_TEXTURE_SAMPLES."
+                    "GL_TEXTURE_SAMPLES"
                 );
                 LERROR(
                     "Returned if the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not "
                     "the same for all attached textures; or , if the attached images are "
                     "a mix of renderbuffers and textures, the value of "
                     "GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not GL_TRUE for all attached "
-                    "textures."
+                    "textures"
                 );
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
                 LERROR(
                     "Returned if any framebuffer attachment is layered, and any "
                     "populated attachment is not layered, or if all populated color "
-                    "attachments are not from textures of the same target."
+                    "attachments are not from textures of the same target"
                 );
                 break;
             default:
@@ -155,9 +151,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ShadowComponent::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "globebrowsing_shadows_component";
-    return doc;
+    return codegen::doc<Parameters>("globebrowsing_shadows_component");
 }
 
 ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
@@ -176,7 +170,7 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
         return;
     }
     ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>("Shadows");
-    
+
     const Parameters p = codegen::bake<Parameters>(d);
 
     addProperty(_enabled);
@@ -210,7 +204,7 @@ bool ShadowComponent::isReady() const {
 }
 
 void ShadowComponent::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     createDepthTexture();
     createShadowFBO();
@@ -356,39 +350,18 @@ void ShadowComponent::end() {
     if (_blendIsEnabled) {
         glEnable(GL_BLEND);
     }
-
-    if (_viewDepthMap) {
-        if (!_renderDMProgram) {
-            _renderDMProgram = global::renderEngine->buildRenderProgram(
-                "ShadowMappingDebuggingProgram",
-                absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_vs.glsl"),
-                absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_fs.glsl")
-            );
-        }
-
-        if (!_quadVAO) {
-            glGenVertexArrays(1, &_quadVAO);
-        }
-
-        _renderDMProgram->activate();
-
-        ghoul::opengl::TextureUnit shadowMapUnit;
-        shadowMapUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
-
-        _renderDMProgram->setUniform("shadowMapTexture", shadowMapUnit);
-
-        glBindVertexArray(_quadVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        _renderDMProgram->deactivate();
-    }
 }
 
 void ShadowComponent::update(const UpdateData&) {
-    ZoneScoped
+    ZoneScoped;
 
-    _sunPosition = global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition();
+    SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
+    if (sun) {
+        _sunPosition = sun->worldPosition();
+    }
+    else {
+        _sunPosition = glm::dvec3(0.0);
+    }
 
     glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
     if (_dynamicDepthTextureRes && ((_shadowDepthTextureWidth != renderingResolution.x) ||
@@ -539,7 +512,7 @@ void ShadowComponent::saveDepthBuffer() {
                 << std::endl;
         ppmFile << "255" << std::endl;
 
-        std::cout << "\n\nSaving depth texture to file depthBufferShadowMapping.ppm\n\n";
+        LDEBUG("Saving depth texture to file depthBufferShadowMapping.ppm");
         int k = 0;
         for (int i = 0; i < _shadowDepthTextureWidth; i++) {
             for (int j = 0; j < _shadowDepthTextureHeight; j++, k++) {
@@ -550,8 +523,7 @@ void ShadowComponent::saveDepthBuffer() {
         }
 
         ppmFile.close();
-
-        std::cout << "Texture saved to file depthBufferShadowMapping.ppm\n\n";
+        LDEBUG("Texture saved to file depthBufferShadowMapping.ppm");
     }
 
     buffer.clear();
@@ -579,7 +551,7 @@ void ShadowComponent::saveDepthBuffer() {
                 << std::endl;
         ppmFile << "255" << std::endl;
 
-        std::cout << "\n\nSaving texture position to positionBufferShadowMapping.ppm\n\n";
+        LDEBUG("Saving texture position to positionBufferShadowMapping.ppm");
 
         float biggestValue = 0.f;
 
@@ -607,7 +579,7 @@ void ShadowComponent::saveDepthBuffer() {
 
         ppmFile.close();
 
-        LINFO("Texture saved to file positionBufferShadowMapping.ppm");
+        LDEBUG("Texture saved to file positionBufferShadowMapping.ppm");
     }
 }
 
@@ -617,10 +589,6 @@ bool ShadowComponent::isEnabled() const {
 
 ShadowComponent::ShadowMapData ShadowComponent::shadowMapData() const {
     return _shadowData;
-}
-
-void ShadowComponent::setViewDepthMap(bool enable) {
-    _viewDepthMap = enable;
 }
 
 GLuint ShadowComponent::dDepthTexture() const {

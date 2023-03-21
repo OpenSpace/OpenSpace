@@ -1,8 +1,0 @@
-<GDAL_WMS>
-  <Service name="TiledWMS">
-    <ServerUrl>http://198.102.45.23/arcgis/rest/services/worldelevation3d/terrain3d?</ServerUrl>
-    <TiledGroupName>GCS_Elevation</TiledGroupName>
-  </Service>
-  <Timeout>2</Timeout>
-  <MaxConnections>5</MaxConnections>
-</GDAL_WMS>

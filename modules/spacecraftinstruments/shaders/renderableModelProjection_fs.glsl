@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,6 @@
 
 #version __CONTEXT__
 
-in vec4 vs_position;
 in vec4 vs_ndc;
 in vec4 vs_normal;
 
@@ -35,54 +34,43 @@ layout (location = 1) out vec4 stencil;
 
 uniform sampler2D projectionTexture;
 uniform sampler2D depthTexture;
-
 uniform bool needShadowMap;
-
-uniform mat4 ModelTransform;
 uniform vec3 boresight;
-uniform vec4 debugColor;
+
 
 bool inRange(float x, float a, float b) {
-    return (x >= a && x <= b);
+  return (x >= a && x <= b);
 } 
 
+
 void main() {
-    vec3 n = normalize(vs_normal.xyz);
-    vec4 projected = vs_ndc;
-    vec2 uv = vec2(0.5) * projected.xy + vec2(0.5);
+  vec3 n = normalize(vs_normal.xyz);
+  vec2 uv = vec2(0.5) * vs_ndc.xy + vec2(0.5);
 
-    if (needShadowMap) {
-        float thisDepth = projected.z * 0.5 + 0.5;
-        float closestDepth = texture(depthTexture, uv).r;
-        const float epsilon = 0.001;
+  if (needShadowMap) {
+    float thisDepth = vs_ndc.z * 0.5 + 0.5;
+    float closestDepth = texture(depthTexture, uv).r;
+    const float epsilon = 0.001;
 
-        if (inRange(uv.x, 0.0, 1.0) && inRange(uv.y, 0.0, 1.0) &&
-            dot(n, boresight) < 0 && thisDepth <= closestDepth + epsilon)
-        {
-            // color = texture(projectionTexture, projected.xy);
-            color = texture(projectionTexture, vec2(1.0) - uv);
-            color.a = 1.0;
-            stencil = vec4(1.0);
-        }
-        else {
-            discard;
-            // color = vec4(vec3(0.0), 0.0);
-            // stencil = vec4(0.0);
-        }
+    if (inRange(uv.x, 0.0, 1.0) && inRange(uv.y, 0.0, 1.0) &&
+        dot(n, boresight) < 0 && thisDepth <= closestDepth + epsilon)
+    {
+      color = texture(projectionTexture, vec2(1.0) - uv);
+      color.a = 1.0;
+      stencil = vec4(1.0);
     }
     else {
-        if (inRange(uv.x, 0.0, 1.0) && inRange(uv.y, 0.0, 1.0) &&
-            dot(n, boresight) < 0)
-        {
-            // color = texture(projectionTexture, projected.xy);
-            color = texture(projectionTexture, vec2(1.0) - uv);
-            color.a = 1.0;
-            stencil = vec4(1.0);
-        }
-        else {
-            discard;
-            // color = vec4(0.0);
-            // stencil = vec4(0.0);
-        }
+      discard;
     }
+  }
+  else {
+    if (inRange(uv.x, 0.0, 1.0) && inRange(uv.y, 0.0, 1.0) && dot(n, boresight) < 0) {
+      color = texture(projectionTexture, vec2(1.0) - uv);
+      color.a = 1.0;
+      stencil = vec4(1.0);
+    }
+    else {
+      discard;
+    }
+  }
 }

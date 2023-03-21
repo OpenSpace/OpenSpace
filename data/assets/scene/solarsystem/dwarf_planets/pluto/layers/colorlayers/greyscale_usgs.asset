@@ -1,32 +1,37 @@
-local globeIdentifier = asset.require("./../../pluto").Pluto.Identifier
+local globeIdentifier = asset.require("../../pluto").Pluto.Identifier
 
 local layer = {
   Identifier = "Greyscale_USGS",
   Name = "Black & White [USGS]",
+  Enabled = asset.enabled,
   FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/pluto_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_PLUTO_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90,360,90",
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
 asset.meta = {
-  Name = "Pluto Black & White & White [USGS]",
+  Name = "Pluto Black & White [USGS]",
   Version = "1.0",
-  Description = [[ This detailed, high-quality global mosaic of Pluto was assembled from
+  Description = [[This detailed, high-quality global mosaic of Pluto was assembled from
     nearly all of the highest-resolution images obtained by the Long-Range
     Reconnaissance Imager (LORRI) and the Multispectral Visible Imaging Camera (MVIC)
     on New Horizons.The mosaic is the most detailed and comprehensive global view yet
-    of Pluto’s surface using New Horizons data. It includes topography data of the
-    hemisphere visible to New Horizons during the spacecraft’s closest approach. The
+    of Pluto's surface using New Horizons data. It includes topography data of the
+    hemisphere visible to New Horizons during the spacecraft's closest approach. The
     topography is derived from digital stereo-image mapping tools that measure the
-    parallax – or the difference in the apparent relative positions – of features on
+    parallax - or the difference in the apparent relative positions - of features on
     the surface obtained at different viewing angles during the encounter. Scientists
     use these parallax displacements of high and low terrain to estimate landform
-    heights.The mosaic is available in Equirectangular projection at an equatorial 
+    heights.The mosaic is available in Equirectangular projection at an equatorial
     pixel scale of 300 meters per pixel (m). (Description from URL)]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Pluto/NewHorizons/" ..

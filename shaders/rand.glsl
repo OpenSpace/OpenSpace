@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +28,8 @@
 /**
  * Return a random number between 0 and 1, based on a vec2
  */
-float rand(vec2 co){
-    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+float rand(vec2 co) {
+  return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
 #endif

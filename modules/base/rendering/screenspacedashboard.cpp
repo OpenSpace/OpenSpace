@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ namespace {
         "UseMainDashboard",
         "Use main dashboard",
         "If this value is set to 'true', this ScreenSpaceDashboard will use the "
-        "main dashboard instead of creating an independent one."
+        "main dashboard instead of creating an independent one"
     };
 
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
@@ -54,83 +54,12 @@ namespace {
 #include "screenspacedashboard_codegen.cpp"
 } // namespace
 
+#include "screenspacedashboard_lua.inl"
+
 namespace openspace {
 
-namespace luascriptfunctions {
-
-/**
-* \ingroup LuaScripts
-* addDashboardItemToScreenSpace(string, table):
-*/
-int addDashboardItemToScreenSpace(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addDashboardItemToScreenSpace");
-
-    const std::string& name = ghoul::lua::value<std::string>(L, 1);
-    const int type = lua_type(L, 2);
-    if (type != LUA_TTABLE) {
-        return ghoul::lua::luaError(L, "Expected argument of type 'table'");
-    }
-
-    ghoul::Dictionary d;
-    try {
-        ghoul::lua::luaDictionaryFromState(L, d);
-    }
-    catch (const ghoul::lua::LuaFormatException& e) {
-        LERRORC("addDashboardItem", e.what());
-        return 0;
-    }
-
-    ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(name);
-
-    if (!ssr) {
-        return ghoul::lua::luaError(L, "Provided name is not a ScreenSpace item");
-    }
-
-    ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
-    if (!dash) {
-        return ghoul::lua::luaError(
-            L,
-            "Provided name is a ScreenSpace item but not a dashboard"
-        );
-    }
-
-    dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
-
-    lua_settop(L, 0);
-    return 0;
-}
-
-/**
-* \ingroup LuaScripts
-* removeDashboardItemsFromScreenSpace(string):
-*/
-int removeDashboardItemsFromScreenSpace(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashboardItemsFromScreenSpace");
-
-    const std::string& name = ghoul::lua::value<std::string>(L, 1);
-    ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(name);
-
-    if (!ssr) {
-        return ghoul::lua::luaError(L, "Provided name is not a ScreenSpace item");
-    }
-
-    ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
-    if (!dash) {
-        return ghoul::lua::luaError(
-            L,
-            "Provided name is a ScreenSpace item but not a dashboard"
-        );
-    }
-
-    dash->dashboard().clearDashboardItems();
-    return 0;
-}
-} // namespace luascriptfunctions
-
 documentation::Documentation ScreenSpaceDashboard::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_screenspace_dashboard";
-    return doc;
+    return codegen::doc<Parameters>("base_screenspace_dashboard");
 }
 
 ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
@@ -162,7 +91,7 @@ bool ScreenSpaceDashboard::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
-        glm::vec2 penPosition = glm::vec2(10.f, _size.value().w );
+        glm::vec2 penPosition = glm::vec2(10.f, _size.value().w);
 
         if (_useMainDashboard) {
             global::dashboard->render(penPosition);
@@ -190,7 +119,7 @@ bool ScreenSpaceDashboard::isReady() const {
 void ScreenSpaceDashboard::update() {
     if (global::windowDelegate->windowHasResized()) {
         const glm::ivec2 size = global::windowDelegate->currentDrawBufferResolution();
-        _size = { 0.f, 0.f, size.x, size.y };
+        _size = glm::vec4(0.f, 0.f, size.x, size.y);
         createFramebuffer();
     }
 }
@@ -207,20 +136,8 @@ scripting::LuaLibrary ScreenSpaceDashboard::luaLibrary() {
     return {
         "dashboard",
         {
-            {
-                "addDashboardItemToScreenSpace",
-                &luascriptfunctions::addDashboardItemToScreenSpace,
-                {},
-                "string, table",
-                "Adds a new dashboard item to an existing SceenSpaceDashboard."
-            },
-            {
-                "removeDashboardItemsFromScreenSpace",
-                &luascriptfunctions::removeDashboardItemsFromScreenSpace,
-                {},
-                "string",
-                "Removes all dashboard items from an existing ScreenSpaceDashboard."
-            }
+            codegen::lua::AddDashboardItemToScreenSpace,
+            codegen::lua::RemoveDashboardItemsFromScreenSpace
         }
     };
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,20 +32,20 @@
 #include <numeric>
 
 namespace {
-    constexpr const char* _loggerCat = "MemoryAwareTileCache";
+    constexpr std::string_view _loggerCat = "MemoryAwareTileCache";
 
     constexpr openspace::properties::Property::PropertyInfo CpuAllocatedDataInfo = {
         "CpuAllocatedTileData",
         "CPU allocated tile data (MB)",
         "This value denotes the amount of RAM memory (in MB) that this tile cache is "
-        "utilizing."
+        "utilizing"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GpuAllocatedDataInfo = {
         "GpuAllocatedTileData",
         "GPU allocated tile data (MB)",
         "This value denotes the amount of GPU memory (in MB) that this tile cache is "
-        "utilizing."
+        "utilizing"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
@@ -195,14 +195,14 @@ MemoryAwareTileCache::TextureContainer::TextureContainer(TileTextureInitData ini
     : _initData(std::move(initData))
     , _numTextures(numTextures)
 {
-    ZoneScoped
+    ZoneScoped;
 
     _textures.reserve(_numTextures);
     reset();
 }
 
 void MemoryAwareTileCache::TextureContainer::reset() {
-    ZoneScoped
+    ZoneScoped;
 
     _textures.clear();
     _freeTexture = 0;
@@ -210,6 +210,7 @@ void MemoryAwareTileCache::TextureContainer::reset() {
         using namespace ghoul::opengl;
         std::unique_ptr<Texture> tex = std::make_unique<Texture>(
             _initData.dimensions,
+            GL_TEXTURE_2D,
             _initData.ghoulTextureFormat,
             toGlTextureFormat(_initData.glType, _initData.ghoulTextureFormat),
             _initData.glType,
@@ -227,7 +228,7 @@ void MemoryAwareTileCache::TextureContainer::reset() {
 }
 
 void MemoryAwareTileCache::TextureContainer::reset(size_t numTextures) {
-    ZoneScoped
+    ZoneScoped;
 
     _numTextures = numTextures;
     reset();
@@ -259,7 +260,7 @@ size_t MemoryAwareTileCache::TextureContainer::size() const {
 //
 
 MemoryAwareTileCache::MemoryAwareTileCache(int tileCacheSize)
-    : PropertyOwner({ "TileCache" })
+    : PropertyOwner({ "TileCache", "Tile Cache" })
     , _numTextureBytesAllocatedOnCPU(0)
     , _cpuAllocatedTileData(CpuAllocatedDataInfo, tileCacheSize, 128, 16384, 1)
     , _gpuAllocatedTileData(GpuAllocatedDataInfo, tileCacheSize, 128, 16384, 1)
@@ -267,7 +268,7 @@ MemoryAwareTileCache::MemoryAwareTileCache(int tileCacheSize)
     , _applyTileCacheSize(ApplyTileCacheInfo)
     , _clearTileCache(ClearTileCacheInfo)
 {
-    ZoneScoped
+    ZoneScoped;
 
     createDefaultTextureContainers();
 
@@ -312,13 +313,10 @@ void MemoryAwareTileCache::clear() {
 }
 
 void MemoryAwareTileCache::createDefaultTextureContainers() {
-    ZoneScoped
+    ZoneScoped;
 
-    for (int id = 0; id < layergroupid::NUM_LAYER_GROUPS; id++) {
-        TileTextureInitData initData = tileTextureInitData(
-            layergroupid::GroupID(id),
-            true
-        );
+    for (const layers::Group& gi : layers::Groups) {
+        TileTextureInitData initData = tileTextureInitData(gi.id, true);
         assureTextureContainerExists(initData);
     }
 }
@@ -326,7 +324,7 @@ void MemoryAwareTileCache::createDefaultTextureContainers() {
 void MemoryAwareTileCache::assureTextureContainerExists(
                                                       const TileTextureInitData& initData)
 {
-    ZoneScoped
+    ZoneScoped;
 
     TileTextureInitData::HashKey initDataKey = initData.hashKey;
     if (_textureContainerMap.find(initDataKey) == _textureContainerMap.end()) {
@@ -341,8 +339,8 @@ void MemoryAwareTileCache::assureTextureContainerExists(
 }
 
 void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
-    ZoneScoped
-    ghoul_assert(!_textureContainerMap.empty(), "Texture containers must exist.");
+    ZoneScoped;
+    ghoul_assert(!_textureContainerMap.empty(), "Texture containers must exist");
 
     LDEBUG("Resetting tile cache size");
 
@@ -368,7 +366,7 @@ void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
 }
 
 void MemoryAwareTileCache::resetTextureContainerSize(size_t numTexturesPerTextureType) {
-    ZoneScoped
+    ZoneScoped;
 
     _numTextureBytesAllocatedOnCPU = 0;
     for (std::pair<const TileTextureInitData::HashKey,
@@ -393,7 +391,7 @@ bool MemoryAwareTileCache::exist(const ProviderTileKey& key) const {
 }
 
 Tile MemoryAwareTileCache::get(const ProviderTileKey& key) {
-    ZoneScoped
+    ZoneScoped;
 
     const TextureContainerMap::const_iterator it = std::find_if(
         _textureContainerMap.cbegin(),

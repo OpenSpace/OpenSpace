@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,7 +49,7 @@ Envelope::Envelope(std::vector<EnvelopePoint> vec) {
 }
 
 bool Envelope::operator!=(const Envelope& env) const {
-    constexpr const double MinDist = 0.0001;
+    constexpr double MinDist = 0.0001;
 
     if (_points.size() != env._points.size()) {
         return true;
@@ -99,7 +99,7 @@ glm::vec3 Envelope::normalizeColor(glm::vec3 vec) const {
 
 glm::vec4 Envelope::valueAtPosition(float pos) const {
     auto afterIter = _points.begin();
-    while (afterIter->position.first < pos ) {
+    while (afterIter->position.first < pos) {
         if (afterIter == _points.end()) {
             return { 0.f, 0.f, 0.f ,0.f };
         }

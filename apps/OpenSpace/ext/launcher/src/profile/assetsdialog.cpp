@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,18 +24,21 @@
 
 #include "profile/assetsdialog.h"
 
+#include "profile/assetedit.h"
 #include "profile/line.h"
 #include <openspace/scene/profile.h>
+#include <ghoul/fmt.h>
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QLabel>
+#include <QPushButton>
 #include <QVBoxLayout>
 #include <QTextEdit>
 #include <QTreeView>
 
 namespace {
-    bool traverseToExpandSelectedItems(QTreeView& tree, AssetTreeModel& model,
-                                       int rows, QModelIndex parent)
+    bool traverseToExpandSelectedItems(QTreeView& tree, AssetTreeModel& model, int rows,
+                                       QModelIndex parent)
     {
         bool isExpanded = false;
 
@@ -63,7 +66,7 @@ namespace {
         int startIndex = 0;
         std::string token = "${USER_ASSETS}/";
         if (path.find(token) == 0) {
-            startIndex = token.length();
+            startIndex = static_cast<int>(token.length());
         }
         const size_t slash = path.find_first_of('/', startIndex);
         const bool endOfPath = (slash == std::string::npos);
@@ -103,8 +106,8 @@ namespace {
             for (int r = 0; r < nRows; r++) {
                 QModelIndex idx = model.index(r, 0, parent);
                 std::string assetName = model.name(idx).toStdString();
-
-                if (path == assetName) {
+                // Need to check if it actually is an asset to prevent issue #2154
+                if (model.isAsset(idx) && path == assetName) {
                     foundFileMatch = true;
                     model.setChecked(idx, true);
                     break;
@@ -122,29 +125,40 @@ namespace {
     }
 } // namespace
 
-AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string& assetBasePath,
-                           const std::string& userAssetBasePath, QWidget* parent)
+AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
+                           const std::string& assetBasePath,
+                           const std::string& userAssetBasePath)
     : QDialog(parent)
     , _profile(profile)
 {
     setWindowTitle("Assets");
     _assetTreeModel.importModelData(assetBasePath, userAssetBasePath);
-    createWidgets();
-}
 
-void AssetsDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     {
+        QGridLayout* container = new QGridLayout;
+        container->setColumnStretch(1, 1);
+
         QLabel* heading = new QLabel("Select assets from /data/assets");
         heading->setObjectName("heading");
-        layout->addWidget(heading);
+        container->addWidget(heading, 0, 0);
+
+        QPushButton* newAssetButton = new QPushButton("New Asset");
+        connect(
+            newAssetButton, &QPushButton::released,
+            this, &AssetsDialog::openAssetEditor
+        );
+        newAssetButton->setCursor(Qt::PointingHandCursor);
+        newAssetButton->setDefault(false);
+        container->addWidget(newAssetButton, 0, 2);
+        layout->addLayout(container);
     }
     {
         _assetTree = new QTreeView;
         _assetTree->setToolTip(
             "Expand arrow entries to browse assets in this OpenSpace installation. "
             "Enable checkbox to include an asset. Those assets highlighted in red are "
-            "present in the profile but do not exist in this OpenSpace installation."
+            "present in the profile but do not exist in this OpenSpace installation"
         );
         _assetTree->setAlternatingRowColors(true);
         _assetTree->setModel(&_assetTreeModel);
@@ -160,10 +174,10 @@ void AssetsDialog::createWidgets() {
         connect(_assetTree, &QTreeView::clicked, this, &AssetsDialog::selected);
 
 
-        for (const std::string& a : _profile.assets()) {
-            QModelIndex parent = _assetTreeModel.index(-1, 0);
-            int nRows = _assetTreeModel.rowCount(parent);
-            traverseToFindFilesystemMatch(_assetTreeModel, parent, nRows, a);
+        for (const std::string& a : _profile->assets) {
+            QModelIndex p = _assetTreeModel.index(-1, 0);
+            int nRows = _assetTreeModel.rowCount(p);
+            traverseToFindFilesystemMatch(_assetTreeModel, p, nRows, a);
         }
 
         int nRows = _assetTreeModel.rowCount(_assetTreeModel.index(-1, 0));
@@ -173,18 +187,19 @@ void AssetsDialog::createWidgets() {
             nRows,
             _assetTreeModel.index(-1, 0)
         );
-        layout->addWidget(_assetTree);
+        layout->addWidget(_assetTree, 4);
     }
     {
+        QWidget* box = new QWidget;
+        QBoxLayout* boxLayout = new QVBoxLayout(box);
         QLabel* summaryHeading = new QLabel("Selection summary");
         summaryHeading->setObjectName("heading");
-        layout->addWidget(summaryHeading);
-    }
-    {
+        boxLayout->addWidget(summaryHeading);
         _summary = new QTextEdit;
         _summary->setReadOnly(true);
         _summary->setText(createTextSummary());
-        layout->addWidget(_summary);
+        boxLayout->addWidget(_summary);
+        layout->addWidget(box, 1);
     }
 
     layout->addWidget(new Line);
@@ -224,14 +239,19 @@ QString AssetsDialog::createTextSummary() {
     return summary;
 }
 
+void AssetsDialog::openAssetEditor() {
+    AssetEdit editor(this);
+    editor.exec();
+}
+
 void AssetsDialog::parseSelections() {
-    _profile.clearAssets();
+    _profile->assets.clear();
     std::vector<std::string> summaryPaths;
     std::vector<AssetTreeItem*> summaryItems;
     _assetTreeModel.getSelectedAssets(summaryPaths, summaryItems);
 
     for (const std::string& sel : summaryPaths) {
-        _profile.addAsset(sel);
+        _profile->addAsset(sel);
     }
     accept();
 }

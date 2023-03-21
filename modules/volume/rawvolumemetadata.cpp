@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -101,34 +101,24 @@ RawVolumeMetadata RawVolumeMetadata::createFromDictionary(
 }
 
 ghoul::Dictionary RawVolumeMetadata::dictionary() {
-    constexpr const char* KeyDimensions = "Dimensions";
-    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
-    constexpr const char* KeyMinValue = "MinValue";
-    constexpr const char* KeyMaxValue = "MaxValue";
-    constexpr const char* KeyTime = "Time";
-    constexpr const char* KeyDomainUnit = "DomainUnit";
-    constexpr const char* KeyValueUnit = "ValueUnit";
-    constexpr const char* KeyGridType = "GridType";
-
     ghoul::Dictionary dict;
-    dict.setValue(KeyDimensions, glm::dvec3(dimensions));
-    dict.setValue(KeyGridType, gridTypeToString(gridType));
+    dict.setValue("Dimensions", glm::dvec3(dimensions));
+    dict.setValue("GridType", gridTypeToString(gridType));
 
     if (hasDomainUnit) {
-        dict.setValue(KeyDomainUnit, domainUnit);
+        dict.setValue("DomainUnit", domainUnit);
     }
     if (hasDomainBounds) {
-        dict.setValue(KeyLowerDomainBound, glm::dvec3(lowerDomainBound));
-        dict.setValue(KeyUpperDomainBound, glm::dvec3(upperDomainBound));
+        dict.setValue("LowerDomainBound", glm::dvec3(lowerDomainBound));
+        dict.setValue("UpperDomainBound", glm::dvec3(upperDomainBound));
     }
 
     if (hasValueRange) {
-        dict.setValue(KeyMinValue, static_cast<double>(minValue));
-        dict.setValue(KeyMaxValue, static_cast<double>(maxValue));
+        dict.setValue("MinValue", static_cast<double>(minValue));
+        dict.setValue("MaxValue", static_cast<double>(maxValue));
     }
     if (hasDomainUnit) {
-        dict.setValue(KeyValueUnit, valueUnit);
+        dict.setValue("ValueUnit", valueUnit);
     }
 
     if (hasTime) {
@@ -137,15 +127,13 @@ ghoul::Dictionary RawVolumeMetadata::dictionary() {
         if (timeString.back() == 'Z') {
             timeString = timeString.substr(0, timeString.size() - 1);
         }
-        dict.setValue(KeyTime, std::string(timeString));
+        dict.setValue("Time", std::string(timeString));
     }
     return dict;
 }
 
 documentation::Documentation RawVolumeMetadata::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "volume_rawvolumemetadata";
-    return doc;
+    return codegen::doc<Parameters>("volume_rawvolumemetadata");
 }
 
 } // namespace openspace::volume

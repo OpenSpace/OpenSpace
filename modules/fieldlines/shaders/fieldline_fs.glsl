@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,23 +34,23 @@ uniform vec4 fieldLineColor;
 
 
 Fragment getFragment() {
-    float alpha = 1 - length(gs_normal) * length(gs_normal);
+  float alpha = 1 - length(gs_normal) * length(gs_normal);
 
-    Fragment frag;
-    if (classification) {
-        frag.color = vec4(gs_color.rgb * alpha, 1.0);
-    }
-    else {
-        frag.color = vec4(fieldLineColor.rgb * fieldLineColor.a * alpha, 1.0);
-    }
+  Fragment frag;
+  if (classification) {
+    frag.color = vec4(gs_color.rgb * alpha, 1.0);
+  }
+  else {
+    frag.color = vec4(fieldLineColor.rgb * fieldLineColor.a * alpha, 1.0);
+  }
 
-    frag.depth = pscDepth(gs_position);
-        
-    // G-Buffer
-    frag.gPosition  = vec4(0.0);//vs_gPosition;
-    // There is no normal here
-    // TODO: Add the correct normal if necessary (JCC)
-    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+  frag.depth = pscDepth(gs_position);
+      
+  // G-Buffer
+  frag.gPosition  = vec4(0.0);//vs_gPosition;
+  // There is no normal here
+  // TODO: Add the correct normal if necessary (JCC)
+  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
-    return frag;
+  return frag;
 }

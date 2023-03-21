@@ -34,28 +34,16 @@
   ],
   "keybindings": [
     {
-      "documentation": "Set and goto Insight Landing",
-      "gui_path": "/Missions/Insight",
-      "is_local": false,
-      "key": "I",
-      "name": "Setup scene for insight EDL",
-      "script": "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', -469.300000);openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset', -470.800006);openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled', true);openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Enabled', true);openspace.time.setPause(true);openspace.time.setTime('2018 NOV 26 19:39:03.68');openspace.navigation.setNavigationState({Anchor = 'Insight',Pitch = 0.567457E-4,Position = { 1.240506E1,-1.369270E1,-2.423553E0 },ReferenceFrame = 'Root',Up = { 0.441211E0,0.247019E0,0.862737E0 },Yaw = -0.446853E-4});"
+      "action": "os.missions.insight.setup",
+      "key": "I"
     },
     {
-      "documentation": "Disable Mars layer settings used for insight EDL",
-      "gui_path": "/Missions/Insight",
-      "is_local": false,
-      "key": "SHIFT+I",
-      "name": "Unset Insight Landing",
-      "script": "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', 0);openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset', 0);openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled', false);openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Enabled', false);"
+      "action": "os.missions.insight.setup.disablelayers",
+      "key": "SHIFT+I"
     },
     {
-      "documentation": "Sets time and layers for Perseverance landing",
-      "gui_path": "/Missions/Perseverance",
-      "is_local": false,
-      "key": "P",
-      "name": "Setup and Goto Perseverance",
-      "script": "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', -1677.088867);openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset', -1677.088867);openspace.time.setPause(true);openspace.time.setTime('2021 FEB 18 20:32:16');openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled', true);openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Enabled', true);openspace.navigation.setNavigationState({Anchor = 'Perseverance',Pitch = 0.567457E-4,Position = { 1.240506E1,-1.369270E1,-2.423553E0 },ReferenceFrame = 'Root',Up = { 0.441211E0,0.247019E0,0.862737E0 },Yaw = -0.446853E-4});"
+      "action": "os.missions.perseverance.setup",
+      "key": "P"
     }
   ],
   "mark_nodes": [

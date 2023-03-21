@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,8 +33,10 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <filesystem>
 
 namespace ghoul::filesystem { class File; }
 
@@ -50,7 +52,7 @@ namespace documentation { struct Documentation; }
 class RenderablePoints : public Renderable {
 public:
     explicit RenderablePoints(const ghoul::Dictionary& dictionary);
-    ~RenderablePoints() = default;
+    ~RenderablePoints() override = default;
 
     void initialize() override;
     void initializeGL() override;
@@ -64,16 +66,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum Unit {
-        Meter = 0,
-        Kilometer = 1,
-        Parsec = 2,
-        Kiloparsec = 3,
-        Megaparsec = 4,
-        Gigaparsec = 5,
-        GigalightYears = 6
-    };
-
     std::vector<double> createDataSlice();
 
     void readColorMapFile();
@@ -95,10 +87,10 @@ private:
         spriteTexture, hasColorMap
     ) _uniformCache;
 
-    std::string _speckFile;
-    std::string _colorMapFile;
+    std::filesystem::path _speckFile;
+    std::filesystem::path _colorMapFile;
 
-    Unit _unit = Parsec;
+    DistanceUnit _unit = DistanceUnit::Parsec;
 
     speck::Dataset _dataset;
     std::vector<glm::vec4> _colorMapData;

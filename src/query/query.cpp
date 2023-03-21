@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #include <openspace/query/query.h>
 
 #include <openspace/engine/globals.h>
-#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 
@@ -63,13 +62,6 @@ std::vector<properties::Property*> allProperties() {
         global::rootPropertyOwner->propertiesRecursive();
 
     properties.insert(properties.end(), p.begin(), p.end());
-
-    // The virtual property manager is not part of the rootProperty owner since it cannot
-    // have an identifier or the "regex as identifier" trick would not work
-    std::vector<properties::Property*> p2 =
-        global::virtualPropertyManager->propertiesRecursive();
-
-    properties.insert(properties.end(), p2.begin(), p2.end());
 
     return properties;
 }

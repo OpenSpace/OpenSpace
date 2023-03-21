@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,24 +26,26 @@
 
 #include "atmosphere_common.glsl"
 
-out vec4 renderTarget1;
+out vec4 renderTarget;
 
+uniform int SAMPLES_R;
+uniform int SAMPLES_MU;
+uniform int SAMPLES_MU_S;
+uniform int SAMPLES_NU;
 uniform int layer;
-
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
 
+
 void main() {
-  // First we convert the window's fragment coordinate to
-  // texel coordinates
-  vec3 rst = vec3(gl_FragCoord.xy, float(layer) + 0.5f) /
+  // First we convert the window's fragment coordinate to texel coordinates
+  vec3 rst = vec3(gl_FragCoord.xy, float(layer) + 0.5) /
     vec3(ivec3(SAMPLES_MU_S * SAMPLES_NU, SAMPLES_MU, SAMPLES_R));
   
-  vec4 rayleighInscattering0 = texture(deltaSRTexture, rst);
-  vec4 mieInscattering0      = texture(deltaSMTexture, rst);
+  vec3 rayleighInscattering = texture(deltaSRTexture, rst).rgb;
+  float mieInscattering = texture(deltaSMTexture, rst).r;
   
-  // We are using only the red component of the Mie scattering
-  // See the Precomputed Atmosphere Scattering paper for details about
-  // the angular precision. 
-  renderTarget1 = vec4(rayleighInscattering0.rgb, mieInscattering0.r); 
+  // We are using only the red component of the Mie scattering. See the Precomputed
+  // Atmosphere Scattering paper for details about the angular precision
+  renderTarget = vec4(rayleighInscattering, mieInscattering); 
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,74 +37,75 @@
 #include <ghoul/misc/clipboard.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <filesystem>
 #include <fstream>
 
 namespace {
-    constexpr const char* HistoryFile = "ConsoleHistory";
+    constexpr std::string_view HistoryFile = "ConsoleHistory";
 
-    constexpr const int NoAutoComplete = -1;
+    constexpr int NoAutoComplete = -1;
 
-    constexpr const int MaximumHistoryLength = 1000;
+    constexpr int MaximumHistoryLength = 1000;
 
     // A high number is chosen since we didn't have a version number before
     // any small number might also be equal to the console history length
 
-    constexpr const uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
+    constexpr uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
 
-    constexpr const openspace::Key CommandInputButton = openspace::Key::GraveAccent;
+    constexpr openspace::Key CommandInputButton = openspace::Key::GraveAccent;
 
-    constexpr const char* FontName = "Console";
-    constexpr const float EntryFontSize = 14.0f;
-    constexpr const float HistoryFontSize = 11.0f;
+    constexpr std::string_view FontName = "Console";
+    constexpr float EntryFontSize = 14.0f;
+    constexpr float HistoryFontSize = 11.0f;
 
     // Additional space between the entry text and the history (in pixels)
-    constexpr const float SeparatorSpace = 30.f;
+    constexpr float SeparatorSpace = 30.f;
 
     // Determines at which speed the console opens.
-    constexpr const float ConsoleOpenSpeed = 2.5;
+    constexpr float ConsoleOpenSpeed = 2.5;
 
     // The number of characters to display after the cursor
     // when horizontal scrolling is required.
-    constexpr const int NVisibleCharsAfterCursor = 5;
+    constexpr int NVisibleCharsAfterCursor = 5;
 
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "IsVisible",
         "Is Visible",
         "Determines whether the Lua console is shown on the screen or not. Toggling it "
-        "will fade the console in and out."
+        "will fade the console in and out"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RemoveScriptingInfo = {
         "RemoteScripting",
         "Remote scripting",
         "Determines whether the entered commands will only be executed locally (if this "
-        "is disabled), or whether they will be send to connected remove instances."
+        "is disabled), or whether they will be send to connected remove instances"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
         "Background Color",
-        "Sets the background color of the console."
+        "Sets the background color of the console"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
         "EntryTextColor",
         "Entry Text Color",
-        "Sets the text color of the entry area of the console."
+        "Sets the text color of the entry area of the console"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HistoryTextColorInfo = {
         "HistoryTextColor",
         "History Text Color",
-        "Sets the text color of the history area of the console."
+        "Sets the text color of the history area of the console"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HistoryLengthInfo = {
         "HistoryLength",
         "History Length",
-        "Determines the length of the history in number of lines."
+        "Determines the length of the history in number of lines"
     };
 
     std::string sanitizeInput(std::string str) {
@@ -127,7 +128,7 @@ namespace {
 namespace openspace {
 
 LuaConsole::LuaConsole()
-    : properties::PropertyOwner({ "LuaConsole" })
+    : properties::PropertyOwner({ "LuaConsole", "Lua Console" })
     , _isVisible(VisibleInfo, false)
     , _remoteScripting(RemoveScriptingInfo, false)
     , _backgroundColor(
@@ -165,12 +166,15 @@ LuaConsole::LuaConsole()
     addProperty(_historyTextColor);
 }
 
-LuaConsole::~LuaConsole() {} // NOLINT
+LuaConsole::~LuaConsole() {}
 
 void LuaConsole::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
-    const std::string filename = FileSys.cacheManager()->cachedFilename(HistoryFile, "");
+    const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
+        HistoryFile,
+        ""
+    );
     if (std::filesystem::is_regular_file(filename)) {
         std::ifstream file(filename, std::ios::binary | std::ios::in);
 
@@ -205,15 +209,17 @@ void LuaConsole::initialize() {
     _commands.emplace_back("");
     _activeCommand = _commands.size() - 1;
 
+    const float dpi = global::windowDelegate->osDpiScaling();
+
     _font = global::fontManager->font(
         FontName,
-        EntryFontSize,
+        EntryFontSize * dpi,
         ghoul::fontrendering::FontManager::Outline::No
     );
 
     _historyFont = global::fontManager->font(
         FontName,
-        HistoryFontSize,
+        HistoryFontSize * dpi,
         ghoul::fontrendering::FontManager::Outline::No
     );
 
@@ -228,9 +234,12 @@ void LuaConsole::initialize() {
 }
 
 void LuaConsole::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
-    const std::string filename = FileSys.cacheManager()->cachedFilename(HistoryFile, "");
+    const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
+        HistoryFile,
+        ""
+    );
 
     // We want to limit the command history to a realistic value, so that it doesn't
     // grow without bounds
@@ -519,7 +528,11 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                         // We only want to remove the autocomplete info if we just
                         // entered the 'default' openspace namespace
                         if (command.substr(0, pos + 1) == "openspace.") {
-                            _autoCompleteInfo = { NoAutoComplete, false, "" };
+                            _autoCompleteInfo = {
+                                .lastIndex = NoAutoComplete,
+                                .hasInitialValue = false,
+                                .initialValue = ""
+                            };
                         }
                     }
                 }
@@ -533,7 +546,11 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         // If any other key is pressed, we want to remove our previous findings
         // The special case for Shift is necessary as we want to allow Shift+TAB
         if (!modifierShift) {
-            _autoCompleteInfo = { NoAutoComplete, false, "" };
+            _autoCompleteInfo = {
+                .lastIndex = NoAutoComplete,
+                .hasInitialValue = false,
+                .initialValue = ""
+            };
         }
     }
 
@@ -586,7 +603,7 @@ void LuaConsole::charCallback(unsigned int codepoint,
 }
 
 void LuaConsole::update() {
-    ZoneScoped
+    ZoneScoped;
 
     // Compute the height by simulating _historyFont number of lines and checking
     // what the bounding box for that text would be.
@@ -598,7 +615,8 @@ void LuaConsole::update() {
 
     // Update the full height and the target height.
     // Add the height of the entry line and space for a separator.
-    _fullHeight = (height + EntryFontSize + SeparatorSpace);
+    const float dpi = global::windowDelegate->osDpiScaling();
+    _fullHeight = (height + EntryFontSize * dpi + SeparatorSpace);
     _targetHeight = _isVisible ? _fullHeight : 0;
 
     // The first frame is going to be finished in approx 10 us, which causes a floating
@@ -621,9 +639,11 @@ void LuaConsole::update() {
 }
 
 void LuaConsole::render() {
-    ZoneScoped
+    ZoneScoped;
 
     using namespace ghoul::fontrendering;
+
+    ghoul::GLDebugGroup group("LuaConsole");
 
     // Don't render the console if it's collapsed.
     if (_currentHeight < 1.f) {
@@ -651,9 +671,10 @@ void LuaConsole::render() {
     glEnable(GL_DEPTH_TEST);
 
     // Render text on top of the background
+    const float dpi = global::windowDelegate->osDpiScaling();
     glm::vec2 inputLocation = glm::vec2(
-        EntryFontSize / 2.f,
-        res.y - _currentHeight + EntryFontSize
+        EntryFontSize * dpi / 2.f,
+        res.y - _currentHeight + EntryFontSize * dpi
     );
 
     // Render the current command
@@ -742,8 +763,8 @@ void LuaConsole::render() {
     );
 
     glm::vec2 historyInputLocation = glm::vec2(
-        HistoryFontSize / 2.f,
-        res.y - HistoryFontSize * 1.5f + _fullHeight - _currentHeight
+        HistoryFontSize * dpi / 2.f,
+        res.y - HistoryFontSize * dpi * 1.5f + _fullHeight - _currentHeight
     );
 
     // @CPP: Replace with array_view
@@ -769,12 +790,12 @@ void LuaConsole::render() {
     }
 
     // Computes the location for right justified text on the same y height as the entry
-    auto locationForRightJustifiedText = [this, res](const std::string& text) {
+    auto locationForRightJustifiedText = [this, res, dpi](const std::string& text) {
         using namespace ghoul::fontrendering;
 
         const glm::vec2 loc = glm::vec2(
-            EntryFontSize / 2.f,
-            res.y - _currentHeight + EntryFontSize
+            EntryFontSize * dpi / 2.f,
+            res.y - _currentHeight + EntryFontSize * dpi
         );
 
         const glm::vec2 bbox = _font->boundingBox(text);

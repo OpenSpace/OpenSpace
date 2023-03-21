@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,13 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
@@ -36,26 +40,55 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyType = "Type";
+    constexpr std::string_view KeyType = "Type";
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this object will be visible or not."
+        "This setting determines whether this object will be visible or not"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
         "This value determines the opacity of this renderable. A value of 0 means "
-        "completely transparent."
+        "completely transparent"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
+        "Fade",
+        "Fade",
+        "This value is used by the system to be able to fade out renderables "
+        "independently from the Opacity value selected by the user. This value should "
+        "not be directly manipulated through a user interface, but instead used by other "
+        "components of the system programmatically",
+        // The Developer mode should be used once the properties in the UI listen to this
+        // openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
         "Type",
         "Renderable Type",
-        "This tells the type of the renderable.",
+        "This tells the type of the renderable",
         openspace::properties::Property::Visibility::Hidden
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderableRenderBinModeInfo =
+    {
+        "RenderBinMode",
+        "Render Bin Mode",
+        "This value specifies if the renderable should be rendered in the Background,"
+        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step",
+        openspace::properties::Property::Visibility::Developer
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DimInAtmosphereInfo = {
+        "DimInAtmosphere",
+        "Dim In Atmosphere",
+        "Enables/Disables if the object should be dimmed when the camera is in the "
+        "sunny part of an atmosphere",
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(Renderable)]] Parameters {
@@ -71,6 +104,21 @@ namespace {
 
         // [[codegen::verbatim(RenderableTypeInfo.description)]]
         std::optional<std::string> type;
+
+        // Fragile! Keep in sync with documentation
+        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderBinMode {
+            Background,
+            Opaque,
+            PreDeferredTransparent,
+            PostDeferredTransparent,
+            Overlay
+        };
+
+        // [[codegen::verbatim(RenderableRenderBinModeInfo.description)]]
+        std::optional<RenderBinMode> renderBinMode;
+
+        // [[codegen::verbatim(DimInAtmosphereInfo.description)]]
+        std::optional<bool> dimInAtmosphere;
     };
 #include "renderable_codegen.cpp"
 } // namespace
@@ -78,9 +126,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation Renderable::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "renderable";
-    return doc;
+    return codegen::doc<Parameters>("renderable");
 }
 
 ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
@@ -94,10 +140,8 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     std::string renderableType = dictionary.value<std::string>(KeyType);
-    // Now we no longer need the type variable
-    dictionary.removeValue(KeyType);
-
-    auto factory = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* factory =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
     Renderable* result = factory->create(
         renderableType,
@@ -108,13 +152,16 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
 }
 
 
+
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
+    , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _renderableType(RenderableTypeInfo, "Renderable")
+    , _dimInAtmosphere(DimInAtmosphereInfo, false)
 {
-    ZoneScoped
+    ZoneScoped;
 
     // I can't come up with a good reason not to do this for all renderables
     registerUpdateRenderBinFromOpacity();
@@ -137,14 +184,32 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
     _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
+    _enabled.onChange([this]() {
+        if (isEnabled()) {
+            global::eventEngine->publishEvent<events::EventRenderableEnabled>(_parent);
+        }
+        else {
+            global::eventEngine->publishEvent<events::EventRenderableDisabled>(_parent);
+        }
+    });
 
     _opacity = p.opacity.value_or(_opacity);
     // We don't add the property here as subclasses should decide on their own whether
     // they to expose the opacity or not
 
+    addProperty(_fade);
+
     // set type for UI
     _renderableType = p.type.value_or(_renderableType);
     addProperty(_renderableType);
+
+    // only used by a few classes such as RenderableTrail and RenderableSphere
+    if (p.renderBinMode.has_value()) {
+        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
+    }
+
+    _dimInAtmosphere = p.dimInAtmosphere.value_or(_dimInAtmosphere);
+    addProperty(_dimInAtmosphere);
 }
 
 void Renderable::initialize() {}
@@ -158,6 +223,8 @@ void Renderable::deinitializeGL() {}
 void Renderable::update(const UpdateData&) {}
 
 void Renderable::render(const RenderData&, RendererTasks&) {}
+
+void Renderable::renderSecondary(const RenderData&, RendererTasks&) {}
 
 void Renderable::setBoundingSphere(double boundingSphere) {
     _boundingSphere = boundingSphere;
@@ -173,6 +240,10 @@ void Renderable::setInteractionSphere(double interactionSphere) {
 
 double Renderable::interactionSphere() const {
     return _interactionSphere;
+}
+
+std::string_view Renderable::typeAsString() const {
+    return _renderableType;
 }
 
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
@@ -198,12 +269,23 @@ void Renderable::setRenderBin(RenderBin bin) {
     _renderBin = bin;
 }
 
-bool Renderable::matchesRenderBinMask(int binMask) {
-    return binMask & static_cast<int>(renderBin());
+bool Renderable::matchesRenderBinMask(int binMask) const noexcept {
+    return binMask & static_cast<int>(_renderBin);
+}
+
+bool Renderable::matchesSecondaryRenderBin(int binMask) const noexcept {
+    if (!_secondaryRenderBin.has_value()) {
+        return false;
+    }
+    return binMask & static_cast<int>(*_secondaryRenderBin);
+}
+
+void Renderable::setFade(float fade) {
+    _fade = fade;
 }
 
 bool Renderable::isVisible() const {
-    return _enabled;
+    return _enabled && _opacity > 0.f && _fade > 0.f;
 }
 
 bool Renderable::isReady() const {
@@ -225,8 +307,11 @@ void Renderable::onEnabledChange(std::function<void(bool)> callback) {
 }
 
 void Renderable::setRenderBinFromOpacity() {
-    if (_renderBin != Renderable::RenderBin::PostDeferredTransparent) {
-        if (_opacity >= 0.f && _opacity < 1.f) {
+    if ((_renderBin != Renderable::RenderBin::PostDeferredTransparent) &&
+        (_renderBin != Renderable::RenderBin::Overlay))
+    {
+        const float v = opacity();
+        if (v >= 0.f && v < 1.f) {
             setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
         }
         else {
@@ -236,18 +321,17 @@ void Renderable::setRenderBinFromOpacity() {
 }
 
 void Renderable::registerUpdateRenderBinFromOpacity() {
-    _opacity.onChange([this](){
-        if ((_renderBin != Renderable::RenderBin::PostDeferredTransparent) &&
-            (_renderBin != Renderable::RenderBin::Overlay))
-        {
-            if (_opacity >= 0.f && _opacity < 1.f) {
-                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-            }
-            else {
-                setRenderBin(Renderable::RenderBin::Opaque);
-            }
-        }
-    });
+    _opacity.onChange([this]() { setRenderBinFromOpacity(); });
+    _fade.onChange([this]() { setRenderBinFromOpacity(); });
+}
+
+float Renderable::opacity() const {
+    // Rendering should depend on if camera is in the atmosphere and if camera is at the
+    // dark part of the globe
+    const float dimming = _dimInAtmosphere ?
+        global::navigationHandler->camera()->atmosphereDimmingFactor() :
+        1.f;
+    return _opacity * _fade * dimming;
 }
 
 }  // namespace openspace

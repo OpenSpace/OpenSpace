@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@ namespace openspace::global::callback {
 namespace {
     // Using the same mechanism as in the globals file
 #ifdef WIN32
-    constexpr const int TotalSize =
+    constexpr int TotalSize =
         sizeof(std::vector<std::function<void()>>) +
         sizeof(std::vector<std::function<void()>>) +
         sizeof(std::vector<std::function<void()>>) +
@@ -43,11 +43,11 @@ namespace {
         sizeof(std::vector<std::function<void()>>) +
         sizeof(std::vector<std::function<void()>>) +
         sizeof(std::vector<std::function<void()>>) +
-        sizeof(std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>) +
-        sizeof(std::vector<std::function<bool(unsigned int, KeyModifier)>>) +
-        sizeof(std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>) +
-        sizeof(std::vector<std::function<void(double, double)>>) +
-        sizeof(std::vector<std::function<bool(double, double)>>) +
+        sizeof(std::vector<KeyboardCallback>) +
+        sizeof(std::vector<CharacterCallback>) +
+        sizeof(std::vector<MouseButtonCallback>) +
+        sizeof(std::vector<MousePositionCallback>) +
+        sizeof(std::vector<MouseScrollWheelCallback>) +
         sizeof(std::vector<std::function<bool(TouchInput)>>) +
         sizeof(std::vector<std::function<bool(TouchInput)>>) +
         sizeof(std::vector<std::function<void(TouchInput)>>);
@@ -58,7 +58,7 @@ namespace {
 } // namespace
 
 void create() {
-    ZoneScoped
+    ZoneScoped;
 
 #ifdef WIN32
     std::fill(DataStorage.begin(), DataStorage.end(), std::byte(0));
@@ -66,147 +66,140 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    initialize = new (currentPos) std::vector<std::function<void()>>;
+    initialize = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(initialize, "No initialize");
     currentPos += sizeof(std::vector<std::function<void()>>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    initialize = new std::vector<std::function<void()>>;
+    initialize = new std::vector<std::function<void()>>();
 #endif // WIN32
 
 #ifdef WIN32
-    deinitialize = new (currentPos) std::vector<std::function<void()>>;
+    deinitialize = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(deinitialize, "No deinitialize");
     currentPos += sizeof(std::vector<std::function<void()>>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    deinitialize = new std::vector<std::function<void()>>;
+    deinitialize = new std::vector<std::function<void()>>();
 #endif // WIN32
 
 #ifdef WIN32
-    initializeGL = new (currentPos) std::vector<std::function<void()>>;
+    initializeGL = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(initializeGL, "No initializeGL");
     currentPos += sizeof(std::vector<std::function<void()>>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    initializeGL = new std::vector<std::function<void()>>;
+    initializeGL = new std::vector<std::function<void()>>();
 #endif // WIN32
 
 #ifdef WIN32
-    deinitializeGL = new (currentPos) std::vector<std::function<void()>>;
+    deinitializeGL = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(deinitializeGL, "No deinitializeGL");
     currentPos += sizeof(std::vector<std::function<void()>>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    deinitializeGL = new std::vector<std::function<void()>>;
+    deinitializeGL = new std::vector<std::function<void()>>();
 #endif // WIN32
 
 #ifdef WIN32
-    preSync = new (currentPos) std::vector<std::function<void()>>;
+    preSync = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(preSync, "No preSync");
     currentPos += sizeof(std::vector<std::function<void()>>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    preSync = new std::vector<std::function<void()>>;
+    preSync = new std::vector<std::function<void()>>();
 #endif // WIN32
 
 #ifdef WIN32
-    postSyncPreDraw = new (currentPos) std::vector<std::function<void()>>;
+    postSyncPreDraw = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(postSyncPreDraw, "No postSyncPreDraw");
     currentPos += sizeof(std::vector<std::function<void()>>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    postSyncPreDraw = new std::vector<std::function<void()>>;
+    postSyncPreDraw = new std::vector<std::function<void()>>();
 #endif // WIN32
 
 #ifdef WIN32
-    render = new (currentPos) std::vector<std::function<void()>>;
+    render = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(render, "No render");
     currentPos += sizeof(std::vector<std::function<void()>>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    render = new std::vector<std::function<void()>>;
+    render = new std::vector<std::function<void()>>();
 #endif // WIN32
 
 #ifdef WIN32
-    draw2D = new (currentPos) std::vector<std::function<void()>>;
+    draw2D = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(draw2D, "No draw2D");
     currentPos += sizeof(std::vector<std::function<void()>>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    draw2D = new std::vector<std::function<void()>>;
+    draw2D = new std::vector<std::function<void()>>();
 #endif // WIN32
 
 #ifdef WIN32
-    postDraw = new (currentPos) std::vector<std::function<void()>>;
+    postDraw = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(postDraw, "No postDraw");
     currentPos += sizeof(std::vector<std::function<void()>>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    postDraw = new std::vector<std::function<void()>>;
+    postDraw = new std::vector<std::function<void()>>();
 #endif // WIN32
 
 #ifdef WIN32
-    keyboard =
-        new (currentPos) std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>;
+    keyboard = new (currentPos) std::vector<KeyboardCallback>();
     ghoul_assert(keyboard, "No keyboard");
-    currentPos += sizeof(std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>);
+    currentPos += sizeof(std::vector<KeyboardCallback>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    keyboard = new std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>;
+    keyboard = new std::vector<KeyboardCallback>();
 #endif // WIN32
 
 #ifdef WIN32
-    character =
-        new (currentPos) std::vector<std::function<bool(unsigned int, KeyModifier)>>;
+    character = new (currentPos) std::vector<CharacterCallback>();
     ghoul_assert(character, "No character");
-    currentPos += sizeof(std::vector<std::function<bool(unsigned int, KeyModifier)>>);
+    currentPos += sizeof(std::vector<CharacterCallback>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    character = new std::vector<std::function<bool(unsigned int, KeyModifier)>>;
+    character = new std::vector<CharacterCallback>();
 #endif // WIN32
 
 #ifdef WIN32
-    mouseButton =
-        new (currentPos) std::vector<
-            std::function<bool(MouseButton, MouseAction, KeyModifier)>
-        >;
+    mouseButton = new (currentPos) std::vector<MouseButtonCallback>();
     ghoul_assert(mouseButton, "No mouseButton");
-    currentPos += sizeof(
-        std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>
-    );
+    currentPos += sizeof(std::vector<MouseButtonCallback>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    mouseButton =
-        new std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>;
+    mouseButton = new std::vector<MouseButtonCallback>();
 #endif // WIN32
 
 #ifdef WIN32
-    mousePosition = new (currentPos) std::vector<std::function<void(double, double)>>;
+    mousePosition =
+        new (currentPos) std::vector<MousePositionCallback>();
     ghoul_assert(mousePosition, "No mousePosition");
-    currentPos += sizeof(std::vector<std::function<void(double, double)>>);
+    currentPos += sizeof(std::vector<MousePositionCallback>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    mousePosition = new std::vector<std::function<void(double, double)>>;
+    mousePosition = new std::vector<MousePositionCallback>();
 #endif // WIN32
 
 #ifdef WIN32
-    mouseScrollWheel = new (currentPos) std::vector<std::function<bool(double, double)>>;
+    mouseScrollWheel = new (currentPos) std::vector<MouseScrollWheelCallback>();
     ghoul_assert(mouseScrollWheel, "No mouseScrollWheel");
-    currentPos += sizeof(std::vector<std::function<bool(double, double)>>);
+    currentPos += sizeof(std::vector<MouseScrollWheelCallback>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    mouseScrollWheel = new std::vector<std::function<bool(double, double)>>;
+    mouseScrollWheel = new std::vector<MouseScrollWheelCallback>();
 #endif // WIN32
 
 #ifdef WIN32
-    touchDetected = new (currentPos) std::vector<std::function<bool(TouchInput)>>;
+    touchDetected = new (currentPos) std::vector<std::function<bool(TouchInput)>>();
     ghoul_assert(touchDetected, "No touchDetected");
     currentPos += sizeof(std::vector<std::function<bool(TouchInput)>>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    touchDetected = new std::vector<std::function<bool(TouchInput)>>;
+    touchDetected = new std::vector<std::function<bool(TouchInput)>>();
 #endif // WIN32
 
 #ifdef WIN32
-    touchUpdated = new (currentPos) std::vector<std::function<bool(TouchInput)>>;
+    touchUpdated = new (currentPos) std::vector<std::function<bool(TouchInput)>>();
     ghoul_assert(touchUpdated, "No touchUpdated");
     currentPos += sizeof(std::vector<std::function<bool(TouchInput)>>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    touchUpdated = new std::vector<std::function<bool(TouchInput)>>;
+    touchUpdated = new std::vector<std::function<bool(TouchInput)>>();
 #endif // WIN32
 
 #ifdef WIN32
-    touchExit = new (currentPos) std::vector<std::function<void(TouchInput)>>;
+    touchExit = new (currentPos) std::vector<std::function<void(TouchInput)>>();
     ghoul_assert(touchExit, "No touchExit");
     //currentPos += sizeof(std::vector<std::function<void(TouchInput)>>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    touchExit = new std::vector<std::function<void(TouchInput)>>;
+    touchExit = new std::vector<std::function<void(TouchInput)>>();
 #endif // WIN32
 }
 

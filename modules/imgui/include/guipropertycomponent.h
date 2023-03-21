@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,20 +43,14 @@ namespace openspace::gui {
 
 class GuiPropertyComponent : public GuiComponent {
 public:
-    using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
-
     BooleanType(UseTreeLayout);
 
-
-    GuiPropertyComponent(std::string identifier, std::string guiName = "",
+    GuiPropertyComponent(std::string identifier, std::string guiName,
         UseTreeLayout useTree = UseTreeLayout::No);
 
-    // This is the function that evaluates to the list of Propertyowners that this
-    // component should render
-    void setSource(SourceFunction function);
-
-    void setVisibility(properties::Property::Visibility visibility);
-    void setHasRegularProperties(bool hasOnlyRegularProperties);
+    void setPropertyOwners(std::vector<properties::PropertyOwner*> propertyOwners);
+    void setPropertyOwnerFunction(
+        std::function<std::vector<properties::PropertyOwner*>()> func);
 
     void render() override;
 
@@ -64,17 +58,11 @@ protected:
     void renderPropertyOwner(properties::PropertyOwner* owner);
     void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
 
-    properties::Property::Visibility _visibility = properties::Property::Visibility::User;
-
-    SourceFunction _function;
-    /// This is set to \c true if all properties contained in this GUIPropertyComponent
-    /// are regular, i.e., not containing wildcards, regex, or groups
-    /// This variable only has an impact on which \c setPropertyValue function is called
-    bool _hasOnlyRegularProperties = false;
+    std::vector<properties::PropertyOwner*> _propertyOwners;
+    std::function<std::vector<properties::PropertyOwner*>()> _propertyOwnerFunction;
 
     properties::BoolProperty _useTreeLayout;
     properties::StringListProperty _treeOrdering;
-    properties::BoolProperty _ignoreHiddenHint;
 };
 
 } // namespace openspace::gui

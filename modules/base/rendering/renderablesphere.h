@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,6 +60,10 @@ public:
 
     static documentation::Documentation Documentation();
 
+protected:
+    virtual void bindTexture();
+    virtual void unbindTexture();
+
 private:
     void loadTexture();
 
@@ -70,9 +74,7 @@ private:
     properties::IntProperty _segments;
 
     properties::BoolProperty _mirrorTexture;
-    properties::BoolProperty _useAdditiveBlending;
     properties::BoolProperty _disableFadeInDistance;
-    properties::BoolProperty _backgroundRendering;
 
     properties::FloatProperty _fadeInThreshold;
     properties::FloatProperty _fadeOutThreshold;

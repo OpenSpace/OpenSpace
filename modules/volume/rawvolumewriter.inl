@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,12 +25,13 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/volumeutils.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/fmt.h>
 #include <fstream>
 
 namespace openspace::volume {
 
 template <typename VoxelType>
-RawVolumeWriter<VoxelType>::RawVolumeWriter(std::string path, size_t bufferSize)
+RawVolumeWriter<VoxelType>::RawVolumeWriter(std::filesystem::path path, size_t bufferSize)
     : _path(std::move(path))
     , _bufferSize(bufferSize)
 {}
@@ -99,7 +100,7 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     std::ofstream file(_path, std::ios::binary);
 
     if (!file.good()) {
-        throw ghoul::RuntimeError("Could not create file '" + _path + "'");
+        throw ghoul::RuntimeError(fmt::format("Could not create file {}", _path));
     }
 
     file.write(buffer, length);

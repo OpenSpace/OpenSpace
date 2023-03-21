@@ -1,0 +1,38 @@
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
+
+local layer = {
+  Identifier = "MOC_WA_Color_LiU",
+  Name = "MOC WA Color [Sweden]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("moc_wa_color_sweden.wms"),
+  Settings = {
+    Gamma = 1.6,
+    Multiplier = 1.07
+  },
+  Description = [[This map is an AMNH version of the global mossaic produced by the
+    Mars Global Surveyor Wide Angle Camera. This version has color added and the
+    shadows subdued based on the MOLA DTM.  Data Reference:
+    https://www.jpl.nasa.gov/spaceimages/details.php?id=PIA03467]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "MOC WA Color [Sweden]",
+  Version = "1.1",
+  Description = [[Main color map layer for Mars. This map is hosted
+    on the OpenSpace server in Sweden]],
+  Author = "OpenSpace Team",
+  URL = "http://www.openspaceproject.com",
+  License = "NASA/PDS"
+}

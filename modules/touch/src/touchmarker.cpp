@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const std::array<const char*, 4> UniformNames = {
+    constexpr std::array<const char*, 4> UniformNames = {
         "radius", "opacity", "thickness", "color"
     };
 
@@ -62,18 +62,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "MarkerColor", "Marker color", "" // @TODO Missing documentation
     };
-
 } // namespace
 
 namespace openspace {
 
 TouchMarker::TouchMarker()
-    : properties::PropertyOwner({ "TouchMarker" })
+    : properties::PropertyOwner({ "TouchMarker", "Touch Marker" })
     , _visible(VisibilityInfo, true)
     , _radiusSize(RadiusInfo, 30.f, 0.f, 100.f)
     , _opacity(OpacityInfo, 0.8f, 0.f, 1.f)
-    , _thickness(ThicknessInfo, 2.f, 0.f, 4.f )
-    , _color(ColorInfo, glm::vec3(0.96f, 0.2f, 0.2f), glm::vec3(0.f), glm::vec3(1.f))
+    , _thickness(ThicknessInfo, 2.f, 0.f, 4.f)
+    , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     addProperty(_visible);
     addProperty(_radiusSize);
@@ -83,7 +82,7 @@ TouchMarker::TouchMarker()
     addProperty(_color);
 }
 
-TouchMarker::~TouchMarker() {} // NOLINT
+TouchMarker::~TouchMarker() {}
 
 void TouchMarker::initialize() {
     glGenVertexArrays(1, &_quad); // generate array

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -90,22 +90,24 @@ protected:
     /**
      * Should create a new texture and populate the _textures vector.
      *
-     * \return \c true if update was successful
+     * \return `true` if update was successful
      */
     virtual bool updateTexture() = 0;
+
     /**
      * Is called before updateTexture. For IswaCygnets getting data from a HTTP request,
      * this function should get the dataFile from the future object.
      *
-     * \return \c true if update was successful
+     * \return `true` if update was successful
      */
     virtual bool updateTextureResource() = 0;
+
     /**
      * Should send a HTTP request to get the resource it needs to create a texture. For
      * Texture cygnets, this should be an image. For DataCygnets, this should be the data
      * file.
      *
-     * \return \c true if update was successful
+     * \return `true` if update was successful
      */
     virtual bool downloadTextureResource(double timestamp) = 0;
 

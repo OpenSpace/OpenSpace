@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/labelscomponent.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -41,8 +42,9 @@ namespace openspace {
 class RenderableSphericalGrid : public Renderable {
 public:
     RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
-    ~RenderableSphericalGrid() = default;
+    ~RenderableSphericalGrid() override = default;
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -75,6 +77,11 @@ protected:
     unsigned int _vsize = 0;
     std::vector<Vertex> _varray;
     std::vector<int> _iarray;
+
+    // Labels
+    bool _hasLabels = false;
+    properties::BoolProperty _drawLabels;
+    std::unique_ptr<LabelsComponent> _labels;
 };
 
 }// namespace openspace

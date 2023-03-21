@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,22 +24,22 @@
 
 #include <openspace/engine/globals.h>
 
-#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/syncengine.h>
-#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/events/eventengine.h>
+#include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/missionmanager.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/dashboard.h>
@@ -70,13 +70,14 @@ namespace {
     // allocation works on Linux, but it fails on Windows in some SGCT function and on Mac
     // in some random global randoms
 #ifdef WIN32
-    constexpr const int TotalSize =
+    constexpr int TotalSize =
+        sizeof(MemoryManager) +
+        sizeof(EventEngine) +
         sizeof(ghoul::fontrendering::FontManager) +
         sizeof(Dashboard) +
         sizeof(DeferredcasterManager) +
         sizeof(DownloadManager) +
         sizeof(LuaConsole) +
-        sizeof(MemoryManager) +
         sizeof(MissionManager) +
         sizeof(ModuleEngine) +
         sizeof(OpenSpaceEngine) +
@@ -87,15 +88,15 @@ namespace {
         sizeof(SyncEngine) +
         sizeof(TimeManager) +
         sizeof(VersionChecker) +
-        sizeof(VirtualPropertyManager) +
         sizeof(WindowDelegate) +
         sizeof(configuration::Configuration) +
+        sizeof(interaction::ActionManager) +
         sizeof(interaction::InteractionMonitor) +
         sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
         sizeof(interaction::NavigationHandler) +
         sizeof(interaction::SessionRecording) +
-        sizeof(interaction::ShortcutManager) +
+        sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
         sizeof(scripting::ScriptEngine) +
@@ -110,13 +111,29 @@ namespace {
 namespace openspace::global {
 
 void create() {
-    ZoneScoped
+    ZoneScoped;
 
     callback::create();
 
 #ifdef WIN32
     std::fill(DataStorage.begin(), DataStorage.end(), std::byte(0));
     std::byte* currentPos = DataStorage.data();
+#endif // WIN32
+
+#ifdef WIN32
+    memoryManager = new (currentPos) MemoryManager;
+    ghoul_assert(memoryManager, "No memoryManager");
+    currentPos += sizeof(MemoryManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    memoryManager = new MemoryManager;
+#endif // WIN32
+
+#ifdef WIN32
+    eventEngine = new (currentPos) EventEngine;
+    ghoul_assert(eventEngine, "No eventEngine");
+    currentPos += sizeof(EventEngine);
+#else // ^^^ WIN32 / !WIN32 vvv
+    eventEngine = new EventEngine;
 #endif // WIN32
 
 #ifdef WIN32
@@ -157,14 +174,6 @@ void create() {
     currentPos += sizeof(LuaConsole);
 #else // ^^^ WIN32 / !WIN32 vvv
     luaConsole = new LuaConsole;
-#endif // WIN32
-
-#ifdef WIN32
-    memoryManager = new (currentPos) MemoryManager;
-    ghoul_assert(memoryManager, "No memoryManager");
-    currentPos += sizeof(MemoryManager);
-#else // ^^^ WIN32 / !WIN32 vvv
-    memoryManager = new MemoryManager;
 #endif // WIN32
 
 #ifdef WIN32
@@ -249,14 +258,6 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    virtualPropertyManager = new (currentPos) VirtualPropertyManager;
-    ghoul_assert(virtualPropertyManager, "No virtualPropertyManager");
-    currentPos += sizeof(VirtualPropertyManager);
-#else // ^^^ WIN32 / !WIN32 vvv
-    virtualPropertyManager = new VirtualPropertyManager;
-#endif // WIN32
-
-#ifdef WIN32
     windowDelegate = new (currentPos) WindowDelegate;
     ghoul_assert(windowDelegate, "No windowDelegate");
     currentPos += sizeof(WindowDelegate);
@@ -270,6 +271,14 @@ void create() {
     currentPos += sizeof(configuration::Configuration);
 #else // ^^^ WIN32 / !WIN32 vvv
     configuration = new configuration::Configuration;
+#endif // WIN32
+
+#ifdef WIN32
+    actionManager = new (currentPos) interaction::ActionManager;
+    ghoul_assert(actionManager, "No action manager");
+    currentPos += sizeof(interaction::ActionManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    actionManager = new interaction::ActionManager;
 #endif // WIN32
 
 #ifdef WIN32
@@ -321,14 +330,6 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    shortcutManager = new (currentPos) interaction::ShortcutManager;
-    ghoul_assert(shortcutManager, "No shortcutManager");
-    currentPos += sizeof(interaction::ShortcutManager);
-#else // ^^^ WIN32 / !WIN32 vvv
-    shortcutManager = new interaction::ShortcutManager;
-#endif // WIN32
-
-#ifdef WIN32
     rootPropertyOwner = new (currentPos) properties::PropertyOwner({ "" });
     ghoul_assert(rootPropertyOwner, "No rootPropertyOwner");
     currentPos += sizeof(properties::PropertyOwner);
@@ -343,6 +344,14 @@ void create() {
     currentPos += sizeof(properties::PropertyOwner);
 #else // ^^^ WIN32 / !WIN32 vvv
     screenSpaceRootPropertyOwner = new properties::PropertyOwner({ "ScreenSpace" });
+#endif // WIN32
+
+#ifdef WIN32
+    userPropertyOwner = new (currentPos) properties::PropertyOwner({ "UserProperties" });
+    ghoul_assert(userPropertyOwner, "No userPropertyOwner");
+    currentPos += sizeof(properties::PropertyOwner);
+#else // ^^^ WIN32 / !WIN32 vvv
+    userPropertyOwner = new properties::PropertyOwner({ "UserProperties" });
 #endif // WIN32
 
 #ifdef WIN32
@@ -371,16 +380,16 @@ void create() {
 }
 
 void initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     rootPropertyOwner->addPropertySubOwner(global::moduleEngine);
 
-    navigationHandler->setPropertyOwner(global::rootPropertyOwner);
     // New property subowners also have to be added to the ImGuiModule callback!
     rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
     rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
     rootPropertyOwner->addPropertySubOwner(global::sessionRecording);
     rootPropertyOwner->addPropertySubOwner(global::timeManager);
+    rootPropertyOwner->addPropertySubOwner(global::scriptScheduler);
 
     rootPropertyOwner->addPropertySubOwner(global::renderEngine);
     rootPropertyOwner->addPropertySubOwner(global::screenSpaceRootPropertyOwner);
@@ -389,12 +398,14 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::luaConsole);
     rootPropertyOwner->addPropertySubOwner(global::dashboard);
 
+    rootPropertyOwner->addPropertySubOwner(global::userPropertyOwner);
+    rootPropertyOwner->addPropertySubOwner(global::openSpaceEngine);
+
     syncEngine->addSyncable(global::scriptEngine);
 }
 
 void initializeGL() {
-    ZoneScoped
-
+    ZoneScoped;
 }
 
 void destroy() {
@@ -431,13 +442,6 @@ void destroy() {
     rootPropertyOwner->~PropertyOwner();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete rootPropertyOwner;
-#endif // WIN32
-
-    LDEBUGC("Globals", "Destroying 'ShortcutManager'");
-#ifdef WIN32
-    shortcutManager->~ShortcutManager();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete shortcutManager;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'SessionRecording'");
@@ -482,6 +486,13 @@ void destroy() {
     delete interactionMonitor;
 #endif // WIN32
 
+    LDEBUGC("Globals", "Destorying 'ActionManager'");
+#ifdef WIN32
+    actionManager->~ActionManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete actionManager;
+#endif // WIN32
+
     LDEBUGC("Globals", "Destroying 'Configuration'");
 #ifdef WIN32
     configuration->~Configuration();
@@ -494,13 +505,6 @@ void destroy() {
     windowDelegate->~WindowDelegate();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete windowDelegate;
-#endif // WIN32
-
-    LDEBUGC("Globals", "Destroying 'VirtualPropertyManager'");
-#ifdef WIN32
-    virtualPropertyManager->~VirtualPropertyManager();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete virtualPropertyManager;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'VersionChecker'");
@@ -573,13 +577,6 @@ void destroy() {
     delete missionManager;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'MemoryManager'");
-#ifdef WIN32
-    memoryManager->~MemoryManager();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete memoryManager;
-#endif // WIN32
-
     LDEBUGC("Globals", "Destroying 'LuaConsole'");
 #ifdef WIN32
     luaConsole->~LuaConsole();
@@ -615,17 +612,31 @@ void destroy() {
     delete fontManager;
 #endif // WIN32
 
+    LDEBUGC("Globals", "Destroying 'EventEngine'");
+#ifdef WIN32
+    eventEngine->~EventEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete eventEngine;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'MemoryManager'");
+#ifdef WIN32
+    memoryManager->~MemoryManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete memoryManager;
+#endif // WIN32
+
     callback::destroy();
 }
 
 void deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *screenSpaceRenderables) {
         ssr->deinitialize();
     }
 
-    syncEngine->removeSyncables(timeManager->getSyncables());
+    syncEngine->removeSyncables(timeManager->syncables());
 
     moduleEngine->deinitialize();
     luaConsole->deinitialize();
@@ -634,7 +645,7 @@ void deinitialize() {
 }
 
 void deinitializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *screenSpaceRenderables) {
         ssr->deinitializeGL();

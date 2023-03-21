@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,7 +63,7 @@ class WebKeyboardHandler;
 class ScreenSpaceBrowser : public ScreenSpaceRenderable {
 public:
     ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceBrowser() = default;
+    ~ScreenSpaceBrowser() override = default;
 
     bool initializeGL() override;
     bool deinitializeGL() override;
@@ -71,6 +71,11 @@ public:
     void render() override;
     void update() override;
     bool isReady() const override;
+
+protected:
+    properties::Vec2Property _dimensions;
+    std::unique_ptr<BrowserInstance> _browserInstance;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
@@ -81,21 +86,19 @@ private:
         void setTexture(GLuint t);
     };
 
+    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
+
+private:
     void bindTexture() override;
 
     properties::StringProperty _url;
-    properties::Vec2Property _dimensions;
     properties::TriggerProperty _reload;
 
-    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
-    std::unique_ptr<BrowserInstance> _browserInstance;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     bool _isUrlDirty = false;
     bool _isDimensionsDirty = false;
 };
-
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__

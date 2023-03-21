@@ -1,11 +1,52 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('util/tle_helper')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-  Title = "Navy Navigation Satellite System",
-  Url = "http://www.celestrak.com/NORAD/elements/nnss.txt",
-  TrailColor = { 0.75, 0.75, 0.35 }
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Navy Navigation Satellite System)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_nnss",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=nnss&FORMAT=kvn",
+  Filename = "nnss.txt",
+  Override = true
+})
+
+local satellites = {
+  Identifier = "nnss",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "nnss.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    Fade = 1.5,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Navy Navigation Satellite System",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Description = [[The first satellite navigation system to be used operationally.]]
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
-shared.registerSatelliteGroupObjects(asset, group, tle, true)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(satellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(satellites)
+end)
+
+asset.export(satellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Navigation Navy Navigation Satellite System",
+  Version = "1.0",
+  Description = [[Satellites asset for Navigation Navy Navigation Satellite System. Data
+    from Celestrak]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

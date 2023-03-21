@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,6 @@
 
 #include "floatoperations.glsl"
 
-const float EPS = 1e-5;
-
 layout(points) in;
 in vec2 vs_brightness[];
 in vec4 vs_gPosition[];
@@ -45,31 +43,34 @@ uniform dmat4 view;
 uniform float viewScaling;
 uniform float cutOffThreshold;
 
+const float EPS = 1e-5;
+
+
 void main() {
-    ge_brightness = vs_brightness[0];
-    ge_starDistFromSun = vs_starDistFromSun[0];
-    ge_cameraDistFromSun = vs_cameraDistFromSun[0];
+  ge_brightness = vs_brightness[0];
+  ge_starDistFromSun = vs_starDistFromSun[0];
+  ge_cameraDistFromSun = vs_cameraDistFromSun[0];
 
-    vec4 viewPosition = vec4(view * vs_gPosition[0]);
+  vec4 viewPosition = vec4(view * vs_gPosition[0]);
 
-    ge_observedDist = safeLength(viewPosition / viewScaling);
-    float distThreshold = cutOffThreshold - log(ge_observedDist) / log(4.0);
+  ge_observedDist = safeLength(viewPosition / viewScaling);
+  float distThreshold = cutOffThreshold - log(ge_observedDist) / log(4.0);
 
-    vec4 position = gl_in[0].gl_Position;
+  vec4 position = gl_in[0].gl_Position;
 
-    // Discard geometry if star has no position (but wasn't a nullArray).
-    // Or if observed distance is above threshold set by cutOffThreshold.
-    // By discarding in gs instead of fs we save computations for when nothing is visible.
-    if (length(position) < EPS || distThreshold <= 0) {
-        return;
-    }
+  // Discard geometry if star has no position (but wasn't a nullArray).
+  // Or if observed distance is above threshold set by cutOffThreshold.
+  // By discarding in gs instead of fs we save computations for when nothing is visible.
+  if (length(position) < EPS || distThreshold <= 0) {
+    return;
+  }
 
-    //gl_PointSize = 1.0;
-    gl_Position = position;
-    gl_Position.z = 0.0;
-    ge_gPosition = viewPosition;
+  //gl_PointSize = 1.0;
+  gl_Position = position;
+  gl_Position.z = 0.0;
+  ge_gPosition = viewPosition;
 
-    EmitVertex();
+  EmitVertex();
 
-    EndPrimitive();
+  EndPrimitive();
 }

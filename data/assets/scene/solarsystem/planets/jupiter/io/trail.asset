@@ -1,7 +1,6 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("../transforms")
 asset.require("spice/base")
-local kernel = asset.require('../kernels').jup310
+local kernel = asset.require("../kernels").jup310
 
 
 
@@ -27,16 +26,24 @@ local IoTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { IoTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(IoTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IoTrail)
+end)
+
+asset.export(IoTrail)
+
 
 
 asset.meta = {
   Name = "Io Trail",
-  Version = "1.0",
-  Description = [[ Trail of Io as observed by the Jupiter. Data from NASA Spice (see
+  Version = "1.1",
+  Description = [[Trail of Io as observed by the Jupiter. Data from NASA Spice (see
     base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"IoTrail"}
+  License = "MIT license"
 }

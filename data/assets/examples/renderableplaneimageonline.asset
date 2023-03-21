@@ -1,6 +1,5 @@
 -- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_SPOUT enabled
 
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
@@ -22,5 +21,12 @@ local RenderablePlaneImageOnline = {
 
 
 
-local objects = { RenderablePlaneImageOnline }
-assetHelper.registerSceneGraphNodesAndExport(asset, objects)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(RenderablePlaneImageOnline)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(RenderablePlaneImageOnline)
+end)
+
+asset.export(RenderablePlaneImageOnline)

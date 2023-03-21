@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,23 +33,12 @@ LongProperty::LongProperty(Property::PropertyInfo info, long value,
     : NumericalProperty<long>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-std::string LongProperty::className() const {
+std::string_view LongProperty::className() const {
     return "LongProperty";
 }
 
 int LongProperty::typeLua() const {
     return LUA_TNUMBER;
-}
-
-long LongProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        long val = static_cast<long>(lua_tonumber(state, -1));
-        return val;
-    }
-    else {
-        return 0;
-    }
 }
 
 } // namespace openspace::properties

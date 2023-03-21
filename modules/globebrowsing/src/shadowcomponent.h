@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -34,7 +35,6 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <openspace/util/camera.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -54,8 +54,8 @@ namespace documentation { struct Documentation; }
 class ShadowComponent : public properties::PropertyOwner {
 public:
     struct ShadowMapData {
-        glm::dmat4 shadowMatrix;
-        GLuint shadowDepthTexture;
+        glm::dmat4 shadowMatrix = glm::dmat4(1.0);
+        GLuint shadowDepthTexture = 0;
     };
 
     ShadowComponent(const ghoul::Dictionary& dictionary);
@@ -76,8 +76,6 @@ public:
     bool isEnabled() const;
 
     ShadowComponent::ShadowMapData shadowMapData() const;
-
-    void setViewDepthMap(bool enable);
 
     GLuint dDepthTexture() const;
 
@@ -137,9 +135,6 @@ private:
 
     // DEBUG
     bool _executeDepthTextureSave = false;
-    bool _viewDepthMap = false;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _renderDMProgram;
-    GLuint _quadVAO = 0u;
 };
 
 } // namespace openspace

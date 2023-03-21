@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,71 +25,29 @@
 #include <openspace/properties/property.h>
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <algorithm>
 
 namespace {
-    constexpr const char* MetaDataKeyGroup = "Group";
-    constexpr const char* MetaDataKeyReadOnly = "isReadOnly";
-    constexpr const char* MetaDataKeyViewOptions = "ViewOptions";
-    constexpr const char* MetaDataKeyVisibility = "Visibility";
+    constexpr std::string_view MetaDataKeyGroup = "Group";
+    constexpr std::string_view MetaDataKeyReadOnly = "isReadOnly";
+    constexpr std::string_view MetaDataKeyViewOptions = "ViewOptions";
+    constexpr std::string_view MetaDataKeyVisibility = "Visibility";
 
+    constexpr std::string_view IdentifierKey = "Identifier";
+    constexpr std::string_view NameKey = "Name";
+    constexpr std::string_view TypeKey = "Type";
+    constexpr std::string_view MetaDataKey = "MetaData";
+    constexpr std::string_view AdditionalDataKey = "AdditionalData";
 } // namespace
 
 namespace openspace::properties {
 
-Property::OnChangeHandle Property::OnChangeHandleAll =
-                                               std::numeric_limits<OnChangeHandle>::max();
-
 const char* Property::ViewOptions::Color = "Color";
-const char* Property::ViewOptions::Logarithmic = "Logarithmic";
-
-const char* Property::IdentifierKey = "Identifier";
-const char* Property::NameKey = "Name";
-const char* Property::TypeKey = "Type";
-const char* Property::DescriptionKey = "Description";
-const char* Property::JsonValueKey = "Value";
-const char* Property::MetaDataKey = "MetaData";
-const char* Property::AdditionalDataKey = "AdditionalData";
-
-
-
-std::string sanitizeString(const std::string& s) {
-    std::string result;
-
-    for (const char& c : s) {
-        switch (c) {
-            case '"':
-                result += "\\\"";
-                break;
-            case '\\':
-                result += "\\\\";
-                break;
-            case '\b':
-                result += "\\b";
-                break;
-            case '\f':
-                result += "\\f";
-                break;
-            case '\n':
-                result += "\\n";
-                break;
-            case '\r':
-                result += "\\r";
-                break;
-            case '\t':
-                result += "\\t";
-                break;
-            default:
-                result += c;
-        }
-    }
-
-    return result;
-}
-
+const char* Property::ViewOptions::MinMaxRange = "MinMaxRange";
 
 #ifdef _DEBUG
 uint64_t Property::Identifier = 0;
@@ -123,7 +81,7 @@ std::string Property::fullyQualifiedIdentifier() const {
     while (currentOwner) {
         std::string ownerId = currentOwner->identifier();
         if (!ownerId.empty()) {
-            identifier = ownerId + "." + identifier; // NOLINT
+            identifier = ownerId + "." + identifier;
         }
         currentOwner = currentOwner->owner();
     }
@@ -138,11 +96,9 @@ bool Property::getLuaValue(lua_State*) const {
     return false;
 }
 
-void Property::set(std::any) {} // NOLINT
+void Property::set(std::any) {}
 
-bool Property::setLuaValue(lua_State*) {
-    return false;
-}
+void Property::setLuaValue(lua_State*) {}
 
 const std::type_info& Property::type() const {
     return typeid(void);
@@ -152,17 +108,8 @@ int Property::typeLua() const {
     return LUA_TNIL;
 }
 
-bool Property::getStringValue(std::string&) const {
-    return false;
-}
-
-std::string Property::getStringValue() const {
-    std::string value;
-    bool status = getStringValue(value);
-    if (!status) {
-        throw ghoul::RuntimeError("Could not get string value", identifier());
-    }
-    return value;
+std::string Property::stringValue() const {
+    return "";
 }
 
 const std::string& Property::guiName() const {
@@ -174,7 +121,7 @@ const std::string& Property::description() const {
 }
 
 void Property::setGroupIdentifier(std::string groupId) {
-    _metaData.setValue(MetaDataKeyGroup, std::move(groupId));
+    _metaData.setValue(std::string(MetaDataKeyGroup), std::move(groupId));
 }
 
 std::string Property::groupIdentifier() const {
@@ -188,7 +135,7 @@ std::string Property::groupIdentifier() const {
 
 void Property::setVisibility(Visibility visibility) {
     _metaData.setValue(
-        MetaDataKeyVisibility,
+        std::string(MetaDataKeyVisibility),
         static_cast<std::underlying_type_t<Visibility>>(visibility)
     );
 }
@@ -200,13 +147,13 @@ Property::Visibility Property::visibility() const {
 }
 
 void Property::setReadOnly(bool state) {
-    _metaData.setValue(MetaDataKeyReadOnly, state);
+    _metaData.setValue(std::string(MetaDataKeyReadOnly), state);
 }
 
 void Property::setViewOption(std::string option, bool value) {
     ghoul::Dictionary d;
     d.setValue(option, value);
-    _metaData.setValue(MetaDataKeyViewOptions, d);
+    _metaData.setValue(std::string(MetaDataKeyViewOptions), d);
 }
 
 bool Property::viewOption(const std::string& option, bool defaultValue) const {
@@ -226,16 +173,8 @@ const ghoul::Dictionary& Property::metaData() const {
     return _metaData;
 }
 
-std::string Property::toJson() const {
-    std::string result = "{";
-    result += "\"" + std::string(DescriptionKey) + "\": " +
-              generateBaseJsonDescription() + ", ";
-    result += "\"" + std::string(JsonValueKey) + "\": " + jsonValue() + '}';
-    return result;
-}
-
 std::string Property::jsonValue() const {
-    return getStringValue();
+    return stringValue();
 }
 
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
@@ -321,29 +260,29 @@ void Property::resetToUnchanged() {
     _isValueDirty = false;
 }
 
-std::string Property::generateBaseJsonDescription() const {
-    std::string cName = className();
-    std::string cNameSan = sanitizeString(cName);
+std::string Property::generateJsonDescription() const {
+    std::string cName = escapedJson(std::string(className()));
     std::string identifier = fullyQualifiedIdentifier();
-    std::string identifierSan = sanitizeString(identifier);
+    std::string identifierSan = escapedJson(identifier);
     std::string gName = guiName();
-    std::string gNameSan = sanitizeString(gName);
+    std::string gNameSan = escapedJson(gName);
     std::string metaData = generateMetaDataJsonDescription();
     std::string description = generateAdditionalJsonDescription();
 
-    return
-        "{ \"" + std::string(TypeKey) + "\": \"" + cNameSan + "\", " +
-        "\"" + std::string(IdentifierKey) + "\": \"" + identifierSan + "\", " +
-        "\"" + std::string(NameKey) + "\": \"" + gNameSan + "\", " +
-        "\"" + std::string(MetaDataKey) + "\": " + metaData + ", " +
-        "\"" + std::string(AdditionalDataKey) + "\": " + description + " }";
+    return fmt::format(
+        R"({{"{}":"{}","{}":"{}","{}":"{}","{}":{},"{}":{}}})",
+        TypeKey, cName, IdentifierKey, identifierSan, NameKey, gNameSan, MetaDataKey,
+        metaData, AdditionalDataKey, description
+    );
 }
 
 std::string Property::generateMetaDataJsonDescription() const {
     static const std::map<Visibility, std::string> VisibilityConverter = {
-        { Visibility::All, "All" },
-        { Visibility::Developer, "Developer" },
+        { Visibility::Always, "Always" },
+        { Visibility::NoviceUser, "NoviceUser" },
         { Visibility::User, "User" },
+        { Visibility::AdvancedUser, "AdvancedUser" },
+        { Visibility::Developer, "Developer" },
         { Visibility::Hidden, "Hidden" }
     };
     Visibility visibility = static_cast<Visibility>(
@@ -357,21 +296,22 @@ std::string Property::generateMetaDataJsonDescription() const {
     std::string isReadOnlyString = (isReadOnly ? "true" : "false");
 
     std::string groupId = groupIdentifier();
-    std::string sanitizedGroupId = sanitizeString(groupId);
+    std::string sanitizedGroupId = escapedJson(groupId);
 
     std::string viewOptions = "{}";
-   if (_metaData.hasValue<ghoul::Dictionary>(MetaDataKeyViewOptions)) {
-       viewOptions = ghoul::formatJson(
-           _metaData.value<ghoul::Dictionary>(MetaDataKeyViewOptions)
-       );
-   }
+    if (_metaData.hasValue<ghoul::Dictionary>(MetaDataKeyViewOptions)) {
+        viewOptions = ghoul::formatJson(
+            _metaData.value<ghoul::Dictionary>(MetaDataKeyViewOptions)
+        );
+    }
 
-    std::string result = "{ ";
-    result += fmt::format("\"{}\": \"{}\",", MetaDataKeyGroup, sanitizedGroupId);
-    result += fmt::format("\"{}\": \"{}\",", MetaDataKeyVisibility, vis);
-    result += fmt::format("\"{}\": {},", MetaDataKeyReadOnly, isReadOnlyString);
-    result += fmt::format("\"{}\": {}", MetaDataKeyViewOptions, viewOptions);
-    result += " }";
+    std::string result = fmt::format(
+        R"({{"{}":"{}","{}":"{}","{}":{},"{}":{}}})",
+        MetaDataKeyGroup, sanitizedGroupId,
+        MetaDataKeyVisibility, vis,
+        MetaDataKeyReadOnly, isReadOnlyString,
+        MetaDataKeyViewOptions, viewOptions
+    );
     return result;
 }
 
@@ -379,7 +319,7 @@ std::string Property::generateAdditionalJsonDescription() const {
     return "{}";
 }
 
-void Property::setInterpolationTarget(std::any) {} // NOLINT
+void Property::setInterpolationTarget(std::any) {}
 void Property::setLuaInterpolationTarget(lua_State*) {}
 void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 

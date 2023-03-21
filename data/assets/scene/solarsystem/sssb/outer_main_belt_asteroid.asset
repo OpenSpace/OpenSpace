@@ -1,35 +1,51 @@
-local assetHelper = asset.require('util/asset_helper')
-local sharedSssb = asset.require('./sssb_shared')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(
-  asset,
-  'outer_main_belt_asteroid',
-  'sssb_data_outer_main_belt_asteroid'
-)
-local object = sharedSssb.createSssbGroupObject(
-  'sssb_data_outer_main_belt_asteroid.csv',
-  "Outer Main Asteroid Belt",
-  filepath,
-  { 0.4, 0.4, 1.0 }
-)
-object.Renderable.Enabled = false
-object.Renderable.SegmentQuality = 1
-object.Renderable.TrailFade = 2
+local sssb = asset.syncedResource({
+  Name = "Small SolarSystem Body Data (Outer Main Belt Asteroid)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_outer_main_belt_asteroid",
+  Version = 1
+})
 
-object.GUI.Description = [[ Asteroids with a semi-major axis of between 3.2 and 4.6 au. ]]
+local object = {
+  Identifier = "sssb_outer_main_belt_asteroid",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_outer_main_belt_asteroid.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 1,
+    Color = { 0.4, 0.4, 1.0 },
+    TrailFade = 2
+  },
+  GUI = {
+    Name = "Outer Main Asteroid Belt",
+    Path = "/Solar System/Small Bodies",
+    Description = [[Asteroids with a semi-major axis of between 3.2 and 4.6 AU.]]
+  }
+}
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Outer Main Asteroid Belt",
-  Version = "1.0",
-  Description = [[ RenderableSmallBody asset with data from from JPL Horizons
-    contiaining Outer Main Asteroid Belt group.]],
+  Version = "1.1",
+    Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
+      Outer Main Asteroid Belt group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
   License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
     All documents available from this server may be protected under the U.S.
-    and Foreign Copyright Laws.]],
-  Identifiers = {"sssb_sssb_data_outer_main_belt_asteroid"}
+    and Foreign Copyright Laws]]
 }

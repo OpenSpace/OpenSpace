@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
@@ -32,7 +33,7 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* DefaultTransferfunctionSource =
+    constexpr std::string_view DefaultTransferfunctionSource =
 R"(
 width 5
 lower 0.0
@@ -59,10 +60,18 @@ FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
 }
 
 void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    auto factory = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* factory =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "No renderable factory existed");
 
     factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
+}
+
+std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
+{
+    return {
+        RenderableFieldlinesSequence::Documentation()
+    };
 }
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +25,14 @@
 #ifndef __OPENSPACE_CORE___SCRIPTSCHEDULER___H__
 #define __OPENSPACE_CORE___SCRIPTSCHEDULER___H__
 
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/navigation/keyframenavigator.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/interaction/keyframenavigator.h>
 
 #include <functional>
+#include <optional>
 #include <queue>
 #include <string>
 #include <vector>
@@ -41,11 +45,13 @@ namespace openspace::scripting {
 struct LuaLibrary;
 
 /**
- * Maintains an ordered list of <code>ScheduledScript</code>s and provides a simple
+ * Maintains an ordered list of `ScheduledScript`s and provides a simple
  * interface for retrieveing scheduled scripts
  */
-class ScriptScheduler {
+class ScriptScheduler : public properties::PropertyOwner {
 public:
+    ScriptScheduler();
+
     struct ScheduledScript {
         ScheduledScript() = default;
         ScheduledScript(const ghoul::Dictionary& dict);
@@ -54,12 +60,15 @@ public:
         std::string forwardScript;
         std::string backwardScript;
         std::string universalScript;
+
+        int group = 0;
     };
 
     /**
-     * Load a schedule from a ghoul::Dictionary \p dictionary and adds the
+     * Load a schedule from a ghoul::Dictionary \p scheduledScripts and adds the
      * ScheduledScript%s to the list of stored scripts.
-     * \param dictionary Dictionary to read
+     *
+     * \param scheduledScripts The scripts that should be loaded
      * \throw SpecificationError If the dictionary does not adhere to the Documentation as
      * specified in the openspace::Documentation function
      */
@@ -73,32 +82,24 @@ public:
 
     /**
      * Removes all scripts for the schedule.
+     *
+     * \param group An int that specifies which group to clear. If none given then all
+     *              scripts
+     *        is cleared from the schedule.
      */
-    void clearSchedule();
+    void clearSchedule(std::optional<int> group = std::nullopt);
 
     /**
     * Progresses the script schedulers time and returns all scripts that has been
-    * scheduled to run between \param newTime and the time provided in the last invocation
+    * scheduled to run between \p newTime and the time provided in the last invocation
     * of this method.
     *
-    * \param newTime_simulation A j2000 time value specifying the new time stamp that
+    * \param newTime A j2000 time value specifying the new time stamp that
     * the script scheduler should progress to.
-    * \param newTime_application The seconds elapsed since the application started
     *
-    * \returns the ordered queue of scripts .
+    * \returns vector with the scheduled scripts that should be run from begining to end.
     */
-//    std::queue<std::string> progressTo(double newTime);
-
-    /**
-     * See <code>progressTo(double newTime)</code>.
-     *
-     * \param timeStr A string specifying the a new time stamp that the
-     * scripts scheduler should progress to.
-     */
-//    std::queue<std::string> progressTo(const std::string& timeStr);
-
-    using ScriptIt = std::vector<std::string>::const_iterator;
-    std::pair<ScriptIt, ScriptIt> progressTo(double newTime);
+    std::vector<std::string> progressTo(double newTime);
 
     /**
      * Returns the the j2000 time value that the script scheduler is currently at
@@ -106,9 +107,20 @@ public:
     double currentTime() const;
 
     /**
-     * \returns a vector of all scripts that has been loaded
+     * Updates the current time to the given j2000 time value
      */
-    std::vector<ScheduledScript> allScripts() const;
+    void setCurrentTime(double time);
+
+    /**
+    * Function that returns all scripts currently loaded in the script scheduler
+    *
+    * \param group An int specifying which group to return, if empty all scripts
+    *              will be returned
+    *
+    * \returns a vector of all scripts that has been loaded
+    */
+    std::vector<ScheduledScript> allScripts(
+        std::optional<int> group = std::nullopt) const;
 
     /**
     * Sets the mode for how each scheduled script's timestamp will be interpreted.
@@ -119,16 +131,6 @@ public:
     */
     void setTimeReferenceMode(openspace::interaction::KeyframeTimeRef refType);
 
-    /**
-    * Sets the mode for scripts being run from playback
-    */
-    void triggerPlaybackStart();
-
-    /**
-    * Sets the flag for scripts no longer being run from playback
-    */
-    void stopPlayback();
-
     static LuaLibrary luaLibrary();
     void setModeApplicationTime();
     void setModeRecordedTime();
@@ -137,13 +139,12 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<double> _timings;
-    std::vector<std::string> _forwardScripts;
-    std::vector<std::string> _backwardScripts;
+    properties::BoolProperty _enabled;
+    properties::BoolProperty _shouldRunAllTimeJump;
+    std::vector<ScheduledScript> _scripts;
 
     int _currentIndex = 0;
     double _currentTime = 0;
-    bool _playbackModeEnabled = false;
 
     openspace::interaction::KeyframeTimeRef _timeframeMode
         = openspace::interaction::KeyframeTimeRef::Absolute_simTimeJ2000;

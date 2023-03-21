@@ -1,22 +1,31 @@
-local assetHelper = asset.require('util/asset_helper')
+local distance_voyager1 = {
+  Type = "DashboardItemDistance",
+  Identifier = "Voyager1Distance",
+  GuiName = "Voyager 1 - Earth Distance",
+  SourceType = "Node",
+  SourceNodeName = "Voyager_1",
+  DestinationType = "Node",
+  DestinationNodeName = "Earth",
+  Enabled = asset.enabled
+}
 
-assetHelper.registerDashboardItems(asset, {
-  {
-    Type = "DashboardItemDistance",
-    Identifier = "Voyager1Distance",
-    GuiName = "Voyager 1 - Earth Distance",
-    SourceType = "Node",
-    SourceNodeName = "Voyager_1",
-    DestinationType = "Node",
-    DestinationNodeName = "Earth"
-  },
-  {
-    Type = "DashboardItemDistance",
-    Identifier = "Voyager2Distance",
-    GuiName = "Voyager 2 - Earth Distance",
-    SourceType = "Node",
-    SourceNodeName = "Voyager_2",
-    DestinationType = "Node",
-    DestinationNodeName = "Earth"
-  }
-})
+local distance_voyager2 = {
+  Type = "DashboardItemDistance",
+  Identifier = "Voyager2Distance",
+  GuiName = "Voyager 2 - Earth Distance",
+  SourceType = "Node",
+  SourceNodeName = "Voyager_2",
+  DestinationType = "Node",
+  DestinationNodeName = "Earth",
+  Enabled = asset.enabled
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(distance_voyager1)
+  openspace.dashboard.addDashboardItem(distance_voyager2)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(distance_voyager2)
+  openspace.dashboard.removeDashboardItem(distance_voyager1)
+end)

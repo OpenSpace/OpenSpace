@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,61 +32,59 @@ layout (location = 0) out vec4 color;
 layout (location = 1) out vec4 stencil;
 
 uniform sampler2D projectionTexture;
-
 uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
-
-uniform vec2 _scaling;
-uniform vec3 _radius;
-uniform int _segments;
-
+uniform vec3 radius;
+uniform int segments;
 uniform vec3 boresight;
 
-#define M_PI 3.14159265358979323846
+const float M_PI = 3.14159265358979323846;
+
 
 vec4 uvToModel(vec2 uv, vec3 radius, float segments) {
-    float fj = uv.x * segments;
-    float fi = (1.0 - uv.y) * segments;
+  float fj = uv.x * segments;
+  float fi = (1.0 - uv.y) * segments;
 
-    float theta = fi * float(M_PI) / segments;  // 0 -> PI
-    float phi   = fj * float(M_PI) * 2.0f / segments;
+  float theta = fi * M_PI / segments;  // 0 -> PI
+  float phi   = fj * M_PI * 2.0 / segments;
 
-    float x = radius[0] * sin(theta) * cos(phi);
-    float y = radius[1] * sin(theta) * sin(phi);
-    float z = radius[2] * cos(theta);
-    
-    return vec4(x, y, z, 0.0);
+  float x = radius.x * sin(theta) * cos(phi);
+  float y = radius.y * sin(theta) * sin(phi);
+  float z = radius.z * cos(theta);
+  
+  return vec4(x, y, z, 0.0);
 }
 
-bool inRange(float x, float a, float b){
-    return (x >= a && x <= b);
+bool inRange(float x, float a, float b) {
+  return (x >= a && x <= b);
 } 
 
+
 void main() {
-    vec2 uv = (vs_position + vec2(1.0)) / vec2(2.0);
+  vec2 uv = (vs_position + vec2(1.0)) / vec2(2.0);
 
-    vec4 vertex = uvToModel(uv, _radius, _segments);
+  vec4 vertex = uvToModel(uv, radius, segments);
 
-    vec4 raw_pos   = psc_to_meter(vertex, _scaling);
-    vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
+  vec4 raw_pos = psc_to_meter(vertex, vec2(1.0, 0.0));
+  vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
 
-    projected.x /= projected.w;
-    projected.y /= projected.w;
+  projected.x /= projected.w;
+  projected.y /= projected.w;
 
-    projected = projected * 0.5 + vec4(0.5);
+  projected = projected * 0.5 + vec4(0.5);
 
-    vec3 normal = normalize((ModelTransform * vec4(vertex.xyz, 0.0)).xyz);
+  vec3 normal = normalize((ModelTransform * vec4(vertex.xyz, 0.0)).xyz);
 
-    vec3 v_b = normalize(boresight);
+  vec3 v_b = normalize(boresight);
 
-    if ((inRange(projected.x, 0.0, 1.0) && inRange(projected.y, 0.0, 1.0)) &&
-        dot(v_b, normal) < 0.0)
-    {
-        color = texture(projectionTexture, vec2(projected.x, projected.y));
-        stencil = vec4(1.0); 
-    }
-    else {
-        color = vec4(0.0);
-        stencil = vec4(0.0);
-    }
+  if ((inRange(projected.x, 0.0, 1.0) && inRange(projected.y, 0.0, 1.0)) &&
+      dot(v_b, normal) < 0.0)
+  {
+    color = texture(projectionTexture, vec2(projected.x, projected.y));
+    stencil = vec4(1.0); 
+  }
+  else {
+    color = vec4(0.0);
+    stencil = vec4(0.0);
+  }
 }

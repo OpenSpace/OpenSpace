@@ -1,6 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local mercuryTransforms = asset.require('scene/solarsystem/planets/mercury/transforms')
+local sun = asset.require("scene/solarsystem/sun/sun")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
 
 
 local models = asset.syncedResource({
@@ -19,35 +19,35 @@ local kernels = asset.syncedResource({
 
 
 local LocalKernels = {
-  kernels .. '/messenger_2548.tsc',
-  kernels .. '/msgr_v231.tf',
+  kernels .. "messenger_2548.tsc",
+  kernels .. "msgr_v231.tf",
 
-  kernels .. '/de405.bsp',
-  kernels .. '/msgr_040803_150430_150430_od431sc_2.bsp',
-  kernels .. '/msgr_antenna_v000.bsp',
-  kernels .. '/msgr_de405_de423s.bsp',
+  kernels .. "de405.bsp",
+  kernels .. "msgr_040803_150430_150430_od431sc_2.bsp",
+  kernels .. "msgr_antenna_v000.bsp",
+  kernels .. "msgr_de405_de423s.bsp",
 
-  kernels .. '/msgr_epps_v100.ti',
-  kernels .. '/msgr_grns_v110.ti',
-  kernels .. '/msgr_mag_v021.ti',
-  kernels .. '/msgr_mascs_v100.ti',
-  kernels .. '/msgr_mdis_v160.ti',
-  kernels .. '/msgr_mla_v010.ti',
-  kernels .. '/msgr_rs_v111.ti',
-  kernels .. '/msgr_xrs_v001.ti',
+  kernels .. "msgr_epps_v100.ti",
+  kernels .. "msgr_grns_v110.ti",
+  kernels .. "msgr_mag_v021.ti",
+  kernels .. "msgr_mascs_v100.ti",
+  kernels .. "msgr_mdis_v160.ti",
+  kernels .. "msgr_mla_v010.ti",
+  kernels .. "msgr_rs_v111.ti",
+  kernels .. "msgr_xrs_v001.ti",
 
 
-  kernels .. '/pck00008.tpc',
-  kernels .. '/pck00008_msgr.tpc',
-  kernels .. '/pck00009_msgr_v10.tpc',
-  kernels .. '/pck00010_msgr_v10.tpc',
-  kernels .. '/pck00010_msgr_v23.tpc',
-  kernels .. '/pck00010.tpc',
+  kernels .. "pck00008.tpc",
+  kernels .. "pck00008_msgr.tpc",
+  kernels .. "pck00009_msgr_v10.tpc",
+  kernels .. "pck00010_msgr_v10.tpc",
+  kernels .. "pck00010_msgr_v23.tpc",
+  kernels .. "pck00010.tpc",
 
-  kernels .. '/msgr_1103_v02.bc',
-  kernels .. '/msgr_1104_v02.bc',
-  kernels .. '/msgr_1105_v02.bc',
-  kernels .. '/msgr_1106_v02.bc',
+  kernels .. "msgr_1103_v02.bc",
+  kernels .. "msgr_1104_v02.bc",
+  kernels .. "msgr_1105_v02.bc",
+  kernels .. "msgr_1106_v02.bc"
 }
 
 
@@ -57,9 +57,6 @@ local RotationMatrix = {
   0, 1, 0
 }
 
-
-local LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
-
 local Messenger = {
   Identifier = "Messenger",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
@@ -67,7 +64,7 @@ local Messenger = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "MESSENGER",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = LocalKernels
     },
     Rotation = {
@@ -92,9 +89,16 @@ local MessengerProbeBlack = {
   Parent = Messenger.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/MessengerProbe_black.obj",
+    GeometryFile = models .. "MessengerProbe_black.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "MessengerProbe Black",
@@ -107,9 +111,16 @@ local MessengerProbeFoil = {
   Parent = Messenger.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/MessengerProbe_foil.obj",
+    GeometryFile = models .. "MessengerProbe_foil.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "MessengerProbe foil",
@@ -122,9 +133,16 @@ local MessengerProbeHeatShield = {
   Parent = Messenger.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/MessengerProbe_heatShield.obj",
+    GeometryFile = models .. "MessengerProbe_heatShield.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "MessengerProbe Heat Sheild",
@@ -137,9 +155,16 @@ local MessengerProbeMetal = {
   Parent = Messenger.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/MessengerProbe_metal.obj",
+    GeometryFile = models .. "MessengerProbe_metal.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "MessengerProbe Metal",
@@ -152,9 +177,16 @@ local MessengerProbePanels = {
   Parent = Messenger.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/MessengerProbe_panels.obj",
+    GeometryFile = models .. "MessengerProbe_panels.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "MessengerProbe Panels",
@@ -187,7 +219,7 @@ local MessengerTrail = {
 }
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local nodes = {
   Messenger,
   MessengerProbeBlack,
   MessengerProbeFoil,
@@ -195,4 +227,20 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
   MessengerProbeMetal,
   MessengerProbePanels,
   MessengerTrail
-})
+}
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end

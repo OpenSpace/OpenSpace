@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -145,6 +145,30 @@ SpecificationError::SpecificationError(TestResult res, std::string comp)
     , result(std::move(res))
 {
     ghoul_assert(!result.success, "Result's success must be false");
+}
+
+void logError(const SpecificationError& error, std::string component) {
+    if (error.result.success) {
+        // Nothing to print if we succeeded
+        return;
+    }
+
+    if (component.empty()) {
+        LERRORC(error.component, error.message);
+    }
+    else {
+        LERRORC(fmt::format("{}: {}", component, error.component), error.message);
+        
+    }
+    for (const documentation::TestResult::Offense& o : error.result.offenses) {
+        LERRORC(
+            o.offender,
+            fmt::format("{}: {}", ghoul::to_string(o.reason), o.explanation)
+        );
+    }
+    for (const documentation::TestResult::Warning& w : error.result.warnings) {
+        LWARNINGC(w.offender, ghoul::to_string(w.reason));
+    }
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,

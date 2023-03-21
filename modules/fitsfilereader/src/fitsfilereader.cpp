@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,7 +47,7 @@
 using namespace CCfits;
 
 namespace {
-    constexpr const char* _loggerCat = "FitsFileReader";
+    constexpr std::string_view _loggerCat = "FitsFileReader";
 } // namespace
 
 namespace openspace {
@@ -69,7 +69,8 @@ bool FitsFileReader::isPrimaryHDU() {
 }
 
 template <typename T>
-std::shared_ptr<ImageData<T>> FitsFileReader::readImage(const std::string& path) {
+std::shared_ptr<ImageData<T>> FitsFileReader::readImage(const std::filesystem::path& path)
+{
     try {
         _infile = std::make_unique<FITS>(path, Read, true);
         // Primary HDU Object
@@ -79,7 +80,7 @@ std::shared_ptr<ImageData<T>> FitsFileReader::readImage(const std::string& path)
         // Extension HDU Object
         return readImageInternal<T>(_infile->currentExtension());
     } catch (const FitsException& e){
-        LERROR("Could not read FITS image from table. " + e.message() );
+        LERROR("Could not read FITS image from table. " + e.message());
     }
 
     return nullptr;
@@ -114,7 +115,7 @@ std::shared_ptr<std::unordered_map<std::string, T>> FitsFileReader::readHeader(
         );
         return std::make_shared<std::unordered_map<std::string, T>>(std::move(result));
     } catch (const FitsException& e) {
-        LERROR("Could not read FITS header. " + e.message() );
+        LERROR("Could not read FITS header. " + e.message());
     }
     return nullptr;
 }
@@ -130,13 +131,13 @@ std::shared_ptr<T> FitsFileReader::readHeaderValue(const std::string key) {
         image.readKey(key, value);
         return std::make_unique<T>(value);
     } catch (FitsException& e) {
-        LERROR("Could not read FITS key. " + e.message() );
+        LERROR("Could not read FITS key. " + e.message());
     }
     return nullptr;
 }
 
 template<typename T>
-std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
+std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::filesystem::path& path,
                                               const std::vector<std::string>& columnNames,
                                                                              int startRow,
                                                                                int endRow,
@@ -148,7 +149,7 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
     std::lock_guard g(_mutex);
 
     try {
-        _infile = std::make_unique<FITS>(path, Read, readAll);
+        _infile = std::make_unique<FITS>(path.string(), Read, readAll);
 
         // Make sure FITS file is not a Primary HDU Object (aka an image).
         if (!isPrimaryHDU()) {
@@ -173,10 +174,10 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
 
             // Create TableData object of table contents.
             TableData<T> loadedTable = {
-                std::move(contents),
-                static_cast<int>(table.rows()),
-                table.getRowsize(),
-                table.name()
+                .contents = std::move(contents),
+                .readRows = static_cast<int>(table.rows()),
+                .optimalRowsize = table.getRowsize(),
+                .name = table.name()
             };
 
             return std::make_shared<TableData<T>>(loadedTable);
@@ -184,15 +185,16 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
     }
     catch (FitsException& e) {
         LERROR(fmt::format(
-            "Could not read FITS table from file '{}'. Make sure it's not an image file.",
+            "Could not read FITS table from file '{}'. Make sure it's not an image file",
             e.message()
         ));
     }
     return nullptr;
 }
 
-std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValuesPerStar,
-                                                int firstRow, int lastRow,
+std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
+                                                int& nValuesPerStar, int firstRow,
+                                                int lastRow,
                                                std::vector<std::string> filterColumnNames,
                                                                            int multiplier)
 {
@@ -245,7 +247,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
     );
 
     if (!table) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open Fits file '{}'", filePath));
+        throw ghoul::RuntimeError(fmt::format("Failed to open Fits file {}", filePath));
     }
 
     int nStars = table->readRows - firstRow + 1;
@@ -255,7 +257,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
     int defaultCols = 17; // Number of columns that are copied by predefined code.
     if (nColumnsRead != defaultCols) {
         LINFO("Additional columns will be read! Consider add column in code for "
-            "significant speedup!");
+            "significant speedup");
     }
     // Declare how many values to save per star
     nValuesPerStar = nColumnsRead + 1; // +1 for B-V color value.
@@ -392,7 +394,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
     size_t defaultCols = 9; // Number of columns that are copied by predefined code.
     if (nColumnsRead != defaultCols) {
         LINFO("Additional columns will be read! Consider add column in code for "
-            "significant speedup!");
+            "significant speedup");
     }
     // Declare how many values to save per star
     nValuesPerStar = 8;
@@ -520,7 +522,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
     return fullData;
 }
 
-std::vector<float> FitsFileReader::readSpeckFile(const std::string& filePath,
+std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& filePath,
                                                  int& nRenderValues)
 {
     std::vector<float> fullData;
@@ -528,7 +530,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::string& filePath,
     std::ifstream fileStream(filePath);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", filePath));
+        LERROR(fmt::format("Failed to open Speck file {}", filePath));
         return fullData;
     }
 
@@ -544,7 +546,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::string& filePath,
         std::streampos position = fileStream.tellg();
         std::getline(fileStream, line);
 
-        if (line[0] == '#' || line.empty()) {
+        if (line.empty() || line[0] == '#') {
             continue;
         }
 
@@ -658,10 +660,14 @@ const std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(ExtHDU& im
    try {
         std::valarray<T> contents;
         image.read(contents);
-        ImageData<T> im = { std::move(contents), image.axis(0), image.axis(1) };
+        ImageData<T> im = {
+            .contents = std::move(contents),
+            .width = image.axis(0),
+            .height = image.axis(1)
+        };
         return std::make_shared<ImageData<T>>(im);
     } catch (const FitsException& e){
-        LERROR("Could not read FITS image EXTHDU. " + e.message() );
+        LERROR("Could not read FITS image EXTHDU. " + e.message());
     }
     return nullptr;
 }
@@ -671,10 +677,14 @@ const std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(PHDU& imag
     try {
         std::valarray<T> contents;
         image.read(contents);
-        ImageData<T> im = { std::move(contents), image.axis(0), image.axis(1) };
+        ImageData<T> im = {
+            .contents = std::move(contents),
+            .width = image.axis(0),
+            .height = image.axis(1)
+        };
         return std::make_shared<ImageData<T>>(im);
     } catch (const FitsException& e){
-        LERROR("Could not read FITS image PHDU. " + e.message() );
+        LERROR("Could not read FITS image PHDU. " + e.message());
     }
     return nullptr;
 }

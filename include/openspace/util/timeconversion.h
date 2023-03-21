@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,57 +60,57 @@ enum class TimeUnit {
 };
 
 // Assumption:  Unit names are sequential in memory
-constexpr const char* TimeUnitNanosecond   = "nanosecond";
-constexpr const char* TimeUnitMicrosecond  = "microsecond";
-constexpr const char* TimeUnitMillisecond  = "millisecond";
-constexpr const char* TimeUnitSecond       = "second";
-constexpr const char* TimeUnitMinute       = "minute";
-constexpr const char* TimeUnitHour         = "hour";
-constexpr const char* TimeUnitDay          = "day";
-constexpr const char* TimeUnitMonth        = "month";
-constexpr const char* TimeUnitYear         = "year";
+constexpr std::string_view TimeUnitNanosecond   = "nanosecond";
+constexpr std::string_view TimeUnitMicrosecond  = "microsecond";
+constexpr std::string_view TimeUnitMillisecond  = "millisecond";
+constexpr std::string_view TimeUnitSecond       = "second";
+constexpr std::string_view TimeUnitMinute       = "minute";
+constexpr std::string_view TimeUnitHour         = "hour";
+constexpr std::string_view TimeUnitDay          = "day";
+constexpr std::string_view TimeUnitMonth        = "month";
+constexpr std::string_view TimeUnitYear         = "year";
 
 // Assumption:  Unit names are sequential in memory
-constexpr const char* TimeUnitNanoseconds = "nanoseconds";
-constexpr const char* TimeUnitMicroseconds = "microseconds";
-constexpr const char* TimeUnitMilliseconds = "milliseconds";
-constexpr const char* TimeUnitSeconds = "seconds";
-constexpr const char* TimeUnitMinutes = "minutes";
-constexpr const char* TimeUnitHours = "hours";
-constexpr const char* TimeUnitDays = "days";
-constexpr const char* TimeUnitMonths = "months";
-constexpr const char* TimeUnitYears = "years";
+constexpr std::string_view TimeUnitNanoseconds = "nanoseconds";
+constexpr std::string_view TimeUnitMicroseconds = "microseconds";
+constexpr std::string_view TimeUnitMilliseconds = "milliseconds";
+constexpr std::string_view TimeUnitSeconds = "seconds";
+constexpr std::string_view TimeUnitMinutes = "minutes";
+constexpr std::string_view TimeUnitHours = "hours";
+constexpr std::string_view TimeUnitDays = "days";
+constexpr std::string_view TimeUnitMonths = "months";
+constexpr std::string_view TimeUnitYears = "years";
 
-constexpr const std::array<TimeUnit, static_cast<int>(TimeUnit::Year) + 1> TimeUnits = {
+constexpr std::array<TimeUnit, static_cast<int>(TimeUnit::Year) + 1> TimeUnits = {
     TimeUnit::Nanosecond, TimeUnit::Microsecond, TimeUnit::Millisecond,
     TimeUnit::Second, TimeUnit::Minute, TimeUnit::Hour, TimeUnit::Day,
     TimeUnit::Month, TimeUnit::Year
 };
 
-constexpr const std::array<const char*, static_cast<int>(TimeUnit::Year) + 1>
+constexpr std::array<std::string_view, static_cast<int>(TimeUnit::Year) + 1>
 TimeUnitNamesSingular = {
     TimeUnitNanosecond, TimeUnitMicrosecond, TimeUnitMillisecond, TimeUnitSecond,
     TimeUnitMinute, TimeUnitHour, TimeUnitDay, TimeUnitMonth, TimeUnitYear
 };
 
-constexpr const std::array<const char*, static_cast<int>(TimeUnit::Year) + 1>
+constexpr std::array<std::string_view, static_cast<int>(TimeUnit::Year) + 1>
 TimeUnitNamesPlural = {
     TimeUnitNanoseconds, TimeUnitMicroseconds, TimeUnitMilliseconds, TimeUnitSeconds,
     TimeUnitMinutes, TimeUnitHours, TimeUnitDays, TimeUnitMonths, TimeUnitYears
 };
 
-constexpr bool isValidTimeUnitName(const char* name) {
+constexpr bool isValidTimeUnitName(std::string_view name) {
     int i = 0;
-    for (const char* val : TimeUnitNamesSingular) {
-        if (ghoul::equal(name, val)) {
+    for (std::string_view val : TimeUnitNamesSingular) {
+        if (val == name) {
             return true;
         }
         ++i;
     }
 
     i = 0;
-    for (const char* val : TimeUnitNamesPlural) {
-        if (ghoul::equal(name, val)) {
+    for (std::string_view val : TimeUnitNamesPlural) {
+        if (val == name) {
             return true;
         }
         ++i;
@@ -118,7 +118,7 @@ constexpr bool isValidTimeUnitName(const char* name) {
     return false;
 }
 
-constexpr const char* nameForTimeUnit(TimeUnit unit, bool pluralForm = false) {
+constexpr std::string_view nameForTimeUnit(TimeUnit unit, bool pluralForm = false) {
     switch (unit) {
         case TimeUnit::Nanosecond:
         case TimeUnit::Microsecond:
@@ -140,11 +140,11 @@ constexpr const char* nameForTimeUnit(TimeUnit unit, bool pluralForm = false) {
     }
 }
 
-constexpr TimeUnit timeUnitFromString(const char* unitName) {
+constexpr TimeUnit timeUnitFromString(std::string_view unitName) {
     int found = -1;
     int i = 0;
-    for (const char* val : TimeUnitNamesSingular) {
-        if (ghoul::equal(unitName, val)) {
+    for (std::string_view val : TimeUnitNamesSingular) {
+        if (val == unitName) {
             found = i;
             break;
         }
@@ -152,8 +152,8 @@ constexpr TimeUnit timeUnitFromString(const char* unitName) {
     }
 
     i = 0;
-    for (const char* val : TimeUnitNamesPlural) {
-        if (ghoul::equal(unitName, val)) {
+    for (std::string_view val : TimeUnitNamesPlural) {
+        if (val == unitName) {
             found = i;
             break;
         }
@@ -168,7 +168,10 @@ constexpr TimeUnit timeUnitFromString(const char* unitName) {
     }
 }
 
-std::pair<double, std::string> simplifyTime(double seconds,
+std::pair<double, std::string_view> simplifyTime(double seconds,
+    bool forceSingularForm = false);
+
+std::vector<std::pair<double, std::string_view>> splitTime(double seconds,
     bool forceSingularForm = false);
 
 constexpr double convertTime(double t, TimeUnit sourceUnit, TimeUnit destinationUnit) {
@@ -198,7 +201,8 @@ constexpr double convertTime(double t, TimeUnit sourceUnit, TimeUnit destination
         case TimeUnit::Year:
             seconds  = t * SecondsPerYear;
             break;
-        default: ;
+        default:
+            break;
     }
 
     switch (destinationUnit) {

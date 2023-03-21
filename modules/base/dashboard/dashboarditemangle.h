@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +40,7 @@ namespace documentation { struct Documentation; }
 class DashboardItemAngle : public DashboardTextItem {
 public:
     DashboardItemAngle(const ghoul::Dictionary& dictionary);
-    virtual ~DashboardItemAngle() = default;
+    ~DashboardItemAngle() override = default;
 
     void render(glm::vec2& penPosition) override;
 
@@ -49,12 +49,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum Type {
-        Node = 0,
-        Focus,
-        Camera
-    };
-
     struct Component {
         properties::OptionProperty type;
         properties::StringProperty nodeName;

@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local sphereTextures = asset.syncedResource({
   Name = "Milky Way Sphere Textures",
   Type = "HttpSynchronization",
@@ -15,7 +11,7 @@ local sphere = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0, 0, 3.14159265359}
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {
@@ -23,12 +19,13 @@ local sphere = {
     Size = 9.2E21,
     Segments = 40,
     Opacity = 0.35,
-    Texture = sphereTextures .. "/DarkUniverse_mellinger_4k.jpg",
+    Texture = sphereTextures .. "DarkUniverse_mellinger_4k.jpg",
     Orientation = "Inside",
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
     MirrorTexture = true,
     FadeOutThreshold = 0.0015,
-    Background = true
+    Background = true,
+    DimInAtmosphere = true,
   },
   GUI = {
     Name = "Milky Way Sphere",
@@ -38,15 +35,23 @@ local sphere = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { sphere })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(sphere)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(sphere)
+end)
+
+asset.export(sphere)
+
 
 
 asset.meta = {
   Name = "Milky Way Galaxy Sphere",
-  Version = "2.0",
-  Description = [[All sky image of the Milky Way]],
+  Version = "2.1",
+  Description = "All sky image of the Milky Way",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"MilkyWay"}
+  License = "MIT license"
 }

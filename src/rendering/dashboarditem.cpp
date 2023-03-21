@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyType = "Type";
+    constexpr std::string_view KeyType = "Type";
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
@@ -40,26 +40,14 @@ namespace {
         "If this value is set to 'true' this dashboard item is shown in the dashboard"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IdentifierInfo = {
-        "Identifier",
-        "Identifier",
-        ""
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
-        "GuiName",
-        "Gui Name",
-        ""
-    };
-
     struct [[codegen::Dictionary(DashboardItem)]] Parameters {
         std::string type;
 
-        // [[codegen::verbatim(IdentifierInfo.description)]]
-        std::string identifier;
+        std::string identifier [[codegen::identifier()]];
 
-        // [[codegen::verbatim(GuiNameInfo.description)]]
         std::optional<std::string> guiName;
+
+        std::optional<bool> enabled;
     };
 #include "dashboarditem_codegen.cpp"
 } // namespace
@@ -67,15 +55,14 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItem::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "dashboarditem";
-    return doc;
+    return codegen::doc<Parameters>("dashboarditem");
 }
 
 std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
                                                              ghoul::Dictionary dictionary)
 {
-    auto factory = FactoryManager::ref().factory<DashboardItem>();
+    ghoul::TemplateFactory<DashboardItem>* factory =
+        FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(factory, "DashboardItem factory did not exist");
 
     const std::string& dashboardType = dictionary.value<std::string>(KeyType);
@@ -86,7 +73,7 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
 
 DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "", "" })
-    , _isEnabled(EnabledInfo, true)
+    , _enabled(EnabledInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -95,11 +82,12 @@ DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
         setGuiName(*p.guiName);
     }
 
-    addProperty(_isEnabled);
+    _enabled = p.enabled.value_or(_enabled);
+    addProperty(_enabled);
 }
 
 bool DashboardItem::isEnabled() const {
-    return _isEnabled;
+    return _enabled;
 }
 
 } // namespace openspace

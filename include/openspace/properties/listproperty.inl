@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,16 @@ ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values
 
 template <typename T>
 ListProperty<T>::~ListProperty() {}
+
+template <typename T>
+std::vector<T> ListProperty<T>::fromLuaConversion(lua_State* state) const {
+    return ghoul::lua::value<std::vector<T>>(state);
+}
+
+template <typename T>
+void ListProperty<T>::toLuaConversion(lua_State* state) const {
+    ghoul::lua::push(state, TemplateProperty<std::vector<T>>::_value);
+}
 
 } // namespace openspace::properties
 

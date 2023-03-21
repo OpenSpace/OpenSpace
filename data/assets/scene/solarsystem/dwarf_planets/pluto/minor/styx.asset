@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels').PlutoKernels
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels").PlutoKernels
 
 
 local Styx = {
@@ -19,7 +18,7 @@ local Styx = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto" },
+  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto"
   }
@@ -39,10 +38,10 @@ local StyxTrail = {
     Period = 20.16155,
     Resolution = 1000
   },
-  Tag = { 
-    "moonTrail_solarSystem", 
-    "moonTrail_dwarf", 
-    "moonTrail_pluto", 
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_dwarf",
+    "moonTrail_pluto",
     "moonTrail_minor"
   },
   GUI = {
@@ -51,14 +50,53 @@ local StyxTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Styx, StyxTrail })
+local StyxLabel = {
+  Identifier = "StyxLabel",
+  Parent = Styx.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Styx",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1000.0 },
+    FadeWidths = { 150.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Cheron Label",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons",
+    Description = "Label for Pluto's moon Styx"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Styx)
+  openspace.addSceneGraphNode(StyxTrail)
+  openspace.addSceneGraphNode(StyxLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(StyxLabel)
+  openspace.removeSceneGraphNode(StyxTrail)
+  openspace.removeSceneGraphNode(Styx)
+end)
+
+asset.export(Styx)
+asset.export(StyxTrail)
+
 
 
 asset.meta = {
   Name = "Styx",
   Version = "1.0",
-  Description = [[ Globe and trail for Pluto's moon Styx. Data from
-    NASA Spice (see base spice asset)]],
+  Description = [[Globe and trail for Pluto's moon Styx. Data from NASA Spice (see base
+    spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

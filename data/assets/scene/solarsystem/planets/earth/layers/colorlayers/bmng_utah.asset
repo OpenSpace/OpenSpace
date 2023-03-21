@@ -1,28 +1,32 @@
-local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "BMNG_Utah",
   Name = "BMNG [Utah]",
-  FilePath = mapServiceConfigsPath .. "/Utah/Bmng.wms",
-  Description = [[ Web loaded full resolution map of Blue Marble Next Generation.
-    This map is hosted on the OpenSpace servers in Utah]],    
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("bmng_utah.wms"),
+  Description = [[Web loaded full resolution map of Blue Marble Next Generation. This map
+    is hosted on the OpenSpace servers in Utah]],
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Blue Marble Next Generation (Utah)",
-  Version = "1.0",
-  Description = [[ Web loaded full resolution map of Blue Marble Next Generation.
-    This map is hosted on the OpenSpace servers in Utah]],
+  Version = "1.1",
+  Description = [[Web loaded full resolution map of Blue Marble Next Generation. This map
+    is hosted on the OpenSpace servers in Utah]],
   Author = "OpenSpace Team",
   URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
-  License = "NASA",
-  Identifiers = {"BMNG_Utah"}
+  License = "NASA"
 }

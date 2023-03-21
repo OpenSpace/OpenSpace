@@ -1,47 +1,72 @@
-local stateMachineHelper = asset.require('util/state_machine_helper')
+-- Create a state machine with a few different states. The state machine can be controlled through
+-- the scripting commands from the state machine module.
 
-states = {
+local targetNode = function(nodeIdentifier)
+  return [[
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+    openspace.setPropertyValueSingle(
+      "NavigationHandler.OrbitalNavigator.Anchor",
+      "]] .. nodeIdentifier ..  [["
+    )
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
+  ]]
+end
+
+local states = {
   {
-    Title = "Highlight EarthTrail",
-    Play = function ()
-      openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 10, 1)
-    end,
-    Rewind = function ()
-      openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 2, 1)
-    end
-  }, 
+    Identifier = "Constellations",
+    Enter = [[
+      openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Opacity", 1.0, 1.0)
+    ]],
+    Exit = [[
+      openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Opacity", 0.0, 1.0)
+    ]]
+  },
   {
-    Title = "Highlight MarsTrail",
-    Play = function ()
-      openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 2, 1)
-      openspace.setPropertyValue("Scene.MarsTrail.Renderable.LineWidth", 10, 1)
-    end,
-    Rewind = function ()
-      openspace.setPropertyValue("Scene.MarsTrail.Renderable.LineWidth", 2, 1)
-      openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 10, 1)
-    end
+    Identifier = "Earth",
+    Enter = 'openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", true)',
+    Exit = 'openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", false)'
+  },
+  {
+    Identifier = "Moon"
   }
 }
 
-local stateMachine
+local transitions = {
+  {
+    From = "Earth",
+    To = "Moon",
+    Action = targetNode("Moon")
+  },
+  {
+    From = "Moon",
+    To = "Earth",
+    Action = targetNode("Earth")
+  },
+  {
+    From = "Earth",
+    To = "Constellations",
+  },
+  {
+    From = "Constellations",
+    To = "Earth"
+  },
+  {
+    From = "Moon",
+    To = "Constellations",
+    Action = targetNode("Earth")
+  },
+  {
+    From = "Constellations",
+    To = "Moon",
+    Action = targetNode("Moon")
+  }
+}
 
-function next() 
-  stateMachine.goToNextState()
-end
+asset.onInitialize(function()
+  -- Setup (could be done in the profile)
+  openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Opacity", 0.0)
 
-function previous()
-  stateMachine.goToPreviousState()
-end
-
-asset.onInitialize(function ()
-  stateMachine = stateMachineHelper.createStateMachine(states)
-  openspace.bindKey('RIGHT', 'next()')
-  openspace.bindKey('LEFT', 'previous()')
-end)
-
-
-asset.onDeinitialize(function ()
-  stateMachine = nil
-  openspace.clearKey('RIGHT')
-  openspace.clearKey('LEFT')
+  openspace.statemachine.createStateMachine(states, transitions, "Earth")
 end)

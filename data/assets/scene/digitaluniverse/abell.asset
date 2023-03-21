@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "Abell Textures",
   Type = "HttpSynchronization",
@@ -21,15 +17,19 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "abell.label",
+      Opacity = 1.0,
+      Color = { 0.0, 0.8, 0.0 },
+      Size = 22,
+      MinMaxSize = { 10, 12 },
+      Unit = "Mpc"
+    },
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 1.0,
-    --ColorMap = speck .. "/abell.cmap",
-    File = speck .. "/abell.speck",
-    Texture = textures .. "/point3A.png",
-    LabelFile = speck .. "/abell.label",
-    TextColor = { 0.0, 0.8, 0.0 },
-    TextSize = 22,
-    TextMinSize = 10.0,
+    --ColorMap = speck .. "abell.cmap",
+    File = speck .. "abell.speck",
+    Texture = textures .. "point3A.png",
     Unit = "Mpc",
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,
@@ -38,7 +38,7 @@ local object = {
       0.0,              0.0,            0.0,           1.0
     },
     ScaleFactor = 520.0,
-    BillboardMaxSize = 7.0,
+    BillboardMinMaxSize = { 0.0, 7.0 },
     EnablePixelSizeControl = true
   },
   GUI = {
@@ -46,7 +46,7 @@ local object = {
     Path = "/Universe/Galaxies",
     Description = [[Census 2,246 galaxies. DU Version 1.4. <br> The Abell catalog
         includes all the nearby, and not so nearby, galaxy clusters. The northern
-        hemisphere survey, published in 1958, was compiled by George Abell (1927–1983)
+        hemisphere survey, published in 1958, was compiled by George Abell (1927-1983)
         from the Palomar Sky Survey plates. A subsequent southern hemisphere catalog
         was published posthumously in 1989. Further analysis by Brent Tully determined
         their distance and three-dimensional distribution. Each point in this data set
@@ -60,15 +60,23 @@ local object = {
 }
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Abell Galaxy Clusters",
-  Version = "2.0",
-  Description = [[Digital Universe asset for The Abell catalog]],
+  Version = "2.1",
+  Description = "Digital Universe asset for The Abell catalog",
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"Abell"}
+  License = "AMNH Digital Universe"
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,11 @@
 
 #include "profile/profileedit.h"
 
+#include "profile/actiondialog.h"
 #include "profile/additionalscriptsdialog.h"
 #include "profile/assetsdialog.h"
 #include "profile/cameradialog.h"
 #include "profile/deltatimesdialog.h"
-#include "profile/keybindingsdialog.h"
 #include "profile/line.h"
 #include "profile/marknodesdialog.h"
 #include "profile/metadialog.h"
@@ -36,6 +36,7 @@
 #include "profile/propertiesdialog.h"
 #include "profile/timedialog.h"
 #include <openspace/scene/profile.h>
+#include <ghoul/fmt.h>
 #include <QDialogButtonBox>
 #include <QKeyEvent>
 #include <QLabel>
@@ -69,17 +70,18 @@ namespace {
         return results;
     }
 
-    std::string summarizeKeybindings(const std::vector<Profile::Keybinding>& keybindings)
+    std::string summarizeKeybindings(const std::vector<Profile::Keybinding>& keybindings,
+                                     const std::vector<Profile::Action>& actions)
     {
         std::string results;
         for (Profile::Keybinding k : keybindings) {
-            results += k.name + " (";
-            int keymod = static_cast<int>(k.key.modifier);
-            if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
-                results += openspace::KeyModifierNames.at(keymod) + "+";
-            }
-            results += openspace::KeyNames.at(static_cast<int>(k.key.key));
-            results += ")\n";
+            const auto it = std::find_if(
+                actions.cbegin(), actions.cend(),
+                [id = k.action](const Profile::Action& a) { return a.identifier == id; }
+            );
+
+            std::string name = it != actions.end() ? it->name : "Unknown action";
+            results += fmt::format("{} ({})\n", name, ghoul::to_string(k.key));
         }
         return results;
     }
@@ -87,7 +89,7 @@ namespace {
     std::string summarizeProperties(const std::vector<Profile::Property>& properties) {
         std::string results;
         for (openspace::Profile::Property p : properties) {
-            results += p.name + " = " + p.value + '\n';
+            results += fmt::format("{} = {}\n", p.name, p.value);
         }
         return results;
     }
@@ -182,9 +184,8 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QGridLayout* container = new QGridLayout;
         container->setColumnStretch(1, 1);
 
-        _keybindingsLabel = new QLabel("Keybindings");
+        _keybindingsLabel = new QLabel("Actions & Keybindings");
         _keybindingsLabel->setObjectName("heading");
-        _keybindingsLabel->setWordWrap(true);
         container->addWidget(_keybindingsLabel, 0, 0);
 
         QPushButton* keybindingsProperties = new QPushButton("Edit");
@@ -333,26 +334,28 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
 }
 
 void ProfileEdit::initSummaryTextForEachCategory() {
-    _modulesLabel->setText(labelText(_profile.modules().size(), "Modules"));
+    _modulesLabel->setText(labelText(_profile.modules.size(), "Modules"));
 
-    _assetsLabel->setText(labelText(_profile.assets().size(), "Assets"));
-    _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets())));
+    _assetsLabel->setText(labelText(_profile.assets.size(), "Assets"));
+    _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets)));
 
-    _propertiesLabel->setText(labelText(_profile.properties().size(), "Properties"));
+    _propertiesLabel->setText(labelText(_profile.properties.size(), "Properties"));
     _propertiesEdit->setText(
-        QString::fromStdString(summarizeProperties(_profile.properties()))
+        QString::fromStdString(summarizeProperties(_profile.properties))
     );
 
-    _keybindingsLabel->setText(labelText(_profile.keybindings().size(), "Keybindings"));
-    _keybindingsEdit->setText(
-        QString::fromStdString(summarizeKeybindings(_profile.keybindings()))
+    _keybindingsLabel->setText(
+        labelText(_profile.keybindings.size(), "Actions & Keybindings")
     );
+    _keybindingsEdit->setText(QString::fromStdString(
+        summarizeKeybindings(_profile.keybindings, _profile.actions)
+    ));
 
     _deltaTimesLabel->setText(
-        labelText(_profile.deltaTimes().size(), "Simulation Time Increments")
+        labelText(_profile.deltaTimes.size(), "Simulation Time Increments")
     );
     _interestingNodesLabel->setText(
-        labelText(_profile.markNodes().size(), "Mark Interesting Nodes")
+        labelText(_profile.markNodes.size(), "Mark Interesting Nodes")
     );
 }
 
@@ -363,7 +366,7 @@ void ProfileEdit::duplicateProfile() {
         return;
     }
 
-    constexpr const char Separator = '_';
+    constexpr char Separator = '_';
     int version = 0;
     if (size_t it = profile.rfind(Separator); it != std::string::npos) {
         // If the value exists, we have a profile that potentially already has a version
@@ -401,68 +404,68 @@ void ProfileEdit::duplicateProfile() {
 
 void ProfileEdit::openMeta() {
     _errorMsg->clear();
-    MetaDialog(_profile, this).exec();
+    MetaDialog(this, &_profile.meta).exec();
 }
 
 void ProfileEdit::openModules() {
     _errorMsg->clear();
-    ModulesDialog(_profile, this).exec();
-    _modulesLabel->setText(labelText(_profile.modules().size(), "Modules"));
+    ModulesDialog(this, &_profile.modules).exec();
+    _modulesLabel->setText(labelText(_profile.modules.size(), "Modules"));
 }
 
 void ProfileEdit::openProperties() {
     _errorMsg->clear();
-    PropertiesDialog(_profile, this).exec();
-    _propertiesLabel->setText(labelText(_profile.properties().size(), "Properties"));
+    PropertiesDialog(this, &_profile.properties).exec();
+    _propertiesLabel->setText(labelText(_profile.properties.size(), "Properties"));
     _propertiesEdit->setText(
-        QString::fromStdString(summarizeProperties(_profile.properties()))
+        QString::fromStdString(summarizeProperties(_profile.properties))
     );
 }
 
 void ProfileEdit::openKeybindings() {
     _errorMsg->clear();
-    KeybindingsDialog(_profile, this).exec();
-    _keybindingsLabel->setText(labelText(_profile.keybindings().size(), "Keybindings"));
-    _keybindingsEdit->setText(
-        QString::fromStdString(summarizeKeybindings(_profile.keybindings()))
-    );
+    ActionDialog(this, &_profile.actions, &_profile.keybindings).exec();
+    _keybindingsLabel->setText(labelText(_profile.keybindings.size(), "Keybindings"));
+    _keybindingsEdit->setText(QString::fromStdString(
+        summarizeKeybindings(_profile.keybindings, _profile.actions)
+    ));
 }
 
 void ProfileEdit::openAssets() {
     _errorMsg->clear();
-    AssetsDialog(_profile, _assetBasePath, _userAssetBasePath, this).exec();
-    _assetsLabel->setText(labelText(_profile.assets().size(), "Assets"));
-    _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets())));
+    AssetsDialog(this, &_profile, _assetBasePath, _userAssetBasePath).exec();
+    _assetsLabel->setText(labelText(_profile.assets.size(), "Assets"));
+    _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets)));
 }
 
 void ProfileEdit::openTime() {
     _errorMsg->clear();
-    TimeDialog(_profile, this).exec();
+    TimeDialog(this, &_profile.time).exec();
 }
 
 void ProfileEdit::openDeltaTimes() {
     _errorMsg->clear();
-    DeltaTimesDialog(_profile, this).exec();
+    DeltaTimesDialog(this, &_profile.deltaTimes).exec();
     _deltaTimesLabel->setText(
-        labelText(_profile.deltaTimes().size(), "Simulation Time Increments")
+        labelText(_profile.deltaTimes.size(), "Simulation Time Increments")
     );
 }
 
 void ProfileEdit::openAddedScripts() {
     _errorMsg->clear();
-    AdditionalScriptsDialog(_profile, this).exec();
+    AdditionalScriptsDialog(this, &_profile.additionalScripts).exec();
 }
 
 void ProfileEdit::openCamera() {
     _errorMsg->clear();
-    CameraDialog(_profile, this).exec();
+    CameraDialog(this, &_profile.camera).exec();
 }
 
 void ProfileEdit::openMarkNodes() {
     _errorMsg->clear();
-    MarkNodesDialog(_profile, this).exec();
+    MarkNodesDialog(this, &_profile.markNodes).exec();
     _interestingNodesLabel->setText(
-        labelText(_profile.markNodes().size(), "Mark Interesting Nodes")
+        labelText(_profile.markNodes.size(), "Mark Interesting Nodes")
     );
 }
 

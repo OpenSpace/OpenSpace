@@ -1,13 +1,13 @@
-asset.require('./callisto/callisto')
-asset.require('./europa/europa')
-asset.require('./ganymede/ganymede')
-asset.require('./io/io')
+asset.require("./callisto/callisto")
+asset.require("./europa/europa")
+asset.require("./ganymede/ganymede")
+asset.require("./io/io")
 
 
 asset.meta = {
   Name = "Jupiter Major Moons",
   Version = "1.0",
-  Description = [[ Meta asset containing Jupiters major moons: Callisto, Europa,
+  Description = [[Meta asset containing Jupiters major moons: Callisto, Europa,
     Ganymede, and Io]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

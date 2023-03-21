@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,20 +24,21 @@
 
 #version __CONTEXT__
 
+#include "PowerScaling/powerScalingMath.hglsl"
+
 layout(location = 0) in vec4 vertPosition;
 
 out vec3 modelPosition;
 out vec4 viewPosition;
 
 uniform mat4 projectionTransform;
-uniform mat4 modelViewTransform;
+uniform dmat4 modelViewTransform;
 
 
 void main() {
-    modelPosition = vertPosition.xyz;
-    viewPosition = modelViewTransform*vertPosition;
+  modelPosition = vertPosition.xyz;
+  dvec4 vp = modelViewTransform * vertPosition;
+  viewPosition = vec4(vp);
 
-    // project the position to view space
-    gl_Position = projectionTransform * viewPosition;
-    gl_Position.z = 0.0;
+  gl_Position = z_normalization(vec4(projectionTransform * viewPosition));
 }

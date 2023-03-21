@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,11 +65,14 @@ private:
     /// This structure is returned from the #updateTrails method and gives information
     /// about which parts of the vertex array to update
     struct UpdateReport {
-        static const int All = 0; ///< The entire array was touched in the update
-        /// If \c true the floating point needs to be updated
+        static constexpr int All = 0; ///< The entire array was touched in the update
+
+        /// If `true` the floating point needs to be updated
         bool floatingPointNeedsUpdate;
-        /// If \c true at least one of their permanent point were touched
+
+        /// If `true` at least one of their permanent point were touched
         bool permanentPointsNeedUpdate;
+
         /// Returns the number of fixed points that were touched in the update method
         /// If this value is negative, the newest values were replaced, if positive the
         /// oldest

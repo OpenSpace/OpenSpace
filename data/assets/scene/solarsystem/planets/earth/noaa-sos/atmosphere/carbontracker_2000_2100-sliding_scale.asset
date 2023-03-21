@@ -1,0 +1,113 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "CarbonTracker: Sliding Scale"
+local Identifier = "noaa-sos-atmosphere-carbontracker_2000_2100-sliding_scale"
+local Description = [["NOAA encourages science that adds benefit to society and the
+environment. CarbonTracker does both." said retired Navy Vice Admiral Conrad
+Lautenbacher, Ph.D., former undersecretary of commerce for oceans and atmosphere and NOAA
+administrator. CarbonTracker is a system to keep track of carbon dioxide uptake and
+release at the Earth's surface over time. It was developed by the Carbon Cycle Greenhouse
+Gases group at NOAA's Earth System Research Laboratory. As a scientific tool,
+CarbonTracker has helped improve the understanding of carbon uptake and release from the
+land and oceans, and how those sources and sinks are responding to the changing climate,
+increasing levels of atmospheric CO2 (the CO2 fertilization effect), and human management
+of land and oceans. CarbonTracker relies on the long-term monitoring of atmospheric CO2
+performed by the NOAA Global Monitoring Division and international partners]]
+local URL = "https://sos.noaa.gov/catalog/datasets/carbon-tracker-sliding-scale/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+local fieldDestination = syncedDirectory .. "field"
+local obsDestination = syncedDirectory .. "obs"
+local colorbarDestination = syncedDirectory .. "colorbar"
+
+local layer_field = {
+  Identifier = Identifier .. "-field",
+  Name = Name .. " (Field)",
+  Type = "TemporalTileLayer",
+  Mode = "Folder",
+  Folder = {
+    Folder = fieldDestination,
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "co2wx_%Y%m%d.png"
+  },
+  Description = Description
+}
+
+local layer_obs = {
+  Identifier = Identifier .. "-obs",
+  Name = Name .. " (Observed)",
+  Type = "TemporalTileLayer",
+  Mode = "Folder",
+  Folder = {
+    Folder = obsDestination,
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "co2wx_%Y%m%d.obs.png"
+  },
+  Description = Description
+}
+
+local colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  -- @TODO:  We need a temporal provider for ScreenSpaceImages to handle this
+  TexturePath = colorbarDestination .. "/" .. "co2wx_20000101.cpt.png",
+  FaceCamera = false,
+  BackgroundColor = { 1.0, 1.0, 1.0, 1.0 },
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+asset.onInitialize(function()
+  if not openspace.directoryExists(fieldDestination) then
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "field-1.zip", fieldDestination, true)
+    openspace.unzipFile(syncedDirectory .. "field-2.zip", fieldDestination, true)
+    openspace.unzipFile(syncedDirectory .. "field-3.zip", fieldDestination, true)
+    openspace.unzipFile(syncedDirectory .. "field-4.zip", fieldDestination, true)
+    openspace.unzipFile(syncedDirectory .. "field-5.zip", fieldDestination, true)
+  end
+
+  if not openspace.directoryExists(obsDestination) then
+    openspace.printInfo("Extracting " .. Name .. " Observed")
+    openspace.unzipFile(syncedDirectory .. "obs.zip", obsDestination, true)
+  end
+
+  if not openspace.directoryExists(colorbarDestination) then
+    openspace.printInfo("Extracting " .. Name .. " Colorbar")
+    openspace.unzipFile(syncedDirectory .. "colorbar.zip", colorbarDestination, true)
+  end
+
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_field)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_obs)
+  openspace.addScreenSpaceRenderable(colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_field)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_obs)
+  openspace.removeScreenSpaceRenderable(colorbar)
+end)
+
+asset.export(layer_field)
+asset.export(layer_obs)
+asset.export(colorbar)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumereader.h>
@@ -41,7 +41,7 @@ TEST_CASE("RawVolumeIO: TinyInputOutput", "[rawvolumeio]") {
     RawVolume<float> vol(dims);
 
     vol.set({ 0, 0, 0 }, value);
-    REQUIRE(vol.get({ 0, 0, 0 }) == value);
+    CHECK(vol.get({ 0, 0, 0 }) == value);
 
     std::filesystem::path volumePath = absPath("${TESTDIR}/tinyvolume.rawvolume");
 
@@ -52,7 +52,7 @@ TEST_CASE("RawVolumeIO: TinyInputOutput", "[rawvolumeio]") {
     // Read the 1x1x1 volume and make sure the value is the same.
     RawVolumeReader<float> reader(volumePath.string(), dims);
     std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
-    REQUIRE(storedVolume->get({ 0, 0, 0 }) == value);
+    CHECK(storedVolume->get({ 0, 0, 0 }) == value);
 }
 
 TEST_CASE("RawVolumeIO: BasicInputOutput", "[rawvolumeio]") {
@@ -66,7 +66,7 @@ TEST_CASE("RawVolumeIO: BasicInputOutput", "[rawvolumeio]") {
     RawVolume<float> vol(dims);
     vol.forEachVoxel([&vol, &value](glm::uvec3 x, float) { vol.set(x, value(x)); });
 
-    vol.forEachVoxel([&value](glm::uvec3 x, float v) { REQUIRE(v == value(x)); });
+    vol.forEachVoxel([&value](glm::uvec3 x, float v) { CHECK(v == value(x)); });
 
     std::filesystem::path volumePath = absPath("${TESTDIR}/basicvolume.rawvolume");
 
@@ -78,6 +78,6 @@ TEST_CASE("RawVolumeIO: BasicInputOutput", "[rawvolumeio]") {
     RawVolumeReader<float> reader(volumePath.string(), dims);
     std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
     vol.forEachVoxel([&value](glm::uvec3 x, float v) {
-        REQUIRE(v == value(x));
+        CHECK(v == value(x));
     });
 }

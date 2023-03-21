@@ -1,13 +1,24 @@
-local texturesPath = asset.require("./../../io_textures").TexturesPath
-local globeIdentifier = asset.require("./../../io").Io.Identifier
+local globeIdentifier = asset.require("../../io").Io.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Io Textures",
+  Type = "HttpSynchronization",
+  Identifier = "io_textures",
+  Version = 1
+})
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/io.jpg",
+  FilePath = texturesPath .. "io.jpg",
+  Enabled = asset.enabled
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
@@ -16,7 +27,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Io Texutre",
   Version = "1.0",
-  Description = [[ Default jpg texture for Io]],
+  Description = "Default jpg texture for Io",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

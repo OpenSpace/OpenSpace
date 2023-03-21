@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,23 +40,12 @@ UIntProperty::UIntProperty(Property::PropertyInfo info, unsigned int value,
     )
 {}
 
-std::string UIntProperty::className() const {
+std::string_view UIntProperty::className() const {
     return "UIntProperty";
 }
 
 int UIntProperty::typeLua() const {
     return LUA_TNUMBER;
-}
-
-unsigned int UIntProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        unsigned int val = static_cast<unsigned int>(lua_tonumber(state, -1));
-        return val;
-    }
-    else {
-        return 0;
-    }
 }
 
 } // namespace openspace::properties

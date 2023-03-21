@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ struct TimeRange {
     TimeRange(const ghoul::Dictionary& dict);
 
     /**
-     * \return \c true if timeRange could be initialized from the dictionary, \c false
+     * \return `true` if timeRange could be initialized from the dictionary, `false`
      *         otherwise.
      */
     static bool initializeFromDictionary(const ghoul::Dictionary& dict,

@@ -1,8 +1,13 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
-asset.require('./trail')
-local labelsPath = asset.require('../saturn_globelabels').LabelsPath
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").sat375
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
 
 local Mimas = {
   Identifier = "Mimas",
@@ -22,44 +27,76 @@ local Mimas = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = 198000,
+    Radii = { 207000, 197000, 191000 },
     SegmentsPerPatch = 64,
     Layers = { },
     Labels = {
-      Enable = false,
-      FileName = labelsPath .. "/mimas.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 14.0,
-      LabelsSize = 8.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 1000000.0,
-      FadeOutStartingDistance = 400000.0,
-      LabelsForceDomeRendering = true,
-      LabelsDistanceEPS = 25000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      Enabled = false,
+      FileName = labelsPath .. "mimas.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 7.7,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 400000.0, 1000000.0 },
+      DistanceEPS = 25000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
   GUI = {
     Name = "Mimas",
     Path = "/Solar System/Planets/Saturn/Moons",
-    Description = [[That's no moon...]]
+    Description = "That's no moon..."
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Mimas })
+
+local MimasLabel = {
+  Identifier = "MimasLabel",
+  Parent = Mimas.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Mimas",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.3, 10.0 },
+    FadeWidths = { 0.15, 10.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Mimas Label",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = "Label for Saturn's moon Mimas"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Mimas)
+  openspace.addSceneGraphNode(MimasLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MimasLabel)
+  openspace.removeSceneGraphNode(Mimas)
+end)
+
+asset.export(Mimas)
+
 
 
 asset.meta = {
   Name = "Mimas",
-  Version = "1.0",
-  Description = [[ Mimas globe with labels.]],
+  Version = "1.1",
+  Description = "Mimas globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Mimas"}
+  License = "MIT license"
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,16 +40,12 @@ Vec4Property::Vec4Property(Property::PropertyInfo info, glm::vec4 value,
     )
 {}
 
-std::string Vec4Property::className() const {
+std::string_view Vec4Property::className() const {
     return "Vec4Property";
 }
 
 int Vec4Property::typeLua() const {
     return LUA_TTABLE;
-}
-
-glm::vec4 Vec4Property::fromLuaConversion(lua_State* state, bool& success) const {
-    return ghoul::lua::tryGetValue<glm::vec4>(state, success);
 }
 
 } // namespace openspace::properties

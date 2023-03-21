@@ -1,11 +1,10 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local trajectory = asset.syncedResource({
   Name = "C-2019 Q4 Borisov Trajectory",
   Type = "HttpSynchronization",
   Identifier = "borisov_horizons",
-  Version = 1
+  Version = 2
 })
 
 local C2019Q4BorisovTrail = {
@@ -15,16 +14,23 @@ local C2019Q4BorisovTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trajectory .. "/horizons_c2019q4borisov.dat"
+      HorizonsTextFile = trajectory .. "horizons_c2019q4borisov.hrz"
+      -- Target: Borisov (C/2019 Q4)
+      -- Observer: SSB
+      -- Start time: 2015-Jan-01 00:00:00 (first data point)
+      -- End time: 2050-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "2015 JAN 01 00:00:00",
-    EndTime = "2024 JAN 01 00:00:00",
-    SampleInterval = 60 * 60 * 24 * 7
+    EndTime = "2050 JAN 01 00:00:00",
+    SampleInterval = 60*60*24 -- = 86 400 seconds in 1 day
   },
   GUI = {
     Name = "C/2019 Q4 Borisov Trail",
-    Path = "/Solar System/Interstellar"
+    Path = "/Solar System/Interstellar",
+    Description = [[Trail of C-2019 Q4 Borisov from 2015 JAN 01 00:00:00
+    to 2050 JAN 01 00:00:00. Data from JPL Horizons]]
   }
 }
 
@@ -34,27 +40,40 @@ local C2019Q4BorisovPosition = {
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trajectory .. "/horizons_c2019q4borisov.dat"
+      HorizonsTextFile = trajectory .. "horizons_c2019q4borisov.hrz"
     }
   },
   GUI = {
     Name = "C/2019 Q4 Borisov",
-    Path = "/Solar System/Interstellar"
+    Path = "/Solar System/Interstellar",
+    Description = [[Position of C-2019 Q4 Borisov from 2015 JAN 01 00:00:00
+    to 2050 JAN 01 00:00:00. Data from JPL Horizons]]
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { C2019Q4BorisovPosition, C2019Q4BorisovTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(C2019Q4BorisovPosition)
+  openspace.addSceneGraphNode(C2019Q4BorisovTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(C2019Q4BorisovTrail)
+  openspace.removeSceneGraphNode(C2019Q4BorisovPosition)
+end)
+
+asset.export(C2019Q4BorisovPosition)
+asset.export(C2019Q4BorisovTrail)
+
 
 
 asset.meta = {
   Name = "C/2019 Q4 Borisov",
-  Version = "1.0",
-  Description = [[ This asset contains the trail
-    and position of C-2019 Q4 Borisov from 2015 JAN 01 00:00:00
-    to 2024 JAN 01 00:00:00. Data from JPL Horizons']],
+  Version = "1.2",
+  Description = [[This asset contains the trail and position of C-2019 Q4 Borisov from
+    2015 JAN 01 00:00:00 to 2050 JAN 01 00:00:00. Data from JPL Horizons]],
   Author = "OpenSpace Team",
   URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
-  License = [[ JPL-authored documents are sponsored by NASA under Contract
-    NAS7-030010. All documents available from this server may be protected
-    under the U.S. and Foreign Copyright Laws."]]
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All
+    documents available from this server may be protected under the U.S. and Foreign
+    Copyright Laws]]
 }

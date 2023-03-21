@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,26 +25,22 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__
 #define __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__
 
-// -Wold-style-cast
-#if (defined(__GNUC__) && !defined(__clang__))
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif // defined(__GNUC__) && !defined(__clang__)
-
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
-#endif // __clang__
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
 
 #include <modules/touch/ext/libTUIO11/TUIO/TuioListener.h>
 #include <modules/touch/ext/libTUIO11/TUIO/TuioClient.h>
 
-#if (defined(__GNUC__) && !defined(__clang__))
-#pragma GCC diagnostic pop
-#endif // defined(__GNUC__) && !defined(__clang__)
 #ifdef __clang__
 #pragma clang diagnostic pop
-#endif // __clang__
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 #include <openspace/util/touch.h>
 #include <ghoul/glm.h>

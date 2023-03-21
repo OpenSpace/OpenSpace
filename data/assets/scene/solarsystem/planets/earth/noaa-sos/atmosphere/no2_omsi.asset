@@ -1,0 +1,71 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Nitrogen Dioxide"
+local Identifier = "noaa-sos-atmosphere-no2_omsi"
+local Description = [[Nitrogen dioxide (NO2) is a key component of urban air pollution.
+  The nitrogen oxides ("NOx" of which NO2 is one component) are emitted from any
+  combustion process. Coal- and gas-fired power plants and vehicles constitute the major
+  anthropogenic (human-produced) sources. Forest fires and lightning are natural sources
+  of NO2, but globally it is clear that anthropogenic sources dominate. High levels of NO2
+  are significant as they are associated with: 1) haze that reduces visibility; 2)
+  irritation of the eyes, nose, throat, and lungs; 3) acid rain; 4) reduced terrestrial
+  plant growth; 5) oxygen-depleting algal blooms; and 6) corrosion of building materials]]
+local URL = "https://sos.noaa.gov/catalog/datasets/nitrogen-dioxide/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "TemporalTileLayer",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "2880",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "NO2monthlymean_%Y%m.png"
+  },
+  Description = Description
+}
+
+local colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "color_bar.jpg",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.removeScreenSpaceRenderable(colorbar)
+end)
+
+asset.export(layer)
+asset.export(colorbar)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

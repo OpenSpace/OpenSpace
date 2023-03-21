@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 namespace openspace::gaia {
 
-enum RenderOption {
+enum RenderMode {
     Static = 0,
     Color = 1,
     Motion = 2
@@ -42,11 +42,11 @@ enum FileReaderOption {
 };
 
 enum ShaderOption {
-    Point_SSBO = 0,
-    Point_VBO = 1,
-    Billboard_SSBO = 2,
-    Billboard_VBO = 3,
-    Billboard_SSBO_noFBO = 4
+    PointSSBO = 0,
+    PointVBO = 1,
+    BillboardSSBO = 2,
+    BillboardVBO = 3,
+    BillboardSSBONoFBO = 4
 };
 
 } // namespace openspace::gaiamission

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ namespace {
         "scaling factor for this transformation. The script needs to define a function "
         "'scale' that takes the current simulation time in seconds past the J2000 epoch "
         "as the first argument, the current wall time as milliseconds past the J2000 "
-        "epoch the second argument and computes the three scaling factors."
+        "epoch the second argument and computes the three scaling factors"
     };
 
     struct [[codegen::Dictionary(LuaScale)]] Parameters {
@@ -55,9 +55,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LuaScale::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_scale_lua";
-    return doc;
+    return codegen::doc<Parameters>("base_scale_lua");
 }
 
 LuaScale::LuaScale()
@@ -79,7 +77,7 @@ LuaScale::LuaScale(const ghoul::Dictionary& dictionary) : LuaScale() {
 }
 
 glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
-    ghoul::lua::runScriptFile(_state, _luaScriptFile);
+    ghoul::lua::runScriptFile(_state, _luaScriptFile.value());
 
     // Get the scaling function
     lua_getglobal(_state, "scale");
@@ -87,7 +85,9 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaScale",
-            fmt::format("Script '{}' does not have a function 'scale'", _luaScriptFile)
+            fmt::format(
+                "Script '{}' does not have a function 'scale'", _luaScriptFile.value()
+            )
         );
         return glm::dvec3(1.0);
     }

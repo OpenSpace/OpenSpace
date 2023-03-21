@@ -1,32 +1,34 @@
-local assetHelper = asset.require('util/asset_helper')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local trail = asset.syncedResource({
   Name = "Gaia Trail",
   Type = "HttpSynchronization",
   Identifier = "gaia_trail",
-  Version = 2
+  Version = 3
 })
 
 local GaiaTrail = {
   Identifier = "GaiaTrail",
-  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Parent = earthTransforms.EarthCenter.Identifier,
   Renderable = {
-    Type = "RenderableTrailTrajectory",
+    Type = "RenderableTrailOrbit",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trail .. "/gaia_orbit_horizons.dat"
+      HorizonsTextFile = {
+        trail .. "gaia_orbit_horizons_1.hrz", --2013-12-19 09:55:27 to 2014-01-19 00:00:00
+        trail .. "gaia_orbit_horizons_2.hrz"  --2014-01-19 00:00:00 to 2026-09-14 00:00:00
+        -- Target: Gaia (spacecraft) (-139479)
+        -- Observer: Earth (399 GEOCENTRIC)
+        -- Start time: 2013-Dec-19 09:55:27 (first data point)
+        -- End time: 2026-Sep-14 00:00:00 (last data point)
+        -- Step size: First file has 40 minutes and seocnd has 1 day step size
+      }
     },
     Color = { 0.0, 0.8, 0.7 },
-    ShowFullTrail = false,
-    StartTime = "2013 DEC 19 09:55:10",
-    EndTime = "2019 JUN 20 05:55:10",
     PointSize = 5,
-    SampleInterval = 12000,
-    TimeStampSubsampleFactor = 1,
-    EnableFade = true,
-    Rendering = "Lines"
+    Period = 365, -- 1 year orbit time
+    Resolution = 24244 -- Sameple rate of 40 minutes
   },
   GUI = {
     Name = "Gaia Trail",
@@ -36,23 +38,23 @@ local GaiaTrail = {
 
 local GaiaTrailEclip = {
   Identifier = "GaiaTrail_Eclip",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunTransforms.SunCenter.Identifier,
   Renderable = {
-    Type = "RenderableTrailTrajectory",
+    Type = "RenderableTrailOrbit",
     Enabled = false,
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trail .. "/gaia_orbit_horizons_sun.dat"
+      HorizonsTextFile = trail .. "gaia_orbit_horizons_sun.hrz"
+      -- Target: Gaia (spacecraft) (-139479)
+      -- Observer: Sun (10 BODYCENTRIC)
+      -- Start time: 2013-Dec-20 00:00:00 (first data point)
+      -- End time: 2026-Sep-14 00:00:00 (last data point)
+      -- Step size: 1 day
     },
     Color = { 1.0, 0.0, 0.0 },
-    ShowFullTrail = false,
-    StartTime = "2013 DEC 19 09:55:10",
-    EndTime = "2019 JUN 20 05:55:10",
     PointSize = 5,
-    SampleInterval = 6000,
-    TimeStampSubsampleFactor = 1,
-    EnableFade = true,
-    Rendering = "Lines"
+    Period = 365, -- 1 year orbit time
+    Resolution = 365 -- Sameple rate of 1 day
   },
   GUI = {
     Name = "Gaia Ecliptic Trail",
@@ -60,4 +62,26 @@ local GaiaTrailEclip = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaTrail, GaiaTrailEclip } )
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GaiaTrail)
+  openspace.addSceneGraphNode(GaiaTrailEclip)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GaiaTrailEclip)
+  openspace.removeSceneGraphNode(GaiaTrail)
+end)
+
+asset.export(GaiaTrail)
+asset.export(GaiaTrailEclip)
+
+
+asset.meta = {
+  Name = "Gaia Trail",
+  Version = "1.0",
+  Description = [[This asset contains the trail of Gaia around both Earth and the Sun.
+    Data from JPL Horizons from 2013 DEC 19 09:55:27 to 2026 SEP 14 21:15:27]],
+  Author = "OpenSpace Team",
+  URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+  License = "NASA"
+}

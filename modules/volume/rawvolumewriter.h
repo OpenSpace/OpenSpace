@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___RAWVOLUMEWRITER___H__
 #define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEWRITER___H__
 
+#include <filesystem>
 #include <functional>
 #include <string>
 
@@ -35,9 +36,9 @@ template <typename T> class RawVolume;
 template <typename VoxelType>
 class RawVolumeWriter {
 public:
-    RawVolumeWriter(std::string path, size_t bufferSize = 1024);
+    RawVolumeWriter(std::filesystem::path path, size_t bufferSize = 1024);
 
-    void setPath(const std::string& path);
+    void setPath(std::filesystem::path path);
     glm::uvec3 dimensions() const;
     void setDimensions(glm::uvec3 dimensions);
     void write(const std::function<VoxelType(const glm::uvec3&)>& fn,
@@ -49,7 +50,7 @@ public:
 
 private:
     glm::ivec3 _dimensions = glm::ivec3(0);
-    std::string _path;
+    std::filesystem::path _path;
     size_t _bufferSize = 0;
 };
 

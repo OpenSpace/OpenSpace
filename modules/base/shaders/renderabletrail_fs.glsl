@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,52 +33,56 @@ uniform vec3 color;
 uniform int renderPhase;
 uniform float opacity = 1.0;
 uniform float lineWidth;
+uniform vec4 viewport;
 
 // Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
-#define RenderPhaseLines 0
-#define RenderPhasePoints 1
+const int RenderPhaseLines = 0;
+const int RenderPhasePoints = 1;
 
-#define Delta 0.25
+const float Delta = 0.25;
 
 
 Fragment getFragment() {
-    Fragment frag;
-    frag.color = vec4(color * fade, fade * opacity);
-    frag.depth = vs_positionDepth;
-    frag.blend = BLEND_MODE_ADDITIVE;
+  Fragment frag;
+  frag.color = vec4(color * fade, fade * opacity);
+  frag.depth = vs_positionDepth;
+  frag.blend = BLEND_MODE_ADDITIVE;
 
-    if (renderPhase == RenderPhasePoints) {
-        // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
-        // smoothstep to gradually decrease the alpha on the edges of the point
-        vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
-        //float circleClipping = 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));        
-        float circleClipping = smoothstep(1.0, 1.0 - Delta, dot(circCoord, circCoord));
-        float transparencyCorrection = frag.color.a * circleClipping;
-        if (transparencyCorrection < 0.9) {
-            discard;
-        }
-
-        frag.color.a = transparencyCorrection;
+  if (renderPhase == RenderPhasePoints) {
+    // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
+    // smoothstep to gradually decrease the alpha on the edges of the point
+    vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
+    //float circleClipping = 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));        
+    float circleClipping = smoothstep(1.0, 1.0 - Delta, dot(circCoord, circCoord));
+    float transparencyCorrection = frag.color.a * circleClipping;
+    if (transparencyCorrection < 0.9) {
+      discard;
     }
 
-    double distanceCenter = length(mathLine - vec2(gl_FragCoord.xy));
-    double dLW = double(lineWidth);
-    float blendFactor = 20;
-    
-    if (distanceCenter > dLW) {
-        frag.color.a = 0.0;
-        //discard;
-    }
-    else {
-        frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
-        // if (frag.color.a < 0.4)
-        //     discard;
-    }
+    frag.color.a = transparencyCorrection;
+  }
 
-    frag.gPosition = vs_gPosition;
-    
-    // There is no normal here
-    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+  // We can't expect a viewport of the form (0, 0, res.x, res.y) used to convert the
+  // window coordinates from gl_FragCoord into [0, 1] coordinates, so we need to use
+  // this more complicated method that is also used in the FXAA and HDR rendering steps
+  vec2 xy = vec2(gl_FragCoord.xy);
+  xy -= viewport.xy;
 
-    return frag;
+  double distanceCenter = length(mathLine - xy);
+  double dLW = double(lineWidth);
+  const float blendFactor = 20.0;
+  
+  if (distanceCenter > dLW) {
+    frag.color.a = 0.0;
+  }
+  else {
+    frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
+  }
+
+  frag.gPosition = vs_gPosition;
+  
+  // There is no normal here
+  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+
+  return frag;
 }

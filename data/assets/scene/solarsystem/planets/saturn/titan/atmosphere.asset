@@ -1,5 +1,4 @@
-local transforms = asset.require('./titan')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("./titan")
 
 local Atmosphere = {
   Identifier = "TitanAtmosphere",
@@ -45,14 +44,22 @@ local Atmosphere = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Atmosphere })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Atmosphere)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Atmosphere)
+end)
+
+asset.export(Atmosphere)
+
 
 asset.meta = {
   Name = "Titan Atmosphere",
-  Version = "1.0",
-  Description = [[ RenderableAtmosphere for Titan.]],
+  Version = "1.1",
+  Description = "RenderableAtmosphere for Titan",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = { "TitanAtmosphere" }
+  License = "MIT license"
 }

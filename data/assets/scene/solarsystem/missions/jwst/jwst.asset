@@ -1,0 +1,230 @@
+asset.require("spice/base")
+asset.require("./actions")
+asset.require("scene/solarsystem/planets/earth/layers/colorlayers/terra_modis_temporal")
+asset.require("scene/solarsystem/planets/earth/layers/colorlayers/esri_viirs_combo")
+
+local sun = asset.require("scene/solarsystem/sun/sun")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+local models = asset.syncedResource({
+  Name = "JWST Model",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_model",
+  Version = 3
+})
+
+local band = asset.syncedResource({
+  Name = "JWST band texture",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_band_texture",
+  Version = 1
+})
+
+local launchTime = "2021 DEC 25 12:20:00"
+local endTime = "2024 JAN 22 00:00:00"
+
+local JWSTBand = {
+  Identifier = "JWSTBand",
+  Parent = transforms.JWSTPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = launchTime,
+    End = endTime
+  },
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "JWSTBand",
+      XAxis = { 1, 0, 0 },
+      XAxisOrthogonal = true,
+      ZAxis = sunTransforms.SolarSystemBarycenter.Identifier
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphere",
+    Texture = band .. "JWST-band.png",
+    Size = 9.2E15,
+    Segments = 50,
+    DisableFadeInOut = true,
+    Orientation = "Inside",
+    Opacity = 0.05,
+    RenderBinMode = "PreDeferredTransparent",
+  },
+  Tag = { "mission_jwst_fov" },
+  GUI = {
+    Name = "JWST Safe Viewing Band",
+    Path = "/Solar System/Missions/JWST",
+    Description = [[
+      The safe viewing band for the James Webb Space Telescope at its current position
+    ]],
+  }
+}
+
+local JWSTModel = {
+  Identifier = "JWSTModel",
+  Parent = transforms.JWSTRotation.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = launchTime,
+    End = endTime
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "jwst_anim74_2fps_2018_nb.osmodel",
+    ModelScale = 0.0328, -- First scale down with centimeters then scale up with feet
+    EnableAnimation = true,
+    AnimationStartTime = "2021 12 25 12:20:00",
+    AnimationTimeScale = "Millisecond",
+    AnimationMode = "Once",
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true,
+    DisableFaceCulling = true
+  },
+  GUI = {
+    Name = "James Webb Space Telescope Model",
+    Path = "/Solar System/Missions/JWST",
+    Description = [[
+      Animated model of the James Webb Space Telescope that shows its deployment in
+      real time
+    ]],
+  }
+}
+
+local JWSTFov = {
+  Identifier = "JWSTFov",
+  Parent = JWSTModel.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = launchTime,
+    End = endTime
+  },
+  Renderable = {
+    Type = "RenderablePrism",
+    Segments = 6,
+    Lines = 3,
+    Radius = 3.25,
+    LineWidth = 1.0,
+    Color = { 1.0, 1.0, 1.0 },
+    Length = 9.2E15
+  },
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, math.rad(30) }
+    },
+  },
+  Tag = { "mission_jwst_fov" },
+  GUI = {
+    Name = "JWST Field of View",
+    Path = "/Solar System/Missions/JWST",
+    Description = [[
+      The field of view for the James Webb Space Telescope at its current position
+    ]],
+  }
+}
+
+local JWSTLabel = {
+  Identifier = "JWSTLabel",
+  Parent = transforms.JWSTPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = launchTime,
+    End = endTime
+  },
+  Renderable = {
+    Type = "RenderableLabel",
+    Text = "JWST",
+    FontSize = 50,
+    Size = 6.5,
+    MinMaxSize = { 4.0, 30.0 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = false
+  },
+  GUI = {
+    Name = "JWST Label",
+    Path = "/Solar System/Missions/JWST",
+    Description = "Main label for the James Webb Space Telescope"
+  }
+}
+
+asset.onInitialize(function()
+  -- Start of data outage, use Terra instead as replacement
+  openspace.scriptScheduler.loadScheduledScript(
+    "2021 DEC 19 00:00:00",
+    [[openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
+      true
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+      false
+    )]],
+    [[openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
+      false
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+      true
+    )]],
+    "",
+    2 -- Not default group, never clear this script
+  )
+
+  -- End of data outage, Go back to VIIRS ESRI combo
+  openspace.scriptScheduler.loadScheduledScript(
+    "2021 DEC 30 00:00:00",
+    [[openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
+      false
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+      true
+    )]],
+    [[openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
+      true
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+      false
+    )]],
+    "",
+    2 -- Not default group, never clear this script
+  )
+
+  openspace.addSceneGraphNode(JWSTBand)
+  openspace.addSceneGraphNode(JWSTModel)
+  openspace.addSceneGraphNode(JWSTFov)
+  openspace.addSceneGraphNode(JWSTLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JWSTLabel)
+  openspace.removeSceneGraphNode(JWSTFov)
+  openspace.removeSceneGraphNode(JWSTModel)
+  openspace.removeSceneGraphNode(JWSTBand)
+
+  openspace.scriptScheduler.clear(2)
+end)
+
+asset.export(JWSTBand)
+asset.export(JWSTModel)
+asset.export(JWSTFov)
+asset.export(JWSTLabel)
+
+asset.meta = {
+  Name = "James Webb Space Telescope",
+  Version = "1.1",
+  Description = [[
+    James Webb Space Telescope animated model, safe viewing band, field of view and label.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___HISTOGRAMMANAGER___H__
 
 #include <openspace/util/histogram.h>
-#include <string>
+#include <filesystem>
 
 namespace openspace {
 
@@ -36,8 +36,8 @@ class HistogramManager {
 public:
     bool buildHistograms(TSP* tsp, int numBins);
     Histogram* histogram(unsigned int brickIndex);
-    bool loadFromFile(const std::string& filename);
-    bool saveToFile(const std::string& filename);
+    bool loadFromFile(const std::filesystem::path& filename);
+    bool saveToFile(const std::filesystem::path& filename);
 
 private:
     bool buildHistogram(TSP* tsp, unsigned int brickIndex);

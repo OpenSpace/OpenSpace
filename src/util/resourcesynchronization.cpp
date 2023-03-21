@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,15 +28,20 @@
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
+#include <fstream>
 
 namespace {
     struct [[codegen::Dictionary(ResourceSynchronization)]] Parameters {
         // This key specifies the type of ResourceSyncrhonization that gets created. It
         // has to be one of the valid ResourceSyncrhonizations that are available for
-        // creation (see the FactoryDocumentation for a list of possible 
+        // creation (see the FactoryDocumentation for a list of possible
         // ResourceSyncrhonizations), which depends on the configration of the application
         std::string type
             [[codegen::annotation("A ResourceSynchronization created by a factory")]];
+
+        // A unique identifier that is used to reference this specific
+        // ResourceSynchronization object
+        std::string identifier [[codegen::identifier()]];
 
         // A user readable name of this synchronization
         std::string name;
@@ -47,9 +52,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ResourceSynchronization::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "resourceSynchronization";
-    return doc;
+    return codegen::doc<Parameters>("resourceSynchronization");
 }
 
 std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(
@@ -57,18 +60,18 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    auto factory = FactoryManager::ref().factory<ResourceSynchronization>();
+    ghoul::TemplateFactory<ResourceSynchronization>* factory =
+        FactoryManager::ref().factory<ResourceSynchronization>();
     ghoul_assert(factory, "ResourceSynchronization factory did not exist");
     ResourceSynchronization* sync = factory->create(p.type, dictionary);
     sync->_name = p.name;
     return std::unique_ptr<ResourceSynchronization>(sync);
 }
 
-ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary&) {}
-
-ResourceSynchronization::State ResourceSynchronization::state() const {
-    return _state;
-}
+ResourceSynchronization::ResourceSynchronization(
+                                                std::filesystem::path synchronizationRoot)
+    : _synchronizationRoot(std::move(synchronizationRoot))
+{}
 
 bool ResourceSynchronization::isResolved() const {
     return _state == State::Resolved;
@@ -82,65 +85,41 @@ bool ResourceSynchronization::isSyncing() const {
     return _state == State::Syncing;
 }
 
-ResourceSynchronization::CallbackHandle
-ResourceSynchronization::addStateChangeCallback(StateChangeCallback cb)
-{
-    std::lock_guard guard(_callbackMutex);
-    CallbackHandle callbackId = _nextCallbackId++;
-    _stateChangeCallbacks[callbackId] = std::move(cb);
-    return callbackId;
+size_t ResourceSynchronization::nSynchronizedBytes() const {
+    return _nSynchronizedBytes;
 }
 
-void ResourceSynchronization::removeStateChangeCallback(CallbackHandle id) {
-    std::lock_guard guard(_callbackMutex);
-    _stateChangeCallbacks.erase(id);
+size_t ResourceSynchronization::nTotalBytes() const {
+    return _nTotalBytes;
 }
 
-void ResourceSynchronization::resolve() {
-    setState(State::Resolved);
+bool ResourceSynchronization::nTotalBytesIsKnown() const {
+    return _nTotalBytesKnown;
 }
 
-void ResourceSynchronization::reject() {
-    setState(State::Rejected);
-}
-
-void ResourceSynchronization::reset() {
-    setState(State::Unsynced);
-}
-
-void ResourceSynchronization::begin() {
-    setState(State::Syncing);
-}
-
-void ResourceSynchronization::setState(State state) {
-    _state = state;
-
-    _callbackMutex.lock();
-    std::vector<StateChangeCallback> callbacks;
-    callbacks.reserve(_stateChangeCallbacks.size());
-    using K = CallbackHandle;
-    using V = StateChangeCallback;
-    for (const std::pair<const K, V>& it : _stateChangeCallbacks) {
-        callbacks.push_back(it.second);
-    }
-    _callbackMutex.unlock();
-    for (const StateChangeCallback& cb : callbacks) {
-        cb(state);
-    }
-}
-
-float ResourceSynchronization::progress() {
-    if (!nTotalBytesIsKnown()) {
-        return 0.f;
-    }
-    if (nTotalBytes() == 0) {
-        return 1.f;
-    }
-    return static_cast<float>(nSynchronizedBytes()) / static_cast<float>(nTotalBytes());
+const std::string& ResourceSynchronization::identifier() const {
+    return _identifier;
 }
 
 const std::string& ResourceSynchronization::name() const {
     return _name;
+}
+
+void ResourceSynchronization::createSyncFile() const {
+    std::filesystem::path dir = directory();
+    std::filesystem::create_directories(dir);
+
+    dir.replace_extension("ossync");
+    std::ofstream syncFile(dir, std::ofstream::out);
+    // The actual text what is written is not used anywhere, but it might be useful to
+    // user that wants to look at it
+    syncFile << "Synchronized";
+}
+
+bool ResourceSynchronization::hasSyncFile() const {
+    std::filesystem::path path = directory();
+    path.replace_extension("ossync");
+    return std::filesystem::is_regular_file(path);
 }
 
 } // namespace openspace

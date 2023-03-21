@@ -1,50 +1,29 @@
 -- This is a blank scene that that just sets up the default menus/dasboard/keys, etc.
 
-local assetHelper = asset.require('util/asset_helper')
-local sceneHelper = asset.require('util/scene_helper')
-local propertyHelper = asset.require('util/property_helper')
-
 -- Specifying which other assets should be loaded in this scene
-asset.require('spice/base')
+asset.require("spice/base")
 
+asset.require("dashboard/default_dashboard")
 -- Load default key bindings applicable to most scenes
-asset.require('dashboard/default_dashboard')
-asset.require('util/default_keybindings')
-asset.require('util/default_joystick')
+asset.require("util/default_keybindings")
 
 -- Load web gui
-local webGui = asset.require('util/webgui')
+local webGui = asset.require("util/webgui")
 
--- Keybindings that are specific for this scene
-local Keybindings = {
-  {
-    Key = "h",
-    Name="Toggle Trails",
-    Command = "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end\n" ..
-      "local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
-    Documentation = "Toggles the visibility of planet and moon trails",
-    GuiPath = "/Rendering",
-    Local = false
-  },
-  {
-    Key = "l",
-    Name = "Toggle planet labels",
-    Command = "local list = openspace.getProperty('{solarsystem_labels}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
-    Documentation = "Turns on visibility for all solar system labels",
-    GuiPath = "/Rendering",
-    Local = false
-  }
-}
+-- Scale the different UI components based on the operating system's DPI scaling value
+asset.require("util/dpiscaling")
+
+-- Load the images required for the launcher to show up
+asset.require("util/launcher_images")
+
+-- Modules and component settings
+asset.require("modules/exoplanets/exoplanets")
+asset.require("modules/skybrowser/skybrowser")
+asset.require("modules/touch/default_settings")
+
 
 asset.onInitialize(function ()
   webGui.setCefRoute("onscreen")
-
-  sceneHelper.bindKeys(Keybindings)
   openspace.setDefaultGuiSorting()
-
   openspace.setPropertyValueSingle("RenderEngine.VerticalLogOffset", 0.100000)
-end)
-
-asset.onDeinitialize(function ()
-  sceneHelper.unbindKeys(Keybindings)
 end)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <modules/galaxy/rendering/renderablegalaxy.h>
 #include <modules/galaxy/tasks/milkywayconversiontask.h>
 #include <modules/galaxy/tasks/milkywaypointsconversiontask.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
@@ -37,14 +38,23 @@ namespace openspace {
 GalaxyModule::GalaxyModule() : OpenSpaceModule(Name) {}
 
 void GalaxyModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableGalaxy>("RenderableGalaxy");
 
-    auto fTask = FactoryManager::ref().factory<Task>();
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fRenderable, "No task factory existed");
     fTask->registerClass<MilkywayConversionTask>("MilkywayConversionTask");
     fTask->registerClass<MilkywayPointsConversionTask>("MilkywayPointsConversionTask");
+}
+
+std::vector<documentation::Documentation> GalaxyModule::documentations() const {
+    return {
+        RenderableGalaxy::Documentation(),
+        MilkywayConversionTask::Documentation(),
+        MilkywayPointsConversionTask::Documentation()
+    };
 }
 
 } // namespace openspace

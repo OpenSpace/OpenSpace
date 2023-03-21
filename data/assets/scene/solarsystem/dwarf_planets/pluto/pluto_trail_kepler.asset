@@ -1,0 +1,72 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
+local kernels = asset.require("./kernels").PlutoKernels
+local OneAU = 1.496e+8
+
+
+local PlutoKeplerianTrail = {
+  Identifier = "PlutoKeplerianTrail",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "KeplerTranslation",
+      Eccentricity = 2.543033082909471E-01,
+      SemiMajorAxis = 3.974407237841206E+01 * OneAU,
+      Inclination = 1.736609481151430E+01,
+      AscendingNode = 1.102099981996057E+02,
+      ArgumentOfPeriapsis = 1.142248569189779E+02,
+      MeanAnomaly = 14.53,
+      Epoch = "2000 01 01 00:00",
+      Period = 7.82438e+9
+    },
+    Color = { 0.2, 0.8, 0.3 },
+    Period = 90487.27692706819,
+    Resolution = 1000,
+    Enabled = false
+  },
+  Tag = { "planetTrail_dwarf" },
+  GUI = {
+    Name = "Pluto Keplerian Trail",
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Description = "Keplerian trail of Pluto. Contains full orbit"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PlutoKeplerianTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PlutoKeplerianTrail)
+end)
+
+asset.export(PlutoKeplerianTrail)
+
+
+
+asset.meta = {
+  Name = "Pluto Keplerian Trail",
+  Version = "1.0",
+  Description = [[Full Keplerian trail of Pluto as observed by the Sun. Data from
+    JPL Horizons]],
+  Author = "OpenSpace Team",
+  URL = "https://ssd.jpl.nasa.gov/sbdb.cgi?sstr=pluto",
+  License = "JPL/NASA"
+}
+
+
+
+-- Double AscendingNode
+-- In range: ( 0.000000,360.000000 )
+-- This value determines the right ascension of the ascending node in degrees, that is the location of position along the orbit where the inclined plane and the horizonal reference plane intersect.
+-- Double ArgumentOfPeriapsis
+-- In range: ( 0.000000,360.000000 )
+-- This value determines the argument of periapsis in degrees, that is the position on the orbit that is closest to the orbiting body.
+-- Double MeanAnomaly
+-- In range: ( 0.000000,360.000000 )
+-- This value determines the mean anomaly at the epoch in degrees, which determines the initial location of the object along the orbit at epoch.
+-- EPOCH= 2457217.500000000 ! 2015-Jul-14 00:00 (TDB)
+--   EC= 2.543033082909471E-01 QR= 2.963702328762702E+01 IN= 1.736609481151430E+01
+--   OM= 1.102099981996057E+02 W = 1.142248569189779E+02 Tp=  2447885.610187903512
+--   A = 3.974407237841206E+01 AD= 4.985112146919710E+01 PR= 9.151809533192721E+04

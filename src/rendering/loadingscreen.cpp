@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -43,42 +44,38 @@
 #include <thread>
 
 namespace {
-    constexpr const float LoadingFontSize = 25.f;
-    constexpr const float MessageFontSize = 22.f;
-    constexpr const float ItemFontSize = 10.f;
+    constexpr float LoadingFontSize = 25.f;
+    constexpr float MessageFontSize = 22.f;
+    constexpr float ItemFontSize = 10.f;
 
-    constexpr const glm::vec2 LogoCenter = glm::vec2(0.f, 0.525f);  // in NDC
-    constexpr const glm::vec2 LogoSize = glm::vec2(0.275f, 0.275);  // in NDC
+    constexpr glm::vec2 LogoCenter = glm::vec2(0.f, 0.525f);  // in NDC
+    constexpr glm::vec2 LogoSize = glm::vec2(0.275f, 0.275);  // in NDC
 
-    constexpr const glm::vec2 ProgressbarCenter = glm::vec2(0.f, -0.75f);  // in NDC
-    constexpr const glm::vec2 ProgressbarSize = glm::vec2(0.7f, 0.0075f);  // in NDC
-    constexpr const float ProgressbarLineWidth = 0.0025f;  // in NDC
+    constexpr glm::vec2 ProgressbarCenter = glm::vec2(0.f, -0.75f);  // in NDC
+    constexpr glm::vec2 ProgressbarSize = glm::vec2(0.7f, 0.0075f);  // in NDC
+    constexpr float ProgressbarLineWidth = 0.0025f;  // in NDC
 
-    constexpr const glm::vec4 ProgressbarOutlineColor =
-        glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
+    constexpr glm::vec4 ProgressbarOutlineColor = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
 
-    constexpr const glm::vec4 PhaseColorConstruction = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
-    constexpr const glm::vec4 PhaseColorSynchronization =
-        glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
-    constexpr const glm::vec4 PhaseColorInitialization =
-        glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
+    constexpr glm::vec4 PhaseColorConstruction = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
+    constexpr glm::vec4 PhaseColorSynchronization = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
+    constexpr glm::vec4 PhaseColorInitialization = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
 
-    constexpr const glm::vec4 ItemStatusColorStarted = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
-    constexpr const glm::vec4 ItemStatusColorInitializing =
-        glm::vec4(0.7f, 0.7f, 0.f, 1.f);
-    constexpr const glm::vec4 ItemStatusColorFinished = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
-    constexpr const glm::vec4 ItemStatusColorFailed = glm::vec4(0.8f, 0.1f, 0.1f, 1.f);
+    constexpr glm::vec4 ItemStatusColorStarted = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
+    constexpr glm::vec4 ItemStatusColorInitializing = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
+    constexpr glm::vec4 ItemStatusColorFinished = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
+    constexpr glm::vec4 ItemStatusColorFailed = glm::vec4(0.8f, 0.1f, 0.1f, 1.f);
 
-    constexpr const float ItemStandoffDistance = 5.f; // in pixels
+    constexpr float ItemStandoffDistance = 5.f; // in pixels
 
-    constexpr const float LoadingTextPosition = 0.275f;  // in NDC
-    constexpr const float StatusMessageOffset = 0.225f;  // in NDC
+    constexpr float LoadingTextPosition = 0.275f;  // in NDC
+    constexpr float StatusMessageOffset = 0.225f;  // in NDC
 
-    constexpr const int MaxNumberLocationSamples = 1000;
+    constexpr int MaxNumberLocationSamples = 1000;
 
-    constexpr const std::chrono::milliseconds TTL(5000);
+    constexpr std::chrono::milliseconds TTL(5000);
 
-    constexpr const std::chrono::milliseconds RefreshRate(16);
+    constexpr std::chrono::milliseconds RefreshRate(16);
 
     bool rectOverlaps(glm::vec2 lhsLl, glm::vec2 lhsUr, glm::vec2 rhsLl, glm::vec2 rhsUr)
     {
@@ -140,7 +137,8 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     {
         // Logo stuff
         _logoTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath("${DATA}/openspace-logo.png").string()
+            absPath("${DATA}/openspace-logo.png").string(),
+            2
         );
         _logoTexture->uploadTexture();
     }
@@ -155,8 +153,8 @@ LoadingScreen::~LoadingScreen() {
 }
 
 void LoadingScreen::render() {
-    ZoneScoped
-    FrameMarkStart("Loading")
+    ZoneScoped;
+    FrameMarkStart("Loading");
 
     if (_phase == Phase::PreStart) {
         return;
@@ -176,10 +174,10 @@ void LoadingScreen::render() {
 
     ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(res);
 
-    const glm::vec2 size = {
+    const glm::vec2 size = glm::vec2(
         LogoSize.x,
         LogoSize.y * textureAspectRatio * screenAspectRatio
-    };
+    );
 
     //
     // Clear background
@@ -206,10 +204,10 @@ void LoadingScreen::render() {
     //
     // Render progress bar
     //
-    const glm::vec2 progressbarSize = {
+    const glm::vec2 progressbarSize = glm::vec2(
         ProgressbarSize.x,
         ProgressbarSize.y * screenAspectRatio
-    };
+    );
 
     if (_showProgressbar) {
         const float progress = _nItems != 0 ?
@@ -283,7 +281,7 @@ void LoadingScreen::render() {
     glm::vec2 messageLl = glm::vec2(0.f);
     glm::vec2 messageUr = glm::vec2(0.f);
     if (_showMessage) {
-        std::lock_guard<std::mutex> guard(_messageMutex);
+        std::lock_guard guard(_messageMutex);
 
         const glm::vec2 bboxMessage = _messageFont->boundingBox(_message);
 
@@ -298,21 +296,21 @@ void LoadingScreen::render() {
     }
 
     if (_showNodeNames) {
-        std::lock_guard<std::mutex> guard(_itemsMutex);
+        std::lock_guard guard(_itemsMutex);
 
         std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 
-        const glm::vec2 logoLl = { LogoCenter.x - size.x,  LogoCenter.y - size.y };
-        const glm::vec2 logoUr = { LogoCenter.x + size.x,  LogoCenter.y + size.y };
+        const glm::vec2 logoLl = glm::vec2(LogoCenter.x - size.x,  LogoCenter.y - size.y);
+        const glm::vec2 logoUr = glm::vec2(LogoCenter.x + size.x,  LogoCenter.y + size.y);
 
-        const glm::vec2 progressbarLl = {
+        const glm::vec2 progressbarLl = glm::vec2(
             ProgressbarCenter.x - progressbarSize.x,
             ProgressbarCenter.y - progressbarSize.y
-        };
-        const glm::vec2 progressbarUr = {
+        );
+        const glm::vec2 progressbarUr = glm::vec2(
             ProgressbarCenter.x + progressbarSize.x ,
             ProgressbarCenter.y + progressbarSize.y
-        };
+        );
 
         for (Item& item : _items) {
             if (!item.hasLocation) {
@@ -335,7 +333,7 @@ void LoadingScreen::render() {
                         static_cast<int>(res.y - b.y - 15)
                     );
 
-                    ll = { distX(_randomEngine), distY(_randomEngine) };
+                    ll = glm::vec2(distX(_randomEngine), distY(_randomEngine));
                     ur = ll + b;
 
                     // Test against logo and text
@@ -481,11 +479,11 @@ void LoadingScreen::render() {
 
     std::this_thread::sleep_for(RefreshRate);
     global::windowDelegate->swapBuffer();
-    FrameMarkEnd("Loading")
+    FrameMarkEnd("Loading");
 }
 
 void LoadingScreen::postMessage(std::string message) {
-    std::lock_guard<std::mutex> guard(_messageMutex);
+    std::lock_guard guard(_messageMutex);
     _message = std::move(message);
 }
 
@@ -535,7 +533,7 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
         // also would create any of the text information
         return;
     }
-    std::lock_guard<std::mutex> guard(_itemsMutex);
+    std::lock_guard guard(_itemsMutex);
 
     auto it = std::find_if(
         _items.begin(),
@@ -552,28 +550,24 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
         }
     }
     else {
-        ghoul_assert(
-            newStatus == ItemStatus::Started,
-            fmt::format(
-                "Item '{}' did not exist and first message was not 'Started'",
-                itemIdentifier
-            )
-        );
         // We are not computing the location in here since doing it this way might stall
         // the main thread while trying to find a position for the new item
-        _items.push_back({
-            itemIdentifier,
-            itemName,
-            ItemStatus::Started,
-            std::move(progressInfo),
-            false,
-#ifdef LOADINGSCREEN_DEBUGGING
-            false,
-#endif // LOADINGSCREEN_DEBUGGING
-            {},
-            {},
-            std::chrono::system_clock::from_time_t(0)
-        });
+        Item item = {
+            .identifier = itemIdentifier,
+            .name = itemName,
+            .status = ItemStatus::Started,
+            .progress = std::move(progressInfo),
+            .hasLocation = false,
+            .finishedTime = std::chrono::system_clock::from_time_t(0)
+        };
+
+        if (newStatus == ItemStatus::Finished) {
+            // This is only going to be triggered if an item finishes so quickly that
+            // there was not even time to create the item between starting and finishing
+            item.finishedTime = std::chrono::system_clock::now();
+        }
+
+        _items.push_back(std::move(item));
     }
 }
 

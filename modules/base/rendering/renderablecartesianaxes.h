@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@ namespace openspace {
 class RenderableCartesianAxes : public Renderable {
 public:
     RenderableCartesianAxes(const ghoul::Dictionary& dictionary);
-    ~RenderableCartesianAxes() = default;
+    ~RenderableCartesianAxes() override = default;
 
     void initializeGL() override;
     void deinitializeGL() override;

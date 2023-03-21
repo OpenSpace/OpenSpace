@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,8 +36,8 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "DataCygnet";
-    constexpr const int MaxTextures = 6;
+    constexpr std::string_view _loggerCat = "DataCygnet";
+    constexpr int MaxTextures = 6;
 
     constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",
@@ -80,7 +80,6 @@ namespace {
         "Transfer Functions",
         "" // @TODO Missing documentation
     };
-
 } // namespace
 
 namespace openspace {
@@ -132,10 +131,10 @@ bool DataCygnet::updateTexture() {
         }
 
         if (!_textures[option]) {
-            using namespace ghoul::opengl;
-            std::unique_ptr<Texture> texture = std::make_unique<Texture>(
+            auto texture = std::make_unique<ghoul::opengl::Texture>(
                 values,
                 _textureDimensions,
+                GL_TEXTURE_2D,
                 ghoul::opengl::Texture::Format::Red,
                 GL_RED,
                 GL_FLOAT,
@@ -143,11 +142,9 @@ bool DataCygnet::updateTexture() {
                 ghoul::opengl::Texture::WrappingMode::ClampToEdge
             );
 
-            if (texture) {
-                texture->uploadTexture();
-                texture->setFilter(Texture::FilterMode::LinearMipMap);
-                _textures[option] = std::move(texture);
-            }
+            texture->uploadTexture();
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+            _textures[option] = std::move(texture);
         }
         else {
             _textures[option]->setPixelData(values);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,12 +34,12 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "ReadSpeckTask";
+    constexpr std::string_view _loggerCat = "ReadSpeckTask";
 
     struct [[codegen::Dictionary(ReadSpeckTask)]] Parameters {
         // The path to the SPECK file that are to be read
         std::string inFilePath;
-        
+
         // The path to the file to export raw VBO data to
         std::string outFilePath;
     };
@@ -49,9 +49,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ReadSpeckTask::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "gaiamission_speckfiletorawdata";
-    return doc;
+    return codegen::doc<Parameters>("gaiamission_speckfiletorawdata");
 }
 
 ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
@@ -85,7 +83,7 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
         LINFO("nValues: " + std::to_string(nValues));
 
         if (nValues == 0) {
-            LERROR("Error writing file - No values were read from file.");
+            LERROR("Error writing file - No values were read from file");
         }
         fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
         fileStream.write(reinterpret_cast<const char*>(&nRenderValues), sizeof(int32_t));
@@ -96,7 +94,7 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
         fileStream.close();
     }
     else {
-        LERROR(fmt::format("Error opening file: {} as output data file.", _outFilePath));
+        LERROR(fmt::format("Error opening file: {} as output data file", _outFilePath));
     }
 
     onProgress(1.f);

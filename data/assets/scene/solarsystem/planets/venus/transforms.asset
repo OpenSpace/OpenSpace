@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
 local VenusBarycenter = {
@@ -9,7 +8,7 @@ local VenusBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VENUS BARYCENTER",
-      Observer = "SUN"
+      Observer = "SSB"
     }
   },
   GUI = {
@@ -20,15 +19,23 @@ local VenusBarycenter = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { VenusBarycenter })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(VenusBarycenter)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(VenusBarycenter)
+end)
+
+asset.export(VenusBarycenter)
+
 
 
 asset.meta = {
   Name = "Venus Transforms",
-  Version = "1.0",
-  Description = [[ Spice translation for Venus Barycenter]],
+  Version = "1.1",
+  Description = "Spice translation for Venus Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"VenusBarycenter"}
+  License = "MIT license"
 }

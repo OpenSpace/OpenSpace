@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,16 +36,14 @@ namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::globebrowsing {
 
-namespace tileprovider { struct TileProvider; }
-
 class LayerAdjustment : public properties::PropertyOwner {
 public:
     LayerAdjustment();
-    ~LayerAdjustment() = default;
+    ~LayerAdjustment() override = default;
 
     void setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict);
 
-    layergroupid::AdjustmentTypeID type() const;
+    layers::Adjustment::ID type() const;
 
     glm::vec3 chromaKeyColor() const;
     float chromaKeyTolerance() const;
@@ -61,7 +59,7 @@ private:
     properties::FloatProperty _chromaKeyTolerance;
 
     properties::OptionProperty _typeOption;
-    layergroupid::AdjustmentTypeID _type;
+    layers::Adjustment::ID _type;
 
     std::function<void(void)> _onChangeCallback;
 };

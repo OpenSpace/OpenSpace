@@ -12,17 +12,28 @@
         <div class="col-lg-12">
           <p>
             <a href="#{{urlify name}}" name="{{urlify name}}">
-              
               <span class="documentation-key">{{name}}(</span>
-              <span class="documentation-type">{{arguments}}</span>
+              <span class="documentation-function-arguments">
+                {{#each arguments}}
+                  <span class="arguments-name">{{name}}</span>
+                  <span class="arguments-type">({{type}})</span>
+                  {{#unless @last}},{{/unless}}
+                {{/each}}
+              </span>
               <span class="documentation-key">)</span>
+              {{#if returnType}}
+              <span class="documentation-function-return">
+                <span class="return-arrow"> -></span>
+                <span class="return-type"> {{returnType}}</span>
+              </span>
+              {{/if}}
             </a>
           </p>
           <p class="documentation-description">{{help}}</p>
         </div>
       </div>
     </div>
-  {{/each}}
+    {{/each}}
   </div>
 </div>
 {{/each}}

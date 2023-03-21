@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('../transforms')
-asset.require('spice/base')
+local transforms = asset.require("../transforms")
+asset.require("spice/base")
 
 
 
@@ -25,16 +24,24 @@ local MoonTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { MoonTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MoonTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MoonTrail)
+end)
+
+asset.export(MoonTrail)
+
 
 
 asset.meta = {
   Name = "Moon Trail",
-  Version = "1.0",
-  Description = [[ Moon Trail - This asset contains the trail of the Moon.
-    Data from NASA Spice (see base spice asset)]],
+  Version = "1.1",
+  Description = [[Moon Trail - This asset contains the trail of the Moon. Data from NASA
+    Spice (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"MoonTrail"}
+  License = "MIT license"
 }

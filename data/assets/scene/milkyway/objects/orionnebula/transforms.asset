@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local PARSEC_CONSTANT = 3.0856776E16;
 
@@ -24,4 +23,24 @@ local NebulaPosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { NebulaPosition })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NebulaPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NebulaPosition)
+end)
+
+asset.export(NebulaPosition)
+
+
+
+asset.meta = {
+  Name = "Orion Nebula Transforms",
+  Version = "1.0",
+  Description = [[This asset contains the position of the Orion Nebula. Generally you
+    would not include this asset as other assets would include it]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

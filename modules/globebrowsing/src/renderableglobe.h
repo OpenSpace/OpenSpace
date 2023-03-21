@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -95,7 +95,7 @@ enum class ShadowCompType {
 class RenderableGlobe : public Renderable {
 public:
     RenderableGlobe(const ghoul::Dictionary& dictionary);
-    ~RenderableGlobe() = default;
+    ~RenderableGlobe() override = default;
 
     void initializeGL() override;
     void deinitialize() override;
@@ -103,6 +103,7 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void renderSecondary(const RenderData& data, RendererTasks&) override;
     void update(const UpdateData& data) override;
 
     SurfacePositionHandle calculateSurfacePositionHandle(
@@ -118,8 +119,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    constexpr static const int MinSplitDepth = 2;
-    constexpr static const int MaxSplitDepth = 22;
+    static constexpr int MinSplitDepth = 2;
+    static constexpr int MaxSplitDepth = 22;
 
     struct {
         properties::BoolProperty showChunkEdges;
@@ -135,11 +136,13 @@ private:
         properties::BoolProperty  eclipseShadowsEnabled;
         properties::BoolProperty  eclipseHardShadows;
         properties::BoolProperty  shadowMapping;
+        properties::BoolProperty  renderAtDistance;
         properties::FloatProperty zFightingPercentage;
         properties::IntProperty   nShadowSamples;
         properties::FloatProperty targetLodScaleFactor;
         properties::FloatProperty currentLodScaleFactor;
         properties::FloatProperty orenNayarRoughness;
+        properties::FloatProperty ambientIntensity;
         properties::IntProperty   nActiveLayers;
     } _generalProperties;
 
@@ -151,8 +154,8 @@ private:
      * Test if a specific chunk can safely be culled without affecting the rendered
      * image.
      *
-     * Goes through all available <code>ChunkCuller</code>s and check if any of them
-     * allows culling of the <code>Chunk</code>s in question.
+     * Goes through all available `ChunkCuller`s and check if any of them
+     * allows culling of the `Chunk`s in question.
      */
     bool testIfCullable(const Chunk& chunk, const RenderData& renderData,
         const BoundingHeights& heights, const glm::dmat4& mvp) const;
@@ -161,10 +164,10 @@ private:
      * Gets the desired level which can be used to determine if a chunk should split
      * or merge.
      *
-     * Using <code>ChunkLevelEvaluator</code>s, the desired level can be higher or
-     * lower than the current level of the <code>Chunks</code>s
-     * <code>TileIndex</code>. If the desired level is higher than that of the
-     * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
+     * Using `ChunkLevelEvaluator`s, the desired level can be higher or
+     * lower than the current level of the `Chunks`s
+     * `TileIndex`. If the desired level is higher than that of the
+     * `Chunk`, it wants to split. If it is lower, it wants to merge with
      * its siblings.
      */
     int desiredLevel(const Chunk& chunk, const RenderData& renderData,
@@ -176,8 +179,8 @@ private:
      *
      * The height can be negative if the height map contains negative values.
      *
-     * \param <code>position</code> is the position of a point that gets geodetically
-     * projected on the reference ellipsoid. <code>position</code> must be in
+     * \param `position` is the position of a point that gets geodetically
+     * projected on the reference ellipsoid. `position` must be in
      * cartesian model space.
      * \returns the height from the reference ellipsoid to the globe surface.
      */

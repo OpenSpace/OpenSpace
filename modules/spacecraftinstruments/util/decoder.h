@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace ghoul { class Dictionary; }
@@ -36,7 +37,7 @@ namespace openspace {
 class Decoder {
 public:
     static std::unique_ptr<Decoder> createFromDictionary(
-        const ghoul::Dictionary& dictionary, const std::string& type);
+        const ghoul::Dictionary& dictionary, std::string_view type);
 
     virtual ~Decoder() = default;
 

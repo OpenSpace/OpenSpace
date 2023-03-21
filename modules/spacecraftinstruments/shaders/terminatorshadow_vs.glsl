@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,23 +29,24 @@
 layout(location = 0) in vec4 in_point_position;
 
 out vec3 vs_color;
-out vec4 vs_positionScreenSpace;
+out float vs_depth;
 
 uniform mat4 modelViewProjectionTransform;
-
 uniform vec3 shadowColor;
 
+
 void main() {
-    if (mod(gl_VertexID, 2) == 0.0) {
-        vs_color = shadowColor;
-    }
-    else {
-        vs_color = vec3(0.0);
-    }
-    
-    // Transform the damn psc to homogenous coordinate
-    vec4 position = vec4(in_point_position.xyz * pow(10, in_point_position.w), 1.0);
-    vec4 positionClipSpace = modelViewProjectionTransform * position;
-    vs_positionScreenSpace = z_normalization(positionClipSpace);
-    gl_Position = vs_positionScreenSpace;
+  if (mod(gl_VertexID, 2) == 0.0) {
+    vs_color = shadowColor;
+  }
+  else {
+    vs_color = vec3(0.0);
+  }
+  
+  // Transform the damn psc to homogenous coordinate
+  vec4 position = vec4(in_point_position.xyz * pow(10, in_point_position.w), 1.0);
+  vec4 positionClipSpace = modelViewProjectionTransform * position;
+  vec4 p = z_normalization(positionClipSpace);
+  vs_depth = p.w;
+  gl_Position = p;
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -72,20 +72,20 @@ struct Shaders {
 
 struct VertexObjects {
     struct {
-        GLuint vao;
-        GLuint vbo;
+        GLuint vao = 0;
+        GLuint vbo = 0;
     } square;
 
     struct {
-        GLuint vao;
-        GLuint vbo;
-        GLuint ibo;
+        GLuint vao = 0;
+        GLuint vbo = 0;
+        GLuint ibo = 0;
 
         int nElements = 64;
     } sphere;
 
     struct {
-        GLuint vao;
+        GLuint vao = 0;
     } empty;
 };
 

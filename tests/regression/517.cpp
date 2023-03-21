@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <openspace/properties/optionproperty.h>
 
@@ -37,5 +37,5 @@ TEST_CASE("Regression: 527", "[regression]") {
 
 
     p = -1;
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().description == "a");
 }

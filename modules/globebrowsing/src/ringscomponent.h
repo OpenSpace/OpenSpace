@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@ namespace documentation { struct Documentation; }
 
 class RingsComponent : public properties::PropertyOwner {
 public:
-    enum RenderPass {
+    enum class RenderPass {
         GeometryOnly,
         GeometryAndShading
     };
@@ -63,7 +63,7 @@ public:
 
     bool isReady() const;
 
-    void draw(const RenderData& data, const RingsComponent::RenderPass renderPass,
+    void draw(const RenderData& data, RenderPass renderPass,
         const ShadowComponent::ShadowMapData& shadowData = {}
     );
     void update(const UpdateData& data);

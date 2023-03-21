@@ -1,0 +1,64 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Lightning Flash Rate"
+local Identifier = "noaa-sos-atmosphere-lightning"
+local Description = [[Typically, more than 2,000 thunderstorms are active throughout the
+world at a given moment, producing on the order of 100 flashes per second. NASA has two
+different sensors on satellites that measuring flash frequency, the Optical Transient
+Detector, OTD, and the Lightning Imaging Sensor, LIS. Data from the OTD from 1995 - 2000
+and the LIS from 1998 - 2005 has been combined and averaged to create an average annual
+lightning flash rate map. 11 year of data is included to remove any anomalies that might
+be present in just one year. The color variations in the map display the average annual
+number of lightning flashes per square kilometer]]
+local URL = "https://sos.noaa.gov/catalog/datasets/lightning-flash-rate/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  FilePath = syncedDirectory .. "2048.jpg",
+  Description = Description
+}
+
+local colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.jpg",
+  FaceCamera = false,
+  Scale = 0.05,
+  CartesianPosition = { 0.75, 0.0, -2.0 }
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.removeScreenSpaceRenderable(colorbar)
+end)
+
+asset.export(layer)
+asset.export(colorbar)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

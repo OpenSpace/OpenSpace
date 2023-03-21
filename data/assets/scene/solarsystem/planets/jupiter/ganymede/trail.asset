@@ -1,7 +1,6 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("../transforms")
 asset.require("spice/base")
-local kernel = asset.require('../kernels').jup310
+local kernel = asset.require("../kernels").jup310
 
 
 
@@ -27,16 +26,24 @@ local GanymedeTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { GanymedeTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GanymedeTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GanymedeTrail)
+end)
+
+asset.export(GanymedeTrail)
+
 
 
 asset.meta = {
   Name = "Ganymede Trail",
-  Version = "1.0",
-  Description = [[ Trail of Ganymede as observed by the Jupiter. Data from NASA Spice
+  Version = "1.1",
+  Description = [[Trail of Ganymede as observed by the Jupiter. Data from NASA Spice
     (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"GanymedeTrail"}
+  License = "MIT license"
 }

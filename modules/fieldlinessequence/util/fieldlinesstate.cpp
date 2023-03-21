@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,8 +32,8 @@
 #include <iomanip>
 
 namespace {
-    constexpr const char* _loggerCat = "FieldlinesState";
-    constexpr const int CurrentVersion = 0;
+    constexpr std::string_view _loggerCat = "FieldlinesState";
+    constexpr int CurrentVersion = 0;
     using json = nlohmann::json;
 } // namespace
 
@@ -76,7 +76,7 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
             // No need to put everything in this scope now, as only version 0 exists!
             break;
         default:
-            LERROR("VERSION OF BINARY FILE WAS NOT RECOGNIZED!");
+            LERROR("VERSION OF BINARY FILE WAS NOT RECOGNIZED");
             return false;
     }
 
@@ -136,7 +136,6 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
 bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
                                         fls::Model Model, float coordToMeters)
 {
-
     // --------------------- ENSURE FILE IS VALID, THEN PARSE IT --------------------- //
     std::ifstream ifs(pathToJsonFile);
 
@@ -168,7 +167,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
         if (nVariables < nPosComponents) {
             LERROR(
                 pathToJsonFile + ": Each field '" + sColumns +
-                "' must contain the variables: 'x', 'y' and 'z' (order is important)."
+                "' must contain the variables: 'x', 'y' and 'z' (order is important)"
             );
             return false;
         }
@@ -393,7 +392,7 @@ std::vector<float> FieldlinesState::extraQuantity(size_t index, bool& isSuccessf
     }
     else {
         isSuccessful = false;
-        LERROR("Provided Index was out of scope!");
+        LERROR("Provided Index was out of scope");
         return {};
     }
 }

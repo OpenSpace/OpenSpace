@@ -1,4 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
+local spheres = {}
 
 local i = 1
 for z=1,3 do
@@ -9,7 +9,7 @@ for z=1,3 do
         Transform = {
           Translation = {
             Type = "StaticTranslation",
-            Position = {x, y, z}
+            Position = { x, y, z }
           }
         },
         Renderable = {
@@ -26,8 +26,27 @@ for z=1,3 do
           Path = "/Other/Spheres"
         }
       }
-      assetHelper.registerSceneGraphNodesAndExport(asset, { sphere })
+
+      table.insert(spheres, sphere)
       i = i + 1
     end
   end
+end
+
+
+asset.onInitialize(function()
+  for _, n in ipairs(spheres) do
+    openspace.addSceneGraphNode(n)
+  end
+end)
+
+asset.onDeinitialize(function()
+  for _, n in ipairs(spheres) do
+    openspace.removeSceneGraphNode(n)
+  end
+end)
+
+
+for _, n in ipairs(spheres) do
+  asset.export(n)
 end

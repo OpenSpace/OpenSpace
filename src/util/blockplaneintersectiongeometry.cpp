@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +25,11 @@
 #include <openspace/util/blockplaneintersectiongeometry.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <algorithm>
 
 namespace {
-    constexpr const char* _loggerCat = "BlockPlaneIntersectionGeometry";
+    constexpr std::string_view _loggerCat = "BlockPlaneIntersectionGeometry";
 } // namespace
 
 namespace openspace {
@@ -78,8 +79,8 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     };
 
     const glm::vec3 halfSize = _size * 0.5f;
-    glm::vec3 intersections[12];
-    std::fill(std::begin(intersections), std::end(intersections), glm::vec3(0.f));
+    std::array<glm::vec3, 12> intersections;
+    std::fill(intersections.begin(), intersections.end(), glm::vec3(0.f));
     int nIntersections = 0;
 
     for (int i = 0; i < 12; i++) {

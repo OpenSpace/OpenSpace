@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,7 +48,7 @@ namespace {
         std::string type [[codegen::annotation("Must name a valid LightSource type")]];
 
         // The identifier of the light source
-        std::string identifier;
+        std::string identifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -63,9 +63,7 @@ bool LightSource::isEnabled() const {
 }
 
 documentation::Documentation LightSource::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_light_source";
-    return doc;
+    return codegen::doc<Parameters>("core_light_source");
 }
 
 std::unique_ptr<LightSource> LightSource::createFromDictionary(
@@ -73,7 +71,8 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    auto factory = FactoryManager::ref().factory<LightSource>();
+    ghoul::TemplateFactory<LightSource>* factory =
+        FactoryManager::ref().factory<LightSource>();
     LightSource* source = factory->create(p.type, dictionary);
     source->setIdentifier(p.identifier);
 
@@ -81,20 +80,17 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
 }
 
 LightSource::LightSource()
-    : properties::PropertyOwner({ "LightSource" })
+    : properties::PropertyOwner({ "LightSource", "Light Source" })
     , _enabled(EnabledInfo, true)
 {
     addProperty(_enabled);
 }
 
 LightSource::LightSource(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "LightSource" })
-    , _enabled(EnabledInfo, true)
+    : LightSource()
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
     _enabled = p.enabled.value_or(_enabled);
-    addProperty(_enabled);
 }
 
 bool LightSource::initialize() {

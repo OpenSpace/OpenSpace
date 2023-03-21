@@ -1,10 +1,10 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "HiRISE-PSP",
   Name = "HiRISE",
-  FilePath = mapServiceConfigs .. "/ESRI/HiRISE/HiRISE_PSP.vrt",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("hirise.vrt"),
   BlendMode = "Color",
   Settings = {
     Gamma = 1.0,
@@ -20,23 +20,27 @@ local layer = {
     construction of this layer were produced by the team at the University of Arizona.
     This tiled web service, as hosted by Esri, is made available using lossy Jpeg
     compression using an 8 bit data range, using a linear stretch from the original
-    10 bit range. (Description from URL)]],
+    10 bit range. (Description from URL)]]
 }
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "HiRISE",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Updated HiRISE layer for Mars with raw unselected imagery. This map is
-    hosted by ESRI.]],
+    hosted by ESRI]],
   Author = "esri_astro",
   URL = "https://www.arcgis.com/home/item.html?id=c1c4c750a2154842ae523c984cc14fa5",
-  License = "Esri Master License Agreement",
-  Identifiers = {"HiRISE-PSP"}
+  License = "Esri Master License Agreement"
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ void ScreenLog::removeExpiredEntries() {
         [&t, ttl = _timeToLive](const LogEntry& e) { return (t - e.timeStamp) > ttl; }
     );
 
-    _entries.erase(rit, _entries.end() );
+    _entries.erase(rit, _entries.end());
 }
 
 void ScreenLog::log(LogLevel level, std::string_view category, std::string_view message) {

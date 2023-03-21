@@ -1,14 +1,31 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 
 local layer = {
   Identifier = "Messenger_HIE_Sweden",
   Name = "Messenger HIE [Sweden]",
-  FilePath = mapServiceConfigs .. "/LiU/Messenger_HIE.wms",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("messenger_hie_sweden.wms")
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Messenger HIE [Sweden]",
+  Version = "1.0",
+  Description = [[Mercury HIE layer for Mercury globe. This map is hosted on the OpenSpace
+    server in Sweden]],
+  Author = "USGS",
+  URL = "",
+  License = "NASA/PDS"
+}
+

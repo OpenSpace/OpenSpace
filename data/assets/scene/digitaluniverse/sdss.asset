@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "Sloan Digital Sky Survey Textures",
   Type = "HttpSynchronization",
@@ -24,22 +20,18 @@ local object = {
     Color = { 0.8, 0.8, 1.0 },
     Opacity = 0.8,
     ScaleFactor = 520.0,
-    File = speck .. "/SDSSgals.speck",
-    ColorMap = speck .. "/SDSSgals.cmap",
+    File = speck .. "SDSSgals.speck",
+    ColorMap = speck .. "SDSSgals.cmap",
     ColorOption = { "redshift", "proximity" },
     ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
-    Texture = textures .. "/point3A.png",
+    Texture = textures .. "point3A.png",
     Unit = "Mpc",
-    -- Fade in value in the same unit as "Unit"
-    FadeInDistances = { 220.0, 650.0 },
-    BillboardMaxSize = 50.0,
-    BillboardMinSize = 0.0,
+    FadeInDistances = { 220.0, 650.0 }, -- Fade in value in the same unit as "Unit"
+    BillboardMinMaxSize = { 0.0, 5.5 },
     CorrectionSizeEndDistance = 20.65,
     CorrectionSizeFactor = 10.41,
     TextSize = 14.8,
-    TextMinSize = 10.0,
-    TextMaxSize = 50.0,
-    BillboardMaxSize = 5.5,
+    TextMinMaxSize = { 10, 50 },
     EnablePixelSizeControl = true
   },
   GUI = {
@@ -63,15 +55,23 @@ local object = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Sloan Digital Sky Survey",
-  Version = "2.0",
-  Description = [[Digital Universe asset for The Sloan Digital Sky Survey (SDSS).]],
+  Version = "2.1",
+  Description = "Digital Universe asset for The Sloan Digital Sky Survey (SDSS)",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"SloanDigitalSkySurvey"}
+  License = "AMNH Digital Universe"
 }

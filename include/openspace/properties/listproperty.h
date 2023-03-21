@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,11 @@ class ListProperty : public TemplateProperty<std::vector<T>> {
 public:
     ListProperty(Property::PropertyInfo info, std::vector<T> values);
 
-    virtual ~ListProperty() = 0;
+    virtual ~ListProperty() override = 0;
+
+protected:
+    std::vector<T> fromLuaConversion(lua_State* state) const override;
+    void toLuaConversion(lua_State* state) const override;
 };
 
 } // namespace openspace::properties

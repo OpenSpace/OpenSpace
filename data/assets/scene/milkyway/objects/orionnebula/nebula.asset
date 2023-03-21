@@ -1,9 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('./transforms')
-
-local center = sunTransforms.SolarSystemBarycenter.Identifier;
-local LIGHTS = assetHelper.getDefaultLightSources(center);
+local sun = asset.require("scene/solarsystem/sun/sun")
+local transforms = asset.require("./transforms")
 
 local sync = asset.syncedResource({
   Name = "Orion Nebula Model",
@@ -32,7 +28,7 @@ local NebulaHolder = {
   GUI = {
     Name = "Orion Nebula",
     Path = "/Milky Way/Orion",
-    Description = [[ In the Digital Universe model of the Orion Nebula, we depict the 
+    Description = [[In the Digital Universe model of the Orion Nebula, we depict the 
       ionization front effectively as a terrain, with a flat Hubble image of the nebula mapped 
       on the undulating surface. In reality, the ionization front has a slight thickness to
       it - about a third of a light year - but is quite thin compared to the overall size of 
@@ -44,7 +40,7 @@ local NebulaHolder = {
       nebulas center. These enormous structures are bow shocks that delineate the region where 
       highspeed winds from the central star slow from supersonic to subsonic speeds. You can 
       think of an HII region as a sort of tremendous explosion, taking place over millennia, 
-      and the bow shocks are part of the outward rush of material. ]]
+      and the bow shocks are part of the outward rush of material]]
   }
 }
 
@@ -57,9 +53,10 @@ local OrionNebulaModel = {
       Scale = 0.67500000
     }
   },
+  InteractionSphere = 0.8,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = sync .. "/orion_nebula.obj",
+    GeometryFile = sync .. "orion_nebula.obj",
     Opacity = 1.0,
     DisableFaceCulling = false,
     SpecularIntensity = 0.0,
@@ -67,13 +64,19 @@ local OrionNebulaModel = {
     DiffuseIntensity = 1.0,
     --PerformShading = false,
     RotationVector = { 0.000000, 22.300000, 0.000000 },
-    LightSources = LIGHTS;
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Orion Nebula Model",
     Path = "/Milky Way/Orion",
-    Hidden = true,
-    Description = "Orion Nebula 3D model. See Orion Nebula for description."
+    Description = "Orion Nebula 3D model. See Orion Nebula for description"
   }
 }
 
@@ -88,21 +91,28 @@ local OrionNebulaShocksModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = sync .. "/orishocks.obj",
-    Opacity = 1.0, 
+    GeometryFile = sync .. "orishocks.obj",
+    Opacity = 1.0,
     DisableFaceCulling = false,
     SpecularIntensity = 0.0,
     AmbientIntensity = 0.0,
     DiffuseIntensity = 1.0,
     --PerformShading = false,
     RotationVector = { 0.000000, 22.300000, 0.000000 },
-    LightSources = LIGHTS;
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Orion Nebula Shocks",
     Path = "/Milky Way/Orion",
     Hidden = false,
-    Description = "Orion Nebula Shocks 3D model. See Orion Nebula for description."
+    Description = "Orion Nebula Shocks 3D model. See Orion Nebula for description"
   }
 }
 
@@ -117,41 +127,59 @@ local OrionNebulaProplydsModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = sync .. "/proplyds.obj",
-    Opacity = 1.0, 
+    GeometryFile = sync .. "proplyds.obj",
+    Opacity = 1.0,
     DisableFaceCulling = false,
     SpecularIntensity = 0.0,
     AmbientIntensity = 0.0,
     DiffuseIntensity = 1.0,
     --PerformShading = false,
     RotationVector = { 0.000000, 22.300000, 0.000000 },
-    LightSources = LIGHTS;
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Orion Nebula Proplyds",
     Path = "/Milky Way/Orion",
     Hidden = false,
-    Description = "Orion Nebula Proplyds 3D model. See Orion Nebula for description."
+    Description = "Orion Nebula Proplyds 3D model. See Orion Nebula for description"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  NebulaHolder,
-  OrionNebulaModel,
-  OrionNebulaShocksModel,
-  OrionNebulaProplydsModel
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NebulaHolder)
+  openspace.addSceneGraphNode(OrionNebulaModel)
+  openspace.addSceneGraphNode(OrionNebulaShocksModel)
+  openspace.addSceneGraphNode(OrionNebulaProplydsModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OrionNebulaProplydsModel)
+  openspace.removeSceneGraphNode(OrionNebulaShocksModel)
+  openspace.removeSceneGraphNode(OrionNebulaModel)
+  openspace.removeSceneGraphNode(NebulaHolder)
+end)
+
+asset.export(NebulaHolder)
+asset.export(OrionNebulaModel)
+asset.export(OrionNebulaShocksModel)
+asset.export(OrionNebulaProplydsModel)
+
 
 
 asset.meta = {
   Name = "Orion Nebula Model",
-  Version = "1.0",
-  Description = [[ Digital Universe asset for the Orion nebula 3D model. This asset
+  Version = "1.1",
+  Description = [[Digital Universe asset for the Orion nebula 3D model. This asset
     contains seperate models for the nebula, proplyds and shocks. To be used in
-    conjunction with orion star cluster. Use orionnebula.asset to include both.]],
+    conjunction with orion star cluster. Use orionnebula.asset to include both]],
   Author = "AMNH Digital Universe",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"OrionNebulaHolder", "OrionNebulaModel", "OrionNebulaProplydsModel",
-    "OrionNebulaShocksModel"}
+  License = "AMNH Digital Universe"
 }

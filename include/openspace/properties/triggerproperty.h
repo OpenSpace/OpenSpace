@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,28 +36,28 @@ namespace openspace::properties {
 class TriggerProperty : public Property {
 public:
     /**
-     * Initializes the TriggerProperty by delegating the <code>identifier</code> and
-     * <code>guiName</code> to the Property constructor.
+     * Initializes the TriggerProperty by delegating the `identifier` and
+     * `guiName` to the Property constructor.
      * \param info The PropertyInfo structure that contains all the required static
-     * information for initializing this Property.
+     *        information for initializing this Property.
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
     TriggerProperty(PropertyInfo info);
 
     /**
-     * Returns the class name <code>TriggerProperty</code>.
-     * \return The class name <code>TriggerProperty</code>
+     * Returns the class name `TriggerProperty`.
+     * \return The class name `TriggerProperty`
      */
-    std::string className() const override;
+    std::string_view className() const override;
 
     /**
-     * Accepts only the <code>LUA_TNIL</code> type and will notify all the listeners
+     * Accepts only the `LUA_TNIL` type and will notify all the listeners
      * that the event has been triggered.
      * \param state The unused Lua state
-     * \return Returns always <code>true</code>
+     * \return Returns always `true`
      */
-    bool setLuaValue(lua_State* state) override;
+    void setLuaValue(lua_State* state) override;
 
     /**
      * Silently ignores any value that is passed into this function and will trigger the
@@ -65,8 +65,6 @@ public:
      * \param value The ignored value
      */
     void set(std::any value) override;
-
-    std::string toJson() const override;
 
     std::string jsonValue() const override;
 };

@@ -1,9 +1,8 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local BENNU_BODY = "2101955"
+local BENNU_BODY = 2101955
 
 local BennuBarycenter = {
   Identifier = "BennuBarycenter",
@@ -12,7 +11,7 @@ local BennuBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = BENNU_BODY,
-      Observer = "SUN"
+      Observer = "SSB"
     }
   },
   GUI = {
@@ -21,4 +20,12 @@ local BennuBarycenter = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { BennuBarycenter })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(BennuBarycenter)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(BennuBarycenter)
+end)
+
+asset.export(BennuBarycenter)

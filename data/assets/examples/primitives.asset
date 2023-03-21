@@ -1,5 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
 local scale = 149597870700 -- 1 AU
 
 local circle = {
@@ -16,7 +14,7 @@ local circle = {
     LineWidth = 3.0,
     GridSegments = { 1, 1 },
     CircleSegments = 64,
-    OuterRadius = 1.0
+    Radii = { 0.0, 1.0 }
   },
   GUI = {
     Name = "Example Circle",
@@ -29,7 +27,7 @@ local ellipse = {
   Transform = {
     Scale = {
       Type = "NonUniformStaticScale",
-      Scale = {1.5, 1.0, 1.0}
+      Scale = { 1.5, 1.0, 1.0 }
     }
   },
   Renderable = {
@@ -38,7 +36,7 @@ local ellipse = {
     LineWidth = 3.0,
     GridSegments = { 1, 1 },
     CircleSegments = 64,
-    OuterRadius = scale
+    Radii = { 0.0, scale }
   },
   GUI = {
     Name = "Example Ellipse",
@@ -46,7 +44,15 @@ local ellipse = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  circle,
-  ellipse
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(circle)
+  openspace.addSceneGraphNode(ellipse)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ellipse)
+  openspace.removeSceneGraphNode(circle)
+end)
+
+asset.export(circle)
+asset.export(ellipse)

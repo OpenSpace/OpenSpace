@@ -1,14 +1,31 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 
 local layer = {
   Identifier = "Messenger_MP3_Utah",
   Name = "Messenger MP3 [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/MessengerMP3.wms",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("messenger_mp3_utah.wms")
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Messenger MP3 [Utah]",
+  Version = "1.0",
+  Description = [[Mercury Messenger MP3 layer for Mercury globe. This map is hosted on the
+    OpenSpace server in Utah]],
+  Author = "USGS",
+  URL = "",
+  License = "NASA/PDS"
+}
+

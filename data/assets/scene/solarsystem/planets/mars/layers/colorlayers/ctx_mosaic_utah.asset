@@ -1,15 +1,31 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "CTX_Mosaic_Utah",
   Name = "CTX Mosaic [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/CTX.wms",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("ctx_mosaic_utah.wms"),
   BlendMode = "Color"
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "CTX Mosaic [Utah]",
+  Version = "1.0",
+  Description = [[CTX Mosaic layer for Mars globe. This layer is served from the
+    OpenSpace servers in Utah]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

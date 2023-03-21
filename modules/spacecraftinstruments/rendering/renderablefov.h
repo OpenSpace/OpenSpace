@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,47 +64,26 @@ private:
     // the potential targets are returns the first name of the target that is in field of
     // view, the previous target, or the closest target to the space craft. The second
     // return value is whether the target is currently in the field of view
-    std::pair<std::string,bool> determineTarget(double time);
+    std::pair<std::string, bool> determineTarget(double time);
 
     void updateGPU();
-    void insertPoint(std::vector<float>& arr, glm::vec4 p, glm::vec4 c);
 
-    glm::vec3 squareColor(float t) const {
-        return _colors.active.value() * t + _colors.square.value() * (1 - t);
-    }
-
-    glm::vec3 endColor(float t) const {
-        return _colors.active.value() * t + _colors.intersectionEnd.value() * (1 - t);
-    }
-
-    glm::vec3 fovColor(float t) const {
-        return _colors.active.value() * t + _colors.targetInFieldOfView.value() * (1 - t);
-    }
-
-    void computeIntercepts(const UpdateData& data, const std::string& target,
+    void computeIntercepts(double time, const std::string& target,
         bool isInFov);
 
     glm::dvec3 orthogonalProjection(const glm::dvec3& vecFov, double time,
         const std::string& target) const;
-    glm::dvec3 checkForIntercept(const glm::dvec3& ray, double time,
-        const std::string& target) const;
 
     // properties
     properties::FloatProperty _lineWidth;
-    properties::BoolProperty _drawSolid;
     properties::DoubleProperty _standOffDistance;
+    properties::BoolProperty _alwaysDrawFov;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewProjection, defaultColorStart, defaultColorEnd, activeColor,
         targetInFieldOfViewColor, intersectionStartColor, intersectionEndColor,
         squareColor, interpolation) _uniformCache;
 
-    // instance variables
-    bool _rebuild = false;
-
     bool _simplifyBounds = false;
-
-    //std::vector<float> _fovBounds;
-    //std::vector<float> _fovPlane;
 
     std::string _previousTarget;
     bool _drawFOV = false;
@@ -126,13 +105,13 @@ private:
         // Differentiating different vertex types
         using VertexColorType = int32_t;
         // This needs to be synced with the fov_vs.glsl shader
-        static const VertexColorType VertexColorTypeDefaultStart = 0;
-        static const VertexColorType VertexColorTypeDefaultEnd = 1;
-        static const VertexColorType VertexColorTypeInFieldOfView = 2;
-        static const VertexColorType VertexColorTypeActive = 3;
-        static const VertexColorType VertexColorTypeIntersectionStart = 4;
-        static const VertexColorType VertexColorTypeIntersectionEnd = 5;
-        static const VertexColorType VertexColorTypeSquare = 6;
+        static constexpr VertexColorType VertexColorTypeDefaultStart = 0;
+        static constexpr VertexColorType VertexColorTypeDefaultEnd = 1;
+        static constexpr VertexColorType VertexColorTypeInFieldOfView = 2;
+        static constexpr VertexColorType VertexColorTypeActive = 3;
+        static constexpr VertexColorType VertexColorTypeIntersectionStart = 4;
+        static constexpr VertexColorType VertexColorTypeIntersectionEnd = 5;
+        static constexpr VertexColorType VertexColorTypeSquare = 6;
 
         struct VBOData {
             GLfloat position[3];

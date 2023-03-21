@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,49 +25,32 @@
 #version __CONTEXT__
 
 layout(points) in;
-//layout(line_strip, max_vertices = 19) out;
 layout(triangle_strip, max_vertices = 63) out;
 
 uniform int sides;
 
 const float PI = 3.1415926;
 
+
 void main() {
-    // for (int i = 0; i <= sides; i++) {
-    //     // Angle between each side in radians
-    //     float ang = PI * 2.0 / float(sides) * i;
-
-    //     // Offset from center of point (0.3 to accomodate for aspect ratio)
-    //     //vec4 offset = vec4(cos(ang) * 0.003, -sin(ang) * 0.004, 0.0, 0.0);
-    //     vec4 offset = vec4(cos(ang) * 0.8, -sin(ang) * 0.8, 0.0, 0.0);
-    //     gl_Position = gl_in[0].gl_Position + offset;
-
-    //     // vec4 offset = vec4(cos(ang) * gl_in[0].gl_Position[0], -sin(ang) * gl_in[0].gl_Position[1],
-    //     //                     gl_in[0].gl_Position[2] , gl_in[0].gl_Position[3]);
-    //     // gl_Position = offset;
-        
-    //     EmitVertex();
-    // }
-    // EndPrimitive();
+  vec4 v0 = gl_in[0].gl_Position;
     
-    vec4 v0 = gl_in[0].gl_Position;
-    
-    for (int i = sides; i > 0; --i) {
-        // Angle between each side in radians
-        float ang = PI * 2.0 / float(sides) * i;
+  for (int i = sides; i > 0; --i) {
+    // Angle between each side in radians
+    float ang = 2.0 * PI / float(sides) * i;
 
-        gl_Position = v0;
-        EmitVertex();
+    gl_Position = v0;
+    EmitVertex();
 
-        vec4 vi = v0 + vec4(cos(ang) * 0.8, -sin(ang) * 0.8, 0.0, 0.0);
-        gl_Position = vi;
-        EmitVertex();
+    vec4 vi = v0 + vec4(cos(ang) * 0.8, -sin(ang) * 0.8, 0.0, 0.0);
+    gl_Position = vi;
+    EmitVertex();
 
-        ang = PI * 2.0 / float(sides) * (i-1);
-        vec4 vii = v0 + vec4(cos(ang) * 0.8, -sin(ang) * 0.8, 0.0, 0.0);
-        gl_Position = vii;
-        EmitVertex();
+    ang = 2.0 * PI / float(sides) * (i - 1);
+    vec4 vii = v0 + vec4(cos(ang) * 0.8, -sin(ang) * 0.8, 0.0, 0.0);
+    gl_Position = vii;
+    EmitVertex();
 
-        EndPrimitive();
-    }
+    EndPrimitive();
+  }
 }

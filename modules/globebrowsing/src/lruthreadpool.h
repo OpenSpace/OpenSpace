@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,7 +49,7 @@ private:
 };
 
 /**
- * The <code>LRUThreadPool</code> will only enqueue a certain number of tasks. The most
+ * The `LRUThreadPool` will only enqueue a certain number of tasks. The most
  * recently enqueued task is the one that will be executed first. This class is templated
  * on a key type which used as an identifier to determine wheter or not a task with the
  * given key has been enqueued or not. This means that a task can be enqueued several

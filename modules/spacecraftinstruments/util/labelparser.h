@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,35 +31,21 @@ namespace openspace {
 
 class LabelParser : public SequenceParser {
 public:
-    LabelParser(std::string name, std::string fileName,
-        const ghoul::Dictionary& translationDictionary);
+    LabelParser(std::string fileName, const ghoul::Dictionary& translationDictionary);
 
     bool create() override;
 
-    // temporary need to figure this out
-    //std::map<std::string, Decoder*> translations() { return _fileTranslation; };
-
 private:
-    void createImage(Image& image, double startTime, double stopTime,
-        std::vector<std::string> instr, std::string target, std::string path);
-
     std::string encode(const std::string& line) const;
     std::string decode(const std::string& line);
 
-    bool augmentWithSpice(Image& image, std::string spacecraft,
-        std::vector<std::string> payload, std::vector<std::string> potentialTargets);
-
-    std::string _name;
     std::string _fileName;
-    std::string _spacecraft;
     std::vector<std::string> _specsOfInterest;
 
     std::string _target;
     std::string _instrumentID;
     std::string _instrumentHostID;
     std::string _detectorType;
-    std::string _sequenceID;
-    bool _badDecoding = false;
 };
 
 } // namespace openspace

@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
     Name = "Kepler Textures",
     Type = "HttpSynchronization",
@@ -24,12 +20,12 @@ local object = {
     Color = { 1.0, 1.0, 0.0 },
     Opacity = 0.99,
     ScaleFactor = 410.0,
-    File = speck .. "/kepler.speck",
-    Texture = textures .. "/halo.png",
+    File = speck .. "kepler.speck",
+    Unit = "pc",
+    Texture = textures .. "halo.png",
     CorrectionSizeEndDistance = 15.86,
     CorrectionSizeFactor = 8.59,
-    Unit = "pc",
-    BillboardMaxSize = 30.0,
+    BillboardMinMaxSize = { 0.0, 30.0 },
     EnablePixelSizeControl = true
   },
   GUI = {
@@ -48,15 +44,23 @@ local object = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Kepler Planetary Candidates",
-  Version = "2.0",
-  Description = [[Digital Universe asset for Kepler Planetary Candidates]],
+  Version = "2.1",
+  Description = "Digital Universe asset for Kepler Planetary Candidates",
   Author = "Brian Abbott, Emily Rice, and Jason No (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"KeplerPlanetaryCandidates"}
+  License = "AMNH Digital Universe"
 }

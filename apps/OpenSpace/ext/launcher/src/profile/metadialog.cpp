@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,32 +34,32 @@
 #include <QVBoxLayout>
 #include <algorithm>
 
-MetaDialog::MetaDialog(openspace::Profile& profile, QWidget *parent)
+MetaDialog::MetaDialog(QWidget* parent, std::optional<openspace::Profile::Meta>* meta)
     : QDialog(parent)
-    , _profile(profile)
+    , _meta(meta)
 {
     setWindowTitle("Meta");
     createWidgets();
 
-    if (_profile.meta().has_value()) {
-        openspace::Profile::Meta meta = *_profile.meta();
-        if (meta.name.has_value()) {
-            _nameEdit->setText(QString::fromStdString(*meta.name));
+    if (_meta->has_value()) {
+        const openspace::Profile::Meta& m = **_meta;
+        if (m.name.has_value()) {
+            _nameEdit->setText(QString::fromStdString(*m.name));
         }
-        if (meta.version.has_value()) {
-            _versionEdit->setText(QString::fromStdString(*meta.version));
+        if (m.version.has_value()) {
+            _versionEdit->setText(QString::fromStdString(*m.version));
         }
-        if (meta.description.has_value()) {
-            _descriptionEdit->setText(QString::fromStdString(*meta.description));
+        if (m.description.has_value()) {
+            _descriptionEdit->setText(QString::fromStdString(*m.description));
         }
-        if (meta.author.has_value()) {
-            _authorEdit->setText(QString::fromStdString(*meta.author));
+        if (m.author.has_value()) {
+            _authorEdit->setText(QString::fromStdString(*m.author));
         }
-        if (meta.url.has_value()) {
-            _urlEdit->setText(QString::fromStdString(*meta.url));
+        if (m.url.has_value()) {
+            _urlEdit->setText(QString::fromStdString(*m.url));
         }
-        if (meta.license.has_value()) {
-            _licenseEdit->setText(QString::fromStdString(*meta.license));
+        if (m.license.has_value()) {
+            _licenseEdit->setText(QString::fromStdString(*m.license));
         }
     }
 }
@@ -127,10 +127,10 @@ void MetaDialog::save() {
         if (!_licenseEdit->text().isEmpty()) {
             m.license = _licenseEdit->text().toStdString();
         }
-        _profile.setMeta(m);
+        *_meta = std::move(m);
     }
     else {
-        _profile.clearMeta();
+        *_meta = std::nullopt;
     }
     accept();
 }

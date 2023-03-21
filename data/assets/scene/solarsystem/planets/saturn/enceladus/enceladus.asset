@@ -1,8 +1,13 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
-asset.require('./trail')
-local labelsPath = asset.require('../saturn_globelabels').LabelsPath
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").sat375
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
 
 local Enceladus = {
   Identifier = "Enceladus",
@@ -19,47 +24,79 @@ local Enceladus = {
       SourceFrame = "IAU_ENCELADUS",
       DestinationFrame = "GALACTIC"
     }
-  },    
+  },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 252000,
     SegmentsPerPatch = 64,
     Layers = {},
     Labels = {
-      Enable = false,
-      FileName = labelsPath .. "/enceladus.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 22.0,
-      LabelsSize = 8.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 1000000.0,
-      FadeOutStartingDistance = 500000.0,
-      LabelsForceDomeRendering = true,
-      LabelsDistanceEPS = 100000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      Enabled = false,
+      FileName = labelsPath .. "enceladus.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.1,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 300000.0, 1000000.0 },
+      DistanceEPS = 100000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
   GUI = {
     Name = "Enceladus",
     Path = "/Solar System/Planets/Saturn/Moons",
-    Description = [[ Enceladus globe with labels]]
+    Description = "Enceladus globe with labels"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Enceladus })
+
+local EnceladusLabel = {
+  Identifier = "EnceladusLabel",
+  Parent = Enceladus.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Enceladus",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.3, 10.0 },
+    FadeWidths = { 0.15, 10.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Enceladus Label",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = "Label for Saturn's moon Enceladus"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Enceladus)
+  openspace.addSceneGraphNode(EnceladusLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EnceladusLabel)
+  openspace.removeSceneGraphNode(Enceladus)
+end)
+
+asset.export(Enceladus)
+
 
 
 asset.meta = {
     Name = "Enceladus",
-    Version = "1.0",
-    Description = [[ Enceladus globe with labels and map layers]],
+    Version = "1.1",
+    Description = "Enceladus globe with labels and map layers",
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"Enceladus"}
+    License = "MIT license"
 }

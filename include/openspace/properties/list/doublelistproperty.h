@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,15 +34,13 @@ public:
     DoubleListProperty(Property::PropertyInfo info,
         std::vector<double> values = std::vector<double>());
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<std::vector<double>>::operator std::vector<double>;
     using TemplateProperty<std::vector<double>>::operator=;
 
 protected:
-    std::vector<double> fromLuaConversion(lua_State* state, bool& success) const override;
-    void toLuaConversion(lua_State* state) const override;
     std::string toStringConversion() const override;
 };
 

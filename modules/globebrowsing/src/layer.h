@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,7 @@
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/layeradjustment.h>
 #include <modules/globebrowsing/src/layerrendersettings.h>
-#include <modules/globebrowsing/src/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
@@ -40,13 +40,11 @@ namespace openspace::globebrowsing {
 
 struct LayerGroup;
 struct TileIndex;
-
-namespace tileprovider { struct TileProvider; }
+struct TileProvider;
 
 class Layer : public properties::PropertyOwner {
 public:
-    Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
-        LayerGroup& parent);
+    Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGroup& parent);
 
     void initialize();
     void deinitialize();
@@ -54,20 +52,19 @@ public:
     ChunkTilePile chunkTilePile(const TileIndex& tileIndex, int pileSize) const;
     Tile::Status tileStatus(const TileIndex& index) const;
 
-    layergroupid::TypeID type() const;
-    layergroupid::BlendModeID blendMode() const;
+    layers::Layer::ID type() const;
+    layers::Blend::ID blendMode() const;
     TileDepthTransform depthTransform() const;
     void setEnabled(bool enabled);
     bool enabled() const;
-    tileprovider::TileProvider* tileProvider() const;
+    TileProvider* tileProvider() const;
     glm::vec3 solidColor() const;
     const LayerRenderSettings& renderSettings() const;
     const LayerAdjustment& layerAdjustment() const;
 
     void onChange(std::function<void(Layer*)> callback);
 
-    // Return:  number of tiles that were updated
-    int update();
+    void update();
 
     glm::ivec2 tilePixelStartOffset() const;
     glm::ivec2 tilePixelSizeDifference() const;
@@ -77,7 +74,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);
+    void initializeBasedOnType(layers::Layer::ID typeId, ghoul::Dictionary initDict);
     void addVisibleProperties();
 
     LayerGroup& _parent;
@@ -89,8 +86,8 @@ private:
     properties::TriggerProperty _remove;
     properties::StringProperty _guiDescription;
 
-    layergroupid::TypeID _type;
-    std::unique_ptr<tileprovider::TileProvider> _tileProvider;
+    layers::Layer::ID _type;
+    std::unique_ptr<TileProvider> _tileProvider;
     properties::Vec3Property _solidColor;
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;
@@ -98,7 +95,7 @@ private:
     glm::ivec2 _padTilePixelStartOffset = glm::ivec2(0);
     glm::ivec2 _padTilePixelSizeDifference = glm::ivec2(0);
 
-    const layergroupid::GroupID _layerGroupId;
+    const layers::Group::ID _layerGroupId;
 
     std::function<void(Layer*)> _onChangeCallback;
   };

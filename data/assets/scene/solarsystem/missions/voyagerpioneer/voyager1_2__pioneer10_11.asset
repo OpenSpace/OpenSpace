@@ -1,6 +1,18 @@
-local assetHelper = asset.require('util/asset_helper')
-
 local sampleInterval = 24*60*60
+
+local voyager_horizons = asset.syncedResource({
+  Name = "Voyager horizons",
+  Type = "HttpSynchronization",
+  Identifier = "voyager_horizons",
+  Version = 1
+})
+
+local pioneer_horizons = asset.syncedResource({
+  Name = "Pioneer horizons",
+  Type = "HttpSynchronization",
+  Identifier = "pioneer_horizons",
+  Version = 1
+})
 
 local voyager1 = {
   Identifier = "Voyager1",
@@ -10,20 +22,25 @@ local voyager1 = {
     Enabled = false,
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = asset.localResource("voyager_1.txt")
+      HorizonsTextFile = voyager_horizons .. "voyager_1.hrz"
+      -- Target: Voyager 1 (spacecraft) (-31)
+      -- Observer: SSB
+      -- Start time: 1977-Sep-06 00:00:00 (first data point)
+      -- End time: 2030-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
     },
     Color = { 0.9, 0.9, 0.0 },
     Fade = 5.0,
     StartTime = "1977 SEP 06 00:00:00",
-    EndTime = "2030 DEC 31 00:00:00",
+    EndTime = "2030 JAN 01 00:00:00",
     SampleInterval = sampleInterval,
     TimeStampSubsampleFactor = 1
   },
   GUI = {
     Name = "Voyager 1 Trail",
     Path = "/Solar System/Missions/Voyager",
-    Description = [[Voyager 1 Trail, spanning September 6th, 1977 to December 31st,
-      2030. Data from JPL Horizons.]]
+    Description = [[Voyager 1 Trail, spanning September 6th, 1977 to January 1st, 2030.
+      Data from JPL Horizons]]
   }
 }
 
@@ -35,20 +52,25 @@ local voyager2 = {
     Enabled = false,
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = asset.localResource("voyager_2.txt")
+      HorizonsTextFile = voyager_horizons .. "voyager_2.hrz"
+      -- Target: Voyager 2 (spacecraft) (-32)
+      -- Observer: SSB
+      -- Start time: 1977-Aug-21 00:00:00 (first data point)
+      -- End time: 2030-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
     },
     Color = { 0.9, 0.9, 0.0 },
     Fade = 5.0,
     StartTime = "1977 AUG 21 00:00:00",
-    EndTime = "2030 DEC 31 00:00:00",
+    EndTime = "2030 JAN 01 00:00:00",
     SampleInterval = sampleInterval,
     TimeStampSubsampleFactor = 1
   },
   GUI = {
     Name = "Voyager 2 Trail",
     Path = "/Solar System/Missions/Voyager",
-    Description = [[Voyager 2 Trail, spanning August 21st, 1977 to December 31st, 2030.
-    Data from JPL Horizons.]]
+    Description = [[Voyager 2 Trail, spanning August 21st, 1977 to January 1st, 2030.
+      Data from JPL Horizons]]
   }
 }
 
@@ -60,20 +82,25 @@ local pioneer10 = {
     Enabled = false,
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = asset.localResource("pioneer_10.txt")
+      HorizonsTextFile = pioneer_horizons .. "pioneer_10.hrz"
+      -- Target: Pioneer 10 (spacecraft) (-23)
+      -- Observer: SSB
+      -- Start time: 1972-Mar-04 00:00:00 (first data point)
+      -- End time: 2030-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
     },
     Color = { 0.9, 0.3, 0.0 },
     Fade = 5.0,
     StartTime = "1972 MAR 04 00:00:00",
-    EndTime = "2030 DEC 31 00:00:00",
+    EndTime = "2030 JAN 01 00:00:00",
     SampleInterval = sampleInterval,
     TimeStampSubsampleFactor = 1
   },
   GUI = {
     Name = "Pioneer 10 Trail",
     Path = "/Solar System/Missions/Pioneer",
-    Description = [[Pioneer 10 Trail, spanning March 4th, 1972 to December 31st, 2030.
-    Data from JPL Horizons.]]
+    Description = [[Pioneer 10 Trail, spanning March 4th, 1972 to January 1st, 2030.
+      Data from JPL Horizons]]
   }
 }
 
@@ -85,34 +112,56 @@ local pioneer11 ={
     Enabled = false,
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = asset.localResource("pioneer_11.txt")
+      HorizonsTextFile = pioneer_horizons .. "pioneer_11.hrz"
+      -- Target: Pioneer 11 (spacecraft) (-24)
+      -- Observer: SSB
+      -- Start time: 1973-Apr-07 00:00:00 (first data point)
+      -- End time: 2030-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
     },
     Color = { 0.9, 0.3, 0.0 },
     Fade = 5.0,
     StartTime = "1973 APR 07 00:00:00",
-    EndTime = "2030 DEC 31 00:00:00",
+    EndTime = "2030 JAN 01 00:00:00",
     SampleInterval = sampleInterval,
     TimeStampSubsampleFactor = 1
   },
   GUI = {
     Name = "Pioneer 11 Trail",
     Path = "/Solar System/Missions/Pioneer",
-    Description = [[Pioneer 11 Trail, spanning April 7th, 1973 to December 31st, 2030.
-      Data from JPL Horizons.]]
+    Description = [[Pioneer 11 Trail, spanning April 7th, 1973 to January 1st, 2030.
+      Data from JPL Horizons]]
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { voyager1, voyager2, pioneer10, pioneer11 })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(voyager1)
+  openspace.addSceneGraphNode(voyager2)
+  openspace.addSceneGraphNode(pioneer10)
+  openspace.addSceneGraphNode(pioneer11)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(pioneer11)
+  openspace.removeSceneGraphNode(pioneer10)
+  openspace.removeSceneGraphNode(voyager2)
+  openspace.removeSceneGraphNode(voyager1)
+end)
+
+asset.export(voyager1)
+asset.export(voyager2)
+asset.export(pioneer10)
+asset.export(pioneer11)
+
 
 
 asset.meta = {
   Name = "Pioneer and Voyager Trails",
-  Version = "1.0",
-  Description = [[ Pioneer 10, Pioneer 11, Voyager 1 and Voyager 2 trails. Driven by JPL
-  Horizons data for better performance then spice but lower resolution. Data is from 
-  shortly after mission launches until December 31st, 2030.]],
+  Version = "1.1",
+  Description = [[Pioneer 10, Pioneer 11, Voyager 1 and Voyager 2 trails. Driven by JPL
+    Horizons data for better performance then spice but lower resolution. Data is from 
+    shortly after mission launches until January 1st, 2030]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Pioneer10", "Pioneer11", "Voyager1", "Voyager2"}
+  License = "MIT license"
 }

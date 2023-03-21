@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -79,19 +79,16 @@ private:
 
     /**
      * Create a mouse event on the current cursor position.
-     *
-     * \return
      */
-    CefMouseEvent mouseEvent(KeyModifier mods = KeyModifier::NoModifier);
+    CefMouseEvent mouseEvent(KeyModifier mods = KeyModifier::None);
 
 #ifdef WIN32
     /**
-     * Build a CEF touch event based on our internal structure
+     * Build a CEF touch event based on our internal structure.
      *
-     * Note: as of 02/21/2020 we are using an older version of CEF on OSX
-     * than WIN32.
-     * This version does not handle the CefTouchEvent type and does
-     * not have any internal touch handling.
+     * Note: As of 2020-02-21 we are using an older version of CEF on OSX than WIN32. This
+     * version does not handle the CefTouchEvent type and does not have any internal
+     * touch handling
      */
     CefTouchEvent touchEvent(const TouchInput& input,
         const cef_touch_event_type_t eventType) const;
@@ -117,12 +114,11 @@ private:
     MouseButtonState _leftButton;
     MouseButtonState _rightButton;
 
-    //This vector assumes first element to be the active one:
+    // This vector assumes first element to be the active one:
     std::vector<TouchInput> _validTouchStates;
 
     /**
-     * determines if a click should be sent as a double click or not
-     * @return
+     * Determines if a click should be sent as a double click or not
      */
     bool isDoubleClick(const MouseButtonState& button) const;
 };

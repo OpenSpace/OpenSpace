@@ -1,15 +1,50 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('util/tle_helper')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-  Title = "Fengyun Debris",
-  Url = "http://www.celestrak.com/NORAD/elements/1999-025.txt",
-  TrailColor = { 0.784, 1.0, 0.737 }
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Fengyun Debris)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_1999-025",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?INTDES=1999-025&FORMAT=kvn",
+  Filename = "1999-025.txt",
+  Override = true
+})
+
+local satellites = {
+  Identifier = "1999-025",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "1999-025.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.784, 1.0, 0.737 },
+    Fade = 1.5,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Fengyun Debris",
+    Path = "/Solar System/Planets/Earth/Satellites"
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(satellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(satellites)
+end)
+
+asset.export(satellites)
 
 
-local objectNames = {}
 
-shared.registerSatelliteGroupObjects(asset, group, tle, true)
+asset.meta = {
+  Name = "Satellites Debris - Fengyun Debris",
+  Version = "1.0",
+  Description = "Satellites asset for Debris - Fengyun Debris. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

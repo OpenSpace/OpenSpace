@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +44,7 @@ struct RaycastData;
 class ToyVolumeRaycaster : public VolumeRaycaster {
 public:
     ToyVolumeRaycaster(glm::vec4 color);
-    virtual ~ToyVolumeRaycaster() = default;
+    ~ToyVolumeRaycaster() override = default;
 
     void initialize();
     void deinitialize();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,12 +37,12 @@ uniform mat4 ModelTransform;
 
 
 void main() {
-    vec4 tmp = in_position;
-    vec4 position = pscTransform(tmp, ModelTransform);
+  vec4 tmp = in_position;
+  vec4 position = pscTransform(tmp, ModelTransform);
 
-    vs_position = tmp;
-    vs_st = in_st;
-    
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
+  vs_position = tmp;
+  vs_st = in_st;
+  
+  position = ViewProjection * position;
+  gl_Position =  z_normalization(position);
 }

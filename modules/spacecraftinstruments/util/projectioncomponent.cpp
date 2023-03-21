@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,11 +30,8 @@
 #include <modules/spacecraftinstruments/util/labelparser.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/framebufferobject.h>
@@ -43,27 +40,24 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <optional>
-#include <variant>
 
 namespace {
-    constexpr const char* keyTranslation = "DataInputTranslation";
-    constexpr const char* keyTimesTranslation = "TimesDataInputTranslation";
-    constexpr const char* placeholderFile = "${DATA}/placeholder.png";
+    constexpr std::string_view placeholderFile = "${DATA}/placeholder.png";
 
-    constexpr const char* _loggerCat = "ProjectionComponent";
+    constexpr std::string_view _loggerCat = "ProjectionComponent";
 
     constexpr openspace::properties::Property::PropertyInfo ProjectionInfo = {
         "PerformProjection",
         "Perform Projections",
         "If this value is enabled, this ProjectionComponent will perform projections. If "
-        "it is disabled, projections will be ignored."
+        "it is disabled, projections will be ignored"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ClearProjectionInfo = {
         "ClearAllProjections",
         "Clear Projections",
         "If this property is triggered, it will remove all the projections that have "
-        "already been applied."
+        "already been applied"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadingInfo = {
@@ -71,7 +65,7 @@ namespace {
         "Projection Fading",
         "This value fades the previously performed projections in or out. If this value "
         "is equal to '1', the projections are fully visible, if the value is equal to "
-        "'0', the performed projections are completely invisible."
+        "'0', the performed projections are completely invisible"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureSizeInfo = {
@@ -80,14 +74,14 @@ namespace {
         "This value determines the size of the texture into which the images are "
         "projected and thus provides the limit to the resolution of projections that can "
         "be applied. Changing this value will not cause the texture to be automatically "
-        "updated, but triggering the 'ApplyTextureSize' property is required."
+        "updated, but triggering the 'ApplyTextureSize' property is required"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyTextureSizeInfo = {
         "ApplyTextureSize",
         "Apply Texture Size",
         "Triggering this property applies a new size to the underlying projection "
-        "texture. The old texture is resized and interpolated to fit the new size."
+        "texture. The old texture is resized and interpolated to fit the new size"
     };
 
     struct [[codegen::Dictionary(ProjectionComponent)]] Parameters {
@@ -115,8 +109,8 @@ namespace {
             InstrumentTimes [[codegen::key("instrument-times")]],
             ImageAndInstrumentTimes [[codegen::key("image-and-instrument-times")]]
         };
-        // This value determines which type of sequencer is used for generating image 
-        // schedules. The 'playbook' is using a custom format designed by the New Horizons 
+        // This value determines which type of sequencer is used for generating image
+        // schedules. The 'playbook' is using a custom format designed by the New Horizons
         // team, the 'image-sequence' uses lbl files from a directory, and the 'hybrid'
         // uses both methods
         std::optional<Type> sequenceType;
@@ -134,7 +128,7 @@ namespace {
         // SPICE integer
         std::string target [[codegen::annotation("A SPICE name of the observed object")]];
 
-        // The aberration correction that is supposed to be used for the projection. The 
+        // The aberration correction that is supposed to be used for the projection. The
         // values for the correction correspond to the SPICE definition as described in
         // ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/IDL/cspice/spkezr_c.html
         std::string aberration [[codegen::inlist("NONE", "LT", "LT+S", "CN", "CN+S",
@@ -143,20 +137,24 @@ namespace {
         // The list of potential targets that are involved with the image projection
         std::optional<std::vector<std::string>> potentialTargets;
 
-        // Determines whether the object requires a self-shadowing algorithm. This is 
-        // necessary if the object is concave and might cast a shadow on itself during 
+        // Determines whether the object requires a self-shadowing algorithm. This is
+        // necessary if the object is concave and might cast a shadow on itself during
         // presentation. The default value is 'false'
         std::optional<bool> textureMap;
 
-        // Determines whether the object requires a self-shadowing algorithm. This is 
-        // necessary if the object is concave and might cast a shadow on itself during 
+        // Determines whether the object requires a self-shadowing algorithm. This is
+        // necessary if the object is concave and might cast a shadow on itself during
         // presentation. The default value is 'false'
         std::optional<bool> shadowMap;
 
-        // Sets the desired aspect ratio of the projected texture. This might be necessary 
-        // as planets usually have 2x1 aspect ratios, whereas this does not hold for 
+        // Sets the desired aspect ratio of the projected texture. This might be necessary
+        // as planets usually have 2x1 aspect ratios, whereas this does not hold for
         // non-planet objects (comets, asteroids, etc). The default value is '1.0'
         std::optional<float> aspectRatio;
+
+        std::optional<ghoul::Dictionary> dataInputTranslation;
+
+        std::optional<ghoul::Dictionary> timesDataInputTranslation;
     };
 #include "projectioncomponent_codegen.cpp"
 } // namespace
@@ -164,13 +162,11 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ProjectionComponent::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "newhorizons_projectioncomponent";
-    return doc;
+    return codegen::doc<Parameters>("spacecraftinstruments_projectioncomponent");
 }
 
 ProjectionComponent::ProjectionComponent()
-    : properties::PropertyOwner({ "ProjectionComponent" })
+    : properties::PropertyOwner({ "ProjectionComponent", "Projection Component" })
     , _performProjection(ProjectionInfo, true)
     , _clearAllProjections(ClearProjectionInfo, false)
     , _projectionFading(FadingInfo, 1.f, 0.f, 1.f)
@@ -232,46 +228,38 @@ void ProjectionComponent::initialize(const std::string& identifier,
         throw ghoul::RuntimeError("Missing SequenceType");
     }
 
-    ghoul::Dictionary translationDictionary;
-    if (dictionary.hasValue<ghoul::Dictionary>(keyTranslation)) {
-        translationDictionary = dictionary.value<ghoul::Dictionary>(keyTranslation);
+    ghoul::Dictionary translations;
+    if (p.dataInputTranslation.has_value()) {
+        translations = *p.dataInputTranslation;
     }
     else {
-        LWARNING("No playbook translation provided, spice calls must match playbook!");
+        LWARNING("No playbook translation provided, SPICE calls must match playbook");
         return;
     }
 
     std::vector<std::unique_ptr<SequenceParser>> parsers;
-    for (std::string& sequenceSource : sequenceSources) {
+    for (std::string& source : sequenceSources) {
         switch (*p.sequenceType) {
             case Parameters::Type::Playbook:
                 parsers.push_back(
                     std::make_unique<HongKangParser>(
                         identifier,
-                        std::move(sequenceSource),
+                        std::move(source),
                         _projectorID,
-                        translationDictionary,
+                        translations,
                         _potentialTargets
                     )
                 );
                 break;
             case Parameters::Type::ImageSequence:
                 parsers.push_back(
-                    std::make_unique<LabelParser>(
-                        identifier,
-                        std::move(sequenceSource),
-                        translationDictionary
-                    )
+                    std::make_unique<LabelParser>(std::move(source), translations)
                 );
                 break;
             case Parameters::Type::Hybrid:
                 // first read labels
                 parsers.push_back(
-                    std::make_unique<LabelParser>(
-                        identifier,
-                        std::move(sequenceSource),
-                        translationDictionary
-                    )
+                    std::make_unique<LabelParser>(std::move(source), translations)
                 );
 
                 if (p.eventFile.has_value()) {
@@ -280,7 +268,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
                             identifier,
                             absPath(*p.eventFile).string(),
                             _projectorID,
-                            translationDictionary,
+                            translations,
                             _potentialTargets
                         )
                     );
@@ -293,28 +281,24 @@ void ProjectionComponent::initialize(const std::string& identifier,
                 parsers.push_back(
                     std::make_unique<InstrumentTimesParser>(
                         identifier,
-                        std::move(sequenceSource),
-                        translationDictionary
+                        std::move(source),
+                        translations
                     )
                 );
                 break;
             case Parameters::Type::ImageAndInstrumentTimes:
             {
                 parsers.push_back(
-                    std::make_unique<LabelParser>(
-                        identifier,
-                        std::move(sequenceSource),
-                        translationDictionary
-                    )
+                    std::make_unique<LabelParser>(std::move(source), translations)
                 );
 
                 if (!p.timesSequence.has_value()) {
                     throw ghoul::RuntimeError("Could not find required TimesSequence");
                 }
+
                 ghoul::Dictionary timesTranslationDictionary;
-                if (dictionary.hasValue<ghoul::Dictionary>(keyTimesTranslation)) {
-                    timesTranslationDictionary =
-                        dictionary.value<ghoul::Dictionary>(keyTimesTranslation);
+                if (p.timesDataInputTranslation.has_value()) {
+                    timesTranslationDictionary = *p.timesDataInputTranslation;
                 }
 
                 parsers.push_back(
@@ -331,11 +315,11 @@ void ProjectionComponent::initialize(const std::string& identifier,
 
     for (std::unique_ptr<SequenceParser>& parser : parsers) {
         bool success = parser->create();
-        if (!success) {
-            LERROR("One or more sequence loads failed; please check mod files");
+        if (success) {
+            ImageSequencer::ref().runSequenceParser(*parser);
         }
         else {
-            ImageSequencer::ref().runSequenceParser(*parser);
+            LERROR("One or more sequence loads failed; please check asset files");
         }
     }
     parsers.clear();
@@ -365,12 +349,11 @@ bool ProjectionComponent::initializeGL() {
     success &= auxiliaryRendertarget();
     success &= depthRendertarget();
 
-    using std::unique_ptr;
     using ghoul::opengl::Texture;
-    using ghoul::io::TextureReader;
 
-    unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-        absPath(placeholderFile).string()
+    std::unique_ptr<Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
+        absPath(placeholderFile).string(),
+        2
     );
     if (texture) {
         texture->uploadTexture();
@@ -387,12 +370,12 @@ bool ProjectionComponent::initializeGL() {
         );
 
         const GLfloat plane[] = {
-            -1, -1,
-            1,  1,
-            -1,  1,
-            -1, -1,
-            1, -1,
-            1,  1,
+            -1.0, -1.0,
+             1.0,  1.0,
+            -1.0,  1.0,
+            -1.0, -1.0,
+             1.0, -1.0,
+             1.0,  1.0,
         };
 
         glGenVertexArrays(1, &_dilation.vao);
@@ -402,22 +385,14 @@ bool ProjectionComponent::initializeGL() {
         glBindBuffer(GL_ARRAY_BUFFER, _dilation.vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(plane), plane, GL_STATIC_DRAW);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(
-            0,
-            2,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(GLfloat) * 2,
-            nullptr
-        );
-
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
         glBindVertexArray(0);
     }
 
     return success;
 }
 
-bool ProjectionComponent::deinitialize() {
+void ProjectionComponent::deinitialize() {
     _projectionTexture = nullptr;
 
     glDeleteFramebuffers(1, &_fboID);
@@ -430,8 +405,6 @@ bool ProjectionComponent::deinitialize() {
         _dilation.program = nullptr;
         _dilation.texture = nullptr;
     }
-
-    return true;
 }
 
 bool ProjectionComponent::isReady() const {
@@ -443,11 +416,8 @@ void ProjectionComponent::imageProjectBegin() {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
     if (_textureSizeDirty) {
-        LDEBUG(
-            fmt::format(
-                "Changing texture size to {}", ghoul::to_string(_textureSize.value())
-            )
-        );
+        glm::ivec2 size = _textureSize;
+        LDEBUG(fmt::format("Changing texture size to {}, {}", size.x, size.y));
 
         // If the texture size has changed, we have to allocate new memory and copy
         // the image texture to the new target
@@ -469,35 +439,21 @@ void ProjectionComponent::imageProjectBegin() {
         }
 
         auto copyFramebuffers = [](Texture* src, Texture* dst, const std::string& msg) {
-            glFramebufferTexture(
-                GL_READ_FRAMEBUFFER,
-                GL_COLOR_ATTACHMENT0,
-                *src,
-                0
-            );
+            glFramebufferTexture(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, *src, 0);
 
             GLenum status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
                 LERROR(fmt::format(
-                    "Read Buffer ({}): {}",
-                    msg,
-                    FramebufferObject::errorChecking(status)
+                    "Read Buffer ({}): {}", msg, FramebufferObject::errorChecking(status)
                 ));
             }
 
-            glFramebufferTexture(
-                GL_DRAW_FRAMEBUFFER,
-                GL_COLOR_ATTACHMENT0,
-                *dst,
-                0
-            );
+            glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, *dst, 0);
 
             status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
                 LERROR(fmt::format(
-                    "Draw Buffer ({}): {}",
-                    msg,
-                    FramebufferObject::errorChecking(status)
+                    "Draw Buffer ({}): {}", msg, FramebufferObject::errorChecking(status)
                 ));
             }
 
@@ -512,35 +468,21 @@ void ProjectionComponent::imageProjectBegin() {
         };
 
         auto copyDepthBuffer = [](Texture* src, Texture* dst, const std::string& msg) {
-            glFramebufferTexture(
-                GL_READ_FRAMEBUFFER,
-                GL_DEPTH_ATTACHMENT,
-                *src,
-                0
-            );
+            glFramebufferTexture(GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, *src, 0);
 
             GLenum status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
                 LERROR(fmt::format(
-                    "Read Buffer ({}): {}",
-                    msg,
-                    FramebufferObject::errorChecking(status)
+                    "Read Buffer ({}): {}", msg, FramebufferObject::errorChecking(status)
                 ));
             }
 
-            glFramebufferTexture(
-                GL_DRAW_FRAMEBUFFER,
-                GL_DEPTH_ATTACHMENT,
-                *dst,
-                0
-            );
+            glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, *dst, 0);
 
             status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
                 LERROR(fmt::format(
-                    "Draw Buffer ({}): {}",
-                    msg,
-                    FramebufferObject::errorChecking(status)
+                    "Draw Buffer ({}): {}", msg, FramebufferObject::errorChecking(status)
                 ));
             }
 
@@ -580,11 +522,7 @@ void ProjectionComponent::imageProjectBegin() {
         }
 
         if (_shadowing.isEnabled) {
-            copyDepthBuffer(
-                oldDepthTexture.get(),
-                _shadowing.texture.get(),
-                "Shadowing"
-            );
+            copyDepthBuffer(oldDepthTexture.get(), _shadowing.texture.get(), "Shadowing");
         }
 
         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
@@ -671,7 +609,7 @@ void ProjectionComponent::depthMapRenderBegin() {
         0, 0,
         static_cast<GLsizei>(_shadowing.texture->width()),
         static_cast<GLsizei>(_shadowing.texture->height())
-        );
+    );
 
     glClear(GL_DEPTH_BUFFER_BIT);
 }
@@ -729,7 +667,8 @@ bool ProjectionComponent::depthRendertarget() {
         GL_DEPTH_ATTACHMENT,
         GL_TEXTURE_2D,
         *_shadowing.texture,
-        0);
+        0
+    );
 
     glDrawBuffer(GL_NONE);
 
@@ -816,9 +755,9 @@ glm::mat4 ProjectionComponent::computeProjectorMatrix(const glm::vec3 loc, glm::
                                                       glm::vec3& boreSight)
 {
 
-    //rotate boresight into correct alignment
-    boreSight = instrumentMatrix*aim;
-    glm::vec3 uptmp(instrumentMatrix*glm::dvec3(up));
+    // rotate boresight into correct alignment
+    boreSight = instrumentMatrix * aim;
+    glm::vec3 uptmp = instrumentMatrix * glm::dvec3(up);
 
     // create view matrix
     glm::vec3 e3 = glm::normalize(-boreSight);
@@ -836,7 +775,7 @@ glm::mat4 ProjectionComponent::computeProjectorMatrix(const glm::vec3 loc, glm::
         glm::radians(fieldOfViewY), aspectRatio, nearPlane, farPlane
     );
 
-    return projProjectionMatrix*projViewMatrix;
+    return projProjectionMatrix * projViewMatrix;
 }
 
 bool ProjectionComponent::doesPerformProjection() const {
@@ -914,15 +853,13 @@ void ProjectionComponent::clearAllProjections() {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(m_viewport[0], m_viewport[1],
-               m_viewport[2], m_viewport[3]);
+    glViewport(m_viewport[0], m_viewport[1], m_viewport[2], m_viewport[3]);
 
     _clearAllProjections = false;
     _mipMapDirty = true;
 }
 
 void ProjectionComponent::generateMipMap() {
-
     _projectionTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
     _mipMapDirty = false;
 }
@@ -931,18 +868,15 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
                                                            const std::string& texturePath,
                                                            bool isPlaceholder)
 {
-    using std::unique_ptr;
     using ghoul::opengl::Texture;
-    using ghoul::io::TextureReader;
-
 
     if (isPlaceholder) {
         return _placeholderTexture;
     }
 
-
-    unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-        absPath(texturePath).string()
+    std::unique_ptr<Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
+        absPath(texturePath).string(),
+        2
     );
     if (texture) {
         if (texture->format() == Texture::Format::Red) {
@@ -963,6 +897,7 @@ bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size)
     using namespace ghoul::opengl;
     _projectionTexture = std::make_unique<Texture>(
         glm::uvec3(size, 1),
+        GL_TEXTURE_2D,
         Texture::Format::RGBA
     );
     if (_projectionTexture) {
@@ -972,28 +907,23 @@ bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size)
     if (_dilation.isEnabled) {
         _dilation.texture = std::make_unique<ghoul::opengl::Texture>(
             glm::uvec3(size, 1),
+            GL_TEXTURE_2D,
             ghoul::opengl::Texture::Format::RGBA
         );
 
         if (_dilation.texture) {
             _dilation.texture->uploadTexture();
-            //_dilation.texture->setFilter(
-            //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-            //);
         }
 
         _dilation.stencilTexture = std::make_unique<ghoul::opengl::Texture>(
             glm::uvec3(size, 1),
+            GL_TEXTURE_2D,
             ghoul::opengl::Texture::Format::Red,
-            // @TODO: Remove the static cast ---abock
             static_cast<GLenum>(ghoul::opengl::Texture::Format::Red)
         );
 
         if (_dilation.stencilTexture) {
             _dilation.stencilTexture->uploadTexture();
-            //_dilation.texture->setFilter(
-            //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-            //);
         }
     }
 
@@ -1005,6 +935,7 @@ bool ProjectionComponent::generateDepthTexture(const glm::ivec2& size) {
 
     _shadowing.texture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(size, 1),
+        GL_TEXTURE_2D,
         ghoul::opengl::Texture::Format::DepthComponent,
         GL_DEPTH_COMPONENT32F
     );
@@ -1014,7 +945,6 @@ bool ProjectionComponent::generateDepthTexture(const glm::ivec2& size) {
     }
 
     return _shadowing.texture != nullptr;
-
 }
 
 } // namespace openspace

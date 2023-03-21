@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,8 +65,13 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
             );
         }
 
-        node->initialize();
-        std::lock_guard<std::mutex> g(_mutex);
+        try {
+            node->initialize();
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+        }
+        std::lock_guard g(_mutex);
         _initializedNodes.push_back(node);
         _initializingNodes.erase(node);
 
@@ -94,19 +99,26 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
         );
     }
 
-    std::lock_guard<std::mutex> g(_mutex);
+    std::lock_guard g(_mutex);
     _initializingNodes.insert(node);
     _threadPool.enqueue(initFunction);
 }
 
 std::vector<SceneGraphNode*> MultiThreadedSceneInitializer::takeInitializedNodes() {
-    std::lock_guard<std::mutex> g(_mutex);
+    // Some of the scene graph nodes might still be in the initialization queue and we
+    // should wait for those to finish or we end up in some half-initialized state since
+    // other parts of the application already know about their existence
+    while (_threadPool.hasOutstandingTasks()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    std::lock_guard g(_mutex);
     std::vector<SceneGraphNode*> nodes = std::move(_initializedNodes);
     return nodes;
 }
 
 bool MultiThreadedSceneInitializer::isInitializing() const {
-    std::lock_guard<std::mutex> g(_mutex);
+    std::lock_guard g(_mutex);
     return !_initializingNodes.empty();
 }
 

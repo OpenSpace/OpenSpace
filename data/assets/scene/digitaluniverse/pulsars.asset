@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "Pulsars Textures",
   Type = "HttpSynchronization",
@@ -21,19 +17,21 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "pulsar.label",
+      Color = { 0.7, 0.2, 0.2 },
+      Size = 15.77,
+      MinMaxSize = { 4, 20 },
+      Unit = "pc"
+    },
     Color = { 0.7, 0.0, 0.0 },
     Opacity = 1.0,
-    File = speck .. "/pulsar.speck",
-    Texture = textures .. "/point4.png",
+    File = speck .. "pulsar.speck",
+    Texture = textures .. "point4.png",
     PolygonSides = 4,
-    LabelFile = speck .. "/pulsar.label",
-    TextColor = { 0.7, 0.2, 0.2 },
-    ScaleFactor = 424,
-    TextSize = 15.77,
-    TextMinSize = 4,
-    TextMaxSize = 20.0,
     Unit = "pc",
-    BillboardMaxSize = 500,
+    ScaleFactor = 424,
+    BillboardMinMaxSize = { 0.0, 500.0 },
     EnablePixelSizeControl = false
   },
   GUI = {
@@ -50,19 +48,27 @@ local object = {
       cannot be packed any tighter. At this point, the star has a radius of about
       10-15 kilometers. The density of this material is so high that a teaspoonful
       would weigh about 100 million tons on Earth. (Description from URL) <br><br>
-      Data Reference: ATNF Pulsar Catalogue, (Manchester+, 2005)]],
+      Data Reference: ATNF Pulsar Catalogue, (Manchester+, 2005)]]
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Pulsars",
-  Version = "2.0",
-  Description = [[Digital Universe asset for Pulsars.]],
+  Version = "2.1",
+  Description = "Digital Universe asset for Pulsars",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"Pulsars"}
+  License = "AMNH Digital Universe"
 }

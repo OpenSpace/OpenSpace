@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,9 +47,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation Scale::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_transform_scaling";
-    return doc;
+    return codegen::doc<Parameters>("core_transform_scaling");
 }
 
 ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(
@@ -57,8 +55,7 @@ ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    auto factory = FactoryManager::ref().factory<Scale>();
-    Scale* result = factory->create(
+    Scale* result = FactoryManager::ref().factory<Scale>()->create(
         p.type,
         dictionary,
         &global::memoryManager->PersistentMemory

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ struct UpdateData;
 class RenderableModelProjection : public Renderable {
 public:
     RenderableModelProjection(const ghoul::Dictionary& dictionary);
-    ~RenderableModelProjection();
+    ~RenderableModelProjection() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -66,10 +66,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void attitudeParameters(double time);
-    void imageProjectGPU(const ghoul::opengl::Texture& projectionTexture);
-
-    void project();
+    glm::mat4 attitudeParameters(double time, const glm::vec3& up);
+    void imageProjectGPU(const ghoul::opengl::Texture& projectionTexture,
+        const glm::mat4& projectorMatrix);
 
     ProjectionComponent _projectionComponent;
 
@@ -79,8 +78,8 @@ private:
         projectionTexture) _mainUniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
-    UniformCache(projectionTexture, needShadowMap, ProjectorMatrix, ModelTransform,
-        boresight) _fboUniformCache;
+    UniformCache(projectionTexture, depthTexture, needShadowMap, ProjectorMatrix,
+        ModelTransform, boresight) _fboUniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
     UniformCache(ProjectorMatrix, ModelTransform) _depthFboUniformCache;
 
@@ -89,13 +88,10 @@ private:
     glm::dmat3 _instrumentMatrix = glm::dmat3(1.0);
 
     // uniforms
-    glm::vec3 _up = glm::vec3(0.f);
     glm::mat4 _transform = glm::mat4(1.f);
-    glm::mat4 _projectorMatrix = glm::mat4(1.f);
     glm::vec3 _boresight = glm::vec3(0.f);
 
     std::vector<Image> _imageTimes;
-    double _time = -std::numeric_limits<double>::max();
 
     bool _shouldCapture = false;
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,6 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <memory>
 
 namespace ghoul { class Dictionary; }
 
@@ -44,19 +43,18 @@ public:
     static ghoul::mm_unique_ptr<Rotation> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    Rotation(const ghoul::Dictionary& dictionary);
-    virtual ~Rotation() = default;
+    Rotation();
+    virtual ~Rotation() override = default;
 
     virtual bool initialize();
 
     const glm::dmat3& matrix() const;
     virtual glm::dmat3 matrix(const UpdateData& time) const = 0;
-    void update(const UpdateData& data);
+    virtual void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
 
 protected:
-    Rotation();
     void requireUpdate();
 
 private:

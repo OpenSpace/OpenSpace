@@ -1,10 +1,10 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "Themis_IR_Night_Utah",
   Name = "Themis IR Night [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/Themis_IR_Night.wms",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("themis_ir_night_utah.vrt"),
   BlendMode = "Color",
   Description = [[This mosaic represents the Thermal Emission Imaging System (THEMIS)
     -nighttime infrared (IR) 100 meter/pixel mosaic (version 12) released in the
@@ -14,26 +14,30 @@ local layer = {
     latitude. <br><br> Reference: * Edwards, C.S., K. J. Nowicki, P. R. Christensen,
     J. Hill, N. Gorelick, and K. Murray (2011), Mosaicking of global planetary image
     datasets: 1. Techniques and data processing for Thermal Emission Imaging System
-    (THEMIS) multi‐spectral data, J. Geophys. Res., 116, E10008,
+    (THEMIS) multi-spectral data, J. Geophys. Res., 116, E10008,
     doi:10.1029/2010JE003755. http://dx.doi.org/10.1029/2010JE003755 (Description from
-    URL).]],
+    URL)]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Themis IR Night [Utah]",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Themis Night layer for Mars. This map is hosted on the OpenSpace
-    server in Utah.]],
+    server in Utah]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mars/Odyssey/THEMIS-IR-Mosaic-ASU/" ..
     "Mars_MO_THEMIS-IR-Night_mosaic_60N60S_100m_v14",
-  License = "NASA/PDS",
-  Identifiers = {"Themis_IR_Night_Utah"}
+  License = "NASA/PDS"
 }

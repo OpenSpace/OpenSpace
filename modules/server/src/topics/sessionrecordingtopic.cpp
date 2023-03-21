@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,11 +30,11 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "SessionRecordingTopic";
-    constexpr const char* EventKey = "event";
-    constexpr const char* SubscribeEvent = "start_subscription";
-    constexpr const char* UnsubscribeEvent = "stop_subscription";
-    constexpr const char* RefreshEvent = "refresh";
+    constexpr std::string_view _loggerCat = "SessionRecordingTopic";
+
+    constexpr std::string_view SubscribeEvent = "start_subscription";
+    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
+    constexpr std::string_view RefreshEvent = "refresh";
 
     constexpr const char* PropertiesKey = "properties";
     constexpr const char* FilesKey = "files";
@@ -60,7 +60,7 @@ bool SessionRecordingTopic::isDone() const {
 }
 
 void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
-    const std::string event = json.at(EventKey).get<std::string>();
+    const std::string event = json.at("event").get<std::string>();
     if (event != SubscribeEvent && event != UnsubscribeEvent &&
         event != RefreshEvent)
     {
@@ -76,13 +76,13 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
 
     if (json.find(PropertiesKey) != json.end()) {
         if (!json.at(PropertiesKey).is_array()) {
-            LERROR("Properties must be an array of strings.");
+            LERROR("Properties must be an array of strings");
         }
         nlohmann::json requestedProperties = json.at(PropertiesKey).get<nlohmann::json>();
         for (const auto& p : requestedProperties) {
             if (!p.is_string()) {
                 _isDone = true;
-                LERROR("Properties must be an array of strings.");
+                LERROR("Properties must be an array of strings");
                 return;
             }
             const std::string v = p.get<std::string>();
@@ -123,6 +123,9 @@ void SessionRecordingTopic::sendJsonData() {
                 break;
             case SessionRecording::SessionState::Playback:
                 stateString = "playing";
+                break;
+            case SessionRecording::SessionState::PlaybackPaused:
+                stateString = "playing-paused";
                 break;
             default:
                 stateString = "idle";

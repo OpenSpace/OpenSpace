@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,84 +24,43 @@
 
 #include <openspace/engine/globals.h>
 
-namespace openspace::luascriptfunctions {
-
-int loadMission(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadMission");
-
-    ghoul::Dictionary d;
-    try {
-        ghoul::lua::luaDictionaryFromState(L, d);
-    }
-    catch (const ghoul::lua::LuaFormatException& e) {
-        //LERRORC("addSceneGraphNode", e.what());
-        return ghoul::lua::luaError(L, "Error loading dictionary from lua state");
-    }
-
-   global::missionManager->loadMission(d);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+// Load mission phases from file.
+[[codegen::luawrap]] void loadMission(ghoul::Dictionary mission) {
+    // TODO: Check if mission table is valid
+    openspace::global::missionManager->loadMission(mission);
 }
 
-int unloadMission(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::unloadMission");
+// Unloads a previously loaded mission.
+[[codegen::luawrap]] void unloadMission(std::string missionName) {
+    using namespace openspace;
 
-    const std::string& missionName = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
     if (missionName.empty()) {
-        return ghoul::lua::luaError(L, "Mission name is empty");
+        throw ghoul::lua::LuaError("Mission name is empty");
     }
 
     if (!global::missionManager->hasMission(missionName)) {
-        return ghoul::lua::luaError(L, "Mission was not previously loaded");
+        throw ghoul::lua::LuaError("Mission was not previously loaded");
     }
 
     global::missionManager->unloadMission(missionName);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
 }
 
-int hasMission(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasMission");
-
-    const std::string& missionName = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
+// Returns whether a mission with the provided name has been loaded.
+[[codegen::luawrap]] bool hasMission(std::string missionName) {
     if (missionName.empty()) {
-        return ghoul::lua::luaError(L, "Missing name is empty");
+        throw ghoul::lua::LuaError("Missing name is empty");
     }
 
-    const bool hasMission = global::missionManager->hasMission(missionName);
-
-    ghoul::lua::push(L, hasMission);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
+    bool hasMission = openspace::global::missionManager->hasMission(missionName);
+    return hasMission;
 }
 
-int setCurrentMission(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setCurrentMission");
-
-    const std::string& missionName = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
+// Set the currnet mission.
+[[codegen::luawrap]] void setCurrentMission(std::string missionName) {
     if (missionName.empty()) {
-        return ghoul::lua::luaError(L, "Mission name is empty");
+        throw ghoul::lua::LuaError("Mission name is empty");
     }
-
-    global::missionManager->setCurrentMission(missionName);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+    openspace::global::missionManager->setCurrentMission(missionName);
 }
+#include "missionmanager_lua_codegen.cpp"
 
-} // namespace openspace::luascriptfunction

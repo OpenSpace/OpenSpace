@@ -1,7 +1,0 @@
-local TexturesPath = asset.syncedResource({
-  Name = "Callisto Textures",
-  Type = "HttpSynchronization",
-  Identifier = "callisto_textures",
-  Version = 1
-})
-asset.export("TexturesPath", TexturesPath)

@@ -1,6 +1,16 @@
-local assetHelper = asset.require('util/asset_helper')
+local planeTextures = asset.syncedResource({
+  Name = "Milky Way Plane Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_milkyway_textures",
+  Version = 2
+})
 
-local dataPaths = asset.require("scene/digitaluniverse/milkyway_data")
+local planeSpeck = asset.syncedResource({
+  Name = "Milky Way Plane Speck",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_milkyway_speck",
+  Version = 1
+})
 
 local plane = {
   Identifier = "MilkyWayGalaxyArmLabelsImage",
@@ -11,8 +21,8 @@ local plane = {
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.99,
     ScaleFactor = 2.8,
-    File = dataPaths.SpeckPath .. "/galaxyArmLabels.speck",
-    TexturePath = dataPaths.TexturesPath,
+    File = planeSpeck .. "galaxyArmLabels.speck",
+    TexturePath = planeTextures,
     Luminosity = "size",
     ScaleLuminosity = 1.0,
     FadeInDistances = { 3000.0, 50000.0 },
@@ -21,8 +31,8 @@ local plane = {
   },
   GUI = {
     Name = "Milky Way Arms Labels",
-    Path = "/Universe/Galaxies",
-    Description = [[ Census: 1 image. DU Version:  1.2. This image contains labels for
+    Path = "/Milky Way",
+    Description = [[Census: 1 image. DU Version:  1.2. This image contains labels for
       the Milky Way's spiral arms. We label them in this manner ("hard coding" the
       labels into an image rather than having native labels) so that they can retain
       their size, shape, and location as they overlay the galaxy. (Description from
@@ -30,16 +40,25 @@ local plane = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { plane })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(plane)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(plane)
+end)
+
+asset.export(plane)
+
 
 
 asset.meta = {
   Name = "Milky Way Arms Labels",
-  Version = "1.0",
-  Description = [[ Image with arm labels for the Milky Way galaxy]],
+  Version = "1.1",
+  Description = "Image with arm labels for the Milky Way galaxy",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = [[ Copyright &#169; American Museum of Natural History. All rights reserved.
+  License = [[Copyright &#169; American Museum of Natural History. All rights reserved.
     <br><br> Downloading the Atlas: AMNH offers the Atlas free of charge via our
     website, http://www.haydenplanetarium.org/. The User is free to download and/or
     duplicate verbatim copies of the Atlas provided this license and copyright
@@ -58,6 +77,5 @@ asset.meta = {
     WARRANTY of any kind. We provide the Atlas as is and take no responsibility for
     any damage resulting from the use of this Atlas. The entire risk as to the quality
     and performance of this product is with the user. <br><br> For more information,
-    please visit http://www.haydenplanetarium.org/universe]],
-  Identifiers = {"MilkyWayGalaxyArmLabelsImage"}
+    please visit http://www.haydenplanetarium.org/universe]]
 }

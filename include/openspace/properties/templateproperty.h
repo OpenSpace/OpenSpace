@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,16 +31,16 @@ namespace openspace::properties {
 
 /**
  * This subclass of Property handles a single parameter value that is of type
- * <code>T</code>. It provides all the necessary methods to automatically access the
+ * `T`. It provides all the necessary methods to automatically access the
  * value. One notable instantiation of this class is StringProperty, using
- * <code>T = std::string</code> while NumericalProperty is a templated subclass dealing
+ * `T = std::string` while NumericalProperty is a templated subclass dealing
  * with numerical parameter types.
  * The accessor operator and assignment operators are overloaded, so that the
  * TemplateProperty can be used just in the same way as a regular member variable. In the
  * case that these cannot not be used inline, the Property::get method will work.
  *
  * Each instantiation of this class should provide a constructor that deals with the
- * default value for that specific type <code>T</code>, so that a property can be
+ * default value for that specific type `T`, so that a property can be
  * created from just a Property::PropertyInfo object.
  *
  * \tparam T The type of value that is stored in this TemplateProperty
@@ -71,7 +71,7 @@ public:
      *
      * \return The class name for the TemplateProperty
      */
-    virtual std::string className() const override = 0;
+    virtual std::string_view className() const override = 0;
 
     /**
      * Returns the stored value packed into a ghoul::any object.
@@ -82,19 +82,19 @@ public:
 
     /**
      * Sets the value from the provided ghoul::any object. If the types between
-     * <code>T</code> and <code>value</code> disagree, an error is logged and the stored
+     * `T` and `value` disagree, an error is logged and the stored
      * value remains unchanged.
      *
      * \param value The value that is used to set this Property
      */
-    virtual void set(std::any value) override;
+    virtual void set(std::any value) final;
 
     /**
-     * Returns the <code>std::type_info</code> describing the template parameter
-     * <code>T</code>. It can be used to test against a ghoul::any value before trying to
+     * Returns the `std::type_info` describing the template parameter
+     * `T`. It can be used to test against a ghoul::any value before trying to
      * assign it.
      *
-     * \return The type info object describing the template parameter <code>T</code>
+     * \return The type info object describing the template parameter `T`
      */
     virtual const std::type_info& type() const override;
 
@@ -103,7 +103,7 @@ public:
      * the stack.
      *
      * \param state The Lua state onto which the encoded object will be pushed
-     * \return \c true if the encoding succeeded; \c false otherwise
+     * \return `true` if the encoding succeeded; `false` otherwise
      */
     virtual bool getLuaValue(lua_State* state) const override;
 
@@ -113,9 +113,9 @@ public:
      * decoding is successful, the new value is set, otherwise it remains unchanged.
      *
      * \param state The Lua state from which the value will be decoded
-     * \return \c true if the decoding succeeded; \c false otherwise
+     * \return `true` if the decoding succeeded; `false` otherwise
      */
-    virtual bool setLuaValue(lua_State* state) override;
+    virtual void setLuaValue(lua_State* state) override;
 
     /// \see Property::typeLua
     virtual int typeLua() const override = 0;
@@ -124,10 +124,9 @@ public:
      * This method encodes the stored value into a std::string object. The resulting
      * encoding must also be a valid JSON representation fo the property.
      *
-     * \param value The string object in which to store the resulting encoding
-     * \return \c true if the encoding succeeded; \c false otherwise
+     * \return The string representation of the stored property value
      */
-    virtual bool getStringValue(std::string& value) const override;
+    virtual std::string stringValue() const override;
 
     /**
      * Returns the description for this TemplateProperty as a Lua script that returns a
@@ -139,8 +138,8 @@ public:
 
     /**
      * This operator allows the TemplateProperty to be used almost transparently as if it
-     * was of the type <code>T</code>. It makes assignments such as
-     * <code>T v = property;</code> possible by allowing implicit casts (even though,
+     * was of the type `T`. It makes assignments such as
+     * `T v = property;` possible by allowing implicit casts (even though,
      * internally, not casts are performed. This method is next to zero overhead).
      *
      * \return The internal representation of the Property
@@ -149,8 +148,8 @@ public:
 
     /**
      * This operator allows the TemplateProperty to be used almost transparently as if it
-     * was of the type <code>T</code>. It makes assignments such as
-     * <code>T v = property;</code> possible by allowing implicit casts (even though,
+     * was of the type `T`. It makes assignments such as
+     * `T v = property;` possible by allowing implicit casts (even though,
      * internally, not casts are performed. This method is next to zero overhead).
      *
      * \return The internal representation of the Property
@@ -160,17 +159,17 @@ public:
     /**
      * The assignment operator allows the TemplateProperty's value to be set without using
      * the TemplateProperty::set method. It will be done internally by this method and it
-     * allows assignments such as <code>prop = T(1)</code>.
+     * allows assignments such as `prop = T(1)`.
      *
      * \param val The value that should be set
      */
     TemplateProperty<T>& operator=(T val);
 
     /**
-     * This method sets the stored value to the provided value <code>val</code>,
-     * moving it into place. The move only happens if the provided value <code>val</code>
+     * This method sets the stored value to the provided value `val`,
+     * moving it into place. The move only happens if the provided value `val`
      * is different from the stored value, which needs an operator== to exist for the type
-     * <code>T</code>. If the value is different, the listeners are notified.
+     * `T`. If the value is different, the listeners are notified.
      *
      * \param val The new value for this TemplateProperty
      */
@@ -185,14 +184,13 @@ public:
 
 protected:
     /**
-     * Decodes the object at the top of the stack to a value of the type <code>T</code>
+     * Decodes the object at the top of the stack to a value of the type `T`
      * and returns it. This method has to be specialized for each new type.
      *
      * \param state The Lua state from which the value will be decoded
-     * \param success Set to true \c true if the decoding succeeded; \c false otherwise
      * \return the decoded value
      */
-    virtual T fromLuaConversion(lua_State* state, bool& success) const = 0;
+    virtual T fromLuaConversion(lua_State* state) const = 0;
 
     /**
      * Encodes the stored value into a Lua object and pushes that object onto

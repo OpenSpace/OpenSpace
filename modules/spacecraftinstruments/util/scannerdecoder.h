@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,11 +37,9 @@ public:
 
     virtual const std::string& decoderType() const override;
     const std::vector<std::string>& spiceIDs() const;
-    const std::string& stopCommand() const;
     void setStopCommand(std::string stopCommand);
 
 private:
-    std::string _type;
     std::string _abort;
     std::vector<std::string> _spiceIDs;
 };

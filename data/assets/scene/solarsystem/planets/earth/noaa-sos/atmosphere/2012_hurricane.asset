@@ -1,0 +1,87 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Hurricane Season - 2012"
+local Identifier = "noaa-sos-atmosphere-2012_hurricane"
+local Description = [["It was an extremely devastating and destructive storm, hopefully
+one that people will only see once in their lifetime," National Weather Service
+meteorologist, Joe Pollina, said of Hurricane Sandy. The 2012 Atlantic Hurricane season
+was tied with 1887, 1995, 2010 and 2011 as the third most active year in recorded
+history, producing nineteen tropical cyclones and named storms, ten hurricanes and two
+major hurricanes. Annual Atlantic hurricane predictions by NOAA and Colorado State
+University fell short of the actual numbers despite raising their numbers after a record
+active start to the season, which began on June 1st and ended on November 30th. The
+Eastern Pacific season was moderately active. This dataset names all the Atlantic and
+Pacific named tropical storms and hurricanes in 2012 from the Linear IR Satellite data
+recorded by geostationary satellites]]
+local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-season-2012/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+local namesDestination = syncedDirectory .. "names"
+local satDestination = syncedDirectory .. "sat"
+
+
+local layer_names = {
+  Identifier = Identifier .. "-names",
+  Name = Name .. " (Names)",
+  Type = "ImageSequenceTileLayer",
+  FolderPath = namesDestination,
+  Description = Description
+}
+
+local layer_sat = {
+  Identifier = Identifier .. "-sat",
+  Name = Name .. " (Satellites)",
+  Type = "TemporalTileLayer",
+  Mode = "Folder",
+  Folder = {
+    Folder = satDestination,
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "linear_rgb_cyl_%Y%m%d_%H%M.jpg"
+  },
+  Description = Description
+}
+
+asset.onInitialize(function()
+  if not openspace.directoryExists(namesDestination) then
+    openspace.printInfo("Extracting " .. Name .. "Names")
+    openspace.unzipFile(syncedDirectory .. "names.zip", namesDestination, true)
+  end
+
+  if not openspace.directoryExists(satDestination) then
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "sat-1.zip", satDestination, true)
+    openspace.unzipFile(syncedDirectory .. "sat-2.zip", satDestination, true)
+    openspace.unzipFile(syncedDirectory .. "sat-3.zip", satDestination, true)
+    openspace.unzipFile(syncedDirectory .. "sat-4.zip", satDestination, true)
+  end
+
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_names)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_sat)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_names)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_sat)
+end)
+
+asset.export(layer_names)
+asset.export(layer_sat)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

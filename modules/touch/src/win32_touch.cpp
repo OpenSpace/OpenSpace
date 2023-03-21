@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@
 #define ENABLE_DIRECTMSG
 
 namespace {
-    constexpr const char* _loggerCat = "win32_touch";
+    constexpr std::string_view _loggerCat = "win32_touch";
     HHOOK gTouchHook = nullptr;
     std::thread* gMouseHookThread = nullptr;
     HHOOK gMouseHook = nullptr;
@@ -119,18 +119,14 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
 
             if (info.pointerFlags & POINTER_FLAG_DOWN) {
 #ifdef ENABLE_DIRECTMSG
-                std::unique_ptr<TouchInputHolder> points =
-                    std::make_unique<TouchInputHolder>(touchInput);
+                auto points = std::make_unique<TouchInputHolder>(touchInput);
                 gTouchInputsMap.emplace(info.pointerId, std::move(points));
                 global::openSpaceEngine->touchDetectionCallback(touchInput);
 #endif
 #ifdef ENABLE_TUIOMESSAGES
                 // Handle new touchpoint
                 gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
-                gCursorMap[info.pointerId] = gTuioServer->addTuioCursor(
-                    xPos,
-                    yPos
-                );
+                gCursorMap[info.pointerId] = gTuioServer->addTuioCursor(xPos, yPos);
                 gTuioServer->commitFrame();
 #endif
             }
@@ -177,7 +173,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
 Win32TouchHook::Win32TouchHook(void* nativeWindow) {
     HWND hWnd = reinterpret_cast<HWND>(nativeWindow);
     if (hWnd == nullptr) {
-        LINFO("No windowhandle available for touch input.");
+        LINFO("No windowhandle available for touch input");
         return;
     }
 
@@ -190,7 +186,7 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
     // stack ready, drivers installed and digitizer is ready for input
     if (value & NID_MULTI_INPUT) {
         // Digitizer is multitouch
-        LINFO("Found Multitouch input digitizer!");
+        LINFO("Found Multitouch input digitizer");
     }
     if (value & NID_INTEGRATED_TOUCH) {
         // Integrated touch
@@ -247,7 +243,7 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
                     0 //<- Global thread id (low-level mouse is global only)
                 );
                 if (!gMouseHook) {
-                    LINFO("Could not setup mousehook!");
+                    LINFO("Could not setup mousehook");
                 }
 
                 MSG msg;
@@ -287,8 +283,8 @@ Win32TouchHook::~Win32TouchHook() {
 // - Seems to move the cursor when we get two fingers as input..
 // - If we ourselves would pump windows for events, we can handle this.
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
-    constexpr const LONG_PTR SIGNATURE_MASK = 0xFFFFFF00;
-    constexpr const LONG_PTR MOUSEEVENTF_FROMTOUCH = 0xFF515700;
+    constexpr LONG_PTR SIGNATURE_MASK = 0xFFFFFF00;
+    constexpr LONG_PTR MOUSEEVENTF_FROMTOUCH = 0xFF515700;
     if (nCode < 0) {
         // do not process message
         return CallNextHookEx(0, nCode, wParam, lParam);

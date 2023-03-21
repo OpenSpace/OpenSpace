@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr const char* _loggerCat = "WebGUI:RenderHandler";
+    constexpr std::string_view _loggerCat = "WebGUI:RenderHandler";
 } // namespace
 
 namespace openspace {
@@ -59,7 +59,7 @@ GUIRenderHandler::GUIRenderHandler() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
     glBindVertexArray(0);
-    LDEBUG("Initializing CEF GL environment... done!");
+    LDEBUG("Initializing CEF GL environment... done");
 }
 
 GUIRenderHandler::~GUIRenderHandler() {

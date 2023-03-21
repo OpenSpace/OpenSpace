@@ -3,7 +3,8 @@
     "base",
     "scene/solarsystem/missions/osirisrex/dashboard",
     "scene/solarsystem/missions/osirisrex/model",
-    "scene/solarsystem/missions/osirisrex/osirisrex"
+    "scene/solarsystem/missions/osirisrex/osirisrex",
+    "scene/solarsystem/missions/osirisrex/imageplane"
   ],
   "camera": {
     "aim": "",
@@ -40,60 +41,32 @@
   ],
   "keybindings": [
     {
-      "documentation": "Sets the focus of the camera on 'OsirisRex'",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "A",
-      "name": "Focus on OsirisRex",
-      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'OsirisRex'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "os.missions.osirisrex.focus",
+      "key": "A"
     },
     {
-      "documentation": "Sets the focus of the camera on 'Bennu'",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "S",
-      "name": "Focus on Bennu",
-      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'BennuBarycenter'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "os.missions.osirisrex.bennu.focus",
+      "key": "S"
     },
     {
-      "documentation": "Sets the time to the approach at Bennu",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "F8",
-      "name": "Set Bennu approach time",
-      "script": "openspace.printInfo('Set time: Approach');openspace.time.setTime('2018-SEP-11 21:31:01.183');"
+      "action": "os.missions.osirisrex.setup.bennuapproach",
+      "key": "F8"
     },
     {
-      "documentation": "Sets the time to the preliminary survey of Bennu",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "F9",
-      "name": "Set Bennu survey time",
-      "script": "openspace.printInfo('Set time: Preliminary Survey'); openspace.time.setTime('2018-NOV-20 01:13:12.183');"
+      "action": "os.missions.osirisrex.setup.bennusurvey",
+      "key": "F9"
     },
     {
-      "documentation": "Sets the time to the orbital B event",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "F10",
-      "name": "Set orbital B event time",
-      "script": "openspace.printInfo('Set time: Orbital B'); openspace.time.setTime('2019-APR-08 10:35:27.186');"
+      "action": "os.missions.osirisrex.setup.bennueventb",
+      "key": "F10"
     },
     {
-      "documentation": "Sets the time to the recon event",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "F11",
-      "name": "Set recon event time",
-      "script": "openspace.printInfo('Set time: Recon'); openspace.time.setTime('2019-MAY-25 03:50:31.195');"
+      "action": "os.missions.osirisrex.setup.bennureconevent",
+      "key": "F11"
     },
     {
-      "documentation": "Toggles the visibility of the text marking the location of the Sun",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "Q",
-      "name": "Toggle Sun marker",
-      "script": "openspace.setPropertyValueSingle('Scene.SunMarker.Renderable.Enabled', not openspace.getPropertyValue('Scene.SunMarker.Renderable.Enabled'));"
+      "action": "os.missions.osirisrex.togglesunmarker",
+      "key": "Q"
     }
   ],
   "mark_nodes": [
@@ -103,11 +76,11 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This profile demonstrates the entire lifetime of the NASA OSIRIS-REx spacecraft on its way to the asteroid Bennu and its subsequent journey back to Earth. The profile starts at Earth around the time of the spacecraft’s launch and has information throughout the entire mission until its landing back on Earth in Utah. The models of OSIRIS-REx and Bennu are available, as well as a preliminary instrument timing, which uses the same image projection technique as employed in New Horizons and Rosetta.",
+    "description": "This profile demonstrates the entire lifetime of the NASA OSIRIS-REx spacecraft on its way to the asteroid Bennu and its subsequent journey back to Earth. The profile starts at Earth around the time of the spacecraft's launch and has information throughout the entire mission until its landing back on Earth in Utah. The models of OSIRIS-REx and Bennu are available, as well as a preliminary instrument timing, which uses the same image projection technique as employed in New Horizons and Rosetta",
     "license": "MIT License",
     "name": "Osiris-Rex",
     "url": "https://www.openspaceproject.com",
-    "version": "1.0"
+    "version": "1.1"
   },
   "properties": [
     {
@@ -122,6 +95,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 1
   }
 }

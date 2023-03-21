@@ -1,6 +1,5 @@
 -- mercurymagnetosphere.asset
-local assetHelper = asset.require('util/asset_helper')
-local mercuryTransforms = asset.require('scene/solarsystem/planets/mercury/transforms')
+local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
 
 local localFolder = asset.syncedResource({
   Name = "Mercury Magnetosphere",
@@ -12,7 +11,7 @@ local localFolder = asset.syncedResource({
 
 local MercuryRadius = 2.4397E6
 
-local Magnetosphere = {   
+local Magnetosphere = {
   Name = "Mercury Magnetosphere",
   Identifier = "MercuryMagnetosphere",
   Parent = mercuryTransforms.MercuryBarycenter.Identifier,
@@ -20,7 +19,7 @@ local Magnetosphere = {
   Renderable = {
     Type = "RenderableTimeVaryingVolume",
     SourceDirectory = localFolder,
-    TransferFunction = localFolder .. "/transferfunction.txt",
+    TransferFunction = localFolder .. "transferfunction.txt",
     Variable = "rho",
     StepSize = 0.003,
     Dimensions = {64, 64, 64},
@@ -40,7 +39,7 @@ local Magnetosphere = {
       SourceFrame = "MERCURYSE",
       DestinationFrame = "GALACTIC",
       Kernels = {
-        localFolder .. "/openspace_mercury.ti"
+        localFolder .. "openspace_mercury.ti"
       }
     },
     Scale = {
@@ -54,4 +53,12 @@ local Magnetosphere = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Magnetosphere })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Magnetosphere)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Magnetosphere)
+end)
+
+asset.export(Magnetosphere)

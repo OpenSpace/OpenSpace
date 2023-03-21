@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,72 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/screenspacerenderable.h>
+namespace {
 
-namespace openspace::luascriptfunctions {
-
-int iswa_addCygnet(lua_State* L) {
-    int nArguments = lua_gettop(L);
-
-    int id = -1;
-    std::string type = "Texture";
-    std::string group = "";
-
-    if (nArguments > 0) {
-        id = static_cast<int>(lua_tonumber(L, 1));
-    }
-
-    if (nArguments > 1) {
-        type = luaL_checkstring(L, 2);
-    }
-
-    if (nArguments > 2) {
-        group = luaL_checkstring(L, 3);
-    }
-
-    IswaManager::ref().addIswaCygnet(id, type, group);
-
-    return 0;
+// Adds a IswaCygnet.
+[[codegen::luawrap]] void addCygnet(int id = -1, std::string type = "Texture",
+                                    std::string group = "")
+{
+    openspace::IswaManager::ref().addIswaCygnet(id, type, group);
 }
 
-int iswa_addScreenSpaceCygnet(lua_State* L) {
-    static const std::string _loggerCat = "addScreenSpaceCygnet";
-    using ghoul::lua::errorLocation;
-
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return ghoul::lua::luaError(L, fmt::format(
-            "Expected {} argumemts, got {}", 1, nArguments
-        ));
-    }
-
-    ghoul::Dictionary d;
-    try {
-        ghoul::lua::luaDictionaryFromState(L, d);
-    }
-    catch (const ghoul::lua::LuaFormatException& e) {
-        LERROR(e.what());
-        return 0;
-    }
+// Adds a Screen Space Cygnets.
+[[codegen::luawrap]] void addScreenSpaceCygnet(ghoul::Dictionary d) {
+    using namespace openspace;
 
     int id = static_cast<int>(d.value<double>("CygnetId"));
-
-    auto cygnetInformation = IswaManager::ref().cygnetInformation();
+    std::map<int, std::shared_ptr<CygnetInfo>> cygnetInformation =
+        IswaManager::ref().cygnetInformation();
     if (cygnetInformation.find(id) == cygnetInformation.end()) {
-        LWARNING("Could not find Cygnet with id = " + std::to_string(id));
-        return 0;
+        throw ghoul::lua::LuaError(
+            "Could not find Cygnet with id = " + std::to_string(id)
+        );
     }
 
-    auto info = cygnetInformation[id];
+    std::shared_ptr<CygnetInfo> info = cygnetInformation[id];
     std::string name = info->name;
     int updateInterval = info->updateInterval;
     info->selected = true;
 
     if (global::renderEngine->screenSpaceRenderable(name)) {
-        LERROR("A cygnet with the name \"" + name +"\" already exist");
-        return 0;
+        throw ghoul::lua::LuaError(fmt::format(
+            "A cygnet with the name \"{}\" already exist", name
+        ));
     }
     else {
         d.setValue("Name", name);
@@ -99,98 +64,68 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
         );
         global::renderEngine->addScreenSpaceRenderable(std::move(s));
     }
-    return 0;
 }
 
-// int iswa_addKameleonPlane(lua_State* L){
-//     int nArguments = lua_gettop(L);
-
-//     std::string kwPath = "";
-//     std::string type = "x";
-//     std::string group = "";
-
-//     if (nArguments > 0) {
-//         kwPath = luaL_checkstring(L, 1);
-//     }
-
-//     if (nArguments > 1) {
-//         type = luaL_checkstring(L, 2);
-//     }
-
-//     if (nArguments > 2) {
-//         group = luaL_checkstring(L, 3);
-//     }
-
-//     IswaManager::ref().createKameleonPlane(kwPath, type, group);
-//     return 0;
-// }
-
-int iswa_removeCygnet(lua_State* L) {
-    std::string name = luaL_checkstring(L, -1);
+// Remove a Cygnets.
+[[codegen::luawrap]] void removeCygnet(std::string name) {
+    using namespace openspace;
     global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + name + "')",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
-    // IswaManager::ref().deleteIswaCygnet(s);
-    return 0;
 }
 
-int iswa_removeScrenSpaceCygnet(lua_State* L) {
-    static const std::string _loggerCat = "removeScreenSpaceCygnet";
+// Remove a Screen Space Cygnets.
+[[codegen::luawrap]] void removeScreenSpaceCygnet(int id) {
+    using namespace openspace;
 
-    int id = static_cast<int>(lua_tonumber(L, 1));
-
-    auto cygnetInformation = IswaManager::ref().cygnetInformation();
+    std::map<int, std::shared_ptr<CygnetInfo>> cygnetInformation =
+        IswaManager::ref().cygnetInformation();
     if (cygnetInformation.find(id) == cygnetInformation.end()) {
-        LWARNING("Could not find Cygnet with id = " + std::to_string(id));
-        return 0;
+        throw ghoul::lua::LuaError(
+            "Could not find Cygnet with id = " + std::to_string(id)
+        );
     }
 
-    auto info = cygnetInformation[id];
+    std::shared_ptr<CygnetInfo> info = cygnetInformation[id];
     info->selected = false;
 
-    std::string script =
-        "openspace.unregisterScreenSpaceRenderable('" +
-        cygnetInformation[id]->name + "');";
+    std::string script = fmt::format(
+        "openspace.unregisterScreenSpaceRenderable('{}');", cygnetInformation[id]->name
+    );
 
     global::scriptEngine->queueScript(
         script,
         scripting::ScriptEngine::RemoteScripting::Yes
     );
-    return 0;
 }
 
-int iswa_removeGroup(lua_State* L) {
-    std::string name = luaL_checkstring(L, -1);
-    // IswaManager::ref().unregisterGroup(id);
+// Remove a group of Cygnets.
+[[codegen::luawrap]] void removeGroup(std::string name) {
+    using namespace openspace;
 
-    auto groups = IswaManager::ref().groups();
+    std::map<std::string, std::shared_ptr<IswaBaseGroup>> groups =
+        IswaManager::ref().groups();
     if (groups.find(name) != groups.end()) {
         groups[name]->clearGroup();
     }
-
-    return 0;
 }
 
-int iswa_addCdfFiles(lua_State* L) {
-    std::string path = luaL_checkstring(L, 1);
-    IswaManager::ref().addCdfFiles(path);
-
-    return 0;
+// Adds a cdf files to choose from.
+[[codegen::luawrap]] void addCdfFiles(std::string path) {
+    openspace::IswaManager::ref().addCdfFiles(path);
 }
 
-int iswa_addKameleonPlanes(lua_State* L) {
-    std::string group = luaL_checkstring(L, 1);
-    int pos = static_cast<int>(lua_tonumber(L, 2));
-    IswaManager::ref().addKameleonCdf(group, pos);
-    // auto cdfInfo =
-    return 0;
+// Adds KameleonPlanes from cdf file.
+[[codegen::luawrap]] void addKameleonPlanes(std::string group, int pos) {
+    openspace::IswaManager::ref().addKameleonCdf(group, pos);
 }
 
-int iswa_setBaseUrl(lua_State* L) {
-    std::string url = luaL_checkstring(L, 1);
-    IswaManager::ref().setBaseUrl(url);
-    return 0;
+// Sets the base url.
+[[codegen::luawrap]] void setBaseUrl(std::string url) {
+    openspace::IswaManager::ref().setBaseUrl(url);
 }
 
-} // namespace openspace::luascriptfunctions
+#include "iswamanager_lua_codegen.cpp"
+
+} // namespace

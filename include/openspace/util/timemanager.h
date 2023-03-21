@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,11 @@
 #ifndef __OPENSPACE_CORE___TIMEMANAGER___H__
 #define __OPENSPACE_CORE___TIMEMANAGER___H__
 
+#include <ghoul/lua/luastate.h>
+#include <ghoul/lua/lua_helper.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include "openspace/scene/profile.h"
 #include <openspace/util/keys.h>
 #include <openspace/util/syncdata.h>
 #include <openspace/util/time.h>
@@ -40,7 +43,7 @@ namespace openspace {
 
 struct TimeKeyframeData {
     Time time;
-    double delta;
+    double delta = 0.0;
     bool pause = false;
     bool jump = false;
 };
@@ -56,7 +59,7 @@ public:
     const Time& integrateFromTime() const;
     const Timeline<TimeKeyframeData>& timeline() const;
 
-    std::vector<Syncable*> getSyncables();
+    std::vector<Syncable*> syncables();
     void preSynchronization(double dt);
 
     TimeKeyframeData interpolate(double applicationTime);
@@ -75,6 +78,15 @@ public:
      * Returns the current delta time, as affected by pause
      */
     double deltaTime() const;
+
+    /**
+     * Sets the simulation time using the time contents of a profile. The function will
+     * set either a relative or absolute time.
+     *
+     * \param p The Profile to be read.
+     */
+    void setTimeFromProfile(const Profile& p);
+
     bool isPaused() const;
 
     std::vector<double> deltaTimeSteps() const;
@@ -114,19 +126,21 @@ public:
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeStepsChangeCallback(CallbackHandle handle);
-    void triggerPlaybackStart();
-    void stopPlayback();
     void removeTimeJumpCallback(CallbackHandle handle);
     void removeTimelineChangeCallback(CallbackHandle handle);
 
 private:
     void progressTime(double dt);
-    void applyKeyframeData(const TimeKeyframeData& keyframe);
+    void applyKeyframeData(const TimeKeyframeData& keyframe, double dt);
     TimeKeyframeData interpolate(const Keyframe<TimeKeyframeData>& past,
         const Keyframe<TimeKeyframeData>& future, double time);
 
     void addDeltaTimesKeybindings();
     void clearDeltaTimesKeybindings();
+    double currentApplicationTimeForInterpolation() const;
+    double previousApplicationTimeForInterpolation() const;
+
+    bool isPlayingBackSessionRecording() const;
 
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;
@@ -139,6 +153,7 @@ private:
     bool _lastTimePaused = false;
     double _lastDeltaTime = 0.0;
     double _lastTargetDeltaTime = 0.0;
+    double _previousApplicationTime = 0.0;
 
     bool _deltaTimeStepsChanged = false;
     std::vector<double> _deltaTimeSteps;
@@ -152,11 +167,10 @@ private:
     bool _shouldSetTime = false;
     Time _timeNextFrame;
 
-    bool _timelineChanged;
+    bool _timelineChanged = false;
 
     double _latestConsumedTimestamp = -std::numeric_limits<double>::max();
     int _nextCallbackHandle = 0;
-    bool _playbackModeEnabled = false;
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeChangeCallbacks;

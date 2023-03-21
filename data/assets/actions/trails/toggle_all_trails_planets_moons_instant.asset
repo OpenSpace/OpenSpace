@@ -1,0 +1,24 @@
+local toggle_trails = {
+  Identifier = "os_default.toggle_trails",
+  Name = "Toggle Planet and Moon Trails (Instant)",
+  Command = [[
+    local list = openspace.getProperty("{planetTrail_solarSystem}.Renderable.Enabled");
+    for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
+
+    local moonlist = openspace.getProperty("{moonTrail_solarSystem}.Renderable.Enabled");
+    for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
+  ]],
+  Documentation = "Toggles the visibility of planet and moon trails",
+  GuiPath = "/Solar System",
+  IsLocal = false,
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(toggle_trails)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(toggle_trails)
+end)
+
+asset.export(toggle_trails)

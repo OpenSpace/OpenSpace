@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,16 +35,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyDimensions = "Dimensions";
-    constexpr const char* KeyTime = "Time";
-    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
-
-    constexpr const char* KeyMinValue = "MinValue";
-    constexpr const char* KeyMaxValue = "MaxValue";
-
-    constexpr const char* KeyVisUnit = "VisUnit";
-
     struct [[codegen::Dictionary(KameleonVolumeToRawTask)]] Parameters {
         // The cdf file to extract data from
         std::filesystem::path input;
@@ -79,9 +69,7 @@ namespace {
 namespace openspace::kameleonvolume {
 
 documentation::Documentation KameleonVolumeToRawTask::documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "kameleon_metadata_to_json_task";
-    return doc;
+    return codegen::doc<Parameters>("kameleon_metadata_to_json_task");
 }
 
 KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary) {
@@ -121,7 +109,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
 
     std::array<std::string, 3> variables = reader.gridVariableNames();
 
-    if (variables.size() == 3 && _autoDomainBounds) {
+    if (_autoDomainBounds) {
         _lowerDomainBound = glm::vec3(
             reader.minValue(variables[0]),
             reader.minValue(variables[1]),
@@ -159,14 +147,14 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
         time.pop_back();
     }
 
-    outputMetadata.setValue(KeyTime, time);
-    outputMetadata.setValue(KeyDimensions, glm::dvec3(_dimensions));
-    outputMetadata.setValue(KeyLowerDomainBound, glm::dvec3(_lowerDomainBound));
-    outputMetadata.setValue(KeyUpperDomainBound, glm::dvec3(_upperDomainBound));
+    outputMetadata.setValue("Time", time);
+    outputMetadata.setValue("Dimensions", glm::dvec3(_dimensions));
+    outputMetadata.setValue("LowerDomainBound", glm::dvec3(_lowerDomainBound));
+    outputMetadata.setValue("UpperDomainBound", glm::dvec3(_upperDomainBound));
 
-    outputMetadata.setValue(KeyMinValue, reader.minValue(_variable));
-    outputMetadata.setValue(KeyMaxValue, reader.maxValue(_variable));
-    outputMetadata.setValue(KeyVisUnit, reader.getVisUnit(_variable));
+    outputMetadata.setValue("MinValue", reader.minValue(_variable));
+    outputMetadata.setValue("MaxValue", reader.maxValue(_variable));
+    outputMetadata.setValue("VisUnit", reader.getVisUnit(_variable));
 
     std::string metadataString = ghoul::formatLua(outputMetadata);
 

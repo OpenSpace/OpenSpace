@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <openspace/rendering/framebufferrenderer.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/deferredcaster.h>
@@ -33,7 +34,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -43,58 +43,38 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <fstream>
 #include <string>
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "FramebufferRenderer";
+    constexpr std::string_view _loggerCat = "FramebufferRenderer";
 
-    // If this is true (detected automatically), the OpenGL debug information functions
-    // are available and will be used to mark object names and debug groups
-    bool HasGLDebugInfo = false;
+    constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
-    struct GLDebugGroup {
-        explicit GLDebugGroup(std::string_view name) {
-            if (HasGLDebugInfo) {
-                glPushDebugGroup(
-                    GL_DEBUG_SOURCE_APPLICATION,
-                    0,
-                    static_cast<GLsizei>(name.length()),
-                    name.data()
-                );
-            }
-        }
-
-        ~GLDebugGroup() {
-            if (HasGLDebugInfo) {
-                glPopDebugGroup();
-            }
-        }
-    };
-
-    constexpr const glm::vec4 PosBufferClearVal = { 1e32, 1e32, 1e32, 1.f };
-
-    constexpr const std::array<const char*, 7> HDRUniformNames = {
+    constexpr std::array<const char*, 9> HDRUniformNames = {
         "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma",
-        "Hue", "Saturation", "Value"
+        "Hue", "Saturation", "Value", "Viewport", "Resolution"
     };
 
-    constexpr const std::array<const char*, 2> FXAAUniformNames = {
-        "renderedTexture", "inverseScreenSize"
+    constexpr std::array<const char*, 4> FXAAUniformNames = {
+        "renderedTexture", "inverseScreenSize", "Viewport", "Resolution"
     };
 
-    constexpr const std::array<const char*, 2> DownscaledVolumeUniformNames = {
-        "downscaledRenderedVolume", "downscaledRenderedVolumeDepth"
+    constexpr std::array<const char*, 4> DownscaledVolumeUniformNames = {
+        "downscaledRenderedVolume", "downscaledRenderedVolumeDepth", "viewport",
+        "resolution"
     };
 
-    constexpr const char* ExitFragmentShaderPath =
+    constexpr std::string_view ExitFragmentShaderPath =
         "${SHADERS}/framebuffer/exitframebuffer.frag";
-    constexpr const char* RaycastFragmentShaderPath =
+    constexpr std::string_view RaycastFragmentShaderPath =
         "${SHADERS}/framebuffer/raycastframebuffer.frag";
-    constexpr const char* GetEntryInsidePath = "${SHADERS}/framebuffer/inside.glsl";
-    constexpr const char* GetEntryOutsidePath = "${SHADERS}/framebuffer/outside.glsl";
-    constexpr const char* RenderFragmentShaderPath =
+    constexpr std::string_view GetEntryInsidePath = "${SHADERS}/framebuffer/inside.glsl";
+    constexpr std::string_view GetEntryOutsidePath =
+        "${SHADERS}/framebuffer/outside.glsl";
+    constexpr std::string_view RenderFragmentShaderPath =
         "${SHADERS}/framebuffer/renderframebuffer.frag";
 
     const GLenum ColorAttachmentArray[4] = {
@@ -108,14 +88,10 @@ namespace {
 namespace openspace {
 
 void FramebufferRenderer::initialize() {
-    ZoneScoped
+    ZoneScoped;
     TracyGpuZone("Rendering initialize");
 
     LDEBUG("Initializing FramebufferRenderer");
-
-    HasGLDebugInfo = glbinding::Binding::ObjectLabel.isResolved() &&
-                     glbinding::Binding::PushDebugGroup.isResolved() &&
-                     glbinding::Binding::PopDebugGroup.isResolved();
 
     const GLfloat vertexData[] = {
         // x     y
@@ -205,7 +181,7 @@ void FramebufferRenderer::initialize() {
         _gBuffers.depthTexture,
         0
     );
-    if (HasGLDebugInfo) {
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(GL_FRAMEBUFFER, _gBuffers.framebuffer, -1, "G-Buffer Main");
     }
 
@@ -401,8 +377,8 @@ void FramebufferRenderer::initialize() {
 }
 
 void FramebufferRenderer::deinitialize() {
-    ZoneScoped
-    TracyGpuZone("Renderer deinitialize")
+    ZoneScoped;
+    TracyGpuZone("Renderer deinitialize");
 
     LINFO("Deinitializing FramebufferRenderer");
 
@@ -447,9 +423,9 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
     _dirtyDeferredcastData = true;
 }
 
-void FramebufferRenderer::applyTMO(float blackoutFactor) {
-    ZoneScoped
-    TracyGpuZone("applyTMO")
+void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewport) {
+    ZoneScoped;
+    TracyGpuZone("applyTMO");
 
     _hdrFilteringProgram->activate();
 
@@ -468,6 +444,8 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Viewport, glm::vec4(viewport));
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
@@ -482,7 +460,7 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
     _hdrFilteringProgram->deactivate();
 }
 
-void FramebufferRenderer::applyFXAA() {
+void FramebufferRenderer::applyFXAA(const glm::ivec4& viewport) {
     _fxaaProgram->activate();
 
     ghoul::opengl::TextureUnit renderedTextureUnit;
@@ -497,8 +475,10 @@ void FramebufferRenderer::applyFXAA() {
         renderedTextureUnit
     );
 
-    glm::vec2 inverseScreenSize(1.f/_resolution.x, 1.f/_resolution.y);
+    glm::vec2 inverseScreenSize = glm::vec2(1.f / _resolution.x, 1.f / _resolution.y);
     _fxaaProgram->setUniform(_fxaaUniformCache.inverseScreenSize, inverseScreenSize);
+    _fxaaProgram->setUniform(_fxaaUniformCache.Viewport, glm::vec4(viewport));
+    _fxaaProgram->setUniform(_fxaaUniformCache.Resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
@@ -532,8 +512,8 @@ void FramebufferRenderer::updateDownscaleTextures() {
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    float volumeBorderColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, volumeBorderColor);
+    constexpr float VolumeBorderColor[] = { 0.f, 0.f, 0.f, 1.f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, VolumeBorderColor);
 
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
     glTexImage2D(
@@ -555,7 +535,7 @@ void FramebufferRenderer::updateDownscaleTextures() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
-void FramebufferRenderer::writeDownscaledVolume() {
+void FramebufferRenderer::writeDownscaledVolume(const glm::ivec4& viewport) {
     _downscaledVolumeProgram->activate();
 
     ghoul::opengl::TextureUnit downscaledTextureUnit;
@@ -580,6 +560,18 @@ void FramebufferRenderer::writeDownscaledVolume() {
     _downscaledVolumeProgram->setUniform(
         _writeDownscaledVolumeUniformCache.downscaledRenderedVolumeDepth,
         downscaledDepthUnit
+    );
+
+    _downscaledVolumeProgram->setUniform(
+        _writeDownscaledVolumeUniformCache.viewport,
+        static_cast<float>(viewport[0]),
+        static_cast<float>(viewport[1]),
+        static_cast<float>(viewport[2]),
+        static_cast<float>(viewport[3])
+    );
+    _downscaledVolumeProgram->setUniform(
+        _writeDownscaledVolumeUniformCache.resolution,
+        glm::vec2(_resolution)
     );
 
 
@@ -701,12 +693,8 @@ void FramebufferRenderer::update() {
 }
 
 void FramebufferRenderer::updateResolution() {
-    ZoneScoped
-    TracyGpuZone("Renderer updateResolution")
-
-    HasGLDebugInfo = glbinding::Binding::ObjectLabel.isResolved() &&
-                     glbinding::Binding::PushDebugGroup.isResolved() &&
-                     glbinding::Binding::PopDebugGroup.isResolved();
+    ZoneScoped;
+    TracyGpuZone("Renderer updateResolution");
 
     glBindTexture(GL_TEXTURE_2D, _gBuffers.colorTexture);
     glTexImage2D(
@@ -720,9 +708,11 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (HasGLDebugInfo) {
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(GL_TEXTURE, _gBuffers.colorTexture, -1, "G-Buffer Color");
     }
 
@@ -738,9 +728,11 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (HasGLDebugInfo) {
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(GL_TEXTURE, _gBuffers.positionTexture, -1, "G-Buffer Position");
     }
 
@@ -756,9 +748,11 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (HasGLDebugInfo) {
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(GL_TEXTURE, _gBuffers.normalTexture, -1, "G-Buffer Normal");
     }
 
@@ -774,9 +768,11 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (HasGLDebugInfo) {
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(GL_TEXTURE, _gBuffers.depthTexture, -1, "G-Buffer Depth");
     }
 
@@ -792,6 +788,8 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
@@ -816,6 +814,8 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
@@ -835,6 +835,8 @@ void FramebufferRenderer::updateResolution() {
         GL_UNSIGNED_BYTE,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
@@ -858,9 +860,12 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    float volumeBorderColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+    float volumeBorderColor[] = { 0.f, 0.f, 0.f, 1.f };
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, volumeBorderColor);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(
@@ -887,6 +892,8 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
@@ -911,6 +918,8 @@ void FramebufferRenderer::updateResolution() {
         GL_UNSIGNED_SHORT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
@@ -929,6 +938,8 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
@@ -939,7 +950,7 @@ void FramebufferRenderer::updateResolution() {
 }
 
 void FramebufferRenderer::updateRaycastData() {
-    ZoneScoped
+    ZoneScoped;
 
     _raycastData.clear();
     _exitPrograms.clear();
@@ -951,9 +962,9 @@ void FramebufferRenderer::updateRaycastData() {
 
     int nextId = 0;
     for (VolumeRaycaster* raycaster : raycasters) {
-        ZoneScopedN("raycaster")
+        ZoneScopedN("raycaster");
 
-        RaycastData data = { nextId++, "Helper" };
+        RaycastData data = { .id = nextId++, .namespaceName = "Helper" };
 
         const std::string& vsPath = raycaster->boundsVertexShaderPath();
         std::string fsPath = raycaster->boundsFragmentShaderPath();
@@ -1022,20 +1033,19 @@ void FramebufferRenderer::updateDeferredcastData() {
         global::deferredcasterManager->deferredcasters();
     int nextId = 0;
     for (Deferredcaster* caster : deferredcasters) {
-        DeferredcastData data = { nextId++, "HELPER" };
+        DeferredcastData data = { .id = nextId++, .namespaceName = "HELPER" };
 
-        std::string vsPath = caster->deferredcastVSPath();
-        std::string fsPath = caster->deferredcastFSPath();
-        std::string deferredShaderPath = caster->deferredcastPath();
+        std::filesystem::path vsPath = caster->deferredcastVSPath();
+        std::filesystem::path fsPath = caster->deferredcastFSPath();
 
         ghoul::Dictionary dict;
         dict.setValue("rendererData", _rendererData);
         //dict.setValue("fragmentPath", fsPath);
         dict.setValue("id", data.id);
-        std::string helperPath = caster->helperPath();
+        std::filesystem::path helperPath = caster->helperPath();
         ghoul::Dictionary helpersDict;
         if (!helperPath.empty()) {
-            helpersDict.setValue("0", helperPath);
+            helpersDict.setValue("0", helperPath.string());
         }
         dict.setValue("helperPaths", helpersDict);
 
@@ -1044,16 +1054,9 @@ void FramebufferRenderer::updateDeferredcastData() {
         try {
             _deferredcastPrograms[caster] = ghoul::opengl::ProgramObject::Build(
                 "Deferred " + std::to_string(data.id) + " raycast",
-                absPath(vsPath),
-                absPath(deferredShaderPath),
+                vsPath,
+                fsPath,
                 dict
-            );
-
-            _deferredcastPrograms[caster]->setIgnoreSubroutineUniformLocationError(
-                ghoul::opengl::ProgramObject::IgnoreError::Yes
-            );
-            _deferredcastPrograms[caster]->setIgnoreUniformLocationError(
-                ghoul::opengl::ProgramObject::IgnoreError::Yes
             );
 
             caster->initializeCachedVariables(*_deferredcastPrograms[caster]);
@@ -1067,7 +1070,7 @@ void FramebufferRenderer::updateDeferredcastData() {
 
 
 void FramebufferRenderer::updateHDRAndFiltering() {
-    ZoneScoped
+    ZoneScoped;
 
     _hdrFilteringProgram = ghoul::opengl::ProgramObject::Build(
         "HDR and Filtering Program",
@@ -1077,7 +1080,7 @@ void FramebufferRenderer::updateHDRAndFiltering() {
 }
 
 void FramebufferRenderer::updateFXAA() {
-    ZoneScoped
+    ZoneScoped;
 
     _fxaaProgram = ghoul::opengl::ProgramObject::Build(
         "FXAA Program",
@@ -1087,7 +1090,7 @@ void FramebufferRenderer::updateFXAA() {
 }
 
 void FramebufferRenderer::updateDownscaledVolume() {
-    ZoneScoped
+    ZoneScoped;
 
     _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
         "Write Downscaled Volume Program",
@@ -1097,14 +1100,16 @@ void FramebufferRenderer::updateDownscaledVolume() {
 }
 
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
-    ZoneScoped
-    TracyGpuZone("FramebufferRenderer")
+    ZoneScoped;
+    TracyGpuZone("FramebufferRenderer");
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
     global::renderEngine->openglStateCache().setDefaultFramebuffer(_defaultFBO);
 
-    GLint viewport[4] = { 0 };
-    global::renderEngine->openglStateCache().viewport(viewport);
+    GLint vp[4] = { 0 };
+    glGetIntegerv(GL_VIEWPORT, vp);
+    global::renderEngine->openglStateCache().setViewportState(vp);
+    glm::ivec4 viewport = glm::ivec4(vp[0], vp[1], vp[2], vp[3]);
 
     // Reset Render Pipeline State
     global::renderEngine->openglStateCache().resetCachedStates();
@@ -1117,11 +1122,8 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     {
         // deferred g-buffer
-        ZoneScopedN("Deferred G-Buffer")
-        TracyGpuZone("Deferred G-Buffer")
-
-        GLint vp[4] = {viewport[0], viewport[1], _resolution.x, _resolution.y};
-        global::renderEngine->openglStateCache().setViewportState(vp);
+        ZoneScopedN("Deferred G-Buffer");
+        TracyGpuZone("Deferred G-Buffer");
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
         glDrawBuffers(3, ColorAttachmentArray);
@@ -1131,30 +1133,29 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     Time time = global::timeManager->time();
 
     RenderData data = {
-        *camera,
-        std::move(time),
-        0,
-        {}
+        .camera = *camera,
+        .time = std::move(time),
+        .renderBinMask = 0
     };
     RendererTasks tasks;
 
     {
         TracyGpuZone("Background")
-        GLDebugGroup group("Background");
+        ghoul::GLDebugGroup group("Background");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Background);
         scene->render(data, tasks);
     }
 
     {
         TracyGpuZone("Opaque")
-        GLDebugGroup group("Opaque");
+        ghoul::GLDebugGroup group("Opaque");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Opaque);
         scene->render(data, tasks);
     }
 
     {
         TracyGpuZone("PreDeferredTransparent")
-        GLDebugGroup group("PreDeferredTransparent");
+        ghoul::GLDebugGroup group("PreDeferredTransparent");
         data.renderBinMask = static_cast<int>(
             Renderable::RenderBin::PreDeferredTransparent
         );
@@ -1164,29 +1165,29 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     // Run Volume Tasks
     {
         TracyGpuZone("Raycaster Tasks")
-        GLDebugGroup group("Raycaster Tasks");
-        performRaycasterTasks(tasks.raycasterTasks);
+        ghoul::GLDebugGroup group("Raycaster Tasks");
+        performRaycasterTasks(tasks.raycasterTasks, viewport);
     }
 
     if (!tasks.deferredcasterTasks.empty()) {
         TracyGpuZone("Deferred Caster Tasks")
-        GLDebugGroup group("Deferred Caster Tasks");
+        ghoul::GLDebugGroup group("Deferred Caster Tasks");
 
-        // We use ping pong rendering in order to be able to
-        // render to the same final buffer, multiple
-        // deferred tasks at same time (e.g. more than 1 ATM being seen at once)
+        // We use ping pong rendering in order to be able to render multiple deferred
+        // tasks at same time (e.g. more than 1 ATM being seen at once) to the same final
+        // buffer
         glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
         glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
 
-        performDeferredTasks(tasks.deferredcasterTasks);
+        performDeferredTasks(tasks.deferredcasterTasks, viewport);
     }
 
     glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
     glEnablei(GL_BLEND, 0);
 
     {
-        TracyGpuZone("PostDeferredTransparent")
-        GLDebugGroup group("PostDeferredTransparent");
+        TracyGpuZone("PostDeferredTransparent");
+        ghoul::GLDebugGroup group("PostDeferredTransparent");
         data.renderBinMask = static_cast<int>(
             Renderable::RenderBin::PostDeferredTransparent
         );
@@ -1194,8 +1195,8 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }
 
     {
-        TracyGpuZone("Overlay")
-        GLDebugGroup group("Overlay");
+        TracyGpuZone("Overlay");
+        ghoul::GLDebugGroup group("Overlay");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
         scene->render(data, tasks);
     }
@@ -1219,32 +1220,33 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     {
         // Apply the selected TMO on the results and resolve the result to the default FBO
-        TracyGpuZone("Apply TMO")
-        GLDebugGroup group("Apply TMO");
+        TracyGpuZone("Apply TMO");
+        ghoul::GLDebugGroup group("Apply TMO");
 
-        applyTMO(blackoutFactor);
+        applyTMO(blackoutFactor, viewport);
     }
 
     if (_enableFXAA) {
         TracyGpuZone("Apply FXAA")
-        GLDebugGroup group("Apply FXAA");
+        ghoul::GLDebugGroup group("Apply FXAA");
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
-        applyFXAA();
+        applyFXAA(viewport);
     }
 }
 
-void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks) {
-    ZoneScoped
+void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
+                                                const glm::ivec4& viewport)
+{
+    ZoneScoped;
 
     for (const RaycasterTask& raycasterTask : tasks) {
-        TracyGpuZone("Raycaster")
+        TracyGpuZone("Raycaster");
 
         VolumeRaycaster* raycaster = raycasterTask.raycaster;
 
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        GLint viewport[4] = { 0 };
-        global::renderEngine->openglStateCache().viewport(viewport);
+        //global::renderEngine->openglStateCache().viewport(glm::value_ptr(viewport));
 
         ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
@@ -1257,10 +1259,10 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
             const float s = raycaster->downscaleRender();
             GLint newVP[4] = {
-                viewport[0],
-                viewport[1],
-                static_cast<GLsizei>(viewport[2] * s),
-                static_cast<GLsizei>(viewport[3] * s)
+                static_cast<GLint>(viewport[0] * s),
+                static_cast<GLint>(viewport[1] * s),
+                static_cast<GLint>(viewport[2] * s),
+                static_cast<GLint>(viewport[3] * s)
             };
             global::renderEngine->openglStateCache().setViewportState(newVP);
 
@@ -1359,20 +1361,23 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         }
 
         if (raycaster->downscaleRender() < 1.f) {
-            global::renderEngine->openglStateCache().setViewportState(viewport);
+            global::renderEngine->openglStateCache().setViewportState(
+                glm::value_ptr(viewport)
+            );
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
-            writeDownscaledVolume();
+            writeDownscaledVolume(viewport);
         }
     }
 }
 
 void FramebufferRenderer::performDeferredTasks(
-                                             const std::vector<DeferredcasterTask>& tasks)
+                                             const std::vector<DeferredcasterTask>& tasks,
+                                                               const glm::ivec4& viewport)
 {
-    ZoneScoped
+    ZoneScoped;
 
     for (const DeferredcasterTask& deferredcasterTask : tasks) {
-        TracyGpuZone("Deferredcaster")
+        TracyGpuZone("Deferredcaster");
 
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
@@ -1399,6 +1404,16 @@ void FramebufferRenderer::performDeferredTasks(
                 "mainColorTexture",
                 mainDColorTextureUnit
             );
+
+            deferredcastProgram->setUniform(
+                "viewport",
+                static_cast<float>(viewport[0]),
+                static_cast<float>(viewport[1]),
+                static_cast<float>(viewport[2]),
+                static_cast<float>(viewport[3])
+            );
+            deferredcastProgram->setUniform("resolution", glm::vec2(_resolution));
+
 
             ghoul::opengl::TextureUnit mainPositionTextureUnit;
             mainPositionTextureUnit.activate();
@@ -1485,7 +1500,7 @@ void FramebufferRenderer::enableFXAA(bool enable) {
 }
 
 void FramebufferRenderer::updateRendererData() {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul::Dictionary dict;
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));

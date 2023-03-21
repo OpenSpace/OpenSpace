@@ -1,0 +1,211 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/L2")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
+
+local kernels = asset.syncedResource({
+  Name = "JWST Kernel",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_kernels",
+  Version = 2
+})
+
+local launchTime = "2021 DEC 25 12:20:00"
+local detachTime = "2021 DEC 25 12:50:00"
+local L2orbitInsertionTime = "2022 JAN 25 00:00:00"
+local endTime = "2024 JAN 22 00:00:00"
+
+-- Trail of JWST relative the Earth Inertial for the first 30 minutes after launch
+-- Makes histroy of trail to stay at launch site, that a trail relative to Earth Center won't
+local JWSTTrailLaunch = {
+  Identifier = "JWSTTrailLaunch",
+  Parent = earthTransforms.EarthIAU.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = launchTime,
+    End = detachTime
+  },
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 'EARTH',
+      Frame = 'IAU_EARTH',
+      Kernels = { kernels .. "webb.bsp" }
+    },
+    Color = { 0.9, 0.9, 0.0 },
+    StartTime = launchTime,
+    EndTime = detachTime,
+    SampleInterval = 60 -- Sample rate of once per minute
+  },
+  GUI = {
+    Name = "JWST Launch Trail",
+    Path = "/Solar System/Missions/JWST/Trails",
+    Description = [[
+      James Webb Space Telescope Launch Trail relative to Earth IAU.
+    ]],
+  }
+}
+
+-- Trail of JWST relative the Earth for the first month after detatching from the rocket
+-- Makes histroy of trail to stay at Earth, that a trail relative to L2 won't
+local JWSTTrailCruise = {
+  Identifier = "JWSTTrailCruise",
+  Parent = earthTransforms.EarthCenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = detachTime,
+    End = L2orbitInsertionTime
+  },
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 'EARTH',
+      Frame = 'GALACTIC',
+      Kernels = { kernels .. "webb.bsp" }
+    },
+    Color = { 0.9, 0.9, 0.0 },
+    StartTime = detachTime,
+    EndTime = L2orbitInsertionTime,
+    SampleInterval = 60 -- Sample rate of once per minute
+  },
+  GUI = {
+    Name = "JWST Cruise Trail",
+    Path = "/Solar System/Missions/JWST/Trails",
+    Description = [[
+      James Webb Space Telescope Cruise Trail relative to Earth.
+    ]],
+  }
+}
+
+-- Trail of JWST relative to L2 after first month to reach L2
+-- Gives a better trail history of the orbit around L2 than if it was relative to Earth
+-- This does NOT co-rotate with L2 and gives a saddle look of the trail
+local JWSTTrailOrbit = {
+  Identifier = "JWSTTrailOrbit",
+  Parent = transforms.L2Position.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = L2orbitInsertionTime,
+    End = endTime
+  },
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 392, -- L2
+      Frame = 'GALACTIC',
+      Kernels = { kernels .. "webb.bsp" }
+    },
+    Color = { 0.863, 0.0, 0.902 },
+    Period = 182.621099, -- About 6 months
+    Resolution = 183 -- About a sample rate of once per day
+  },
+  GUI = {
+    Name = "JWST Orbit Trail",
+    Path = "/Solar System/Missions/JWST/Trails",
+    Description = [[
+      James Webb Space Telescope Orbit Trail relative to L2.
+    ]],
+  }
+}
+
+-- Trail of JWST in orbit around L2 that co-revolves with L2 around the Sun
+-- This gives the trail a look of a wheel going along L2 around the Sun
+local JWSTTrailCoRevOrbit = {
+  Identifier = "JWSTTrailCoRevOrbit",
+  Parent = transforms.L2CoRevFrame.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = L2orbitInsertionTime,
+    End = endTime
+  },
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 392, -- L2
+      Frame = 'L2_COREV',
+      Kernels = { kernels .. "webb.bsp" }
+    },
+    Color = { 1.0, 0.663, 0.157 },
+    Period = 365.242198, -- About a year, 2 orbits. 1 orbit would be 182.621099 (6 months)
+    Resolution = 365 -- About a sample rate of once per day
+  },
+  GUI = {
+    Name = "JWST L2 Co-revolving Orbit Trail",
+    Path = "/Solar System/Missions/JWST/Trails",
+    Description = [[
+      James Webb Space Telescope Orbit Trail that Co-revolves with L2.
+    ]],
+  }
+}
+
+local JWSTSunTrail = {
+  Identifier = "JWSTSunTrail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = L2orbitInsertionTime,
+    End = endTime
+  },
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 'SSB',
+      Frame = 'GALACTIC',
+      Kernels = { kernels .. "webb.bsp" }
+    },
+    Color = { 0.0, 0.9, 0.9 },
+    Period = 365.242,
+    Resolution = 365 -- About a sample rate of once per day
+  },
+  GUI = {
+    Name = "JWST Sun Trail",
+    Path = "/Solar System/Missions/JWST/Trails",
+    Description = [[
+      James Webb Space Telescope Trail relative to the Sun.
+    ]],
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JWSTTrailLaunch)
+  openspace.addSceneGraphNode(JWSTTrailCruise)
+  openspace.addSceneGraphNode(JWSTTrailOrbit)
+  openspace.addSceneGraphNode(JWSTTrailCoRevOrbit)
+  openspace.addSceneGraphNode(JWSTSunTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JWSTSunTrail)
+  openspace.removeSceneGraphNode(JWSTTrailCoRevOrbit)
+  openspace.removeSceneGraphNode(JWSTTrailOrbit)
+  openspace.removeSceneGraphNode(JWSTTrailCruise)
+  openspace.removeSceneGraphNode(JWSTTrailLaunch)
+end)
+
+asset.export(JWSTTrailLaunch)
+asset.export(JWSTTrailCruise)
+asset.export(JWSTTrailOrbit)
+asset.export(JWSTTrailCoRevOrbit)
+asset.export(JWSTSunTrail)
+
+
+asset.meta = {
+  Name = "James Webb Space Telescope Trails",
+  Version = "1.0",
+  Description = [[
+    Trail of James Webb Space Telescope in respect to Earth, L2 and the Sun
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

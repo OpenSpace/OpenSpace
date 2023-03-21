@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ struct RenderData;
 class RenderableGalaxy : public Renderable {
 public:
     explicit RenderableGalaxy(const ghoul::Dictionary& dictionary);
-    virtual ~RenderableGalaxy() = default;
+    ~RenderableGalaxy() override = default;
 
     void initialize() override;
     void initializeGL() override;
@@ -53,6 +53,8 @@ public:
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
 
 private:
     void renderPoints(const RenderData& data);
@@ -64,7 +66,7 @@ private:
         std::vector<glm::vec3> color;
     };
     Result loadPointFile();
-    Result loadCachedFile(const std::string& file);
+    Result loadCachedFile(const std::filesystem::path& file);
 
     glm::vec3 _volumeSize = glm::vec3(0.f);
     glm::vec3 _pointScaling = glm::vec3(0.f);

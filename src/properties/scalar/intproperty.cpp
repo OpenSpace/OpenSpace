@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@ IntProperty::IntProperty(Property::PropertyInfo info, int value,
     : NumericalProperty<int>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-std::string IntProperty::className() const {
+std::string_view IntProperty::className() const {
     return "IntProperty";
 }
 
@@ -41,14 +41,15 @@ int IntProperty::typeLua() const {
     return LUA_TNUMBER;
 }
 
-int IntProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        int val = static_cast<int>(lua_tonumber(state, -1));
-        return val;
+int IntProperty::fromLuaConversion(lua_State* state) const {
+    if (ghoul::lua::hasValue<double>(state)) {
+        return static_cast<int>(ghoul::lua::value<double>(state));
+    }
+    else if (ghoul::lua::hasValue<int>(state)) {
+        return ghoul::lua::value<int>(state);
     }
     else {
-        return 0;
+        throw ghoul::RuntimeError(fmt::format("Error extracting value in IntProperty"));
     }
 }
 

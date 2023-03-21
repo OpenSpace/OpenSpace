@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,14 +44,14 @@ namespace openspace {
 
 IswaModule::IswaModule() : OpenSpaceModule(Name) {
     global::callback::initialize->push_back([]() {
-        ZoneScopedN("IswaModule")
+        ZoneScopedN("IswaModule");
         IswaManager::initialize();
     });
 }
 
 void IswaModule::internalInitialize(const ghoul::Dictionary&) {
-
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<TexturePlane>("TexturePlane");
@@ -59,7 +59,8 @@ void IswaModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<KameleonPlane>("KameleonPlane");
     fRenderable->registerClass<DataSphere>("DataSphere");
 
-    auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
+        FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "No fScreenSpaceRenderable factory existed");
 
     fScreenSpaceRenderable->registerClass<ScreenSpaceCygnet>("ScreenSpaceCygnet");

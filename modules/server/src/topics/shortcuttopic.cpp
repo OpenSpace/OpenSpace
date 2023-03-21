@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,14 +26,9 @@
 
 #include <modules/server/include/connection.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/shortcutmanager.h>
+#include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-
-namespace {
-    constexpr const char* EventKey = "event";
-    constexpr const char* StartSubscription = "start_subscription";
-    constexpr const char* StopSubscription = "stop_subscription";
-} // namespace
+#include <ghoul/logging/logmanager.h>
 
 using nlohmann::json;
 
@@ -44,32 +39,50 @@ bool ShortcutTopic::isDone() const {
 }
 
 std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
-    using ShortcutInformation = interaction::ShortcutManager::ShortcutInformation;
-
-    const std::vector<ShortcutInformation>& shortcuts =
-        global::shortcutManager->shortcuts();
-
     std::vector<nlohmann::json> json;
-    for (const ShortcutInformation& shortcut : shortcuts) {
+    std::vector<interaction::Action> actions = global::actionManager->actions();
+    std::sort(
+        actions.begin(),
+        actions.end(),
+        [](const interaction::Action& lhs, const interaction::Action& rhs) {
+            if (!lhs.name.empty() && !rhs.name.empty()) {
+                return lhs.name < rhs.name;
+            }
+            else {
+                return lhs.identifier < rhs.identifier;
+            }
+        }
+    );
+
+    for (const interaction::Action& action : actions) {
         nlohmann::json shortcutJson = {
-            { "name", shortcut.name },
-            { "script", shortcut.script },
-            { "synchronization", static_cast<bool>(shortcut.synchronization) },
-            { "documentation", shortcut.documentation },
-            { "guiPath", shortcut.guiPath },
+            { "identifier", action.identifier },
+            { "name", action.name },
+            { "script", action.command },
+            { "synchronization", static_cast<bool>(action.synchronization) },
+            { "documentation", action.documentation },
+            { "guiPath", action.guiPath },
         };
         json.push_back(shortcutJson);
     }
 
-    using KeyInformation = interaction::KeybindingManager::KeyInformation;
-
-    const std::multimap<KeyWithModifier, KeyInformation>& keyBindings =
+    const std::multimap<KeyWithModifier, std::string>& keyBindings =
         global::keybindingManager->keyBindings();
 
-    for (const std::pair<const KeyWithModifier, KeyInformation>& keyBinding : keyBindings)
-    {
+    for (const std::pair<const KeyWithModifier, std::string>& keyBinding : keyBindings) {
+        if (!global::actionManager->hasAction(keyBinding.second)) {
+            // We don't warn here as we don't know if the user didn't expect the action
+            // to be there or not. They might have defined a keybind to do multiple things
+            // only one of which is actually defined
+            continue;
+        }
+
         const KeyWithModifier& k = keyBinding.first;
-        const KeyInformation& info = keyBinding.second;
+        // @TODO (abock, 2021-08-05) Probably this should be rewritten to better account
+        // for the new action mechanism
+        const interaction::Action& action = global::actionManager->action(
+            keyBinding.second
+        );
 
         nlohmann::json shortcutJson = {
             { "key", ghoul::to_string(k.key) },
@@ -81,11 +94,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
                     { "super" , hasKeyModifier(k.modifier, KeyModifier::Super) }
                 }
             },
-            { "name", info.name },
-            { "script", info.command },
-            { "synchronization", static_cast<bool>(info.synchronization) },
-            { "documentation", info.documentation },
-            { "guiPath", info.guiPath },
+            { "action", action.identifier },
         };
         json.push_back(shortcutJson);
     }
@@ -98,12 +107,12 @@ void ShortcutTopic::sendData() const {
 }
 
 void ShortcutTopic::handleJson(const nlohmann::json& input) {
-    const std::string& event = input.at(EventKey).get<std::string>();
-    if (event == StartSubscription) {
+    const std::string& event = input.at("event").get<std::string>();
+    if (event == "start_subscription") {
         // TODO: Subscribe to shortcuts and keybindings
         // shortcutManager.subscribe(); ...
     }
-    else if (event == StopSubscription) {
+    else if (event == "stop_subscription") {
         // TODO: Unsubscribe to shortcuts and keybindings
         // shortcutManager.unsubscribe(); ...
         return;

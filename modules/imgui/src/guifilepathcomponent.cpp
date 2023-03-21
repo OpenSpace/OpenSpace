@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 
 namespace openspace::gui {
 
-GuiFilePathComponent::GuiFilePathComponent() : GuiComponent("FilePath", "File Path") {}
+GuiFilePathComponent::GuiFilePathComponent() : GuiComponent("FilePaths", "File Paths") {}
 
 void GuiFilePathComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
@@ -41,7 +41,7 @@ void GuiFilePathComponent::render() {
 
     ImGui::Text(
         "%s",
-        "These are file paths registered in the current OpenSpace instance."
+        "These are file paths registered in the current OpenSpace instance"
     );
     ImGui::Separator();
 
@@ -51,7 +51,7 @@ void GuiFilePathComponent::render() {
     for (const std::string& t : tokens) {
         ImGui::Text("%s", t.c_str());
         ImGui::NextColumn();
-        ImGui::Text("%s", absPath(t).c_str());
+        ImGui::Text("%s", absPath(t).string().c_str());
         ImGui::NextColumn();
         ImGui::Separator();
     }

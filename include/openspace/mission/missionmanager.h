@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,6 +52,7 @@ public:
     * Reads a mission from file and maps the mission name to the Mission object. If
     * this is the first mission to be loaded, the mission will also be set as the
     * current active mission.
+    *
     * \param filename The file that contains the mission that is to be loaded
     * \return The name of the mission that was loaded
     * \pre \p filename must not be empty
@@ -62,6 +63,7 @@ public:
 
     /**
      * Unloads a previously loaded mission identified by the provided \p missionName.
+     *
      * \param missionName The name of the mission that should be unloded
      * \pre \p filename must not be empty
      * \pre \p missionName must be a valid mission that has previously been loaded
@@ -71,16 +73,18 @@ public:
     /**
      * Returns whether the provided \p missionName has previously been added to the
      * MissionManager.
+     *
      * \param missionName The name of the mission that is to be tested
-     * \return \c true if the \p missionName has been added before
+     * \return `true` if the \p missionName has been added before
      */
     bool hasMission(const std::string& missionName);
 
     /**
-     * Sets the mission with the name <missionName> as the current mission. The current
-     * mission is what is return by `currentMission()`.
-     * \pre missionName must not be empty
-     */
+    * Sets the mission with the name \p missionName as the current mission. The current
+    * mission is what is return by `currentMission()`.
+    *
+    * \pre missionName must not be empty
+    */
     void setCurrentMission(const std::string& missionName);
 
     /**

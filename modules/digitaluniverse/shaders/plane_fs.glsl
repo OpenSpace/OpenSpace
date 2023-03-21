@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,37 +28,25 @@ in float vs_screenSpaceDepth;
 in vec2 vs_st;
 
 uniform sampler2D galaxyTexture;
-//uniform bool additiveBlending;
 uniform float alphaValue;
 uniform float fadeInValue;
 
 
 Fragment getFragment() {
-    Fragment frag;
-    // if (gl_FrontFacing) {
-    //     frag.color = texture(galaxyTexture, vs_st);
-    // }
-    // else {
-    //     frag.color = texture(galaxyTexture, vec2(1 - vs_st.s, vs_st.t));
-    // }
+  Fragment frag;
 
-    frag.color = texture(galaxyTexture, vs_st);
-    frag.color *= alphaValue;
+  frag.color = texture(galaxyTexture, vs_st);
+  frag.color *= alphaValue;
 
-    frag.color *= fadeInValue;
+  frag.color *= fadeInValue;
 
-    if (frag.color.a == 0.0) {
-        discard;
-    }
+  if (frag.color.a == 0.0) {
+    discard;
+  }
 
-    // if (additiveBlending) {
-    //     frag.blend = BLEND_MODE_ADDITIVE;
-    // }
+  frag.depth = vs_screenSpaceDepth;
+  frag.gPosition = vec4(vs_screenSpaceDepth, vs_screenSpaceDepth, vs_screenSpaceDepth, 1.0);
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
-    //frag.color = texture(galaxyTexture, vs_st);
-    frag.depth      = vs_screenSpaceDepth;
-    frag.gPosition  = vec4(vs_screenSpaceDepth, vs_screenSpaceDepth, vs_screenSpaceDepth, 1.0);
-    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
-
-    return frag;
+  return frag;
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,9 +39,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char _loggerCat[] = "RenderableDisc";
-
-    constexpr const std::array<const char*, 4> UniformNames = {
+    constexpr std::array<const char*, 4> UniformNames = {
         "modelViewProjectionTransform", "opacity", "width", "colorTexture"
     };
 
@@ -49,13 +47,13 @@ namespace {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture to be used for the color."
+        "texture to be used for the color"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the outer radius of the disc in meter."
+        "This value specifies the outer radius of the disc in meter"
     };
 
     constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
@@ -63,7 +61,7 @@ namespace {
         "Width",
         "This value is used to set the width of the disc. The actual width is set "
         "based on the given size and this value should be set between 0 and 1. A value "
-        "of 1 results in a full circle and 0.5 a disc with an inner radius of 0.5*size."
+        "of 1 results in a full circle and 0.5 a disc with an inner radius of 0.5*size"
     };
 
     struct [[codegen::Dictionary(RenderableDisc)]] Parameters {
@@ -82,9 +80,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableDisc::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_disc";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_disc");
 }
 
 RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
@@ -99,7 +95,7 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
 
-    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _size.setExponent(13.f);
     _size = p.size.value_or(_size);
     setBoundingSphere(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
@@ -118,7 +114,7 @@ bool RenderableDisc::isReady() const {
 }
 
 void RenderableDisc::initialize() {
-    _texture = std::make_unique<TextureComponent>();
+    _texture = std::make_unique<TextureComponent>(1);
     _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
     _texture->setShouldWatchFileForChanges(true);
@@ -159,7 +155,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _shader->setUniform(_uniformCache.width, _width);
-    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.opacity, opacity());
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();

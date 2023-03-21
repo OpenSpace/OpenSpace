@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "6dF Textures",
   Type = "HttpSynchronization",
@@ -23,15 +19,15 @@ local object = {
     Enabled = false,
     Color = { 1.0, 1.0, 0.0 },
     Opacity = 1.0,
-    File = speck .. "/6dF.speck",
-    Texture = textures .. "/point3A.png",
-    ColorMap = speck .. "/6dF.cmap",
+    File = speck .. "6dF.speck",
+    Unit = "Mpc",
+    Texture = textures .. "point3A.png",
+    ColorMap = speck .. "6dF.cmap",
     ColorOption = { "redshift", "proximity" },
     ColorRange = { { 0.0, 0.075 }, { 1.0, 10.0 } },
-    Unit = "Mpc",
     ScaleFactor = 534.0,
-    BillboardMaxSize = 9.0,
-    EnablePixelSizeControl = true,
+    BillboardMinMaxSize = { 0.0, 9.0 },
+    EnablePixelSizeControl = true
   },
   GUI = {
     Name = "6dF Galaxies",
@@ -51,15 +47,23 @@ local object = {
 }
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "6dF Galaxies",
-  Version = "2.0",
-  Description = [[Digital Universe asset for The Six-degree Field (6dF) Galaxy Survey]],
+  Version = "2.1",
+  Description = "Digital Universe asset for The Six-degree Field (6dF) Galaxy Survey",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"6dF"}
+  License = "AMNH Digital Universe"
 }

@@ -1,8 +1,5 @@
 # Build and editor thing
-/build/
-/build-ninja/
-/build-xcode/
-/build-make/
+/build*/
 *~
 *.dir
 *.idea/
@@ -40,3 +37,6 @@ customization.lua
 # The COMMIT info is generated everytime CMake is run
 COMMIT.md
 *_codegen.cpp
+# SkyBrowser Module downloaded data
+/modules/skybrowser/wwtimagedata
+doc

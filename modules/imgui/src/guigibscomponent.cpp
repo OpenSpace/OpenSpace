@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -104,6 +104,7 @@ void GuiGIBSComponent::render() {
     ImGui::InputText("Image Format", ImageFormatBuffer.data(), ImageFormatBuffer.size());
 
     if (ImGui::Button("Add Layer")) {
+        // Extract values from the ImGui fields
         std::string layer = std::string(LayerBuffer.data());
         std::string startDate = std::string(StartDateBuffer.data());
         std::string endDate = std::string(EndDateBuffer.data());
@@ -112,17 +113,37 @@ void GuiGIBSComponent::render() {
         std::string imageRes = std::string(ImageResolutionBuffer.data());
         std::string imageFormat = std::string(ImageFormatBuffer.data());
 
+        // Construct the components of the Lua function
         std::string xmlFunc = fmt::format(
-            "openspace.globebrowsing.createTemporalGibsGdalXml("
-            "'{}', '{}', '{}', '{}', '{}', '{}', '{}')",
-            layer, startDate, endDate, temporalRes, imageRes, imageFormat, temporalFormat
+            "openspace.globebrowsing.createTemporalGibsGdalXml('{}', '{}', '{}')",
+            layer, imageRes, imageFormat
+        );
+
+        if (startDate == "Present") {
+            startDate.clear();
+        }
+        std::string layerScript = fmt::format(
+            "{{"
+            "    Identifier = '{}',"
+            "    Type = 'TemporalTileLayer',"
+            "    Enabled = true,"
+            "    Mode = 'Prototyped',"
+            "    Prototyped = {{"
+            "        Time = {{"
+            "            Start = '{}',"
+            "            End = '{}'"
+            "        }},"
+            "        TemporalResolution = '{}',"
+            "        TimeFormat = '{}',"
+            "        Prototype = {}"
+            "    }}"
+            "}}",
+            layer, startDate, endDate, temporalRes, temporalFormat, xmlFunc
         );
 
         std::string script = fmt::format(
-            "openspace.globebrowsing.addLayer('Earth', 'ColorLayers', {{ "
-            "Identifier = '{}', Enabled = true, Type = 'TemporalTileLayer', "
-            "FilePath = {} }})",
-            layer, xmlFunc
+            "openspace.globebrowsing.addLayer('Earth', 'ColorLayers', {})",
+            layerScript
         );
         global::scriptEngine->queueScript(
             script,

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,10 +61,10 @@ public:
     };
 
     struct MemoryFile {
-        char* buffer;
-        size_t size;
+        char* buffer = nullptr;
+        size_t size = 0;
         std::string format;
-        bool corrupted;
+        bool corrupted = false;
     };
 
     BooleanType(UseMultipleThreads);

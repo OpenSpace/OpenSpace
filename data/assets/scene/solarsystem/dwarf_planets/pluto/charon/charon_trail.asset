@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('../transforms')
+local transforms = asset.require("../transforms")
 asset.require("spice/base")
 
 
@@ -17,10 +16,10 @@ local CharonTrailBarycentric = {
     Period = 6.38723,
     Resolution = 1000
   },
-  Tag = { 
-    "moonTrail_solarSystem", 
-    "moonTrail_dwarf", 
-    "moonTrail_pluto", 
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_dwarf",
+    "moonTrail_pluto",
     "moonTrail_minor"
   },
   GUI = {
@@ -29,13 +28,22 @@ local CharonTrailBarycentric = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { CharonTrailBarycentric })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CharonTrailBarycentric)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CharonTrailBarycentric)
+end)
+
+asset.export(CharonTrailBarycentric)
+
 
 
 asset.meta = {
   Name = "Charon Barycentric Trail",
   Version = "1.0",
-  Description = [[ Trail of Charon as observed by Pluto Barycenter. Data from
+  Description = [[Trail of Charon as observed by Pluto Barycenter. Data from
     NASA Spice (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <openspace/util/spicemanager.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
@@ -37,12 +38,12 @@
 #include "SpiceZpr.h"
 
 namespace {
-    constexpr const char* _loggerCat = "SpiceManager";
+    constexpr std::string_view _loggerCat = "SpiceManager";
 
     // The value comes from
     // http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getmsg_c.html
     // as the maximum message length
-    constexpr const unsigned SpiceErrorBufferSize = 1841;
+    constexpr unsigned SpiceErrorBufferSize = 1841;
 
     const char* toString(openspace::SpiceManager::FieldOfViewMethod m) {
         using SM = openspace::SpiceManager;
@@ -150,9 +151,9 @@ SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString(
 
 SpiceManager::SpiceManager() {
     // Set the SPICE library to not exit the program if an error occurs
-    erract_c("SET", 0, const_cast<char*>("REPORT")); // NOLINT
+    erract_c("SET", 0, const_cast<char*>("REPORT"));
     // But we do not want SPICE to print the errors, we will fetch them ourselves
-    errprt_c("SET", 0, const_cast<char*>("NONE")); // NOLINT
+    errprt_c("SET", 0, const_cast<char*>("NONE"));
 }
 
 SpiceManager::~SpiceManager() {
@@ -161,8 +162,8 @@ SpiceManager::~SpiceManager() {
     }
 
     // Set values back to default
-    erract_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
-    errprt_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
+    erract_c("SET", 0, const_cast<char*>("DEFAULT"));
+    errprt_c("SET", 0, const_cast<char*>("DEFAULT"));
 }
 
 void SpiceManager::initialize() {
@@ -204,13 +205,13 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty file path");
     ghoul_assert(
         std::filesystem::is_regular_file(filePath),
-        fmt::format("File '{}' ('{}') does not exist", filePath, absPath(filePath))
+        fmt::format("File '{}' ({}) does not exist", filePath, absPath(filePath))
     );
     ghoul_assert(
         std::filesystem::is_directory(std::filesystem::path(filePath).parent_path()),
         fmt::format(
-            "File '{}' exists, but directory '{}' doesn't",
-            absPath(filePath), std::filesystem::path(filePath).parent_path().string()
+            "File {} exists, but directory {} does not",
+            absPath(filePath), std::filesystem::path(filePath).parent_path()
         )
     );
 
@@ -231,10 +232,10 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     // kernels
     std::filesystem::path currentDirectory = std::filesystem::current_path();
 
-    std::filesystem::path p = std::filesystem::path(path).parent_path();
+    std::filesystem::path p = path.parent_path();
     std::filesystem::current_path(p);
 
-    LINFO(fmt::format("Loading SPICE kernel '{}'", path));
+    LINFO(fmt::format("Loading SPICE kernel {}", path));
     // Load the kernel
     furnsh_c(path.string().c_str());
 
@@ -245,7 +246,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
         throwSpiceError("Kernel loading");
     }
 
-    std::filesystem::path fileExtension = std::filesystem::path(path).extension();
+    std::filesystem::path fileExtension = path.extension();
     if (fileExtension == ".bc" || fileExtension == ".BC") {
         findCkCoverage(path.string()); // binary ck kernel
     }
@@ -273,7 +274,7 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
             // No need to check for errors as we do not allow empty path names
-            LINFO(fmt::format("Unloading SPICE kernel '{}'", it->path));
+            LINFO(fmt::format("Unloading SPICE kernel {}", it->path));
             unload_c(it->path.c_str());
             _loadedKernels.erase(it);
         }
@@ -299,7 +300,7 @@ void SpiceManager::unloadKernel(std::string filePath) {
     if (it == _loadedKernels.end()) {
         if (_useExceptions) {
             throw SpiceException(
-                fmt::format("'{}' did not correspond to a loaded kernel", path)
+                fmt::format("{} did not correspond to a loaded kernel", path)
             );
         }
         else {
@@ -309,7 +310,7 @@ void SpiceManager::unloadKernel(std::string filePath) {
     else {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
-            LINFO(fmt::format("Unloading SPICE kernel '{}'", path));
+            LINFO(fmt::format("Unloading SPICE kernel {}", path));
             unload_c(path.string().c_str());
             _loadedKernels.erase(it);
         }
@@ -325,6 +326,11 @@ bool SpiceManager::hasSpkCoverage(const std::string& target, double et) const {
     ghoul_assert(!target.empty(), "Empty target");
 
     const int id = naifId(target);
+    // SOLAR SYSTEM BARYCENTER special case, implicitly included by Spice
+    if (id == 0) {
+        return true;
+    }
+
     const auto it = _spkIntervals.find(id);
     if (it != _spkIntervals.end()) {
         const std::vector<std::pair<double, double>>& intervalVector = it->second;
@@ -398,8 +404,19 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
 {
     std::vector<std::pair<int, std::string>> bodies;
 
-    constexpr const int Frnmln = 33;
-    SPICEINT_CELL(idset, 8192);
+    constexpr int Frnmln = 33;
+    static SpiceInt idsetBuffer[SPICE_CELL_CTRLSZ + 8192];
+    static SpiceCell idset = {
+        SPICE_INT,
+        0,
+        8192,
+        0,
+        SPICETRUE,
+        SPICEFALSE,
+        SPICEFALSE,
+        &idsetBuffer,
+        &(idsetBuffer[SPICE_CELL_CTRLSZ])
+    };
 
     SpiceChar frname[Frnmln];
 
@@ -571,16 +588,23 @@ double SpiceManager::ephemerisTimeFromDate(const char* timeString) const {
 
 std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime, const char* format)
 {
-    char Buffer[128];
-    std::memset(Buffer, char(0), 128);
+    constexpr int BufferSize = 128;
+    char Buffer[BufferSize];
+    std::memset(Buffer, char(0), BufferSize);
 
-    timout_c(ephemerisTime, format, 128, Buffer);
+    timout_c(ephemerisTime, format, BufferSize, Buffer);
     if (failed_c()) {
         throwSpiceError(fmt::format(
             "Error converting ephemeris time '{}' to date with format '{}'",
             ephemerisTime, format
         ));
     }
+    if (Buffer[0] == '*') {
+        // The conversion failed and we need to use et2utc
+        constexpr int SecondsPrecision = 3;
+        et2utc_c(ephemerisTime, "C", SecondsPrecision, BufferSize, Buffer);
+    }
+
 
     return std::string(Buffer);
 }
@@ -607,7 +631,7 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
             );
         }
         else {
-            return glm::dvec3();
+            return glm::dvec3(0.0);
         }
     }
     else if (targetHasCoverage && observerHasCoverage) {
@@ -678,7 +702,7 @@ glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
     ghoul_assert(!to.empty(), "To must not be empty");
 
     // get rotation matrix from frame A - frame B
-    glm::dmat3 transform;
+    glm::dmat3 transform = glm::dmat3(1.0);
     pxform_c(
         from.c_str(),
         to.c_str(),
@@ -851,7 +875,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
     ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
     ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
-    glm::dmat3 result;
+    glm::dmat3 result = glm::dmat3(1.0);
     pxform_c(
         sourceFrame.c_str(),
         destinationFrame.c_str(),
@@ -883,7 +907,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
     ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
     ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
-    glm::dmat3 result;
+    glm::dmat3 result = glm::dmat3(1.0);
 
     pxfrm2_c(
         sourceFrame.c_str(),
@@ -1006,8 +1030,8 @@ void SpiceManager::findCkCoverage(const std::string& path) {
         fmt::format("File '{}' does not exist", path)
     );
 
-    constexpr unsigned int MaxObj = 256;
-    constexpr unsigned int WinSiz = 10000;
+    constexpr unsigned int MaxObj = 1024;
+    constexpr unsigned int WinSiz = 16384;
 
 #if defined __clang__
 #pragma clang diagnostic push
@@ -1026,7 +1050,7 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     }
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
-        const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
+        const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i);
 
 #if defined __clang__
 #pragma clang diagnostic pop
@@ -1065,8 +1089,8 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
         fmt::format("File '{}' does not exist", path)
     );
 
-    constexpr unsigned int MaxObj = 256;
-    constexpr unsigned int WinSiz = 10000;
+    constexpr unsigned int MaxObj = 1024;
+    constexpr unsigned int WinSiz = 16384;
 
 #if defined __clang__
 #pragma clang diagnostic push
@@ -1085,7 +1109,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
     }
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
-        const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
+        const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i);
 
 #if defined __clang__
 #pragma clang diagnostic pop
@@ -1125,7 +1149,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
                                               double ephemerisTime,
                                               double& lightTime) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(!target.empty(), "Target must not be empty");
     ghoul_assert(!observer.empty(), "Observer must not be empty");
@@ -1145,7 +1169,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
             throw SpiceException(fmt::format("No position for '{}' at any time", target));
         }
         else {
-            return glm::dvec3();
+            return glm::dvec3(0.0);
         }
     }
 
@@ -1337,46 +1361,11 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
     return {
         "spice",
         {
-            {
-                "loadKernel",
-                &luascriptfunctions::loadKernel,
-                {},
-                "string",
-                "Loads the provided SPICE kernel by name. The name can contain path "
-                "tokens, which are automatically resolved"
-            },
-            {
-                "unloadKernel",
-                &luascriptfunctions::unloadKernel,
-                {},
-                "{string, number}",
-                "Unloads the provided SPICE kernel. The name can contain path tokens, "
-                "which are automatically resolved"
-            },
-            {
-                "getSpkCoverage",
-                &luascriptfunctions::spkCoverage,
-                {},
-                "{string [, printValues]}",
-                "Returns a list of SPK coverage intervals for the target."
-            },
-            {
-                "getCkCoverage",
-                & luascriptfunctions::ckCoverage,
-                {},
-                "{string [, printValues]}",
-                "Returns a list of CK coverage intervals for the target."
-            },
-            {
-                "getSpiceBodies",
-                &luascriptfunctions::spiceBodies,
-                {},
-                "{ builtInFrames [, printValues] }",
-                "Returns a list of Spice Bodies loaded into the system. Returns SPICE "
-                "built in frames if builtInFrames. Returns User loaded frames if "
-                "!builtInFrames"
-            }
-
+            codegen::lua::LoadKernel,
+            codegen::lua::UnloadKernel,
+            codegen::lua::SpiceBodies,
+            codegen::lua::RotationMatrix,
+            codegen::lua::Position
         }
     };
 }

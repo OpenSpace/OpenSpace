@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,7 +60,7 @@ public:
     void appendNewInputEventsSinceLastCall(VRDataQueue* queue) override;
 };
 
-constexpr const char* _loggerCat = "main_minvr";
+constexpr std::string_view _loggerCat = "main_minvr";
 
 VRMain engine;
 Handler handler;
@@ -86,7 +86,7 @@ struct {
 
 bool HasInitializedGL = false;
 std::array<float, 30> LastFrametimes = { 1.f / 60.f }; // we can be optimistic here
-constexpr const char* MasterNode = "/MinVR/Desktop1";
+constexpr std::string_view MasterNode = "/MinVR/Desktop1";
 bool IsMasterNode = false;
 uint64_t FrameNumber = 0;
 std::chrono::time_point<std::chrono::high_resolution_clock> lastFrameTime;

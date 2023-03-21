@@ -1,0 +1,50 @@
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+
+local travelSpeedIndicator = {
+  Identifier = "TravelSpeedIndicator-2000",
+  --SunIAU adds an extra rotation. Using barycenter, then offsetting to SunIAU
+  Parent =  sunTransforms.SolarSystemBarycenter.Identifier,
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 695700000.0,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SUN",
+      Observer = "SSB"
+    }
+  },
+  Renderable = {
+    Type = "RenderableTravelSpeed",
+    Target = earthTransforms.EarthCenter.Identifier,    --name of scene graph node. Earth by default
+    LineWidth = 4,
+    IndicatorLength = 10,
+    FadeLength = 10
+  },
+   GUI = {
+    Path = "/Solar System/Heliosphere",
+    Name = "Speed indicator",
+    Description = "Speed of light indicator from sun to earth"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(travelSpeedIndicator)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(travelSpeedIndicator)
+end)
+
+asset.export(travelSpeedIndicator)
+
+
+asset.meta = {
+  Name = "Light travel from sun to earth",
+  Version = "1.0",
+  Description = "Speed of light indicator from sun to earth",
+  Author = "CCMC, Christian Adamsson, Emilie Ho",
+  URL = "",
+  License = "MIT"
+}

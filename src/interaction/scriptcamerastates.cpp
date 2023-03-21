@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,13 +24,11 @@
 
 #include <openspace/interaction/scriptcamerastates.h>
 
-#include <openspace/interaction/inputstate.h>
-
 namespace openspace::interaction {
 
 ScriptCameraStates::ScriptCameraStates() : CameraInteractionStates(1.0, 1.0) {}
 
-void ScriptCameraStates::updateStateFromInput(const InputState&, double deltaTime) {
+void ScriptCameraStates::updateStateFromInput(double deltaTime) {
     if (_localRotation != glm::dvec2(0.0)) {
         _localRotationState.velocity.set(
             _localRotation * _sensitivity,

@@ -1,36 +1,45 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "GHRSST_L4_MUR_Sea_Surface_Temperature_Temporal",
   Name = "GHRSST L4 MUR Sea Surface Temperature (Temporal)",
+  Enabled = asset.enabled,
   Type = "TemporalTileLayer",
-  FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-    "GHRSST_L4_MUR_Sea_Surface_Temperature",
-    "2002-06-01",
-    "Yesterday",
-    "1d",
-    "1km",
-    "jpg"
-  ),
-  Description = [[ Temporal coverage: 01 June 2002 - Present. The imagery resolution
-    is 1 km, and the temporal resolution is daily.]]
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2002-06-01",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "GHRSST_L4_MUR_Sea_Surface_Temperature",
+      "1km",
+      "png"
+    )
+  },
+  Description = [[Temporal coverage: 01 June 2002 - Present. The imagery resolution
+    is 1 km, and the temporal resolution is daily]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "GHRSST L4 MUR Sea Surface Temperature (Temporal)",
-  Version = "1.0",
-  Description = [[ GIBS hosted layer created with
-    openspace.globebrowsing.createTemporalGibsGdalXml ]],
+  Version = "1.1",
+  Description = "GIBS hosted layer",
   Author = "NASA EOSDIS Global Imagery Browse Services",
-  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/"..
-    "eosdis-components/gibs",
-  License = "NASA",
-  Identifiers = {"GHRSST_L4_MUR_Sea_Surface_Temperature_Temporal"}
+  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
+  License = "NASA"
 }

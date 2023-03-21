@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <modules/spacecraftinstruments/util/instrumenttimesparser.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
@@ -34,12 +35,16 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "InstrumentTimesParser";
+    constexpr std::string_view _loggerCat = "InstrumentTimesParser";
 
-    constexpr const char* KeyTargetBody = "Target.Body";
-    constexpr const char* KeyInstruments = "Instruments";
-    constexpr const char* KeyInstrument = "Instrument";
-    constexpr const char* KeyInstrumentFiles = "Files";
+    constexpr std::string_view KeyInstrument = "Instrument";
+    constexpr std::string_view KeyInstrumentFiles = "Files";
+
+    struct [[codegen::Dictionary(InstrumentTimesParser)]] Parameters {
+        std::string target;
+        std::map<std::string, ghoul::Dictionary> instruments;
+    };
+#include "instrumenttimesparser_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -50,18 +55,16 @@ InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string seque
     , _name(std::move(name))
     , _fileName(std::move(sequenceSource))
 {
+    const Parameters p = codegen::bake<Parameters>(inputDict);
 
-    _target = inputDict.value<std::string>(KeyTargetBody);
-    ghoul::Dictionary instruments = inputDict.value<ghoul::Dictionary>(KeyInstruments);
-
-    for (std::string_view key : instruments.keys()) {
-        ghoul::Dictionary instrument = instruments.value<ghoul::Dictionary>(key);
-        ghoul::Dictionary files = instrument.value<ghoul::Dictionary>(KeyInstrumentFiles);
-        _fileTranslation[std::string(key)] =
-            Decoder::createFromDictionary(instrument, KeyInstrument);
+    _target = p.target;
+    for (const std::pair<const std::string, ghoul::Dictionary>& ps : p.instruments) {
+        ghoul::Dictionary files = ps.second.value<ghoul::Dictionary>(KeyInstrumentFiles);
+        _fileTranslation[ps.first] =
+            Decoder::createFromDictionary(ps.second, KeyInstrument);
         for (size_t i = 0; i < files.size(); i++) {
             std::string filename = files.value<std::string>(std::to_string(i + 1));
-            _instrumentFiles[std::string(key)].push_back(std::move(filename));
+            _instrumentFiles[ps.first].push_back(std::move(filename));
         }
     }
 }
@@ -92,47 +95,46 @@ bool InstrumentTimesParser::create() {
             TimeRange instrumentActiveTimeRange;
             bool successfulRead = true;
             while (std::getline(inFile, line)) {
-                if (std::regex_match(line, matches, _pattern)) {
-                    if (matches.size() != 3) {
-                        LERROR(
-                            "Bad event data formatting. Must \
-                            have regex 3 matches (source string, start time, stop time)."
-                        );
-                        successfulRead = false;
-                        break;
-                    }
-
-                    TimeRange captureTimeRange;
-                    try { // parse date strings
-                        std::string start = matches[1].str();
-                        std::string stop = matches[2].str();
-                        captureTimeRange.start =
-                            SpiceManager::ref().ephemerisTimeFromDate(start);
-                        captureTimeRange.end =
-                            SpiceManager::ref().ephemerisTimeFromDate(stop);
-                    }
-                    catch (const SpiceManager::SpiceException& e) {
-                        LERROR(e.what());
-                        successfulRead = false;
-                        break;
-                    }
-
-                    instrumentActiveTimeRange.include(captureTimeRange);
-
-                    //_instrumentTimes.push_back({ instrumentID, timeRange });
-                    _targetTimes.emplace_back(captureTimeRange.start, _target);
-                    _captureProgression.push_back(captureTimeRange.start);
-
-                    Image image = {
-                        captureTimeRange,
-                        std::string(),
-                        { instrumentID },
-                        _target,
-                        true,
-                        false
-                    };
-                    _subsetMap[_target]._subset.push_back(std::move(image));
+                if (!std::regex_match(line, matches, _pattern)) {
+                    continue;
                 }
+
+                if (matches.size() != 3) {
+                    LERROR(
+                        "Bad event data formatting. Must have regex 3 matches "
+                        "(source string, start time, stop time)"
+                    );
+                    successfulRead = false;
+                    break;
+                }
+
+                TimeRange tr;
+                try { // parse date strings
+                    std::string start = matches[1].str();
+                    std::string stop = matches[2].str();
+                    tr.start = SpiceManager::ref().ephemerisTimeFromDate(start);
+                    tr.end = SpiceManager::ref().ephemerisTimeFromDate(stop);
+                }
+                catch (const SpiceManager::SpiceException& e) {
+                    LERROR(e.what());
+                    successfulRead = false;
+                    break;
+                }
+
+                instrumentActiveTimeRange.include(tr);
+
+                _targetTimes.emplace_back(tr.start, _target);
+                _captureProgression.push_back(tr.start);
+
+                Image image = {
+                    .timeRange = tr,
+                    .path = std::string(),
+                    .activeInstruments = { instrumentID },
+                    .target = _target,
+                    .isPlaceholder = true,
+                    .projected = false
+                };
+                _subsetMap[_target]._subset.push_back(std::move(image));
             }
             if (successfulRead){
                 _subsetMap[_target]._range.include(instrumentActiveTimeRange);

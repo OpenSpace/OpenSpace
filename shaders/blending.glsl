@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,8 @@
  * src is expressed in straight RGBA
  */
 void normalBlend(inout vec4 dst, vec4 src) {
-    dst.rgb = dst.rgb + (1.f - dst.a) * src.a * src.rgb;
-    dst.a = dst.a + (1.f - dst.a) * src.a;
+  dst.rgb = dst.rgb + (1.f - dst.a) * src.a * src.rgb;
+  dst.a = dst.a + (1.f - dst.a) * src.a;
 }
 
 /**
@@ -41,8 +41,7 @@ void normalBlend(inout vec4 dst, vec4 src) {
  * src is expressed in straight RGBA
  */
 void additiveBlend(inout vec4 dst, vec4 src) {
-    dst.rgb = dst.rgb + (1.f - dst.a) * src.a * src.rgb;//    dst.rgb = dst.rgb + src.a * src.rgb;
-    //dst.a = dst.a + src.a;
+  dst.rgb = dst.rgb + (1.f - dst.a) * src.a * src.rgb;
 }
 
 
@@ -54,8 +53,8 @@ void additiveBlend(inout vec4 dst, vec4 src) {
  * stepSize = 1: alpha becomes src.a
  */
 void normalBlendStep(inout vec4 dst, vec4 src, float stepSize) {
-    src.a = 1.f - pow(1.f - src.a, stepSize);
-    normalBlend(dst, src);
+  src.a = 1.f - pow(1.f - src.a, stepSize);
+  normalBlend(dst, src);
 }
 
 /**
@@ -66,8 +65,8 @@ void normalBlendStep(inout vec4 dst, vec4 src, float stepSize) {
  * stepSize = 1: alpha becomes src.a
  */
 void additiveBlendStep(inout vec4 dst, vec4 src, float stepSize) {
-    src.a = 1.0 - pow(1.0 - src.a, stepSize);
-    additiveBlend(dst, src);
+  src.a = 1.0 - pow(1.0 - src.a, stepSize);
+  additiveBlend(dst, src);
 }
 
 /**
@@ -76,8 +75,8 @@ void additiveBlendStep(inout vec4 dst, vec4 src, float stepSize) {
  * src is expressed in straight RGBA
  */
 void blend(inout vec4 dst, vec4 src) {
-    dst.rgb = dst.rgb + (1.f - dst.a) * src.a * src.rgb;
-    dst.a = dst.a + (1.f - dst.a) * src.a;
+  dst.rgb = dst.rgb + (1.f - dst.a) * src.a * src.rgb;
+  dst.a = dst.a + (1.f - dst.a) * src.a;
 }
 
 /**
@@ -88,8 +87,8 @@ void blend(inout vec4 dst, vec4 src) {
  * stepSize = 1: alpha becomes src.a
  */
 void blendStep(inout vec4 dst, vec4 src, float stepSize) {
-    src.a = 1.0 - pow(1.f - src.a, stepSize);
-    blend(dst, src);
+  src.a = 1.0 - pow(1.f - src.a, stepSize);
+  blend(dst, src);
 }
 
 #endif // _BLENDING_GLSL_

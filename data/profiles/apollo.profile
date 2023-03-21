@@ -1,11 +1,10 @@
 {
   "assets": [
     "base",
+    "scene/solarsystem/missions/apollo/8/apollo8",
     "scene/solarsystem/missions/apollo/11/apollo11",
     "scene/solarsystem/missions/apollo/11/lem_flipbook",
-    "scene/solarsystem/missions/apollo/17/lem",
-    "scene/solarsystem/missions/apollo/8/apollo8",
-    "scene/solarsystem/missions/apollo/apollo_globebrowsing",
+    "scene/solarsystem/missions/apollo/17/apollo17",
     "scene/solarsystem/missions/apollo/insignias_map"
   ],
   "camera": {
@@ -39,76 +38,40 @@
   ],
   "keybindings": [
     {
-      "documentation": "Jump to right before the earthrise photo",
-      "gui_path": "/Missions/Apollo/8",
-      "is_local": false,
-      "key": "E",
-      "name": "Set Earthrise time",
-      "script": "openspace.time.setPause(true); openspace.time.setDeltaTime(1); openspace.time.setTime('1968 DEC 24 16:37:31'); openspace.navigation.setNavigationState({Anchor = 'Apollo8', Position = { 1.494592E1, 3.236777E1, -4.171296E1 }, ReferenceFrame = 'Root', Up = { 0.960608E0, -0.212013E0, 0.179675E0 }}); openspace.setPropertyValue('*Trail.Renderable.Enabled', false);"
+      "action": "os.missions.apollo8.setup.earthrise",
+      "key": "E"
     },
     {
-      "documentation": "Jump to time right before Apollo 8 liftoff, with its trail enabled",
-      "gui_path": "/Missions/Apollo/8",
-      "is_local": false,
-      "key": "U",
-      "name": "Set Apollo 8 launch time",
-      "script": "openspace.time.setTime('1968-12-21T12:51:37.00'); openspace.setPropertyValueSingle('Scene.Apollo8LaunchTrail.Renderable.Enabled', true);"
+      "action": "os.missions.apollo8.setup.launch",
+      "key": "U"
     },
     {
-      "documentation": "Toggles Moon Kaguya color layer",
-      "gui_path": "/Missions/Apollo",
-      "is_local": false,
-      "key": "K",
-      "name": "Toggle Kaguya layer",
-      "script": "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled', not openspace.getPropertyValue('Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled'));"
+      "action": "os.missions.apollo.moon.togglekaguyalayer",
+      "key": "K"
     },
     {
-      "documentation": "Toggles shading for the Moon",
-      "gui_path": "/Missions/Apollo",
-      "is_local": false,
-      "key": "S",
-      "name": "Toggle Moon shading",
-      "script": "openspace.setPropertyValueSingle('Scene.Moon.Renderable.PerformShading', not openspace.getPropertyValue('Scene.Moon.Renderable.PerformShading'));"
+      "action": "os.missions.apollo.moon.toggleshading",
+      "key": "S"
     },
     {
-      "documentation": "Set camera focus to the Earth",
-      "gui_path": "/Missions/Apollo",
-      "is_local": false,
-      "key": "HOME",
-      "name": "Focus on Earth",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth'); openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "os.missions.apollo.earth.focus",
+      "key": "Home"
     },
     {
-      "documentation": "Set camera focus to the Moon",
-      "gui_path": "/Missions/Apollo",
-      "is_local": false,
-      "key": "M",
-      "name": "Focus on Moon",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon'); openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "os.missions.apollo.moon.focus",
+      "key": "M"
     },
     {
-      "documentation": "Disable apollo site on moon when leaving",
-      "gui_path": "/Missions/Apollo",
-      "is_local": false,
-      "key": "F9",
-      "name": "Disable Apollo sites",
-      "script": "openspace.setPropertyValue('Scene.Moon.Renderable.Layers.ColorLayers.A17_*.Enabled', false); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', false); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', false); openspace.setPropertyValueSingle('Scene.Apollo11MoonTrail.Renderable.Enabled', false); openspace.setPropertyValueSingle('Scene.Apollo11LemTrail.Renderable.Enabled', false); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled', false);"
+      "action": "os.missions.apollo17.setup.landingsite",
+      "key": "F7"
     },
     {
-      "documentation": "Setup for Apollo 11 landing site",
-      "gui_path": "/Missions/Apollo/11",
-      "is_local": false,
-      "key": "F11",
-      "name": "Setup A11 site",
-      "script": "openspace.time.setTime('1969 JUL 20 20:17:40'); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', true); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', true); openspace.setPropertyValueSingle('Scene.Moon.Renderable.TargetLodScaleFactor', 20.11); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo11LemPosition'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil); openspace.setPropertyValueSingle('Scene.Apollo11MoonTrail.Renderable.Enabled', true); openspace.setPropertyValueSingle('Scene.Apollo11LemTrail.Renderable.Enabled', true);"
+      "action": "os.missions.apollo.moon.disableapollosites",
+      "key": "F9"
     },
     {
-      "documentation": "Setup for Apollo 17 landing site",
-      "gui_path": "/Missions/Apollo/17",
-      "is_local": false,
-      "key": "F7",
-      "name": "Setup A17 site",
-      "script": "openspace.time.setTime('1972 DEC 12 19:47:11'); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode', 0.000000); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.Enabled', true); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled', true); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_LEM.Enabled', true); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_LEM.BlendMode', 0.000000); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_NAC_Alt_p.Enabled', true); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_NAC_Alt_p.BlendMode', 0.000000); openspace.setPropertyValueSingle('Scene.Moon.Renderable.TargetLodScaleFactor', 20.17); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo17LemModel'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_station7.BlendMode', 0.000000);"
+      "action": "os.missions.apollo11.setup.landingsite",
+      "key": "F11"
     }
   ],
   "mark_nodes": [
@@ -145,6 +108,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 1
   }
 }

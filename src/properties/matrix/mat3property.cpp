@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,16 +41,12 @@ Mat3Property::Mat3Property(Property::PropertyInfo info, glm::mat3x3 value,
     )
 {}
 
-std::string Mat3Property::className() const {
+std::string_view Mat3Property::className() const {
     return "Mat3Property";
 }
 
 int Mat3Property::typeLua() const {
     return LUA_TTABLE;
-}
-
-glm::mat3x3 Mat3Property::fromLuaConversion(lua_State* state, bool& success) const {
-    return ghoul::lua::tryGetValue<glm::mat3x3>(state, success);
 }
 
 }  // namespace openspace::properties

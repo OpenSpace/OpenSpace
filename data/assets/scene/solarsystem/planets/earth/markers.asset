@@ -1,8 +1,12 @@
-local transforms = asset.require('./transforms')
-local assetHelper = asset.require('util/asset_helper')
-local texturesPath = asset.require('./earth_textures').TexturesPath
+local transforms = asset.require("./transforms")
 
 
+local texturesPath = asset.syncedResource({
+  Name = "Earth Textures",
+  Type = "HttpSynchronization",
+  Identifier = "earth_textures",
+  Version = 2
+})
 
 local EarthMarker = {
   Identifier = "EarthMarker",
@@ -13,7 +17,7 @@ local EarthMarker = {
     Size = 3.0E11,
     Origin = "Center",
     Billboard = true,
-    Texture = texturesPath .. "/marker.png",
+    Texture = texturesPath .. "marker.png",
     BlendMode = "Additive"
   },
   GUI = {
@@ -22,15 +26,23 @@ local EarthMarker = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { EarthMarker })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EarthMarker)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthMarker)
+end)
+
+asset.export(EarthMarker)
+
 
 
 asset.meta = {
   Name = "Earth marker",
-  Version = "1.0",
-  Description = [[ Earth marker with name, sized for Solar System view]],
+  Version = "1.1",
+  Description = "Earth marker with name, sized for Solar System view",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"EarthMarker"}
+  License = "MIT license"
 }

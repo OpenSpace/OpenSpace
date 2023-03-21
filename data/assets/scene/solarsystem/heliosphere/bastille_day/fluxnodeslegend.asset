@@ -1,0 +1,62 @@
+asset.require("spice/base")
+
+local TexturesPath = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Streamnodes textures",
+  Identifier = "streamnodes_legend",
+  Version = 1
+})
+
+local legend = {
+  Identifier = "LegendFluxNodes-bastille-day-2000",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = TexturesPath .. "CMR_transparent_white_text.png",
+  Scale = 0.15,
+  CartesianPosition = { 0.677970, 0.0, -1.049180 }
+}
+
+local show_legend = {
+  Identifier = "os.events.bastilleday.fluxnodelegend.showlegend",
+  Name = "Show the legend image",
+  Command = [[
+    openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Opacity", 0.0);
+    openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", true);
+    openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Opacity", 1.0, 4);
+  ]],
+  Documentation = "Show the legend image",
+  GuiPath = "/Bastille-Day 2000",
+  IsLocal =  false
+}
+
+local hide_legend = {
+  Identifier = "os.events.bastilleday.fluxnodelegend.hidelegend",
+  Name = "Hides the legend image",
+  Command = [[openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Opacity", 0.0, 2)]],
+  Documentation = "Hides the legend image",
+  GuiPath = "/Bastille-Day 2000",
+  IsLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(legend)
+  -- These numbers are there to put the legend on the side of the screen.
+  openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Rotation", { 0.0, 0.0, 0.56652 });
+  openspace.action.registerAction(show_legend)
+  openspace.action.registerAction(hide_legend)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeScreenSpaceRenderable(legend)
+  openspace.action.removeAction(show_legend)
+  openspace.action.removeAction(hide_legend)
+end)
+
+asset.meta = {
+  Name = "Predictive Science Inc. Flux nodes legend for Bastille Days",
+  Version = "1.1",
+  Description = [[Screen space renderable image legend of flux nodes for the bastille day
+    CME event]],
+  Author = "Christian Adamsson, Emilie Ho",
+  URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+  License = "MIT"
+}

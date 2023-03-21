@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,13 +38,13 @@ BooleanType(SkipAllZeroLines);
 
 struct Dataset {
     struct Variable {
-        int index;
+        int index = -1;
         std::string name;
     };
     std::vector<Variable> variables;
 
     struct Texture {
-        int index;
+        int index = -1;
         std::string file;
     };
     std::vector<Texture> textures;
@@ -53,7 +53,7 @@ struct Dataset {
     int orientationDataIndex = -1;
 
     struct Entry {
-        glm::vec3 position;
+        glm::vec3 position = glm::vec3(0.f);
         std::vector<float> data;
         std::optional<std::string> comment;
     };
@@ -67,8 +67,10 @@ struct Labelset {
     int textColorIndex = -1;
 
     struct Entry {
-        glm::vec3 position;
+        glm::vec3 position = glm::vec3(0.f);
+        std::string identifier;
         std::string text;
+        bool isEnabled = true;
     };
     std::vector<Entry> entries;
 };

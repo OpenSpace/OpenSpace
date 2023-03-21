@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,18 +33,19 @@
 #include <QPushButton>
 #include <QTextEdit>
 #include <QVBoxLayout>
+#include <sstream>
 
-AdditionalScriptsDialog::AdditionalScriptsDialog(openspace::Profile& profile,
-                                                 QWidget* parent)
+AdditionalScriptsDialog::AdditionalScriptsDialog(QWidget* parent,
+                                                 std::vector<std::string>* scripts)
     : QDialog(parent)
-    , _profile(profile)
+    , _scripts(scripts)
+    , _scriptsData(*_scripts)
 {
     setWindowTitle("Additional Scripts");
     createWidgets();
 
-    std::vector<std::string> scripts = _profile.additionalScripts();
     std::string scriptText = std::accumulate(
-        scripts.begin(), scripts.end(),
+        _scriptsData.begin(), _scriptsData.end(),
         std::string(), [](std::string lhs, std::string rhs) { return lhs + rhs + '\n'; }
     );
     _textScripts->setText(QString::fromStdString(std::move(scriptText)));
@@ -95,16 +96,21 @@ void AdditionalScriptsDialog::parseScript() {
         std::getline(iss, s);
         additionalScripts.push_back(std::move(s));
     }
-    _profile.setAdditionalScripts(additionalScripts);
+    *_scripts = std::move(additionalScripts);
     accept();
 }
 
 void AdditionalScriptsDialog::chooseScripts() {
     ScriptlogDialog d(this);
-    connect(&d, &ScriptlogDialog::scriptsSelected, this, &AdditionalScriptsDialog::appendScriptsToTextfield);
+    connect(
+        &d, &ScriptlogDialog::scriptsSelected,
+        this, &AdditionalScriptsDialog::appendScriptsToTextfield
+    );
     d.exec();
 }
 
-void AdditionalScriptsDialog::appendScriptsToTextfield(std::string scripts) {
-    _textScripts->append(QString::fromStdString(std::move(scripts)));
+void AdditionalScriptsDialog::appendScriptsToTextfield(std::vector<std::string> scripts) {
+    for (std::string script : scripts) {
+        _textScripts->append(QString::fromStdString(std::move(script)));
+    }
 }

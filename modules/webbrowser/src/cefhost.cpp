@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,49 +32,46 @@
 
 #ifdef __APPLE__
 #include <include/wrapper/cef_library_loader.h>
-#endif
+#endif // __APPLE__
 
 namespace {
-    constexpr const char* _loggerCat = "CefHost";
+    constexpr std::string_view _loggerCat = "CefHost";
 } // namespace
 
 namespace openspace {
 
-CefHost::CefHost(const std::string& helperLocation) {
+CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
     LDEBUG("Initializing CEF...");
 
     CefSettings settings;
 
 #ifndef __APPLE__
-    // Apple will always look for helper in a fixed location.
+    // Apple will always look for helper in a fixed location
     CefString(&settings.browser_subprocess_path).FromString(helperLocation);
-#else
-    // Silence a warning about unused variable
-    (void)helperLocation;
-#endif
+#endif // __APPLE__
 
     settings.windowless_rendering_enabled = true;
     attachDebugSettings(settings);
 
 #ifdef WIN32
-    // Enable High-DPI support on Windows 7 or newer.
+    // Enable High-DPI support on Windows 7 or newer
     CefEnableHighDPISupport();
-#endif
+#endif // WIN32
 
 #ifdef __APPLE__
-    // Load the CEF framework library at runtime instead of linking directly
-    // as required by the macOS sandbox implementation.
+    // Load the CEF framework library at runtime instead of linking directly as required
+    // by the macOS sandbox implementation
     CefScopedLibraryLoader library_loader;
     if (!library_loader.LoadInMain()) {
         return;
     }
-#endif
+#endif // __APPLE__
 
     CefRefPtr<WebBrowserApp> app(new WebBrowserApp);
 
     CefMainArgs args;
     CefInitialize(args, settings, app.get(), nullptr);
-    LDEBUG("Initializing CEF... done!");
+    LDEBUG("Initializing CEF... done");
 }
 
 CefHost::~CefHost() {
@@ -91,7 +88,7 @@ void CefHost::attachDebugSettings(CefSettings &settings) {
 }
 
 void CefHost::doMessageLoopWork() {
-    ZoneScoped
+    ZoneScoped;
 
     CefDoMessageLoopWork();
 }

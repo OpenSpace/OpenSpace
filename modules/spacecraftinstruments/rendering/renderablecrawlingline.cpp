@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,10 +31,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
-#include <optional>
 
 namespace {
     struct VBOData {
@@ -75,9 +73,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableCrawlingLine::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "newhorizons_renderable_crawlingline";
-    return doc;
+    return codegen::doc<Parameters>("spacecraftinstruments_renderablecrawlingline");
 }
 
 RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictionary)
@@ -120,7 +116,7 @@ void RenderableCrawlingLine::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(VBOData),
-        reinterpret_cast<void*>(offsetof(VBOData, color)) // NOLINT
+        reinterpret_cast<void*>(offsetof(VBOData, color))
     );
 
     glBindVertexArray(0);
@@ -147,8 +143,8 @@ void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
     _frameCounter++;
 
     glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewProjectionTransform = data.camera.projectionMatrix() *
@@ -162,10 +158,9 @@ void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
 
     glLineWidth(2.f);
 
-    _program->setUniform("_alpha", alpha);
+    _program->setUniform("alpha", alpha);
 
     glBindVertexArray(_vao);
-
     glDrawArrays(GL_LINES, 0, 2);
     glBindVertexArray(0);
 
@@ -204,20 +199,15 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
 
 
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferSubData(
-        GL_ARRAY_BUFFER,
-        0,
-        2 * sizeof(VBOData),
-        vboData
-    );
+    glBufferSubData(GL_ARRAY_BUFFER, 0, 2 * sizeof(VBOData), vboData);
 
     if (ImageSequencer::ref().isReady()) {
-        _imageSequenceTime = ImageSequencer::ref().instrumentActiveTime(
+        float imageSequenceTime = ImageSequencer::ref().instrumentActiveTime(
             data.time.j2000Seconds(),
             _instrumentName
         );
 
-        _drawLine = _imageSequenceTime != -1.f;
+        _drawLine = (imageSequenceTime != -1.f);
     }
 }
 

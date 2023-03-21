@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,13 +41,10 @@ public:
             ghoul::createFillMat4x4<float>(std::numeric_limits<float>::max()),
         glm::mat4x4 stepValue = ghoul::createFillMat4x4<float>(0.01f));
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<glm::mat4x4>::operator=;
-
-protected:
-    glm::mat4x4 fromLuaConversion(lua_State* state, bool& success) const override;
 };
 
 } // namespace openspace::properties

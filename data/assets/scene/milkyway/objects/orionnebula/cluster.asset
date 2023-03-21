@@ -1,6 +1,6 @@
---orionnebula/cluster.asset
-local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require("./transforms")
+
+
 
 local sync = asset.syncedResource({
   Name = "Orion Nebula Star Cluster",
@@ -14,17 +14,27 @@ local OrionClusterStars = {
   Parent = transforms.NebulaPosition.Identifier,
   Renderable = {
     Type = "RenderableStars",
-    File = sync .. "/oricluster.speck",
-    Texture = sync .. "/halo.png",
-    ColorMap = sync .. "/colorbv.cmap",
+    File = sync .. "oricluster.speck",
+    Texture = sync .. "halo.png",
+    ColorMap = sync .. "colorbv.cmap",
     MagnitudeExponent = 5.02,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based"
+    RenderMethod = "Texture Based",
+    DataMapping = {
+      Bv = "colorb_v",
+      Luminance = "lum",
+      AbsoluteMagnitude = "absmag",
+      ApparentMagnitude = "appmag",
+      Vx = "vx",
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed"
+    }
   },
   GUI = {
     Name = "Orion Nebula Star Cluster",
     Path = "/Milky Way/Orion",
-    Description = [[ In order to have an accurate depiction of the Orion nebula, we
+    Description = [[In order to have an accurate depiction of the Orion nebula, we
       need to include the star cluster that was birthed from it. We turned to a study of the
       cluster's stellar population by Lynne Hillenbrand, who was working at the University of 
       California, Berkeley at the time. The catalog from her paper contains more than 1500 
@@ -36,20 +46,28 @@ local OrionClusterStars = {
       placed each star along a line of sight through this imaginary sphere centered on the 
       cluster. In this sense, these data are observed data and the view from Earth is accurate. 
       But the distance of each star has been derived from this educated-guess approach for the 
-      cluster distribution. ]]
+      cluster distribution]]
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { OrionClusterStars })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OrionClusterStars)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OrionClusterStars)
+end)
+
+asset.export(OrionClusterStars)
+
 
 
 asset.meta = {
   Name = "Orion Nebula Star Cluster",
-  Version = "1.0",
-  Description = [[ Digital Universe asset for the Orion star cluster. To be used in
-    conjunction with nebula model. Use orionnebula.asset to include both.]],
+  Version = "1.1",
+  Description = [[Digital Universe asset for the Orion star cluster. To be used in
+    conjunction with nebula model. Use orionnebula.asset to include both]],
   Author = "AMNH Digital Universe",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"OrionClusterStars"}
+  License = "AMNH Digital Universe"
 }

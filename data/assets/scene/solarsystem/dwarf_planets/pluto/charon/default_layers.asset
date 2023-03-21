@@ -1,19 +1,10 @@
-local colorLayersPath = "./layers/colorlayers"
-
-local colorLayer = asset.require(colorLayersPath .. "/greyscale_usgs")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Charon.Renderable.Layers.ColorLayers." ..
-    colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/colorlayers/greyscale_usgs", true)
 
 
 asset.meta = {
   Name = "Default Charon Layers",
   Version = "1.0",
-  Description = [[ Default Charon layers are: Black & White USGS]],
+  Description = "Default Charon layers are: Black & White USGS",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

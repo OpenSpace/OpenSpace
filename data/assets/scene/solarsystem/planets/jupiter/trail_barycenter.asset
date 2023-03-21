@@ -1,0 +1,48 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
+
+
+
+local JupiterBarycenterTrail = {
+  Identifier = "JupiterBarycenterTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JUPITER BARYCENTER",
+      Observer = "SSB"
+    },
+    Color = { 0.8, 0.7, 0.7 },
+    Period = 4330.595,
+    Resolution = 1000,
+    Enabled = false
+  },
+  Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
+  GUI = {
+    Name = "Jupiter Barycenter Trail",
+    Path = "/Solar System/Planets/Jupiter"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JupiterBarycenterTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JupiterBarycenterTrail)
+end)
+
+asset.export(JupiterBarycenterTrail)
+
+
+
+asset.meta = {
+  Name = "Jupiter Trail",
+  Version = "1.1",
+  Description = [[Trail of Jupiter's Barycenter as observed by the Sun. Data from NASA
+    Spice (see base spice asset)]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

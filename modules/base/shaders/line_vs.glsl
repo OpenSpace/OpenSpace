@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,12 +32,13 @@ out vec4 vs_positionViewSpace;
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 
-void main() {
-    vs_positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1));
-    vec4 positionScreenSpace = projectionTransform * vs_positionViewSpace;
-    vs_depth = positionScreenSpace.w;
-    gl_Position  = positionScreenSpace;
 
-    // Set z to 0 to disable near and far plane, unique handling for perspective in space
-    gl_Position.z = 0.f;
+void main() {
+  vs_positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1));
+  vec4 positionScreenSpace = projectionTransform * vs_positionViewSpace;
+  vs_depth = positionScreenSpace.w;
+  gl_Position  = positionScreenSpace;
+
+  // Set z to 0 to disable near and far plane, unique handling for perspective in space
+  gl_Position.z = 0.f;
 }

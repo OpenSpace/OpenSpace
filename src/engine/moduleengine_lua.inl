@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,43 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
-#include <ghoul/lua/ghoul_lua.h>
+namespace {
 
-namespace openspace::luascriptfunctions {
+// Checks whether the passed OpenSpaceModule is loaded.
+[[codegen::luawrap]] bool isLoaded(std::string moduleName) {
+    using namespace openspace;
 
-/**
- * \ingroup LuaScripts
- * isLoaded(string):
- * Checks whether the passed OpenSpaceModule is loaded or not
- */
-int isLoaded(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::isLoaded");
-
-    const int type = lua_type(L, 1);
-    if (type != LUA_TSTRING) {
-        return ghoul::lua::luaError(L, "Expected argument of type 'string'");
-    }
-    const std::string& moduleName = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-
-    const std::vector<OpenSpaceModule*>& modules = global::moduleEngine->modules();
-
-    auto it = std::find_if(
-        modules.begin(),
-        modules.end(),
-        [moduleName](OpenSpaceModule* module) {
-            return module->identifier() == moduleName;
+    for (OpenSpaceModule* module : global::moduleEngine->modules()) {
+        if (module->identifier() == moduleName) {
+            return true;
         }
-    );
-
-    ghoul::lua::push(L, it != modules.end());
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
+    }
+    return false;
 }
 
-} // namespace openspace::luascriptfunctions
+#include "moduleengine_lua_codegen.cpp"
+
+} // namespace

@@ -1,0 +1,46 @@
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
+local HEEQ180Kernel = asset.localResource("./kernels/HEEQ180.tf")
+
+local HEEQ180ReferenceFrame = {
+  Identifier = "HEEQ180ReferenceFrame",
+  -- The HEEQ180 reference frame should have Sun_IAU as parent
+  -- instead of Solar center, however the Sun_IAU adds
+  -- an unwanted rotation which is difficult to cancel out
+  -- since it is using SpiceRotation. Sun center
+  -- is used instead.
+  Parent = sunTransforms.SunCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "HEEQ180",
+      DestinationFrame = "GALACTIC",
+      Kernels = HEEQ180Kernel
+    },
+  },
+  GUI = {
+    Name = "HEEQ180 Reference Frame",
+    Path = "/Solar System/Sun",
+    Hidden = true
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HEEQ180ReferenceFrame)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HEEQ180ReferenceFrame)
+end)
+
+asset.export(HEEQ180ReferenceFrame)
+
+
+asset.meta = {
+  Name = "Sun Transform, HEEQ180",
+  Version = "1.1",
+  Description = "Sun transform: HEEQ180",
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@ class ScriptCameraStates : public CameraInteractionStates {
 public:
     ScriptCameraStates();
 
-    void updateStateFromInput(const InputState& inputState, double deltaTime) override;
+    void updateStateFromInput(double deltaTime);
 
     void addLocalRotation(const glm::dvec2& delta);
     void addGlobalRotation(const glm::dvec2& delta);

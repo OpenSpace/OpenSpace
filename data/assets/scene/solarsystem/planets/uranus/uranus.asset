@@ -1,12 +1,16 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local transforms = asset.require("./transforms")
 asset.require("spice/base")
-asset.require('./trail')
+asset.require("./trail")
 
 local Uranus = {
   Identifier = "Uranus",
   Parent = transforms.UranusBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "URANUS",
+      Observer = "URANUS BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_URANUS",
@@ -23,7 +27,7 @@ local Uranus = {
   GUI = {
     Name = "Uranus",
     Path = "/Solar System/Planets/Uranus",
-    Description = [[Globe for Uranus.]]
+    Description = "Globe for Uranus"
   }
 }
 
@@ -32,32 +36,46 @@ local UranusLabel = {
   Parent = Uranus.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
-    LabelText = "Uranus",
-    FontSize = 100.0,
-    LabelSize = 8.7,
-    LabelMaxSize = 100.0,
-    LabelMinSize = 1.0,
-    LabelOrientationOption = "Camera View Direction",
-    BlendMode = "Additive"
+    Type = "RenderableLabel",
+    Text = "Uranus",
+    FontSize = 70.0,
+    Size = 9.0,
+    MinMaxSize = { 1, 80 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.5, 100.0 },
+    FadeWidths = { 1.0, 120.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Uranus Label",
     Path = "/Solar System/Planets/Uranus",
-    Description = [[ Main planet label for Uranus.]],
+    Description = "Main planet label for Uranus",
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Uranus, UranusLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Uranus)
+  openspace.addSceneGraphNode(UranusLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(UranusLabel)
+  openspace.removeSceneGraphNode(Uranus)
+end)
+
+asset.export(Uranus)
+asset.export(UranusLabel)
+
 
 
 asset.meta = {
   Name = "Uranus",
-  Version = "1.0",
-  Description = [[ Uranus globe, and main planet label.]],
+  Version = "1.1",
+  Description = "Uranus globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Uranus" , "UranusLabel"}
+  License = "MIT license"
 }

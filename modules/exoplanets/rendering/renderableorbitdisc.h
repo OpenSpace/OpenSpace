@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
@@ -64,10 +65,11 @@ private:
     properties::FloatProperty _size;
     properties::FloatProperty _eccentricity;
     properties::Vec2Property _offset;
+    properties::Vec3Property _multiplyColor;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
     UniformCache(modelViewProjection, offset, opacity, texture,
-        eccentricity, semiMajorAxis) _uniformCache;
+        eccentricity, semiMajorAxis, multiplyColor) _uniformCache;
 
     std::unique_ptr<PlaneGeometry> _plane;
     std::unique_ptr<TextureComponent> _texture;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_BASE___TIMELINEROTATION___H__
 
 #include <openspace/scene/rotation.h>
+
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/timeline.h>
 
 namespace openspace {
@@ -42,6 +44,7 @@ public:
 
 private:
     Timeline<ghoul::mm_unique_ptr<Rotation>> _timeline;
+    properties::BoolProperty _shouldInterpolate;
 };
 
 } // namespace openspace

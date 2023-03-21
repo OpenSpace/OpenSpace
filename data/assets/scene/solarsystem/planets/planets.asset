@@ -1,39 +1,39 @@
-asset.require('./mercury/mercury')
+asset.require("./mercury/mercury")
 
-asset.require('./venus/venus')
-asset.require('./venus/trail')
-asset.require('./venus/trail_earth')
-asset.require('./venus/atmosphere')
+asset.require("./venus/venus")
+asset.require("./venus/trail")
+asset.require("./venus/trail_earth")
+asset.require("./venus/atmosphere")
 
-asset.require('./earth/earth')
-asset.require('./earth/trail')
-asset.require('./earth/atmosphere')
-asset.require('./earth/markers')
-asset.require('./earth/moon/moon')
-asset.require('./earth/moon/trail')
+asset.require("./earth/earth")
+asset.require("./earth/trail")
+asset.require("./earth/atmosphere")
+asset.require("./earth/markers")
+asset.require("./earth/moon/moon")
+asset.require("./earth/moon/trail")
 
-asset.require('./mars/mars')
-asset.require('./mars/atmosphere')
-asset.require('./mars/moons/phobos')
-asset.require('./mars/moons/deimos')
+asset.require("./mars/mars")
+asset.require("./mars/atmosphere")
+asset.require("./mars/moons/phobos")
+asset.require("./mars/moons/deimos")
 
-asset.require('./jupiter/jupiter')
-asset.require('./jupiter/major_moons')
+asset.require("./jupiter/jupiter")
+asset.require("./jupiter/major_moons")
 
-asset.require('./saturn/saturn')
-asset.require('./saturn/major_moons')
+asset.require("./saturn/saturn")
+asset.require("./saturn/major_moons")
 
-asset.require('./uranus/uranus')
-asset.require('./uranus/major_moons')
+asset.require("./uranus/uranus")
+asset.require("./uranus/major_moons")
 
-asset.require('./neptune/neptune')
-asset.require('./neptune/major_moons')
+asset.require("./neptune/neptune")
+asset.require("./neptune/major_moons")
 
 
 asset.meta = {
   Name = "Planets",
   Version = "1.0",
-  Description = [[ Collection of planets in the solar system ]],
+  Description = "Collection of planets in the solar system",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

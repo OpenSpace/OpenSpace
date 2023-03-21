@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,49 +37,12 @@ StringListProperty::StringListProperty(Property::PropertyInfo info,
     : ListProperty(std::move(info), std::move(values))
 {}
 
-std::string StringListProperty::className() const {
+std::string_view StringListProperty::className() const {
     return "StringListProperty";
 }
 
 int StringListProperty::typeLua() const {
     return LUA_TTABLE;
-}
-
-std::vector<std::string> StringListProperty::fromLuaConversion(lua_State* state,
-                                                               bool& success) const
-{
-    if (!lua_istable(state, -1)) {
-        success = false;
-        LERRORC(className(), "Conversion from Lua failed. The input was not a table");
-        return {};
-    }
-
-    std::vector<std::string> result;
-    lua_pushnil(state);
-    while (lua_next(state, -2) != 0) {
-        if (lua_isstring(state, -1)) {
-            result.emplace_back(lua_tostring(state, -1));
-        }
-        else {
-            success = false;
-            return {};
-        }
-        lua_pop(state, 1);
-    }
-    success = true;
-    return result;
-}
-
-void StringListProperty::toLuaConversion(lua_State* state) const {
-    lua_createtable(state, static_cast<int>(_value.size()), 0);
-
-    int i = 1;
-    for (const std::string& v : _value) {
-        ghoul::lua::push(state, i);
-        ghoul::lua::push(state, v.c_str());
-        lua_settable(state, -3);
-        ++i;
-    }
 }
 
 std::string StringListProperty::toStringConversion() const {

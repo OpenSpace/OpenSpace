@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,11 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/documentation/verifier.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
 #include <string>
 
@@ -54,6 +55,26 @@ TEST_CASE("Documentation: Constructor", "[documentation]") {
     doc.entries.emplace_back(
         "StringVerifier",
         new StringVerifier,
+        Optional::No
+    );
+    doc.entries.emplace_back(
+        "IdentifierVerifier",
+        new IdentifierVerifier,
+        Optional::No
+    );
+    doc.entries.emplace_back(
+        "FileVerifier",
+        new FileVerifier,
+        Optional::No
+    );
+    doc.entries.emplace_back(
+        "DirectoryVerifier",
+        new DirectoryVerifier,
+        Optional::No
+    );
+    doc.entries.emplace_back(
+        "DateTimeVerifier",
+        new DateTimeVerifier,
         Optional::No
     );
     doc.entries.emplace_back(
@@ -263,6 +284,10 @@ TEST_CASE("Documentation: Initializer Constructor", "[documentation]") {
             {"DoubleVerifier", new DoubleVerifier, Optional::No },
             {"IntVerifier", new IntVerifier, Optional::No },
             {"StringVerifier", new StringVerifier, Optional::No },
+            {"IdentifierVerifier", new IdentifierVerifier, Optional::No },
+            {"FileVerifier", new FileVerifier, Optional::No },
+            {"DirectoryVerifier", new DirectoryVerifier, Optional::No },
+            {"DateTimeVerifier", new DateTimeVerifier, Optional::No },
             {"TableVerifier", new TableVerifier, Optional::No },
 
             // Operator Verifiers
@@ -327,26 +352,25 @@ TEST_CASE("Documentation: BoolVerifier", "[documentation]") {
     positive.setValue("Bool", true);
 
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
-    ghoul::Dictionary negative;
-    negative.setValue("Bool", 0);
-
-    TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    ghoul::Dictionary negativeType;
+    negativeType.setValue("Bool", 0);
+    TestResult negativeRes = testSpecification(doc, negativeType);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Bool");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "Bool");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negativeExist;
     negativeExist.setValue("Bool2", 0);
     negativeRes = testSpecification(doc, negativeExist);
 
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Bool");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+    CHECK(negativeRes.offenses[0].offender == "Bool");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
 }
 
 TEST_CASE("Documentation: DoubleVerifier", "[documentation]") {
@@ -360,25 +384,24 @@ TEST_CASE("Documentation: DoubleVerifier", "[documentation]") {
     positive.setValue("Double", 0.0);
 
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
-    ghoul::Dictionary negative;
-    negative.setValue("Double", 0);
-
-    TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    ghoul::Dictionary negativeType;
+    negativeType.setValue("Double", 0);
+    TestResult negativeRes = testSpecification(doc, negativeType);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negativeExist;
     negativeExist.setValue("Double2", 0.0);
     negativeRes = testSpecification(doc, negativeExist);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
 }
 
 TEST_CASE("Documentation: IntVerifier", "[documentation]") {
@@ -391,31 +414,30 @@ TEST_CASE("Documentation: IntVerifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Int", 0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
     positive2.setValue("Int", 0.0);
     positiveRes = testSpecification(doc, positive2);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
-    ghoul::Dictionary negative;
-    negative.setValue("Int", 0.1);
-
-    TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    ghoul::Dictionary negativeType;
+    negativeType.setValue("Int", 0.1);
+    TestResult negativeRes = testSpecification(doc, negativeType);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negativeExist;
     negativeExist.setValue("Int2", 0);
     negativeRes = testSpecification(doc, negativeExist);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
 }
 
 TEST_CASE("Documentation: StringVerifier", "[documentation]") {
@@ -429,24 +451,204 @@ TEST_CASE("Documentation: StringVerifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("String", ""s);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
-    ghoul::Dictionary negative;
-    negative.setValue("String", 0);
-    TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    ghoul::Dictionary negativeType;
+    negativeType.setValue("String", 0);
+    TestResult negativeRes = testSpecification(doc, negativeType);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "String");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "String");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negativeExist;
     negativeExist.setValue("String2", ""s);
     negativeRes = testSpecification(doc, negativeExist);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "String");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+    CHECK(negativeRes.offenses[0].offender == "String");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+}
+
+TEST_CASE("Documentation: IdentifierVerifier", "[documentation]") {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc{
+        {{ "Identifier", new IdentifierVerifier, Optional::No }}
+    };
+
+    ghoul::Dictionary positive;
+    positive.setValue("Identifier", "abcdef"s);
+    TestResult positiveRes = testSpecification(doc, positive);
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
+
+    ghoul::Dictionary negativeSpace;
+    negativeSpace.setValue("Identifier", "abc def"s);
+    TestResult negativeRes = testSpecification(doc, negativeSpace);
+    CHECK(!negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Identifier");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+
+    ghoul::Dictionary negativeTab;
+    negativeTab.setValue("Identifier", "abc\tdef"s);
+    negativeRes = testSpecification(doc, negativeTab);
+    CHECK(!negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Identifier");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+
+    ghoul::Dictionary negativeNewline;
+    negativeNewline.setValue("Identifier", "abc\ndef"s);
+    negativeRes = testSpecification(doc, negativeNewline);
+    CHECK(!negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Identifier");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+
+    ghoul::Dictionary negativeCarriageReturn;
+    negativeCarriageReturn.setValue("Identifier", "abc\rdef"s);
+    negativeRes = testSpecification(doc, negativeCarriageReturn);
+    CHECK(!negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Identifier");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+
+    ghoul::Dictionary negativeDot;
+    negativeDot.setValue("Identifier", "abc.def"s);
+    negativeRes = testSpecification(doc, negativeDot);
+    CHECK(!negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Identifier");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+
+    ghoul::Dictionary negativeType;
+    negativeType.setValue("Identifier", 0);
+    negativeRes = testSpecification(doc, negativeType);
+    CHECK_FALSE(negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Identifier");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+}
+
+TEST_CASE("Documentation: FileVerifier", "[documentation]") {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc {
+        {{ "File", new FileVerifier, Optional::No }}
+    };
+
+    ghoul::Dictionary positive;
+    positive.setValue("File", absPath("${TESTDIR}/verifier/dummyfile.txt").string());
+    TestResult positiveRes = testSpecification(doc, positive);
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
+
+    ghoul::Dictionary negative404;
+    negative404.setValue("File", absPath("${TESTDIR}/verifier/404.txt").string());
+    TestResult negativeRes = testSpecification(doc, negative404);
+    CHECK(!negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "File");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+
+    ghoul::Dictionary negativeType;
+    negativeType.setValue("File", 0);
+    negativeRes = testSpecification(doc, negativeType);
+    CHECK_FALSE(negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "File");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+
+    ghoul::Dictionary negativeExist;
+    negativeExist.setValue("File2", ""s);
+    negativeRes = testSpecification(doc, negativeExist);
+    CHECK_FALSE(negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "File");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+}
+
+TEST_CASE("Documentation: DirectoryVerifier", "[documentation]") {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc{
+        {{ "Dir", new DirectoryVerifier, Optional::No }}
+    };
+
+    ghoul::Dictionary positive;
+    positive.setValue("Dir", absPath("${TESTDIR}/verifier").string());
+    TestResult positiveRes = testSpecification(doc, positive);
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
+
+    ghoul::Dictionary negative404;
+    negative404.setValue("Dir", absPath("${TESTDIR}/verifier404").string());
+    TestResult negativeRes = testSpecification(doc, negative404);
+    CHECK(!negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Dir");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+
+    ghoul::Dictionary negativeType;
+    negativeType.setValue("Dir", 0);
+    negativeRes = testSpecification(doc, negativeType);
+    CHECK_FALSE(negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Dir");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+
+    ghoul::Dictionary negativeExist;
+    negativeExist.setValue("Dir2", ""s);
+    negativeRes = testSpecification(doc, negativeExist);
+    CHECK_FALSE(negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Dir");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+}
+
+TEST_CASE("Documentation: DateTimeVerifier", "[documentation]") {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc{
+        {{ "DateTime", new DateTimeVerifier, Optional::No }}
+    };
+
+    ghoul::Dictionary positive;
+    positive.setValue("DateTime", "1969 07 20 20:17:00"s);
+    TestResult positiveRes = testSpecification(doc, positive);
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
+
+    ghoul::Dictionary negative404;
+    negative404.setValue("DateTime", "abc"s);
+    TestResult negativeRes = testSpecification(doc, negative404);
+    CHECK(!negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "DateTime");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+
+    ghoul::Dictionary negativeType;
+    negativeType.setValue("DateTime", 0);
+    negativeRes = testSpecification(doc, negativeType);
+    CHECK_FALSE(negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "DateTime");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+
+    ghoul::Dictionary negativeExist;
+    negativeExist.setValue("DateTime2", ""s);
+    negativeRes = testSpecification(doc, negativeExist);
+    CHECK_FALSE(negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "DateTime");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
 }
 
 TEST_CASE("Documentation: TableVerifierType", "[documentation]") {
@@ -459,24 +661,24 @@ TEST_CASE("Documentation: TableVerifierType", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Table", ghoul::Dictionary());
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
-    ghoul::Dictionary negative;
-    negative.setValue("Table", 0);
-    TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    ghoul::Dictionary negativeType;
+    negativeType.setValue("Table", 0);
+    TestResult negativeRes = testSpecification(doc, negativeType);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Table");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "Table");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negativeExist;
     negativeExist.setValue("Table2", ghoul::Dictionary());
     negativeRes = testSpecification(doc, negativeExist);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Table");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+    CHECK(negativeRes.offenses[0].offender == "Table");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
 }
 
 TEST_CASE("Documentation: StringListVerifierType", "[documentation]") {
@@ -496,16 +698,16 @@ TEST_CASE("Documentation: StringListVerifierType", "[documentation]") {
         positive.setValue("StringList", inner);
     }
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
-    ghoul::Dictionary negative;
-    negative.setValue("StringList", 0);
-    TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    ghoul::Dictionary negativeType;
+    negativeType.setValue("StringList", 0);
+    TestResult negativeRes = testSpecification(doc, negativeType);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "StringList");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "StringList");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
 
     ghoul::Dictionary negative2;
@@ -517,18 +719,18 @@ TEST_CASE("Documentation: StringListVerifierType", "[documentation]") {
         negative2.setValue("StringList", inner);
     }
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "StringList.3");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "StringList.3");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negativeExist;
     negativeExist.setValue("StringList2", ghoul::Dictionary());
     negativeRes = testSpecification(doc, negativeExist);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "StringList");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+    CHECK(negativeRes.offenses[0].offender == "StringList");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
 }
 
 TEST_CASE("Documentation: IntListVerifierType", "[documentation]") {
@@ -548,16 +750,16 @@ TEST_CASE("Documentation: IntListVerifierType", "[documentation]") {
         positive.setValue("IntList", inner);
     }
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
-    ghoul::Dictionary negative;
-    negative.setValue("IntList", 0);
-    TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    ghoul::Dictionary negativeType;
+    negativeType.setValue("IntList", 0);
+    TestResult negativeRes = testSpecification(doc, negativeType);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "IntList");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "IntList");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     {
@@ -568,18 +770,18 @@ TEST_CASE("Documentation: IntListVerifierType", "[documentation]") {
         negative2.setValue("IntList", inner);
     }
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "IntList.1");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "IntList.1");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negativeExist;
     negativeExist.setValue("IntList2", ghoul::Dictionary());
     negativeRes = testSpecification(doc, negativeExist);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "IntList");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+    CHECK(negativeRes.offenses[0].offender == "IntList");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
 }
 
 TEST_CASE("Documentation: MixedVerifiers", "[documentation]") {
@@ -603,34 +805,34 @@ TEST_CASE("Documentation: MixedVerifiers", "[documentation]") {
     positive.setValue("String", ""s);
     positive.setValue("Table", ghoul::Dictionary());
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
-    ghoul::Dictionary negative1;
-    negative1.setValue("Bool", true);
-    negative1.setValue("Double", 1);
-    negative1.setValue("Int", 0);
-    negative1.setValue("String", ""s);
-    negative1.setValue("Table", ghoul::Dictionary());
-    TestResult negativeRes = testSpecification(doc, negative1);
-    REQUIRE_FALSE(negativeRes.success);
+    ghoul::Dictionary negativeType1;
+    negativeType1.setValue("Bool", true);
+    negativeType1.setValue("Double", 1);
+    negativeType1.setValue("Int", 0);
+    negativeType1.setValue("String", ""s);
+    negativeType1.setValue("Table", ghoul::Dictionary());
+    TestResult negativeRes = testSpecification(doc, negativeType1);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
-    ghoul::Dictionary negative2;
-    negative2.setValue("Bool", true);
-    negative2.setValue("Double", 0.0);
-    negative2.setValue("Int", ""s);
-    negative2.setValue("String", 1);
-    negative2.setValue("Table", ghoul::Dictionary());
-    negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    ghoul::Dictionary negativeType2;
+    negativeType2.setValue("Bool", true);
+    negativeType2.setValue("Double", 0.0);
+    negativeType2.setValue("Int", ""s);
+    negativeType2.setValue("String", 1);
+    negativeType2.setValue("Table", ghoul::Dictionary());
+    negativeRes = testSpecification(doc, negativeType2);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 2);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-    REQUIRE(negativeRes.offenses[1].offender == "String");
-    REQUIRE(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[1].offender == "String");
+    CHECK(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: NestedTables", "[documentation]") {
@@ -676,8 +878,8 @@ TEST_CASE("Documentation: NestedTables", "[documentation]") {
         positive.setValue("Outer_Table2", inner);
     }
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negativeSimple;
     negativeSimple.setValue("Outer_Int", 1);
@@ -695,10 +897,10 @@ TEST_CASE("Documentation: NestedTables", "[documentation]") {
         negativeSimple.setValue("Outer_Table2", inner);
     }
     TestResult negativeRes = testSpecification(doc, negativeSimple);
-    REQUIRE_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Outer_Table");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK_FALSE(negativeRes.success);
+    CHECK(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Outer_Table");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negativeInner;
     negativeInner.setValue("Outer_Int", 1);
@@ -721,10 +923,10 @@ TEST_CASE("Documentation: NestedTables", "[documentation]") {
         negativeInner.setValue("Outer_Table2", inner);
     }
     negativeRes = testSpecification(doc, negativeInner);
-    REQUIRE_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Outer_Table.Inner_Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK_FALSE(negativeRes.success);
+    CHECK(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Outer_Table.Inner_Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negativeInner2;
     negativeInner2.setValue("Outer_Int", 1);
@@ -747,12 +949,12 @@ TEST_CASE("Documentation: NestedTables", "[documentation]") {
         negativeInner2.setValue("Outer_Table2", inner);
     }
     negativeRes = testSpecification(doc, negativeInner2);
-    REQUIRE_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 2);
-    REQUIRE(negativeRes.offenses[0].offender == "Outer_Table.Inner_Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-    REQUIRE(negativeRes.offenses[1].offender == "Outer_Table.Inner_String");
-    REQUIRE(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
+    CHECK_FALSE(negativeRes.success);
+    CHECK(negativeRes.offenses.size() == 2);
+    CHECK(negativeRes.offenses[0].offender == "Outer_Table.Inner_Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[1].offender == "Outer_Table.Inner_String");
+    CHECK(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negativeInnerSeparate;
     negativeInnerSeparate.setValue("Outer_Int", 1);
@@ -775,12 +977,12 @@ TEST_CASE("Documentation: NestedTables", "[documentation]") {
         negativeInnerSeparate.setValue("Outer_Table2", inner);
     }
     negativeRes = testSpecification(doc, negativeInnerSeparate);
-    REQUIRE_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 2);
-    REQUIRE(negativeRes.offenses[0].offender == "Outer_Table.Inner_Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-    REQUIRE(negativeRes.offenses[1].offender == "Outer_Table2.Inner_Double2");
-    REQUIRE(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
+    CHECK_FALSE(negativeRes.success);
+    CHECK(negativeRes.offenses.size() == 2);
+    CHECK(negativeRes.offenses[0].offender == "Outer_Table.Inner_Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[1].offender == "Outer_Table2.Inner_Double2");
+    CHECK(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negativeInnerFull;
     negativeInnerFull.setValue("Outer_Int", 1);
@@ -803,16 +1005,14 @@ TEST_CASE("Documentation: NestedTables", "[documentation]") {
         negativeInnerFull.setValue("Outer_Table2", inner);
     }
     negativeRes = testSpecification(doc, negativeInnerFull);
-    REQUIRE_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 3);
-    REQUIRE(negativeRes.offenses[0].offender == "Outer_Table.Inner_Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-    REQUIRE(negativeRes.offenses[1].offender == "Outer_Table2.Inner_Double2");
-    REQUIRE(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
-    REQUIRE(
-        negativeRes.offenses[2].offender == "Outer_Table2.Inner_Table.Inner_Inner_Int"
-    );
-    REQUIRE(negativeRes.offenses[2].reason == TestResult::Offense::Reason::WrongType);
+    CHECK_FALSE(negativeRes.success);
+    CHECK(negativeRes.offenses.size() == 3);
+    CHECK(negativeRes.offenses[0].offender == "Outer_Table.Inner_Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[1].offender == "Outer_Table2.Inner_Double2");
+    CHECK(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[2].offender == "Outer_Table2.Inner_Table.Inner_Inner_Int");
+    CHECK(negativeRes.offenses[2].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: Optional", "[documentation]") {
@@ -828,39 +1028,39 @@ TEST_CASE("Documentation: Optional", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Bool_Force", true);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
     positive2.setValue("Bool_Force", true);
     positive2.setValue("Bool_Optional", true);
     positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
     
     ghoul::Dictionary negative;
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Bool_Force");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+    CHECK(negativeRes.offenses[0].offender == "Bool_Force");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
 
     ghoul::Dictionary negative2;
     negative2.setValue("Bool_Optional", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Bool_Force");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+    CHECK(negativeRes.offenses[0].offender == "Bool_Force");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
 
     ghoul::Dictionary negative3;
     negative3.setValue("Bool_Force", true);
     negative3.setValue("Bool_Optional", 1);
     negativeRes = testSpecification(doc, negative3);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Bool_Optional");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "Bool_Optional");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: Required In Optional", "[documentation]") {
@@ -892,8 +1092,8 @@ TEST_CASE("Documentation: Required In Optional", "[documentation]") {
         positive.setValue("a", inner);
     }
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
     {
@@ -903,13 +1103,13 @@ TEST_CASE("Documentation: Required In Optional", "[documentation]") {
         positive2.setValue("a", inner);
     }
     positiveRes = testSpecification(doc, positive2);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive3;
     positiveRes = testSpecification(doc, positive3);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -918,10 +1118,10 @@ TEST_CASE("Documentation: Required In Optional", "[documentation]") {
         negative.setValue("a", inner);
     }
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a.b");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+    CHECK(negativeRes.offenses[0].offender == "a.b");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
 }
 
 TEST_CASE("Documentation: Exhaustive", "[documentation]") {
@@ -934,24 +1134,24 @@ TEST_CASE("Documentation: Exhaustive", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Int", 1);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("False_Int", 1);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
 
     ghoul::Dictionary negative2;
     negative2.setValue("Double", 2.0);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
 }
 
 TEST_CASE("Documentation: Nested Exhaustive", "[documentation]") {
@@ -971,8 +1171,8 @@ TEST_CASE("Documentation: Nested Exhaustive", "[documentation]") {
         positive.setValue("Table", inner);
     }
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -981,10 +1181,10 @@ TEST_CASE("Documentation: Nested Exhaustive", "[documentation]") {
         negative.setValue("Table", inner);
     }
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Table.a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+    CHECK(negativeRes.offenses[0].offender == "Table.a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
 }
 
 TEST_CASE("Documentation: Empty Entries Non Exhaustive", "[documentation]") {
@@ -994,14 +1194,14 @@ TEST_CASE("Documentation: Empty Entries Non Exhaustive", "[documentation]") {
 
     ghoul::Dictionary positive {};
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
     positive2.setValue("a", 1);
     positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 }
 
 TEST_CASE("Documentation: Empty Nested Exhaustive", "[documentation]") {
@@ -1018,8 +1218,8 @@ TEST_CASE("Documentation: Empty Nested Exhaustive", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Table", ghoul::Dictionary());
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -1028,8 +1228,8 @@ TEST_CASE("Documentation: Empty Nested Exhaustive", "[documentation]") {
         negative.setValue("Table", inner);
     }
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.empty());
+    CHECK(negativeRes.success);
+    CHECK(negativeRes.offenses.empty());
 }
 
 TEST_CASE("Documentation: Less Int", "[documentation]") {
@@ -1040,18 +1240,18 @@ TEST_CASE("Documentation: Less Int", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("Int", 0);
+    positive.setValue("Int", 0.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
-    negative.setValue("Int", 10);
+    negative.setValue("Int", 10.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: Less Double", "[documentation]") {
@@ -1064,16 +1264,16 @@ TEST_CASE("Documentation: Less Double", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Double", 0.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Double", 10.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: LessEqual Int", "[documentation]") {
@@ -1084,24 +1284,24 @@ TEST_CASE("Documentation: LessEqual Int", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("Int", 0);
+    positive.setValue("Int", 0.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positiveEqual;
-    positiveEqual.setValue("Int", 5);
+    positiveEqual.setValue("Int", 5.0);
     positiveRes = testSpecification(doc, positiveEqual);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
-    negative.setValue("Int", 10);
+    negative.setValue("Int", 10.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: LessEqual Double", "[documentation]") {
@@ -1114,22 +1314,22 @@ TEST_CASE("Documentation: LessEqual Double", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Double", 0.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positiveEqual;
     positiveEqual.setValue("Double", 5.0);
     positiveRes = testSpecification(doc, positiveEqual);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Double", 10.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: Greater Int", "[documentation]") {
@@ -1140,18 +1340,18 @@ TEST_CASE("Documentation: Greater Int", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("Int", 10);
+    positive.setValue("Int", 10.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
-    negative.setValue("Int", 0);
+    negative.setValue("Int", 0.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: Greater Double", "[documentation]") {
@@ -1164,16 +1364,16 @@ TEST_CASE("Documentation: Greater Double", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Double", 10.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Double", 0.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: GreaterEqual Int", "[documentation]") {
@@ -1184,24 +1384,24 @@ TEST_CASE("Documentation: GreaterEqual Int", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("Int", 10);
+    positive.setValue("Int", 10.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positiveEqual;
-    positiveEqual.setValue("Int", 5);
+    positiveEqual.setValue("Int", 5.0);
     positiveRes = testSpecification(doc, positiveEqual);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
-    negative.setValue("Int", 0);
+    negative.setValue("Int", 0.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: GreaterEqual Double", "[documentation]") {
@@ -1214,22 +1414,22 @@ TEST_CASE("Documentation: GreaterEqual Double", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Double", 10.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positiveEqual;
     positiveEqual.setValue("Double", 5.0);
     positiveRes = testSpecification(doc, positiveEqual);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Double", 0.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: Equal Bool", "[documentation]") {
@@ -1242,16 +1442,16 @@ TEST_CASE("Documentation: Equal Bool", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Bool", true);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Bool", false);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Bool");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Bool");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: Equal Int", "[documentation]") {
@@ -1262,18 +1462,18 @@ TEST_CASE("Documentation: Equal Int", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("Int", 1);
+    positive.setValue("Int", 1.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
-    negative.setValue("Int", 0);
+    negative.setValue("Int", 0.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: Equal Double", "[documentation]") {
@@ -1286,16 +1486,16 @@ TEST_CASE("Documentation: Equal Double", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Double", 1.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Double", 0.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: Equal String", "[documentation]") {
@@ -1309,16 +1509,16 @@ TEST_CASE("Documentation: Equal String", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("String", "string"s);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("String", "no_string"s);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "String");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "String");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: Unequal Bool", "[documentation]") {
@@ -1331,16 +1531,16 @@ TEST_CASE("Documentation: Unequal Bool", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Bool", false);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Bool", true);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Bool");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Bool");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: Unequal Int", "[documentation]") {
@@ -1351,18 +1551,18 @@ TEST_CASE("Documentation: Unequal Int", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("Int", 0);
+    positive.setValue("Int", 0.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
-    negative.setValue("Int", 1);
+    negative.setValue("Int", 1.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: Unequal Double", "[documentation]") {
@@ -1375,16 +1575,16 @@ TEST_CASE("Documentation: Unequal Double", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Double", 0.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Double", 1.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: Unequal String", "[documentation]") {
@@ -1398,16 +1598,16 @@ TEST_CASE("Documentation: Unequal String", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("String", "no_string"s);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("String", "string"s);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "String");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "String");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: List Bool", "[documentation]") {
@@ -1420,16 +1620,16 @@ TEST_CASE("Documentation: List Bool", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Bool", true);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Bool", false);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Bool");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Bool");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: List Int", "[documentation]") {
@@ -1440,24 +1640,24 @@ TEST_CASE("Documentation: List Int", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("Int", 1);
+    positive.setValue("Int", 1.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
-    positive2.setValue("Int", 2);
+    positive2.setValue("Int", 2.0);
     positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
-    negative.setValue("Int", 5);
+    negative.setValue("Int", 5.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: List Double", "[documentation]") {
@@ -1470,22 +1670,22 @@ TEST_CASE("Documentation: List Double", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Double", 1.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
     positive2.setValue("Double", 2.0);
     positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Double", 5.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: List String", "[documentation]") {
@@ -1499,22 +1699,22 @@ TEST_CASE("Documentation: List String", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("String", "1"s);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
     positive2.setValue("String", "2"s);
     positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("String", "5"s);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "String");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "String");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: NotList Bool", "[documentation]") {
@@ -1527,16 +1727,16 @@ TEST_CASE("Documentation: NotList Bool", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Bool", false);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Bool", true);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Bool");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Bool");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: NotList Int", "[documentation]") {
@@ -1547,24 +1747,24 @@ TEST_CASE("Documentation: NotList Int", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("Int", -1);
+    positive.setValue("Int", -1.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
-    positive2.setValue("Int", 3);
+    positive2.setValue("Int", 3.0);
     positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
-    negative.setValue("Int", 2);
+    negative.setValue("Int", 2.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: NotList Double", "[documentation]") {
@@ -1577,22 +1777,22 @@ TEST_CASE("Documentation: NotList Double", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Double", -1.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
     positive2.setValue("Double", 3.0);
     positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Double", 1.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: NotList String", "[documentation]") {
@@ -1606,22 +1806,22 @@ TEST_CASE("Documentation: NotList String", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("String", "string"s);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
     positive2.setValue("String", "foo_string"s);
     positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("String", "1"s);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "String");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "String");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: Annotation Bool", "[documentation]") {
@@ -1634,16 +1834,16 @@ TEST_CASE("Documentation: Annotation Bool", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Bool", true);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Bool", 0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Bool");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "Bool");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: Annotation Int", "[documentation]") {
@@ -1654,18 +1854,18 @@ TEST_CASE("Documentation: Annotation Int", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("Int", 1);
+    positive.setValue("Int", 1.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Int", 1.1);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: Annotation Double", "[documentation]") {
@@ -1678,16 +1878,16 @@ TEST_CASE("Documentation: Annotation Double", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Double", 0.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Double", true);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: Annotation String", "[documentation]") {
@@ -1701,16 +1901,16 @@ TEST_CASE("Documentation: Annotation String", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("String", ""s);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("String", 1);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "String");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "String");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: Annotation Table", "[documentation]") {
@@ -1723,16 +1923,16 @@ TEST_CASE("Documentation: Annotation Table", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Table", ghoul::Dictionary());
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Table", 1);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Table");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "Table");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: InRange Int", "[documentation]") {
@@ -1743,30 +1943,30 @@ TEST_CASE("Documentation: InRange Int", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("Int", 2);
+    positive.setValue("Int", 2.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
-    positive2.setValue("Int", 0);
+    positive2.setValue("Int", 0.0);
     positiveRes = testSpecification(doc, positive2);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive3;
-    positive3.setValue("Int", 5);
+    positive3.setValue("Int", 5.0);
     positiveRes = testSpecification(doc, positive3);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
-    negative.setValue("Int", 10);
+    negative.setValue("Int", 10.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: InRange Double", "[documentation]") {
@@ -1779,34 +1979,34 @@ TEST_CASE("Documentation: InRange Double", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Double", 2.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
     positive2.setValue("Double", 0.0);
     positiveRes = testSpecification(doc, positive2);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive3;
     positive3.setValue("Double", 5.0);
     positiveRes = testSpecification(doc, positive3);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive4;
     positive4.setValue("Double", 1.5);
     positiveRes = testSpecification(doc, positive4);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Double", 10.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: NotInRange Int", "[documentation]") {
@@ -1817,40 +2017,40 @@ TEST_CASE("Documentation: NotInRange Int", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("Int", -1);
+    positive.setValue("Int", -1.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
-    positive2.setValue("Int", 6);
+    positive2.setValue("Int", 6.0);
     positiveRes = testSpecification(doc, positive2);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
-    negative.setValue("Int", 2);
+    negative.setValue("Int", 2.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 
     ghoul::Dictionary negative2;
-    negative2.setValue("Int", 0);
+    negative2.setValue("Int", 0.0);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 
     ghoul::Dictionary negative3;
-    negative3.setValue("Int", 5);
+    negative3.setValue("Int", 5.0);
     negativeRes = testSpecification(doc, negative3);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Int");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Int");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: NotInRange Double", "[documentation]") {
@@ -1863,38 +2063,38 @@ TEST_CASE("Documentation: NotInRange Double", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("Double", -1.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
     positive2.setValue("Double", 6.0);
     positiveRes = testSpecification(doc, positive2);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Double", 0.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 
     ghoul::Dictionary negative2;
     negative2.setValue("Double", 5.0);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 
     ghoul::Dictionary negative3;
     negative3.setValue("Double", 2.5);
     negativeRes = testSpecification(doc, negative3);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Double");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "Double");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: Wildcard", "[documentation]") {
@@ -1909,44 +2109,44 @@ TEST_CASE("Documentation: Wildcard", "[documentation]") {
     positive.setValue("b", 2);
     positive.setValue("c", 3);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("a", false);
     negative.setValue("b", 2);
     negative.setValue("c", 3);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", false);
     negative2.setValue("b", false);
     negative2.setValue("c", 3);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 2);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-    REQUIRE(negativeRes.offenses[1].offender == "b");
-    REQUIRE(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[1].offender == "b");
+    CHECK(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative3;
     negative3.setValue("a", false);
     negative3.setValue("b", false);
     negative3.setValue("c", false);
     negativeRes = testSpecification(doc, negative3);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 3);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-    REQUIRE(negativeRes.offenses[1].offender == "b");
-    REQUIRE(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
-    REQUIRE(negativeRes.offenses[2].offender == "c");
-    REQUIRE(negativeRes.offenses[2].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[1].offender == "b");
+    CHECK(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[2].offender == "c");
+    CHECK(negativeRes.offenses[2].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: Wildcard Mixed", "[documentation]") {
@@ -1954,68 +2154,68 @@ TEST_CASE("Documentation: Wildcard Mixed", "[documentation]") {
 
     Documentation doc {
         {
-            { DocumentationEntry::Wildcard, new IntVerifier , Optional::No},
+            { DocumentationEntry::Wildcard, new IntVerifier, Optional::No},
             { "b", new IntGreaterVerifier(5), Optional::No }
         }
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("a", 1);
-    positive.setValue("b", 8);
-    positive.setValue("c", 3);
+    positive.setValue("a", 1.0);
+    positive.setValue("b", 8.0);
+    positive.setValue("c", 3.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("a", false);
-    negative.setValue("b", 2);
-    negative.setValue("c", 3);
+    negative.setValue("b", 2.0);
+    negative.setValue("c", 3.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 2);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-    REQUIRE(negativeRes.offenses[1].offender == "b");
-    REQUIRE(negativeRes.offenses[1].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[1].offender == "b");
+    CHECK(negativeRes.offenses[1].reason == TestResult::Offense::Reason::Verification);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", false);
     negative2.setValue("b", false);
-    negative2.setValue("c", 3);
+    negative2.setValue("c", 3.0);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 2);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-    REQUIRE(negativeRes.offenses[1].offender == "b");
-    REQUIRE(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[1].offender == "b");
+    CHECK(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative3;
     negative3.setValue("a", false);
-    negative3.setValue("b", 1);
+    negative3.setValue("b", 1.0);
     negative3.setValue("c", false);
     negativeRes = testSpecification(doc, negative3);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 3);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-    REQUIRE(negativeRes.offenses[1].offender == "b");
-    REQUIRE(negativeRes.offenses[1].reason == TestResult::Offense::Reason::Verification);
-    REQUIRE(negativeRes.offenses[2].offender == "c");
-    REQUIRE(negativeRes.offenses[2].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[1].offender == "b");
+    CHECK(negativeRes.offenses[1].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[2].offender == "c");
+    CHECK(negativeRes.offenses[2].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative4;
     negative4.setValue("a", false);
-    negative4.setValue("b", 10);
+    negative4.setValue("b", 10.0);
     negative4.setValue("c", false);
     negativeRes = testSpecification(doc, negative4);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 2);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-    REQUIRE(negativeRes.offenses[1].offender == "c");
-    REQUIRE(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[1].offender == "c");
+    CHECK(negativeRes.offenses[1].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: Referencing", "[documentation]") {
@@ -2043,16 +2243,16 @@ TEST_CASE("Documentation: Referencing", "[documentation]") {
         positive.setValue("Table", inner);
     };
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("Table", 1);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Table");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "Table");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     {
@@ -2062,10 +2262,10 @@ TEST_CASE("Documentation: Referencing", "[documentation]") {
         negative2.setValue("Table", inner);
     };
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Table.b");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "Table.b");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
 
     Documentation wrongDoc {{
@@ -2079,10 +2279,10 @@ TEST_CASE("Documentation: Referencing", "[documentation]") {
         wrongNegative.setValue("Table", inner);
     }
     negativeRes = testSpecification(wrongDoc, wrongNegative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "Table");
-    REQUIRE(
+    CHECK(negativeRes.offenses[0].offender == "Table");
+    CHECK(
         negativeRes.offenses[0].reason == TestResult::Offense::Reason::UnknownIdentifier
     );
 }
@@ -2103,26 +2303,26 @@ TEST_CASE("Documentation: AndOperator", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("a", 4);
+    positive.setValue("a", 4.0);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
-    negative.setValue("a", 0);
+    negative.setValue("a", 0.0);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 
     ghoul::Dictionary negative2;
-    negative2.setValue("a", 8);
+    negative2.setValue("a", 8.0);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: OrOperator", "[documentation]") {
@@ -2136,22 +2336,22 @@ TEST_CASE("Documentation: OrOperator", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", ""s);
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary positive2;
     positive2.setValue("a", 1);
     positiveRes = testSpecification(doc, positive2);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     negative.setValue("a", false);
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
 TEST_CASE("Documentation: IntVector2Verifier", "[documentation]") {
@@ -2164,8 +2364,8 @@ TEST_CASE("Documentation: IntVector2Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::ivec2(2));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2175,18 +2375,18 @@ TEST_CASE("Documentation: IntVector2Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: DoubleVector2Verifier", "[documentation]") {
@@ -2199,8 +2399,8 @@ TEST_CASE("Documentation: DoubleVector2Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::dvec2(2.0));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2210,18 +2410,18 @@ TEST_CASE("Documentation: DoubleVector2Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: IntVector3Verifier", "[documentation]") {
@@ -2235,8 +2435,8 @@ TEST_CASE("Documentation: IntVector3Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::ivec3(2));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2247,18 +2447,18 @@ TEST_CASE("Documentation: IntVector3Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: DoubleVector3Verifier", "[documentation]") {
@@ -2272,8 +2472,8 @@ TEST_CASE("Documentation: DoubleVector3Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::dvec3(2.0));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2284,18 +2484,18 @@ TEST_CASE("Documentation: DoubleVector3Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: IntVector4Verifier", "[documentation]") {
@@ -2309,8 +2509,8 @@ TEST_CASE("Documentation: IntVector4Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::ivec4(2));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2322,18 +2522,18 @@ TEST_CASE("Documentation: IntVector4Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: DoubleVector4Verifier", "[documentation]") {
@@ -2347,8 +2547,8 @@ TEST_CASE("Documentation: DoubleVector4Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::dvec4(2.0));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2360,18 +2560,18 @@ TEST_CASE("Documentation: DoubleVector4Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: DoubleMatrix2x2Verifier", "[documentation]") {
@@ -2385,8 +2585,8 @@ TEST_CASE("Documentation: DoubleMatrix2x2Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::dmat2x2(1.0));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2397,18 +2597,18 @@ TEST_CASE("Documentation: DoubleMatrix2x2Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: DoubleMatrix2x3Verifier", "[documentation]") {
@@ -2422,8 +2622,8 @@ TEST_CASE("Documentation: DoubleMatrix2x3Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::dmat2x3(1.0));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2434,18 +2634,18 @@ TEST_CASE("Documentation: DoubleMatrix2x3Verifier", "[documentation]") {
         negative.setValue("a", inner);
     }
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: DoubleMatrix2x4Verifier", "[documentation]") {
@@ -2459,8 +2659,8 @@ TEST_CASE("Documentation: DoubleMatrix2x4Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::dmat2x4(1.0));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2471,18 +2671,18 @@ TEST_CASE("Documentation: DoubleMatrix2x4Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: DoubleMatrix3x2Verifier", "[documentation]") {
@@ -2496,8 +2696,8 @@ TEST_CASE("Documentation: DoubleMatrix3x2Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::dmat3x2(1.0));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2508,18 +2708,18 @@ TEST_CASE("Documentation: DoubleMatrix3x2Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: DoubleMatrix3x3Verifier", "[documentation]") {
@@ -2533,8 +2733,8 @@ TEST_CASE("Documentation: DoubleMatrix3x3Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::dmat3x3(1.0));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2545,18 +2745,18 @@ TEST_CASE("Documentation: DoubleMatrix3x3Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: DoubleMatrix3x4Verifier", "[documentation]") {
@@ -2570,8 +2770,8 @@ TEST_CASE("Documentation: DoubleMatrix3x4Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::dmat3x4(1.0));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2582,18 +2782,18 @@ TEST_CASE("Documentation: DoubleMatrix3x4Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: DoubleMatrix4x2Verifier", "[documentation]") {
@@ -2607,8 +2807,8 @@ TEST_CASE("Documentation: DoubleMatrix4x2Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::dmat4x2(1.0));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2619,18 +2819,18 @@ TEST_CASE("Documentation: DoubleMatrix4x2Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: DoubleMatrix4x3Verifier", "[documentation]") {
@@ -2644,8 +2844,8 @@ TEST_CASE("Documentation: DoubleMatrix4x3Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::dmat4x3(1.0));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2656,18 +2856,18 @@ TEST_CASE("Documentation: DoubleMatrix4x3Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: DoubleMatrix4x4Verifier", "[documentation]") {
@@ -2681,8 +2881,8 @@ TEST_CASE("Documentation: DoubleMatrix4x4Verifier", "[documentation]") {
     ghoul::Dictionary positive;
     positive.setValue("a", glm::dmat4x4(1.0));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative;
     {
@@ -2693,18 +2893,18 @@ TEST_CASE("Documentation: DoubleMatrix4x4Verifier", "[documentation]") {
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 
     ghoul::Dictionary negative2;
     negative2.setValue("a", true);
     negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
+    CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
+    CHECK(negativeRes.offenses[0].offender == "a");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: DeprecatedVerifier", "[documentation]") {
@@ -2736,180 +2936,180 @@ TEST_CASE("Documentation: DeprecatedVerifier", "[documentation]") {
     positive.setValue("intvec4", glm::ivec4(0));
     positive.setValue("doublevec4", glm::dvec4(0.0));
     TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
-    REQUIRE(positiveRes.warnings.size() == doc.entries.size());
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
+    REQUIRE(positiveRes.warnings.size() == 10);
 
-    REQUIRE(positiveRes.warnings[0].offender == "bool");
-    REQUIRE(positiveRes.warnings[0].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[1].offender == "double");
-    REQUIRE(positiveRes.warnings[1].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[2].offender == "doublevec2");
-    REQUIRE(positiveRes.warnings[2].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[3].offender == "doublevec3");
-    REQUIRE(positiveRes.warnings[3].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[4].offender == "doublevec4");
-    REQUIRE(positiveRes.warnings[4].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[5].offender == "int");
-    REQUIRE(positiveRes.warnings[5].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[6].offender == "intvec2");
-    REQUIRE(positiveRes.warnings[6].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[7].offender == "intvec3");
-    REQUIRE(positiveRes.warnings[7].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[8].offender == "intvec4");
-    REQUIRE(positiveRes.warnings[8].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[9].offender == "string");
-    REQUIRE(positiveRes.warnings[9].reason == TestResult::Warning::Reason::Deprecated);
+    CHECK(positiveRes.warnings[0].offender == "bool");
+    CHECK(positiveRes.warnings[0].reason == TestResult::Warning::Reason::Deprecated);
+    CHECK(positiveRes.warnings[1].offender == "double");
+    CHECK(positiveRes.warnings[1].reason == TestResult::Warning::Reason::Deprecated);
+    CHECK(positiveRes.warnings[2].offender == "doublevec2");
+    CHECK(positiveRes.warnings[2].reason == TestResult::Warning::Reason::Deprecated);
+    CHECK(positiveRes.warnings[3].offender == "doublevec3");
+    CHECK(positiveRes.warnings[3].reason == TestResult::Warning::Reason::Deprecated);
+    CHECK(positiveRes.warnings[4].offender == "doublevec4");
+    CHECK(positiveRes.warnings[4].reason == TestResult::Warning::Reason::Deprecated);
+    CHECK(positiveRes.warnings[5].offender == "int");
+    CHECK(positiveRes.warnings[5].reason == TestResult::Warning::Reason::Deprecated);
+    CHECK(positiveRes.warnings[6].offender == "intvec2");
+    CHECK(positiveRes.warnings[6].reason == TestResult::Warning::Reason::Deprecated);
+    CHECK(positiveRes.warnings[7].offender == "intvec3");
+    CHECK(positiveRes.warnings[7].reason == TestResult::Warning::Reason::Deprecated);
+    CHECK(positiveRes.warnings[8].offender == "intvec4");
+    CHECK(positiveRes.warnings[8].reason == TestResult::Warning::Reason::Deprecated);
+    CHECK(positiveRes.warnings[9].offender == "string");
+    CHECK(positiveRes.warnings[9].reason == TestResult::Warning::Reason::Deprecated);
 }
 
 TEST_CASE("Documentation: Verifier Type Post Conditions", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    REQUIRE(BoolVerifier().type() != "");
-    REQUIRE(DoubleVerifier().type() != "");
-    REQUIRE(IntVerifier().type() != "");
-    REQUIRE(StringVerifier().type() != "");
-    REQUIRE(TableVerifier().type() != "");
+    CHECK(BoolVerifier().type() != "");
+    CHECK(DoubleVerifier().type() != "");
+    CHECK(IntVerifier().type() != "");
+    CHECK(StringVerifier().type() != "");
+    CHECK(TableVerifier().type() != "");
 
-    REQUIRE(IntVector2Verifier().type() != "");
-    REQUIRE(DoubleVector2Verifier().type() != "");
-    REQUIRE(IntVector3Verifier().type() != "");
-    REQUIRE(DoubleVector3Verifier().type() != "");
-    REQUIRE(IntVector4Verifier().type() != "");
-    REQUIRE(DoubleVector4Verifier().type() != "");
+    CHECK(IntVector2Verifier().type() != "");
+    CHECK(DoubleVector2Verifier().type() != "");
+    CHECK(IntVector3Verifier().type() != "");
+    CHECK(DoubleVector3Verifier().type() != "");
+    CHECK(IntVector4Verifier().type() != "");
+    CHECK(DoubleVector4Verifier().type() != "");
 
-    REQUIRE(IntLessVerifier(0).type() != "");
-    REQUIRE(DoubleLessVerifier(0.0).type() != "");
-    REQUIRE(IntLessEqualVerifier(0).type() != "");
-    REQUIRE(DoubleLessEqualVerifier(0.0).type() != "");
-    REQUIRE(IntGreaterVerifier(0).type() != "");
-    REQUIRE(DoubleGreaterVerifier(0.0).type() != "");
-    REQUIRE(IntGreaterEqualVerifier(0).type() != "");
-    REQUIRE(DoubleGreaterEqualVerifier(0.0).type() != "");
+    CHECK(IntLessVerifier(0).type() != "");
+    CHECK(DoubleLessVerifier(0.0).type() != "");
+    CHECK(IntLessEqualVerifier(0).type() != "");
+    CHECK(DoubleLessEqualVerifier(0.0).type() != "");
+    CHECK(IntGreaterVerifier(0).type() != "");
+    CHECK(DoubleGreaterVerifier(0.0).type() != "");
+    CHECK(IntGreaterEqualVerifier(0).type() != "");
+    CHECK(DoubleGreaterEqualVerifier(0.0).type() != "");
 
-    REQUIRE(BoolEqualVerifier(true).type() != "");
-    REQUIRE(IntEqualVerifier(0).type() != "");
-    REQUIRE(DoubleEqualVerifier(0.0).type() != "");
-    REQUIRE(StringEqualVerifier(""s).type() != "");
-    REQUIRE(BoolUnequalVerifier(true).type() != "");
-    REQUIRE(IntUnequalVerifier(0).type() != "");
-    REQUIRE(DoubleUnequalVerifier(0.0).type() != "");
-    REQUIRE(StringUnequalVerifier(""s).type() != "");
+    CHECK(BoolEqualVerifier(true).type() != "");
+    CHECK(IntEqualVerifier(0).type() != "");
+    CHECK(DoubleEqualVerifier(0.0).type() != "");
+    CHECK(StringEqualVerifier(""s).type() != "");
+    CHECK(BoolUnequalVerifier(true).type() != "");
+    CHECK(IntUnequalVerifier(0).type() != "");
+    CHECK(DoubleUnequalVerifier(0.0).type() != "");
+    CHECK(StringUnequalVerifier(""s).type() != "");
 
-    REQUIRE(BoolInListVerifier({ true }).type() != "");
-    REQUIRE(IntInListVerifier({ 0 }).type() != "");
-    REQUIRE(DoubleInListVerifier({ 0.0 }).type() != "");
-    REQUIRE(StringInListVerifier({ ""s }).type() != "");
-    REQUIRE(BoolNotInListVerifier({ true }).type() != "");
-    REQUIRE(IntNotInListVerifier({ 0 }).type() != "");
-    REQUIRE(DoubleNotInListVerifier({ 0.0 }).type() != "");
-    REQUIRE(StringNotInListVerifier({ ""s }).type() != "");
+    CHECK(BoolInListVerifier({ true }).type() != "");
+    CHECK(IntInListVerifier({ 0 }).type() != "");
+    CHECK(DoubleInListVerifier({ 0.0 }).type() != "");
+    CHECK(StringInListVerifier({ ""s }).type() != "");
+    CHECK(BoolNotInListVerifier({ true }).type() != "");
+    CHECK(IntNotInListVerifier({ 0 }).type() != "");
+    CHECK(DoubleNotInListVerifier({ 0.0 }).type() != "");
+    CHECK(StringNotInListVerifier({ ""s }).type() != "");
 
-    REQUIRE(IntInRangeVerifier({ 0, 1 }).type() != "");
-    REQUIRE(DoubleInRangeVerifier({ 0.0, 1.0 }).type() != "");
-    REQUIRE(IntNotInRangeVerifier({ 0, 1 }).type() != "");
-    REQUIRE(DoubleNotInRangeVerifier({ 0.0, 1.0 }).type() != "");
+    CHECK(IntInRangeVerifier({ 0, 1 }).type() != "");
+    CHECK(DoubleInRangeVerifier({ 0.0, 1.0 }).type() != "");
+    CHECK(IntNotInRangeVerifier({ 0, 1 }).type() != "");
+    CHECK(DoubleNotInRangeVerifier({ 0.0, 1.0 }).type() != "");
 
-    REQUIRE(BoolAnnotationVerifier("A"s).type() != "");
-    REQUIRE(IntAnnotationVerifier("A"s).type() != "");
-    REQUIRE(DoubleAnnotationVerifier("A"s).type() != "");
-    REQUIRE(StringAnnotationVerifier("A"s).type() != "");
-    REQUIRE(TableAnnotationVerifier("A"s).type() != "");
-    REQUIRE(AnnotationVerifier<IntVector2Verifier>("A"s).type() != "");
-    REQUIRE(AnnotationVerifier<DoubleVector2Verifier>("A"s).type() != "");
-    REQUIRE(AnnotationVerifier<IntVector3Verifier>("A"s).type() != "");
-    REQUIRE(AnnotationVerifier<DoubleVector3Verifier>("A"s).type() != "");
-    REQUIRE(AnnotationVerifier<IntVector4Verifier>("A"s).type() != "");
-    REQUIRE(AnnotationVerifier<DoubleVector4Verifier>("A"s).type() != "");
+    CHECK(BoolAnnotationVerifier("A"s).type() != "");
+    CHECK(IntAnnotationVerifier("A"s).type() != "");
+    CHECK(DoubleAnnotationVerifier("A"s).type() != "");
+    CHECK(StringAnnotationVerifier("A"s).type() != "");
+    CHECK(TableAnnotationVerifier("A"s).type() != "");
+    CHECK(AnnotationVerifier<IntVector2Verifier>("A"s).type() != "");
+    CHECK(AnnotationVerifier<DoubleVector2Verifier>("A"s).type() != "");
+    CHECK(AnnotationVerifier<IntVector3Verifier>("A"s).type() != "");
+    CHECK(AnnotationVerifier<DoubleVector3Verifier>("A"s).type() != "");
+    CHECK(AnnotationVerifier<IntVector4Verifier>("A"s).type() != "");
+    CHECK(AnnotationVerifier<DoubleVector4Verifier>("A"s).type() != "");
 
-    REQUIRE(BoolDeprecatedVerifier().type() != "");
-    REQUIRE(IntDeprecatedVerifier().type() != "");
-    REQUIRE(DoubleDeprecatedVerifier().type() != "");
-    REQUIRE(StringDeprecatedVerifier().type() != "");
-    REQUIRE(TableDeprecatedVerifier().type() != "");
-    REQUIRE(DeprecatedVerifier<IntVector2Verifier>().type() != "");
-    REQUIRE(DeprecatedVerifier<DoubleVector2Verifier>().type() != "");
-    REQUIRE(DeprecatedVerifier<IntVector3Verifier>().type() != "");
-    REQUIRE(DeprecatedVerifier<DoubleVector3Verifier>().type() != "");
-    REQUIRE(DeprecatedVerifier<IntVector4Verifier>().type() != "");
-    REQUIRE(DeprecatedVerifier<DoubleVector4Verifier>().type() != "");
+    CHECK(BoolDeprecatedVerifier().type() != "");
+    CHECK(IntDeprecatedVerifier().type() != "");
+    CHECK(DoubleDeprecatedVerifier().type() != "");
+    CHECK(StringDeprecatedVerifier().type() != "");
+    CHECK(TableDeprecatedVerifier().type() != "");
+    CHECK(DeprecatedVerifier<IntVector2Verifier>().type() != "");
+    CHECK(DeprecatedVerifier<DoubleVector2Verifier>().type() != "");
+    CHECK(DeprecatedVerifier<IntVector3Verifier>().type() != "");
+    CHECK(DeprecatedVerifier<DoubleVector3Verifier>().type() != "");
+    CHECK(DeprecatedVerifier<IntVector4Verifier>().type() != "");
+    CHECK(DeprecatedVerifier<DoubleVector4Verifier>().type() != "");
 
-    REQUIRE(ReferencingVerifier("identifier"s).type() != "");
+    CHECK(ReferencingVerifier("identifier"s).type() != "");
 }
 
 TEST_CASE("Documentation: Verifier Documentation Post Conditions", "[documentation]") {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    REQUIRE(BoolVerifier().documentation() != "");
-    REQUIRE(DoubleVerifier().documentation() != "");
-    REQUIRE(IntVerifier().documentation() != "");
-    REQUIRE(StringVerifier().documentation() != "");
-    REQUIRE(TableVerifier().documentation() != "");
+    CHECK(BoolVerifier().documentation() != "");
+    CHECK(DoubleVerifier().documentation() != "");
+    CHECK(IntVerifier().documentation() != "");
+    CHECK(StringVerifier().documentation() != "");
+    CHECK(TableVerifier().documentation() != "");
 
-    REQUIRE(IntVector2Verifier().documentation() != "");
-    REQUIRE(DoubleVector2Verifier().documentation() != "");
-    REQUIRE(IntVector3Verifier().documentation() != "");
-    REQUIRE(DoubleVector3Verifier().documentation() != "");
-    REQUIRE(IntVector4Verifier().documentation() != "");
-    REQUIRE(DoubleVector4Verifier().documentation() != "");
+    CHECK(IntVector2Verifier().documentation() != "");
+    CHECK(DoubleVector2Verifier().documentation() != "");
+    CHECK(IntVector3Verifier().documentation() != "");
+    CHECK(DoubleVector3Verifier().documentation() != "");
+    CHECK(IntVector4Verifier().documentation() != "");
+    CHECK(DoubleVector4Verifier().documentation() != "");
 
-    REQUIRE(IntLessVerifier(0).documentation() != "");
-    REQUIRE(DoubleLessVerifier(0.0).documentation() != "");
-    REQUIRE(IntLessEqualVerifier(0).documentation() != "");
-    REQUIRE(DoubleLessEqualVerifier(0.0).documentation() != "");
-    REQUIRE(IntGreaterVerifier(0).documentation() != "");
-    REQUIRE(DoubleGreaterVerifier(0.0).documentation() != "");
-    REQUIRE(IntGreaterEqualVerifier(0).documentation() != "");
-    REQUIRE(DoubleGreaterEqualVerifier(0.0).documentation() != "");
+    CHECK(IntLessVerifier(0).documentation() != "");
+    CHECK(DoubleLessVerifier(0.0).documentation() != "");
+    CHECK(IntLessEqualVerifier(0).documentation() != "");
+    CHECK(DoubleLessEqualVerifier(0.0).documentation() != "");
+    CHECK(IntGreaterVerifier(0).documentation() != "");
+    CHECK(DoubleGreaterVerifier(0.0).documentation() != "");
+    CHECK(IntGreaterEqualVerifier(0).documentation() != "");
+    CHECK(DoubleGreaterEqualVerifier(0.0).documentation() != "");
 
-    REQUIRE(BoolEqualVerifier(true).documentation() != "");
-    REQUIRE(IntEqualVerifier(0).documentation() != "");
-    REQUIRE(DoubleEqualVerifier(0.0).documentation() != "");
-    REQUIRE(StringEqualVerifier(""s).documentation() != "");
-    REQUIRE(BoolUnequalVerifier(true).documentation() != "");
-    REQUIRE(IntUnequalVerifier(0).documentation() != "");
-    REQUIRE(DoubleUnequalVerifier(0.0).documentation() != "");
-    REQUIRE(StringUnequalVerifier(""s).documentation() != "");
+    CHECK(BoolEqualVerifier(true).documentation() != "");
+    CHECK(IntEqualVerifier(0).documentation() != "");
+    CHECK(DoubleEqualVerifier(0.0).documentation() != "");
+    CHECK(StringEqualVerifier(""s).documentation() != "");
+    CHECK(BoolUnequalVerifier(true).documentation() != "");
+    CHECK(IntUnequalVerifier(0).documentation() != "");
+    CHECK(DoubleUnequalVerifier(0.0).documentation() != "");
+    CHECK(StringUnequalVerifier(""s).documentation() != "");
 
-    REQUIRE(BoolInListVerifier({ true }).documentation() != "");
-    REQUIRE(IntInListVerifier({ 0 }).documentation() != "");
-    REQUIRE(DoubleInListVerifier({ 0.0 }).documentation() != "");
-    REQUIRE(StringInListVerifier({ ""s }).documentation() != "");
-    REQUIRE(BoolNotInListVerifier({ true }).documentation() != "");
-    REQUIRE(IntNotInListVerifier({ 0 }).documentation() != "");
-    REQUIRE(DoubleNotInListVerifier({ 0.0 }).documentation() != "");
-    REQUIRE(StringNotInListVerifier({ ""s }).documentation() != "");
+    CHECK(BoolInListVerifier({ true }).documentation() != "");
+    CHECK(IntInListVerifier({ 0 }).documentation() != "");
+    CHECK(DoubleInListVerifier({ 0.0 }).documentation() != "");
+    CHECK(StringInListVerifier({ ""s }).documentation() != "");
+    CHECK(BoolNotInListVerifier({ true }).documentation() != "");
+    CHECK(IntNotInListVerifier({ 0 }).documentation() != "");
+    CHECK(DoubleNotInListVerifier({ 0.0 }).documentation() != "");
+    CHECK(StringNotInListVerifier({ ""s }).documentation() != "");
 
-    REQUIRE(IntInRangeVerifier({ 0, 1 }).documentation() != "");
-    REQUIRE(DoubleInRangeVerifier({ 0.0, 1.0 }).documentation() != "");
-    REQUIRE(IntNotInRangeVerifier({ 0, 1 }).documentation() != "");
-    REQUIRE(DoubleNotInRangeVerifier({ 0.0, 1.0 }).documentation() != "");
+    CHECK(IntInRangeVerifier({ 0, 1 }).documentation() != "");
+    CHECK(DoubleInRangeVerifier({ 0.0, 1.0 }).documentation() != "");
+    CHECK(IntNotInRangeVerifier({ 0, 1 }).documentation() != "");
+    CHECK(DoubleNotInRangeVerifier({ 0.0, 1.0 }).documentation() != "");
 
-    REQUIRE(BoolAnnotationVerifier("A"s).documentation() != "");
-    REQUIRE(IntAnnotationVerifier("A"s).documentation() != "");
-    REQUIRE(DoubleAnnotationVerifier("A"s).documentation() != "");
-    REQUIRE(StringAnnotationVerifier("A"s).documentation() != "");
-    REQUIRE(TableAnnotationVerifier("A"s).documentation() != "");
-    REQUIRE(AnnotationVerifier<IntVector2Verifier>("A"s).documentation() != "");
-    REQUIRE(AnnotationVerifier<DoubleVector2Verifier>("A"s).documentation() != "");
-    REQUIRE(AnnotationVerifier<IntVector3Verifier>("A"s).documentation() != "");
-    REQUIRE(AnnotationVerifier<DoubleVector3Verifier>("A"s).documentation() != "");
-    REQUIRE(AnnotationVerifier<IntVector4Verifier>("A"s).documentation() != "");
-    REQUIRE(AnnotationVerifier<DoubleVector4Verifier>("A"s).documentation() != "");
+    CHECK(BoolAnnotationVerifier("A"s).documentation() != "");
+    CHECK(IntAnnotationVerifier("A"s).documentation() != "");
+    CHECK(DoubleAnnotationVerifier("A"s).documentation() != "");
+    CHECK(StringAnnotationVerifier("A"s).documentation() != "");
+    CHECK(TableAnnotationVerifier("A"s).documentation() != "");
+    CHECK(AnnotationVerifier<IntVector2Verifier>("A"s).documentation() != "");
+    CHECK(AnnotationVerifier<DoubleVector2Verifier>("A"s).documentation() != "");
+    CHECK(AnnotationVerifier<IntVector3Verifier>("A"s).documentation() != "");
+    CHECK(AnnotationVerifier<DoubleVector3Verifier>("A"s).documentation() != "");
+    CHECK(AnnotationVerifier<IntVector4Verifier>("A"s).documentation() != "");
+    CHECK(AnnotationVerifier<DoubleVector4Verifier>("A"s).documentation() != "");
 
-    REQUIRE(BoolDeprecatedVerifier().documentation() != "");
-    REQUIRE(IntDeprecatedVerifier().documentation() != "");
-    REQUIRE(DoubleDeprecatedVerifier().documentation() != "");
-    REQUIRE(StringDeprecatedVerifier().documentation() != "");
-    REQUIRE(TableDeprecatedVerifier().documentation() != "");
-    REQUIRE(DeprecatedVerifier<IntVector2Verifier>().documentation() != "");
-    REQUIRE(DeprecatedVerifier<DoubleVector2Verifier>().documentation() != "");
-    REQUIRE(DeprecatedVerifier<IntVector3Verifier>().documentation() != "");
-    REQUIRE(DeprecatedVerifier<DoubleVector3Verifier>().documentation() != "");
-    REQUIRE(DeprecatedVerifier<IntVector4Verifier>().documentation() != "");
-    REQUIRE(DeprecatedVerifier<DoubleVector4Verifier>().documentation() != "");
+    CHECK(BoolDeprecatedVerifier().documentation() != "");
+    CHECK(IntDeprecatedVerifier().documentation() != "");
+    CHECK(DoubleDeprecatedVerifier().documentation() != "");
+    CHECK(StringDeprecatedVerifier().documentation() != "");
+    CHECK(TableDeprecatedVerifier().documentation() != "");
+    CHECK(DeprecatedVerifier<IntVector2Verifier>().documentation() != "");
+    CHECK(DeprecatedVerifier<DoubleVector2Verifier>().documentation() != "");
+    CHECK(DeprecatedVerifier<IntVector3Verifier>().documentation() != "");
+    CHECK(DeprecatedVerifier<DoubleVector3Verifier>().documentation() != "");
+    CHECK(DeprecatedVerifier<IntVector4Verifier>().documentation() != "");
+    CHECK(DeprecatedVerifier<DoubleVector4Verifier>().documentation() != "");
 
-    REQUIRE(ReferencingVerifier("identifier"s).documentation() != "");
+    CHECK(ReferencingVerifier("identifier"s).documentation() != "");
 }

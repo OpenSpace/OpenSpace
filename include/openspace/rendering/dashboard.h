@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ namespace scripting { struct LuaLibrary; }
 class Dashboard : public properties::PropertyOwner {
 public:
     Dashboard();
-    ~Dashboard() = default;
+    virtual ~Dashboard() override = default;
 
     void render(glm::vec2& penPosition);
 

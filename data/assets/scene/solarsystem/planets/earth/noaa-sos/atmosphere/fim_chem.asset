@@ -1,0 +1,65 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Aerosols: FIM Chem Model"
+local Identifier = "noaa-sos-atmosphere-fim_chem"
+local Description = [[The Flow Following Finite Volume Icosahedral Model (FIM) was
+developed by NOAA to produce weather forecasts. In fact, weather forecasts from the FIM
+model are available for SOS here. Building upon the success of the FIM model, the
+FIM-Chem model was created. The FIM-Chem is the FIM model with chemistry and aerosol
+modules added. Aerosols are one of the biggest uncertainties in climate models due to
+their varied affects on radiation and cloud physics. The FIM-Chem allows researchers to
+forecast and study the behavior of aerosols in the atmosphere, leading to the potential
+for better Earth system modeling for climate prediction]]
+local URL = "https://sos.noaa.gov/catalog/datasets/aerosols-fim-chem-model/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ImageSequenceTileLayer",
+  FolderPath = syncedDirectory .. "composite",
+  Description = Description
+}
+
+local colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.removeScreenSpaceRenderable(colorbar)
+end)
+
+asset.export(layer)
+asset.export(colorbar)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

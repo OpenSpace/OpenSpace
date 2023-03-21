@@ -1,51 +1,40 @@
-local colorLayersPath = "./layers/colorlayers"
-local heightLayersPath = "./layers/heightlayers"
-local overlaysPath = "./layers/overlays"
-    
 -- Color layer
-local colorLayer = asset.require(colorLayersPath .. "/moc_wa_color_utah") -- TODO: fallback
-asset.require(colorLayersPath .. "/moc_wa_color_liu") -- TODO: fallback
-asset.require(colorLayersPath .. "/viking_mdim_utah") 
-asset.require(colorLayersPath .. "/viking_mdim_sweden") 
-asset.require(colorLayersPath .. "/mola_pseudo_color_utah") 
-asset.require(colorLayersPath .. "/mola_pseudo_color_sweden") 
-asset.require(colorLayersPath .. "/mola_hrsc_utah") 
-asset.require(colorLayersPath .. "/mola_hrsc_sweden") 
-asset.require(colorLayersPath .. "/themis_ir_day_utah") 
-asset.require(colorLayersPath .. "/themis_ir_day_sweden") 
-asset.require(colorLayersPath .. "/themis_ir_night_utah") 
-asset.require(colorLayersPath .. "/themis_ir_night_sweden")
-asset.require(colorLayersPath .. "/ctx_mosaic_utah") 
-asset.require(colorLayersPath .. "/ctx_mosaic_sweden") 
-asset.require(colorLayersPath .. "/ctx_blended_01")
-asset.require(colorLayersPath .. "/hirise")
-asset.require(colorLayersPath .. "/hirisels")
+asset.require("./layers/colorlayers/mars_texture", false)
+asset.require("./layers/colorlayers/moc_wa_color_utah", true)
+asset.require("./layers/colorlayers/moc_wa_color_sweden", false)
+asset.require("./layers/colorlayers/viking_mdim_utah", false)
+asset.require("./layers/colorlayers/viking_mdim_sweden", false)
+asset.require("./layers/colorlayers/mola_pseudo_color_utah", false)
+asset.require("./layers/colorlayers/mola_pseudo_color_sweden", false)
+asset.require("./layers/colorlayers/mola_hrsc_utah", false)
+asset.require("./layers/colorlayers/mola_hrsc_sweden", false)
+asset.require("./layers/colorlayers/themis_ir_day_utah", false)
+asset.require("./layers/colorlayers/themis_ir_day_sweden", false)
+asset.require("./layers/colorlayers/themis_ir_night_utah", false)
+asset.require("./layers/colorlayers/themis_ir_night_sweden", false)
+asset.require("./layers/colorlayers/ctx_mosaic_utah", false)
+asset.require("./layers/colorlayers/ctx_mosaic_sweden", false)
+asset.require("./layers/colorlayers/ctx_blended_01", false)
+asset.require("./layers/colorlayers/hirise", false)
+asset.require("./layers/colorlayers/hirisels", false)
 
 -- Height layers
-asset.require(heightLayersPath .. "/mola_europe")
-local heightLayer = asset.require(heightLayersPath .. "/mola_utah")
-asset.require(heightLayersPath .. "/hirisels")
+asset.require("./layers/heightlayers/mola_sweden", false)
+asset.require("./layers/heightlayers/mola_utah", false)
+asset.require("./layers/heightlayers/MDEM200M", true)
+asset.require("./layers/heightlayers/hirisels", false)
 
 -- Overlays
-asset.require(overlaysPath .. "/indices")
-asset.require(overlaysPath .. "/size_reference")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers." ..
-    colorLayer.layer.Identifier .. ".Enabled", true)
-  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers." ..
-    heightLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/overlays/indices", false)
+asset.require("./layers/overlays/size_reference", false)
 
 
 asset.meta = {
   Name = "Default Mars Layers",
   Version = "1.1",
-  Description = [[ Default Mars layers are: MOC WA Color, Viking MDIM, MOLA Pseudo
-    Color, MOLA HRSC, Themis IR Day, Themis IR Night, CTX Mosaic, CTX Blended
-    beta01, HiRISE, and HiRISE Local Set]],
+  Description = [[Default Mars layers are: MOC WA Color, Viking MDIM, MOLA Pseudo Color,
+    MOLA HRSC, Themis IR Day, Themis IR Night, CTX Mosaic, CTX Blended beta01, HiRISE, and
+    HiRISE Local Set]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

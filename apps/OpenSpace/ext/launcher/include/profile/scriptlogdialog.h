@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,33 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
-#define __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___SCRIPTLOGDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___SCRIPTLOGDIALOG___H__
 
-#include "profile/keybindingsdialog.h"
 #include <QDialog>
-#include <QListWidget>
 
-class ScriptlogDialog : public QDialog {
+class QLineEdit;
+class QListWidget;
+class QPushButton;
+
+class ScriptlogDialog final : public QDialog {
 Q_OBJECT
 public:
-    /**
-     * Constructor for ScriptlogDialog class
-     *
-     * \param parent Pointer to parent Qt widget
-     */
-    ScriptlogDialog(QWidget* parent);
+    ScriptlogDialog(QWidget* parent, std::string filter = "");
 
 signals:
-    void scriptsSelected(std::string script);
-
-private slots:
-    void saveChosenScripts();
+    void scriptsSelected(std::vector<std::string> script);
 
 private:
     void createWidgets();
+    
+    void loadScriptFile();
+    void saveChosenScripts();
+    
+    void updateScriptList();
 
     QListWidget* _scriptlogList = nullptr;
+    QLineEdit* _filter = nullptr;
+    QPushButton* _reloadFile = nullptr;
+    std::string _scriptLogFile;
+    std::vector<std::string> _scripts;
+
+    std::string _fixedFilter;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
+#endif // __OPENSPACE_UI_LAUNCHER___SCRIPTLOGDIALOG___H__

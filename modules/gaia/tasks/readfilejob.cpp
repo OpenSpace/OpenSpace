@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,8 +30,8 @@
 #include <ghoul/fmt.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ReadFileJob";
-}
+    constexpr std::string_view _loggerCat = "ReadFileJob";
+} // namespace
 
 namespace openspace::gaia {
 
@@ -68,8 +68,10 @@ void ReadFileJob::execute() {
     int nNullArr = 0;
     size_t nColumnsRead = _allColumns.size();
     if (nColumnsRead != _nDefaultCols) {
-        LINFO("Additional columns will be read! Consider add column in code for "
-            "significant speedup!");
+        LINFO(
+            "Additional columns will be read! Consider add column in code for "
+            "significant speedup"
+        );
     }
 
     // Copy columns to local variables.
@@ -259,8 +261,7 @@ void ReadFileJob::execute() {
         _octants[index].insert(_octants[index].end(), values.begin(), values.end());
     }
 
-    /*LINFO(std::to_string(nNullArr) + " out of " +
-        std::to_string(nStars) + " read stars were nullArrays.");*/
+    // LINFO(fmt::format("{} out of {} read stars were nullArrays", nNullArr, nStars));
 }
 
 std::vector<std::vector<float>> ReadFileJob::product() {

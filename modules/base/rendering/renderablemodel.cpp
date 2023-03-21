@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,14 +45,14 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableModel";
-    constexpr const char* ProgramName = "ModelProgram";
+    constexpr std::string_view _loggerCat = "RenderableModel";
+    constexpr std::string_view ProgramName = "ModelProgram";
 
-    constexpr const int DefaultBlending = 0;
-    constexpr const int AdditiveBlending = 1;
-    constexpr const int PointsAndLinesBlending = 2;
-    constexpr const int PolygonBlending = 3;
-    constexpr const int ColorAddingBlending = 4;
+    constexpr int DefaultBlending = 0;
+    constexpr int AdditiveBlending = 1;
+    constexpr int PointsAndLinesBlending = 2;
+    constexpr int PolygonBlending = 3;
+    constexpr int ColorAddingBlending = 4;
 
     std::map<std::string, int> BlendingMapping = {
         { "Default", DefaultBlending },
@@ -62,55 +62,55 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
-        "EnableAnimation",
-        "Enable Animation",
-        "Enable or disable the animation for the model if it has any"
-    };
-
-    constexpr const std::array<const char*, 12> UniformNames = {
+    constexpr std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",
         "specularIntensity", "opacityBlending"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
+        "EnableAnimation",
+        "Enable Animation",
+        "Enable or disable the animation for the model if it has any"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient Intensity",
-        "A multiplier for ambient lighting."
+        "A multiplier for ambient lighting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
         "Diffuse Intensity",
-        "A multiplier for diffuse lighting."
+        "A multiplier for diffuse lighting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
         "Specular Intensity",
-        "A multiplier for specular lighting."
+        "A multiplier for specular lighting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadingInfo = {
         "PerformShading",
         "Perform Shading",
         "This value determines whether this model should be shaded by using the position "
-        "of the Sun."
+        "of the Sun"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFaceCullingInfo = {
         "DisableFaceCulling",
         "Disable Face Culling",
-        "Disable OpenGL automatic face culling optimization."
+        "Disable OpenGL automatic face culling optimization"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
         "ModelTransform",
         "Model Transform",
         "This value specifies the model transform that is applied to the model before "
-        "all other transformations are applied."
+        "all other transformations are applied"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
@@ -122,26 +122,26 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
         "LightSources",
         "Light Sources",
-        "A list of light sources that this model should accept light from."
+        "A list of light sources that this model should accept light from"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableDepthTestInfo = {
         "DisableDepthTest",
         "Disable Depth Test",
-        "Disable Depth Testing for the Model."
+        "Disable Depth Testing for the Model"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending Options",
         "Changes the blending function used to calculate the colors of the model with "
-        "respect to the opacity."
+        "respect to the opacity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableOpacityBlendingInfo = {
         "EnableOpacityBlending",
         "Enable Opacity Blending",
-        "Enable Opacity Blending."
+        "Enable Opacity Blending"
     };
 
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {
@@ -150,19 +150,33 @@ namespace {
         // the Renderable.
         std::filesystem::path geometryFile;
 
-        enum class ScaleUnit {
+        enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
             Nanometer,
             Micrometer,
             Millimeter,
             Centimeter,
             Decimeter,
             Meter,
-            Kilometer
+            Kilometer,
+
+            // Weird units
+            Thou,
+            Inch,
+            Foot,
+            Yard,
+            Chain,
+            Furlong,
+            Mile
         };
 
         // The scale of the model. For example if the model is in centimeters
         // then ModelScale = Centimeter or ModelScale = 0.01
         std::optional<std::variant<ScaleUnit, double>> modelScale;
+
+        // By default the given ModelScale is used to scale the model down,
+        // by setting this setting to true the model is instead scaled up with the
+        // given ModelScale
+        std::optional<bool> invertModelScale;
 
         // Set if invisible parts (parts with no textures or materials) of the model
         // should be forced to render or not.
@@ -175,7 +189,7 @@ namespace {
         // In format 'YYYY MM DD hh:mm:ss'.
         std::optional<std::string> animationStartTime [[codegen::datetime()]];
 
-        enum class AnimationTimeUnit {
+        enum class [[codegen::map(openspace::TimeUnit)]] AnimationTimeUnit {
             Nanosecond,
             Microsecond,
             Millisecond,
@@ -203,13 +217,13 @@ namespace {
         std::optional<AnimationMode> animationMode;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]
-        std::optional<double> ambientIntensity;
+        std::optional<float> ambientIntensity;
 
         // [[codegen::verbatim(DiffuseIntensityInfo.description)]]
-        std::optional<double> diffuseIntensity;
+        std::optional<float> diffuseIntensity;
 
         // [[codegen::verbatim(SpecularIntensityInfo.description)]]
-        std::optional<double> specularIntensity;
+        std::optional<float> specularIntensity;
 
         // [[codegen::verbatim(ShadingInfo.description)]]
         std::optional<bool> performShading;
@@ -235,6 +249,14 @@ namespace {
 
         // [[codegen::verbatim(EnableOpacityBlendingInfo.description)]]
         std::optional<bool> enableOpacityBlending;
+
+        // The path to the vertex shader program that is used instead of the default
+        // shader.
+        std::optional<std::filesystem::path> vertexShader;
+
+        // The path to the fragment shader program that is used instead of the default
+        // shader.
+        std::optional<std::filesystem::path> fragmentShader;
     };
 #include "renderablemodel_codegen.cpp"
 } // namespace
@@ -242,9 +264,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableModel::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_model";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_model");
 }
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
@@ -262,8 +282,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         glm::dmat3(1.0)
     )
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
-    , _enableOpacityBlending(EnableOpacityBlendingInfo, false)
     , _disableDepthTest(DisableDepthTestInfo, false)
+    , _enableOpacityBlending(EnableOpacityBlendingInfo, false)
     , _blendingFuncOption(
         BlendingOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -292,44 +312,24 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
     );
 
+    _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
+
     if (p.modelScale.has_value()) {
         if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
             Parameters::ScaleUnit scaleUnit =
                 std::get<Parameters::ScaleUnit>(*p.modelScale);
-            DistanceUnit distanceUnit;
-
-            switch (scaleUnit) {
-                case Parameters::ScaleUnit::Nanometer:
-                    distanceUnit = DistanceUnit::Nanometer;
-                    break;
-                case Parameters::ScaleUnit::Micrometer:
-                    distanceUnit = DistanceUnit::Micrometer;
-                    break;
-                case Parameters::ScaleUnit::Millimeter:
-                    distanceUnit = DistanceUnit::Millimeter;
-                    break;
-                case Parameters::ScaleUnit::Centimeter:
-                    distanceUnit = DistanceUnit::Centimeter;
-                    break;
-                case Parameters::ScaleUnit::Decimeter:
-                    distanceUnit = DistanceUnit::Decimeter;
-                    break;
-                case Parameters::ScaleUnit::Meter:
-                    distanceUnit = DistanceUnit::Meter;
-                    break;
-                case Parameters::ScaleUnit::Kilometer:
-                    distanceUnit = DistanceUnit::Kilometer;
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
-            }
-            _modelScale = convertUnit(distanceUnit, DistanceUnit::Meter);
+            DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
+            _modelScale = toMeter(distanceUnit);
         }
         else if (std::holds_alternative<double>(*p.modelScale)) {
             _modelScale = std::get<double>(*p.modelScale);
         }
         else {
             throw ghoul::MissingCaseException();
+        }
+
+        if (_invertModelScale) {
+            _modelScale = 1.0 / _modelScale;
         }
     }
 
@@ -360,32 +360,17 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         else if (std::holds_alternative<float>(*p.animationTimeScale)) {
             _geometry->setTimeScale(std::get<float>(*p.animationTimeScale));
         }
-        else if (std::holds_alternative<Parameters::AnimationTimeUnit>(*p.animationTimeScale)) {
+        else if (std::holds_alternative<Parameters::AnimationTimeUnit>(
+                    *p.animationTimeScale)
+                )
+        {
             Parameters::AnimationTimeUnit animationTimeUnit =
                 std::get<Parameters::AnimationTimeUnit>(*p.animationTimeScale);
-            TimeUnit timeUnit;
+            TimeUnit timeUnit = codegen::map<TimeUnit>(animationTimeUnit);
 
-            switch (animationTimeUnit) {
-                case Parameters::AnimationTimeUnit::Nanosecond:
-                    timeUnit = TimeUnit::Nanosecond;
-                    break;
-                case Parameters::AnimationTimeUnit::Microsecond:
-                    timeUnit = TimeUnit::Microsecond;
-                    break;
-                case Parameters::AnimationTimeUnit::Millisecond:
-                    timeUnit = TimeUnit::Millisecond;
-                    break;
-                case Parameters::AnimationTimeUnit::Second:
-                    timeUnit = TimeUnit::Second;
-                    break;
-                case Parameters::AnimationTimeUnit::Minute:
-                    timeUnit = TimeUnit::Minute;
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
-            }
-
-            _geometry->setTimeScale(convertTime(1.0, timeUnit, TimeUnit::Second));
+            _geometry->setTimeScale(static_cast<float>(
+                convertTime(1.0, timeUnit, TimeUnit::Second))
+            );
         }
         else {
             throw ghoul::MissingCaseException();
@@ -428,6 +413,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _performShading = p.performShading.value_or(_performShading);
     _disableDepthTest = p.disableDepthTest.value_or(_disableDepthTest);
     _disableFaceCulling = p.disableFaceCulling.value_or(_disableFaceCulling);
+
+    if (p.vertexShader.has_value()) {
+        _vertexShaderPath = p.vertexShader->string();
+    }
+    if (p.fragmentShader.has_value()) {
+        _fragmentShaderPath = p.fragmentShader->string();
+    }
 
     if (p.lightSources.has_value()) {
         std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
@@ -498,7 +490,7 @@ bool RenderableModel::isReady() const {
 }
 
 void RenderableModel::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_geometry->hasAnimation() && _enableAnimation && _animationStart.empty()) {
         LWARNING("Model with animation not given any start time");
@@ -515,32 +507,55 @@ void RenderableModel::initialize() {
 }
 
 void RenderableModel::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
+    std::string program = std::string(ProgramName);
+    if (!_vertexShaderPath.empty()) {
+        program += "|vs=" + _vertexShaderPath;
+    }
+    if (!_fragmentShaderPath.empty()) {
+        program += "|fs=" + _fragmentShaderPath;
+    }
     _program = BaseModule::ProgramObjectManager.request(
-        ProgramName,
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine->buildRenderProgram(
-                ProgramName,
-                absPath("${MODULE_BASE}/shaders/model_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/model_fs.glsl")
-            );
+        program,
+        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            std::filesystem::path vs =
+                _vertexShaderPath.empty() ?
+                absPath("${MODULE_BASE}/shaders/model_vs.glsl") :
+                std::filesystem::path(_vertexShaderPath);
+            std::filesystem::path fs =
+                _fragmentShaderPath.empty() ?
+                absPath("${MODULE_BASE}/shaders/model_fs.glsl") :
+                std::filesystem::path(_fragmentShaderPath);
+
+            return global::renderEngine->buildRenderProgram(program, vs, fs);
         }
+    );
+    // We don't really know what kind of shader the user provides us with, so we can't
+    // make the assumption that we are going to use all uniforms
+    _program->setIgnoreUniformLocationError(
+        ghoul::opengl::ProgramObject::IgnoreError::Yes
     );
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     _geometry->initialize();
     _geometry->calculateBoundingRadius();
-    setBoundingSphere(_geometry->boundingRadius() * _modelScale);
 }
 
 void RenderableModel::deinitializeGL() {
     _geometry->deinitialize();
     _geometry.reset();
 
+    std::string program = std::string(ProgramName);
+    if (!_vertexShaderPath.empty()) {
+        program += "|vs=" + _vertexShaderPath;
+    }
+    if (!_fragmentShaderPath.empty()) {
+        program += "|fs=" + _fragmentShaderPath;
+    }
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        program,
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -564,17 +579,14 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     if (distanceToCamera < maxDistance) {
         _program->activate();
 
-        _program->setUniform(_uniformCache.opacity, _opacity);
+        _program->setUniform(_uniformCache.opacity, opacity());
 
         // Model transform and view transform needs to be in double precision
         const glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-            glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            glm::dmat4(data.modelTransform.rotation) *
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-            glm::scale(
-                glm::dmat4(_modelTransform.value()),
-                glm::dvec3(_modelScale) // Model scale unit
-            );
+            glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
         const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
             modelTransform;
 
@@ -674,6 +686,12 @@ void RenderableModel::update(const UpdateData& data) {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
+    setBoundingSphere(_geometry->boundingRadius() * _modelScale *
+        glm::compMax(data.modelTransform.scale)
+    );
+    // Set Interaction sphere size to be 10% of the bounding sphere
+    setInteractionSphere(_boundingSphere * 0.1);
+
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime;
         double now = data.time.j2000Seconds();
@@ -685,8 +703,9 @@ void RenderableModel::update(const UpdateData& data) {
         // be converted to the animation time range, so the animation knows which
         // keyframes it should interpolate between for each frame. The conversion is
         // done in different ways depending on the animation mode.
-        // Explanation: s indicates start time, / indicates animation is played once forwards,
-        // \ indicates animation is played once backwards, time moves to the right.
+        // Explanation: s indicates start time, / indicates animation is played once
+        // forwards, \ indicates animation is played once backwards, time moves to the
+        // right.
         switch (_animationMode) {
             case AnimationMode::LoopFromStart:
                 // Start looping from the start time
@@ -713,7 +732,7 @@ void RenderableModel::update(const UpdateData& data) {
                 // starts again
                 // s/\/\/\/\ ...
                 relativeTime =
-                    duration - abs(fmod(now - startTime, 2 * duration) - duration);
+                    duration - std::abs(fmod(now - startTime, 2 * duration) - duration);
                 break;
             case AnimationMode::BounceInfinitely: {
                 // Bounce both before and after the start time where the model is
@@ -723,7 +742,7 @@ void RenderableModel::update(const UpdateData& data) {
                 if (modulo < 0.0) {
                     modulo += 2 * duration;
                 }
-                relativeTime = duration - abs(modulo - duration);
+                relativeTime = duration - std::abs(modulo - duration);
                 break;
             }
             case AnimationMode::Once:

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,9 +67,9 @@ private:
 };
 
 struct MappingKey {
-    MappingKey(float p, const glm::vec4& c): position(p), color(c) {};
-    MappingKey(float p): position(p), color(glm::vec4(0.f)) {};
-    bool operator<(const MappingKey& rhs) {return position < rhs.position;};
+    MappingKey(float p, const glm::vec4& c): position(p), color(c) {}
+    MappingKey(float p): position(p), color(glm::vec4(0.f)) {}
+    bool operator<(const MappingKey& rhs) { return position < rhs.position; }
 
     float position = 0.f;
     glm::vec4 color = glm::vec4(0.f);

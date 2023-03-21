@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
-#define __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___PROPERTIESDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___PROPERTIESDIALOG___H__
 
 #include <QDialog>
 
@@ -36,7 +36,7 @@ class QLineEdit;
 class QListWidget;
 class QPushButton;
 
-class PropertiesDialog : public QDialog {
+class PropertiesDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -46,7 +46,8 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    PropertiesDialog(openspace::Profile& profile, QWidget* parent);
+    PropertiesDialog(QWidget* parent,
+        std::vector<openspace::Profile::Property>* properties);
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -55,7 +56,9 @@ public:
      */
     virtual void keyPressEvent(QKeyEvent* evt) override;
 
-private slots:
+private:
+    void createWidgets();
+
     void listItemSelected();
     void listItemAdded();
     void listItemRemove();
@@ -64,8 +67,7 @@ private slots:
     void transitionToEditMode();
     void parseSelections();
 
-private:
-    void createWidgets();
+    void selectLineFromScriptLog();
 
     QString createOneLineSummary(openspace::Profile::Property p);
     void transitionFromEditMode();
@@ -73,13 +75,15 @@ private:
     bool areRequiredFormsFilled();
     bool isLineEmpty(int index);
 
-    openspace::Profile& _profile;
-    std::vector<openspace::Profile::Property> _data;
+    std::vector<openspace::Profile::Property>* _properties = nullptr;
+    std::vector<openspace::Profile::Property> _propertyData;
     bool _editModeNewItem = false;
 
     QListWidget* _list = nullptr;
     QPushButton* _addButton = nullptr;
     QPushButton* _removeButton = nullptr;
+
+    QPushButton* _fillFromScriptLog = nullptr;
     QLabel* _commandLabel = nullptr;
     QComboBox* _commandCombo = nullptr;
     QLabel* _propertyLabel = nullptr;
@@ -93,4 +97,4 @@ private:
     QLabel* _errorMsg = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
+#endif // __OPENSPACE_UI_LAUNCHER___PROPERTIESDIALOG___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,23 +33,12 @@ DoubleProperty::DoubleProperty(Property::PropertyInfo info, double value,
     : NumericalProperty<double>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-std::string DoubleProperty::className() const {
+std::string_view DoubleProperty::className() const {
     return "DoubleProperty";
 }
 
 int DoubleProperty::typeLua() const {
     return LUA_TNUMBER;
-}
-
-double DoubleProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        double val = lua_tonumber(state, -1);
-        return val;
-    }
-    else {
-        return 0.0;
-    }
 }
 
 } // namespace openspace::properties

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,14 +42,13 @@ public:
         Host
     };
 
-    enum class MessageType : uint32_t {
+    enum class MessageType : uint8_t {
         Authentication = 0,
         Data,
         ConnectionStatus,
         HostshipRequest,
         HostshipResignation,
-        NConnections,
-        Disconnection
+        NConnections
     };
 
     struct Message {
@@ -71,7 +70,9 @@ public:
 
     class ConnectionLostError : public ghoul::RuntimeError {
     public:
-        explicit ConnectionLostError();
+        explicit ConnectionLostError(bool shouldLogError = true);
+
+        bool shouldLogError;
     };
 
     ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
@@ -84,9 +85,12 @@ public:
 
     ParallelConnection::Message receiveMessage();
 
-    static const unsigned int ProtocolVersion;
+    // Gonna do some UTF-like magic once we reach 255 to introduce a second byte or so
+    static constexpr uint8_t ProtocolVersion = 6;
+
 private:
     std::unique_ptr<ghoul::io::TcpSocket> _socket;
+    bool _shouldDisconnect = false;
 };
 
 } // namespace openspace

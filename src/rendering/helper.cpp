@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <algorithm>
@@ -47,7 +48,7 @@ std::filesystem::path xyuvrgbaFragmentFile;
 std::filesystem::path screenFillingVertexFile;
 std::filesystem::path screenFillingFragmentFile;
 
-constexpr const char* XyuvrgbaVertexCode = R"(
+constexpr std::string_view XyuvrgbaVertexCode = R"(
 #version __CONTEXT__
 
 layout(location = 0) in vec2 in_position;
@@ -72,7 +73,7 @@ void main() {
 
 )";
 
-constexpr const char* ScreenFillingQuadVertexCode = R"(
+constexpr std::string_view ScreenFillingQuadVertexCode = R"(
 #version __CONTEXT__
 
 vec2 positions[6] = vec2[](
@@ -91,7 +92,7 @@ void main() {
 
 )";
 
-constexpr const char* XyuvrgbaFragmentCode = R"(
+constexpr std::string_view XyuvrgbaFragmentCode = R"(
 #version __CONTEXT__
 
 #include "fragment.glsl"
@@ -126,7 +127,6 @@ void main() {
 
 } // namespace
 
-#pragma optimize ("", off)
 namespace openspace::rendering::helper {
 
 namespace detail {
@@ -144,8 +144,8 @@ VertexObjects& gVertexObjectsConstructor() {
 } // namespace detail
 
 void initialize() {
-    ZoneScoped
-    TracyGpuZone("helper::initialize")
+    ZoneScoped;
+    TracyGpuZone("helper::initialize");
 
     ghoul_assert(!isInitialized, "Rendering Helper initialized twice");
 
@@ -459,7 +459,7 @@ std::pair<std::vector<Vertex>, std::vector<GLushort>> createSphere(int nSegments
             // 0 -> PI
             // azimuth angle (east to west)
             const float theta = fi * glm::pi<float>() / nSegments;
-                                                                    
+
             // 0 -> 2*PI
             const float phi = fj * glm::pi<float>() * 2.f / nSegments;
 

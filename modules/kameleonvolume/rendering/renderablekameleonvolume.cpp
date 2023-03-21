@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,22 +48,22 @@
 #include <filesystem>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableKameleonVolume";
+    constexpr std::string_view _loggerCat = "RenderableKameleonVolume";
 
-    constexpr const char* KeyDimensions = "Dimensions";
-    constexpr const char* KeyStepSize = "StepSize";
-    constexpr const char* KeyTransferFunction = "TransferFunction";
-    constexpr const char* KeySource = "Source";
-    constexpr const char* KeyVariable = "Variable";
-    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
-    constexpr const char* KeyDomainScale = "DomainScale";
-    constexpr const char* KeyLowerValueBound = "LowerValueBound";
-    constexpr const char* KeyUpperValueBound = "UpperValueBound";
-    constexpr const char* KeyClipPlanes = "ClipPlanes";
-    constexpr const char* KeyCache = "Cache";
-    constexpr const char* KeyGridType = "GridType";
-    constexpr const char* ValueSphericalGridType = "Spherical";
+    constexpr std::string_view KeyDimensions = "Dimensions";
+    constexpr std::string_view KeyStepSize = "StepSize";
+    constexpr std::string_view KeyTransferFunction = "TransferFunction";
+    constexpr std::string_view KeySource = "Source";
+    constexpr std::string_view KeyVariable = "Variable";
+    constexpr std::string_view KeyLowerDomainBound = "LowerDomainBound";
+    constexpr std::string_view KeyUpperDomainBound = "UpperDomainBound";
+    constexpr std::string_view KeyDomainScale = "DomainScale";
+    constexpr std::string_view KeyLowerValueBound = "LowerValueBound";
+    constexpr std::string_view KeyUpperValueBound = "UpperValueBound";
+    constexpr std::string_view KeyClipPlanes = "ClipPlanes";
+    constexpr std::string_view KeyCache = "Cache";
+    constexpr std::string_view KeyGridType = "GridType";
+    constexpr std::string_view ValueSphericalGridType = "Spherical";
 
     constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
@@ -332,7 +332,7 @@ void RenderableKameleonVolume::load() {
         loadFromPath(_sourcePath);
         return;
     }
-    std::string cachePath = FileSys.cacheManager()->cachedFilename(
+    std::filesystem::path cachePath = FileSys.cacheManager()->cachedFilename(
         std::filesystem::path(_sourcePath.value()).stem(),
         cacheSuffix()
     );
@@ -360,7 +360,7 @@ void RenderableKameleonVolume::loadFromPath(const std::string& path) {
     }
 }
 
-void RenderableKameleonVolume::loadRaw(const std::string& path) {
+void RenderableKameleonVolume::loadRaw(const std::filesystem::path& path) {
     volume::RawVolumeReader<float> reader(path, _dimensions);
     _rawVolume = reader.read();
     updateTextureFromVolume();
@@ -422,6 +422,7 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
 
     _volumeTexture = std::make_shared<ghoul::opengl::Texture>(
         _dimensions,
+        GL_TEXTURE_3D,
         ghoul::opengl::Texture::Format::Red,
         GL_RED,
         GL_FLOAT,
@@ -433,7 +434,7 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
     _volumeTexture->setPixelData(data, ghoul::opengl::Texture::TakeOwnership::No);
 }
 
-void RenderableKameleonVolume::storeRaw(const std::string& path) {
+void RenderableKameleonVolume::storeRaw(const std::filesystem::path& path) {
     volume::RawVolumeWriter<float> writer(path);
     writer.write(*_rawVolume);
 }

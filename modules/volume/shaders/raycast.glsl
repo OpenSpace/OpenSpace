@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,9 @@ uniform int nClips_#{id};
 uniform vec3 clipNormals_#{id}[8];
 uniform vec2 clipOffsets_#{id}[8];
 
-uniform float opacity_#{id} = 10.0;
-
+uniform float brightness_#{id} = 1.0;
+// unitless factor that multiplies with the brightness [0,1] to achieve desired visuals.
+const float SamplingIntervalReferenceFactor = 500.0;
 
 // Normalization factor x for radius r [0, 1].
 // value *= 1/(r^x)
@@ -42,54 +43,54 @@ uniform float rNormalization_#{id} = 0.0;
 
 uniform float rUpperBound_#{id} = 1.0;
 
+
 void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
                  inout vec3 accumulatedAlpha, inout float stepSize)
 {
+  vec3 transformedPos = samplePos;
+  if (gridType_#{id} == 1) {
+    transformedPos = volume_cartesianToSpherical(samplePos);
+    if (abs(transformedPos.r) > 1.0) {
+      return;
+    }
+  }
 
-    vec3 transformedPos = samplePos;
-    if (gridType_#{id} == 1) {
-        transformedPos = volume_cartesianToSpherical(samplePos);
-        if (abs(transformedPos.r) > 1.0) {
-           return;
-        }
+  float clipAlpha = 1.0;
+  vec3 centerToPos = transformedPos - vec3(0.5);
+
+  for (int i = 0; i < nClips_#{id} && i < 8; i++) {
+    vec3 clipNormal = clipNormals_#{id}[i];
+    float clipBegin = clipOffsets_#{id}[i].x;
+    float clipEnd = clipBegin + clipOffsets_#{id}[i].y;
+    clipAlpha *= smoothstep(clipBegin, clipEnd, dot(centerToPos, clipNormal));
+  }
+
+  clipAlpha *= 1.0 - smoothstep(rUpperBound_#{id} - 0.01, rUpperBound_#{id} + 0.01, transformedPos.x);
+
+  if (clipAlpha > 0) {
+    float val = texture(volumeTexture_#{id}, transformedPos).r;
+
+    if (rNormalization_#{id} > 0 && gridType_#{id} == 1) {
+      val *= pow(transformedPos.x, rNormalization_#{id});
     }
 
-    float clipAlpha = 1.0;
-    vec3 centerToPos = transformedPos - vec3(0.5);
+    vec4 color = texture(transferFunction_#{id}, val);
 
-    for (int i = 0; i < nClips_#{id} && i < 8; i++) {
-        vec3 clipNormal = clipNormals_#{id}[i];
-        float clipBegin = clipOffsets_#{id}[i].x;
-        float clipEnd = clipBegin + clipOffsets_#{id}[i].y;
-        clipAlpha *= smoothstep(clipBegin, clipEnd, dot(centerToPos, clipNormal));
-    }
+    vec3 backColor = color.rgb;
+    vec3 backAlpha = color.aaa;
 
-    clipAlpha *= 1.0 - smoothstep(rUpperBound_#{id} - 0.01, rUpperBound_#{id} + 0.01, transformedPos.x);
+    backColor *= stepSize * brightness_#{id} * SamplingIntervalReferenceFactor * clipAlpha;
+    backAlpha *= stepSize * brightness_#{id} * SamplingIntervalReferenceFactor * clipAlpha;
 
-    if (clipAlpha > 0) {
-        float val = texture(volumeTexture_#{id}, transformedPos).r;
+    backColor = clamp(backColor, 0.0, 1.0);
+    backAlpha = clamp(backAlpha, 0.0, 1.0);
 
-        if (rNormalization_#{id} > 0 && gridType_#{id} == 1) {
-            val *= pow(transformedPos.x, rNormalization_#{id});
-        }
+    vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
+    accumulatedColor += oneMinusFrontAlpha * backColor;
+    accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
+  }
 
-        vec4 color = texture(transferFunction_#{id}, val);
-
-        vec3 backColor = color.rgb;
-        vec3 backAlpha = color.aaa;
-
-        backColor *= stepSize*opacity_#{id} * clipAlpha;
-        backAlpha *= stepSize*opacity_#{id} * clipAlpha;
-
-        backColor = clamp(backColor, 0.0, 1.0);
-        backAlpha = clamp(backAlpha, 0.0, 1.0);
-
-        vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
-        accumulatedColor += oneMinusFrontAlpha * backColor;
-        accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
-    }
-
-    stepSize = maxStepSize#{id};
+  stepSize = maxStepSize#{id};
 }
 
 float stepSize#{id}(vec3 samplePos, vec3 dir) {

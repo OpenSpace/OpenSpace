@@ -1,0 +1,80 @@
+local propertyHelper = asset.require("util/property_helper")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
+
+local densityDirectory = asset.syncedResource({
+  Name = "Bastille Day MAS Density",
+  Type = "HttpSynchronization",
+  Identifier = "bastille_day_mas_density",
+  Version = 1
+})
+
+local sunRadius = 6.957E8
+
+local densityVolume = {
+  Identifier = "MAS-MHD-Density-bastille-day-2000",
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 1/695700000,
+  Parent = sunTransforms.SunIAU.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = sunRadius
+    },
+    Rotation = {
+      Type = "FixedRotation",
+      XAxis = { -1.0, 0.0, 0.0 },
+      YAxis = { 0.0, 1.0, 0.0 },
+      ZAxis = { 0.0, 0.0, -1.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableTimeVaryingVolume",
+    StepSize = 0.004,
+    Brightness = 0.3,
+    TransferFunction = asset.localResource("transferfunctions/mas-mhd-r-squared-old.txt"),
+    SourceDirectory = densityDirectory,
+    GridType = "Spherical",
+    SecondsBefore = 24*60*60,
+    SecondsAfter = 24*60*60,
+    Dimensions = { 100, 100, 128 },
+    InvertDataAtZ = true
+  },
+  GUI = {
+    Name = "MAS Density",
+    Path = "/Solar System/Heliosphere/Bastille Day 2000",
+    Description = "Volumetric rendering for the bastille day CME event. This asset contain data from 2000-07-14 08:33 to 2000-07-14 11:49"
+  }
+}
+
+local toggle_volume = {
+  Identifier = "os.events.bastilleday.densityvolume.togglevolume",
+  Name = "Toggle volume",
+  Command = propertyHelper.invert("Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Enabled"),
+  Documentation = "Toggle volume rendering of CME",
+  GuiPath = "/Bastille-Day 2000",
+  IsLocal = false
+}
+
+asset.onInitialize(function ()
+  openspace.action.registerAction(toggle_volume)
+  openspace.addSceneGraphNode(densityVolume)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(densityVolume)
+  openspace.action.removeAction(toggle_volume)
+end)
+
+asset.export(densityVolume)
+
+
+asset.meta = {
+  Name = "Predictive Science Inc. Volume Rendering Bastille Day",
+  Version = "1.1",
+  Description = "Volumetric rendering for the bastille day CME event",
+  Author = "CCMC, OpenSpace team",
+  URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+  License = "CC-BY"
+}

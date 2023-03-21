@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -23,55 +23,17 @@
 ##########################################################################################
 
 function (set_openspace_compile_settings target)
-  target_compile_features(${target} PRIVATE cxx_std_17)
+  target_compile_features(${target} PUBLIC cxx_std_20)
 
   set(MSVC_WARNINGS
     "/MP"       # Multi-threading support
     "/W4"       # Highest warning level
-    "/w44062"   # enumerator 'identifier' in a switch of enum 'enumeration' is not handled
-    "/wd4127"   # conditional expression is constant
-    "/wd4201"   # nonstandard extension used : nameless struct/union
-    "/wd5030"   # attribute 'attribute' is not recognized
-    "/w44255"   # 'function': no function prototype given: converting '()' to '(void)'
-    "/w44263"   # 'function': member function does not override any base class virtual member function
-    "/w44264"   # 'virtual_function': no override available for virtual member function from base 'class'; function is hidden
-    "/w44265"   # 'class': class has virtual functions, but destructor is not virtual
-    "/w44266"   # 'function': no override available for virtual member function from base 'type'; function is hidden
-    "/w44289"   # nonstandard extension used : 'var' : loop control variable declared in the for-loop is used outside the for-loop scope
-    "/w44296"   # 'operator': expression is always false
-    "/w44311"   # 'variable' : pointer truncation from 'type' to 'type'
-    "/w44339"   # 'type' : use of undefined type detected in CLR meta-data - use of this type may lead to a runtime exception
-    "/w44342"   # behavior change: 'function' called, but a member operator was called in previous versions
-    "/w44350"   # behavior change: 'member1' called instead of 'member2'
-    "/w44431"   # missing type specifier - int assumed. Note: C no longer supports default-int
-    "/w44471"   # a forward declaration of an unscoped enumeration must have an underlying type (int assumed)
-    "/wd4505"   # unreferenced local function has been removed
-    "/w44545"   # expression before comma evaluates to a function which is missing an argument list
-    "/w44546"   # function call before comma missing argument list
-    "/w44547"   # 'operator': operator before comma has no effect; expected operator with side-effect
-    "/w44548"   # expression before comma has no effect; expected expression with side-effect
-    "/w44549"   # 'operator': operator before comma has no effect; did you intend 'operator'?
-    "/w44555"   # expression has no effect; expected expression with side-effect
-    # This is disabled until GLM is updated to version 0.9.9 that removes occurrance of this warning
-    # "/w44574"   # 'identifier' is defined to be '0': did you mean to use '#if identifier'?
-    "/w44608"   # 'symbol1' has already been initialized by another union member in the initializer list, 'symbol2'
-    "/w44628"   # digraphs not supported with -Ze. Character sequence 'digraph' not interpreted as alternate token for 'char'
-    "/w44640"   # 'instance': construction of local static object is not thread-safe
-    "/w44905"   # wide string literal cast to 'LPSTR'
-    "/w44906"   # string literal cast to 'LPWSTR'
-    "/w44986"   # 'symbol': exception specification does not match previous declaration
-    "/w44988"   # 'symbol': variable declared outside class/function scope
-    "/std:c++latest"
+    "/wd4127"   # conditional expression is constant [raised by: websocketpp]
+    "/wd4201"   # nonstandard extension used : nameless struct/union  [raised by: GLM]
+    "/wd5030"   # attribute 'attribute' is not recognized  [raised by: codegen]
     "/permissive-"
-    "/Zc:twoPhase-"  # Used to prevent C:\Program Files (x86)\Windows Kits\8.1\Include\um\combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here
-                      # This is a bug in Visual Studio 15.3 and can be removed with the next version:
-                      # https://developercommunity.visualstudio.com/content/problem/94419/vs-2017-153-with-permissive-shows-error-c2187-in-c.html
-    "/Zc:strictStrings-"    # Windows header don't adhere to this
     "/Zc:__cplusplus" # Correctly set the __cplusplus macro
   )
-  if (OPENSPACE_WARNINGS_AS_ERRORS)
-    set(MSVC_WARNINGS ${MSVC_WARNINGS} "/WX")
-  endif ()
   if (OPENSPACE_OPTIMIZATION_ENABLE_AVX)
     set(MSVC_WARNINGS ${MSVC_WARNINGS} "/arch:AVX")
   endif ()
@@ -87,96 +49,98 @@ function (set_openspace_compile_settings target)
       "/GL" # Whole program optimization
     )
   else ()
-    set(MSVC_WARNINGS ${MSVC_WARNINGS}
-      "/ZI"       # Edit and continue support
-    )
+    if (GHOUL_ENABLE_EDIT_CONTINUE)
+      set(MSVC_WARNINGS ${MSVC_WARNINGS}
+        "/ZI"       # Edit and continue support
+      )
+    endif ()
   endif ()
 
   set(CLANG_WARNINGS
-    "-stdlib=libc++"
     "-Wall"
     "-Wextra"
+    "-Wmost"
+    "-Wpedantic"
+
     "-Wabstract-vbase-init"
+    "-Walloca"
+    "-Wanon-enum-enum-conversion"
     "-Warray-bounds-pointer-arithmetic"
     "-Wassign-enum"
-    "-Wauto-import"
     "-Wbad-function-cast"
+    "-Wbinary-literal"
+    "-Wbind-to-temporary-copy"
     "-Wbitfield-constant-conversion"
-    "-Wcast-calling-convention"
+    "-Wbool-conversions"
+    "-Wcast-align"
     "-Wcast-qual"
-    "-Wchar-subscripts"
     "-Wcomma"
-    "-Wcomment"
-    "-Wcomplex-component-init"
     "-Wconditional-uninitialized"
     "-Wdate-time"
-    "-Wdeprecated-implementations"
-    "-Wdollar-in-identifier-extension"
+    "-Wdeprecated-dynamic-exception-spec"
+    "-Wdeprecated-this-capture"
+    "-Wdivision-by-zero"
+    "-Wdtor-name"
+    "-Wduplicate-decl-specifier"
     "-Wduplicate-enum"
+    "-Wduplicate-method-arg"
     "-Wduplicate-method-match"
-    "-Wempty-body"
+    "-Wextra-semi"
+    "-Wfloat-overflow-conversion"
+    "-Wfloat-zero-conversion"
+    "-Wformat"
+    "-Wformat-non-iso"
+    "-Wformat-nonliteral"
     "-Wformat-pedantic"
+    "-Wformat-type-confusion"
     "-Wheader-hygiene"
     "-Widiomatic-parentheses"
+    "-Wimplicit"
     "-Wimplicit-fallthrough"
-    "-Wimport-preprocessor-directive-pedantic"
-    "-Winconsistent-missing-override"
-    "-Winfinite-recursion"
-    "-Wkeyword-macro"
-    "-Wlanguage-extension-token"
     "-Wloop-analysis"
+    "-Wmain"
     "-Wmethod-signatures"
-    "-Wmicrosoft-end-of-file"
-    "-Wmicrosoft-enum-forward-reference"
-    "-Wmicrosoft-fixed-enum"
-    "-Wmicrosoft-flexible-array"
-    "-Wmismatched-tags"
-    "-Wmissing-field-initializers"
     "-Wmissing-noreturn"
+    "-Wmove"
     "-Wnon-virtual-dtor"
     "-Wold-style-cast"
-    "-Woverloaded-virtual"
-    "-Wpessimizing-move"
     "-Wpointer-arith"
     "-Wpragmas"
-    "-Wredundant-move"
+    "-Wrange-loop-analysis"
     "-Wreorder"
-    "-Wsemicolon-before-method-body"
-    # "-Wshadow-field"
-    "-Wshadow-field-in-constructor"
-    # "-Wshadow-all"  Add this again once the Properties don't throw warnings --abock
+    "-Wshadow-all"
     "-Wshift-sign-overflow"
     "-Wshorten-64-to-32"
-    "-Wsign-compare"
+    "-Wsometimes-uninitialized"
     "-Wstring-conversion"
+    "-Wsuggest-destructor-override"
+    "-Wsuggest-override"
     "-Wtautological-compare"
+    "-Wtautological-constant-in-range-compare"
+    "-Wtautological-constant-out-of-range-compare"
     "-Wthread-safety"
+    "-Wtype-limits"
     "-Wundef"
     "-Wundefined-reinterpret-cast"
-    "-Wuninitialized"
+    "-Wuninitialized-const-reference"
     "-Wunneeded-internal-declaration"
     "-Wunneeded-member-function"
+    "-Wunreachable-code"
     "-Wunreachable-code-break"
-    "-Wunreachable-code-loop-increment"
     "-Wunreachable-code-return"
+    "-Wunused"
+    "-Wunused-const-variable"
     "-Wunused-exception-parameter"
-    "-Wunused-label"
-    "-Wunused-local-typedef"
     "-Wunused-macros"
-    "-Wunused-parameter"
-    "-Wunused-private-field"
     "-Wunused-result"
-    "-Wunused-variable"
-    "-Wused-but-marked-unused"
     "-Wvariadic-macros"
     "-Wvla"
-    "-Wzero-length-array"
+    "-Wzero-as-null-pointer-constant"
+
+    "-Wno-attributes"
     "-Wno-missing-braces"
     "-Wno-unknown-attributes"
   )
-  if (OPENSPACE_WARNINGS_AS_ERRORS)
-    set(CLANG_WARNINGS ${CLANG_WARNINGS} "-Werror")
-  endif ()
 
 
   set(GCC_WARNINGS
@@ -184,35 +148,36 @@ function (set_openspace_compile_settings target)
     "-Wall"
     "-Wextra"
     "-Wpedantic"
-    "-Wunused-parameter"
-    "-Wuninitialized"
-    "-Wsuggest-attribute=const"
-    "-Wsuggest-final-types"
-    "-Wsuggest-final-methods"
-    "-Wsuggest-override"
+
     "-Walloc-zero"
-    "-Wduplicated-cond"
-    "-Wshadow"
-    "-Wundef"
     "-Wcast-qual"
-    "-Wzero-as-null-pointer-constant"
     "-Wdate-time"
-    "-Wuseless-cast"
+    "-Wduplicated-branches"
+    "-Wduplicated-cond"
+    "-Wformat"
     "-Wlogical-op"
-    "-Wint-in-bool-context"
-    "-Wno-deprecated-copy"
-    "-Wno-float-equal"
-    "-Wno-write-strings"
+    "-Wmain"
     "-Wnon-virtual-dtor"
     "-Wold-style-cast"
     "-Woverloaded-virtual"
-    "-Wno-long-long"
-    "-Wno-ignored-attributes"
+    "-Wshadow"
+    "-Wsuggest-override"
+    "-Wtautological-compare"
+    "-Wtype-limits"
+    "-Wundef"
+    "-Wunused"
+    "-Wuninitialized"
+    "-Wvla"
+    "-Wzero-as-null-pointer-constant"
+
     "-Wno-attributes"
+    "-Wno-deprecated-copy"
+    "-Wno-float-equal"
+    "-Wno-long-long"
+    "-Wno-missing-field-initializers"
+    "-Wno-unknown-attributes"
+    "-Wno-write-strings"
   )
-  if (OPENSPACE_WARNINGS_AS_ERRORS)
-    set(GCC_WARNINGS ${CLANG_WARNINGS} "-Werror")
-  endif ()
 
   if (MSVC)
     target_compile_options(${target} PRIVATE ${MSVC_WARNINGS})
@@ -220,17 +185,15 @@ function (set_openspace_compile_settings target)
     # Boost as of 1.64 still uses unary_function unless we define this
     target_compile_definitions(${target} PRIVATE "_HAS_AUTO_PTR_ETC")
     target_compile_definitions(${target} PRIVATE "NOMINMAX")
+    target_compile_definitions(${target} PRIVATE "WIN32_LEAN_AND_MEAN")
+    target_compile_definitions(${target} PRIVATE "VC_EXTRALEAN")
   elseif (NOT LINUX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    if (OPENSPACE_WARNINGS_AS_ERRORS)
-      target_compile_options(${target} PRIVATE "-Werror")
-    endif ()
-    # Apple has "deprecated" OpenGL and offers nothing by warnings instead
+    # Apple has "deprecated" OpenGL and offers nothing but warnings instead
     target_compile_definitions(${target} PRIVATE "GL_SILENCE_DEPRECATION")
 
     target_compile_options(${target} PRIVATE ${CLANG_WARNINGS})
   elseif (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    target_compile_options(${target} PRIVATE ${CLANG_WARNINGS} "-std=c++17")
-    target_link_libraries(${target} PRIVATE "c++" "c++abi")
+    target_compile_options(${target} PRIVATE ${CLANG_WARNINGS})
   elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     target_compile_options(${target} PRIVATE ${GCC_WARNINGS})
   else ()

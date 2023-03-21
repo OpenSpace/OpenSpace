@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,8 @@
 
 #include <openspace/interaction/mousecamerastates.h>
 
-#include <openspace/interaction/inputstate.h>
+#include <openspace/interaction/mouseinputstate.h>
+#include <openspace/interaction/keyboardinputstate.h>
 
 namespace {
     const double SENSITIVITY_ADJUSTMENT_INCREASE = 8.0;
@@ -37,7 +38,8 @@ MouseCameraStates::MouseCameraStates(double sensitivity, double velocityScaleFac
     : CameraInteractionStates(sensitivity, velocityScaleFactor)
 {}
 
-void MouseCameraStates::updateStateFromInput(const InputState& inputState,
+void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseinputState,
+                                             const KeyboardInputState& keyboardinputState,
                                              double deltaTime)
 {
     MouseButton primary =
@@ -45,17 +47,17 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
     MouseButton secondary =
         _isMouseButtonInverted ? MouseButton::Button1 : MouseButton::Button2;
 
-    glm::dvec2 mousePosition = inputState.mousePosition();
+    glm::dvec2 mousePosition = mouseinputState.mousePosition();
 
-    bool primaryPressed = inputState.isMouseButtonPressed(primary);
-    bool secondaryPressed = inputState.isMouseButtonPressed(secondary);
-    bool button3Pressed = inputState.isMouseButtonPressed(MouseButton::Button3);
-    bool keyCtrlPressed = inputState.isKeyPressed(Key::LeftControl) |
-                          inputState.isKeyPressed(Key::RightControl);
-    bool keyShiftPressed = inputState.isKeyPressed(Key::LeftShift) |
-                           inputState.isKeyPressed(Key::RightShift);
-    bool keyAltPressed = inputState.isKeyPressed(Key::LeftAlt) |
-                         inputState.isKeyPressed(Key::RightAlt);
+    bool primaryPressed = mouseinputState.isMouseButtonPressed(primary);
+    bool secondaryPressed = mouseinputState.isMouseButtonPressed(secondary);
+    bool button3Pressed = mouseinputState.isMouseButtonPressed(MouseButton::Button3);
+    bool keyCtrlPressed = keyboardinputState.isKeyPressed(Key::LeftControl) ||
+                          keyboardinputState.isKeyPressed(Key::RightControl);
+    bool keyShiftPressed = keyboardinputState.isKeyPressed(Key::LeftShift) ||
+                           keyboardinputState.isKeyPressed(Key::RightShift);
+    bool keyAltPressed = keyboardinputState.isKeyPressed(Key::LeftAlt) ||
+                         keyboardinputState.isKeyPressed(Key::RightAlt);
 
     // Update the mouse states
     if (primaryPressed && !keyShiftPressed && !keyAltPressed) {
@@ -94,10 +96,10 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
                                         mousePosition;
 
         double sensitivity = _sensitivity;
-        if (inputState.isKeyPressed(Key::Z)) {
+        if (keyboardinputState.isKeyPressed(Key::Z)) {
             sensitivity *= SENSITIVITY_ADJUSTMENT_INCREASE;
         }
-        else if (inputState.isKeyPressed(Key::X)) {
+        else if (keyboardinputState.isKeyPressed(Key::X)) {
             sensitivity *= SENSITIVITY_ADJUSTMENT_DECREASE;
         }
 

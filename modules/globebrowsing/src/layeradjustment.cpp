@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,20 +32,20 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ChromaKeyColorInfo = {
         "ChromaKeyColor",
         "Chroma Key Color",
-        "This color is used as the chroma key for the layer that is adjusted."
+        "This color is used as the chroma key for the layer that is adjusted"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ChromaKeyToleranceInfo = {
         "ChromaKeyTolerance",
         "Chroma Key Tolerance",
         "This value determines the tolerance that is used to determine whether a color "
-        "is matching the selected Chroma key."
+        "is matching the selected Chroma key"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
-        "The type of layer adjustment that is applied to the underlying layer."
+        "The type of layer adjustment that is applied to the underlying layer"
     };
 
     struct [[codegen::Dictionary(LayerAdjustment)]] Parameters {
@@ -70,37 +70,34 @@ namespace {
 namespace openspace::globebrowsing {
 
 documentation::Documentation LayerAdjustment::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "globebrowsing_layeradjustment";
-    return doc;
+    return codegen::doc<Parameters>("globebrowsing_layeradjustment");
 }
 
 LayerAdjustment::LayerAdjustment()
-    : properties::PropertyOwner({ "adjustment" })
+    : properties::PropertyOwner({ "Adjustment" })
     , _chromaKeyColor(ChromaKeyColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _chromaKeyTolerance(ChromaKeyToleranceInfo, 0.f, 0.f, 1.f)
     , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     // Add options to option properties
-    for (int i = 0; i < layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
-        _typeOption.addOption(i, layergroupid::ADJUSTMENT_TYPE_NAMES[i]);
+    for (const layers::Adjustment& ai : layers::Adjustments) {
+        _typeOption.addOption(static_cast<int>(ai.id), std::string(ai.identifier));
     }
-    _typeOption.setValue(static_cast<int>(layergroupid::AdjustmentTypeID::None));
-    _type = static_cast<layergroupid::AdjustmentTypeID>(_typeOption.value());
+    _typeOption.setValue(static_cast<int>(layers::Adjustment::ID::None));
+    _type = static_cast<layers::Adjustment::ID>(_typeOption.value());
 
     _typeOption.onChange([&]() {
         switch (type()) {
-            case layergroupid::AdjustmentTypeID::None:
+            case layers::Adjustment::ID::None:
                 break;
-            case layergroupid::AdjustmentTypeID::ChromaKey: {
+            case layers::Adjustment::ID::ChromaKey:
                 removeProperty(_chromaKeyColor);
                 removeProperty(_chromaKeyTolerance);
                 break;
-            }
-            case layergroupid::AdjustmentTypeID::TransferFunction:
+            case layers::Adjustment::ID::TransferFunction:
                 break;
         }
-        _type = static_cast<layergroupid::AdjustmentTypeID>(_typeOption.value());
+        _type = static_cast<layers::Adjustment::ID>(_typeOption.value());
         addVisibleProperties();
         if (_onChangeCallback) {
             _onChangeCallback();
@@ -118,14 +115,13 @@ void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmen
     if (p.type.has_value()) {
         switch (*p.type) {
             case Parameters::Type::None:
-                _typeOption = static_cast<int>(layergroupid::AdjustmentTypeID::None);
+                _typeOption = static_cast<int>(layers::Adjustment::ID::None);
                 break;
             case Parameters::Type::ChromaKey:
-                _typeOption = static_cast<int>(layergroupid::AdjustmentTypeID::ChromaKey);
+                _typeOption = static_cast<int>(layers::Adjustment::ID::ChromaKey);
                 break;
             case Parameters::Type::TransferFunction:
-                _typeOption =
-                    static_cast<int>(layergroupid::AdjustmentTypeID::TransferFunction);
+                _typeOption = static_cast<int>(layers::Adjustment::ID::TransferFunction);
                 break;
             default:
                 throw ghoul::MissingCaseException();
@@ -136,20 +132,19 @@ void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmen
     _chromaKeyTolerance = p.chromaKeyTolerance.value_or(_chromaKeyTolerance);
 }
 
-layergroupid::AdjustmentTypeID LayerAdjustment::type() const {
+layers::Adjustment::ID LayerAdjustment::type() const {
     return _type;
 }
 
 void LayerAdjustment::addVisibleProperties() {
     switch (type()) {
-        case layergroupid::AdjustmentTypeID::None:
+        case layers::Adjustment::ID::None:
             break;
-        case layergroupid::AdjustmentTypeID::ChromaKey: {
+        case layers::Adjustment::ID::ChromaKey:
             addProperty(_chromaKeyColor);
             addProperty(_chromaKeyTolerance);
             break;
-        }
-        case layergroupid::AdjustmentTypeID::TransferFunction:
+        case layers::Adjustment::ID::TransferFunction:
             break;
     }
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,8 +36,8 @@ class RawTileDataReader;
 
 struct TileLoadJob : public Job<RawTile> {
     /**
-     * Allocates enough data for one tile. When calling <code>product()</code>, the
-     * ownership of this data will be released. If <code>product()</code> has not been
+     * Allocates enough data for one tile. When calling `product()`, the
+     * ownership of this data will be released. If `product()` has not been
      * called before the TileLoadJob is finished, the data will be deleted as it has not
      * been exposed outside of this object.
      */
@@ -47,7 +47,7 @@ struct TileLoadJob : public Job<RawTile> {
      * Destroys the allocated data pointer if it has been allocated and the TileLoadJob
      * has ownership of it.
      */
-    ~TileLoadJob();
+    ~TileLoadJob() override;
 
     /**
      * If the TileLoadJob has been created using PBO, this is the address that the

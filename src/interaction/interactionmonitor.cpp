@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,22 +33,22 @@ namespace {
         "IdleTime",
         "Idle Time",
         "Time in seconds that has passed from latest registered interaction until the "
-        "application goes idle."
+        "application goes idle"
     };
     constexpr openspace::properties::Property::PropertyInfo IsInActiveStateInfo = {
         "IsInActiveState",
         "Is State Active",
         "Keeps track whether the interaction session is in active state or not. False if "
-        "application is in idle state, true if it is in active state."
+        "application is in idle state, true if it is in active state"
     };
 } // namespace
 
 namespace openspace::interaction {
 
 InteractionMonitor::InteractionMonitor()
-    : properties::PropertyOwner({ "InteractionMonitor" })
+    : properties::PropertyOwner({ "InteractionMonitor", "Interaction Monitor" })
     , _isInActiveState(IsInActiveStateInfo, false)
-    , _idleTime(IdleTimeInfo, 120.f)
+    , _idleTime(IdleTimeInfo, 120.f, 0.f, 300.f)
 {
     addProperty(_isInActiveState);
     addProperty(_idleTime);

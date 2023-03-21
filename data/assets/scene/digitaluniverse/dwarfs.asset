@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "Brown Dwarf Textures",
   Type = "HttpSynchronization",
@@ -21,23 +17,26 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "dwarfs.label",
+      Color = { 0.5, 0.1, 0.2 },
+      Size = 14.6,
+      MinMaxSize = { 10, 20 },
+      Unit = "pc"
+    },
     Color = { 0.4, 0.0, 0.1 },
     Opacity = 1.0,
-    File = speck .. "/dwarfs.speck",
-    Texture = textures .. "/point3.png",
-    LabelFile = speck .. "/dwarfs.label",
-    ColorMap = speck .. "/dwarfs.cmap",
+    File = speck .. "dwarfs.speck",
+    Texture = textures .. "point3.png",
+    Unit = "pc",
+    ColorMap = speck .. "dwarfs.cmap",
     ColorOption = { "typeindex" },
     --ColorRange = { { 1.0, 4.0} },
-    TextColor = { 0.5, 0.1, 0.2 },
-    TextSize = 14.6,
-    TextMinSize = 10.0,
     ScaleFactor = 372.1,
     --CorrectionSizeEndDistance = 16.1,
     --CorrectionSizeFactor = 7.75,
-    BillboardMaxSize = 20.0,
-    EnablePixelSizeControl = true,
-    Unit = "pc"
+    BillboardMinMaxSize = { 0.0, 20.0 },
+    EnablePixelSizeControl = true
   },
   GUI = {
     Name = "Brown Dwarfs",
@@ -62,15 +61,23 @@ local object = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Brown Dwarfs",
-  Version = "2.0",
-  Description = [[Digital Universe asset for Brown Dwarfs]],
+  Version = "2.1",
+  Description = "Digital Universe asset for Brown Dwarfs",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"Dwarfs"}
+  License = "AMNH Digital Universe"
 }

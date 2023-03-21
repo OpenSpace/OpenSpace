@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,13 +42,14 @@ namespace webbrowser {
     extern std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
     extern CefHost* cefHost;
     void update();
-}
+} // namespace webbrowser
 
 class WebBrowserModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebBrowser";
+
     WebBrowserModule();
-    virtual ~WebBrowserModule() = default;
+    ~WebBrowserModule() override = default;
 
     void addBrowser(BrowserInstance*);
     void removeBrowser(BrowserInstance*);

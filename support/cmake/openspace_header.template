@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,20 +31,20 @@ namespace openspace {
 
 std::string licenseText();
 
-constexpr const int OPENSPACE_VERSION_MAJOR = @OPENSPACE_VERSION_MAJOR@;
-constexpr const int OPENSPACE_VERSION_MINOR = @OPENSPACE_VERSION_MINOR@;
-constexpr const int OPENSPACE_VERSION_PATCH = @OPENSPACE_VERSION_PATCH@;
+constexpr int OPENSPACE_VERSION_MAJOR = @OPENSPACE_VERSION_MAJOR@;
+constexpr int OPENSPACE_VERSION_MINOR = @OPENSPACE_VERSION_MINOR@;
+constexpr int OPENSPACE_VERSION_PATCH = @OPENSPACE_VERSION_PATCH@;
 
-constexpr const char* OPENSPACE_VERSION_NUMBER = "@OPENSPACE_VERSION_MAJOR@.@OPENSPACE_VERSION_MINOR@.@OPENSPACE_VERSION_PATCH@";
+constexpr std::string_view OPENSPACE_VERSION_NUMBER = "@OPENSPACE_VERSION_MAJOR@.@OPENSPACE_VERSION_MINOR@.@OPENSPACE_VERSION_PATCH@";
 
-constexpr const char* OPENSPACE_VERSION_STRING = "@OPENSPACE_VERSION_STRING@";
+constexpr std::string_view OPENSPACE_VERSION_STRING = "@OPENSPACE_VERSION_STRING@";
 
-constexpr const char* OPENSPACE_VERSION_STRING_FULL = "@OPENSPACE_VERSION_MAJOR@.@OPENSPACE_VERSION_MINOR@.@OPENSPACE_VERSION_PATCH@ (@OPENSPACE_VERSION_STRING@)";
+constexpr std::string_view OPENSPACE_VERSION_STRING_FULL = "@OPENSPACE_VERSION_MAJOR@.@OPENSPACE_VERSION_MINOR@.@OPENSPACE_VERSION_PATCH@ (@OPENSPACE_VERSION_STRING@)";
 
-constexpr const char* OPENSPACE_GIT_BRANCH = "@OPENSPACE_GIT_BRANCH@";
-constexpr const char* OPENSPACE_GIT_COMMIT = "@OPENSPACE_GIT_COMMIT@";
-constexpr const char* OPENSPACE_GIT_STATUS = "@OPENSPACE_GIT_STATUS@";
-constexpr const char* OPENSPACE_GIT_FULL = "@OPENSPACE_GIT_BRANCH@@@OPENSPACE_GIT_COMMIT@ @OPENSPACE_GIT_STATUS@";
+constexpr std::string_view OPENSPACE_GIT_BRANCH = "@OPENSPACE_GIT_BRANCH@";
+constexpr std::string_view OPENSPACE_GIT_COMMIT = "@OPENSPACE_GIT_COMMIT@";
+constexpr std::string_view OPENSPACE_GIT_STATUS = "@OPENSPACE_GIT_STATUS@";
+constexpr std::string_view OPENSPACE_GIT_FULL = "@OPENSPACE_GIT_BRANCH@@@OPENSPACE_GIT_COMMIT@ @OPENSPACE_GIT_STATUS@";
 
 } // namespace openspace
 

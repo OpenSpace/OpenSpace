@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,13 +33,16 @@ class StringProperty : public TemplateProperty<std::string> {
 public:
     StringProperty(Property::PropertyInfo info, std::string value = "");
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<std::string>::operator=;
 
+    operator std::string_view();
+    operator std::string_view() const;
+
 protected:
-    std::string fromLuaConversion(lua_State* state, bool& success) const override;
+    std::string fromLuaConversion(lua_State* state) const override;
     void toLuaConversion(lua_State* state) const override;
     std::string toStringConversion() const override;
 };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@
 
 namespace {
     using json = nlohmann::json;
-    constexpr const char* _loggerCat = "KameleonPlane";
+    constexpr std::string_view _loggerCat = "KameleonPlane";
 
     constexpr openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
         "FieldlineSeedsIndexFile",
@@ -151,7 +151,7 @@ void KameleonPlane::initializeGL() {
             // else if autofilter is turned off, register backgroundValues
             }
             else {
-                _backgroundValues.setVisibility(properties::Property::Visibility::All);
+                _backgroundValues.setVisibility(properties::Property::Visibility::Always);
                 //_backgroundValues.setVisible(true);
             }
         });

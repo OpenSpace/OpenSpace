@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,32 +23,31 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
 
 in vec4 vs_position;
 in vec2 vs_textureCoords;
 in vec3 vs_normal;
 
-uniform float time;
 uniform sampler2D colorTexture;
 uniform float opacity;
 uniform bool mirrorTexture;
 
+
 Fragment getFragment() {
-    vec2 texCoord = vs_textureCoords;
+  vec2 texCoord = vs_textureCoords;
 
-    Fragment frag;
-    if (mirrorTexture) {
-        texCoord.x = 1.0 - texCoord.x;
-    }
+  Fragment frag;
+  if (mirrorTexture) {
+    texCoord.x = 1.0 - texCoord.x;
+  }
 
-    frag.color = texture(colorTexture, texCoord);
-    frag.color.a *= opacity;
-    frag.depth = vs_position.w;
+  frag.color = texture(colorTexture, texCoord);
+  frag.color.a *= opacity;
+  frag.depth = vs_position.w;
 
-    // G-Buffer
-    frag.gPosition = vs_position;
-    frag.gNormal = vec4(vs_normal, 1.0);
+  // G-Buffer
+  frag.gPosition = vs_position;
+  frag.gNormal = vec4(vs_normal, 1.0);
 
-    return frag;
+  return frag;
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,14 +32,13 @@
 #include <algorithm>
 
 namespace {
-    constexpr const char* _loggerCat = "SimpleTfBrickSelector";
+    constexpr std::string_view _loggerCat = "SimpleTfBrickSelector";
 
     bool compareSplitPoints(const openspace::BrickSelection& a,
                             const openspace::BrickSelection& b)
     {
         return a.splitPoints < b.splitPoints;
     }
-
 } // namespace
 
 namespace openspace {

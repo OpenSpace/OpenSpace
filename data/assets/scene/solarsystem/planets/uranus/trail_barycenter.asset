@@ -1,0 +1,48 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local UranusBarycenterTrail = {
+  Identifier = "UranusBarycenterTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "URANUS BARYCENTER",
+      Observer = "SSB"
+    },
+    Color = { 0.60, 0.95, 1.00 },
+    Period = 30588.740,
+    Resolution = 1000,
+    Enabled = false
+  },
+  Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
+  GUI = {
+    Name = "Uranus Barycenter Trail",
+    Path = "/Solar System/Planets/Uranus",
+    Description = "Trail of Uranus as observed by the Sun",
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(UranusBarycenterTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(UranusBarycenterTrail)
+end)
+
+asset.export(UranusBarycenterTrail)
+
+
+
+asset.meta = {
+  Name = "Uranus Trail",
+  Version = "1.1",
+  Description = [[Trail of Uranus' Barycenter. Data from NASA Spice (see base spice
+    asset)]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

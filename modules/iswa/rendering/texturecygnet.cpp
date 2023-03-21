@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,7 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    constexpr const char* _loggerCat = "TextureCygnet";
+    constexpr std::string_view _loggerCat = "TextureCygnet";
 } // namespace
 
 namespace openspace {
@@ -47,6 +47,7 @@ bool TextureCygnet::updateTexture() {
     std::unique_ptr<opengl::Texture> texture = io::TextureReader::ref().loadTexture(
         reinterpret_cast<void*>(_imageFile.buffer),
         _imageFile.size,
+        2,
         _imageFile.format
     );
 

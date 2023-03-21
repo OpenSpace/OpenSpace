@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,8 @@
 #define __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
 
 #include <atomic>
-#include <functional>
-#include <memory>
-#include <mutex>
+#include <filesystem>
 #include <string>
-#include <unordered_map>
 
 namespace ghoul { class Dictionary; }
 
@@ -38,8 +35,143 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
+/**
+ * The ResourceSynchronization class handles the download of persistent datasets, meaning
+ * that the contents of the data is only downloaded once at the beginning of the
+ * application. A ResourceSynchronization is created through the #createFromDictionary
+ * function, whose dictionary must contain at least a `Type` value that specifies which
+ * type of ResourceSynchronization should be create. Any type that is registered to the
+ * global factory is a valid type here.
+ * A ResourceSynchronization state can be in one of four states that can be queried
+ * through the #isSyncing, #isResolved, and #isRejected functions. The available states
+ * are:
+ *  - `Unsynchronized` (#isSyncing = false, #isResolved = false, #isRejected = false)
+ *  - `Syncing` (#isSyncing = true, #isResolved = false, #isRejected = false)
+ *  - `Resolved` (#isSyncing = false, #isResolved = true, #isRejected = false)
+ *  - `Rejected` (#isSyncing = false, #isResolved = false, #isRejected = true)
+ */
 class ResourceSynchronization {
 public:
+    /**
+     * Creates a new ResourceSynchronization based on the \p dictionary information that
+     * is passed into this function. The dictionary must contain at least a `Type`, an
+     * `Identifier`, and a `Name`, with other optional parameters depending on the
+     * specific subtype of ResourceSynchronization class is is specified through the
+     * provided `Type`.
+     *
+     * \param dictionary The dictionary containing the parameters with which to choose the
+     *        specific type of ResourceSynchronization and all the necessary parameters to
+     *        initialize said ResourceSynchronization
+     *
+     * \throw SpecificationError If the \p dictionary does not contain a `Type`, an
+     *        `Identifier`, and a `Name`
+     */
+    static std::unique_ptr<ResourceSynchronization> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
+
+    /**
+     * Generates a unique identifying string for ResourceSynchronizaiton.
+     */
+    virtual std::string generateUid() = 0;
+
+    /// Defaulted virtual constructor
+    virtual ~ResourceSynchronization() = default;
+
+    /**
+     * Returns the location to which files downloaded through this ResourceSynchronization
+     * are saved.
+     *
+     * \return The location for files created by this class
+     */
+    virtual std::filesystem::path directory() const = 0;
+
+    /// Starts the synchronization for this ResourceSynchronization
+    virtual void start() = 0;
+
+    /// Cancels any ongoing synchronization of this ResourceSynchronization
+    virtual void cancel() = 0;
+
+    /**
+     * Returns the number of bytes that have already been synchronized or 0 if the
+     * synchronization hasn't started yet. This number always will only contain the number
+     * of bytes of actual payload data, not any additional data transfers that some
+     * subtypes might require.
+     *
+     * \return The number of synchronized bytes
+     */
+    size_t nSynchronizedBytes() const;
+
+    /**
+     * Returns the number of total bytes that ought to be synchronized for this
+     * ResourceSynchronization to be considered complete. If that number is not known
+     * (yet), the returned value is 0. This number always will only contain the number of
+     * bytes of actual payload data, not any additional data transfers that some subtypes
+     * might require.
+     *
+     * \return The total number of required bytes
+     */
+    size_t nTotalBytes() const;
+
+    /**
+     * Returns `true` if the total number of bytes for this ResourceSynchronization is
+     * known. Will return `false` otherwise. This number always will only contain the
+     * number of bytes of actual payload data, not any additional data transfers that some
+     * subtypes might require.
+     *
+     * \return The state whether the number of total bytes is known or not
+     */
+    bool nTotalBytesIsKnown() const;
+
+    /**
+     * Returns the unique identifier of this ResourceSynchronization.
+     *
+     * \return The unique identifier of this ResourceSynchronization
+     */
+    const std::string& identifier() const;
+
+    /**
+     * Returns the name of this ResourceSynchronization.
+     *
+     * \return The name of this ResourceSynchronization
+     */
+    const std::string& name() const;
+
+    /**
+     * Returns whether this ResourceSynchronization is currently syncing its files and has
+     * not finished doing so.
+     *
+     * \return `true` if this object is currently synchronizing
+     */
+    bool isSyncing() const;
+
+    /**
+     * Returns whether this ResourceSynchronization has successfully finished
+     * synchronizing all of its files. Once this has returned `true`, it will stay so
+     * until the object is destroyed and it is guaranteed that no more files will be added
+     * to the #directory.
+     *
+     * \return `true` if this object is finished synchronizing
+     */
+    bool isResolved() const;
+
+    /**
+     * Returns whether this ResourceSynchronization has failed to synchronizing all or any
+     * of its files. Once this has returned `true`, it will stay so until the object is
+     * destroyed. Some subclasses might try to download as many files as possible, but no
+     * general guarantee is provided regarding the completeness of the download.
+     *
+     * \return `true` if this object has failed synchronizing one or more of the required
+     *         files
+     */
+    bool isRejected() const;
+
+    static documentation::Documentation Documentation();
+
+protected:
+    /// Empty constructor that just sets the synchronization root
+    ResourceSynchronization(std::filesystem::path synchronizationRoot);
+
+    /// Representation of the state that this object can be in
     enum class State {
         Unsynced,
         Syncing,
@@ -47,49 +179,34 @@ public:
         Rejected
     };
 
-    using CallbackHandle = size_t;
-    using StateChangeCallback = std::function<void(State)>;
+    /// Creates a file next to the directory that indicates that this
+    /// ResourceSynchronization has successfully synchronized its contents
+    void createSyncFile() const;
 
-    static std::unique_ptr<ResourceSynchronization> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+    /// Returns whether the synchronization file create in #createSyncFile exists
+    bool hasSyncFile() const;
 
-    ResourceSynchronization(const ghoul::Dictionary& dictionary);
-    virtual ~ResourceSynchronization() = default;
+    /// The internal identifier for this ResourceSynchronization. It is not enforced but
+    /// advised that this identifier be different for all instances of the same subtype
+    std::string _identifier;
 
-    virtual std::string directory() = 0;
-    virtual void start() = 0;
-    virtual void cancel() = 0;
-    virtual void clear() = 0;
-
-    virtual size_t nSynchronizedBytes() = 0;
-    virtual size_t nTotalBytes() = 0;
-    virtual bool nTotalBytesIsKnown() = 0;
-    virtual float progress();
-
-    State state() const;
-    const std::string& name() const;
-    bool isResolved() const;
-    bool isRejected() const;
-    bool isSyncing() const;
-    CallbackHandle addStateChangeCallback(StateChangeCallback cb);
-    void removeStateChangeCallback(CallbackHandle id);
-
-    static documentation::Documentation Documentation();
-
-protected:
-    void resolve();
-    void reject();
-    void reset();
-    void begin();
-
-private:
-    void setState(State state);
-
+    /// The user-facing name of this ResourceSynchronization
     std::string _name;
+
+    /// The path to the root folder relative to which synchronization files are placed
+    const std::filesystem::path _synchronizationRoot;
+
+    /// The current #State of this ResouceSynchronization
     std::atomic<State> _state = State::Unsynced;
-    std::mutex _callbackMutex;
-    CallbackHandle _nextCallbackId = 0;
-    std::unordered_map<CallbackHandle, StateChangeCallback> _stateChangeCallbacks;
+
+    /// Contains the fact whether the total number of payload bytes is known
+    std::atomic_bool _nTotalBytesKnown = false;
+
+    /// Contains the total number of payload bytes or 0 if that number is not known
+    std::atomic_size_t _nTotalBytes = 0;
+
+    /// Contains the number of already synchronized payload bytes
+    std::atomic_size_t _nSynchronizedBytes = 0;
 };
 
 } // namespace openspace

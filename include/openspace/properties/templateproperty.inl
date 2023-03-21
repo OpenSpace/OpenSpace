@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,6 +21,8 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
@@ -61,12 +63,6 @@ void openspace::properties::TemplateProperty<T>::setValue(T val) {
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const TemplateProperty<T>& obj) {
-    os << obj.value();
-    return os;
-}
-
-template <typename T>
 std::any TemplateProperty<T>::get() const {
     return std::any(_value);
 }
@@ -89,19 +85,14 @@ bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
 }
 
 template <typename T>
-bool TemplateProperty<T>::setLuaValue(lua_State* state) {
-    bool success = false;
-    T thisValue = fromLuaConversion(state, success);
-    if (success) {
-        set(std::any(thisValue));
-    }
-    return success;
+void TemplateProperty<T>::setLuaValue(lua_State* state) {
+    T thisValue = fromLuaConversion(state);
+    set(std::any(thisValue));
 }
 
 template <typename T>
-bool TemplateProperty<T>::getStringValue(std::string& outValue) const {
-    outValue = toStringConversion();
-    return true;
+std::string TemplateProperty<T>::stringValue() const {
+    return toStringConversion();
 }
 
 }  // namespace openspace::properties

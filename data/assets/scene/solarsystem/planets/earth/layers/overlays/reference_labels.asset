@@ -1,14 +1,29 @@
-local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "Reference_Labels",
   Name = "Reference Labels",
-  FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Labels.wms"
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("reference_labels.wms")
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Earth Reference Labels",
+  Version = "1.0",
+  Description = "Reference Labels layer for Earth globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

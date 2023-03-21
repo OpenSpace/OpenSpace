@@ -1,0 +1,96 @@
+local circle = asset.syncedResource({
+  Name = "Circle",
+  Type = "HttpSynchronization",
+  Identifier = "circle_image",
+  Version = 1
+})
+
+local HUDFSpeck = asset.syncedResource({
+  Name = "HUDF Speck",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_hudf_speck",
+  Version = 1
+})
+
+local ColorMap = asset.syncedResource({
+  Name = "HUDF color map",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_hudf_textures",
+  Version = 1
+})
+
+local object = {
+  Identifier = "HubbleDeepField",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    Color = { 1.0, 1.0, 1.0 },
+    Opacity = 1.0,
+    File = HUDFSpeck .. "hudf.speck",
+    Texture = circle .. "circle.png",
+    ColorMap = ColorMap .. "hudf.cmap",
+    ColorOption = { "redshift", "proximity" },
+    ColorRange = { { 0.0, 0.075 }, { 1.0, 25.0 } },
+    Unit = "Mpc",
+    ScaleFactor = 505.0,
+    BillboardMaxSize = 4.7,
+    EnablePixelSizeControl = true
+  },
+  GUI = {
+    Name = "Hubble Deep Field",
+    Path = "/Universe/Galaxies",
+    Description = [[
+      Hubble Ultra Deep Field galaxy survey <br><br>
+      Data Reference: Hubble Ultra Deep Field 2012 program (Ellis+, Koekemoer+, 2013)
+    ]],
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
+
+asset.meta = {
+  Name = "Hubble Ultra Deep Field",
+  Version = "1.2",
+  Description = "Hubble Ultra Deep Field galaxy survey",
+  Author = "Frank Summers (STScI), Brian Abbott (AMNH)",
+  URL = "http://www.haydenplanetarium.org/universe",
+  License = [[
+    Copyright (c) American Museum of Natural History. All rights reserved.<br><br>
+
+    Downloading the Atlas:<br>
+    AMNH offers the Atlas free of charge via our website, http://www.haydenplanetarium.org/.
+    The User is free to download and/or duplicate verbatim copies of the Atlas provided this
+    license and copyright information accompany the Atlas.<br><br>
+
+    Modifying the Atlas:<br>
+    The user is free to modify the Atlas by either adding data or altering existing data,
+    provided it is for personal use only. Once the user modifies the Atlas, it is no longer
+    part of AMNH's Atlas and cannot be used publicly alongside or within the Atlas without
+    written permission from AMNH.<br><br>
+
+    Distributing the Atlas:<br>
+    The user is forbidden to distribute and use the Atlas for profit, as part of a software
+    and/or production system that will subsequently be redistributed, or for public consumption
+    (via print, electronic media, or broadcast/produced pieces) without written permission
+    from AMNH.<br><br>
+
+    Neither the names of American Museum of Natural History and Hayden Planetarium nor the names
+    of their contributors may be used to endorse or promote products derived from this Atlas
+    without specific, prior written permission.<br><br>
+
+    The Atlas is free but is offered WITHOUT ANY WARRANTY of any kind. We provide the Atlas as
+    is and take no responsibility for any damage resulting from the use of this Atlas. The entire
+    risk as to the quality and performance of this product is with the user.<br><br>
+
+    For more information, please visit http://www.haydenplanetarium.org/universe
+  ]]
+}

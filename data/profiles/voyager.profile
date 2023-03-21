@@ -5,6 +5,7 @@
     "scene/solarsystem/missions/voyager/mission",
     "scene/solarsystem/missions/voyager/voyager1",
     "scene/solarsystem/missions/voyager/voyager2",
+    "scene/solarsystem/missions/voyager/actions",
     "scene/solarsystem/planets/jupiter/minor_moons",
     "scene/solarsystem/planets/neptune/minor_moons",
     "scene/solarsystem/planets/saturn/minor_moons",
@@ -38,60 +39,32 @@
   ],
   "keybindings": [
     {
-      "documentation": "Set camera focus to Voyager 1",
-      "gui_path": "/Missions/Voyager",
-      "is_local": false,
-      "key": "V",
-      "name": "Focvus on Voyager",
-      "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Voyager_1');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '')"
+      "action": "os.missions.voyager.v1.focus",
+      "key": "V"
     },
     {
-      "documentation": "Sets the camera focus on Voyager 2",
-      "gui_path": "/Missions/Voyager",
-      "is_local": false,
-      "key": "SHIFT+V",
-      "name": "Focus on Voyager2",
-      "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Voyager_2');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
+      "action": "os.missions.voyager.v2.focus",
+      "key": "SHIFT+V"
     },
     {
-      "documentation": "Sets the time for Voyager's approach to Jupiter",
-      "gui_path": "/",
-      "is_local": false,
-      "key": "SHIFT+J",
-      "name": "Set Jupiter Approach",
-      "script": "openspace.time.setTime(\"1979-01-20T01:32:07.914\")"
+      "action": "os.missions.voyager.setup.jupiterapproach",
+      "key": "SHIFT+J"
     },
     {
-      "documentation": "Sets the time for Voyager's approach to Saturn",
-      "gui_path": "/Missions/Voyager",
-      "is_local": false,
-      "key": "SHIFT+S",
-      "name": "Set Saturn Approach",
-      "script": "openspace.time.setTime(\"1980-10-20T07:43:42.645\");"
+      "action": "os.missions.voyager.setup.saturnapproach",
+      "key": "SHIFT+S"
     },
     {
-      "documentation": "Set the camera focus to Jupiter",
-      "gui_path": "/Missions/Voyager",
-      "is_local": false,
-      "key": "J",
-      "name": "Focus on Jupiter",
-      "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Jupiter');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
+      "action": "os.missions.voyager.jupiter.focus",
+      "key": "J"
     },
     {
-      "documentation": "Sets the camera focus on Saturn",
-      "gui_path": "/Missions/Voyager",
-      "is_local": false,
-      "key": "S",
-      "name": "Focus on Saturn",
-      "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Saturn');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
+      "action": "os.missions.voyager.saturn.focus",
+      "key": "S"
     },
     {
-      "documentation": "Toggles the trails of the minor moons",
-      "gui_path": "/Solar System",
-      "is_local": false,
-      "key": "SHIFT+H",
-      "name": "Toggle minor trails",
-      "script": "local list = openspace.getProperty('{moonTrail_minor}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "os.missions.voyager.toggleminormoontrails",
+      "key": "SHIFT+H"
     }
   ],
   "mark_nodes": [
@@ -105,11 +78,11 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This scene contains the NASA Voyager 1 and Voyager 2 missions as they were launched from Earth in the 1970s and observed the gas giants in the Solar System. The spacecraft models are included and are pointed accurately throughout the mission. Position and orientation information are available until the second half of the 21st century.",
+    "description": "This scene contains the NASA Voyager 1 and Voyager 2 missions as they were launched from Earth in the 1970s and observed the gas giants in the Solar System. The spacecraft models are included and are pointed accurately throughout the mission. Position and orientation information are available until the second half of the 21st century",
     "license": "MIT License",
     "name": "Voyager",
     "url": "https://www.openspaceproject.com",
-    "version": "1.0"
+    "version": "1.1"
   },
   "properties": [
     {
@@ -124,6 +97,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 1
   }
 }

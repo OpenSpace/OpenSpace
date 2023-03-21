@@ -1,0 +1,48 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
+
+
+
+local EarthBarycenterTrail = {
+  Identifier = "EarthBarycenterTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "EARTH BARYCENTER",
+      Observer = "SSB"
+    },
+    Color = { 0.5, 0.8, 1.0 },
+    Period = 365.242,
+    Resolution = 1000,
+    Enabled = false
+  },
+  Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
+  GUI = {
+    Name = "Earth Barycenter Trail",
+    Path = "/Solar System/Planets/Earth"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EarthBarycenterTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthBarycenterTrail)
+end)
+
+asset.export(EarthBarycenterTrail)
+
+
+
+asset.meta = {
+  Name = "Earth Trail",
+  Version = "1.1",
+  Description = [[Trail of Earth's Barycenter as observed by the Sun. Data from NASA Spice
+    (see base spice asset)]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

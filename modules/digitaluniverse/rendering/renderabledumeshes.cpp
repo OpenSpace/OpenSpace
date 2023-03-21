@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,57 +49,46 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableDUMeshes";
-    constexpr const char* ProgramObjectName = "RenderableDUMeshes";
+    constexpr std::string_view _loggerCat = "RenderableDUMeshes";
 
-    constexpr const std::array<const char*, 4> UniformNames = {
+    constexpr std::array<const char*, 4> UniformNames = {
         "modelViewTransform", "projectionTransform", "alphaValue", "color"
     };
 
-    constexpr const int RenderOptionViewDirection = 0;
-    constexpr const int RenderOptionPositionNormal = 1;
-
-    constexpr const int8_t CurrentCacheVersion = 1;
-    constexpr const double PARSEC = 0.308567756E17;
+    constexpr int RenderOptionViewDirection = 0;
+    constexpr int RenderOptionPositionNormal = 1;
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
-        "The text color for the astronomical object."
+        "The text color for the astronomical object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
         "TextOpacity",
         "Text Opacity",
         "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent."
+        "and 0 fully transparent"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text Size",
-        "The text size for the astronomical object labels."
+        "The text size for the astronomical object labels"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
         "LabelFile",
         "Label File",
         "The path to the label file that contains information about the astronomical "
-        "objects being rendered."
+        "objects being rendered"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
-        "TextMinSize",
-        "Text Min Size",
-        "The minimal size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
-        "TextMaxSize",
-        "Text Max Size",
-        "The maximum size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered."
+    constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
+        "TextMinMaxSize",
+        "Text Min/Max Size",
+        "The minimum and maximum size (in pixels) of the text for the labels for the "
+        "astronomical objects being rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -111,25 +100,25 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the astronomical objects."
+        "Enables/Disables the drawing of the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
         "Draw Labels",
-        "Determines whether labels should be drawn or hidden."
+        "Determines whether labels should be drawn or hidden"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MeshColorInfo = {
         "MeshColor",
         "Meshes colors",
-        "The defined colors for the meshes to be rendered."
+        "The defined colors for the meshes to be rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Debug option for rendering of billboards and texts."
+        "Debug option for rendering of billboards and texts"
     };
 
     struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {
@@ -140,14 +129,14 @@ namespace {
         // [[codegen::verbatim(DrawLabelInfo.description)]]
         std::optional<bool> drawLabels;
 
-        enum class Unit {
+        enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
             Kilometer [[codegen::key("Km")]],
             Parsec [[codegen::key("pc")]],
             Kiloparsec [[codegen::key("Kpc")]],
-            MegaParsec [[codegen::key("Mpc")]],
+            Megaparsec [[codegen::key("Mpc")]],
             Gigaparsec [[codegen::key("Gpc")]],
-            Gigalightyears [[codegen::key("Gly")]]
+            Gigalightyear [[codegen::key("Gly")]]
         };
         std::optional<Unit> unit;
 
@@ -163,11 +152,8 @@ namespace {
         // [[codegen::verbatim(LabelFileInfo.description)]]
         std::optional<std::string> labelFile;
 
-        // [[codegen::verbatim(LabelMinSizeInfo.description)]]
-        std::optional<float> textMinSize;
-
-        // [[codegen::verbatim(LabelMaxSizeInfo.description)]]
-        std::optional<float> textMaxSize;
+        // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
+        std::optional<glm::ivec2> textMinMaxSize;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
@@ -181,9 +167,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableDUMeshes::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "digitaluniverse_renderabledumeshes";
-    return doc;
+    return codegen::doc<Parameters>("digitaluniverse_renderabledumeshes");
 }
 
 RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
@@ -193,8 +177,12 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
-    , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
-    , _textMaxSize(LabelMaxSizeInfo, 500.f, 0.f, 1000.f)
+    , _textMinMaxSize(
+        LabelMinMaxSizeInfo,
+        glm::ivec2(8, 500),
+        glm::ivec2(0),
+        glm::ivec2(1000)
+    )
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
@@ -221,44 +209,21 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     addProperty(_renderOption);
 
     if (p.unit.has_value()) {
-        switch (*p.unit) {
-            case Parameters::Unit::Meter:
-                _unit = Meter;
-                break;
-            case Parameters::Unit::Kilometer:
-                _unit = Kilometer;
-                break;
-            case Parameters::Unit::Parsec:
-                _unit = Parsec;
-                break;
-            case Parameters::Unit::Kiloparsec:
-                _unit = Kiloparsec;
-                break;
-            case Parameters::Unit::MegaParsec:
-                _unit = Megaparsec;
-                break;
-            case Parameters::Unit::Gigaparsec:
-                _unit = Gigaparsec;
-                break;
-            case Parameters::Unit::Gigalightyears:
-                _unit = GigalightYears;
-                break;
-        }
+        _unit = codegen::map<DistanceUnit>(*p.unit);
     }
     else {
-        LWARNING("No unit given for RenderableDUMeshes. Using meters as units.");
-        _unit = Meter;
+        _unit = DistanceUnit::Meter;
     }
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    _drawLabels = p.drawLabels.value_or(_drawLabels);
-    addProperty(_drawLabels);
-
     if (p.labelFile.has_value()) {
         _labelFile = absPath(*p.labelFile).string();
         _hasLabel = true;
+
+        _drawLabels = p.drawLabels.value_or(_drawLabels);
+        addProperty(_drawLabels);
 
         _textColor = p.textColor.value_or(_textColor);
         _hasLabel = p.textColor.has_value();
@@ -272,11 +237,9 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         _textSize = p.textSize.value_or(_textSize);
         addProperty(_textSize);
 
-        _textMinSize = p.textMinSize.value_or(_textMinSize);
-        addProperty(_textMinSize);
-
-        _textMaxSize = p.textMaxSize.value_or(_textMaxSize);
-        addProperty(_textMaxSize);
+        _textMinMaxSize = p.textMinMaxSize.value_or(_textMinMaxSize);
+        _textMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        addProperty(_textMinMaxSize);
     }
 
     if (p.meshColor.has_value()) {
@@ -292,9 +255,16 @@ bool RenderableDUMeshes::isReady() const {
         (!_renderingMeshesMap.empty() || (!_labelset.entries.empty()));
 }
 
+void RenderableDUMeshes::initialize() {
+    bool success = loadData();
+    if (!success) {
+        throw ghoul::RuntimeError("Error loading data");
+    }
+}
+
 void RenderableDUMeshes::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
-        ProgramObjectName,
+        "RenderableDUMeshes",
         []() {
             return global::renderEngine->buildRenderProgram(
                 "RenderableDUMeshes",
@@ -306,16 +276,11 @@ void RenderableDUMeshes::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    bool success = loadData();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
-    }
-
     createMeshes();
 
     if (_hasLabel) {
         if (!_font) {
-            constexpr const int FontSize = 50;
+            constexpr int FontSize = 50;
             _font = global::fontManager->font(
                 "Mono",
                 static_cast<float>(FontSize),
@@ -335,7 +300,7 @@ void RenderableDUMeshes::deinitializeGL() {
     }
 
     DigitalUniverseModule::ProgramObjectManager.release(
-        ProgramObjectName,
+        "RenderableDUMeshes",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -356,7 +321,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 
     _program->setUniform(_uniformCache.modelViewTransform, modelViewMatrix);
     _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
-    _program->setUniform(_uniformCache.alphaValue, _opacity);
+    _program->setUniform(_uniformCache.alphaValue, opacity());
 
     for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
         _program->setUniform(_uniformCache.color, _meshColorMap[pair.second.colorIndex]);
@@ -392,36 +357,13 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
                                       const glm::vec3& orthoRight,
                                       const glm::vec3& orthoUp)
 {
-    float scale = 0.f;
-    switch (_unit) {
-        case Meter:
-            scale = 1.f;
-            break;
-        case Kilometer:
-            scale = 1e3f;
-            break;
-        case Parsec:
-            scale = static_cast<float>(PARSEC);
-            break;
-        case Kiloparsec:
-            scale = static_cast<float>(1e3 * PARSEC);
-            break;
-        case Megaparsec:
-            scale = static_cast<float>(1e6 * PARSEC);
-            break;
-        case Gigaparsec:
-            scale = static_cast<float>(1e9 * PARSEC);
-            break;
-        case GigalightYears:
-            scale = static_cast<float>(306391534.73091 * PARSEC);
-            break;
-    }
+    float scale = static_cast<float>(toMeter(_unit));
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
     labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = static_cast<int>(_textMinSize);
-    labelInfo.maxSize = static_cast<int>(_textMaxSize);
+    labelInfo.minSize = _textMinMaxSize.value().x;
+    labelInfo.maxSize = _textMinMaxSize.value().y;
     labelInfo.cameraPos = data.camera.positionVec3();
     labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
     labelInfo.renderType = _renderOption;
@@ -495,7 +437,7 @@ void RenderableDUMeshes::update(const UpdateData&) {
 bool RenderableDUMeshes::loadData() {
     bool success = false;
     if (_hasSpeckFile) {
-        LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
+        LINFO(fmt::format("Loading Speck file {}", std::filesystem::path(_speckFile)));
         success = readSpeckFile();
         if (!success) {
             return false;
@@ -513,9 +455,14 @@ bool RenderableDUMeshes::loadData() {
 bool RenderableDUMeshes::readSpeckFile() {
     std::ifstream file(_speckFile);
     if (!file.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
+        LERROR(fmt::format(
+            "Failed to open Speck file {}", std::filesystem::path(_speckFile)
+        ));
         return false;
     }
+
+    const float scale = static_cast<float>(toMeter(_unit));
+    double maxRadius = 0.0;
 
     int meshIndex = 0;
 
@@ -524,7 +471,6 @@ bool RenderableDUMeshes::readSpeckFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (true) {
-        std::streampos position = file.tellg();
         std::getline(file, line);
 
         if (file.eof()) {
@@ -543,16 +489,9 @@ bool RenderableDUMeshes::readSpeckFile() {
 
         std::size_t found = line.find("mesh");
         if (found == std::string::npos) {
-        //if (line.substr(0, 4) != "mesh") {
-            // we read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line
-            //file.seekg(position);
-            //break;
             continue;
         }
         else {
-
-        //if (line.substr(0, 4) == "mesh") {
             // mesh lines are structured as follows:
             // mesh -t texnum -c colorindex -s style {
             // where textnum is the index of the texture;
@@ -599,29 +538,60 @@ bool RenderableDUMeshes::readSpeckFile() {
 
             std::getline(file, line);
             std::stringstream dim(line);
-            dim >> mesh.numU; // numU
-            dim >> mesh.numV; // numV
+            dim >> mesh.numU >> mesh.numV;
 
             // We can now read the vertices data:
             for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
                 std::getline(file, line);
-                if (line.substr(0, 1) != "}") {
-                    std::stringstream lineData(line);
-                    for (int i = 0; i < 7; ++i) {
-                        GLfloat value;
-                        lineData >> value;
-                        bool errorReading = lineData.rdstate() & std::ifstream::failbit;
-                        if (!errorReading) {
-                            mesh.vertices.push_back(value);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-                else {
+                if (line.substr(0, 1) == "}") {
                     break;
                 }
+
+                std::stringstream lineData(line);
+
+                // Try to read three values for the position
+                glm::vec3 pos;
+                bool success = true;
+                for (int i = 0; i < 3; ++i) {
+                    GLfloat value;
+                    lineData >> value;
+                    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
+                    if (errorReading) {
+                        success = false;
+                        break;
+                    }
+
+                    GLfloat scaledValue = value * scale;
+                    pos[i] = scaledValue;
+                    mesh.vertices.push_back(scaledValue);
+                }
+
+                if (!success) {
+                    LERROR(fmt::format(
+                        "Failed reading position on line {} of mesh {} in file: '{}'. "
+                        "Stopped reading mesh data", l, meshIndex, _speckFile
+                    ));
+                    break;
+                }
+
+                // Check if new max radius
+                const double r = glm::length(glm::dvec3(pos));
+                maxRadius = std::max(maxRadius, r);
+
+                // OLD CODE:
+                // (2022-03-23, emmbr)  None of our files included texture coordinates,
+                // and if they would they would still not be used by the shader
+                //for (int i = 0; i < 7; ++i) {
+                //    GLfloat value;
+                //    lineData >> value;
+                //    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
+                //    if (!errorReading) {
+                //        mesh.vertices.push_back(value);
+                //    }
+                //    else {
+                //        break;
+                //    }
+                //}
             }
 
             std::getline(file, line);
@@ -633,6 +603,7 @@ bool RenderableDUMeshes::readSpeckFile() {
             }
         }
     }
+    setBoundingSphere(maxRadius);
 
     return true;
 }
@@ -644,35 +615,6 @@ void RenderableDUMeshes::createMeshes() {
     LDEBUG("Creating planes");
 
     for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
-        float scale = 0.f;
-        switch (_unit) {
-            case Meter:
-                scale = 1.f;
-                break;
-            case Kilometer:
-                scale = 1e3f;
-                break;
-            case Parsec:
-                scale = static_cast<float>(PARSEC);
-                break;
-            case Kiloparsec:
-                scale = static_cast<float>(1e3 * PARSEC);
-                break;
-            case Megaparsec:
-                scale = static_cast<float>(1e6 * PARSEC);
-                break;
-            case Gigaparsec:
-                scale = static_cast<float>(1e9 * PARSEC);
-                break;
-            case GigalightYears:
-                scale = static_cast<float>(306391534.73091 * PARSEC);
-                break;
-        }
-
-        for (GLfloat& v : p.second.vertices) {
-            v *= scale;
-        }
-
         for (int i = 0; i < p.second.numU; ++i) {
             GLuint vao;
             glGenVertexArrays(1, &vao);
@@ -693,29 +635,32 @@ void RenderableDUMeshes::createMeshes() {
             );
             // in_position
             glEnableVertexAttribArray(0);
-            // U and V may not be given by the user
-            if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
-                glVertexAttribPointer(
-                    0,
-                    3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    sizeof(GLfloat) * 5,
-                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i * p.second.numV)
-                );
+            // (2022-03-23, emmbr) This code was actually never used. We only read three
+            // values per line and did not handle any texture cooridnates, even if there
+            // would have been some in the file
+            //// U and V may not be given by the user
+            //if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
+            //    glVertexAttribPointer(
+            //        0,
+            //        3,
+            //        GL_FLOAT,
+            //        GL_FALSE,
+            //        sizeof(GLfloat) * 5,
+            //        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i * p.second.numV)
+            //    );
 
-                // texture coords
-                glEnableVertexAttribArray(1);
-                glVertexAttribPointer(
-                    1,
-                    2,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    sizeof(GLfloat) * 7,
-                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
-                );
-            }
-            else { // no U and V:
+            //    // texture coords
+            //    glEnableVertexAttribArray(1);
+            //    glVertexAttribPointer(
+            //        1,
+            //        2,
+            //        GL_FLOAT,
+            //        GL_FALSE,
+            //        sizeof(GLfloat) * 7,
+            //        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
+            //    );
+            //}
+            //else { // no U and V:
                 glVertexAttribPointer(
                     0,
                     3,
@@ -724,7 +669,7 @@ void RenderableDUMeshes::createMeshes() {
                     0,
                     reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
                 );
-            }
+            //}
         }
 
         // Grid: we need columns

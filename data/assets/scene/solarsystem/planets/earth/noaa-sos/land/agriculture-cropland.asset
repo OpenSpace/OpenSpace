@@ -1,0 +1,73 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "NOAA Science on a Sphere. Agriculture: Cropland Intensity"
+local Identifier = "noaa-sos-land-agriculture-cropland"
+local Description = [[These visualizations, created by the University of Minnesota's
+Institute on the Environment, show the global land use intensity for pastureland and
+cropland. Cropland is land devoted to growing plants for humans use for food, material,
+or fuel. Pastureland is land used for raising and grazing animals. Altogether, cropland
+covers about 16 million square kilometers, an area of land approximately the size of
+South America. Global pastureland occupies more than 30 million square kilometers, about
+the area of Africa]]
+local URL = "https://sos.noaa.gov/catalog/datasets/agriculture-cropland-intensity/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+local layer_countries = {
+  Identifier = Identifier .. "-countries",
+  Name = Name .. " (w/ countries)",
+  Enabled = asset.enabled,
+  FilePath = syncedDirectory .. "4096_countries.png",
+  Description = Description
+}
+
+local legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_countries)
+  openspace.addScreenSpaceRenderable(legend)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_countries)
+  openspace.removeScreenSpaceRenderable(legend)
+end)
+
+asset.export(layer)
+asset.export(layer_countries)
+asset.export(legend)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

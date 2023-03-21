@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,11 +49,18 @@ struct Message {
 class ServerModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "Server";
+    using CallbackHandle = int;
+    using CallbackFunction = std::function<void()>;
 
     ServerModule();
-    virtual ~ServerModule();
+    virtual ~ServerModule() override;
 
     ServerInterface* serverInterfaceByIdentifier(const std::string& identifier);
+
+    int skyBrowserUpdateTime() const;
+
+    CallbackHandle addPreSyncCallback(CallbackFunction cb);
+    void removePreSyncCallback(CallbackHandle handle);
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
@@ -76,6 +83,11 @@ private:
     std::vector<ConnectionData> _connections;
     std::vector<std::unique_ptr<ServerInterface>> _interfaces;
     properties::PropertyOwner _interfaceOwner;
+    int _skyBrowserUpdateTime = 100;
+
+    // Callbacks for tiggering topic
+    int _nextCallbackHandle = 0;
+    std::vector<std::pair<CallbackHandle, CallbackFunction>> _preSyncCallbacks;
 };
 
 } // namespace openspace

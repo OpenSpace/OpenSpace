@@ -1,6 +1,16 @@
-local assetHelper = asset.require('util/asset_helper')
+local planeTextures = asset.syncedResource({
+  Name = "Milky Way Plane Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_milkyway_textures",
+  Version = 2
+})
 
-local dataPaths = asset.require("scene/digitaluniverse/milkyway_data")
+local planeSpeck = asset.syncedResource({
+  Name = "Milky Way Plane Speck",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_milkyway_speck",
+  Version = 1
+})
 
 local plane = {
     Identifier = "MilkyWayGalaxyImage",
@@ -11,8 +21,8 @@ local plane = {
       Color = { 1.0, 1.0, 1.0 },
       Opacity = 0.99,
       ScaleFactor = 2.8,
-      File = dataPaths.SpeckPath .. "/galaxy.speck",
-      TexturePath = dataPaths.TexturesPath,
+      File = planeSpeck .. "galaxy.speck",
+      TexturePath = planeTextures,
       Luminosity = "size",
       ScaleLuminosity = 1.0,
       FadeInDistances = { 3000.0, 50000.0 },
@@ -21,7 +31,7 @@ local plane = {
     },
     GUI = {
       Name = "Milky Way Galaxy Image",
-      Path = "/Universe/Galaxies",
+      Path = "/Milky Way",
       Description = [[Census: 1 image. DU Version 2.2. <br> The exterior view of the
         Milky Way is simply a two-dimensional image. The image is that of NGC 1232, a
         galaxy thought to resemble our Milky Way. The image has been properly sized
@@ -33,16 +43,24 @@ local plane = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { plane })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(plane)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(plane)
+end)
+
+asset.export(plane)
+
 
 
 asset.meta = {
   Name = "MilkyWay Galaxy",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[Digital Universe asset containt 2D image of the MilkyWay. For
     extragalactic viewing]],
   Author = "Brian Abbott, Carter Emmart (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"MilkyWayGalaxyImage"}
+  License = "AMNH Digital Universe"
 }

@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
 
 
@@ -12,7 +11,7 @@ local SaturnTrailEarth = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SATURN BARYCENTER",
+      Target = "SATURN",
       Observer = "EARTH"
     },
     Color = { 1.0, 0.5, 0.2 },
@@ -25,20 +24,27 @@ local SaturnTrailEarth = {
     Name = "Saturn trail from Earth",
     Path = "/Solar System/Planets/Saturn",
     Hidden = false,
-    Description = [[ Trail of Saturn as observed by the Earth.]],
+    Description = "Trail of Saturn as observed by the Earth",
   }
 }
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SaturnTrailEarth)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SaturnTrailEarth)
+end)
+
+asset.export(SaturnTrailEarth)
+
+
 asset.meta = {
   Name = "Saturn Trail from Earth",
-  Version = "1.0",
-  Description = [[ Alternate trail of Saturn, as observed by the Earth rather then the
-    Sun. Data from NASA SPICE (see base spice asset)]],
+  Version = "1.1",
+  Description = [[Alternate trail of Saturn, as observed by the Earth rather then the Sun.
+    Data from NASA SPICE (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"VenusTrailEarth"}
+  License = "MIT license"
 }
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { UranusTrailEarth })

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,17 +35,27 @@
 #include <optional>
 
 namespace {
+    enum FrametimeType {
+        DtTimeAvg = 0,
+        DtTimeExtremes,
+        DtStandardDeviation,
+        DtCoefficientOfVariation,
+        FPS,
+        FPSAvg,
+        None
+    };
+
     constexpr openspace::properties::Property::PropertyInfo FrametimeInfo = {
         "FrametimeType",
         "Type of the frame time display",
-        "This value determines the units in which the frame time is displayed."
+        "This value determines the units in which the frame time is displayed"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ClearCacheInfo = {
         "ClearCache",
         "Clear Cache",
         "Clears the cache of this DashboardItemFramerate item. If the selected option "
-        "does not use any caching, this trigger does not do anything."
+        "does not use any caching, this trigger does not do anything"
     };
 
     [[ nodiscard ]] char* formatDt(std::vector<char>& buffer) {
@@ -104,23 +114,22 @@ namespace {
         );
     }
 
-    [[ nodiscard ]] char* format(std::vector<char>& buffer,
-                           openspace::DashboardItemFramerate::FrametimeType frametimeType,
+    [[ nodiscard ]] char* format(std::vector<char>& buffer, FrametimeType frametimeType,
                                        double minFrametimeCache, double maxFrametimeCache)
     {
         using namespace openspace;
         switch (frametimeType) {
-            case DashboardItemFramerate::FrametimeType::DtTimeAvg:
+            case FrametimeType::DtTimeAvg:
                 return formatDt(buffer);
-            case DashboardItemFramerate::FrametimeType::DtTimeExtremes:
+            case FrametimeType::DtTimeExtremes:
                 return formatDtExtremes(buffer, minFrametimeCache, maxFrametimeCache);
-            case DashboardItemFramerate::FrametimeType::DtStandardDeviation:
+            case FrametimeType::DtStandardDeviation:
                 return formatDtStandardDeviation(buffer);
-            case DashboardItemFramerate::FrametimeType::DtCoefficientOfVariation:
+            case FrametimeType::DtCoefficientOfVariation:
                 return formatDtCoefficientOfVariation(buffer);
-            case DashboardItemFramerate::FrametimeType::FPS:
+            case FrametimeType::FPS:
                 return formatFps(buffer);
-            case DashboardItemFramerate::FrametimeType::FPSAvg:
+            case FrametimeType::FPSAvg:
                 return formatAverageFps(buffer);
             default:
                 throw ghoul::MissingCaseException();
@@ -128,9 +137,9 @@ namespace {
     }
 
     struct [[codegen::Dictionary(DashboardItemFramerate)]] Parameters {
-        enum class Type {
-            DtAvg [[codegen::key("Average Deltatime")]],
-            DtExtremes [[codegen::key("Deltatime extremes")]],
+        enum class [[codegen::map(FrametimeType)]] Type {
+            DtTimeAvg [[codegen::key("Average Deltatime")]],
+            DtTimeExtremes [[codegen::key("Deltatime extremes")]],
             DtStandardDeviation [[codegen::key("Deltatime standard deviation")]],
             DtCoefficientOfVariation
                 [[codegen::key("Deltatime coefficient of variation")]],
@@ -148,9 +157,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemFramerate::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_dashboarditem_framerate";
-    return doc;
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_framerate",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
@@ -177,27 +187,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     });
 
     if (p.frametimeType.has_value()) {
-        switch (*p.frametimeType) {
-            case Parameters::Type::DtAvg:
-                _frametimeType = static_cast<int>(FrametimeType::DtTimeAvg);
-                break;
-            case Parameters::Type::DtExtremes:
-                _frametimeType = static_cast<int>(FrametimeType::DtTimeExtremes);
-                break;
-            case Parameters::Type::DtStandardDeviation:
-                _frametimeType = static_cast<int>(FrametimeType::DtStandardDeviation);
-                break;
-            case Parameters::Type::DtCoefficientOfVariation:
-                _frametimeType =
-                    static_cast<int>(FrametimeType::DtCoefficientOfVariation);
-                break;
-            case Parameters::Type::FPS:
-                _frametimeType = static_cast<int>(FrametimeType::FPS);
-                break;
-            case Parameters::Type::FPSAvg:
-                _frametimeType = static_cast<int>(FrametimeType::FPSAvg);
-                break;
-        }
+        _frametimeType = codegen::map<FrametimeType>(*p.frametimeType);
     }
     else {
         _frametimeType = static_cast<int>(FrametimeType::FPSAvg);
@@ -213,7 +203,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
 }
 
 void DashboardItemFramerate::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_shouldClearCache) {
         _minDeltaTimeCache = 1.0;
@@ -253,7 +243,7 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemFramerate::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     const FrametimeType t = FrametimeType(_frametimeType.value());
     char* end = format(_buffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);

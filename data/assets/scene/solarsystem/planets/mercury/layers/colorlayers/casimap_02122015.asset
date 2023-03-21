@@ -1,15 +1,38 @@
-local texturesPath = asset.require("./../../mercury_textures").TexturesPath
-local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Mercury Textures",
+  Type = "HttpSynchronization",
+  Identifier = "mercury_abundance_textures",
+  Version = 1
+})
 
 local layer = {
   Name = "Calcium Abundance",
   Identifier = "casimap_02122015",
-  FilePath = texturesPath .. "/casimap_02122015.png",
+  Enabled = asset.enabled,
+  FilePath = texturesPath .. "casimap_02122015.png",
   BlendMode = "Multiply",
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+
+asset.meta = {
+  Name = "Mercury Calcium Abundance",
+  Version = "1.0",
+  Description = "Calcium Abundance layer for Mercury globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

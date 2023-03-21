@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,14 @@
 
 #include <modules/base/dashboard/dashboarditemvelocity.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
@@ -46,14 +45,14 @@ namespace {
         "Simplification",
         "If this value is enabled, the velocity is displayed in nuanced units, such as "
         "m/s, AU/s, light years / s etc. If this value is disabled, the unit can be "
-        "explicitly requested."
+        "explicitly requested"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this distance unit is used for the velocity "
-        "display."
+        "display"
     };
 
     std::vector<std::string> unitList() {
@@ -62,8 +61,8 @@ namespace {
             openspace::DistanceUnits.begin(),
             openspace::DistanceUnits.end(),
             res.begin(),
-            [](openspace::DistanceUnit unit) -> std::string {
-                return nameForDistanceUnit(unit);
+            [](openspace::DistanceUnit unit) {
+                return std::string(nameForDistanceUnit(unit));
             }
         );
         return res;
@@ -83,9 +82,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemVelocity::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_dashboarditem_velocity";
-    return doc;
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_velocity",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary)
@@ -105,7 +105,10 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     addProperty(_doSimplification);
 
     for (DistanceUnit u : DistanceUnits) {
-        _requestedUnit.addOption(static_cast<int>(u), nameForDistanceUnit(u));
+        _requestedUnit.addOption(
+            static_cast<int>(u),
+            std::string(nameForDistanceUnit(u))
+        );
     }
     _requestedUnit = static_cast<int>(DistanceUnit::Meter);
     if (p.requestedUnit.has_value()) {
@@ -117,7 +120,7 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
 }
 
 void DashboardItemVelocity::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     const glm::dvec3 currentPos = global::renderEngine->scene()->camera()->positionVec3();
     const glm::dvec3 dt = currentPos - _prevPosition;
@@ -127,14 +130,14 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
 
     const double speedPerSecond = speedPerFrame / secondsPerFrame;
 
-    std::pair<double, std::string> dist;
+    std::pair<double, std::string_view> dist;
     if (_doSimplification) {
         dist = simplifyDistance(speedPerSecond);
     }
     else {
         const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
         const double convertedD = convertMeters(speedPerSecond, unit);
-        dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
+        dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
     RenderFont(
@@ -150,17 +153,17 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemVelocity::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     const double d = glm::length(1e20);
-    std::pair<double, std::string> dist;
+    std::pair<double, std::string_view> dist;
     if (_doSimplification) {
         dist = simplifyDistance(d);
     }
     else {
         DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
         double convertedD = convertMeters(d, unit);
-        dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
+        dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
     return _font->boundingBox(

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ public:
     double edgeLatitudeNearestEquator() const;
 
     /**
-     * Returns \c true if the center above the equator
+     * Returns `true` if the center above the equator
      */
     double isNorthern() const;
 
@@ -63,7 +63,7 @@ public:
     double maxLon() const;
 
     /**
-     * Returns \c true if the specified coordinate is contained within the patch
+     * Returns `true` if the specified coordinate is contained within the patch
      */
     bool contains(const Geodetic2& p) const;
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,24 +33,24 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    constexpr const char* GlslRaycastPath =
+    constexpr std::string_view GlslRaycastPath =
         "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
-    constexpr const char* GlslBoundsVsPath =
+    constexpr std::string_view GlslBoundsVsPath =
         "${MODULES}/galaxy/shaders/raycasterbounds_vs.glsl";
-    constexpr const char* GlslBoundsFsPath =
+    constexpr std::string_view GlslBoundsFsPath =
         "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
 } // namespace
 
 namespace openspace {
 
 GalaxyRaycaster::GalaxyRaycaster(ghoul::opengl::Texture& texture)
-    : _boundingBox(glm::vec3(1.0))
+    : _boundingBox(glm::vec3(1.f))
     , _texture(texture)
     , _textureUnit(nullptr)
 {}
 
 void GalaxyRaycaster::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     _boundingBox.initialize();
 }
@@ -58,7 +58,7 @@ void GalaxyRaycaster::initialize() {
 void GalaxyRaycaster::renderEntryPoints(const RenderData& data,
                                         ghoul::opengl::ProgramObject& program)
 {
-    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
+    program.setUniform("modelViewTransform", modelViewTransform(data));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull back face
@@ -73,7 +73,7 @@ void GalaxyRaycaster::renderExitPoints(const RenderData& data,
                                        ghoul::opengl::ProgramObject& program)
 {
     // Uniforms
-    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
+    program.setUniform("modelViewTransform", modelViewTransform(data));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull front face
@@ -133,7 +133,7 @@ bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPos
     glm::vec4 modelPos = glm::inverse(modelViewTransform(data)) *
         glm::vec4(0.f, 0.f, 0.f, 1.f);
 
-    localPosition = (glm::vec3(modelPos) + glm::vec3(0.5));
+    localPosition = (glm::vec3(modelPos) + glm::vec3(0.5f));
 
     return (localPosition.x > 0 && localPosition.x < 1 &&
         localPosition.y > 0 && localPosition.y < 1 &&
@@ -141,15 +141,15 @@ bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPos
 }
 
 std::string GalaxyRaycaster::boundsVertexShaderPath() const {
-    return GlslBoundsVsPath;
+    return std::string(GlslBoundsVsPath);
 }
 
 std::string GalaxyRaycaster::boundsFragmentShaderPath() const {
-    return GlslBoundsFsPath;
+    return std::string(GlslBoundsFsPath);
 }
 
 std::string GalaxyRaycaster::raycasterPath() const {
-    return GlslRaycastPath;
+    return std::string(GlslRaycastPath);
 }
 
 std::string GalaxyRaycaster::helperPath() const {

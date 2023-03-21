@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat  = "InstrumentDecoder";
+    constexpr std::string_view _loggerCat  = "InstrumentDecoder";
 
     struct [[codegen::Dictionary(InstrumentDecoder)]] Parameters {
         std::string detectorType;
@@ -57,7 +57,7 @@ InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
         _stopCommand = *p.stopCommand;
     }
     else {
-        LWARNING("Scanner must provide stop command, please check mod file.");
+        LWARNING("Scanner must provide stop command, please check asset file");
     }
 
     _spiceIDs = p.spice;

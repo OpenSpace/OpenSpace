@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,19 +33,21 @@
  * still be used for depth comparison.
  */
 float normalizeFloat(float inpt) {
-    if (inpt > 1.0) {
-        return inpt / pow(10, 30);
-    } else {
-        return inpt - 1.0;
-    }
+  if (inpt > 1.0) {
+    return inpt / pow(10, 30);
+  }
+  else {
+    return inpt - 1.0;
+  }
 }
 
 float denormalizeFloat(float inpt) {
-    if (inpt < 0.0) {
-        return inpt + 1.0;
-    } else {
-        return inpt * pow(10, 30);
-    }
+  if (inpt < 0.0) {
+    return inpt + 1.0;
+  }
+  else {
+    return inpt * pow(10, 30);
+  }
 }
 
 /**
@@ -54,15 +56,20 @@ float denormalizeFloat(float inpt) {
  * represented as a float. 
  */
 float safeLength(vec4 v) {
-    float m = max(max(max(abs(v.x), abs(v.y)), abs(v.z)), abs(v.w));
-    if (m > 0.f) {
-        return length(v / m) * m;
-    } else {
-        return 0.f;
-    }
+  float m = max(max(max(abs(v.x), abs(v.y)), abs(v.z)), abs(v.w));
+  if (m > 0.f) {
+    return length(v / m) * m;
+  }
+  else {
+    return 0.f;
+  }
 }
 
-float safeLength(vec3 v) { return safeLength(vec4(v, 0.0)); }
-float safeLength(vec2 v) { return safeLength(vec4(v, 0.0, 0.0)); }
+float safeLength(vec3 v) {
+  return safeLength(vec4(v, 0.0));
+}
+float safeLength(vec2 v) {
+  return safeLength(vec4(v, 0.0, 0.0));
+}
 
 #endif // _FLOATOPERATIONS_GLSL_

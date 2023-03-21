@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,6 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/joystickinputstate.h>
 
 namespace {
@@ -62,8 +60,9 @@ void GuiJoystickComponent::render() {
         ImGui::Text("%s", "Axes");
         for (int j = 0; j < state.nAxes; ++j) {
             float f = state.axes[j];
+            std::string id = std::to_string(j) + "##" + state.name + "Axis";
             ImGui::SliderFloat(
-                std::to_string(j).c_str(),
+                id.c_str(),
                 &f,
                 -1.f,
                 1.f
@@ -71,8 +70,9 @@ void GuiJoystickComponent::render() {
         }
         ImGui::Text("%s", "Buttons");
         for (int j = 0; j < state.nButtons; ++j) {
+            std::string id = std::to_string(j) + "##" + state.name + "Button";
             ImGui::RadioButton(
-                std::to_string(j).c_str(),
+                id.c_str(),
                 state.buttons[j] == JoystickAction::Press ||
                 state.buttons[j] == JoystickAction::Repeat
             );
@@ -86,21 +86,23 @@ void GuiJoystickComponent::render() {
 
     ImGui::Text("%s", "Summed contributions");
     ImGui::Text("%s", "Axes");
-    for (int i = 0; i < JoystickInputState::MaxAxes; ++i) {
-        float f = global::joystickInputStates->axis(i);
+    for (int i = 0; i < global::joystickInputStates->numAxes(); ++i) {
+        float f = global::joystickInputStates->axis("", i);
+        std::string id = std::to_string(i) + "##" + "TotalAxis";
         ImGui::SliderFloat(
-            std::to_string(i).c_str(),
+            id.c_str(),
             &f,
             -1.f,
             1.f
         );
     }
     ImGui::Text("%s", "Buttons");
-    for (int i = 0; i < JoystickInputState::MaxButtons; ++i) {
+    for (int i = 0; i < global::joystickInputStates->numButtons(); ++i) {
+        std::string id = std::to_string(i) + "##" + "TotalButton";
         ImGui::RadioButton(
-            std::to_string(i).c_str(),
-            global::joystickInputStates->button(i, JoystickAction::Press) ||
-                global::joystickInputStates->button(i, JoystickAction::Repeat)
+            id.c_str(),
+            global::joystickInputStates->button("", i, JoystickAction::Press) ||
+                global::joystickInputStates->button("", i, JoystickAction::Repeat)
         );
     }
 

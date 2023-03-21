@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,18 +26,45 @@
 #define __OPENSPACE_CORE___COORDINATECONVERSION___H__
 
 #include <ghoul/glm.h>
+#include <string>
 
 namespace openspace {
 
 /**
- * Converts from ICRS coordinates to galactic cartesian coordinates.
+ * Converts from ICRS decimal degrees coordinates to galactic cartesian coordinates.
  * \param ra Right ascension, given in decimal degrees
  * \param dec Declination, given in decimal degrees
  * \param distance The distance, or radius, to the position given in any unit.
  * \return A position in galactic cartesian coordinates, given in the same unit as the
  *         distance parameter.
  */
-glm::dvec3 icrsToGalacticCartesian(float ra, float dec, double distance);
+glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance);
+
+/**
+ * Converts from ICRS (hms and dms) coordinates to decimal degrees.
+ * \param ra Right ascension, given as a string in format 'XhYmZs'
+ * \param dec Declination, given as a string in format 'XdYmZs'
+ * \return The decimal degrees coordinate in degrees
+ */
+glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec);
+
+/**
+ * Converts from galactic cartesian coordinates to ICRS decimal degrees coordinates
+ * and distance.
+ * \param x X coordinate
+ * \param y Y coordinate
+ * \param z Z coordinate
+ * \return A vector with the ra and dec decimal degrees in degrees and distance.
+ */
+glm::dvec3 galacticCartesianToIcrs(double x, double y, double z);
+
+/**
+ * Converts from ICRS decimal degrees coordinates to ICRS hms and dms coordinates.
+ * \param ra Right ascension, given in decimal degrees
+ * \param dec Declination, given in decimal degrees
+ * \return A pair with the ra and dec strings in hms and dms format.
+ */
+std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec);
 
 } // namespace openspace
 

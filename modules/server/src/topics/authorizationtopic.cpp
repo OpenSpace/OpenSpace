@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,12 +30,12 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "AuthorizationTopic";
+    constexpr std::string_view _loggerCat = "AuthorizationTopic";
 
-    constexpr const char* KeyStatus = "status";
-    constexpr const char* Authorized = "authorized";
-    constexpr const char* IncorrectKey = "incorrectKey";
-    constexpr const char* BadRequest = "badRequest";
+    constexpr std::string_view KeyStatus = "status";
+    constexpr std::string_view Authorized = "authorized";
+    constexpr std::string_view IncorrectKey = "incorrectKey";
+    constexpr std::string_view BadRequest = "badRequest";
 } // namespace
 
 namespace openspace {
@@ -54,18 +54,20 @@ void AuthorizationTopic::handleJson(const nlohmann::json& json) {
     }
     else {
         try {
-            auto providedKey = json.at("key").get<std::string>();
+            std::string providedKey = json.at("key").get<std::string>();
             if (authorize(providedKey)) {
                 _connection->setAuthorized(true);
                 _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
-                LINFO("Client successfully authorized.");
+                LINFO("Client successfully authorized");
             }
             else {
                 _connection->sendJson(wrappedPayload({ KeyStatus, IncorrectKey }));
             }
-        } catch (const std::out_of_range&) {
+        }
+        catch (const std::out_of_range&) {
             _connection->sendJson(wrappedPayload({ KeyStatus, BadRequest }));
-        } catch (const std::domain_error&) {
+        }
+        catch (const std::domain_error&) {
             _connection->sendJson(wrappedPayload({ KeyStatus, BadRequest }));
         }
     }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,15 +43,13 @@ namespace {
 namespace openspace {
 
 documentation::Documentation Task::documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_task";
-    return doc;
+    return codegen::doc<Parameters>("core_task");
 }
 
 std::unique_ptr<Task> Task::createFromDictionary(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    auto factory = FactoryManager::ref().factory<Task>();
+    ghoul::TemplateFactory<Task>* factory = FactoryManager::ref().factory<Task>();
     Task* task = factory->create(p.type, dictionary);
     return std::unique_ptr<Task>(task);
 }

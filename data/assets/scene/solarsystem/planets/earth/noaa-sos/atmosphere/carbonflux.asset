@@ -1,0 +1,55 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Carbon Flux"
+local Identifier = "noaa-sos-atmosphere-carbonflux"
+local Description = [[The Global Monitoring Division at NOAA diligently monitors carbon
+dioxide and other trace gases in the atmosphere. One of the methods they use to sample
+trace gases is collecting flasks of air from around the world that can be tested. They
+have several other means for collecting samples as well. In this data set, the NOAA GMD
+sampling network as of 2005 is portrayed. Circles are flask sampling locations, stars are
+aircraft sites (12 flasks per flight are filled) and ships, which are only visible as
+they race from Australia and New Zealand to the US west coast or Japan, or from Cape Town
+to the US east coast. The coloration in the dataset represents the fluxes constructed by
+the ocean, biosphere, and fossil fuel modules of the NOAA ESRL data assimilation system
+for CO2 and related trace gases. The data set shows daily average fluxes constructed from
+3-hour model output]]
+local URL = "https://sos.noaa.gov/catalog/datasets/polar-orbiting-aqua-satellite-and-modis-swath/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ImageSequenceTileLayer",
+  FolderPath = syncedDirectory .. "2160",
+  Description = Description
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export(layer)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,19 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
-#define __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___MARKNODESDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___MARKNODESDIALOG___H__
 
 #include <QDialog>
-
-namespace openspace { class Profile; }
 
 class QLineEdit;
 class QListWidget;
 class QListWidgetItem;
 class QPushButton;
 
-class MarkNodesDialog : public QDialog {
+class MarkNodesDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -44,7 +42,7 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    MarkNodesDialog(openspace::Profile& profile, QWidget* parent);
+    MarkNodesDialog(QWidget* parent, std::vector<std::string>* markedNodes);
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -53,23 +51,18 @@ public:
      */
     void keyPressEvent(QKeyEvent* evt) override;
 
-private slots:
-    void listItemSelected();
+private:
+    void createWidgets();
+
     void listItemAdded();
     void listItemRemove();
     void parseSelections();
 
-private:
-    void createWidgets();
-
-    std::vector<QListWidgetItem*> _markedNodesListItems;
-    openspace::Profile& _profile;
-    std::vector<std::string> _data;
+    std::vector<std::string>* _markedNodes;
 
     QListWidget* _list = nullptr;
     QPushButton* _removeButton = nullptr;
     QLineEdit* _newNode = nullptr;
-
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
+#endif // __OPENSPACE_UI_LAUNCHER___MARKNODESDIALOG___H__

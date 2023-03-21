@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,13 +34,13 @@ namespace openspace {
 class SessionRecordingTopic : public Topic {
 public:
     SessionRecordingTopic();
-    virtual ~SessionRecordingTopic();
+    ~SessionRecordingTopic() override;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
 
 private:
-    static const int UnsetOnChangeHandle = -1;
+    static constexpr int UnsetOnChangeHandle = -1;
 
     bool _sendState;
     bool _sendFiles;

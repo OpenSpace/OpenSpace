@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,7 @@
 out vec4 _out_color_;
 
 void main() {
-     Fragment f = getFragment();
-     _out_color_ = f.color;
-     gl_FragDepth = normalizeFloat(f.depth);
+  Fragment f = getFragment();
+  _out_color_ = f.color;
+  gl_FragDepth = normalizeFloat(f.depth);
 }

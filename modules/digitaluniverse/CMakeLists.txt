@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   rendering/renderablepoints.h
@@ -34,19 +34,13 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   rendering/renderablepoints.cpp
-  rendering/renderabledumeshes.cpp 
+  rendering/renderabledumeshes.cpp
   rendering/renderablebillboardscloud.cpp
   rendering/renderableplanescloud.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  shaders/pointssprite_fs.glsl
-  shaders/pointssprite_vs.glsl
-  shaders/points_sprite_fs.glsl
-  shaders/points_fs.glsl
-  shaders/points_gs.glsl
-  shaders/points_vs.glsl
   shaders/billboard_fs.glsl
   shaders/billboard_gs.glsl
   shaders/billboard_vs.glsl
@@ -57,6 +51,8 @@ set(SHADER_FILES
   shaders/dumesh_fs.glsl
   shaders/plane_vs.glsl
   shaders/plane_fs.glsl
+  shaders/points_sprite_fs.glsl
+  shaders/points_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

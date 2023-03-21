@@ -1,6 +1,5 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
-local textures = asset.require('scene/milkyway/habitable_zones/habitable_zone_textures').TexturesPath
+local textures = asset.require("scene/milkyway/habitable_zones/habitable_zone_textures").TexturesPath
 
 local HabitableZone = {
   Identifier = "SunHabitableZone",
@@ -8,7 +7,7 @@ local HabitableZone = {
   Renderable = {
     Type = "RenderableHabitableZone",
     Enabled = false,
-    Texture = textures .. "/hot_to_cold_faded.png",
+    Texture = textures .. "hot_to_cold_faded.png",
     EffectiveTemperature = 5780, -- Kelvin
     Luminosity = 1, -- solar
     Opacity = 0.1,
@@ -17,19 +16,27 @@ local HabitableZone = {
   GUI = {
     Name = "Sun Habitable Zone",
     Path = "/Solar System/Sun",
-    Description = "Habitable zone for the sun in our solar system."
+    Description = "Habitable zone for the sun in our solar system"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { HabitableZone })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HabitableZone)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HabitableZone)
+end)
+
+asset.export(HabitableZone)
+
 
 asset.meta = {
   Name = "Sun Habitable Zone",
-  Version = "1.0",
-  Description = [[ The habitable zone around our sun, computed using formula and 
+  Version = "1.1",
+  Description = [[The habitable zone around our sun, computed using formula and 
     coefficients by Kopparapu et al. (2015) https://arxiv.org/abs/1404.5292]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"SunHabitableZone"}
+  License = "MIT license"
 }

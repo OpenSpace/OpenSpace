@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@ namespace documentation { struct Documentation; }
 class DashboardItemSimulationIncrement : public DashboardTextItem {
 public:
     DashboardItemSimulationIncrement(const ghoul::Dictionary& dictionary);
-    virtual ~DashboardItemSimulationIncrement() = default;
+    ~DashboardItemSimulationIncrement() override = default;
 
     void render(glm::vec2& penPosition) override;
     glm::vec2 size() const override;

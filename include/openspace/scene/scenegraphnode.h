@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -75,13 +75,13 @@ public:
     BooleanType(UpdateScene);
 
     static constexpr const char* RootNodeIdentifier = "Root";
-    static constexpr const char* KeyIdentifier = "Identifier";
-    static constexpr const char* KeyParentName = "Parent";
-    static constexpr const char* KeyDependencies = "Dependencies";
-    static constexpr const char* KeyTag = "Tag";
+    static constexpr std::string_view KeyIdentifier = "Identifier";
+    static constexpr std::string_view KeyParentName = "Parent";
+    static constexpr std::string_view KeyDependencies = "Dependencies";
+    static constexpr std::string_view KeyTag = "Tag";
 
     SceneGraphNode();
-    ~SceneGraphNode();
+    virtual ~SceneGraphNode() override;
 
     static ghoul::mm_unique_ptr<SceneGraphNode> createFromDictionary(
         const ghoul::Dictionary& dictionary);
@@ -128,8 +128,18 @@ public:
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
 
+    const std::vector<std::string>& onApproachAction() const;
+    const std::vector<std::string>& onReachAction() const;
+    const std::vector<std::string>& onRecedeAction() const;
+    const std::vector<std::string>& onExitAction() const;
+
     double boundingSphere() const;
     double interactionSphere() const;
+
+    double reachFactor() const;
+    double approachFactor() const;
+
+    bool supportsDirectInteraction() const;
 
     SceneGraphNode* childNode(const std::string& identifier);
 
@@ -155,6 +165,11 @@ private:
     std::vector<SceneGraphNode*> _dependentNodes;
     Scene* _scene = nullptr;
 
+    std::vector<std::string> _onApproachAction;
+    std::vector<std::string> _onReachAction;
+    std::vector<std::string> _onRecedeAction;
+    std::vector<std::string> _onExitAction;
+
     // If this value is 'true' GUIs are asked to hide this node from collections, as it
     // might be a node that is not very interesting (for example barycenters)
     properties::BoolProperty _guiHidden;
@@ -165,7 +180,7 @@ private:
     properties::StringProperty _guiDisplayName;
     properties::StringProperty _guiDescription;
 
-    // Transformation defined by ephemeris, rotation and scale
+    // Transformation defined by translation, rotation and scale
     struct {
         ghoul::mm_unique_ptr<Translation> translation;
         ghoul::mm_unique_ptr<Rotation> rotation;
@@ -183,12 +198,15 @@ private:
 
     properties::DoubleProperty _boundingSphere;
     properties::DoubleProperty _interactionSphere;
+    properties::DoubleProperty _approachFactor;
+    properties::DoubleProperty _reachFactor;
     properties::BoolProperty _computeScreenSpaceValues;
     properties::IVec2Property _screenSpacePosition;
     properties::BoolProperty _screenVisibility;
     properties::DoubleProperty _distFromCamToNode;
     properties::DoubleProperty _screenSizeRadius;
     properties::FloatProperty _visibilityDistance;
+    properties::BoolProperty _supportsDirectInteraction;
 
     // This variable is used for the rate-limiting of the screenspace positions (if they
     // are calculated when _computeScreenSpaceValues is true)

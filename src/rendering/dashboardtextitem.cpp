@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,13 +35,13 @@ namespace {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
+        "internal name registered previously, or it can refer to a path that is used"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "This value determines the size of the font that is used to render the distance."
+        "This value determines the size of the font that is used to render the distance"
     };
 
     struct [[codegen::Dictionary(DashboardTextItem)]] Parameters {
@@ -57,9 +57,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardTextItem::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "dashboardtextitem";
-    return doc;
+    return codegen::doc<Parameters>("dashboardtextitem");
 }
 
 DashboardTextItem::DashboardTextItem(const ghoul::Dictionary& dictionary, float fontSize,

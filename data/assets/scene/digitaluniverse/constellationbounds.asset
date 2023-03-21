@@ -1,11 +1,7 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local data = asset.syncedResource({
-  Name = "Constellation Bounds Data",
+  Name = "Constellation Files",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_constellationbounds_data",
+  Identifier = "digitaluniverse_constellations_data",
   Version = 1
 })
 
@@ -19,9 +15,9 @@ local object = {
   Renderable = {
     Type = "RenderableConstellationBounds",
     Enabled = false,
-    File = data .. "/bound_20.dat",
-    ConstellationFile = data .. "/constellations.dat"
-    -- ConstellationSelection = zodiacs
+    File = data .. "bound_20.dat",
+    NamesFile = data .. "constellations.dat",
+    -- Selection = zodiacs
   },
   Transform = {
     Rotation = {
@@ -38,20 +34,28 @@ local object = {
     Name = "Constellation Bounds",
     Path = "/Milky Way/Constellations",
     Description = [[A Spherical mesh dividing the sky into regions that fit the
-    constellations.]],
+      constellations]],
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Constellation Bounds",
-  Version = "1.0",
+  Version = "1.2",
   Description = [[DU asset providing a Spherical mesh dividing the sky into regions that
-      fit the constellations.]],
+    fit the constellations]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"ConstellationBounds"}
+  License = "AMNH Digital Universe"
 }

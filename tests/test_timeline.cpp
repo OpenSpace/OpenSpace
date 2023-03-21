@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <openspace/util/timeline.h>
 #include <openspace/util/time.h>
@@ -32,8 +33,7 @@ TEST_CASE("TimeLine: Add and Count Keyframes", "[timeline]") {
     timeline.addKeyframe(0.0, openspace::Time::now());
     timeline.addKeyframe(1.0, openspace::Time::now());
 
-    REQUIRE(timeline.nKeyframes() == 2);
-
+    CHECK(timeline.nKeyframes() == 2);
 }
 
 TEST_CASE("TimeLine: Query Keyframes", "[timeline]") {
@@ -43,13 +43,13 @@ TEST_CASE("TimeLine: Query Keyframes", "[timeline]") {
 
     REQUIRE(timeline.nKeyframes() == 2);
 
-    REQUIRE(timeline.firstKeyframeAfter(0.0)->data == Approx(1.f));
-    REQUIRE(timeline.firstKeyframeAfter(0.0, false)->data == Approx(1.f));
-    REQUIRE(timeline.firstKeyframeAfter(0.0, true)->data == Approx(0.f));
+    CHECK(timeline.firstKeyframeAfter(0.0)->data == Catch::Approx(1.f));
+    CHECK(timeline.firstKeyframeAfter(0.0, false)->data == Catch::Approx(1.f));
+    CHECK(timeline.firstKeyframeAfter(0.0, true)->data == Catch::Approx(0.f));
 
-    REQUIRE(timeline.lastKeyframeBefore(1.0)->data == Approx(0.f));
-    REQUIRE(timeline.lastKeyframeBefore(1.0, false)->data == Approx(0.f));
-    REQUIRE(timeline.lastKeyframeBefore(1.0, true)->data == Approx(1.f));
+    CHECK(timeline.lastKeyframeBefore(1.0)->data == Catch::Approx(0.f));
+    CHECK(timeline.lastKeyframeBefore(1.0, false)->data == Catch::Approx(0.f));
+    CHECK(timeline.lastKeyframeBefore(1.0, true)->data == Catch::Approx(1.f));
 }
 
 TEST_CASE("TimeLine: Remove Keyframes", "[timeline]") {
@@ -58,22 +58,22 @@ TEST_CASE("TimeLine: Remove Keyframes", "[timeline]") {
     timeline.addKeyframe(1.0, 1.f);
 
     timeline.removeKeyframesBefore(0.0);
-    REQUIRE(timeline.nKeyframes() == 2);
+    CHECK(timeline.nKeyframes() == 2);
 
     timeline.removeKeyframesBefore(0.0, false);
-    REQUIRE(timeline.nKeyframes() == 2);
+    CHECK(timeline.nKeyframes() == 2);
 
     timeline.removeKeyframesBefore(0.0, true);
-    REQUIRE(timeline.nKeyframes() == 1);
+    CHECK(timeline.nKeyframes() == 1);
 
     timeline.removeKeyframesAfter(1.0);
-    REQUIRE(timeline.nKeyframes() == 1);
+    CHECK(timeline.nKeyframes() == 1);
 
     timeline.removeKeyframesAfter(1.0, false);
-    REQUIRE(timeline.nKeyframes() == 1);
+    CHECK(timeline.nKeyframes() == 1);
 
     timeline.removeKeyframesAfter(1.0, true);
-    REQUIRE(timeline.nKeyframes() == 0);
+    CHECK(timeline.nKeyframes() == 0);
 }
 
 TEST_CASE("TimeLine: Remove Keyframes In Range", "[timeline]") {
@@ -84,14 +84,14 @@ TEST_CASE("TimeLine: Remove Keyframes In Range", "[timeline]") {
     timeline.addKeyframe(3.0, 3.f);
 
     timeline.removeKeyframesBetween(1.0, 2.0);
-    REQUIRE(timeline.nKeyframes() == 4);
+    CHECK(timeline.nKeyframes() == 4);
 
     timeline.removeKeyframesBetween(1.0, 2.0, false, true);
-    REQUIRE(timeline.nKeyframes() == 3);
+    CHECK(timeline.nKeyframes() == 3);
 
     timeline.removeKeyframesBetween(1.0, 2.0, true, true);
-    REQUIRE(timeline.nKeyframes() == 2);
+    CHECK(timeline.nKeyframes() == 2);
 
     timeline.removeKeyframesBetween(-1.0, 4.0);
-    REQUIRE(timeline.nKeyframes() == 0);
+    CHECK(timeline.nKeyframes() == 0);
 }

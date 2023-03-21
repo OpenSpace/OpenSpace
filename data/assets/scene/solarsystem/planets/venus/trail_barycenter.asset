@@ -1,0 +1,47 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
+
+local VenusBarycenterTrail = {
+  Identifier = "VenusBarycenterTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VENUS BARYCENTER",
+      Observer = "SSB"
+    },
+    Color = { 1.0, 0.5, 0.2 },
+    Period = 224.695,
+    Resolution = 1000,
+    Enabled = false
+  },
+  Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
+  GUI = {
+    Name = "Venus Barycenter Trail",
+    Path = "/Solar System/Planets/Venus",
+    Description = "Berycenter trail for Venus",
+    Hidden = false
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(VenusBarycenterTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(VenusBarycenterTrail)
+end)
+
+asset.export(VenusBarycenterTrail)
+
+
+asset.meta = {
+  Name = "Venus Trail",
+  Version = "1.1",
+  Description = [[Barycenter Trail of Venus as observed by the Sun. Data from NASA Spice
+    (see base spice asset)]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

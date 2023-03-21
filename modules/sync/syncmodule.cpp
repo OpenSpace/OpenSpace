@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,13 @@
 
 #include <modules/sync/syncs/httpsynchronization.h>
 #include <modules/sync/syncs/urlsynchronization.h>
-#include <modules/sync/tasks/syncassettask.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/resourcesynchronization.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -39,11 +41,20 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/templatefactory.h>
+#include <optional>
+
+#include "syncmodule_lua.inl"
 
 namespace {
-    constexpr const char* KeyHttpSynchronizationRepositories =
-        "HttpSynchronizationRepositories";
-    constexpr const char* KeySynchronizationRoot = "SynchronizationRoot";
+    struct [[codegen::Dictionary(SyncModule)]] Parameters {
+        // The list of all repository URLs that are used to fetch data from for
+        // HTTPSynchronizations
+        std::optional<std::vector<std::string>> httpSynchronizationRepositories;
+
+        // The folder where all of the synchronizations are stored
+        std::string synchronizationRoot;
+    };
+#include "syncmodule_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -51,30 +62,16 @@ namespace openspace {
 SyncModule::SyncModule() : OpenSpaceModule(Name) {}
 
 void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
-    if (configuration.hasKey(KeyHttpSynchronizationRepositories)) {
-        ghoul::Dictionary dictionary = configuration.value<ghoul::Dictionary>(
-            KeyHttpSynchronizationRepositories
-        );
+    const Parameters p = codegen::bake<Parameters>(configuration);
 
-        for (std::string_view key : dictionary.keys()) {
-            _synchronizationRepositories.push_back(dictionary.value<std::string>(key));
-        }
+    if (p.httpSynchronizationRepositories.has_value()) {
+        _synchronizationRepositories = *p.httpSynchronizationRepositories;
     }
 
-    if (configuration.hasKey(KeySynchronizationRoot)) {
-        _synchronizationRoot = configuration.value<std::string>(KeySynchronizationRoot);
-    }
-    else {
-        LWARNINGC(
-            "SyncModule",
-            "No synchronization root specified. Disabling resource synchronization"
-        );
-        //_synchronizationEnabled = false;
-        // TODO: Make it possible to disable synchronization manually.
-        // Group root and enabled into a sync config object that can be passed to syncs.
-    }
+    _synchronizationRoot = absPath(p.synchronizationRoot);
 
-    auto fSynchronization = FactoryManager::ref().factory<ResourceSynchronization>();
+    ghoul::TemplateFactory<ResourceSynchronization>* fSynchronization =
+        FactoryManager::ref().factory<ResourceSynchronization>();
     ghoul_assert(fSynchronization, "ResourceSynchronization factory was not created");
 
     fSynchronization->registerClass(
@@ -103,40 +100,33 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
         [this](bool, const ghoul::Dictionary& dictionary, ghoul::MemoryPoolBase* pool) {
             if (pool) {
                 void* ptr = pool->allocate(sizeof(UrlSynchronization));
-                return new (ptr) UrlSynchronization(
-                    dictionary,
-                    _synchronizationRoot
-                );
+                return new (ptr) UrlSynchronization(dictionary, _synchronizationRoot);
             }
             else {
-                return new UrlSynchronization(
-                    dictionary,
-                    _synchronizationRoot
-                );
+                return new UrlSynchronization(dictionary, _synchronizationRoot);
             }
         }
     );
-
-    auto fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTask, "No task factory existed");
-    fTask->registerClass<SyncAssetTask>("SyncAssetTask");
 }
 
-std::string SyncModule::synchronizationRoot() const {
+std::filesystem::path SyncModule::synchronizationRoot() const {
     return _synchronizationRoot;
-}
-
-void SyncModule::addHttpSynchronizationRepository(std::string repository) {
-    _synchronizationRepositories.push_back(std::move(repository));
-}
-
-std::vector<std::string> SyncModule::httpSynchronizationRepositories() const {
-    return _synchronizationRepositories;
 }
 
 std::vector<documentation::Documentation> SyncModule::documentations() const {
     return {
-        HttpSynchronization::Documentation()
+        HttpSynchronization::Documentation(),
+        UrlSynchronization::Documentation()
+    };
+}
+
+scripting::LuaLibrary SyncModule::luaLibrary() const {
+    return {
+        "sync",
+        {
+            codegen::lua::SyncResource,
+            codegen::lua::UnsyncResource
+        }
     };
 }
 

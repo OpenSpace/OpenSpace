@@ -1,20 +1,33 @@
-local asset_helper = asset.require('util/asset_helper')
-local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
-local moon_transforms = asset.require('scene/solarsystem/planets/earth/moon/moon')
+asset.require("spice/base")
+asset.require("../actions")
+asset.require("./actions")
 
-local descentKeyframes = asset.require('./lem_descent.asset')
-local descentRotationKeyframes = asset.require('./lem_descent_rotation.asset')
+local sun = asset.require("scene/solarsystem/sun/sun")
+local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
-local lem_model = asset.require('scene/solarsystem/missions/apollo/lem_model')
-local kernels = asset.require('./kernels').kernels
+local descentKeyframes = asset.require("./lem_descent.asset")
+local descentRotationKeyframes = asset.require("./lem_descent_rotation.asset")
 
-local models = asset.require('./models').models
+local kernels = asset.require("./kernels").kernels
 
-asset.require('spice/base')
+local models = asset.syncedResource({
+  Name = "Apollo Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_11_models",
+  Version = 1
+})
+
+local lem_model = asset.syncedResource({
+  Name = "Apollo Lem Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_lem_model",
+  Version = 4
+})
+
 
 --landing - 1969-07-20T20:17:40
-local apolloSpiceId = "-911"
-local apolloLemSpiceId = "-911500"
+local apolloSpiceId = -911
+local apolloLemSpiceId = -911500
 
 local Apollo11Position = {
   Identifier = "Apollo11Position",
@@ -56,8 +69,15 @@ local Apollo11Model = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/Apollo_CSM_shrunk_rotated_xy_double_size.obj",
-    LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
+    GeometryFile = models .. "Apollo_CSM_shrunk_rotated_xy_double_size.obj",
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Apollo 11 CSM",
@@ -97,14 +117,14 @@ local lemTranslation = {
     -- 20:14:30 is an arbitrary cutoff, but last 4 minutes data in descentKeyframes
     -- begins at 20.14.40. Due to linear interpolation, we will get
     -- a 10s linear transition to the location where the descentKeyframes start.
-    ['1969 JUL 20 20:14:30'] = {
+    ["1969 JUL 20 20:14:30"] = {
       Type = "SpiceTranslation",
       Target = apolloLemSpiceId,
       Observer = "MOON",
       Frame = "IAU_MOON",
       Kernels = kernels
     },
-    ['1969 JUL 20 20:14:40'] = {
+    ["1969 JUL 20 20:14:40"] = {
       Type = "TimelineTranslation",
       Keyframes = descentKeyframes.keyframes
     }
@@ -171,10 +191,17 @@ local Apollo11LemDescentModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = lem_model.modelFolder .. "/lmremoved.obj",
+    GeometryFile = lem_model .. "lmremoved.obj",
     SpecularIntensity = 0.0,
     RotationVector = { 273.750,28.0,309.85 },
-    LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Apollo 11 Descent Lem",
@@ -197,10 +224,17 @@ local Apollo11LemLandedModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = lem_model.modelFolder .. "/LM-2_ver2clean.obj",
+    GeometryFile = lem_model .. "LM-2_ver2clean.obj",
     SpecularIntensity = 0.0,
     RotationVector = { 273.750,28.0,309.85 },
-    LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Apollo 11 Landed Lem",
@@ -208,7 +242,7 @@ local Apollo11LemLandedModel = {
   }
 }
 
-local exportList = {
+local nodes = {
   Apollo11Position,
   Apollo11LemPosition,
   Apollo11Model,
@@ -218,4 +252,19 @@ local exportList = {
   Apollo11LemTrail,
 }
 
-asset_helper.registerSceneGraphNodesAndExport(asset, exportList)
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node)
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end

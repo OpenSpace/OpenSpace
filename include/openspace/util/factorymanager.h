@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,10 +45,9 @@ public:
     struct FactoryNotFoundError : public ghoul::RuntimeError {
         /**
          * Constructor for FactoryNotFoundError, the \p type is a human-readable (-ish)
-         * type descriptor for the type <code>T</code> for the TemplateFactory that could
+         * type descriptor for the type `T` for the TemplateFactory that could
          * not be found.
-         * \param t The type <code>T</code> for the <code>TemplateFactory<T></code>
-         * that could not be found
+         * \param t The type `T` for the `TemplateFactory<T>` that could not be found
          * \pre \p t must not be empty
          */
         explicit FactoryNotFoundError(std::string t);
@@ -73,8 +72,8 @@ public:
     static void deinitialize();
 
     /**
-     * Returns <code>true</code> if the static FactoryManager has already been
-     * initiailzed, <code>false</code> otherwise.
+     * Returns `true` if the static FactoryManager has already been
+     * initiailzed, `false` otherwise.
      * \return The initialization status of the static FactoryManager
      */
     static bool isInitialized();
@@ -88,19 +87,21 @@ public:
 
     /**
      * Adds the passed \p factory to the FactoryManager. Factories may only be added once.
-     * \param factory The ghoul::TemplateFactory to add to this FactoryManager
      * \param name A user-readable name for the registered factory.
-     * \pre \p factory must not be nullptr
+     *
+     * \tparam Factory The type for which a factory should be created and added
+     *
+     * \pre \p name must not be empty
      */
-    void addFactory(std::unique_ptr<ghoul::TemplateFactoryBase> factory,
-        std::string name = "");
+    template <typename T>
+    void addFactory(std::string name);
 
     /**
      * This method provides access to all registered ghoul::TemplateFactory%s through
      * their type. The method will always return a proper ghoul::TemplateFactory or throw
      * an error if the appropriate ghoul::TemplateFactory was not registered.
      * \tparam T The type that the requested ghoul::TemplateFactory should create
-     * \return The ghoul::TemplateFactory that will create the pass type <code>T</code>
+     * \return The ghoul::TemplateFactory that will create the pass type `T`
      * \throw FactoryNotFoundError If the requested ghoul::TemplateFactory could not be
      * found
      */
@@ -108,8 +109,8 @@ public:
     ghoul::TemplateFactory<T>* factory() const;
 
     std::string generateJson() const override;
-private:
 
+private:
     /// Singleton member for the Factory Manager
     static FactoryManager* _manager;
 

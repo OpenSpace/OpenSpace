@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "HII Regions Textures",
   Type = "HttpSynchronization",
@@ -21,19 +17,21 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "h2.label",
+      Color = { 0.5, 0.5, 0.5 },
+      Size = 16.24,
+      MinMaxSize = { 4, 20 },
+      Unit = "pc"
+    },
     Color = { 0.0, 0.5, 1.0 },
     Opacity = 0.70,
-    File = speck .. "/h2.speck",
-    Texture = textures .."/point4.png",
+    File = speck .. "h2.speck",
+    Texture = textures .. "point4.png",
     PolygonSides = 6,
-    LabelFile = speck .. "/h2.label",
-    TextColor = { 0.5, 0.5, 0.5 },
-    ScaleFactor = 420,
-    TextSize = 16.24,
-    TextMinSize = 4.0,
-    TextMaxSize = 20.0,
     Unit = "pc",
-    BillboardMaxSize = 300.0,
+    ScaleFactor = 420,
+    BillboardMinMaxSize = { 0.0, 300.0 },
     EnablePixelSizeControl = false
   },
   GUI = {
@@ -49,19 +47,27 @@ local object = {
       Because of this, they are great tracers of the spiral arms of the Galaxy, and
       were instrumental in our understanding of the Galaxy's overall structure
       (Description from URL) <br><br> Data Reference: The WISE catalog of Galactic
-      HII Regions (Anderson+, 2014)]],
+      HII Regions (Anderson+, 2014)]]
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "HII Regions",
-  Version = "1.0",
-  Description = [[Digital Universe asset for HII Regions]],
+  Version = "1.1",
+  Description = "Digital Universe asset for HII Regions",
   Author = "Carter Emmart, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"HIIRegions"}
+  License = "AMNH Digital Universe"
 }

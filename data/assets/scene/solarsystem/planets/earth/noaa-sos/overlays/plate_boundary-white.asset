@@ -1,0 +1,45 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Plate Boundaries (white)"
+local Identifier = "noaa-sos-overlays-plate_boundary-white"
+local Description = [[Overlays are datasets with transparent backgrounds that contain
+foreground data used to augment other SOS datasets.This particular dataset overlays
+tectonic plate boundaries in white onto any dataset that you are viewing]]
+local URL = "https://sos.noaa.gov/catalog/datasets/plate-boundaries-white/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer)
+end)
+
+asset.export(layer)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

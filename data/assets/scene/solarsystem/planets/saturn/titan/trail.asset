@@ -1,6 +1,5 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").sat375
 
 
 
@@ -22,20 +21,28 @@ local TitanTrail = {
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
   GUI = {
     Name = "Titan Trail",
-    Path = "/Solar System/Planets/Saturn/Moons",
-    Description = [[ Trail of Saturn's moon Titan as observed by Saturn.]],
+    Path = "/Solar System/Planets/Saturn/Moons/Titan",
+    Description = "Trail of Saturn's moon Titan as observed by Saturn",
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { TitanTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(TitanTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TitanTrail)
+end)
+
+asset.export(TitanTrail)
+
 
 
 asset.meta = {
   Name = "Titan Trail",
-  Version = "1.0",
-  Description = [[ Main trail for Titan. Data from NASA Spice (see base spice asset)]],
+  Version = "1.2",
+  Description = "Main trail for Titan. Data from NASA Spice (see base spice asset)",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"TitanTrail"}
+  License = "MIT license"
 }

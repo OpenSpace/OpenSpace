@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,17 @@
 
 namespace openspace {
 
+template <typename T>
+void FactoryManager::addFactory(std::string name) {
+    ghoul_assert(!name.empty(), "Name must not be empty");
+    auto f = std::make_unique<ghoul::TemplateFactory<T>>();
+    _factories.push_back({ std::move(f), std::move(name) });
+}
+
+
 template <class T>
 ghoul::TemplateFactory<T>* FactoryManager::factory() const {
-    for (auto& f : _factories) {
+    for (const FactoryInfo& f : _factories) {
         if (f.factory->baseClassType() == typeid(T))
             return dynamic_cast<ghoul::TemplateFactory<T>*>(f.factory.get());
     }

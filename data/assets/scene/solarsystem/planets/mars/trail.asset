@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
 
@@ -11,8 +10,8 @@ local MarsTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MARS BARYCENTER",
-      Observer = "SUN"
+      Target = "MARS",
+      Observer = "SSB"
     },
     Color = { 0.814, 0.305, 0.220 },
     Period = 686.973,
@@ -22,20 +21,28 @@ local MarsTrail = {
   GUI = {
     Name = "Mars Trail",
     Path = "/Solar System/Planets/Mars",
-    Description = [[ Trail of Mars as observed by the Sun. Data from NASA Spice (see
+    Description = [[Trail of Mars as observed by the Sun. Data from NASA Spice (see
       base spice asset)]],
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { MarsTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MarsTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MarsTrail)
+end)
+
+asset.export(MarsTrail)
+
 
 
 asset.meta = {
   Name = "Mars Trail",
-  Version = "1.0",
-  Description = [[ Main Mars trail from SPICE.]],
+  Version = "1.1",
+  Description = "Main Mars trail from SPICE",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"MarsTrail"}
+  License = "MIT license"
 }

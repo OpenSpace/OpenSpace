@@ -1,21 +1,10 @@
-local colorLayersPath = "./layers/colorlayers"
-
-colorLayer = asset.require(colorLayersPath .. "/titan_texture")
-local colorLayer = asset.require(colorLayersPath .. "/cassini_iss_global_mosaic_4km_liu")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Titan.Renderable.Layers.ColorLayers." ..
-    colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/colorlayers/cassini_iss_global_mosaic_4km_local", true)
 
 
 asset.meta = {
   Name = "Default Titan Layers",
   Version = "1.0",
-  Description = [[ Default Titan layers are: Titan Texture and Cassini ISS Global
-    Mosaic]],
+  Description = "Default Titan layers are: Cassini ISS Global Mosaic",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

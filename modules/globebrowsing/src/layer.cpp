@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,26 +36,26 @@
 namespace openspace::globebrowsing {
 
 namespace {
-    constexpr const char* _loggerCat = "Layer";
+    constexpr std::string_view _loggerCat = "Layer";
 
-    constexpr const char* KeyIdentifier = "Identifier";
-    constexpr const char* KeyName = "Name";
-    constexpr const char* KeyDesc = "Description";
-    constexpr const char* KeyLayerGroupID = "LayerGroupID";
-    constexpr const char* KeyAdjustment = "Adjustment";
+    constexpr std::string_view KeyIdentifier = "Identifier";
+    constexpr std::string_view KeyName = "Name";
+    constexpr std::string_view KeyDesc = "Description";
+    constexpr std::string_view KeyLayerGroupID = "LayerGroupID";
+    constexpr std::string_view KeyAdjustment = "Adjustment";
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "The type of this Layer. This value is a read-only property and thus cannot be "
-        "changed."
+        "changed"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blend Mode",
         "This value specifies the blend mode that is applied to this layer. The blend "
-        "mode determines how this layer is added to the underlying layers beneath."
+        "mode determines how this layer is added to the underlying layers beneath"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -63,28 +63,28 @@ namespace {
         "Enabled",
         "If this value is enabled, the layer will be used for the final composition of "
         "the planet. If this value is disabled, the layer will be ignored in the "
-        "composition."
+        "composition"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
         "Reset",
         "Reset",
         "If this value is triggered, this layer will be reset. This will delete the "
-        "local cache for this layer and will trigger a fresh load of all tiles."
+        "local cache for this layer and will trigger a fresh load of all tiles"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RemoveInfo = {
         "Remove",
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
-        "layer before the next frame."
+        "layer before the next frame"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "If the 'Type' of this layer is a solid color, this value determines what this "
-        "solid color is."
+        "solid color is"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
@@ -96,8 +96,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(Layer), codegen::noexhaustive()]] Parameters {
-        // The unique identifier for this layer. May not contain '.' or spaces
-        std::string identifier;
+        // The unique identifier for this layer.
+        std::string identifier [[codegen::identifier()]];
 
         // A human-readable name for the user interface. If this is omitted, the
         // identifier is used instead
@@ -113,8 +113,9 @@ namespace {
         // Specifies the type of layer that is to be added. If this value is not
         // specified, the layer is a DefaultTileLayer
         std::optional<std::string> type [[codegen::inlist("DefaultTileLayer",
-            "SingleImageTileLayer", "SizeReferenceTileLayer", "TemporalTileLayer",
-            "TileIndexTileLayer", "ByIndexTileLayer", "ByLevelTileLayer", "SolidColor")]];
+            "SingleImageTileLayer", "ImageSequenceTileLayer", "SizeReferenceTileLayer",
+            "TemporalTileLayer", "TileIndexTileLayer", "ByIndexTileLayer",
+            "ByLevelTileLayer", "SolidColor", "SpoutImageTileLayer")]];
 
         // Determine whether the layer is enabled or not. If this value is not specified,
         // the layer is disabled
@@ -179,13 +180,10 @@ namespace {
 } // namespace
 
 documentation::Documentation Layer::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "globebrowsing_layer";
-    return doc;
+    return codegen::doc<Parameters>("globebrowsing_layer");
 }
 
-Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
-             LayerGroup& parent)
+Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGroup& parent)
     : properties::PropertyOwner({
         layerDict.value<std::string>(KeyIdentifier),
         layerDict.hasKey(KeyName) ? layerDict.value<std::string>(KeyName) : "",
@@ -204,15 +202,15 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 {
     const Parameters p = codegen::bake<Parameters>(layerDict);
 
-    layergroupid::TypeID typeID;
+    layers::Layer::ID typeID;
     if (p.type.has_value()) {
-        typeID = ghoul::from_string<layergroupid::TypeID>(*p.type);
-        if (typeID == layergroupid::TypeID::Unknown) {
-            throw ghoul::RuntimeError("Unknown layer type!");
+        typeID = ghoul::from_string<layers::Layer::ID>(*p.type);
+        if (typeID == layers::Layer::ID::Unknown) {
+            throw ghoul::RuntimeError("Unknown layer type");
         }
     }
     else {
-        typeID = layergroupid::TypeID::DefaultTileLayer;
+        typeID = layers::Layer::ID::DefaultTileLayer;
     }
 
     initializeBasedOnType(typeID, layerDict);
@@ -244,38 +242,38 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     }
 
     // Add options to option properties
-    for (int i = 0; i < layergroupid::NUM_LAYER_TYPES; ++i) {
-        _typeOption.addOption(i, layergroupid::LAYER_TYPE_NAMES[i]);
+    for (const layers::Layer& li : layers::Layers) {
+        _typeOption.addOption(static_cast<int>(li.id), std::string(li.identifier));
     }
     _typeOption.setValue(static_cast<int>(typeID));
-    _type = static_cast<layergroupid::TypeID>(_typeOption.value());
+    _type = static_cast<layers::Layer::ID>(_typeOption.value());
 
-    for (int i = 0; i < layergroupid::NUM_BLEND_MODES; ++i) {
-        _blendModeOption.addOption(i, layergroupid::BLEND_MODE_NAMES[i]);
+    for (const layers::Blend& bi : layers::Blends) {
+        _blendModeOption.addOption(static_cast<int>(bi.id), std::string(bi.identifier));
     }
 
     // Initialize blend mode
     if (p.blendMode.has_value()) {
         switch (*p.blendMode) {
             case Parameters::BlendMode::Normal:
-                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Normal);
+                _blendModeOption = static_cast<int>(layers::Blend::ID::Normal);
                 break;
             case Parameters::BlendMode::Multiply:
-                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Multiply);
+                _blendModeOption = static_cast<int>(layers::Blend::ID::Multiply);
                 break;
             case Parameters::BlendMode::Add:
-                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Add);
+                _blendModeOption = static_cast<int>(layers::Blend::ID::Add);
                 break;
             case Parameters::BlendMode::Subtract:
-                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Subtract);
+                _blendModeOption = static_cast<int>(layers::Blend::ID::Subtract);
                 break;
             case Parameters::BlendMode::Color:
-                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Color);
+                _blendModeOption = static_cast<int>(layers::Blend::ID::Color);
                 break;
         }
     }
     else {
-        _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Normal);
+        _blendModeOption = static_cast<int>(layers::Blend::ID::Normal);
     }
 
     // On change callbacks definitions
@@ -287,39 +285,49 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 
     _reset.onChange([&]() {
         if (_tileProvider) {
-            tileprovider::reset(*_tileProvider);
+            _tileProvider->reset();
         }
     });
 
     _remove.onChange([&]() {
         if (_tileProvider) {
-            tileprovider::reset(*_tileProvider);
+            _tileProvider->reset();
             _parent.deleteLayer(identifier());
+        }
+    });
+
+    _renderSettings.onChange([&]() {
+        // Only if we are a height layer will anyone care about these settings changing as
+        // that will change the overall bounding box of the layer and thus require culling
+        if (_parent.isHeightLayer() && _onChangeCallback) {
+            _onChangeCallback(this);
         }
     });
 
     _typeOption.onChange([&]() {
         switch (type()) {
             // Intentional fall through. Same for all tile layers
-            case layergroupid::TypeID::DefaultTileLayer:
-            case layergroupid::TypeID::SingleImageTileLayer:
-            case layergroupid::TypeID::SizeReferenceTileLayer:
-            case layergroupid::TypeID::TemporalTileLayer:
-            case layergroupid::TypeID::TileIndexTileLayer:
-            case layergroupid::TypeID::ByIndexTileLayer:
-            case layergroupid::TypeID::ByLevelTileLayer:
+            case layers::Layer::ID::DefaultTileLayer:
+            case layers::Layer::ID::SingleImageTileLayer:
+            case layers::Layer::ID::SpoutImageTileLayer:
+            case layers::Layer::ID::ImageSequenceTileLayer:
+            case layers::Layer::ID::SizeReferenceTileLayer:
+            case layers::Layer::ID::TemporalTileLayer:
+            case layers::Layer::ID::TileIndexTileLayer:
+            case layers::Layer::ID::ByIndexTileLayer:
+            case layers::Layer::ID::ByLevelTileLayer:
                 if (_tileProvider) {
                     removePropertySubOwner(*_tileProvider);
                 }
                 break;
-            case layergroupid::TypeID::SolidColor:
+            case layers::Layer::ID::SolidColor:
                 removeProperty(_solidColor);
                 break;
             default:
-                break;
+                throw ghoul::MissingCaseException();
         }
 
-        _type = static_cast<layergroupid::TypeID>(_typeOption.value());
+        _type = static_cast<layers::Layer::ID>(_typeOption.value());
         initializeBasedOnType(type(), {});
         addVisibleProperties();
         if (_onChangeCallback) {
@@ -357,24 +365,24 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 }
 
 void Layer::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_tileProvider) {
-        tileprovider::initialize(*_tileProvider);
+        _tileProvider->initialize();
     }
 }
 
 void Layer::deinitialize() {
     if (_tileProvider) {
-        tileprovider::deinitialize(*_tileProvider);
+        _tileProvider->deinitialize();
     }
 }
 
 ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) const {
-    ZoneScoped
+    ZoneScoped;
 
     if (_tileProvider) {
-        return tileprovider::chunkTilePile(*_tileProvider, tileIndex, pileSize);
+        return _tileProvider->chunkTilePile(tileIndex, pileSize);
     }
     else {
         ChunkTilePile chunkTilePile;
@@ -390,21 +398,21 @@ ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) con
 
 Tile::Status Layer::tileStatus(const TileIndex& index) const {
     return _tileProvider ?
-        tileprovider::tileStatus(*_tileProvider, index) :
+        _tileProvider->tileStatus(index) :
         Tile::Status::Unavailable;
 }
 
-layergroupid::TypeID Layer::type() const {
+layers::Layer::ID Layer::type() const {
     return _type;
 }
 
-layergroupid::BlendModeID Layer::blendMode() const {
-    return static_cast<layergroupid::BlendModeID>(_blendModeOption.value());
+layers::Blend::ID Layer::blendMode() const {
+    return static_cast<layers::Blend::ID>(_blendModeOption.value());
 }
 
 TileDepthTransform Layer::depthTransform() const {
     return _tileProvider ?
-        tileprovider::depthTransform(*_tileProvider) :
+        _tileProvider->depthTransform() :
         TileDepthTransform{ 1.f, 0.f };
 }
 
@@ -416,7 +424,7 @@ bool Layer::enabled() const {
     return _enabled;
 }
 
-tileprovider::TileProvider* Layer::tileProvider() const {
+TileProvider* Layer::tileProvider() const {
     return _tileProvider.get();
 }
 
@@ -436,14 +444,11 @@ void Layer::onChange(std::function<void(Layer*)> callback) {
     _onChangeCallback = std::move(callback);
 }
 
-int Layer::update() {
-    ZoneScoped
+void Layer::update() {
+    ZoneScoped;
 
     if (_tileProvider) {
-        return tileprovider::update(*_tileProvider);
-    }
-    else {
-        return 0;
+        _tileProvider->update();
     }
 }
 
@@ -468,32 +473,35 @@ glm::vec2 Layer::tileUvToTextureSamplePosition(const TileUvTransform& uvTransfor
     return sourceToCurrentSize * (uv - glm::vec2(_padTilePixelStartOffset) / sourceSize);
 }
 
-void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary initDict) {
+void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDict) {
     switch (id) {
         // Intentional fall through. Same for all tile layers
-        case layergroupid::TypeID::DefaultTileLayer:
-        case layergroupid::TypeID::SingleImageTileLayer:
-        case layergroupid::TypeID::SizeReferenceTileLayer:
-        case layergroupid::TypeID::TemporalTileLayer:
-        case layergroupid::TypeID::TileIndexTileLayer:
-        case layergroupid::TypeID::ByIndexTileLayer:
-        case layergroupid::TypeID::ByLevelTileLayer: {
+        case layers::Layer::ID::DefaultTileLayer:
+        case layers::Layer::ID::SingleImageTileLayer:
+        case layers::Layer::ID::SpoutImageTileLayer:
+        case layers::Layer::ID::ImageSequenceTileLayer:
+        case layers::Layer::ID::SizeReferenceTileLayer:
+        case layers::Layer::ID::TemporalTileLayer:
+        case layers::Layer::ID::TileIndexTileLayer:
+        case layers::Layer::ID::ByIndexTileLayer:
+        case layers::Layer::ID::ByLevelTileLayer:
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
-            initDict.setValue(KeyLayerGroupID, static_cast<int>(_layerGroupId));
+            initDict.setValue(
+                std::string(KeyLayerGroupID),
+                static_cast<int>(_layerGroupId)
+            );
             if (initDict.hasKey(KeyName) && initDict.hasValue<std::string>(KeyName)) {
                 std::string name = initDict.value<std::string>(KeyName);
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
-            _tileProvider = tileprovider::createFromDictionary(id, std::move(initDict));
+            _tileProvider = TileProvider::createFromDictionary(id, std::move(initDict));
             break;
-        }
-        case layergroupid::TypeID::SolidColor: {
+        case layers::Layer::ID::SolidColor:
             if (initDict.hasValue<glm::dvec3>(ColorInfo.identifier)) {
                 _solidColor = initDict.value<glm::dvec3>(ColorInfo.identifier);
             }
             break;
-        }
         default:
             throw ghoul::MissingCaseException();
     }
@@ -502,24 +510,24 @@ void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary ini
 void Layer::addVisibleProperties() {
     switch (type()) {
         // Intentional fall through. Same for all tile layers
-        case layergroupid::TypeID::DefaultTileLayer:
-        case layergroupid::TypeID::SingleImageTileLayer:
-        case layergroupid::TypeID::SizeReferenceTileLayer:
-        case layergroupid::TypeID::TemporalTileLayer:
-        case layergroupid::TypeID::TileIndexTileLayer:
-        case layergroupid::TypeID::ByIndexTileLayer:
-        case layergroupid::TypeID::ByLevelTileLayer: {
+        case layers::Layer::ID::DefaultTileLayer:
+        case layers::Layer::ID::SingleImageTileLayer:
+        case layers::Layer::ID::SpoutImageTileLayer:
+        case layers::Layer::ID::ImageSequenceTileLayer:
+        case layers::Layer::ID::SizeReferenceTileLayer:
+        case layers::Layer::ID::TemporalTileLayer:
+        case layers::Layer::ID::TileIndexTileLayer:
+        case layers::Layer::ID::ByIndexTileLayer:
+        case layers::Layer::ID::ByLevelTileLayer:
             if (_tileProvider) {
                 addPropertySubOwner(*_tileProvider);
             }
             break;
-        }
-        case layergroupid::TypeID::SolidColor: {
+        case layers::Layer::ID::SolidColor:
             addProperty(_solidColor);
             break;
-        }
         default:
-            break;
+            throw ghoul::MissingCaseException();
     }
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,9 +34,9 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ConvertRecFileVersionTask";
+    constexpr std::string_view _loggerCat = "ConvertRecFileVersionTask";
 
-    constexpr const char* KeyInFilePath = "InputFilePath";
+    constexpr std::string_view KeyInFilePath = "InputFilePath";
 } // namespace
 
 namespace openspace::interaction {
@@ -51,11 +51,6 @@ ConvertRecFileVersionTask::ConvertRecFileVersionTask(const ghoul::Dictionary& di
 
     _inFilename = dictionary.value<std::string>(KeyInFilePath);
     _inFilePath = absPath(_inFilename);
-
-    std::string::size_type idx = _inFilename.find_last_of('/');
-    if( idx != std::string::npos ) {
-        _inFilename = _inFilename.substr(idx + 1);
-    }
 
     ghoul_assert(std::filesystem::is_regular_file(_inFilePath), "The file must exist");
     if (!std::filesystem::is_regular_file(_inFilePath)) {
@@ -95,13 +90,12 @@ void ConvertRecFileVersionTask::convert() {
     );
     if (!hasBinaryFileExtension && !hasAsciiFileExtension) {
         LERROR(fmt::format(
-            "Input filename does not have expected {} or {} extension.",
-            SessionRecording::FileExtensionBinary,
-            SessionRecording::FileExtensionAscii
+            "Input filename does not have expected {} or {} extension",
+            SessionRecording::FileExtensionBinary, SessionRecording::FileExtensionAscii
         ));
         return;
     }
-    sessRec->convertFile(_inFilename);
+    sessRec->convertFileRelativePath(_inFilename);
 }
 
 documentation::Documentation ConvertRecFileVersionTask::documentation() {
@@ -111,10 +105,10 @@ documentation::Documentation ConvertRecFileVersionTask::documentation() {
         "convert_file_version_task",
         {
             {
-                KeyInFilePath,
+                "InputFilePath",
                 new StringAnnotationVerifier("A valid filename to convert"),
                 Optional::No,
-                "The filename to update to the current file format.",
+                "The filename to update to the current file format",
             },
         },
     };

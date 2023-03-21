@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <filesystem>
+
 namespace openspace {
 
 class SyncModule : public OpenSpaceModule {
@@ -35,19 +37,18 @@ public:
 
     SyncModule();
 
-    std::string synchronizationRoot() const;
-
-    void addHttpSynchronizationRepository(std::string repository);
-    std::vector<std::string> httpSynchronizationRepositories() const;
+    std::filesystem::path synchronizationRoot() const;
 
     std::vector<documentation::Documentation> documentations() const override;
+
+    scripting::LuaLibrary luaLibrary() const override;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 
 private:
     std::vector<std::string> _synchronizationRepositories;
-    std::string _synchronizationRoot;
+    std::filesystem::path _synchronizationRoot;
 };
 
 } // namespace openspace

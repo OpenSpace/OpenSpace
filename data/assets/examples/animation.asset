@@ -1,0 +1,203 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+
+local model = asset.syncedResource({
+  Name = "Animated Box",
+  Type = "HttpSynchronization",
+  Identifier = "animated_box",
+  Version = 1
+})
+
+local StartTime = "2021 06 01 00:00:00";
+
+local animationLoop = {
+  Identifier = "animationLoop",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0, -11E7, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "BoxAnimated.glb",
+    EnableAnimation = true,
+    AnimationMode = "LoopFromStart",
+    AnimationStartTime = StartTime,
+    ModelScale = 3E7,
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true,
+    DisableFaceCulling = true
+  },
+  GUI = {
+    Name = "Animated Model example (LoopFromStart)",
+    Path = "/Example",
+    Description = "Simple animated box model with the animation mode 'LoopFromStart'",
+  }
+}
+
+local animationLoopInf = {
+  Identifier = "animationLoopInf",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0, 11E7, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "BoxAnimated.glb",
+    EnableAnimation = true,
+    AnimationMode = "LoopInfinitely",
+    AnimationStartTime = StartTime,
+    ModelScale = 3E7,
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true,
+    DisableFaceCulling = true
+  },
+  GUI = {
+    Name = "Animated Model example (LoopInfinitely)",
+    Path = "/Example",
+    Description = "Simple animated box model with the animation mode 'LoopInfinitely'",
+  }
+}
+
+local animationOnce = {
+  Identifier = "animationOnce",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 11E7, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "BoxAnimated.glb",
+    EnableAnimation = true,
+    AnimationMode = "Once",
+    AnimationStartTime = StartTime,
+    ModelScale = 3E7,
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true,
+    DisableFaceCulling = true
+  },
+  GUI = {
+    Name = "Animated Model example (Once)",
+    Path = "/Example",
+    Description = "Simple animated box model with the animation mode 'Once'",
+  }
+}
+
+local animationBounceInf = {
+  Identifier = "animationBounceInf",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0, 0.0, 11E7 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "BoxAnimated.glb",
+    EnableAnimation = true,
+    AnimationMode = "BounceInfinitely",
+    AnimationStartTime = StartTime,
+    ModelScale = 3E7,
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true,
+    DisableFaceCulling = true
+  },
+  GUI = {
+    Name = "Animated Model example (BounceInfinitely)",
+    Path = "/Example",
+    Description = "Simple animated box model with the animation mode 'BounceInfinitely'",
+  }
+}
+
+local animationBounce = {
+  Identifier = "animationBounce",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0, 0.0, -11E7 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "BoxAnimated.glb",
+    EnableAnimation = true,
+    AnimationMode = "BounceFromStart",
+    AnimationStartTime = StartTime,
+    ModelScale = 3E7,
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true,
+    DisableFaceCulling = true
+  },
+  GUI = {
+    Name = "Animated Model example (BounceFromStart)",
+    Path = "/Example",
+    Description = "Simple animated box model with the animation mode 'BounceFromStart'",
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(animationLoop)
+  openspace.addSceneGraphNode(animationLoopInf)
+  openspace.addSceneGraphNode(animationOnce)
+  openspace.addSceneGraphNode(animationBounceInf)
+  openspace.addSceneGraphNode(animationBounce)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(animationBounce)
+  openspace.removeSceneGraphNode(animationBounceInf)
+  openspace.removeSceneGraphNode(animationOnce)
+  openspace.removeSceneGraphNode(animationLoopInf)
+  openspace.removeSceneGraphNode(animationLoop)
+end)
+
+
+asset.export(animationLoop)
+asset.export(animationLoopInf)
+asset.export(animationOnce)
+asset.export(animationBounceInf)
+asset.export(animationBounce)
+
+-- Asset
+asset.meta = {
+  Name = "Animation Example asset",
+  Version = "1.0",
+  Description = "Simple animation example asset with an animated box model",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
+
+-- Model
+-- @TODO: At the moment, this overwrites the previous meta description. Probably needs a way to specify multiple meta's per file?
+asset.meta = {
+  Name = "Animated Box Model",
+  Version = "1.0",
+  Description = "Simple animated box model",
+  Author = "Cesium, https://cesium.com/",
+  URL = "https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/BoxAnimated",
+  License = [[
+    Creative Commons Attribution 4.0 International License,
+    https://creativecommons.org/licenses/by/4.0/
+  ]]
+}

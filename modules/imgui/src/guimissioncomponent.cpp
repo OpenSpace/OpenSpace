@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,13 +24,11 @@
 
 #include <modules/imgui/include/guimissioncomponent.h>
 
-#include <modules/imgui/include/gui.h>
+#include <modules/imgui/imguimodule.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/util/timerange.h>
-#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 
 namespace {
@@ -61,7 +59,7 @@ namespace {
             openspace::Time startTime = openspace::Time(range.start);
             openspace::Time endTime  = openspace::Time(range.end);
 
-            openspace::gui::CaptionText("Mission Progress");
+            openspace::CaptionText("Mission Progress");
 
             ImGui::Text("%s", std::string(startTime.UTC()).c_str());
             ImGui::SameLine();
@@ -79,7 +77,7 @@ namespace {
             ImGui::SameLine();
             ImGui::Text("%s", std::string(endTime.UTC()).c_str());
 
-            openspace::gui::CaptionText("Phases");
+            openspace::CaptionText("Phases");
 
             for (const openspace::Mission& m : mission.phases()) {
                 renderMission(m);
@@ -98,9 +96,7 @@ GuiMissionComponent::GuiMissionComponent()
 {}
 
 void GuiMissionComponent::render() {
-    if (!global::missionManager->hasCurrentMission()) {
-        return;
-    }
+
 
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
@@ -111,8 +107,13 @@ void GuiMissionComponent::render() {
 
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    const Mission& currentMission = global::missionManager->currentMission();
-    renderMission(currentMission);
+    if (global::missionManager->hasCurrentMission()) {
+        const Mission& currentMission = global::missionManager->currentMission();
+        renderMission(currentMission);
+    }
+    else {
+        ImGui::Text("%s", "No mission loaded");
+    }
 
     ImGui::End();
 }

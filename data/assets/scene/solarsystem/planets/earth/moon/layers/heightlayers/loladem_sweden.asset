@@ -1,16 +1,32 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
 
 local layer = {
   Identifier = "LolaDem_Sweden",
   Name = "Lola DEM [Sweden]",
-  FilePath = mapServiceConfigs .. "/LiU/Lola_DEM.wms",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("loladem_sweden.wms"),
   TilePixelSize = 64,
   Settings = { Multiplier = 0.5 }
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Lola DEM [Sweden]",
+  Version = "1.1",
+  Description = [[Moon LRO LOLA DEM 118m v1 layer for Moon globe. This map is hosted on
+    the OpenSpace server in Sweden]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Moon/LRO/LOLA/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014",
+  License = "NASA/PDS"
+}

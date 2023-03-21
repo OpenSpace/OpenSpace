@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,13 +39,10 @@ public:
         glm::dvec4 maxValue = glm::dvec4(std::numeric_limits<double>::max()),
         glm::dvec4 stepValue = glm::dvec4(0.01));
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<glm::dvec4>::operator=;
-
-protected:
-    glm::dvec4 fromLuaConversion(lua_State* state, bool& success) const override;
 };
 
 } // namespace openspace::properties

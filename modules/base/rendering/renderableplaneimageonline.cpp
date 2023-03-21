@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ namespace {
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed."
+        "and displayed"
     };
 
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
@@ -52,19 +52,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlaneImageOnline::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_plane_image_online";
-
-    // @TODO cleanup
-    // Insert the parents documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = RenderablePlane::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
+    return codegen::doc<Parameters>(
+        "base_renderable_plane_image_online",
+        RenderablePlane::Documentation()
     );
-    return doc;
 }
 
 RenderablePlaneImageOnline::RenderablePlaneImageOnline(
@@ -94,53 +85,58 @@ void RenderablePlaneImageOnline::bindTexture() {
     }
 }
 
-void RenderablePlaneImageOnline::update(const UpdateData&) {
-    if (_textureIsDirty) {
-        if (!_imageFuture.valid()) {
-            std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
-                _texturePath
+void RenderablePlaneImageOnline::update(const UpdateData& data) {
+    RenderablePlane::update(data);
+
+    if (!_textureIsDirty) {
+        return;
+    }
+
+    if (!_imageFuture.valid()) {
+        std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
+            _texturePath
+        );
+        if (future.valid()) {
+            _imageFuture = std::move(future);
+        }
+    }
+
+    if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
+        DownloadManager::MemoryFile imageFile = _imageFuture.get();
+
+        if (imageFile.corrupted) {
+            LERRORC(
+                "ScreenSpaceImageOnline",
+                fmt::format("Error loading image from URL '{}'", _texturePath)
             );
-            if (future.valid()) {
-                _imageFuture = std::move(future);
-            }
+            return;
         }
 
-        if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-            DownloadManager::MemoryFile imageFile = _imageFuture.get();
-
-            if (imageFile.corrupted) {
-                LERRORC(
-                    "ScreenSpaceImageOnline",
-                    fmt::format("Error loading image from URL '{}'", _texturePath)
+        try {
+            std::unique_ptr<ghoul::opengl::Texture> texture =
+                ghoul::io::TextureReader::ref().loadTexture(
+                    reinterpret_cast<void*>(imageFile.buffer),
+                    imageFile.size,
+                    2,
+                    imageFile.format
                 );
-                return;
-            }
 
-            try {
-                std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::TextureReader::ref().loadTexture(
-                        reinterpret_cast<void*>(imageFile.buffer),
-                        imageFile.size,
-                        imageFile.format
-                    );
+            if (texture) {
+                // Images don't need to start on 4-byte boundaries, for example if the
+                // image is only RGB
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-                if (texture) {
-                    // Images don't need to start on 4-byte boundaries, for example if the
-                    // image is only RGB
-                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                texture->uploadTexture();
+                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                texture->purgeFromRAM();
 
-                    texture->uploadTexture();
-                    texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                    texture->purgeFromRAM();
-
-                    _texture = std::move(texture);
-                    _textureIsDirty = false;
-                }
-            }
-            catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+                _texture = std::move(texture);
                 _textureIsDirty = false;
-                LERRORC(e.component, e.message);
             }
+        }
+        catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+            _textureIsDirty = false;
+            LERRORC(e.component, e.message);
         }
     }
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -152,12 +152,12 @@ DateTime::DateTime(std::string_view initDateTime) {
 
 void DateTime::setTime(std::string_view input) {
     // Indices into an ISO8601 YYYY-MM-ddTHH:mm:ss string
-    constexpr const size_t IndexYear = 0;
-    constexpr const size_t IndexMonth = 5;
-    constexpr const size_t IndexDay = 8;
-    constexpr const size_t IndexHour = 11;
-    constexpr const size_t IndexMinute = 14;
-    constexpr const size_t IndexSecond = 17;
+    constexpr size_t IndexYear = 0;
+    constexpr size_t IndexMonth = 5;
+    constexpr size_t IndexDay = 8;
+    constexpr size_t IndexHour = 11;
+    constexpr size_t IndexMinute = 14;
+    constexpr size_t IndexSecond = 17;
 
     std::from_chars(input.data() + IndexYear, input.data() + IndexYear + 4, _year);
     std::from_chars(input.data() + IndexMonth, input.data() + IndexMonth + 2, _month);
@@ -277,7 +277,7 @@ void DateTime::decrementOnce(int value, char unit) {
         default:
             throw ghoul::RuntimeError(
                 "Invalid unit format in TQ decrementOnce '" + std::to_string(unit) +
-                "'. Expected 'y', 'M', 'd', 'h', or 'm'."
+                "'. Expected 'y', 'M', 'd', 'h', or 'm'"
             );
     }
 }
@@ -370,8 +370,8 @@ void TimeQuantizer::setResolution(const std::string& resolutionString) {
 }
 
 void TimeQuantizer::verifyStartTimeRestrictions() {
-    //If monthly time resolution then restrict to 28 days so every month is consistent
-    unsigned int dayUpperLimit;
+    // If monthly time resolution then restrict to 28 days so every month is consistent
+    int dayUpperLimit;
     std::string helpfulDescription = "the selected month";
     if (_resolutionUnit == 'M') {
         dayUpperLimit = 28;
@@ -479,10 +479,10 @@ double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char
 }
 
 bool TimeQuantizer::quantize(Time& t, bool clamp) {
-    ZoneScoped
+    ZoneScoped;
 
     constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
-    constexpr const int BufferSize = sizeof(Format);
+    constexpr int BufferSize = sizeof(Format);
     char unquantizedString[BufferSize];
     std::memset(unquantizedString, 0, BufferSize);
     SpiceManager::ref().dateFromEphemerisTime(
@@ -493,8 +493,8 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
 
     DateTime unquantized(std::string_view(unquantizedString, BufferSize));
     // resolutionFraction helps to improve iteration performance
-    constexpr const double ResolutionFraction = 0.7;
-    constexpr const int IterationLimit = 50;
+    constexpr double ResolutionFraction = 0.7;
+    constexpr int IterationLimit = 50;
 
     if (_timerange.includes(t)) {
         int iterations = 0;
@@ -551,7 +551,7 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
 void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ, double value,
                                          char unit)
 {
-    ZoneScoped
+    ZoneScoped;
 
     switch (unit) {
         case 'y':
@@ -630,10 +630,8 @@ std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
 
     const double startSeconds = s.J2000();
     const double endSeconds = e.J2000();
-    const double delta = endSeconds - startSeconds;
-
     ghoul_assert(
-        static_cast<int>(delta) % static_cast<int>(_resolution) == 0,
+        static_cast<int>(endSeconds - startSeconds) % static_cast<int>(_resolution) == 0,
         "Quantization error"
     );
 

@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels').PlutoKernels
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels").PlutoKernels
 
 
 
@@ -20,7 +19,7 @@ local Nix = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto" },
+  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto"
   }
@@ -40,10 +39,10 @@ local NixTrail = {
     Period = 24.85463,
     Resolution = 1000
   },
-  Tag = { 
-    "moonTrail_solarSystem", 
-    "moonTrail_dwarf", 
-    "moonTrail_pluto", 
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_dwarf",
+    "moonTrail_pluto",
     "moonTrail_minor"
   },
   GUI = {
@@ -52,14 +51,53 @@ local NixTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Nix, NixTrail })
+local NixLabel = {
+  Identifier = "NixLabel",
+  Parent = Nix.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Nix",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1000.0 },
+    FadeWidths = { 150.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Cheron Label",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons",
+    Description = "Label for Pluto's moon Nix"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Nix)
+  openspace.addSceneGraphNode(NixTrail)
+  openspace.addSceneGraphNode(NixLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NixLabel)
+  openspace.removeSceneGraphNode(NixTrail)
+  openspace.removeSceneGraphNode(Nix)
+end)
+
+asset.export(Nix)
+asset.export(NixTrail)
+
 
 
 asset.meta = {
   Name = "Nix",
   Version = "1.0",
-  Description = [[ Globe and trail for Pluto's moon Nix. Data from
-    NASA Spice (see base spice asset)]],
+  Description = [[Globe and trail for Pluto's moon Nix. Data from NASA Spice (see base
+    spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

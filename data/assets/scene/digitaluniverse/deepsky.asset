@@ -1,5 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
 local textures = asset.syncedResource({
   Name = "Deep Sky Objects Textures",
   Type = "HttpSynchronization",
@@ -19,26 +17,26 @@ local deepSkyPoints = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "dso.label",
+      Color = { 0.1, 0.4, 0.6 },
+      Size = 20.50,
+      MinMaxSize = { 16, 20 },
+      Unit = "pc"
+    },
     Color = { 1.0, 1.0, 0.0 },
     Opacity = 0.99,
     ScaleFactor = 500.0,
-    File = speck .. "/dso.speck",
-    Texture = textures .. "/point3.png",
-    --ColorMap = speck .. "/tully.cmap",
-    --ColorMap = speck .. "/lss.cmap",
+    File = speck .. "dso.speck",
+    Texture = textures .. "point3.png",
+    --ColorMap = speck .. "tully.cmap",
+    --ColorMap = speck .. "lss.cmap",
     --ColorOption = { "proximity" },
     --ColorOption = { "prox5Mpc" },
     --ColorRange = { { 1.0, 30.0 } },
-    LabelFile = speck .. "/dso.label",
-    TextColor = { 0.1, 0.4, 0.6 },
-    TextSize = 20.50,
-    TextMinSize = 16.0,
     Unit = "pc",
-    -- Fade in value in the same unit as "Unit"
-    --FadeInDistances = { 0.05, 1.0 },
-    -- Max size in pixels
-    BillboardMaxSize = 8.22,
-    BillboardMinSize = 0.0,
+    --FadeInDistances = { 0.05, 1.0 }, -- Fade in value in the same unit as "Unit"
+    BillboardMinMaxSize = { 0.0, 8.22 }, -- in pixels
     --CorrectionSizeEndDistance = 22.0,
     --CorrectionSizeFactor = 10.45
     EnablePixelSizeControl = true
@@ -46,13 +44,13 @@ local deepSkyPoints = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, 0, 3.14159265359 }
+      Rotation = { 0, 0, math.pi }
     }
   },
   GUI = {
     Name = "Deep Sky Objects Points",
     Path = "/Universe/Galaxies",
-    Description = [[Point cloud and labels for Deep Sky Objects]]
+    Description = "Point cloud and labels for Deep Sky Objects"
   }
 }
 
@@ -64,7 +62,7 @@ local deepSkyImages = {
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.99,
     ScaleFactor = 1.0,
-    File = speck .. "/dso.speck",
+    File = speck .. "dso.speck",
     TexturePath = textures,
     Luminosity = "radius",
     ScaleLuminosity = 0.001,
@@ -76,14 +74,14 @@ local deepSkyImages = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {3.14159265359, 3.14159265359, 0 }
+      Rotation = { math.pi, math.pi, 0 }
     }
   },
   GUI = {
     Name = "Deep Sky Objects Images",
     Path = "/Universe/Galaxies",
     Description = [[Census: 63 images and labels. DU Version 1.3. <br> These data are
-      2-D images of Messier objects placed in 3-D space. Not only do we place these 
+      2-D images of Messier objects placed in 3-D space. Not only do we place these
       images at the proper location and give them the correct orientation, we also
       size them accurately so that you can fly to the globular cluster M13, for
       example, and see just how small the cluster of hundreds of thousands of stars
@@ -95,15 +93,26 @@ local deepSkyImages = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { deepSkyPoints, deepSkyImages })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(deepSkyPoints)
+  openspace.addSceneGraphNode(deepSkyImages)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(deepSkyImages)
+  openspace.removeSceneGraphNode(deepSkyPoints)
+end)
+
+asset.export(deepSkyPoints)
+asset.export(deepSkyImages)
+
 
 
 asset.meta = {
   Name = "Deep Sky Objects Images",
-  Version = "1.0",
-  Description = [[Digital Universe asset for Deep Sky Objects and their Images]],
+  Version = "1.1",
+  Description = "Digital Universe asset for Deep Sky Objects and their Images",
   Author = "Nate Greenstein, Matt Everhart, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"DeepSkyObjects", "DeepSkyObjectsImages"}
+  License = "AMNH Digital Universe"
 }

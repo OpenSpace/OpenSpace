@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('./kernels')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
 
 local PlutoBarycenterAccurate = {
   Identifier = "PlutoBarycenterAccurate",
@@ -14,7 +13,7 @@ local PlutoBarycenterAccurate = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "PLUTO BARYCENTER",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = kernels.PlutoKernels
     }
   },
@@ -46,7 +45,15 @@ local NewHorizonsPosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  PlutoBarycenterAccurate,
-  NewHorizonsPosition 
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PlutoBarycenterAccurate)
+  openspace.addSceneGraphNode(NewHorizonsPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NewHorizonsPosition)
+  openspace.removeSceneGraphNode(PlutoBarycenterAccurate)
+end)
+
+asset.export(PlutoBarycenterAccurate)
+asset.export(NewHorizonsPosition)

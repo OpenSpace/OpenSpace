@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,13 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/scene/scene.h>
+
 #include <ghoul/opengl/programobject.h>
 #include <numeric>
 #include <optional>
@@ -86,7 +93,7 @@ namespace {
         "The objects period, i.e. the length of its orbit around the parent object given "
         "in (Earth) days. In the case of Earth, this would be a sidereal year "
         "(=365.242 days). If this values is specified as multiples of the period, it is "
-        "possible to show the effects of precession."
+        "possible to show the effects of precession"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
@@ -95,14 +102,14 @@ namespace {
         "The number of samples along the orbit. This determines the resolution of the "
         "trail; the tradeoff being that a higher resolution is able to resolve more "
         "detail, but will take more resources while rendering, too. The higher, the "
-        "smoother the trail, but also more memory will be used."
+        "smoother the trail, but also more memory will be used"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
        "RenderableType",
        "RenderableType",
        "This value specifies if the orbit should be rendered in the Background,"
-       "Opaque, Transparent, or Overlay rendering step. Default is Transparent."
+       "Opaque, Transparent, or Overlay rendering step. Default is Transparent"
     };
 
     struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
@@ -112,7 +119,7 @@ namespace {
         // [[codegen::verbatim(ResolutionInfo.description)]]
         int resolution;
 
-        enum class RenderableType {
+        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderableType {
             Background,
             Opaque,
             PreDeferredTransparent,
@@ -129,24 +136,15 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableTrailOrbit::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_renderabletrailorbit";
-
-    // Insert the parents documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = RenderableTrail::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
+    return codegen::doc<Parameters>(
+        "base_renderable_renderabletrailorbit",
+        RenderableTrail::Documentation()
     );
-
-    return doc;
 }
 
 RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
-    , _period(PeriodInfo, 0.0, 0.0, 1e9)
+    , _period(PeriodInfo, 0.0, 0.0, 250.0 * 365.25) // 250 years should be enough I guess
     , _resolution(ResolutionInfo, 10000, 1, 1000000)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -154,38 +152,21 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     _translation->onParameterChange([this]() { _needsFullSweep = true; });
 
     // Period is in days
-    using namespace std::chrono;
-    _period = p.period * duration_cast<seconds>(hours(24)).count();
+    _period = p.period;
     _period.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
+    _period.setExponent(3.f);
     addProperty(_period);
 
     _resolution = p.resolution;
     _resolution.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
+    _resolution.setExponent(3.5f);
     addProperty(_resolution);
 
     // We store the vertices with (excluding the wrapping) decending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
 
     if (p.renderableType.has_value()) {
-        switch (*p.renderableType) {
-            case Parameters::RenderableType::Background:
-                setRenderBin(Renderable::RenderBin::Background);
-                break;
-            case Parameters::RenderableType::Opaque:
-                setRenderBin(Renderable::RenderBin::Opaque);
-                break;
-            case Parameters::RenderableType::PreDeferredTransparent:
-                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-                break;
-            case Parameters::RenderableType::PostDeferredTransparent:
-                setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-                break;
-            case Parameters::RenderableType::Overlay:
-                setRenderBin(Renderable::RenderBin::Overlay);
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
+        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderableType));
     }
     else {
         setRenderBin(Renderable::RenderBin::Overlay);
@@ -380,13 +361,15 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     }
 
 
-    constexpr const double Epsilon = 1e-7;
+    constexpr double Epsilon = 1e-7;
     // When time stands still (at the iron hill), we don't need to perform any work
     if (std::abs(data.time.j2000Seconds() - _previousTime) < Epsilon) {
         return { false, false, 0 };
     }
 
-    const double secondsPerPoint = _period / (_resolution - 1);
+    using namespace std::chrono;
+    double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
+    const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // How much time has passed since the last permanent point
     const double delta = data.time.j2000Seconds() - _lastPointTime;
 
@@ -504,7 +487,9 @@ void RenderableTrailOrbit::fullSweep(double time) {
 
     _lastPointTime = time;
 
-    const double secondsPerPoint = _period / (_resolution - 1);
+    using namespace std::chrono;
+    const double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
+    const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // starting at 1 because the first position is a floating current one
     for (int i = 1; i < _resolution; ++i) {
         const glm::vec3 p = _translation->position({ {}, Time(time), Time(0.0) });

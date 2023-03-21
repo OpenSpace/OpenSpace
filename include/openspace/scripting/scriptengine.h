@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,9 +31,10 @@
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
+#include <filesystem>
 #include <mutex>
-#include <queue>
 #include <optional>
+#include <queue>
 #include <functional>
 
 namespace openspace { class SyncBuffer; }
@@ -45,7 +46,7 @@ namespace openspace::scripting {
  * executing scripts (#runScript and #runScriptFile). Before usage, it has to be
  * #initialize%d and #deinitialize%d. New ScriptEngine::Library%s consisting of
  * ScriptEngine::Library::Function%s have to be added which can then be called using the
- * <code>openspace</code> namespac prefix in Lua. The same functions can be exposed to
+ * `openspace` namespace prefix in Lua. The same functions can be exposed to
  * other Lua states by passing them to the #initializeLuaState method.
  */
 class ScriptEngine : public Syncable, public DocumentationGenerator {
@@ -59,7 +60,7 @@ public:
         ScriptCallback callback;
     };
 
-    static constexpr const char* OpenSpaceLibraryName = "openspace";
+    static constexpr std::string_view OpenSpaceLibraryName = "openspace";
 
     ScriptEngine();
 
@@ -82,16 +83,14 @@ public:
     bool hasLibrary(const std::string& name);
 
     bool runScript(const std::string& script, ScriptCallback callback = ScriptCallback());
-    bool runScriptFile(const std::string& filename);
-
-    bool writeLog(const std::string& script);
+    bool runScriptFile(const std::filesystem::path& filename);
 
     virtual void preSync(bool isMaster) override;
     virtual void encode(SyncBuffer* syncBuffer) override;
     virtual void decode(SyncBuffer* syncBuffer) override;
     virtual void postSync(bool isMaster) override;
 
-    void queueScript(const std::string& script, RemoteScripting remoteScripting,
+    void queueScript(std::string script, RemoteScripting remoteScripting,
         ScriptCallback cb = ScriptCallback());
 
     std::vector<std::string> allLuaFunctions() const;
@@ -101,23 +100,24 @@ public:
 private:
     BooleanType(Replace);
 
+    void writeLog(const std::string& script);
+
     bool registerLuaLibrary(lua_State* state, LuaLibrary& library);
     void addLibraryFunctions(lua_State* state, LuaLibrary& library, Replace replace);
 
     bool isLibraryNameAllowed(lua_State* state, const std::string& name);
 
     void addBaseLibrary();
-    void remapPrintFunction();
 
     ghoul::lua::LuaState _state;
     std::vector<LuaLibrary> _registeredLibraries;
 
     std::queue<QueueItem> _incomingScripts;
 
-    // Slave scripts are mutex protected since decode and rendering may
-    // happen asynchronously.
-    std::mutex _slaveScriptsMutex;
-    std::queue<std::string> _slaveScriptQueue;
+    // Client scripts are mutex protected since decode and rendering may happen
+    // asynchronously
+    std::mutex _clientScriptsMutex;
+    std::queue<std::string> _clientScriptQueue;
     std::queue<QueueItem> _masterScriptQueue;
 
     std::vector<std::string> _scriptsToSync;
@@ -125,7 +125,6 @@ private:
     // Logging variables
     bool _logFileExists = false;
     bool _logScripts = true;
-    std::string _logType;
     std::string _logFilename;
 };
 

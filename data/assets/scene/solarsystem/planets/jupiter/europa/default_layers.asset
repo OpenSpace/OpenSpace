@@ -1,20 +1,13 @@
 local colorLayersPath = "./layers/colorlayers"
 
-asset.require(colorLayersPath .. "/europa_texture")
-local colorLayer = asset.require(colorLayersPath .. "/voyager_global_mosaic")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Europa.Renderable.Layers.ColorLayers." ..
-    colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require(colorLayersPath .. "/europa_texture", false)
+asset.require(colorLayersPath .. "/voyager_global_mosaic_local", true)
 
 
 asset.meta = {
   Name = "Default Europa Layers",
   Version = "1.0",
-  Description = [[ Default Europa layers are: Europa Texture]],
+  Description = "Default Europa layers are: Europa Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,7 @@
 #include <vector>
 
 namespace {
-    constexpr const size_t MaxIterations = 8;
+    constexpr size_t MaxIterations = 8;
 } // namespace
 
 namespace openspace::globebrowsing {
@@ -133,8 +133,8 @@ double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) 
     );
 
     const Geodetic2 pMid = {
-        (p1.lat + p2.lat) / 2.0,
-        (p1.lon + p2.lon) / 2.0
+        .lat = (p1.lat + p2.lat) / 2.0,
+        .lon = (p1.lon + p2.lon) / 2.0
     };
     const glm::dvec3 centralNormal = cartesianSurfacePosition(pMid);
 

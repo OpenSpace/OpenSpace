@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,47 +29,46 @@ flat in float vs_screenSpaceDepth;
 in vec2 texCoord;
 in float ta;
 
-uniform float alphaValue; // opacity
+uniform float alphaValue;
 uniform vec3 color;
 uniform sampler2D spriteTexture;
 uniform bool hasColorMap;
+uniform bool useColorMap;
 uniform float fadeInValue;
 
+
 Fragment getFragment() {
-    vec4 textureColor = texture(spriteTexture, texCoord);
+  if (gs_colorMap.a == 0.0 || ta == 0.0 || fadeInValue == 0.0 || alphaValue == 0.0) {
+    discard;
+  }
+
+  vec4 textureColor = texture(spriteTexture, texCoord);
+  if (textureColor.a == 0.0) {
+    discard;
+  }
+
+  vec4 fullColor = textureColor;
     
-    if (textureColor.a == 0.f || gs_colorMap.a == 0.f || ta == 0.f || fadeInValue == 0.f)
-    {
-        discard;
-    }
+  if (hasColorMap && useColorMap) {
+    fullColor *= gs_colorMap;
+  }
+  else {
+    fullColor.rgb *= color;
+  }
 
-    vec4 fullColor = vec4(1.0);
-    
-    if (hasColorMap) {
-        fullColor = vec4(
-            gs_colorMap.rgb * textureColor.rgb,
-            gs_colorMap.a * textureColor.a * alphaValue
-        );
-    }
-    else {
-        fullColor = vec4(color.rgb * textureColor.rgb, textureColor.a * alphaValue);
-    }
+  float textureOpacity = dot(fullColor.rgb, vec3(1.0));
+  if (textureOpacity == 0.0) {
+    discard;
+  }
 
-    fullColor.a *= fadeInValue * ta;
-    
-    float textureOpacity = dot(fullColor.rgb, vec3(1.0));
-    if (fullColor.a == 0.f || textureOpacity == 0.0) {
-        discard;
-    }
+  fullColor.a *= alphaValue * fadeInValue * ta;
 
-    Fragment frag;
-    frag.color = fullColor;
-    frag.depth = vs_screenSpaceDepth;
-    // Setting the position of the billboards to not interact 
-    // with the ATM.
-    frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
-    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-    //frag.disableLDR2HDR = true;
+  Fragment frag;
+  frag.color = fullColor;
+  frag.depth = vs_screenSpaceDepth;
+  // Setting the position of the billboards to not interact with the ATM
+  frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
-    return frag;
+  return frag;
 }

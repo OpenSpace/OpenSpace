@@ -1,6 +1,12 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local models = asset.require("./model" ).modelFolder;
+local sun = asset.require("scene/solarsystem/sun/sun")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+
+local models = asset.syncedResource({
+  Name = "Voyager Model",
+  Type = "HttpSynchronization",
+  Identifier = "voyager_model",
+  Version = 1
+})
 
 local kernels = asset.syncedResource({
   Name = "Voyager 1 Kernels",
@@ -10,34 +16,20 @@ local kernels = asset.syncedResource({
 })
 
 local Kernels = {
-  kernels .. '/vg1_v02.tf',
-  kernels .. '/vg100019.tsc',
-  kernels .. '/Voyager_1.a54206u_V0.2_merged.bsp',
-  kernels .. '/voyager_1.ST+1991_a54418u.merged.bsp',
-  kernels .. '/vgr1_jup230.bsp',
-  kernels .. '/vgr1_sat337.bsp',
-  kernels .. '/vgr1_super.bc',
-  kernels .. '/vgr1_super_v2.bc'
+  kernels .. "vg1_v02.tf",
+  kernels .. "vg100019.tsc",
+  kernels .. "Voyager_1.a54206u_V0.2_merged.bsp",
+  kernels .. "voyager_1.ST+1991_a54418u.merged.bsp",
+  kernels .. "vgr1_jup230.bsp",
+  kernels .. "vgr1_sat337.bsp",
+  kernels .. "vgr1_super.bc",
+  kernels .. "vgr1_super_v2.bc"
 }
 
 local RotationMatrix = {
   -1, 0, 0,
   0, 0, -1,
   0, -1, 0
-}
-
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
-  {
-    Identifier = "Camera",
-    Type = "CameraLightSource",
-    Intensity = 0.5
-  }
 }
 
 local Voyager1 = {
@@ -47,7 +39,7 @@ local Voyager1 = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     Rotation = {
@@ -72,10 +64,19 @@ local Voyager1Main = {
   Parent = Voyager1.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/voyager-main.obj",
+    GeometryFile = models .. "voyager-main.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_part" },
   GUI = {
     Name = "Voyager 1 Main",
     Path = "/Solar System/Missions/Voyager 1"
@@ -83,16 +84,25 @@ local Voyager1Main = {
 }
 
 local Voyager1Antenna = {
-  Identifier = "Voyager_1_Antanna",
+  Identifier = "Voyager_1_Antenna",
   Parent = Voyager1.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/voyager-antenna.obj",
+    GeometryFile = models .. "voyager-antenna.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_part" },
   GUI = {
-    Name = "Voyager 1 Antanna",
+    Name = "Voyager 1 Antenna",
     Path = "/Solar System/Missions/Voyager 1"
   }
 }
@@ -108,14 +118,16 @@ local VoyagerTrailCruiseEarthJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1977 SEP 05",
     EndTime = "1979 MAR 04",
-    SampleInterval = 545 * 2  -- 545 is the number of days between the Start and End time
+    SampleInterval = 545 * 2,  -- 545 is the number of days between the Start and End time
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Cruise Earth-Jupiter",
     Path = "/Solar System/Missions/Voyager 1"
@@ -130,15 +142,17 @@ local VoyagerTrailEncounterJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     Color = { 0.70, 0.50, 0.20 },
     EnableFade = false,
     StartTime = "1979 MAR 03 23:24:00", -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
     EndTime = "1979 MAR 09",
-    SampleInterval = 100
+    SampleInterval = 100,
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Encounter Jupiter",
     Path = "/Solar System/Missions/Voyager 1"
@@ -153,15 +167,17 @@ local VoyagerTrailCruiseJupiterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1979 MAR 09",
     EndTime = "1980 NOV 11",
-    SampleInterval = 618 * 2  -- 618 is the number of days between the Start and End time
+    SampleInterval = 618 * 2,  -- 618 is the number of days between the Start and End time
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Cruise Jupiter-Saturn",
     Path = "/Solar System/Missions/Voyager 1"
@@ -176,15 +192,17 @@ local VoyagerTrailEncounterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1980 NOV 10 23:08:30",  -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
     EndTime = "1980 NOV 16",
-    SampleInterval = 100
+    SampleInterval = 100,
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Encounter Saturn",
     Path = "/Solar System/Missions/Voyager 1"
@@ -199,22 +217,24 @@ local VoyagerTrailCruiseSaturnInf = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1980 NOV 16",
-    EndTime = "2021 JAN 01",
-    SampleInterval = 14656 * 2  -- 14656 is the number of days between the Start and End time
+    EndTime = "2300 JAN 01",
+    SampleInterval = 116558 * 2,  -- 116558 is the number of days between the Start and End time
+    Enabled = asset.enabled
   },
+  Tag = { "voyager1_trail" },
   GUI = {
     Name = "Voyager 1 Trail Cruise Saturn-Inf",
     Path = "/Solar System/Missions/Voyager 1"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local nodes = {
   Voyager1,
   Voyager1Main,
   Voyager1Antenna,
@@ -223,4 +243,41 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
   VoyagerTrailCruiseJupiterSaturn,
   VoyagerTrailEncounterSaturn,
   VoyagerTrailCruiseSaturnInf
-})
+}
+
+-- Actions
+
+local focus_voyager1 = {
+  Identifier = "os.missions.voyager.v1.focus",
+  Name = "Focus on Voyager 1",
+  Command = [[
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Voyager_1');
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')
+  ]],
+  Documentation = "Set camera focus to Voyager 1",
+  GuiPath = "/Missions/Voyager",
+  isLocal = false
+}
+
+-- Initialize
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+
+  openspace.action.registerAction(focus_voyager1)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(focus_voyager1)
+
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end

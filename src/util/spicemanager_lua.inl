@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,213 +22,89 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/filesystem/filesystem.h>
-#include <openspace/engine/globals.h>
-#include <ghoul/logging/logmanager.h>
-#include <filesystem>
-
-namespace openspace::luascriptfunctions {
+namespace {
 
 /**
- * \ingroup LuaScripts
- * loadKernel(string):
  * Loads the provided SPICE kernel by name. The name can contain path tokens, which are
  * automatically resolved.
  */
-
-int loadKernel(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadKernel");
-
-    bool isString = (lua_isstring(L, 1) == 1);
-    if (!isString) {
-        LERROR(fmt::format(
-            "{}: Expected argument of type 'string'", ghoul::lua::errorLocation(L)
-        ));
-        return 0;
+[[codegen::luawrap]] int loadKernel(std::string kernel) {
+    if (!std::filesystem::is_regular_file(kernel)) {
+        throw ghoul::lua::LuaError(fmt::format("Kernel file '{}' did not exist", kernel));
     }
-
-    std::string argument = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    if (!std::filesystem::is_regular_file(argument)) {
-        return ghoul::lua::luaError(
-            L,
-            fmt::format("Kernel file '{}' did not exist", argument)
-        );
-    }
-    unsigned int result = SpiceManager::ref().loadKernel(argument);
-
-    lua_pushnumber(L, result);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
+    unsigned int result = openspace::SpiceManager::ref().loadKernel(kernel);
+    return static_cast<int>(result);
 }
 
 /**
- * unloadKernel({string, number}):
  * Unloads the provided SPICE kernel. The name can contain path tokens, which are
  * automatically resolved.
  */
-int unloadKernel(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadKernel");
-
-    bool isString = (lua_isstring(L, 1) == 1);
-    bool isNumber = (lua_isnumber(L, 1) == 1);
-
-    if (!isString && !isNumber) {
-        LERRORC(
-            "loadKernel",
-            fmt::format(
-                "{}: Expected argument of type 'string' or 'number'",
-                ghoul::lua::errorLocation(L)
-            )
-        );
-        lua_settop(L, 0);
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
+[[codegen::luawrap]] void unloadKernel(std::variant<std::string, int> kernel) {
+    if (std::holds_alternative<std::string>(kernel)) {
+        openspace::SpiceManager::ref().unloadKernel(std::get<std::string>(kernel));
     }
-
-    if (isString) {
-        std::string argument = ghoul::lua::value<std::string>(L, 1);
-        SpiceManager::ref().unloadKernel(argument);
+    else {
+        openspace::SpiceManager::ref().unloadKernel(std::get<int>(kernel));
     }
-
-    if (isNumber) {
-        unsigned int argument = ghoul::lua::value<unsigned int>(L, 1);
-        SpiceManager::ref().unloadKernel(argument);
-    }
-
-    lua_settop(L, 0);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
 }
 
 /**
- * spiceBodies():
- * Returns the list of bodies loaded into the spicemanager
+ * Returns a list of Spice Bodies loaded into the system. Returns SPICE built in frames if
+ * builtInFrames. Returns User loaded frames if !builtInFrames.
  */
-int spiceBodies(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1,2 }, "lua::getSpiceBodies");
-    bool isBool = (lua_isboolean(L, 1) == 1);
-    const bool buildInBodies = isBool ? ghoul::lua::value<bool>(L, 1) : false;
+[[codegen::luawrap]] std::map<std::string, std::string> spiceBodies(bool includeBuiltIn) {
+    std::vector<std::pair<int, std::string>> bodies =
+        openspace::SpiceManager::ref().spiceBodies(includeBuiltIn);
 
-    isBool = (lua_isboolean(L, 2) == 1);
-    bool printValues = isBool ? ghoul::lua::value<bool>(L, 2) : false;
-    lua_settop(L, 0);
-    std::vector<std::pair<int, std::string>> bodies = SpiceManager::ref().spiceBodies(
-        buildInBodies
-    );
-
-    lua_newtable(L);
-    int number = 1;
-    for (const std::pair<int, std::string>& body : bodies) {
-        lua_newtable(L);
-        ghoul::lua::push(L, 1, body.first);
-        lua_rawset(L, -3);
-        ghoul::lua::push(L, 2, body.second);
-        lua_rawset(L, -3);
-        lua_rawseti(L, -2, number);
-        ++number;
-
-        if (printValues) {
-            LINFO(fmt::format("Body id '{}' and name: {}", body.first, body.second));
-        }
+    std::map<std::string, std::string> res;
+    for (const std::pair<int, std::string>& p : bodies) {
+        res[std::to_string(p.first)] = p.second;
     }
-
-    return 1;
+    return res;
 }
 
-//internal function for getSpk and getCk coverages
-void buildLuaCoverageStack(lua_State* L,
-                           const std::vector<std::pair<double, double>>& coverage,
-                           bool printValues)
+/**
+ * Returns the rotationMatrix for a given body in a frame of reference at a specific time.
+ * Example:
+ * openspace.spice.rotationMatrix('INSIGHT_LANDER_CRUISE','MARS', '2018 NOV 26 19:45:34')
+ */
+[[codegen::luawrap]] glm::dmat3 rotationMatrix(std::string body, std::string frame,
+                                               std::string date)
 {
-    lua_settop(L, 0);
-    lua_newtable(L);
-    int number = 1;
-    for (const std::pair<double, double>& window : coverage) {
-        std::string start = SpiceManager::ref().dateFromEphemerisTime(window.first);
-        std::string end = SpiceManager::ref().dateFromEphemerisTime(window.second);
+    using namespace openspace;
 
-        if (printValues) {
-            LINFO(fmt::format(
-                "Coverage start {} and end: {}",
-                SpiceManager::ref().dateFromEphemerisTime(window.first),
-                SpiceManager::ref().dateFromEphemerisTime(window.second)
-            ));
-        }
-
-        lua_newtable(L);
-        ghoul::lua::push(L, 1, start);
-        lua_rawset(L, -3);
-        ghoul::lua::push(L, 2, end);
-        lua_rawset(L, -3);
-        lua_rawseti(L, -2, number);
-        ++number;
-    }
+    const double ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date);
+    glm::dmat3 rotationMatrix = SpiceManager::ref().frameTransformationMatrix(
+        body,
+        frame,
+        ephemerisTime
+    );
+    return rotationMatrix;
 }
 
 /**
- * getSpkCoverage({string, bool(optional)}):
- * Returns the spk coverage for given body
+ * Returns the position for a given body relative to another body, in a given frame of
+ * reference, at a specific time.
+ * Example:
+ * openspace.spice.position('INSIGHT', 'MARS',' GALACTIC', '2018 NOV 26 19:45:34')
  */
-int spkCoverage(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::getSpkCoverage");
-    const bool isString = (lua_isstring(L, 1) == 1);
-    const bool isBool = (lua_isboolean(L, 2) == 1);
+[[codegen::luawrap]] glm::dvec3 position(std::string target, std::string observer,
+                                         std::string frame, std::string date)
+{
+    using namespace openspace;
 
-    if (!isString) {
-        LERRORC(
-            "getSpkCoverage",
-            fmt::format(
-                "{}: Expected argument of type 'string'",
-                ghoul::lua::errorLocation(L)
-            )
-        );
-        lua_settop(L, 0);
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
-    }
-
-    std::string argument = ghoul::lua::value<std::string>(L, 1);
-
-    bool printValues = isBool ? ghoul::lua::value<bool>(L, 2) : false;
-    buildLuaCoverageStack(L, SpiceManager::ref().spkCoverage(argument), printValues);
-
-    return 1;
+    const double ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date);
+    glm::dvec3 position = SpiceManager::ref().targetPosition(
+        target,
+        observer,
+        frame,
+        {},
+        ephemerisTime
+    );
+    return position;
 }
 
-/**
- * getCkCoverage({string, bool(optional)}):
- * Returns the spk coverage for given body
- */
-int ckCoverage(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::getCkCoverage");
+#include "spicemanager_lua_codegen.cpp"
 
-    const bool isString = (lua_isstring(L, 1) == 1);
-    const bool isBool = (lua_isboolean(L, 2) == 1);
-
-    if (!isString) {
-        LERRORC(
-            "getCkCoverage",
-            fmt::format(
-                "{}: Expected argument of type 'string'",
-                ghoul::lua::errorLocation(L)
-            )
-        );
-        lua_settop(L, 0);
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
-    }
-
-    std::string argument = ghoul::lua::value<std::string>(L, 1);
-    bool printValues = isBool ? ghoul::lua::value<bool>(L, 2) : false;
-    buildLuaCoverageStack(L, SpiceManager::ref().ckCoverage(argument), printValues);
-
-    return 1;
-}
-
-} // namespace openspace::luascriptfunctions
+} // namespace

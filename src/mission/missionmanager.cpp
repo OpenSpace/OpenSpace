@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <openspace/mission/missionmanager.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -105,34 +106,10 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
     return {
         "",
         {
-            {
-                "loadMission",
-                &luascriptfunctions::loadMission,
-                {},
-                "string",
-                "Load mission phases specified in a dictionary"
-            },
-            {
-                "unloadMission",
-                &luascriptfunctions::unloadMission,
-                {},
-                "string",
-                "Unloads a previously loaded mission"
-            },
-            {
-                "hasMission",
-                &luascriptfunctions::hasMission,
-                {},
-                "string",
-                "Returns whether a mission with the provided identifier has been loaded"
-            },
-            {
-                "setCurrentMission",
-                &luascriptfunctions::setCurrentMission,
-                {},
-                "string",
-                "Set the current mission"
-            },
+            codegen::lua::LoadMission,
+            codegen::lua::UnloadMission,
+            codegen::lua::HasMission,
+            codegen::lua::SetCurrentMission
         }
     };
 }

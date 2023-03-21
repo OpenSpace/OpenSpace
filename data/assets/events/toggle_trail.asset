@@ -1,0 +1,27 @@
+local action = asset.require("actions/trails/toggle_trail")
+
+asset.onInitialize(function()
+  openspace.event.registerEventAction(
+    "CameraFocusTransition",
+    action.show_trail,
+    { Transition = "Exiting" }
+  )
+  openspace.event.registerEventAction(
+    "CameraFocusTransition",
+    action.hide_trail,
+    { Transition = "Approaching" }
+  )
+end)
+
+asset.onDeinitialize(function()
+  openspace.event.unregisterEventAction(
+    "CameraFocusTransition",
+    action.show_trail,
+    { Transition = "Exiting" }
+  )
+  openspace.event.unregisterEventAction(
+    "CameraFocusTransition",
+    action.hide_trail,
+    { Transition = "Approaching" }
+  )
+end)

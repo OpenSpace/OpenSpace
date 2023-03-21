@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@ namespace {
         "SetDefault",
         "Set Default",
         "If this value is triggered it will reset all of these values to their default "
-        "values."
+        "values"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
@@ -37,27 +37,27 @@ namespace {
         "Opacity",
         "This value sets the transparency of this layer. If this value is equal to '1', "
         "the layer is completely opaque. If this value is equal to '0', the layer is "
-        "completely transparent."
+        "completely transparent"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma",
-        "This value is used as an exponent to adjust the color for each tile."
+        "This value is used as an exponent to adjust the color for each tile"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplierInfo = {
         "Multiplier",
         "Multiplier",
         "This value is used as a multiplier to adjust the color applied after taking the "
-        "gamma value as an exponent."
+        "gamma value as an exponent"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "This value is used as an additive modifier to adjust the color applied after "
-        "the gamma exponent and the multiplier has been performed."
+        "the gamma exponent and the multiplier has been performed"
     };
 } // namespace
 
@@ -83,6 +83,14 @@ LayerRenderSettings::LayerRenderSettings()
         multiplier = 1.f;
         offset = 0.f;
     });
+}
+
+void LayerRenderSettings::onChange(std::function<void()> callback) {
+    opacity.onChange(callback);
+    gamma.onChange(callback);
+    multiplier.onChange(callback);
+    multiplier.onChange(callback);
+    offset.onChange(callback);
 }
 
 float LayerRenderSettings::performLayerSettings(float v) const {

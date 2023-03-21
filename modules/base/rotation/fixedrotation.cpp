@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,149 +37,137 @@
 #include <variant>
 
 namespace {
-    constexpr const openspace::properties::Property::PropertyInfo EnableInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnableInfo = {
         "Enable",
         "Enabled",
         "If this value is 'true', all the machinery of this rotation is used, of it is "
         "'false', it provides the ability to change its attributes without risking some "
-        "undefined behavior."
+        "undefined behavior"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo XAxisTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo XAxisTypeInfo = {
         "xAxisType",
         "xAxis: Specification Type",
         "This value specifies how this axis is being specified, that is whether it is "
         "referencing another object, specifying an absolute vector, or whether it is "
         "using the right handed coordinate system completion based off the other two "
-        "vectors."
+        "vectors"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo YAxisTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo YAxisTypeInfo = {
         "yAxisType",
         "yAxis: Specification Type",
         "This value specifies how this axis is being specified, that is whether it is "
         "referencing another object, specifying an absolute vector, or whether it is "
         "using the right handed coordinate system completion based off the other two "
-        "vectors."
+        "vectors"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo ZAxisTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ZAxisTypeInfo = {
         "zAxisType",
         "zAxis: Specification Type",
         "This value specifies how this axis is being specified, that is whether it is "
         "referencing another object, specifying an absolute vector, or whether it is "
         "using the right handed coordinate system completion based off the other two "
-        "vectors."
+        "vectors"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo XAxisObjectInfo = {
+    constexpr openspace::properties::Property::PropertyInfo XAxisObjectInfo = {
         "xAxisObject",
         "xAxis: Focus Object",
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
-        "stay fixed to the current position of that object."
+        "stay fixed to the current position of that object"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo YAxisObjectInfo = {
+    constexpr openspace::properties::Property::PropertyInfo YAxisObjectInfo = {
         "yAxisObject",
         "yAxis: Focus Object",
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
-        "stay fixed to the current position of that object."
+        "stay fixed to the current position of that object"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo ZAxisObjectInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ZAxisObjectInfo = {
         "zAxisObject",
         "zAxis: Focus Object",
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
-        "stay fixed to the current position of that object."
+        "stay fixed to the current position of that object"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo XAxisInvertObjectInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo XAxisInvertObjectInfo = {
         "xAxisInvertObject",
         "xAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
-        "referenced object."
+        "referenced object"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo YAxisInvertObjectInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo YAxisInvertObjectInfo = {
         "yAxisInvertObject",
         "yAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
-        "referenced object."
+        "referenced object"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo ZAxisInvertObjectInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo ZAxisInvertObjectInfo = {
         "zAxisInvertObject",
         "zAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
-        "referenced object."
+        "referenced object"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo XAxisVectorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo XAxisVectorInfo = {
         "xAxisVector",
         "xAxis: Direction vector",
-        "This value specifies a static direction vector that is used for a fixed "
-        "rotation."
+        "This value specifies a static direction vector that is used for a fixed rotation"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo YAxisVectorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo YAxisVectorInfo = {
         "yAxisVector",
         "yAxis: Direction vector",
-        "This value specifies a static direction vector that is used for a fixed "
-        "rotation."
+        "This value specifies a static direction vector that is used for a fixed rotation"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo ZAxisVectorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ZAxisVectorInfo = {
         "zAxisVector",
         "zAxis: Direction vector",
-        "This value specifies a static direction vector that is used for a fixed "
-        "rotation."
+        "This value specifies a static direction vector that is used for a fixed rotation"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo
-    XAxisOrthogonalVectorInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo XAxisOrthogonalVectorInfo = {
         "xAxisOrthogonal",
         "xAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
         "it is used together with another non-coordinate system completion vector to "
-        "construct an orthogonal vector instead."
+        "construct an orthogonal vector instead"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo
-    YAxisOrthogonalVectorInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo YAxisOrthogonalVectorInfo = {
         "yAxisOrthogonal",
         "yAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
         "it is used together with another non-coordinate system completion vector to "
-        "construct an orthogonal vector instead."
+        "construct an orthogonal vector instead"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo
-    ZAxisOrthogonalVectorInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo ZAxisOrthogonalVectorInfo = {
         "zAxisOrthogonal",
         "zAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
         "it is used together with another non-coordinate system completion vector to "
-        "construct an orthogonal vector instead."
+        "construct an orthogonal vector instead"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo AttachedInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AttachedInfo = {
         "Attached",
         "Attached Node",
         "This is the name of the node that this rotation is attached to, this value is "
         "only needed if any of the three axis uses the Object type. In this case, the "
-        "location of the attached node is required to compute the relative direction."
+        "location of the attached node is required to compute the relative direction"
     };
 
     struct [[codegen::Dictionary(FixedRotation)]] Parameters {
@@ -231,9 +219,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation FixedRotation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_rotation_fixed";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_rotation_fixed");
 }
 
 FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
@@ -404,7 +390,7 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
 }
 
 bool FixedRotation::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     // We have already checked this before, but still
     const Parameters p = codegen::bake<Parameters>(_constructorDictionary);
@@ -483,8 +469,22 @@ bool FixedRotation::initialize() {
     }
 
     // No need to hold on to the data
-    _constructorDictionary = {};
+    _constructorDictionary = ghoul::Dictionary();
     return res;
+}
+
+void FixedRotation::update(const UpdateData& data) {
+    bool anyAxisIsObjectType = (
+        _xAxis.type == Axis::Type::Object ||
+        _yAxis.type == Axis::Type::Object ||
+        _zAxis.type == Axis::Type::Object
+    );
+
+    if (_attachedNode || anyAxisIsObjectType) {
+        requireUpdate();
+    }
+
+    Rotation::update(data);
 }
 
 glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
@@ -496,7 +496,7 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
     const glm::vec3 y = yAxis();
     const glm::vec3 z = zAxis();
 
-    constexpr const float Epsilon = 1e-3f;
+    constexpr float Epsilon = 1e-3f;
 
     if (glm::dot(x, y) > 1.f - Epsilon ||
         glm::dot(y, z) > 1.f - Epsilon ||

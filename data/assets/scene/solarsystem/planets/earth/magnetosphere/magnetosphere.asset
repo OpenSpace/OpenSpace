@@ -1,0 +1,55 @@
+local transforms = asset.require("./transforms_magnetosphere")
+local transferFunction = asset.localResource("./CMR-illuminance2.txt")
+
+local fieldlinesDirectory = asset.syncedResource({
+  Name = "Magnetosphere 2012 event",
+  Type = "HttpSynchronization",
+  Identifier = "magnetosphere_2012_event",
+  Version = 1
+})
+
+local earthMagnetosphere = {
+  Identifier = "EarthMagnetosphere",
+  Parent = transforms.GSMReferenceFrame.Identifier,
+  InteractionSphere = 6380000,  -- A value slightly bigger than earth radius
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    SourceFolder = fieldlinesDirectory,
+    LineWidth = 1.0,
+    AlphaBlendlingEnabled = false,
+    InputFileType = "Osfls",    -- OpenSpace Field lines sequence
+    MaskingEnabled = true,
+    MaskingQuantity = 5,      -- corresponds to "topology"
+    MaskingRanges = {{-0, 0}},  --closed only
+    ColorMethod = "By Quantity",
+    ColorQuantity = 4, -- speed
+    ColorTableRanges = {{50, 300}},
+    ColorTablePaths = {transferFunction},
+    LoadAtRuntime = true,
+    ScaleToMeters = 1.0,
+    Color = { 1.0, 0.725, 0.75, 0.8 }
+  },
+  GUI = {
+    Path = "/Solar System/Planets/Earth",
+    Name = "Magnetosphere"
+  },
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(earthMagnetosphere)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(earthMagnetosphere)
+end)
+
+asset.export(earthMagnetosphere)
+
+asset.meta = {
+  Name = "Static generic magnetosphere of fieldlines",
+  Version = "1.1",
+  Description = "Generic static magnetosphere fieldlines. Actual timestep 2012-07-14T00-00-00-000. Defaultly colored by speed; 50-300 km/s",
+  Author = "CCMC",
+  URL = "",
+  License = "CC-BY"
+}

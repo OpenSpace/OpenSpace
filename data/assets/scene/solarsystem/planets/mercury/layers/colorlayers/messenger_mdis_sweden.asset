@@ -1,14 +1,40 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 
 local layer = {
   Identifier = "Messenger_MDIS_Sweden",
   Name = "Messenger MDIS [Sweden]",
-  FilePath = mapServiceConfigs .. "/LiU/Messenger_MDIS.wms",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("messenger_mdis_sweden.wms"),
+  Description = [[This May 2013 basemap is a combination of the following mosaics; (1)
+  The 2013-05-10 version of the monochrome global mosaic, made from Applied Coherent
+  Technology (ACT) Corporation tiles, (2) An average north polar mosaic from 90N to 82.5N,
+  composed of images from many campaigns, made by C. Ernst, and (3) An average south
+  polar mosaic from 90S to 85S, composed of images from the south polar monitoring
+  campaign from the primary mission, made by N. Chabot. To fill minor areas of missing
+  data, the 2013-05-10 version of the high-incidence global mosaic was underlain. This
+  monochrome mosaic is composed of Mercury Dual Imaging System (MDIS) Narrow Angle
+  Camera (NAC) images and Wide Angle Camers (WAC) images acquired in the filter centered
+  at 750 nm. The resolution of this mosaic is 250 meters per pixel (m)]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Messenger MDIS [Sweden]",
+  Version = "1.0",
+  Description = [[Messenger MDIS layer for Mercury globe. This map is hosted on the
+    OpenSpace server in Sweden]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Mercury/Messenger/Global/Mercury_MESSENGER_MDIS_mosaic_global_250m_2013",
+  License = "NASA/PDS"
+}

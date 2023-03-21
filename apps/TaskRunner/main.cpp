@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,6 @@
 #include <ghoul/ghoul.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereaderdevil.h>
-#include <ghoul/io/texture/texturereaderfreeimage.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
@@ -55,23 +53,13 @@
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/engine/moduleengine.h>
+#ifdef WIN32
+#include <Windows.h>
+#endif // WIN32
 
 namespace {
     const std::string ConfigurationFile = "openspace.cfg";
     const std::string _loggerCat = "TaskRunner Main";
-}
-
-void initTextureReaders() {
-    #ifdef GHOUL_USE_DEVIL
-        ghoul::io::TextureReader::ref().addReader(
-            std::make_unique<ghoul::io::TextureReaderDevIL>()
-        );
-    #endif // GHOUL_USE_DEVIL
-    #ifdef GHOUL_USE_FREEIMAGE
-        ghoul::io::TextureReader::ref().addReader(
-            std::make_unique<ghoul::io::TextureReaderFreeImage>()
-        );
-    #endif // GHOUL_USE_FREEIMAGE
 }
 
 void performTasks(const std::string& path) {
@@ -99,7 +87,7 @@ void performTasks(const std::string& path) {
         };
         task.perform(onProgress);
     }
-    std::cout << "Done performing tasks." << std::endl;
+    std::cout << "Done performing tasks" << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -124,11 +112,24 @@ int main(int argc, char** argv) {
 
     // Register the base path as the directory where the configuration file lives
     std::filesystem::path base = configFile.parent_path();
-    constexpr const char* BasePathToken = "${BASE}";
-    FileSys.registerPathToken(BasePathToken, base);
+    constexpr std::string_view BasePathToken = "${BASE}";
+    FileSys.registerPathToken(BasePathToken.data(), base);
+
+    // Using same configuration for size as in apps/OpenSpace/main.cpp
+    glm::ivec2 size = glm::ivec2(1920, 1080);
+#ifdef WIN32
+    DEVMODEW dm = { 0 };
+    dm.dmSize = sizeof(DEVMODEW);
+    BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
+    if (success) {
+        size.x = dm.dmPelsWidth;
+        size.y = dm.dmPelsHeight;
+    }
+#endif // WIN32
 
     *global::configuration = configuration::loadConfigurationFromFile(
         configFile.string(),
+        size,
         ""
     );
     openspace::global::openSpaceEngine->registerPathTokens();

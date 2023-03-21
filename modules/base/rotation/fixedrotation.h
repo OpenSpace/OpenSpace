@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,6 +47,7 @@ public:
 
     static documentation::Documentation Documentation();
 
+    void update(const UpdateData& data) override;
     glm::dmat3 matrix(const UpdateData& data) const override;
 
 private:

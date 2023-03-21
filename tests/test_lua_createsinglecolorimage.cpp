@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <openspace/engine/openspaceengine.h>
 #include <ghoul/filesystem/file.h>
@@ -35,82 +37,26 @@
 TEST_CASE("CreateSingleColorImage: Create image and check return value",
           "[createsinglecolorimage]")
 {
-    ghoul::lua::LuaState L;
-    ghoul::lua::push(L, "colorFile");
-    ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
+    std::filesystem::path path = createSingleColorImage(
+        "colorFile",
+        glm::dvec3(1.0, 0.0, 0.0)
+    );
 
-    int res = openspace::luascriptfunctions::createSingleColorImage(L);
-
-    // One return value
-    CHECK(res == 1);
-    CHECK(lua_gettop(L) == 1);
-    CHECK(lua_isstring(L, 1));
-
-    std::string path = ghoul::lua::value<std::string>(L, 1);
     CHECK_THAT(
-        path,
-        Catch::Matchers::Contains("OpenSpace\\cache\\colorFile.ppm")
-    );
-}
-
-TEST_CASE("CreateSingleColorImage: Faulty 1st input type", "[createsinglecolorimage]") {
-    ghoul::lua::LuaState L;
-    ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
-    ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
-
-    CHECK_THROWS_WITH(
-        openspace::luascriptfunctions::createSingleColorImage(L),
-        Catch::Matchers::Contains("parameter 1 was not the expected type")
-    );
-}
-
-TEST_CASE("CreateSingleColorImage: Faulty 2nd input type", "[createsinglecolorimage]") {
-    ghoul::lua::LuaState L;
-    ghoul::lua::push(L, "notCreatedColorFile");
-    ghoul::lua::push(L, "not a vector");
-
-    CHECK_THROWS_WITH(
-        openspace::luascriptfunctions::createSingleColorImage(L),
-        Catch::Matchers::Contains("parameter 2 was not the expected type")
-    );
-}
-
-TEST_CASE("CreateSingleColorImage: Invalid number of inputs", "[createsinglecolorimage]")
-{
-    ghoul::lua::LuaState L;
-    ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
-
-    CHECK_THROWS_WITH(
-        openspace::luascriptfunctions::createSingleColorImage(L),
-        Catch::Matchers::Contains("Expected 2 arguments, got 1")
-    );
-}
-
-TEST_CASE("CreateSingleColorImage: Faulty color value (vec4)",
-          "[createsinglecolorimage]")
-{
-    ghoul::lua::LuaState L;
-    ghoul::lua::push(L, "notCreatedColorFile");
-    ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0, 0.0 });
-
-    CHECK_THROWS_WITH(
-        openspace::luascriptfunctions::createSingleColorImage(L),
-        Catch::Matchers::Contains(
-            "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
-        )
+        path.string(),
+        Catch::Matchers::ContainsSubstring("colorFile.ppm")
     );
 }
 
 TEST_CASE("CreateSingleColorImage: Faulty color value (invalid values)",
           "[createsinglecolorimage]")
 {
-    ghoul::lua::LuaState L;
-    ghoul::lua::push(L, "notCreatedColorFile");
-    ghoul::lua::push(L, std::vector{ 255.0, 0.0, 0.0 }); // not a valid color
-
     CHECK_THROWS_WITH(
-        openspace::luascriptfunctions::createSingleColorImage(L),
-        Catch::Matchers::Contains(
+        createSingleColorImage(
+            "notCreatedColorFile",
+            glm::dvec3(255.0, 0.0, 0.0)
+        ).string(),
+        Catch::Matchers::Equals(
             "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
         )
     );
@@ -119,28 +65,18 @@ TEST_CASE("CreateSingleColorImage: Faulty color value (invalid values)",
 TEST_CASE("CreateSingleColorImage: Check if file was created",
           "[createsinglecolorimage]")
 {
-    ghoul::lua::LuaState L;
-    ghoul::lua::push(L, "colorFile2");
-    ghoul::lua::push(L, std::vector{ 0.0, 1.0, 0.0 });
-
-    int res = openspace::luascriptfunctions::createSingleColorImage(L);
-
-    CHECK(res == 1);
-    std::string path = ghoul::lua::value<std::string>(L, 1);
+    std::filesystem::path path = createSingleColorImage(
+        "colorFile2",
+        glm::dvec3(0.0, 1.0, 0.0)
+    );
     CHECK(std::filesystem::is_regular_file(path));
 }
 
 TEST_CASE("CreateSingleColorImage: Load created image", "[createsinglecolorimage]") {
-    ghoul::lua::LuaState L;
-    ghoul::lua::push(L, "colorFile");
-    ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
-
-    // Loads the same file that was created in a previous test case
-    int res = openspace::luascriptfunctions::createSingleColorImage(L);
-    CHECK(res == 1);
-    CHECK(lua_gettop(L) == 1);
-
-    std::string path = ghoul::lua::value<std::string>(L, 1);
+    std::filesystem::path path = createSingleColorImage(
+        "colorFile",
+        glm::dvec3(1.0, 0.0, 0.0)
+    );
 
     // Read the PPM file and check the image dimensions
     // (maybe too hard coded, but cannot load a texture here...)
@@ -153,7 +89,6 @@ TEST_CASE("CreateSingleColorImage: Load created image", "[createsinglecolorimage
 
     ppmFile >> version >> width >> height;
 
-    REQUIRE(width == 1);
-    REQUIRE(height == 1);
+    CHECK(width == 1);
+    CHECK(height == 1);
 }
-

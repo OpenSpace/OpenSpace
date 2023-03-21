@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,25 +36,36 @@
 #include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "GridProgram";
-
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered."
+        "This value determines the color of the grid lines that are rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
         "This value specifies the number of segments that are used to render the "
-        "surrounding sphere."
+        "surrounding sphere"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the spherical grid."
+        "This value specifies the line width of the spherical grid"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
+        "DrawLabels",
+        "Draw Labels",
+        "Determines whether labels should be drawn or hidden"
+    };
+
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
+    {
+        "Labels",
+        "Labels",
+        "The labels for the grid"
     };
 
     struct [[codegen::Dictionary(RenderableSphericalGrid)]] Parameters {
@@ -66,6 +77,13 @@ namespace {
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(DrawLabelInfo.description)]]
+        std::optional<bool> drawLabels;
+
+        // [[codegen::verbatim(LabelsInfo.description)]]
+        std::optional<ghoul::Dictionary> labels
+            [[codegen::reference("space_labelscomponent")]];
     };
 #include "renderablesphericalgrid_codegen.cpp"
 } // namespace
@@ -73,9 +91,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphericalGrid::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_sphericalgrid";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_sphericalgrid");
 }
 
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)
@@ -84,6 +100,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
+    , _drawLabels(DrawLabelInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -105,20 +122,37 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
+
+    // Radius is always 1
+    setBoundingSphere(1.0);
+
+    if (p.labels.has_value()) {
+        _drawLabels = p.drawLabels.value_or(_drawLabels);
+        addProperty(_drawLabels);
+
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
+        _hasLabels = true;
+        addPropertySubOwner(_labels.get());
+    }
 }
 
 bool RenderableSphericalGrid::isReady() const {
-    bool ready = true;
-    ready &= (_gridProgram != nullptr);
-    return ready;
+    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
+}
+
+void RenderableSphericalGrid::initialize() {
+    if (_hasLabels) {
+        _labels->initialize();
+        _labels->loadLabels();
+    }
 }
 
 void RenderableSphericalGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "GridProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "GridProgram",
                 absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/grid_fs.glsl")
             );
@@ -147,7 +181,7 @@ void RenderableSphericalGrid::deinitializeGL() {
     _iBufferID = 0;
 
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "GridProgram",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -163,15 +197,15 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-                                          modelTransform;
+    const glm::dmat4 modelViewTransform =
+        data.camera.combinedViewMatrix() * modelTransform;
+    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+
+    const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewTransform;
 
     _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform(
-        "MVPTransform",
-        glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
-    );
-    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
+    _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
     // Change GL state:
@@ -196,6 +230,31 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
+
+    // Draw labels
+    if (_drawLabels && _hasLabels) {
+        const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+        const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+        glm::vec3 right = glm::cross(viewDirection, lookup);
+        const glm::vec3 up = glm::cross(right, viewDirection);
+
+        const glm::dmat4 worldToModelTransform = glm::inverse(modelTransform);
+        glm::vec3 orthoRight = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+        );
+
+        if (orthoRight == glm::vec3(0.0)) {
+            glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+            right = glm::cross(viewDirection, otherVector);
+            orthoRight = glm::normalize(
+                glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+            );
+        }
+        const glm::vec3 orthoUp = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
+        );
+        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+    }
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {
@@ -232,11 +291,11 @@ void RenderableSphericalGrid::update(const UpdateData&) {
                     normal = glm::normalize(normal);
                 }
 
-                glm::vec4 tmp(x, y, z, 1);
+                glm::vec4 tmp(x, y, z, 1.f);
                 glm::mat4 rot = glm::rotate(
-                    glm::mat4(1),
+                    glm::mat4(1.f),
                     glm::half_pi<float>(),
-                    glm::vec3(1, 0, 0)
+                    glm::vec3(1.f, 0.f, 0.f)
                 );
                 tmp = glm::vec4(glm::dmat4(rot) * glm::dvec4(tmp));
 

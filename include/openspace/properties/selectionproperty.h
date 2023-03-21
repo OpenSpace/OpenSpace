@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,11 +37,11 @@ class SelectionProperty : public TemplateProperty<std::set<std::string>> {
 public:
     SelectionProperty(Property::PropertyInfo info);
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     /**
-     * This method sets the stored value to the provided value <code>val</code>.
+     * This method sets the stored value to the provided value `val`.
      * If the value is different, the listeners are notified. It also removes any
      * invalid keys in the input set. A key is invalid if it does not correspond to
      * an existing option in the SelectionProperty
@@ -51,18 +51,18 @@ public:
     void setValue(std::set<std::string> val) override;
 
     /**
-     * Checks if an option given by the provided <code>key</code> exists.
+     * Checks if an option given by the provided `key` exists.
      *
      * \param key The key that should be checked for existence
-     * \return \c if the option exists; \c false otherwise
+     * \return `true` if the option exists; `false` otherwise
      */
     bool hasOption(const std::string& key) const;
 
     /**
-     * Checks if an option given by the provided <code>key</code> is selected.
+     * Checks if an option given by the provided `key` is selected.
      *
      * \param key The key that should be checked
-     * \return \c true if the option is selected; \c false otherwise
+     * \return `true` if the option is selected; `false` otherwise
      */
     bool isSelected(const std::string& key) const;
 
@@ -70,7 +70,7 @@ public:
      * Checks if the SelectionProperty has any selected values, that is, if its
      * value is empty.
      *
-     * \return \c true if there are selected options; \c false otherwise
+     * \return `true` if there are selected options; `false` otherwise
      */
     bool hasSelected() const;
 
@@ -114,7 +114,7 @@ public:
     using TemplateProperty<std::set<std::string>>::operator=;
 
 protected:
-    std::set<std::string> fromLuaConversion(lua_State* state, bool& success) const override;
+    std::set<std::string> fromLuaConversion(lua_State* state) const override;
 
     void toLuaConversion(lua_State* state) const override;
 

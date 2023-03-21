@@ -1,6 +1,5 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").sat375
 
 
 
@@ -23,19 +22,27 @@ local MimasTrail = {
   GUI = {
     Name = "Mimas Trail",
     Path = "/Solar System/Planets/Saturn/Moons",
-    Description = [[ Trail of Saturn's moon Mimas as observed by Saturn.]],
+    Description = "Trail of Saturn's moon Mimas as observed by Saturn",
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { MimasTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MimasTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MimasTrail)
+end)
+
+asset.export(MimasTrail)
+
 
 
 asset.meta = {
   Name = "Mimas Trail",
-  Version = "1.0",
-  Description = [[ Main trail for Mimas. Data from NASA Spice (see base spice asset)]],
+  Version = "1.1",
+  Description = "Main trail for Mimas. Data from NASA Spice (see base spice asset)",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"MimasTrail"}
+  License = "MIT license"
 }

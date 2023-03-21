@@ -1,10 +1,15 @@
-local asset_helper = asset.require('util/asset_helper')
-local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('./kernels').kernels
-local models = asset.require('scene/solarsystem/missions/apollo/csm_model').models
+local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
+local kernels = asset.require("./kernels").kernels
 
-local apolloSpiceId = "-908"
+local models = asset.syncedResource({
+  Name = "Apollo Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_models",
+  Version = 4
+})
+
+local apolloSpiceId = -908
 
 local Apollo8 = {
   Identifier = "Apollo8",
@@ -50,26 +55,17 @@ local Apollo8Model = {
     End = "1968 DEC 28"
   },
   Transform = {
-    Scale = {
-      Type = "StaticScale",
-      -- The scale of the model is in cm; OpenSpace is in m
-      Scale = 0.01
-    },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0.0, 0.0, -3.1415 / 2}
+      Rotation = {0.0, 0.0, -math.pi / 2}
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/ApolloCSM.fbx",
+    GeometryFile = models .. "ApolloCSM.osmodel",
+    ModelScale = 0.0001,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sun_transforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     },
     PerformShading = true,
     DisableFaceCulling = true
@@ -97,6 +93,18 @@ local Apollo8Pivot = {
   }
 }
 
-local list = { Apollo8, Apollo8Model, Apollo8Pivot }
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Apollo8)
+  openspace.addSceneGraphNode(Apollo8Model)
+  openspace.addSceneGraphNode(Apollo8Pivot)
+end)
 
-asset_helper.registerSceneGraphNodesAndExport(asset, list)
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Apollo8Pivot)
+  openspace.removeSceneGraphNode(Apollo8Model)
+  openspace.removeSceneGraphNode(Apollo8)
+end)
+
+asset.export(Apollo8)
+asset.export(Apollo8Model)
+asset.export(Apollo8Pivot)

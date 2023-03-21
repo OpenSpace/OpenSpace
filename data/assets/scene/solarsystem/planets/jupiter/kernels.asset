@@ -5,14 +5,14 @@ local Kernels = asset.syncedResource({
   Version = 1
 })
 
-asset.export("jup310", Kernels .. '/jup310.bsp')
-asset.export("jup341", Kernels .. '/jup341.bsp')
+asset.export("jup310", Kernels .. "jup310.bsp")
+asset.export("jup341", Kernels .. "jup341.bsp")
 
 
 asset.meta = {
   Name = "Jupiter Spice Kernels",
   Version = "1.0",
-  Description = [[ Generic SPICE kernels for Jupiter.]],
+  Description = "Generic SPICE kernels for Jupiter",
   Author = "OpenSpace Team",
   URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
   License = "NASA"

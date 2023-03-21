@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,31 +26,30 @@
 
 #include <modules/globebrowsing/src/layer.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* _loggerCat = "LayerGroup";
-    constexpr const char* KeyFallback = "Fallback";
+    constexpr std::string_view _loggerCat = "LayerGroup";
 
     constexpr openspace::properties::Property::PropertyInfo BlendTileInfo = {
         "BlendTileLevels",
         "Blend between levels",
         "If this value is enabled, images between different levels are interpolated, "
         "rather than switching between levels abruptly. This makes transitions smoother "
-        "and more visually pleasing.",
+        "and more visually pleasing",
         openspace::properties::Property::Visibility::Hidden
     };
 } // namespace
 
 namespace openspace::globebrowsing {
 
-LayerGroup::LayerGroup(layergroupid::GroupID id)
-    : properties::PropertyOwner({
-        layergroupid::LAYER_GROUP_IDENTIFIERS[id],
-        layergroupid::LAYER_GROUP_NAMES[id]
-    })
-    , _groupId(id)
+LayerGroup::LayerGroup(layers::Group group)
+    : properties::PropertyOwner({ std::string(group.identifier), std::string(group.name)})
+    , _groupId(group.id)
     , _levelBlendingEnabled(BlendTileInfo, true)
 {
     addProperty(_levelBlendingEnabled);
@@ -65,24 +64,12 @@ void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
-
-            if (layerDict.hasValue<ghoul::Dictionary>(KeyFallback))  {
-                LWARNING("Unable to create layer. Initializing fallback layer.");
-                ghoul::Dictionary fallbackLayerDict =
-                    layerDict.value<ghoul::Dictionary>(KeyFallback);
-                try {
-                    addLayer(fallbackLayerDict);
-                }
-                catch (const ghoul::RuntimeError& except) {
-                    LERRORC(except.component, except.message);
-                }
-            }
         }
     }
 }
 
 void LayerGroup::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     for (const std::unique_ptr<Layer>& l : _layers) {
         l->initialize();
@@ -90,31 +77,28 @@ void LayerGroup::initialize() {
 }
 
 void LayerGroup::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     for (const std::unique_ptr<Layer>& l : _layers) {
         l->deinitialize();
     }
 }
 
-int LayerGroup::update() {
-    ZoneScoped
+void LayerGroup::update() {
+    ZoneScoped;
 
-    int res = 0;
     _activeLayers.clear();
 
     for (const std::unique_ptr<Layer>& layer : _layers) {
         if (layer->enabled()) {
-            res += layer->update();
+            layer->update();
             _activeLayers.push_back(layer.get());
         }
     }
-
-    return res;
 }
 
 Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
-    ZoneScoped
+    ZoneScoped;
 
     documentation::TestResult res = documentation::testSpecification(
         Layer::Documentation(),
@@ -125,17 +109,18 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     }
 
     if (!layerDict.hasValue<std::string>("Identifier")) {
-        LERROR("'Identifier' must be specified for layer.");
+        LERROR("'Identifier' must be specified for layer");
         return nullptr;
     }
-    std::unique_ptr<Layer> layer = std::make_unique<Layer>(_groupId, layerDict, *this);
-    layer->onChange(_onChangeCallback);
-    if (hasPropertySubOwner(layer->identifier())) {
-        LINFO("Layer with identifier " + layer->identifier() + " already exists.");
+    std::string identifier = layerDict.value<std::string>("Identifier");
+    if (hasPropertySubOwner(identifier)) {
+        LINFO("Layer with identifier '" + identifier + "' already exists");
         _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
         return nullptr;
     }
 
+    std::unique_ptr<Layer> layer = std::make_unique<Layer>(_groupId, layerDict, *this);
+    layer->onChange(_onChangeCallback);
     Layer* ptr = layer.get();
     _layers.push_back(std::move(layer));
     update();
@@ -144,6 +129,32 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     }
     addPropertySubOwner(ptr);
     _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
+
+    properties::PropertyOwner* layerGroup = ptr->owner();
+    properties::PropertyOwner* layerManager = layerGroup->owner();
+
+    // @TODO (emmbr, 2021-11-03) If the layer is added as part of the globe's
+    // dictionary during construction this function is called in the LayerManager's
+    // initialize function. This means that the layerManager does not exists yet, and
+    // we cannot find which SGN it belongs to... Want to avoid doing this check, so
+    // this should be fixed (probably as part of a cleanup/rewite of the LayerManager)
+    if (!layerManager) {
+        global::eventEngine->publishEvent<events::EventLayerAdded>(
+            "", // we don't know this yet
+            layerGroup->identifier(),
+            ptr->identifier()
+        );
+    }
+    else {
+        properties::PropertyOwner* globe = layerManager->owner();
+        properties::PropertyOwner* sceneGraphNode = globe->owner();
+        global::eventEngine->publishEvent<events::EventLayerAdded>(
+            sceneGraphNode->identifier(),
+            layerGroup->identifier(),
+            ptr->identifier()
+        );
+    }
+
     return ptr;
 }
 
@@ -158,6 +169,15 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             std::string name = layerName;
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
+            properties::PropertyOwner* layerGroup = it->get()->owner();
+            properties::PropertyOwner* layerManager = layerGroup->owner();
+            properties::PropertyOwner* globe = layerManager->owner();
+            properties::PropertyOwner* sceneGraphNode = globe->owner();
+            global::eventEngine->publishEvent<events::EventLayerRemoved>(
+                sceneGraphNode->identifier(),
+                layerGroup->identifier(),
+                it->get()->identifier()
+            );
             _layers.erase(it);
             update();
             if (_onChangeCallback) {
@@ -176,16 +196,9 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
     LERROR("Could not find layer " + layerName);
 }
 
-void LayerGroup::moveLayers(int oldPosition, int newPosition) {
+void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     oldPosition = std::max(0, oldPosition);
-    newPosition = std::min(newPosition, static_cast<int>(_layers.size()));
-
-    // We need to adjust the new position as we first delete the old position, if this
-    // position is before the new position we have reduced the size of the vector by 1 and
-    // need to adapt where we want to put the value in
-    if (oldPosition < newPosition) {
-        newPosition -= 1;
-    }
+    newPosition = std::min(newPosition, static_cast<int>(_layers.size() - 1));
 
     // There are two synchronous vectors that we have to update here.  The _layers vector
     // is used to determine the order while rendering, the _subowners is the order in
@@ -230,6 +243,10 @@ void LayerGroup::onChange(std::function<void(Layer*)> callback) {
     for (const std::unique_ptr<Layer>& layer : _layers) {
         layer->onChange(_onChangeCallback);
     }
+}
+
+bool LayerGroup::isHeightLayer() const {
+    return _groupId == layers::Group::ID::HeightLayers;
 }
 
 } // namespace openspace::globebrowsing

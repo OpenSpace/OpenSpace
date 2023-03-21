@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
 
 
@@ -12,7 +11,7 @@ local NeptuneTrailEarth = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NEPTUNE BARYCENTER",
+      Target = "NEPTUNE",
       Observer = "EARTH"
     },
     Color = { 1.0, 0.5, 0.2 },
@@ -25,20 +24,28 @@ local NeptuneTrailEarth = {
     Name = "Neptune trail from Earth",
     Path = "/Solar System/Planets/Neptune",
     Hidden = false,
-    Description = [[ Trail of Neptune as observed by the Earth.]],
+    Description = "Trail of Neptune as observed by the Earth",
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { NeptuneTrailEarth })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NeptuneTrailEarth)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NeptuneTrailEarth)
+end)
+
+asset.export(NeptuneTrailEarth)
+
 
 
 asset.meta = {
   Name = "Neptune Trail from Earth",
-  Version = "1.0",
-  Description = [[ Alternate trail of Neptune, as observed by the Earth rather then the
-    Sun.]],
+  Version = "1.1",
+  Description = [[Alternate trail of Neptune, as observed by the Earth rather then the
+    Sun]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"VenusTrailEarth"}
+  License = "MIT license"
 }

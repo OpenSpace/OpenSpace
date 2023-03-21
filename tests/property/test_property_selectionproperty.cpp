@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <openspace/properties/selectionproperty.h>
 #include <ghoul/lua/ghoul_lua.h>
@@ -35,9 +35,9 @@
 TEST_CASE("SelectionProperty: Class Name and Default Value", "[selectionproperty]") {
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
 
-    REQUIRE(p.className() == "SelectionProperty");
-    REQUIRE(p.value() == std::set<std::string>());
-    REQUIRE(p.options().empty());
+    CHECK(p.className() == "SelectionProperty");
+    CHECK(p.value() == std::set<std::string>());
+    CHECK(p.options().empty());
 }
 
 TEST_CASE("SelectionProperty: Set Value", "[selectionproperty]") {
@@ -47,11 +47,11 @@ TEST_CASE("SelectionProperty: Set Value", "[selectionproperty]") {
     const std::set<std::string> list{ "a", "b" };
     p.setValue(list);
 
-    REQUIRE(p.value() == list);
+    CHECK(p.value() == list);
 
     // Empty value
     p.setValue({});
-    REQUIRE(p.value() == std::set<std::string>());
+    CHECK(p.value() == std::set<std::string>());
 }
 
 TEST_CASE("SelectionProperty: Set Value - Invalid Input", "[selectionproperty]") {
@@ -60,15 +60,7 @@ TEST_CASE("SelectionProperty: Set Value - Invalid Input", "[selectionproperty]")
 
     p.setValue({ "d", "a" }); // d is not valid option and should be ignored
 
-    REQUIRE(p.value() == std::set<std::string>{ "a" });
-}
-
-TEST_CASE("SelectionProperty: Set Value - No Options", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
-
-    p.setValue({ "a" });
-
-    REQUIRE(p.value() == std::set<std::string>());
+    CHECK(p.value() == std::set<std::string>{ "a" });
 }
 
 TEST_CASE("SelectionProperty: Set Value - Duplicates", "[selectionproperty]") {
@@ -78,7 +70,7 @@ TEST_CASE("SelectionProperty: Set Value - Duplicates", "[selectionproperty]") {
     p.setValue({ "a", "a" });
 
     // Duplicate should be ignored in set creation
-    REQUIRE(p.value() == std::set<std::string>{ "a" });
+    CHECK(p.value() == std::set<std::string>{ "a" });
 }
 
 TEST_CASE("SelectionProperty: Options and Selection Helpers", "[selectionproperty]") {
@@ -86,28 +78,28 @@ TEST_CASE("SelectionProperty: Options and Selection Helpers", "[selectionpropert
     p.setOptions({ "a", "b" });
     p.setValue({ "a" });
 
-    REQUIRE(p.hasSelected());
-    REQUIRE(p.isSelected("a"));
-    REQUIRE((p.hasOption("a") && p.hasOption("b")));
+    CHECK(p.hasSelected());
+    CHECK(p.isSelected("a"));
+    CHECK((p.hasOption("a") && p.hasOption("b")));
 
     p.clearSelection();
-    REQUIRE(!p.hasSelected());
-    REQUIRE(p.value().empty());
+    CHECK(!p.hasSelected());
+    CHECK(p.value().empty());
 
     p.setValue({ "a" });
     p.clearOptions();
 
     // Clearing options should clear selection as well
-    REQUIRE(p.options().empty());
-    REQUIRE(!p.hasSelected());
-    REQUIRE(p.value().empty());
+    CHECK(p.options().empty());
+    CHECK(!p.hasSelected());
+    CHECK(p.value().empty());
 }
 
 TEST_CASE("SelectionProperty: Options Sorting", "[selectionproperty]") {
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "c", "b" });
 
-    REQUIRE(p.options() == std::vector<std::string>{ "a", "b", "c" });
+    CHECK(p.options() == std::vector<std::string>{ "a", "b", "c" });
 }
 
 TEST_CASE("SelectionProperty: Add Options", "[selectionproperty]") {
@@ -118,8 +110,8 @@ TEST_CASE("SelectionProperty: Add Options", "[selectionproperty]") {
     p.addOption("a"); // duplicate
 
     const int nOptions = static_cast<int>(p.options().size());
-    REQUIRE(nOptions == 2);
-    REQUIRE(p.options() == std::vector<std::string>{ "a", "b" });
+    CHECK(nOptions == 2);
+    CHECK(p.options() == std::vector<std::string>{ "a", "b" });
 }
 
 TEST_CASE("SelectionProperty: Get String Value", "[selectionproperty]") {
@@ -129,14 +121,12 @@ TEST_CASE("SelectionProperty: Get String Value", "[selectionproperty]") {
     const std::set<std::string> list{ "a", "b" };
     p.setValue(list);
 
-    std::string res;
-    p.getStringValue(res);
-
-    REQUIRE(res == "[\"a\",\"b\"]");
+    std::string res = p.stringValue();
+    CHECK(res == "[\"a\",\"b\"]");
 
     p.setValue({});
-    p.getStringValue(res);
-    REQUIRE(res == "[]");
+    std::string res2 = p.stringValue();
+    CHECK(res2 == "[]");
 }
 
 TEST_CASE("SelectionProperty: Set Lua Value", "[selectionproperty]") {
@@ -148,7 +138,7 @@ TEST_CASE("SelectionProperty: Set Lua Value", "[selectionproperty]") {
 
     p.setLuaValue(L);
 
-    REQUIRE(p.value() == std::set<std::string>{ "a", "b" });
+    CHECK(p.value() == std::set<std::string>{ "a", "b" });
 }
 
 TEST_CASE("SelectionProperty: Set Lua Value - Duplicates", "[selectionproperty]") {
@@ -160,7 +150,7 @@ TEST_CASE("SelectionProperty: Set Lua Value - Duplicates", "[selectionproperty]"
 
     p.setLuaValue(L);
 
-    REQUIRE(p.value() == std::set<std::string>{ "a", "b" });
+    CHECK(p.value() == std::set<std::string>{ "a", "b" });
 }
 
 TEST_CASE("SelectionProperty: Set Lua Value - Invalid Key", "[selectionproperty]") {
@@ -172,7 +162,7 @@ TEST_CASE("SelectionProperty: Set Lua Value - Invalid Key", "[selectionproperty]
 
     p.setLuaValue(L);
 
-    REQUIRE(p.value() == std::set<std::string>{ "a" });
+    CHECK(p.value() == std::set<std::string>{ "a" });
 }
 
 TEST_CASE("SelectionProperty: Get Lua Value", "[selectionproperty]") {
@@ -195,8 +185,8 @@ TEST_CASE("SelectionProperty: Get Lua Value", "[selectionproperty]") {
     ghoul::Dictionary res = ghoul::lua::value<ghoul::Dictionary>(L);
 
     // Also test JSON representation for meaningful output
-    REQUIRE(ghoul::formatJson(res) == ghoul::formatJson(reference));
-    REQUIRE(res == reference);
+    CHECK(ghoul::formatJson(res) == ghoul::formatJson(reference));
+    CHECK(res == reference);
 }
 
 TEST_CASE("SelectionProperty: Get Empty Lua Value", "[selectionproperty]") {
@@ -210,27 +200,27 @@ TEST_CASE("SelectionProperty: Get Empty Lua Value", "[selectionproperty]") {
     ghoul::Dictionary emptyDict;
 
     // Also test JSON representation for meaningful output
-    REQUIRE(ghoul::formatJson(res) == ghoul::formatJson(emptyDict));
-    REQUIRE(res == emptyDict);
+    CHECK(ghoul::formatJson(res) == ghoul::formatJson(emptyDict));
+    CHECK(res == emptyDict);
 }
 
 TEST_CASE("SelectionProperty: Value From Copying Variable", "[selectionproperty]") {
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    p = { "a", "b" };
+    p = std::set<std::string>{ "a", "b" };
 
-    REQUIRE(p.value() == std::set<std::string>{ "a", "b" });
+    CHECK(p.value() == std::set<std::string>{ "a", "b" });
 }
 
 TEST_CASE("SelectionProperty: Re-set Options After Selection", "[selectionproperty]") {
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    p = { "a", "b" };
+    p = std::set<std::string>{ "a", "b" };
 
-    p.setOptions({ "a", "c", "d" }); // b no longer included
-                                     // => should be removed from selection
+    p.setOptions(std::vector<std::string>{ "a", "c", "d" }); // b no longer included
+                                                             // => should be removed
 
-    REQUIRE(p.value() == std::set<std::string>{ "a" });
+    CHECK(p.value() == std::set<std::string>{ "a" });
 }

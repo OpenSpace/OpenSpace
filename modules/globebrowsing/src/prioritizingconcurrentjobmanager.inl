@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,7 +67,7 @@ void PrioritizingConcurrentJobManager<P, KeyType>::clearEnqueuedJobs() {
 
 template <typename P, typename KeyType>
 std::shared_ptr<Job<P>> PrioritizingConcurrentJobManager<P, KeyType>::popFinishedJob() {
-    ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop!");
+    ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop");
 
     std::lock_guard lock(_finishedJobsMutex);
     std::shared_ptr<Job<P>> result = _finishedJobs.pop();

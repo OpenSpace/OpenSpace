@@ -1,14 +1,23 @@
-local transforms = asset.require('./transforms')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("./transforms")
 asset.require("spice/base")
-asset.require('./trail')
+asset.require("./trail")
 
-local texturesPath = asset.require("./saturn_textures").TexturesPath
+local texturesPath = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Saturn textures",
+  Identifier = "saturn_textures",
+  Version = 4
+})
 
 local Saturn = {
   Identifier = "Saturn",
   Parent = transforms.SaturnBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SATURN",
+      Observer = "SATURN BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_SATURN",
@@ -26,13 +35,13 @@ local Saturn = {
       --ColorFilter = 0.15,
 
       -- MultiTexture Valeus:
-      TextureFwrd = texturesPath .. "/forward_original_single.png",
-      TextureBckwrd = texturesPath .. "/back_original_single.png",
-      TextureUnlit = texturesPath .. "/unlit_original_single.png",
-      TextureColor = texturesPath .. "/color_original_single.png",
-      TextureTransparency = texturesPath .. "/trans_original_single.png",
+      TextureFwrd = texturesPath .. "forward_original_single.png",
+      TextureBckwrd = texturesPath .. "back_original_single.png",
+      TextureUnlit = texturesPath .. "unlit_original_single.png",
+      TextureColor = texturesPath .. "color_original_single.png",
+      TextureTransparency = texturesPath .. "trans_original_single.png",
       ColorFilter = 0.8,
-      
+
       NightFactor = 1.0,
       Size = 140445000,
       Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
@@ -40,13 +49,13 @@ local Saturn = {
     Shadows = {
       Enabled = true,
       DistanceFraction = 40.0
-    } 
+    }
   },
   Tag = { "planet_solarSystem", "planet_giants" },
   GUI = {
     Name = "Saturn",
     Path = "/Solar System/Planets/Saturn",
-    Description = [[Saturn globe.]]
+    Description = "Saturn globe"
   }
 }
 
@@ -55,32 +64,46 @@ local SaturnLabel = {
   Parent = Saturn.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
-    LabelText = "Saturn",
-    FontSize = 100.0,
-    LabelSize = 8.7,
-    LabelMaxSize = 100.0,
-    LabelMinSize = 1.0,
+    Type = "RenderableLabel",
+    Text = "Saturn",
+    FontSize = 70.0,
+    Size = 8.9,
+    MinMaxSize = { 1, 60 },
     BlendMode = "Additive",
-    LabelOrientationOption = "Camera View Direction"
+    OrientationOption = "Camera View Direction",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.5, 80.0 },
+    FadeWidths = { 1.0, 100.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Saturn Label",
     Path = "/Solar System/Planets/Saturn",
-    Description = [[ Main planet label for Saturn.]],
+    Description = "Main planet label for Saturn",
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Saturn)
+  openspace.addSceneGraphNode(SaturnLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SaturnLabel)
+  openspace.removeSceneGraphNode(Saturn)
+end)
+
+asset.export(Saturn)
+asset.export(SaturnLabel)
+
 
 
 asset.meta = {
   Name = "Saturn",
-  Version = "1.0",
-  Description = [[ Saturn globe, and main planet label.]],
+  Version = "1.1",
+  Description = "Saturn globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Saturn", "SaturnLabel"}
+  License = "MIT license"
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@ namespace {
         "translation for this transformation. The script needs to define a function "
         "'translate' that takes the current simulation time in seconds past the J2000 "
         "epoch as the first argument, the current wall time as milliseconds past the "
-        "J2000 epoch as the second argument and computes the translation."
+        "J2000 epoch as the second argument and computes the translation"
     };
 
     struct [[codegen::Dictionary(LuaTranslation)]] Parameters {
@@ -56,9 +56,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LuaTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_translation_lua";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_translation_lua");
 }
 
 LuaTranslation::LuaTranslation()
@@ -83,7 +81,7 @@ LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary) : LuaTransla
 }
 
 glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
-    ghoul::lua::runScriptFile(_state, _luaScriptFile);
+    ghoul::lua::runScriptFile(_state, _luaScriptFile.value());
 
     // Get the scaling function
     lua_getglobal(_state, "translation");
@@ -93,7 +91,7 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
             "LuaScale",
             fmt::format(
                 "Script '{}' does not have a function 'translation'",
-                _luaScriptFile
+                _luaScriptFile.value()
             )
         );
         return glm::dvec3(0.0);
@@ -121,7 +119,7 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
 
     double values[3];
     for (int i = 1; i <= 3; ++i) {
-        values[i] = ghoul::lua::value<double>(_state, i);
+        values[i - 1] = ghoul::lua::value<double>(_state, i);
     }
 
     return glm::make_vec3(values);

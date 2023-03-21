@@ -1,0 +1,78 @@
+local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
+local propertyHelper = asset.require("util/property_helper")
+local rot = asset.require("./carringtonToHEEQRotation.asset")
+
+local fieldlinesDirectory = asset.syncedResource({
+  Name = "Bastille Day MAS Fieldlines",
+  Type = "HttpSynchronization",
+  Identifier = "bastille_day_mas_fieldlines",
+  Version = 1
+})
+
+local sunRadius = 6.957E8
+
+-- Fieldlies from binaries
+local fieldlines = {
+  Identifier = "MAS-MHD-Fieldlines-bastille-day-2000",
+  Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 1/695700000,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = sunRadius
+    },
+    Rotation = rot.CarringtonLongitudeToHEEQ180Rotation
+  },
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    SourceFolder = fieldlinesDirectory,
+    AlphaBlendlingEnabled = false,
+    InputFileType = "Osfls",
+    ColorTablePaths = {
+      asset.localResource("transferfunctions/density-fieldlines.txt"),
+      asset.localResource("transferfunctions/velocity-fieldlines.txt")
+    },
+    ColorTableRanges = {
+      { 0, 1000000 },
+      { 100, 2000 }
+    },
+    SimulationModel = "mas",
+  },
+  GUI = {
+    Path = "/Solar System/Heliosphere/Bastille Day 2000",
+    Name = "MAS Fieldlines",
+    Description = "Magnetic fieldlines for the bastille day CME event. This asset contains data from 2000-07-14 08:33 to 2000-07-14 11:49"
+  }
+}
+
+local toggle_fieldlines = {
+  Identifier = "os.events.bastilleday.fieldlines.togglefieldlines",
+  Name = "Toggle Fieldlines",
+  Command = propertyHelper.invert("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled"),
+  Documentation = "Toggle fieldline rendering of CME",
+  GuiPath = "/Bastille-Day 2000",
+  IsLocal = false
+}
+
+asset.onInitialize(function ()
+  openspace.action.registerAction(toggle_fieldlines)
+  openspace.addSceneGraphNode(fieldlines)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(fieldlines)
+  openspace.action.removeAction(toggle_fieldlines)
+end)
+
+asset.export(fieldlines)
+
+asset.meta = {
+  Name = "Predictive Science Inc. Fieldlines Bastille Day",
+  Version = "1.1",
+  Description = "Magnetic fieldlines for the bastille day CME event",
+  Author = "CCMC, Jonathan Grangien, Matthias Berg",
+  URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+  License = "CC-BY"
+}

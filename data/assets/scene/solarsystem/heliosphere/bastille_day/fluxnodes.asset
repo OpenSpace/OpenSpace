@@ -1,0 +1,64 @@
+local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
+local propertyHelper = asset.require("util/property_helper")
+local rot = asset.require("./carringtonToHEEQRotation.asset")
+
+local fluxNodesBinaries = asset.syncedResource({
+  Name = "Bastille day Flux nodes binaries",
+  Type = "HttpSynchronization",
+  Identifier = "bastille_day_streamnodes_binaries",
+  Version = 1
+})
+
+-- FluxNodes from binaries
+local fluxNodes = {
+  Identifier = "MAS-MHD-FluxNodes-bastille-day-2000",
+  Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 695700000.0,
+  Transform = {
+    Rotation = rot.CarringtonLongitudeToHEEQ180Rotation
+  },
+  Renderable = {
+    Type = "RenderableFluxNodes",
+    SourceFolder = fluxNodesBinaries,
+    ColorTablePath = asset.localResource("transferfunctions/CMR.txt"),
+    ColorTableRange = {-2.0, 4.0}
+  },
+  GUI = {
+    Path = "/Solar System/Heliosphere/Bastille Day 2000",
+    Name = "Flux Nodes",
+    Description = "Flux nodes for the bastille day CME event. This asset contains data from 2000-07-14 08:38 to 2000-07-14 19:48"
+  }
+}
+
+local toggle_fluxnodes = {
+  Identifier = "os.events.bastilleday.fluxnodes.togglefluxnodes",
+  Name = "Toggle flux nodes",
+  Command = propertyHelper.invert("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled"),
+  Documentation = "Toggle flux node rendering of CME",
+  GuiPath = "/Bastille-Day 2000",
+  IsLocal = false
+}
+
+asset.onInitialize(function ()
+  openspace.action.registerAction(toggle_fluxnodes)
+  openspace.addSceneGraphNode(fluxNodes)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(fluxNodes)
+  openspace.action.removeAction(toggle_fluxnodes)
+end)
+
+asset.export(fluxNodes)
+
+
+asset.meta = {
+  Name = "Predictive Science Inc. Flux nodes Bastille Day",
+  Version = "1.1",
+  Description = "Flux nodes for the bastille day CME event",
+  Author = "CCMC, Christian Adamsson, Emilie Ho",
+  URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+  License = "CC-BY"
+}

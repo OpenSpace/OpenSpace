@@ -1,0 +1,49 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
+
+
+
+local MercuryBarycenterTrail = {
+  Identifier = "MercuryBarycenterTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MERCURY BARYCENTER",
+      Observer = "SSB"
+    },
+    Color = { 0.6, 0.5, 0.5 },
+    Period = 87.968,
+    Resolution = 1000,
+    Enabled = false
+  },
+  Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
+  GUI = {
+    Name = "Mercury Barycenter Trail",
+    Path = "/Solar System/Planets/Mercury",
+    Description = "Barycenter Trail of Mercury as observed by the Sun",
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MercuryBarycenterTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MercuryBarycenterTrail)
+end)
+
+asset.export(MercuryBarycenterTrail)
+
+
+
+asset.meta = {
+  Name = "Mercury Trail",
+  Version = "1.1",
+  Description = [[Trail for Mercury's Barycenter. Data from NASA Spice (see base spice
+    asset)]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

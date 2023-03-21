@@ -1,30 +1,52 @@
-local assetHelper = asset.require('util/asset_helper')
-local sharedSssb = asset.require('./sssb_shared')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'centaur_asteroid',
-  'sssb_data_centaur_asteroid')
-local object = sharedSssb.createSssbGroupObject('sssb_data_centaur_asteroid.csv',
-  "Centaur Asteroids", filepath, { 0.94, 0.96, 0.94 })
-object.Renderable.Enabled = false
-object.Renderable.SegmentQuality = 6
-object.Renderable.TrailFade = 18
+local sssb = asset.syncedResource({
+  Name = "Small SolarSystem Body Data (Centaur Asteroid)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_centaur_asteroid",
+  Version = 1
+})
 
-object.GUI.Description = [[ Asteroids with either a perihelion or a semi-major axis
-  between those of the four outer planets. ]]
+local object = {
+  Identifier = "sssb_centaur_asteroid",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_centaur_asteroid.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 6,
+    Color = { 0.94, 0.96, 0.94 },
+    TrailFade = 18
+  },
+  GUI = {
+    Name = "Centaur Asteroids",
+    Path = "/Solar System/Small Bodies",
+    Description = [[Asteroids with either a perihelion or a semi-major axis between those
+      of the four outer planets.]]
+  }
+}
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Centaur Asteroids",
-  Version = "1.0",
-  Description = [[ RenderableSmallBody asset with data from from JPL Horizons
-    contiaining the Centaur group.]],
+  Version = "1.1",
+  Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
+    the Centaur group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
   License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
     All documents available from this server may be protected under the U.S. and 
-    Foreign Copyright Laws.]],
-  Identifiers = {"sssb_sssb_data_centaur_asteroid"}
+    Foreign Copyright Laws]]
 }

@@ -1,10 +1,15 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./../transforms')
+local transforms = asset.require("../transforms")
 asset.require("spice/base")
-asset.require('../trail')
-local labelsPath = asset.require('./../pluto_globelabels').LabelsPath
+asset.require("../trail")
 
 
+
+local labelsPath = asset.syncedResource({
+  Name = "Pluto Labels",
+  Type = "HttpSynchronization",
+  Identifier = "pluto_labels",
+  Version = 1
+})
 
 local Charon = {
   Identifier = "Charon",
@@ -27,21 +32,16 @@ local Charon = {
     SegmentsPerPatch = 64,
     Layers = {},
     Labels = {
-      Enable = false,
-      FileName = labelsPath .. "/charon.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 40.0,
-      LabelsSize = 8.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 2000000.0,
-      FadeOutStartingDistance = 800000.0,
-      LabelsForceDomeRendering = true,
-      LabelsDistanceEPS = 250000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      Enabled = false,
+      FileName = labelsPath .. "charon.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 9.0,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      Distances = { 800000.0, 2000000.0 },
+      DistanceEPS = 250000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   Tag = { "planet_solarSystem", "planet_terrestrial" },
@@ -50,13 +50,49 @@ local Charon = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Charon })
+local CharonLabel = {
+  Identifier = "CharonLabel",
+  Parent = Charon.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Charon",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 500.0 },
+    FadeWidths = { 150.0, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Charon Label",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons",
+    Description = "Label for Pluto's moon Charon"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Charon)
+  openspace.addSceneGraphNode(CharonLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CharonLabel)
+  openspace.removeSceneGraphNode(Charon)
+end)
+
+asset.export(Charon)
+
 
 
 asset.meta = {
   Name = "Charon",
   Version = "1.0",
-  Description = [[ Charon globe with labels.]],
+  Description = "Charon globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

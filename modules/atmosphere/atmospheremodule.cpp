@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <modules/atmosphere/atmospheremodule.h>
 
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
@@ -35,9 +36,16 @@ namespace openspace {
 AtmosphereModule::AtmosphereModule() : OpenSpaceModule(Name) {}
 
 void AtmosphereModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
+
     fRenderable->registerClass<RenderableAtmosphere>("RenderableAtmosphere");
 }
 
+std::vector<documentation::Documentation> AtmosphereModule::documentations() const {
+    return {
+        RenderableAtmosphere::Documentation()
+    };
+}
 } // namespace openspace

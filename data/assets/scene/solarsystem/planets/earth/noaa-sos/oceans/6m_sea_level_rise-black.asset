@@ -1,0 +1,115 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Sea Level Rise: Impact of 6 meter (black)"
+local Identifier = "noaa-sos-oceans-6m_sea_level_rise-black"
+local Description = [[There are many questions surrounding climate change. One big
+question is how the changing climate will affect the oceans. The sea level has been
+steadily rising since 1900 at a rate of 1 to 2.5 millimeters per year. In fact, since
+1992 new methods of satellite altimetry using the TOPEX/Poseidon satellite indicate a
+rate of rise of 3 millimeters per year. The Fourth Assessment Report from the IPCC states
+that "there is strong evidence that global sea level gradually rose in the 20th century
+and is currently rising at an increased rate, after a period of little change between AD
+0 and AD 1900. Sea level is projected to rise at an even greater rate in this century. "
+- Fourth Assessment Report on Sea Level Rise Sea level can rise by two different
+mechanisms with respect to climate change. The first is the expansion of the sea water as
+the oceans warm due to an increasing global temperature. The second mechanism is the
+melting of ice over land, which then adds water to the ocean. The IPCC Fourth Assessment
+Report predicts that total global-average sea level rise from 1990 - 2100 will be 7 - 15
+inches for low emission scenarios and 10 - 23 inches for high emission scenarios]]
+local URL = "https://sos.noaa.gov/catalog/datasets/sea-level-rise-impact-of-6-meter-black/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+local layer_0m = {
+  Identifier = Identifier .. "-0m",
+  Name = Name .. " (0m)",
+  FilePath = syncedDirectory .. "0m-new.png",
+  Description = Description
+}
+
+local layer_1m = {
+  Identifier = Identifier .. "-1m",
+  Name = Name .. " (1m)",
+  FilePath = syncedDirectory .. "1m-new.png",
+  Description = Description
+}
+
+local layer_2m = {
+  Identifier = Identifier .. "-2m",
+  Name = Name .. " (2m)",
+  FilePath = syncedDirectory .. "2m-new.png",
+  Description = Description
+}
+
+local layer_3m = {
+  Identifier = Identifier .. "-3m",
+  Name = Name .. " (3m)",
+  FilePath = syncedDirectory .. "3m-new.png",
+  Description = Description
+}
+
+local layer_4m = {
+  Identifier = Identifier .. "-4m",
+  Name = Name .. " (4m)",
+  FilePath = syncedDirectory .. "4m-new.png",
+  Description = Description
+}
+
+local layer_5m = {
+  Identifier = Identifier .. "-5m",
+  Name = Name .. " (5m)",
+  FilePath = syncedDirectory .. "5m-new.png",
+  Description = Description
+}
+
+local layer_6m = {
+  Identifier = Identifier .. "-6m",
+  Name = Name .. " (6m)",
+  FilePath = syncedDirectory .. "6m-new.png",
+  Description = Description
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_0m)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_1m)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2m)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_3m)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_4m)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_5m)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_6m)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_0m)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_1m)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_2m)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_3m)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_4m)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_5m)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_6m)
+end)
+
+asset.export(layer_0m)
+asset.export(layer_1m)
+asset.export(layer_2m)
+asset.export(layer_3m)
+asset.export(layer_4m)
+asset.export(layer_5m)
+asset.export(layer_6m)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

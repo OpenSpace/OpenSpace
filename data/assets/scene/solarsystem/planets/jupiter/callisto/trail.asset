@@ -1,7 +1,6 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("../transforms")
 asset.require("spice/base")
-local kernel = asset.require('../kernels').jup310
+local kernel = asset.require("../kernels").jup310
 
 
 
@@ -27,16 +26,24 @@ local CallistoTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { CallistoTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CallistoTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CallistoTrail)
+end)
+
+asset.export(CallistoTrail)
+
 
 
 asset.meta = {
   Name = "Callisto Trail",
-  Version = "1.0",
-  Description = [[ Trail of Callisto as observed by the Jupiter. Data from NASA Spice
+  Version = "1.1",
+  Description = [[Trail of Callisto as observed by the Jupiter. Data from NASA Spice
     (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"CallistoTrail"}
+  License = "MIT license"
 }

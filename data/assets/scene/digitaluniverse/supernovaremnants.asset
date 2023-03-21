@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "Supernova Remnants Textures",
   Type = "HttpSynchronization",
@@ -21,21 +17,23 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "snr.label",
+      Color = { 0.6, 0.46, 0.0 },
+      Size = 16.44,
+      MinMaxSize = { 4, 100 },
+      Unit = "pc"
+    },
     Color = { 1.0, 0.5, 0.0 },
     Opacity = 0.32,
-    File = speck .. "/snr.speck",
-    Texture = textures .. "/point4.png",
+    File = speck .. "snr.speck",
+    Texture = textures .. "point4.png",
     PolygonSides = 7,
-    LabelFile = speck .. "/snr.label",
-    TextColor = { 0.6, 0.46, 0.0 },
+    Unit = "pc",
     ScaleFactor = 424,
-    TextSize = 16.44,
-    TextMinSize = 4.0,
-    TextMaxSize = 200.0,
     --CorrectionSizeEndDistance = 17.5,
     --CorrectionSizeFactor = 13.96,
-    Unit = "pc",
-    BillboardMaxSize = 500,
+    BillboardMinMaxSize = { 0.0, 500.0 },
     EnablePixelSizeControl = true
   },
   GUI = {
@@ -45,19 +43,27 @@ local object = {
       remnant is the ejected gas that results from a supernova. It glows for a
       cosmically short period of time before mixing with the interstellar medium.
       (Description from URL) <br><br> Data Reference: The First Fermi LAT SNR
-      Catalog (Acero+, 2016)]],
+      Catalog (Acero+, 2016)]]
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Supernova Remnants",
-  Version = "2.0",
-  Description = [[Digital Universe asset for Supernova Remnants.]],
+  Version = "2.1",
+  Description = "Digital Universe asset for Supernova Remnants",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"SupernovaRemnants"}
+  License = "AMNH Digital Universe"
 }

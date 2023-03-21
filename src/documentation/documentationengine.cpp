@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,11 +35,11 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* HandlebarsFilename =
+    constexpr std::string_view HandlebarsFilename =
         "${WEB}/documentation/handlebars-v4.0.5.js";
-    constexpr const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
-    constexpr const char* CssFilename = "${WEB}/documentation/style.css";
-    constexpr const char* JsFilename = "${WEB}/documentation/script.js";
+    constexpr std::string_view BootstrapFilename = "${WEB}/common/bootstrap.min.css";
+    constexpr std::string_view CssFilename = "${WEB}/documentation/style.css";
+    constexpr std::string_view JsFilename = "${WEB}/documentation/script.js";
 } // namespace
 
 namespace openspace::documentation {
@@ -49,7 +49,7 @@ DocumentationEngine* DocumentationEngine::_instance = nullptr;
 DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationException(
                                                                         Documentation doc)
     : ghoul::RuntimeError(fmt::format(
-        "Duplicate Documentation with name '{}' and id '{}'",doc.name, doc.id
+        "Duplicate Documentation with name '{}' and id '{}'", doc.name, doc.id
     ))
     , documentation(std::move(doc))
 {}
@@ -182,8 +182,8 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
 void DocumentationEngine::addHandlebarTemplates(std::vector<HandlebarTemplate> templates)
 {
     _handlebarTemplates.insert(
-        std::end(_handlebarTemplates),
-        std::begin(templates), std::end(templates)
+        _handlebarTemplates.end(),
+        templates.begin(), templates.end()
     );
 }
 
@@ -194,7 +194,7 @@ std::vector<Documentation> DocumentationEngine::documentations() const {
 void DocumentationEngine::writeDocumentationHtml(const std::string& path,
                                                  std::string data)
 {
-    ZoneScoped
+    ZoneScoped;
 
     std::ifstream handlebarsInput;
     handlebarsInput.exceptions(~std::ofstream::goodbit);

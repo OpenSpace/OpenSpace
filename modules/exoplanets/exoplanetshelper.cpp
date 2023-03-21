@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,8 +38,8 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* _loggerCat = "ExoplanetsModule";
-}
+    constexpr std::string_view _loggerCat = "ExoplanetsModule";
+} // namespace
 
 namespace openspace::exoplanets {
 
@@ -65,8 +65,7 @@ glm::vec3 computeStarColor(float bv) {
 
     if (!colorMap.good()) {
         LERROR(fmt::format(
-            "Failed to open colormap data file: '{}'",
-            absPath(bvColormapPath)
+            "Failed to open colormap data file: {}", absPath(bvColormapPath)
         ));
         return glm::vec3(0.f);
     }

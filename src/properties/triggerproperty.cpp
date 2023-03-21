@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,24 +30,16 @@ TriggerProperty::TriggerProperty(PropertyInfo info)
     : Property(std::move(info))
 {}
 
-std::string TriggerProperty::className() const {
+std::string_view TriggerProperty::className() const {
     return "TriggerProperty";
 }
 
-bool TriggerProperty::setLuaValue(lua_State*) {
+void TriggerProperty::setLuaValue(lua_State*) {
     notifyChangeListeners();
-    return true;
 }
 
 void TriggerProperty::set(std::any) {
     notifyChangeListeners();
-}
-
-std::string TriggerProperty::toJson() const {
-    std::string result = "{";
-    result += "\"" + std::string(DescriptionKey) + "\": " + generateBaseJsonDescription();
-    result += "}";
-    return result;
 }
 
 std::string TriggerProperty::jsonValue() const {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,12 +37,12 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* GlslRaycastPath =
+    constexpr std::string_view GlslRaycastPath =
         "${MODULE_TOYVOLUME}/shaders/raycast.glsl";
-    constexpr const char* GlslBoundsVsPath =
-        "${MODULE_TOYVOLUME}/shaders/boundsvs.glsl";
-    constexpr const char* GlslBoundsFsPath =
-        "${MODULE_TOYVOLUME}/shaders/boundsfs.glsl";
+    constexpr std::string_view GlslBoundsVsPath =
+        "${MODULE_TOYVOLUME}/shaders/bounds_vs.glsl";
+    constexpr std::string_view GlslBoundsFsPath =
+        "${MODULE_TOYVOLUME}/shaders/bounds_fs.glsl";
 } // namespace
 
 namespace openspace {

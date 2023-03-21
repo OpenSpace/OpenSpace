@@ -4,6 +4,8 @@ local CreateFocusNodes = false
 local AddMarsLayers = true
 local AddMoonLayers = true
 local AddMercuryLayers = true
+local AddEarthLayers = true
+local DataFolder = openspace.absPath("${GLOBEBROWSING}")
 ----------------------------------------
 
 -- If you add layers for different planets than listed here, be sure to add an
@@ -22,61 +24,75 @@ local vrt_folders = {
     -- CTX will stomp over the HiRISE.
 
     -- tl;dr:  Specify CTX folders first, then HiRISE 
-    -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
+    -- example:   "C:/OpenSpace/GlobeBrowsingData/Mars/CTX"
 
     -- We recommend using this folder for CTX
-    openspace.absPath('${BASE}/../OpenSpaceData/Mars/CTX'),
+    DataFolder .. "/Mars/CTX",
     -- if not and you have a custom path for CTX layers, enter it below
-    '',
+    "",
     -- We recommend using this folder for HiRISE
-    openspace.absPath('${BASE}/../OpenSpaceData/Mars/HiRISE'),
+    DataFolder .. "/Mars/HiRISE",
     -- if not and you have a custom path for HiRISE layers, enter it below
-    ''
+    ""
   },
   Moon = {
     -- Add folders here whose contents will be automatically added to the Moon globe
     -- If multiple folders are added, the results will be added sequentially, meaning that
     -- if areas overlap, images from the lower results will overwrite the images from former
     -- results
-    -- example:  'C:/OpenSpace/GlobeBrowsingData/Moon'
-    openspace.absPath('${BASE}/../OpenSpaceData/Moon'),
-    openspace.absPath('${BASE}/../OpenSpaceData/Apollo'),
-    ''
+    -- example:  "C:/OpenSpace/GlobeBrowsingData/Moon"
+    DataFolder .. "/Moon",
+    DataFolder .. "/Apollo",
+    ""
   },
   Mercury = {
     -- Add folders here whose contents will be automatically added to the Mercury globe
     -- If multiple folders are added, the results will be added sequentially, meaning that
     -- if areas overlap, images from the lower results will overwrite the images from former
     -- results
-    -- example:  'C:/OpenSpace/GlobeBrowsingData/Mercury'
-    openspace.absPath('${BASE}/../OpenSpaceData/Mercury'),
-    ''
+    -- example:  "C:/OpenSpace/GlobeBrowsingData/Mercury"
+    DataFolder .. "/Mercury",
+    ""
+  },
+  Earth = {
+    -- Add folders here whose contents will be automatically added to the Earth globe
+    -- If multiple folders are added, the results will be added sequentially, meaning that
+    -- if areas overlap, images from the lower results will overwrite the images from former
+    -- results
+    -- example:  "C:/OpenSpace/GlobeBrowsingData/Earth"
+    DataFolder .. "/Earth",
+    ""
   }
 }
 
 -- Add require statements for assets exporting the neccessary globes
 -- here we add Mars, Moon and Mercury:
 if AddMarsLayers then
-  asset.require('../scene/solarsystem/planets/mars/mars')
+  asset.require("../scene/solarsystem/planets/mars/mars")
 else
-  vrt_folders['Mars'] = nil
+  vrt_folders["Mars"] = nil
 end
 if AddMoonLayers then
-  asset.require('../scene/solarsystem/planets/earth/moon/moon')
+  asset.require("../scene/solarsystem/planets/earth/moon/moon")
 else
-  vrt_folders['Moon'] = nil
+  vrt_folders["Moon"] = nil
 end
 if AddMercuryLayers then
-  asset.require('../scene/solarsystem/planets/mercury/mercury')
+  asset.require("../scene/solarsystem/planets/mercury/mercury")
 else
-  vrt_folders['Mercury'] = nil
+  vrt_folders["Mercury"] = nil
+end
+if AddEarthLayers then
+  asset.require("../scene/solarsystem/planets/earth/earth")
+else
+  vrt_folders["Earth"] = nil
 end
 
 asset.onInitialize(function ()
   -- Add local patches described at the top of this file
   for obj, list in pairs(vrt_folders) do
     for _, dir in pairs(list) do
-      if (dir ~= '') then
+      if (dir ~= "") then
         openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
 
         if CreateFocusNodes then
@@ -86,3 +102,14 @@ asset.onInitialize(function ()
     end
   end
 end)
+
+
+asset.meta = {
+  Name = "Customization - GlobeBrowsing",
+  Version = "1.0",
+  Description = [[This asset adds planetary images that can be downloaded separately
+  and placed in the OpenSpaceData folder]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

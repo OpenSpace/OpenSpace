@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,15 +32,16 @@ out vec4 vs_positionViewSpace;
 uniform dmat4 modelViewTransform;
 uniform dmat4 MVPTransform;
 
+
 void main() {
-    dvec4 objPosDouble      = dvec4(in_position, 1.0);
-    dvec4 positionViewSpace = modelViewTransform * objPosDouble;
-    dvec4 positionClipSpace = MVPTransform * objPosDouble;
-    
-    positionClipSpace.z = 0.0;
-    
-    vs_depthClipSpace    = float(positionClipSpace.w);
-    vs_positionViewSpace = vec4(positionViewSpace);
-    
-    gl_Position = vec4(positionClipSpace);
+  dvec4 objPosDouble = dvec4(in_position, 1.0);
+  dvec4 positionViewSpace = modelViewTransform * objPosDouble;
+  dvec4 positionClipSpace = MVPTransform * objPosDouble;
+
+  positionClipSpace.z = 0.0;
+
+  vs_depthClipSpace = float(positionClipSpace.w);
+  vs_positionViewSpace = vec4(positionViewSpace);
+
+  gl_Position = vec4(positionClipSpace);
 }

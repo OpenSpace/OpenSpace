@@ -1,5 +1,5 @@
-local helper = asset.require('util/vrt_flipbook_helper')
-local moon_asset = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local helper = asset.require("util/vrt_flipbook_helper")
+local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local assetPrefix = "A11flip";
 local assetGlobe = moon_asset.Moon.Identifier;
@@ -14,21 +14,42 @@ local vrts = asset.syncedResource({
   Version = 1
 })
 
+
+
 asset.onInitialize(function ()
   openspace.globebrowsing.addBlendingLayersFromDirectory(vrts, assetGlobe);
   flipbook = helper.createFlipbook(assetPrefix, assetGlobe, 19);
 
   rawset(_G, "nextFlip", function() helper.nextFlipbookPage(flipbook) end)
-  rawset(_G, "previousFlip", function() helper.previousFlipbookPage(flipbook) end)
+  openspace.action.registerAction({
+    Identifier = "lem_flipbook.next_flip",
+    Name = "Next A11 flip",
+    Command = "nextFlip()",
+    Documentation = "Show the next Apollo 11 flipbook image",
+    GuiPath = "/Missions/Apollo/11",
+    IsLocal = false
+  })
 
-  openspace.bindKey("p", "nextFlip()", "Show the next Apollo 11 flipbook image.", "Next A11 flip", "/Missions/Apollo/11")
-  openspace.bindKey("o", "previousFlip()","Show the previous Apollo 11 flipbook image.", "Prev A11 flip", "/Missions/Apollo/11")
+  rawset(_G, "previousFlip", function() helper.previousFlipbookPage(flipbook) end)
+  openspace.action.registerAction({
+    Identifier = "lem_flipbook.prev_flip",
+    Name = "Prev A11 flip",
+    Command = "previousFlip()",
+    Documentation = "Show the previous Apollo 11 flipbook image",
+    GuiPath = "/Missions/Apollo/11",
+    IsLocal = false
+  })
+
+  openspace.bindKey("p", "lem_flipbook.next_flip")
+  openspace.bindKey("o", "lem_flipbook.prev_flip")
 end)
 
 
 asset.onDeinitialize(function ()
   flipbook = nil;
 
+  openspace.action.removeAction("lem_flipbook.next_flip")
+  openspace.action.removeAction("lem_flipbook.prev_flip")
   openspace.clearKey("o")
   openspace.clearKey("p")
 end)

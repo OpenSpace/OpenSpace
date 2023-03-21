@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,67 +28,15 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <filesystem>
-
-#ifdef OPENSPACE_CURL_ENABLED
-#ifdef WIN32
-#pragma warning (push)
-#pragma warning (disable: 4574) // 'INCL_WINSOCK_API_TYPEDEFS' is defined to be '0'
-#endif // WIN32
-
 #include <curl/curl.h>
-
-#ifdef WIN32
-#pragma warning (pop)
-#endif // WIN32
-#endif
-
-namespace {
-    constexpr const long StatusCodeOk = 200;
-    constexpr const char* _loggerCat = "HttpRequest";
-} // namespace
+#include <filesystem>
 
 namespace openspace {
 
-namespace curlfunctions {
-
-size_t headerCallback(char* ptr, size_t size, size_t nmemb, void* userData) {
-    HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
-    size_t nBytes = r->_onHeader(HttpRequest::Header{ptr, size * nmemb});
-    r->setReadyState(HttpRequest::ReadyState::ReceivedHeader);
-    return nBytes;
-}
-
-int progressCallback(void* userData, int64_t nTotalDownloadBytes,
-                     int64_t nDownloadedBytes, int64_t, int64_t)
-{
-    HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
-    return r->_onProgress(
-        HttpRequest::Progress{
-            nTotalDownloadBytes > 0,
-            static_cast<size_t>(nTotalDownloadBytes),
-            static_cast<size_t>(nDownloadedBytes)
-        }
-    );
-}
-
-size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userData) {
-    HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
-    return r->_onData(HttpRequest::Data{ptr, size * nmemb});
-}
-
-} // namespace curlfunctions
-
 HttpRequest::HttpRequest(std::string url)
     : _url(std::move(url))
-    , _onReadyStateChange([](ReadyState) {})
-    , _onProgress([](Progress) { return 0; })
-    , _onData([](Data d) { return d.size; })
-    , _onHeader([](Header h) { return h.size; })
-{}
-
-void HttpRequest::onReadyStateChange(ReadyStateChangeCallback cb) {
-    _onReadyStateChange = std::move(cb);
+{
+    ghoul_assert(!_url.empty(), "url must not be empty");
 }
 
 void HttpRequest::onProgress(ProgressCallback cb) {
@@ -103,369 +51,325 @@ void HttpRequest::onHeader(HeaderCallback cb) {
     _onHeader = std::move(cb);
 }
 
-void HttpRequest::perform(RequestOptions opt) {
-    setReadyState(ReadyState::Loading);
-
+bool HttpRequest::perform(std::chrono::milliseconds timeout) {
     CURL* curl = curl_easy_init();
     if (!curl) {
-        setReadyState(ReadyState::Fail);
-        return;
+        return false;
     }
 
-    curl_easy_setopt(curl, CURLOPT_URL, _url.c_str()); // NOLINT
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // NOLINT
+    curl_easy_setopt(curl, CURLOPT_URL, _url.data());
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace");
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this); // NOLINT
-    // NOLINTNEXTLINE
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlfunctions::headerCallback);
+    // The leading + in all of the lambda expressions are to cause an implicit conversion
+    // to a standard C function pointer. Since the `curl_easy_setopt` function just takes
+    // anything as an argument, passing the standard lambda-created anonoymous struct
+    // causes crashes while using it if the + is not there
 
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this); // NOLINT
-    // NOLINTNEXTLINE
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlfunctions::writeCallback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
+    curl_easy_setopt(
+        curl,
+        CURLOPT_HEADERFUNCTION,
+        +[](char* ptr, size_t size, size_t nmemb, void* userData) {
+            HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
+            bool shouldContinue = r->_onHeader ? r->_onHeader(ptr, size * nmemb) : true;
+            return shouldContinue ? size * nmemb : 0;
+        }
+    );
 
-    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L); // NOLINT
-    #if LIBCURL_VERSION_NUM >= 0x072000
-    // xferinfo was introduced in 7.32.0, if a lower curl version is used the progress
-    // will not be shown for downloads on the splash screen
-    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this); // NOLINT
-    // NOLINTNEXTLINE
-    curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curlfunctions::progressCallback);
-    #endif
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+    curl_easy_setopt(
+        curl,
+        CURLOPT_WRITEFUNCTION,
+        +[](char* ptr, size_t size, size_t nmemb, void* userData) {
+            HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
+            bool shouldContinue = r->_onData ? r->_onData(ptr, size * nmemb) : true;
+            return shouldContinue ? size * nmemb : 0;
+        }
+    );
 
-    if (opt.requestTimeoutSeconds > 0) {
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, opt.requestTimeoutSeconds); // NOLINT
-    }
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
+    curl_easy_setopt(
+        curl,
+        CURLOPT_XFERINFOFUNCTION,
+        +[](void* userData, int64_t nTotalDownloadBytes, int64_t nDownloadedBytes,
+           int64_t, int64_t)
+        {
+            HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
+
+            std::optional<int64_t> totalBytes;
+            if (nTotalDownloadBytes > 0) {
+                totalBytes = nTotalDownloadBytes;
+            }
+
+            bool shouldContinue = r->_onProgress ?
+                r->_onProgress(nDownloadedBytes, totalBytes) :
+                true;
+            return shouldContinue ? 0 : 1;
+        }
+    );
+
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, static_cast<long>(timeout.count()));
 
     CURLcode res = curl_easy_perform(curl);
+    bool success = false;
     if (res == CURLE_OK) {
         long responseCode;
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode); // NOLINT
-        if (responseCode == StatusCodeOk) {
-            setReadyState(ReadyState::Success);
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+
+        if (responseCode >= 400) {
+            LERRORC(
+                "HttpRequest",
+                fmt::format("Failed download {} with code {}", _url, responseCode)
+            );
+            success = false;
         }
         else {
-            setReadyState(ReadyState::Fail);
+            success = true;
         }
     }
     else {
-        setReadyState(ReadyState::Fail);
+        LERRORC(
+            "HttpRequest",
+            fmt::format(
+                "Failed download {} with error {}", _url, curl_easy_strerror(res)
+            )
+        );
     }
     curl_easy_cleanup(curl);
-}
-
-void HttpRequest::setReadyState(openspace::HttpRequest::ReadyState state) {
-    _readyState = state;
-    _onReadyStateChange(state);
+    return success;
 }
 
 const std::string& HttpRequest::url() const {
     return _url;
 }
 
-HttpDownload::HttpDownload() : _onProgress([](HttpRequest::Progress) { return true; }) {}
 
-void HttpDownload::onProgress(ProgressCallback progressCallback) {
+
+
+HttpDownload::HttpDownload(std::string url)
+    : _httpRequest(std::move(url))
+{
+    _httpRequest.onData([this](char* buffer, size_t size) {
+        return handleData(buffer, size) && !_shouldCancel;
+    });
+
+    _httpRequest.onProgress(
+        [this](int64_t downloadedBytes, std::optional<int64_t> totalBytes) {
+            bool cont = _onProgress ? _onProgress(downloadedBytes, totalBytes) : true;
+            return cont && !_shouldCancel;
+        }
+    );
+}
+
+HttpDownload::~HttpDownload() {
+    cancel();
+    wait();
+}
+
+void HttpDownload::onProgress(HttpRequest::ProgressCallback progressCallback) {
     _onProgress = std::move(progressCallback);
 }
 
-bool HttpDownload::hasStarted() const {
-    return _started;
-}
-
 bool HttpDownload::hasFailed() const {
-    return _failed;
+    return _isFinished && !_isSuccessful;
 }
 
 bool HttpDownload::hasSucceeded() const {
-    return _successful;
+    return _isFinished && _isSuccessful;
 }
 
-void HttpDownload::markAsStarted() {
-    _started = true;
-}
-
-void HttpDownload::markAsFailed() {
-    _failed = true;
-}
-
-void HttpDownload::markAsSuccessful() {
-    _successful = true;
-}
-
-bool HttpDownload::callOnProgress(HttpRequest::Progress p) {
-    return _onProgress(p);
-}
-
-SyncHttpDownload::SyncHttpDownload(std::string url) : _httpRequest(std::move(url)) {}
-
-void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
-    LTRACE(fmt::format("Start sync download '{}'", _httpRequest.url()));
-
-    if (!initDownload()) {
-        LERROR(fmt::format("Failed sync download '{}'", _httpRequest.url()));
-        deinitDownload();
-        markAsFailed();
+void HttpDownload::start(std::chrono::milliseconds timeout) {
+    if (_isDownloading) {
         return;
     }
-    _httpRequest.onData([this] (HttpRequest::Data d) {
-        return handleData(d);
-    });
-    _httpRequest.onProgress([this](HttpRequest::Progress p) {
-        // Return a non-zero value to cancel download
-        // if onProgress returns false.
-        return callOnProgress(p) ? 0 : 1;
-    });
-    _httpRequest.onReadyStateChange([this](HttpRequest::ReadyState rs) {
-        if (rs == HttpRequest::ReadyState::Success) {
-            LTRACE(fmt::format("Finished sync download '{}'", _httpRequest.url()));
-            deinitDownload();
-            markAsSuccessful();
+    _isDownloading = true;
+    _downloadThread = std::thread([this, timeout]() {
+        _isFinished = false;
+        LTRACEC("HttpDownload", fmt::format("Start download '{}'", _httpRequest.url()));
+
+        const bool setupSuccess = setup();
+        if (setupSuccess) {
+            _isSuccessful = _httpRequest.perform(timeout);
+
+            const bool teardownSuccess = teardown();
+            _isSuccessful = _isSuccessful && teardownSuccess;
         }
-        else if (rs == HttpRequest::ReadyState::Fail) {
-            LERROR(fmt::format("Failed sync download '{}'", _httpRequest.url()));
-            deinitDownload();
-            markAsFailed();
+        else {
+            _isSuccessful = false;
         }
-    });
-    _httpRequest.perform(opt);
 
-    LTRACE(fmt::format("End sync download '{}'", _httpRequest.url()));
-}
-
-const std::string& SyncHttpDownload::url() const {
-    return _httpRequest.url();
-}
-
-AsyncHttpDownload::AsyncHttpDownload(std::string url) : _httpRequest(std::move(url)) {}
-
-AsyncHttpDownload::AsyncHttpDownload(AsyncHttpDownload&& d)
-    : _httpRequest(std::move(d._httpRequest))
-    , _downloadThread(std::move(d._downloadThread))
-    , _shouldCancel(std::move(d._shouldCancel))
-{}
-
-void AsyncHttpDownload::start(HttpRequest::RequestOptions opt) {
-    std::lock_guard<std::mutex> guard(_stateChangeMutex);
-    if (hasStarted()) {
-        return;
-    }
-    markAsStarted();
-    _downloadThread = std::thread([this, opt] {
-        try {
-            download(opt);
+        _isFinished = true;
+        if (_isSuccessful) {
+            LTRACEC(
+                "HttpDownload",
+                fmt::format("Finished async download '{}'", _httpRequest.url())
+            );
         }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
+        else {
+            LTRACEC(
+                "HttpDownload",
+                fmt::format("Failed async download '{}'", _httpRequest.url())
+            );
         }
+
+        _downloadFinishCondition.notify_all();
+        _isDownloading = false;
     });
 }
 
-void AsyncHttpDownload::cancel() {
+void HttpDownload::cancel() {
     _shouldCancel = true;
 }
 
-void AsyncHttpDownload::wait() {
-    std::unique_lock<std::mutex> lock(_conditionMutex);
-    _downloadFinishCondition.wait(lock, [this] {
-        return hasFailed() || hasSucceeded();
-    });
+bool HttpDownload::wait() {
+    std::mutex conditionMutex;
+    std::unique_lock lock(conditionMutex);
+    _downloadFinishCondition.wait(lock, [this]() { return _isFinished; });
     if (_downloadThread.joinable()) {
         _downloadThread.join();
     }
+    return _isSuccessful;
 }
 
-void AsyncHttpDownload::download(HttpRequest::RequestOptions opt) {
-    LTRACE(fmt::format("Start async download '{}'", _httpRequest.url()));
-
-    initDownload();
-
-    _httpRequest.onData([this](HttpRequest::Data d) {
-        return handleData(d);
-    });
-
-    _httpRequest.onProgress([this](HttpRequest::Progress p) {
-        // Return a non-zero value to cancel download
-        // if onProgress returns false.
-        //std::lock_guard<std::mutex> guard(_mutex);
-        const bool shouldContinue = callOnProgress(p);
-        if (!shouldContinue) {
-            return 1;
-        }
-        if (_shouldCancel) {
-            return 1;
-        }
-        return 0;
-    });
-
-    _httpRequest.onReadyStateChange([this](HttpRequest::ReadyState rs) {
-        if (rs == HttpRequest::ReadyState::Success) {
-            LTRACE(fmt::format("Finished async download '{}'", _httpRequest.url()));
-            deinitDownload();
-            markAsSuccessful();
-        }
-        else if (rs == HttpRequest::ReadyState::Fail) {
-            LTRACE(fmt::format("Failed async download '{}'", _httpRequest.url()));
-            deinitDownload();
-            markAsFailed();
-        }
-    });
-
-    _httpRequest.perform(opt);
-    if (!hasSucceeded()) {
-        deinitDownload();
-        markAsFailed();
-    }
-
-    LTRACE(fmt::format("End async download '{}'", _httpRequest.url()));
-
-    _downloadFinishCondition.notify_all();
-}
-
-const std::string& AsyncHttpDownload::url() const {
+const std::string& HttpDownload::url() const {
     return _httpRequest.url();
 }
 
-const std::vector<char>& HttpMemoryDownload::downloadedData() const {
-    return _downloadedData;
-}
-
-bool HttpMemoryDownload::initDownload() {
+bool HttpDownload::setup() {
     return true;
 }
 
-bool HttpMemoryDownload::deinitDownload() {
+bool HttpDownload::teardown() {
     return true;
 }
 
-size_t HttpMemoryDownload::handleData(HttpRequest::Data d) {
-    _downloadedData.insert(_downloadedData.end(), d.buffer, d.buffer + d.size);
-    return d.size;
-}
 
-HttpFileDownload::HttpFileDownload(std::string destination,
-                                   HttpFileDownload::Overwrite overwrite)
-    : _destination(std::move(destination))
-    , _overwrite(overwrite)
-{}
 
-bool HttpFileDownload::initDownload() {
-    if (!_overwrite && std::filesystem::is_regular_file(_destination)) {
-        LWARNING(fmt::format("File {} already exists", _destination));
-        return false;
+std::atomic_int HttpFileDownload::nCurrentFileHandles = 0;
+std::mutex HttpFileDownload::_directoryCreationMutex;
+
+HttpFileDownload::HttpFileDownload(std::string url, std::filesystem::path destination,
+                                   Overwrite overwrite)
+    : HttpDownload(std::move(url))
+    , _destination(std::move(destination))
+{
+    if (!overwrite && std::filesystem::is_regular_file(_destination)) {
+        throw ghoul::RuntimeError(fmt::format("File {} already exists", _destination));
     }
+}
 
-    std::filesystem::path d = std::filesystem::path(_destination).parent_path();
-
+bool HttpFileDownload::setup() {
     {
         std::lock_guard g(_directoryCreationMutex);
+        std::filesystem::path d = _destination.parent_path();
         if (!std::filesystem::is_directory(d)) {
             std::filesystem::create_directories(d);
         }
     }
 
-    while (nCurrentFilehandles >= MaxFilehandles) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    while (nCurrentFileHandles >= MaxFileHandles) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
-    ++nCurrentFilehandles;
+    nCurrentFileHandles++;
     _hasHandle = true;
     _file = std::ofstream(_destination, std::ofstream::binary);
 
-    if (_file.fail()) {
-#ifdef WIN32
-        // GetLastError() gives more details than errno.
-        DWORD errorId = GetLastError();
-        if (errorId != 0) {
-            char Buffer[256];
-            size_t size = FormatMessageA(
-                FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-                    FORMAT_MESSAGE_IGNORE_INSERTS,
-                nullptr,
-                errorId,
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                Buffer,
-                256,
-                nullptr
-            );
-
-            std::string message(Buffer, size);
-
-            LERROR(fmt::format(
-                "Cannot open file {}: {}", _destination, message)
-            );
-
-            return false;
-        }
-        else {
-            LERROR(fmt::format("Cannot open file {}", _destination));
-            return false;
-        }
-#else
-        if (errno) {
-#if defined(__unix__)
-            char buffer[255];
-            LERROR(fmt::format(
-                "Cannot open file '{}': {}",
-                std::string(_destination),
-                std::string(strerror_r(errno, buffer, sizeof(buffer)))
-            ));
-            return false;
-#else
-            LERROR(fmt::format(
-                "Cannot open file '{}': {}",
-                std::string(_destination),
-                std::string(strerror(errno))
-            ));
-            return false;
-#endif
-        }
-
-        LERROR(fmt::format("Cannot open file {}", std::string(_destination)));
-        return false;
-#endif
+    if (_file.good()) {
+        return true;
     }
-    return true;
+
+
+#ifdef WIN32
+    // GetLastError() gives more details than errno.
+    DWORD errorId = GetLastError();
+    if (errorId == 0) {
+        LERRORC("HttpFileDownload", fmt::format("Cannot open file {}", _destination));
+        return false;
+    }
+    std::array<char, 256> Buffer;
+    size_t size = FormatMessageA(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+        nullptr,
+        errorId,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        Buffer.data(),
+        static_cast<DWORD>(Buffer.size()),
+        nullptr
+    );
+
+    std::string message(Buffer.data(), size);
+    LERRORC(
+        "HttpFileDownload",
+        fmt::format("Cannot open file {}: {}", _destination, message)
+    );
+    return false;
+#else // ^^^ WIN32 / !WIN32 vvv
+    if (errno) {
+#ifdef __unix__
+        char buffer[256];
+        LERRORC(
+            "HttpFileDownload",
+            fmt::format(
+                "Cannot open file '{}': {}",
+                _destination, std::string(strerror_r(errno, buffer, sizeof(buffer)))
+            )
+        );
+        return false;
+#else // ^^^ __unix__ / !__unix__ vvv
+        LERRORC(
+            "HttpFileDownload",
+            fmt::format(
+                "Cannot open file '{}': {}", _destination, std::string(strerror(errno))
+            )
+        );
+        return false;
+#endif // __unix__
+    }
+
+    LERRORC("HttpFileDownload", fmt::format("Cannot open file {}", _destination));
+    return false;
+#endif // WIN32
 }
 
-const std::string& HttpFileDownload::destination() const {
+std::filesystem::path HttpFileDownload::destination() const {
     return _destination;
 }
 
-bool HttpFileDownload::deinitDownload() {
+bool HttpFileDownload::teardown() {
     if (_hasHandle) {
         _hasHandle = false;
         _file.close();
-        --nCurrentFilehandles;
+        nCurrentFileHandles--;
+        ghoul_assert(nCurrentFileHandles >= 0, "More handles returned than taken out");
+        return _file.good();
     }
+    else {
+        return true;
+    }
+}
+
+bool HttpFileDownload::handleData(char* buffer, size_t size) {
+    _file.write(buffer, size);
     return _file.good();
 }
 
-size_t HttpFileDownload::handleData(HttpRequest::Data d) {
-    _file.write(d.buffer, d.size);
-    return d.size;
+
+
+HttpMemoryDownload::HttpMemoryDownload(std::string url)
+    : HttpDownload(std::move(url))
+{}
+
+const std::vector<char>& HttpMemoryDownload::downloadedData() const {
+    return _buffer;
 }
 
-std::atomic_int HttpFileDownload::nCurrentFilehandles(0);
-std::mutex HttpFileDownload::_directoryCreationMutex;
-
-SyncHttpMemoryDownload::SyncHttpMemoryDownload(std::string url)
-    : SyncHttpDownload(std::move(url))
-{}
-
-SyncHttpFileDownload::SyncHttpFileDownload(std::string url, std::string destinationPath,
-                                           HttpFileDownload::Overwrite overwrite)
-    : SyncHttpDownload(std::move(url))
-    , HttpFileDownload(std::move(destinationPath), overwrite)
-{}
-
-AsyncHttpMemoryDownload::AsyncHttpMemoryDownload(std::string url)
-    : AsyncHttpDownload(std::move(url))
-{}
-
-AsyncHttpFileDownload::AsyncHttpFileDownload(std::string url, std::string destinationPath,
-                                             HttpFileDownload::Overwrite overwrite)
-    : AsyncHttpDownload(std::move(url))
-    , HttpFileDownload(std::move(destinationPath), overwrite)
-{}
+bool HttpMemoryDownload::handleData(char* buffer, size_t size) {
+    _buffer.insert(_buffer.end(), buffer, buffer + size);
+    return true;
+}
 
 } // namespace openspace

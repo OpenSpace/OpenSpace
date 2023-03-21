@@ -1,8 +1,13 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
-asset.require('./trail')
-local labelsPath = asset.require('../saturn_globelabels').LabelsPath
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").sat375
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
 
 local Titan = {
   Identifier = "Titan",
@@ -26,40 +31,72 @@ local Titan = {
     SegmentsPerPatch = 64,
     Layers = {},
     Labels = {
-      Enable = false,
-      FileName = labelsPath .. "/titan.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 14.0,
-      LabelsSize = 10.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 7500000.0,
-      FadeOutStartingDistance = 6000000.0,
-      LabelsForceDomeRendering = true,
-      LabelsDistanceEPS = 1350000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      Enabled = false,
+      FileName = labelsPath .. "titan.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 9.6,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 5000000.0, 7500000.0 },
+      DistanceEPS = 1350000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
   GUI = {
     Name = "Titan",
-    Path = "/Solar System/Planets/Saturn/Moons",
-    Description = [[Largest moon of Saturn.]]
+    Path = "/Solar System/Planets/Saturn/Moons/Titan",
+    Description = "Largest moon of Saturn"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Titan })
+
+local TitanLabel = {
+  Identifier = "TitanLabel",
+  Parent = Titan.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Titan",
+    FontSize = 70.0,
+    Size = 6.2,
+    MinMaxSize = { 1, 35 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.5, 20.0 },
+    FadeWidths = { 0.3, 20.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Titan Label",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = "Label for Saturn's moon Titan"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Titan)
+  openspace.addSceneGraphNode(TitanLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TitanLabel)
+  openspace.removeSceneGraphNode(Titan)
+end)
+
+asset.export(Titan)
+
 
 
 asset.meta = {
   Name = "Titan",
-  Version = "1.0",
-  Description = [[ Titan globe with labels.]],
+  Version = "1.2",
+  Description = "Titan globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Titan"}
+  License = "MIT license"
 }

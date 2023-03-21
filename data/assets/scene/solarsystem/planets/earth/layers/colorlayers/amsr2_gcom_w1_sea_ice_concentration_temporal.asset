@@ -1,39 +1,49 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "AMSR2_GCOM_W1_Sea_Ice_Concentration_Temporal",
   Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
+  Enabled = asset.enabled,
   Type = "TemporalTileLayer",
-  FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-    "AMSRU2_Sea_Ice_Concentration_12km",
-    "2012-05-08",
-    "Yesterday",
-    "1d",
-    "2km",
-    "png"
-  ),
-  Description = [[ Temporal coverage: 02 July 2012 - Present. The Advanced Microwave
-    Scanning Radiometer-E/Advanced Microwave Scanning Radiometer-2 (AMSR-E/AMSR2)
-    unified "Sea Ice Concentration (12 km)" layer displays the percent of sea ice
-    concentration in the polar regions as a daily composite of the AMSR2 1:30 a.m.
-    ascending and 1:30 p.m. descending half-orbit passes, at a spatial resolution
-    of 12 km. (Description from NASA Worldview)]]
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2012-05-08",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "AMSRU2_Sea_Ice_Concentration_12km",
+      "2km",
+      "png"
+    )
+  },
+  Description = [[Temporal coverage: 02 July 2012 - Present. The Advanced Microwave
+    Scanning Radiometer-E/Advanced Microwave Scanning Radiometer-2 (AMSR-E/AMSR2) unified
+    "Sea Ice Concentration (12 km)" layer displays the percent of sea ice concentration in
+    the polar regions as a daily composite of the AMSR2 1:30 a.m. ascending and 1:30 p.m.
+    descending half-orbit passes, at a spatial resolution of 12 km. (Description from NASA
+    Worldview)]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
-  Version = "1.0",
-  Description = [[ GIBS hosted layer created with
-    openspace.globebrowsing.createTemporalGibsGdalXml ]],
+  Version = "1.1",
+  Description = "GIBS hosted layer",
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
-  License = "NASA",
-  Identifiers = {"AMSR2_GCOM_W1_Sea_Ice_Concentration_Temporal"}
+  License = "NASA"
 }

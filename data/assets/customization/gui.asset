@@ -6,3 +6,13 @@ asset.export("webguiDevelopmentMode", false)
 -- 2) Clone the repository: https://github.com/OpenSpace/OpenSpace-WebGuiFrontend
 -- 3) Install nodejs (including npm)
 -- 4) Within the repository, run `npm install` and `npm start`
+
+
+asset.meta = {
+  Name = "Customization - User Interface",
+  Version = "1.0",
+  Description = "This asset is used by developers working on the GUI",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   globebrowsingmodule.h
@@ -34,6 +34,7 @@ set(HEADER_FILES
   src/geodeticpatch.h
   src/globelabelscomponent.h
   src/globetranslation.h
+  src/globerotation.h
   src/gpulayergroup.h
   src/layer.h
   src/layeradjustment.h
@@ -56,9 +57,19 @@ set(HEADER_FILES
   src/skirtedgrid.h
   src/tileindex.h
   src/tileloadjob.h
-  src/tileprovider.h
   src/tiletextureinitdata.h
   src/timequantizer.h
+  src/tileprovider/defaulttileprovider.h
+  src/tileprovider/imagesequencetileprovider.h
+  src/tileprovider/singleimagetileprovider.h
+  src/tileprovider/sizereferencetileprovider.h
+  src/tileprovider/spoutimageprovider.h
+  src/tileprovider/temporaltileprovider.h
+  src/tileprovider/texttileprovider.h
+  src/tileprovider/tileindextileprovider.h
+  src/tileprovider/tileprovider.h
+  src/tileprovider/tileproviderbyindex.h
+  src/tileprovider/tileproviderbylevel.h
 )
 
 set(SOURCE_FILES
@@ -71,10 +82,12 @@ set(SOURCE_FILES
   src/geodeticpatch.cpp
   src/globelabelscomponent.cpp
   src/globetranslation.cpp
+  src/globerotation.cpp
   src/gpulayergroup.cpp
   src/layer.cpp
   src/layeradjustment.cpp
   src/layergroup.cpp
+  src/layergroupid.cpp
   src/layermanager.cpp
   src/layerrendersettings.cpp
   src/memoryawaretilecache.cpp
@@ -85,16 +98,26 @@ set(SOURCE_FILES
   src/skirtedgrid.cpp
   src/tileindex.cpp
   src/tileloadjob.cpp
-  src/tileprovider.cpp
   src/tiletextureinitdata.cpp
   src/timequantizer.cpp
+  src/tileprovider/defaulttileprovider.cpp
+  src/tileprovider/imagesequencetileprovider.cpp
+  src/tileprovider/singleimagetileprovider.cpp
+  src/tileprovider/sizereferencetileprovider.cpp
+  src/tileprovider/spoutimageprovider.cpp
+  src/tileprovider/temporaltileprovider.cpp
+  src/tileprovider/texttileprovider.cpp
+  src/tileprovider/tileindextileprovider.cpp
+  src/tileprovider/tileprovider.cpp
+  src/tileprovider/tileproviderbyindex.cpp
+  src/tileprovider/tileproviderbylevel.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
   shaders/advanced_rings_vs.glsl
   shaders/advanced_rings_fs.glsl
-  shaders/blending.hglsl
+  shaders/blending.glsl
   shaders/globalrenderer_vs.glsl
   shaders/localrenderer_vs.glsl
   shaders/renderer_fs.glsl
@@ -102,10 +125,10 @@ set(SHADER_FILES
   shaders/rings_fs.glsl
   shaders/rings_geom_vs.glsl
   shaders/rings_geom_fs.glsl
-  shaders/texturetilemapping.hglsl
-  shaders/tile.hglsl
-  shaders/tileheight.hglsl
-  shaders/tilevertexskirt.hglsl
+  shaders/texturetilemapping.glsl
+  shaders/tile.glsl
+  shaders/tileheight.glsl
+  shaders/tilevertexskirt.glsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})
@@ -116,13 +139,21 @@ create_new_module(
   STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
+target_precompile_headers(${globebrowsing_module} PRIVATE
+  <modules/globebrowsing/src/tileprovider/tileprovider.h>
+  <modules/globebrowsing/globebrowsingmodule.h>
+  <future>
+  <map>
+)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 
 if (WIN32)
-  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include)
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib)
-  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal241.dll")
+  add_library(gdal SHARED IMPORTED)
+  target_include_directories(gdal SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include)
+  set_target_properties(gdal PROPERTIES IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib)
+  set_target_properties(gdal PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal241.dll)
+  target_link_libraries(openspace-module-globebrowsing PRIVATE gdal)
 else (WIN32)
   find_package(GDAL REQUIRED)
 

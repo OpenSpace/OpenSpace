@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,20 +25,20 @@
 #ifndef __OPENSPACE_MODULE_VISLAB___RENDERABLEDISTANCELABEL___H__
 #define __OPENSPACE_MODULE_VISLAB___RENDERABLEDISTANCELABEL___H__
 
-#include <modules/base/rendering/renderablelabels.h>
+#include <modules/base/rendering/renderablelabel.h>
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RenderableDistanceLabel : public RenderableLabels {
+class RenderableDistanceLabel : public RenderableLabel {
 public:
      RenderableDistanceLabel(const ghoul::Dictionary& dictionary);
 
      void update(const UpdateData& data) override;
      static documentation::Documentation Documentation();
-private:
 
+private:
      properties::StringProperty _nodelineId;
      properties::IntProperty _distanceUnit;
      properties::StringProperty _customUnitDescriptor;

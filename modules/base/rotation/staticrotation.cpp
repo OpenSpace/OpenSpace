@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@ namespace {
         "Rotation",
         "Rotation",
         "This value is the used as a 3x3 rotation matrix that is applied to the scene "
-        "graph node that this transformation is attached to relative to its parent."
+        "graph node that this transformation is attached to relative to its parent"
     };
 
     // Conversion from rotation matrix to euler angles, given that the rotation is a pure
@@ -67,9 +67,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation StaticRotation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_rotation_static";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_rotation_static");
 }
 
 StaticRotation::StaticRotation()

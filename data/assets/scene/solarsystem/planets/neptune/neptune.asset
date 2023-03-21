@@ -1,12 +1,16 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local transforms = asset.require("./transforms")
 asset.require("spice/base")
-asset.require('./trail')
+asset.require("./trail")
 
 local Neptune = {
   Identifier = "Neptune",
   Parent = transforms.NeptuneBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NEPTUNE",
+      Observer = "NEPTUNE BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_NEPTUNE",
@@ -23,7 +27,7 @@ local Neptune = {
   GUI = {
     Name = "Neptune",
     Path = "/Solar System/Planets/Neptune",
-    Description = [[Neptune globe]]
+    Description = "Neptune globe"
   }
 }
 
@@ -32,32 +36,46 @@ local NeptuneLabel = {
   Parent = Neptune.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
-    LabelText = "Neptune",
-    FontSize = 100.0,
-    LabelSize = 8.8,
-    LabelMaxSize = 100.0,
-    LabelMinSize = 1.0,
-    LabelOrientationOption = "Camera View Direction",
-    BlendMode = "Additive"
+    Type = "RenderableLabel",
+    Text = "Neptune",
+    FontSize = 70.0,
+    Size = 9.0,
+    MinMaxSize = { 1, 80 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 6.0, 120.0 },
+    FadeWidths = { 2.0, 150.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Neptune Label",
     Path = "/Solar System/Planets/Neptune",
-    Description = [[ Main planet label for Neptune.]],
+    Description = "Main planet label for Neptune",
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Neptune, NeptuneLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Neptune)
+  openspace.addSceneGraphNode(NeptuneLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NeptuneLabel)
+  openspace.removeSceneGraphNode(Neptune)
+end)
+
+asset.export(Neptune)
+asset.export(NeptuneLabel)
+
 
 
 asset.meta = {
   Name = "Neptune",
-  Version = "1.0",
-  Description = [[ Neptune globe, and main planet label.]],
+  Version = "1.1",
+  Description = "Neptune globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Neptune"}
+  License = "MIT license"
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,30 +28,25 @@
 
 #ifdef WIN32
 #include <shellapi.h>
-#endif
-
-namespace {
-
-void launchBrowser(const std::string& url) {
-    LDEBUGC("DefaultBrowserLauncher", "Launching default browser: " + url);
-#ifdef WIN32
-    ShellExecuteA(nullptr, nullptr, url.c_str(), nullptr, nullptr, SW_SHOW);
-#endif
-}
-
-} // namespace
+#endif // WIN32
 
 namespace openspace {
 
 bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
-                                           const CefString& targetUrl, const CefString&,
+                                           [[ maybe_unused ]] const CefString& targetUrl,
+                                           const CefString&,
                                            CefLifeSpanHandler::WindowOpenDisposition,
                                            bool, const CefPopupFeatures&, CefWindowInfo&,
                                            CefRefPtr<CefClient>&, CefBrowserSettings&,
+                                           CefRefPtr<CefDictionaryValue>&,
                                            bool*)
 {
     // never permit CEF popups, always launch in default browser
-    launchBrowser(targetUrl.ToString());
+#ifdef WIN32
+    std::string url = targetUrl.ToString();
+    LDEBUGC("DefaultBrowserLauncher", "Launching default browser: " + url);
+    ShellExecuteA(nullptr, nullptr, url.c_str(), nullptr, nullptr, SW_SHOW);
+#endif
     return true;
 }
 

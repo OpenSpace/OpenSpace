@@ -1,0 +1,37 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Earth Textures",
+  Type = "HttpSynchronization",
+  Identifier = "earth_textures",
+  Version = 2
+})
+
+local layer = {
+  Name = "Earth Bluemarble Height",
+  Identifier = "Earth_Bluemarble_Height",
+  Enabled = asset.enabled,
+  FilePath = texturesPath .. "earth_bluemarble_height.jpg",
+  Description = "Topographic layer from Blue Marble Next Generation"
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+asset.meta = {
+  Name = "Earth Bluemarble Height",
+  Version = "1.1",
+  Description = [[Fallback layer for earth height if no internet is available. Contains
+    Blue Marble Next Generation Topographic]],
+  Author = "NASA",
+  URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
+  License = "NASA"
+}

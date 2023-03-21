@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels').PlutoKernels
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels").PlutoKernels
 
 
 
@@ -20,7 +19,7 @@ local Kerberos = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto" },
+  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto"
   }
@@ -40,10 +39,10 @@ local KerberosTrail = {
     Period = 32.16756,
     Resolution = 1000
   },
-  Tag = { 
-    "moonTrail_solarSystem", 
-    "moonTrail_dwarf", 
-    "moonTrail_pluto", 
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_dwarf",
+    "moonTrail_pluto",
     "moonTrail_minor"
   },
   GUI = {
@@ -52,14 +51,53 @@ local KerberosTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Kerberos, KerberosTrail })
+local KerberosLabel = {
+  Identifier = "KerberosLabel",
+  Parent = Kerberos.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Kerberos",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1000.0 },
+    FadeWidths = { 150.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Cheron Label",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons",
+    Description = "Label for Pluto's moon Kerberos"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Kerberos)
+  openspace.addSceneGraphNode(KerberosTrail)
+  openspace.addSceneGraphNode(KerberosLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(KerberosLabel)
+  openspace.removeSceneGraphNode(KerberosTrail)
+  openspace.removeSceneGraphNode(Kerberos)
+end)
+
+asset.export(Kerberos)
+asset.export(KerberosTrail)
+
 
 
 asset.meta = {
   Name = "Kerberos",
   Version = "1.0",
-  Description = [[ Globe and trail for Pluto's moon Kerberos. Data from
-    NASA Spice (see base spice asset)]],
+  Description = [[Globe and trail for Pluto's moon Kerberos. Data from NASA Spice (see
+    base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

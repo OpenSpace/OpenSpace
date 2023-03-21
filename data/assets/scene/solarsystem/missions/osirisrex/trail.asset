@@ -1,11 +1,10 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require("./transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
-local BENNU_BODY = "2101955"
+local BENNU_BODY = 2101955
 
 local OsirisRexTrailEarth = {
   Identifier = "OsirisRexTrailEarth",
@@ -37,7 +36,7 @@ local OsirisRexTrailSolarSystem = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "OSIRIS-REX",
-      Observer = "SUN"
+      Observer = "SSB"
     },
     Color = { 0.2, 0.9, 0.2 },
     StartTime = "2016 SEP 8 23:05:00.50",
@@ -71,8 +70,18 @@ local OsirisRexTrailBennu = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  OsirisRexTrailEarth,
-  OsirisRexTrailSolarSystem,
-  OsirisRexTrailBennu
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OsirisRexTrailEarth)
+  openspace.addSceneGraphNode(OsirisRexTrailSolarSystem)
+  openspace.addSceneGraphNode(OsirisRexTrailBennu)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OsirisRexTrailBennu)
+  openspace.removeSceneGraphNode(OsirisRexTrailSolarSystem)
+  openspace.removeSceneGraphNode(OsirisRexTrailEarth)
+end)
+
+asset.export(OsirisRexTrailEarth)
+asset.export(OsirisRexTrailSolarSystem)
+asset.export(OsirisRexTrailBennu)

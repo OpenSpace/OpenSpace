@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,6 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <memory>
 
 namespace ghoul { class Dictionary; }
 
@@ -45,7 +44,7 @@ public:
         const ghoul::Dictionary& dictionary);
 
     Scale();
-    virtual ~Scale() = default;
+    virtual ~Scale() override = default;
 
     virtual bool initialize();
 

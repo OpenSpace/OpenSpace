@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,16 +38,6 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemFramerate : public DashboardTextItem {
 public:
-    enum class FrametimeType {
-        DtTimeAvg = 0,
-        DtTimeExtremes,
-        DtStandardDeviation,
-        DtCoefficientOfVariation,
-        FPS,
-        FPSAvg,
-        None
-    };
-
     DashboardItemFramerate(const ghoul::Dictionary& dictionary);
 
     void render(glm::vec2& penPosition) override;

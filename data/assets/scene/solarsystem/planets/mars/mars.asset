@@ -1,8 +1,13 @@
-local transforms = asset.require('./transforms')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("./transforms")
 asset.require("spice/base")
-asset.require('./trail')
-local labelsPath = asset.require('./mars_globelabels').LabelsPath
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Mars Labels",
+  Type = "HttpSynchronization",
+  Identifier = "mars_labels",
+  Version = 1
+})
 
 -- local marsRadii = { 3396190.0, 3396190.0, 3376200.0 }
 local marsRadii = { 3396190.0, 3396190.0, 3396190.0 }
@@ -11,6 +16,11 @@ local Mars = {
   Identifier = "Mars",
   Parent = transforms.MarsBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MARS",
+      Observer = "MARS BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_MARS",
@@ -23,28 +33,23 @@ local Mars = {
     SegmentsPerPatch = 90,
     Layers = {},
     Labels = {
-      Enable = false,
-      FileName = labelsPath .. "/mars.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 14.0,
-      LabelsSize = 9.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 2000000.0,
-      FadeOutStartingDistance = 750000.0,
-      LabelsForceDomeRendering = true,
-      LabelsDistanceEPS = 2500000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      Enabled = false,
+      FileName = labelsPath .. "mars.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.7,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 750000.0, 2000000.0 },
+      DistanceEPS = 2500000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   Tag = { "planet_solarSystem", "planet_terrestrial" },
   GUI = {
     Name = "Mars",
     Path = "/Solar System/Planets/Mars",
-    Description = [[ Main globe for Mars with labels and map layers.]]
+    Description = "Main globe for Mars with labels and map layers"
   }
 }
 
@@ -53,13 +58,12 @@ local MarsLabel = {
   Parent = Mars.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
-    LabelText = "Mars",
-    FontSize = 100.0,
-    LabelSize = 8.5,
-    LabelMaxSize = 100.0,
-    LabelMinSize = 1.0,
-    LabelOrientationOption = "Camera View Direction",
+    Type = "RenderableLabel",
+    Text = "Mars",
+    FontSize = 70.0,
+    Size = 8.50,
+    MinMaxSize = { 1, 50 },
+    OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     TransformationMatrix = {
       1.0, 0.0, 0.0, -8.0E6,
@@ -67,24 +71,39 @@ local MarsLabel = {
       0.0, 0.0, 1.0, 1.0E7,
       0.0, 0.0, 0.0, 1.0
     },
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 40.0 },
+    FadeWidths = { 1.0, 50.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Mars Label",
     Path = "/Solar System/Planets/Mars",
-    Description = [[ Main label for Mars]]
+    Description = "Main label for Mars"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Mars, MarsLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Mars)
+  openspace.addSceneGraphNode(MarsLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MarsLabel)
+  openspace.removeSceneGraphNode(Mars)
+end)
+
+asset.export(Mars)
+asset.export(MarsLabel)
+
 
 
 asset.meta = {
   Name = "Mars",
-  Version = "1.0",
-  Description = [[ Mars globe, and main globe label.]],
+  Version = "1.1",
+  Description = "Mars globe, and main globe label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Mars", "MarsLabel"}
+  License = "MIT license"
 }

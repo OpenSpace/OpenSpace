@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,13 @@
 #ifndef __OPENSPACE_CORE___SESSIONRECORDING___H__
 #define __OPENSPACE_CORE___SESSIONRECORDING___H__
 
-#include <openspace/interaction/externinteraction.h>
-#include <openspace/interaction/keyframenavigator.h>
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/navigation/keyframenavigator.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
 #include <vector>
+#include <chrono>
 
 namespace openspace::interaction {
 
@@ -60,13 +62,26 @@ public:
     enum class SessionState {
         Idle = 0,
         Recording,
-        Playback
+        Playback,
+        PlaybackPaused
     };
 
     struct Timestamps {
         double timeOs;
         double timeRec;
         double timeSim;
+    };
+
+    /*
+     * Struct for storing a script substring that, if found in a saved script,
+     * will be replaced by its substringReplacement counterpart.
+     */
+    struct ScriptSubstringReplace {
+        std::string substringFound;
+        std::string substringReplacement;
+        ScriptSubstringReplace(std::string found, std::string replace)
+            : substringFound(found)
+            , substringReplacement(replace) {}
     };
 
     static const size_t FileHeaderVersionLength = 5;
@@ -86,7 +101,7 @@ public:
     SessionRecording();
     SessionRecording(bool isGlobal);
 
-    ~SessionRecording();
+    ~SessionRecording() override;
 
     /**
      * Used to de-initialize the session recording feature. Any recording or playback
@@ -118,6 +133,33 @@ public:
     double fixedDeltaTimeDuringFrameOutput() const;
 
     /**
+     * Returns the number of microseconds that have elapsed since playback started, if
+     * playback is set to be in the mode where a screenshot is captured with every
+     * rendered frame (enableTakeScreenShotDuringPlayback() is used to enable this mode).
+     * At the start of playback, this timer is set to the current steady_clock value.
+     * However, during playback it is incremented by the fixed framerate of the playback
+     * rather than the actual clock value (as in normal operation).
+     *
+     * \returns number of microseconds elapsed since playback started in terms of the
+     *          number of rendered frames multiplied by the fixed time increment per
+     *          frame
+     */
+    std::chrono::steady_clock::time_point currentPlaybackInterpolationTime() const;
+
+    /**
+     * Returns the simulated application time. This simulated application time is only
+     * used when playback is set to be in the mode where a screenshot is captured with
+     * every rendered frame (enableTakeScreenShotDuringPlayback() is used to enable this
+     * mode). At the start of playback, this timer is set to the value of the current
+     * applicationTime function provided by the window delegate (used during normal
+     * mode or playback). However, during playback it is incremented by the fixed
+     * framerate of the playback rather than the actual clock value.
+     *
+     * \returns application time in seconds, for use in playback-with-frames mode
+     */
+    double currentApplicationInterpolationTime() const;
+
+    /**
      * Starts a recording session, which will save data to the provided filename
      * according to the data format specified, and will continue until recording is
      * stopped using stopRecording() method.
@@ -132,9 +174,7 @@ public:
      * Starts a recording session, which will save data to the provided filename
      * in ASCII data format until recording is stopped using stopRecording() method.
      *
-     * \param filename file saved with recorded keyframes.
-     *
-     * \return \c true if recording to file starts without errors
+     * \param dataMode The format in which the session recording is stored
      */
     void setRecordDataFormat(DataMode dataMode);
 
@@ -154,22 +194,42 @@ public:
     /**
      * Starts a playback session, which can run in one of three different time modes.
      *
-     * \param filename file containing recorded keyframes to play back
+     * \param filename file containing recorded keyframes to play back. The file path
+     *                 is relative to the base recordings directory specified in the
+     *                 config file by the RECORDINGS variable
      * \param timeMode which of the 3 time modes to use for time reference during
      * \param forceSimTimeAtStart if true simulation time is forced to that of playback
      *        playback: recorded time, application time, or simulation time. See the
      *        LuaLibrary entry for SessionRecording for details on these time modes
+     * \param loop if true then the file will playback in loop mode, continuously
+     *             looping back to the beginning until it is manually stopped
      *
-     * \return \c true if recording to file starts without errors
+     * \return `true` if recording to file starts without errors
      */
     bool startPlayback(std::string& filename, KeyframeTimeRef timeMode,
-        bool forceSimTimeAtStart);
+        bool forceSimTimeAtStart, bool loop);
 
     /**
      * Used to stop a playback in progress. If open, the playback file will be closed,
      * and all keyframes deleted from memory.
      */
     void stopPlayback();
+
+    /**
+     * Returns playback pause status.
+     *
+     * \return `true` if playback is paused
+     */
+    bool isPlaybackPaused();
+
+    /**
+     * Pauses a playback session. This does both the normal pause functionality of
+     * setting simulation delta time to zero, and pausing the progression through the
+     * timeline.
+     *
+     * \param pause if true, then will set playback timeline progression to zero
+     */
+    void setPlaybackPause(bool pause);
 
     /**
      * Enables that rendered frames should be saved during playback
@@ -205,13 +265,13 @@ public:
      * whether it is following the rotation of a node, and timestamp). The data will be
      * saved to the recording file only if a recording is currently in progress.
      */
-    void saveCameraKeyframe();
+    void saveCameraKeyframeToTimeline();
 
     /**
      * Used to trigger a save of the current timing states. The data will be saved to the
      * recording file only if a recording is currently in progress.
      */
-    void saveTimeKeyframe();
+    void saveTimeKeyframeToTimeline();
 
     /**
      * Used to trigger a save of a script to the recording file, but only if a recording
@@ -219,7 +279,7 @@ public:
      *
      * \param scriptToSave String of the Lua command to be saved
      */
-    void saveScriptKeyframe(std::string scriptToSave);
+    void saveScriptKeyframeToTimeline(std::string scriptToSave);
 
     /**
      * \return The Lua library that contains all Lua functions available to affect the
@@ -241,7 +301,7 @@ public:
      *
      * \param callback function handle for the callback
      */
-    void removeStateChangeCallback(CallbackHandle handle);
+    void removeStateChangeCallback(CallbackHandle callback);
 
     /**
      * Provides list of available playback files.
@@ -406,6 +466,19 @@ public:
         datamessagestructures::ScriptMessage& sm, std::ofstream& file);
 
     /**
+     * Since session recordings only record changes, the initial conditions aren't
+     * preserved when a playback starts. This function is called whenever a property
+     * value is set and a recording is in progress. Before the set happens, this
+     * function will read the current value of the property and store it so that when
+     * the recording is finished, the initial state will be added as a set property
+     * command at the beginning of the recording file, to be applied when playback
+     * starts.
+     *
+     * \param prop The property being set
+     */
+    void savePropertyBaseline(properties::Property& prop);
+
+    /**
      * Reads header information from a session recording file
      *
      * \param stream reference to ifstream that contains the session recording file data
@@ -415,12 +488,13 @@ public:
     static std::string readHeaderElement(std::ifstream& stream, size_t readLen_chars);
 
     /**
- * Reads header information from a session recording file
- *
- * \param stringstream reference to ifstream that contains the session recording file data
- * \param readLen_chars number of characters to be read, which may be the expected
- *        length of the header line, or an arbitrary number of characters within it
- */
+     * Reads header information from a session recording file
+     *
+     * \param stream reference to ifstream that contains the session recording file
+     *        data
+     * \param readLen_chars number of characters to be read, which may be the expected
+     *        length of the header line, or an arbitrary number of characters within it
+     */
     static std::string readHeaderElement(std::stringstream& stream, size_t readLen_chars);
 
     /**
@@ -475,6 +549,16 @@ public:
     std::string convertFile(std::string filename, int depth = 0);
 
     /**
+     * Converts file format of a session recording file to the current format version
+     * (will determine the file format conversion to convert from based on the file's
+     * header version number). Accepts a relative path (currently from task runner dir)
+     * rather than a path assumed to be relative to ${RECORDINGS}.
+     *
+     * \param filenameRelative name of the file to convert
+     */
+    void convertFileRelativePath(std::string filenameRelative);
+
+    /**
      * Goes to legacy session recording inherited class, and calls its convertFile()
      * method, and then returns the resulting conversion filename.
      *
@@ -514,6 +598,7 @@ public:
 
 protected:
     properties::BoolProperty _renderPlaybackInformation;
+    properties::BoolProperty _ignoreRecordedScale;
 
     enum class RecordedType {
         Camera = 0,
@@ -521,42 +606,52 @@ protected:
         Script,
         Invalid
     };
-    struct timelineEntry {
+    struct TimelineEntry {
         RecordedType keyframeType;
         unsigned int idxIntoKeyframeTypeArray;
-        double timestamp;
+        Timestamps t3stamps;
     };
-    ExternInteraction _externInteract;
     double _timestampRecordStarted = 0.0;
+    Timestamps _timestamps3RecordStarted{ 0.0, 0.0, 0.0 };
     double _timestampPlaybackStarted_application = 0.0;
     double _timestampPlaybackStarted_simulation = 0.0;
     double _timestampApplicationStarted_simulation = 0.0;
     bool hasCameraChangedFromPrev(datamessagestructures::CameraKeyframe kfNew);
-    double appropriateTimestamp(double timeOs, double timeRec, double timeSim);
+    double appropriateTimestamp(Timestamps t3stamps);
     double equivalentSimulationTime(double timeOs, double timeRec, double timeSim);
     double equivalentApplicationTime(double timeOs, double timeRec, double timeSim);
+    void recordCurrentTimePauseState();
+    void recordCurrentTimeRate();
     bool handleRecordingFile(std::string filenameIn);
     static bool isPath(std::string& filename);
     void removeTrailingPathSlashes(std::string& filename);
-    void extractFilenameFromPath(std::string& filename);
     bool playbackCamera();
     bool playbackTimeChange();
     bool playbackScript();
     bool playbackAddEntriesToTimeline();
     void signalPlaybackFinishedForComponent(RecordedType type);
-    void findFirstCameraKeyframeInTimeline();
+    void handlePlaybackEnd();
+
+    bool findFirstCameraKeyframeInTimeline();
+    Timestamps generateCurrentTimestamp3(double keyframeTime);
     static void saveStringToFile(const std::string& s, unsigned char* kfBuffer,
         size_t& idx, std::ofstream& file);
     static void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size,
         std::ofstream& file);
 
-    bool addKeyframe(double timestamp,
+    bool addKeyframe(Timestamps t3stamps,
         interaction::KeyframeNavigator::CameraPose keyframe, int lineNum);
-    bool addKeyframe(double timestamp, datamessagestructures::TimeKeyframe keyframe,
-        int lineNum);
-    bool addKeyframe(double timestamp, std::string scriptToQueue, int lineNum);
-    bool addKeyframeToTimeline(RecordedType type, size_t indexIntoTypeKeyframes,
-        double timestamp, int lineNum);
+    bool addKeyframe(Timestamps t3stamps,
+        datamessagestructures::TimeKeyframe keyframe, int lineNum);
+    bool addKeyframe(Timestamps t3stamps,
+        std::string scriptToQueue, int lineNum);
+    bool addKeyframeToTimeline(std::vector<TimelineEntry>& timeline, RecordedType type,
+            size_t indexIntoTypeKeyframes, Timestamps t3stamps, int lineNum);
+
+    void initializePlayback_time(double now);
+    void initializePlayback_modeFlags();
+    bool initializePlayback_timeline();
+    void initializePlayback_triggerStart();
     void moveAheadInTime();
     void lookForNonCameraKeyframesThatHaveComeDue(double currTime);
     void updateCameraWithOrWithoutNewKeyframes(double currTime);
@@ -580,15 +675,21 @@ protected:
         const int lineNum);
     void saveSingleKeyframeScript(datamessagestructures::ScriptMessage& kf,
         Timestamps& times, DataMode mode, std::ofstream& file, unsigned char* buffer);
+    void saveScriptKeyframeToPropertiesBaseline(std::string script);
+    bool isPropertyAllowedForBaseline(const std::string& propString);
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
-    std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
+    bool doesStartWithSubstring(const std::string& s, const std::string& matchSubstr);
+    void trimCommandsFromScriptIfFound(std::string& script);
+    void replaceCommandsFromScriptIfFound(std::string& script);
 
     RecordedType getNextKeyframeType();
     RecordedType getPrevKeyframeType();
     double getNextTimestamp();
     double getPrevTimestamp();
     void cleanUpPlayback();
+    void cleanUpRecording();
+    void cleanUpTimelinesAndKeyframes();
     bool convertEntries(std::string& inFilename, std::stringstream& inStream,
         DataMode mode, int lineNum, std::ofstream& outFile);
     virtual bool convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
@@ -600,6 +701,16 @@ protected:
     DataMode readModeFromHeader(std::string filename);
     void readPlaybackHeader_stream(std::stringstream& conversionInStream,
         std::string& version, DataMode& mode);
+    void populateListofLoadedSceneGraphNodes();
+
+    void checkIfScriptUsesScenegraphNode(std::string s);
+    bool checkForScenegraphNodeAccessScene(std::string& s);
+    bool checkForScenegraphNodeAccessNav(std::string& navTerm);
+    std::string extractScenegraphNodeFromScene(std::string& s);
+    bool checkIfInitialFocusNodeIsLoaded(unsigned int firstCamIndex);
+    std::string isolateTermFromQuotes(std::string s);
+    void eraseSpacesFromString(std::string& s);
+    std::string getNameFromSurroundingQuotes(std::string& s);
 
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, double src);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, std::vector<char>& cv);
@@ -616,26 +727,79 @@ protected:
     std::string _playbackLineParsing;
     std::ofstream _recordFile;
     int _playbackLineNum = 1;
+    int _recordingEntryNum = 1;
     KeyframeTimeRef _playbackTimeReferenceMode;
     datamessagestructures::CameraKeyframe _prevRecordedCameraKeyframe;
     bool _playbackActive_camera = false;
     bool _playbackActive_time = false;
     bool _playbackActive_script = false;
     bool _hasHitEndOfCameraKeyframes = false;
-    bool _setSimulationTimeWithNextCameraKeyframe = false;
+    bool _playbackPausedWithinDeltaTimePause = false;
+    bool _playbackLoopMode = false;
+    bool _playbackForceSimTimeAtStart = false;
+    double _playbackPauseOffset = 0.0;
+    double _previousTime = 0.0;
 
     bool _saveRenderingDuringPlayback = false;
     double _saveRenderingDeltaTime = 1.0 / 30.0;
-    double _saveRenderingCurrentRecordedTime;
+    double _saveRenderingCurrentRecordedTime = 0.0;
+    std::chrono::steady_clock::duration _saveRenderingDeltaTime_interpolation_usec;
+    std::chrono::steady_clock::time_point _saveRenderingCurrentRecordedTime_interpolation;
+    double _saveRenderingCurrentApplicationTime_interpolation = 0.0;
+    long long _saveRenderingClockInterpolation_countsPerSec = 1;
+    bool _saveRendering_isFirstFrame = true;
 
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
 
-    bool _cleanupNeeded = false;
+    bool _cleanupNeededRecording = false;
+    bool _cleanupNeededPlayback = false;
+    const std::string scriptReturnPrefix = "return ";
 
     std::vector<interaction::KeyframeNavigator::CameraPose> _keyframesCamera;
     std::vector<datamessagestructures::TimeKeyframe> _keyframesTime;
     std::vector<std::string> _keyframesScript;
-    std::vector<timelineEntry> _timeline;
+    std::vector<TimelineEntry> _timeline;
+
+    std::vector<std::string> _keyframesSavePropertiesBaseline_scripts;
+    std::vector<TimelineEntry> _keyframesSavePropertiesBaseline_timeline;
+    std::vector<std::string> _propertyBaselinesSaved;
+    const std::vector<std::string> _propertyBaselineRejects = {
+        "NavigationHandler.OrbitalNavigator.Anchor",
+        "NavigationHandler.OrbitalNavigator.Aim",
+        "NavigationHandler.OrbitalNavigator.RetargetAnchor",
+        "NavigationHandler.OrbitalNavigator.RetargetAim"
+    };
+    //A script that begins with an exact match of any of the strings contained in
+    // _scriptRejects will not be recorded
+    const std::vector<std::string> _scriptRejects = {
+        "openspace.sessionRecording.enableTakeScreenShotDuringPlayback",
+        "openspace.sessionRecording.startPlayback",
+        "openspace.sessionRecording.stopPlayback",
+        "openspace.sessionRecording.startRecording",
+        "openspace.sessionRecording.stopRecording",
+        "openspace.scriptScheduler.clear"
+    };
+    const std::vector<std::string> _navScriptsUsingNodes = {
+        "RetargetAnchor",
+        "Anchor",
+        "Aim"
+    };
+    //Any script snippet included in this vector will be trimmed from any script
+    // from the script manager, before it is recorded in the session recording file.
+    // The remainder of the script will be retained.
+    const std::vector<std::string> _scriptsToBeTrimmed = {
+        "openspace.sessionRecording.togglePlaybackPause"
+    };
+    //Any script snippet included in this vector will be trimmed from any script
+    // from the script manager, before it is recorded in the session recording file.
+    // The remainder of the script will be retained.
+    const std::vector<ScriptSubstringReplace> _scriptsToBeReplaced = {
+        {
+            "openspace.time.pauseToggleViaKeyboard",
+            "openspace.time.interpolateTogglePause"
+        }
+    };
+    std::vector<std::string> _loadedNodes;
 
     unsigned int _idxTimeline_nonCamera = 0;
     unsigned int _idxTime = 0;
@@ -648,6 +812,7 @@ protected:
     double _cameraFirstInTimeline_timestamp = 0;
 
     int _nextCallbackHandle = 0;
+    std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
 
     DataMode _conversionDataMode = DataMode::Binary;
     int _conversionLineNum = 1;
@@ -679,24 +844,24 @@ protected:
 class SessionRecording_legacy_0085 : public SessionRecording {
 public:
     SessionRecording_legacy_0085() : SessionRecording() {}
-    ~SessionRecording_legacy_0085() {}
+    ~SessionRecording_legacy_0085() override {}
     char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
     char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";
-    std::string fileFormatVersion() {
+    std::string fileFormatVersion() override {
         return std::string(FileHeaderVersion);
     }
-    std::string targetFileFormatVersion() {
+    std::string targetFileFormatVersion() override {
         return std::string(TargetConvertVersion);
     }
-    std::string getLegacyConversionResult(std::string filename, int depth);
+    std::string getLegacyConversionResult(std::string filename, int depth) override;
 
     struct ScriptMessage_legacy_0085 : public datamessagestructures::ScriptMessage {
-        void read(std::istream* in) {
+        void read(std::istream* in) override {
             size_t strLen;
             //Read string length from file
             in->read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
             if (strLen > saveBufferStringSize_max) {
-                throw ConversionError("Invalid script size for conversion read.");
+                throw ConversionError("Invalid script size for conversion read");
             }
             //Read back full string
             std::vector<char> temp(strLen + 1);
@@ -705,12 +870,12 @@ public:
 
             _script.erase();
             _script = temp.data();
-        };
+        }
     };
 
 protected:
     bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
-        std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
+        std::string& inputLine, std::ofstream& outFile, unsigned char* buffer) override;
 };
 
 } // namespace openspace

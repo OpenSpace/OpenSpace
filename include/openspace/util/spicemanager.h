@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,11 +78,11 @@ public:
     public:
         /// The type of the aberration correction
         enum class Type {
-            None = 0, ///< No correction (<code>NONE</code>)
-            LightTime, ///< One-way light time (<code>LT</code>)
-            LightTimeStellar, ///< One-way light time and stellar (<code>LT+S</code>)
-            ConvergedNewtonian, ///< Converged newtonian light time (<code>CN</code>)
-            ConvergedNewtonianStellar ///< Converged newtonian+stellar (<code>CN+S</code>)
+            None = 0, ///< No correction (`NONE`)
+            LightTime, ///< One-way light time (`LT`)
+            LightTimeStellar, ///< One-way light time and stellar (`LT+S`)
+            ConvergedNewtonian, ///< Converged newtonian light time (`CN`)
+            ConvergedNewtonianStellar ///< Converged newtonian+stellar (`CN+S`)
         };
         /// The direction of the aberration correct
         enum class Direction {
@@ -108,8 +108,16 @@ public:
         /**
          * Converts one of the valid aberration correction strings into its enumeration
          * format. The valid strings are:
-         * \c NONE, \c LT, \c LT+S, \c CN, \c CN+S, \c XLT, \c XLT+S, \c XCN, and
-         * \c XCN+S.
+         *
+         *  - `NONE`
+         *  - `LT`
+         *  - `LT+S`
+         *  - `CN`
+         *  - `CN+S`
+         *  - `XLT`
+         *  - `XLT+S`
+         *  - `XCN`
+         *  - XCN+S.
          *
          * \param identifier The identifier that should be converted into the enumeration
          *        Type and Direction
@@ -139,7 +147,7 @@ public:
 
     /**
      * Returns the FieldOfViewMethod for the passed string. The allowed strings are
-     * \c ELLIPSOID and \c POINT. All other values will result in an exception.
+     * `ELLIPSOID` and `POINT`. All other values will result in an exception.
      *
      * \param method The field of view method
      * \return The field of view method enum
@@ -157,7 +165,7 @@ public:
 
     /**
      * Returns the TerminatorType for the passed string. The allowed strings are
-     * \c UMBRAL and \c PENUMBRAL. All other values will result in an exception.
+     * `UMBRAL` and `PENUMBRAL`. All other values will result in an exception.
      *
      * \param type The terminator type
      * \return The terminator type enum
@@ -175,11 +183,11 @@ public:
     /**
      * Loads one or more SPICE kernels into a program. The provided path can either be a
      * binary, text-kernel, or meta-kernel which gets loaded into the kernel pool. The
-     * loading is done by passing the \p filePath to the \c furnsh_c function. Kernels can
+     * loading is done by passing the \p filePath to the `furnsh_c` function. Kernels can
      * safely be loaded multiple times and are reference counted.
      *
      * \param filePath The path to the kernel that should be loaded. This path will be
-     *        passed to <code>absPath</code> to convert a relative path to an absolute
+     *        passed to `absPath` to convert a relative path to an absolute
      *        path before usage
      * \return The loaded kernel's unique identifier that can be used to unload the kernel
      *
@@ -189,7 +197,7 @@ public:
      * \pre \p filePath must be an absolute or relative path pointing to an existing file.
      * \post The kernel is loaded or has its reference counter incremented and the handle
      *       to the kernel is returned. The returned value is never equal to
-     *       \c KernelHandle(0).
+     *       `KernelHandle(0)`.
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
      */
@@ -198,12 +206,12 @@ public:
     /**
      * Unloads a SPICE kernel identified by the \p kernelId which was returned by the
      * loading call to #loadKernel. The unloading is done by calling the
-     * \c unload_c function.
+     * `unload_c` function.
      *
      * \param kernelId The unique identifier that was returned from the call to
      *        #loadKernel which loaded the kernel
      * \pre \p kernelId must be a valid handle.
-     * \pre \p kernelId cannot be equal to <code>KernelHandle(0)</code>.
+     * \pre \p kernelId cannot be equal to `KernelHandle(0)`.
      * \post The kernel identified by \p kernelId is unloaded.
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
@@ -213,7 +221,7 @@ public:
     /**
      * Unloads a SPICE kernel identified by the \p filePath which was used in the
      * loading call to #loadKernel. The unloading is done by calling the
-     * \c unload_c function.
+     * `unload_c` function.
      *
      * \param filePath The path of the kernel that should be unloaded.
      *
@@ -233,8 +241,8 @@ public:
      * \param target The body to be examined. The target has to name a valid SPICE object
      *        with respect to the kernels that have been loaded
      * \param et The time for which the coverage should be checked
-     * \return \c true if SPK kernels have been loaded to cover \p target at the
-     *         time \p et, \c false otherwise.
+     * \return `true` if SPK kernels have been loaded to cover \p target at the
+     *         time \p et, `false` otherwise.
      *
      * \throw SpiceException If \p target does not name a valid SPICE object
      * \pre \p target must not be empty.
@@ -246,7 +254,7 @@ public:
      *
      * \param target The body to be examined. The target has to name a valid SPICE object
      *        with respect to the kernels that have been loaded
-     * \return \c list of SPK kernels for \p target , \c empty list if none loaded.
+     * \return `list` of SPK kernels for \p target , `empty` list if none loaded.
      *
      * \throw SpiceException If \p target does not name a valid SPICE object
      * \pre \p target must not be empty.
@@ -260,7 +268,7 @@ public:
      * \param frame The frame to be examined. The \p frame has to name a valid frame with
      *        respect to the kernels that have been loaded
      * \param et The time for which the coverage should be checked
-     * \return \c true if SPK kernels have been loaded to cover \p target at the
+     * \return `true` if SPK kernels have been loaded to cover \p target at the
      *         time \p et, false otherwise.
      *
      * \throw SpiceException If \p target does not name a valid SPICE object or \p frame
@@ -274,7 +282,7 @@ public:
     *
     * \param target The body to be examined. The target has to name a valid SPICE object
     *        with respect to the kernels that have been loaded
-    * \return \c list of CK kernels for \p target , \c empty list if none loaded.
+    * \return `list` of CK kernels for \p target , `empty` list if none loaded.
     *
     * \throw SpiceException If \p target does not name a valid SPICE object
     * \pre \p target must not be empty.
@@ -285,18 +293,18 @@ public:
    * Returns a list of loaded spice frames,
    *
    * \param builtInFrames Boolean representing if builtIn or LoadedFrames should be used
-   * \return \c list of Spice frames with ID(int) and Name(string).
+   * \return `list` of Spice frames with ID(int) and Name(string).
    *
    */
     std::vector<std::pair<int, std::string>> spiceBodies(bool builtInFrames) const;
 
     /**
      * Determines whether values exist for some \p item for any body, identified by its
-     * \p naifId, in the kernel pool by passing it to the \c bodfnd_c function.
+     * \p naifId, in the kernel pool by passing it to the `bodfnd_c` function.
      *
      * \param naifId NAIF ID code of body
      * \param item The item to find
-     * \return \c true if the function succeeded, \c false otherwise
+     * \return `true` if the function succeeded, `false` otherwise
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
@@ -305,11 +313,11 @@ public:
 
     /**
      * Determines whether values exist for some \p item for any \p body in the kernel pool
-     * by passing it to the \c bodfnd_c function.
+     * by passing it to the `bodfnd_c` function.
      *
      * \param body The name of the body that should be sampled
      * \param item The item to find in the \p body
-     * \return <code>true</code> if the function succeeded, <code>false</code> otherwise
+     * \return `true` if the function succeeded, `false` otherwise
      *
      * \throw SpiceException If \p body does not name a valid SPICE object.
      * \pre \p body must not be empty.
@@ -320,10 +328,10 @@ public:
     bool hasValue(const std::string& body, const std::string& item) const;
 
     /**
-     * Returns the NAIF ID for a specific \p body using the \c bods2c_c function.
+     * Returns the NAIF ID for a specific \p body using the `bods2c_c` function.
      *
      * \param body The body name that should be retrieved
-     * \return The ID of the <code>body</code> will be stored in this variable. The
+     * \return The ID of the `body` will be stored in this variable. The
      *         value will only be changed if the retrieval was successful
      *
      * \throw SpiceException If \p body does not name a valid SPICE object.
@@ -339,15 +347,14 @@ public:
      * Spice kernels.
      *
      * \param body The body for which the presence of a valid ID should be checked
-     * \return <code>true</code> if the \p body has a NAIF ID, <code>false</code>
-     *         otherwise
+     * \return `true` if the \p body has a NAIF ID, `false` otherwise
      *
      * \pre \p body must not be empty.
      */
     bool hasNaifId(const std::string& body) const;
 
     /**
-     * Returns the NAIF ID for a specific frame using \c namfrm_c.
+     * Returns the NAIF ID for a specific frame using `namfrm_c`.
      *
      * \param frame The frame name that should be retrieved
      * \return The NAIF ID of the \p frame
@@ -364,7 +371,7 @@ public:
      * loaded Spice kernels.
      *
      * \param frame The frame for which the presence of a valid ID should be checked
-     * \return \c true if the \p frame has a NAIF ID, \c false otherwise
+     * \return `true` if the \p frame has a NAIF ID, `false` otherwise
      *
      * \pre \p frame must not be empty.
      */
@@ -373,12 +380,12 @@ public:
     /**
      * Retrieves a single \p value for a certain \p body. This method succeeds iff \p body
      * is the name of a valid body, \p value is a value associated with the body, and the
-     * value consists of only a single \c double value. If all conditions are true, the
-     * value is retrieved using the method \c bodvrd_c and stored in \p v.
+     * value consists of only a single `double` value. If all conditions are true, the
+     * value is retrieved using the method `bodvrd_c` and stored in \p v.
      *
      * \param body The name of the body whose value should be retrieved or the NAIF ID of
      *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
+     * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value
      *
      * \throw SpiceException If the \p body does not name a valid body, \p value
@@ -395,12 +402,12 @@ public:
     /**
      * Retrieves a \p value with two components for a certain \p body. This method
      * succeeds iff \p body is the name of a valid body, \p value is a value associated
-     * with the body, and the value consists of two \c double values. If all conditions
-     * are true, the value is retrieved using the method \c bodvrd_c and stored in \p v.
+     * with the body, and the value consists of two `double` values. If all conditions
+     * are true, the value is retrieved using the method `bodvrd_c` and stored in \p v.
      *
      * \param body The name of the body whose value should be retrieved or the NAIF ID of
      *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
+     * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value
      *
      * \throw SpiceException If the \p body does not name a valid body, \p value
@@ -417,12 +424,12 @@ public:
     /**
      * Retrieves a \p value with three components for a certain \p body. This method
      * succeeds iff \p body is the name of a valid body, \p value is a value associated
-     * with the body, and the value consists of three \c double values. If all conditions
-     * are true, the value is retrieved using the method \c bodvrd_c and stored in \p v.
+     * with the body, and the value consists of three `double` values. If all conditions
+     * are true, the value is retrieved using the method `bodvrd_c` and stored in \p v.
      *
      * \param body The name of the body whose value should be retrieved or the NAIF ID of
      *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
+     * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value
      *
      * \throw SpiceException If the \p body does not name a valid body, \p value
@@ -439,12 +446,12 @@ public:
     /**
      * Retrieves a \p value with four components for a certain \p body. This method
      * succeeds iff \p body is the name of a valid body, \p value is a value associated
-     * with the body, and the value consists of four \c double values. If all conditions
-     * are true, the value is retrieved using the method \c bodvrd_c and stored in \p v.
+     * with the body, and the value consists of four `double` values. If all conditions
+     * are true, the value is retrieved using the method `bodvrd_c` and stored in \p v.
      *
      * \param body The name of the body whose value should be retrieved or the NAIF ID of
      *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
+     * \param value The value that should be retrieved, this value is case-sensitive
      * \param v The destination for the retrieved value
      *
      * \throw SpiceException If the \p body does not name a valid body, \p value
@@ -462,13 +469,13 @@ public:
      * Retrieves a \p value with an arbitrary number of components for a certain \p body.
      * This method succeeds iff \p body is the name of a valid body, \p value is a value
      * associated with the body, and the value consists of the correct number of
-     * \c double values. If all conditions are true, the value is retrieved using the
-     * method \c bodvrd_c and stored in \p v.
+     * `double` values. If all conditions are true, the value is retrieved using the
+     * method `bodvrd_c` and stored in \p v.
      *
      * \param body The name of the body whose value should be retrieved or the NAIF ID of
      *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved value. The \c vector must be
+     * \param value The value that should be retrieved, this value is case-sensitive
+     * \param v The destination for the retrieved value. The `vector` must be
      *          preallocated to the correct size of components that should be retrieved
      *
      * \throw SpiceException If the \p body does not name a valid body, \p value
@@ -509,7 +516,7 @@ public:
      *         representing the passed \p timeString
      *
      * \throw SpiceException If \p timeString is not a valid timestring according
-     *        to the \c str2et_c function (see the Particulars section of the linked
+     *        to the `str2et_c` function (see the Particulars section of the linked
      *        webpage).
      * \pre \p timeString must not be empty
      *
@@ -556,6 +563,12 @@ public:
                 "Error converting ephemeris time '{}' to date with format '{}'",
                     ephemerisTime, format
             ));
+        }
+
+        if (outBuf[0] == '*') {
+            // The conversion failed and we need to use et2utc
+            constexpr int SecondsPrecision = 3;
+            et2utc_c(ephemerisTime, "C", SecondsPrecision, bufferSize, outBuf);
         }
     }
 
@@ -663,7 +676,7 @@ public:
          */
         glm::dvec3 surfaceVector = glm::dvec3(0.0);
 
-        /// <code>true</code> if the ray intersects the body, <code>false</code> otherwise
+        /// `true` if the ray intersects the body, `false` otherwise
         bool interceptFound = false;
     };
 
@@ -715,7 +728,7 @@ public:
      * \param method The type of shape model used for the target
      * \param aberrationCorrection The aberration correction method
      * \param ephemerisTime Time of the observation (seconds past J2000)
-     * \return \c true if the target is visible, \c false otherwise
+     * \return `true` if the target is visible, `false` otherwise
      *
      * \throw SpiceException If the \p target or \p observer do not name valid
      *        NAIF objects, the \p target or \p observer name the same NAIF object, the
@@ -742,7 +755,7 @@ public:
         /// The target velocity
         glm::dvec3 velocity = glm::dvec3(0.0);
 
-        /// One-way light time between <code>target</code> and <code>observer</code> if
+        /// One-way light time between `target` and `observer` if
         /// the aberration correction is enabled
         double lightTime = 0.0;
     };
@@ -757,9 +770,9 @@ public:
      * \param referenceFrame The reference frame of the output position vector
      * \param aberrationCorrection The aberration correction method
      * \param ephemerisTime The time at which the position is to be queried
-     * \return A TargetStateResult object that contains the \c position, containing the
-     *         position of the target; the \c velocity, containing the velocity of the
-     *         target; and the \c lightTime, containing the one-way light time between the
+     * \return A TargetStateResult object that contains the `position`, containing the
+     *         position of the target; the `velocity`, containing the velocity of the
+     *         target; and the `lightTime`, containing the one-way light time between the
      *         \p target and the \p observer. This method is only set if the
      *         \p aberrationCorrection is set to a valid different from
      *         AberrationCorrection::None
@@ -771,7 +784,7 @@ public:
      * \pre \p observer must not be empty.
      * \pre \p referenceFrame must not be empty.
      * \post The resulting TargetStateResult is set to valid values; the
-     *       \c lightTime is only set to a valid different from <code>0.0</code> if the
+     *       `lightTime` is only set to a valid different from `0.0` if the
      *       \p aberrationCorrection is not AberrationCorrection::None.
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkezr_c.html
@@ -856,7 +869,7 @@ public:
         };
 
         /// The shape of the returned field of view
-        Shape shape;
+        Shape shape = Shape::Rectangle;
 
         /// The name of the reference frame in which the #bounds are defined
         std::string frameName;
@@ -910,7 +923,7 @@ public:
         std::vector<glm::dvec3> terminatorPoints;
 
         /// The local ephemeris time at the target, determined by the original
-        /// <code>aberrationCorrection</code> factor
+        /// `aberrationCorrection` factor
         double targetEphemerisTime = 0.0;
     };
 
@@ -992,7 +1005,7 @@ private:
 
     /**
      * Function to find and store the intervals covered by a ck file, this is done
-     * by using mainly the \c ckcov_c and \c ckobj_c functions.
+     * by using mainly the `ckcov_c` and `ckobj_c` functions.
      *
      * \param path The path to the kernel that should be examined
      * \return true if the operation was successful
@@ -1007,7 +1020,7 @@ private:
 
     /**
      * Function to find and store the intervals covered by a spk file, this is done
-     * by using mainly the \c spkcov_c and \c spkobj_c functions.
+     * by using mainly the `spkcov_c` and `spkobj_c` functions.
      *
      * \param path The path to the kernel that should be examined
      * \return true if the operation was successful

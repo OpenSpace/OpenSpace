@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,16 +35,15 @@
 #include <ghoul/misc/profiling.h>
 #include <filesystem>
 #include <optional>
+#include <variant>
 
 namespace {
-    constexpr const char* DefaultReferenceFrame = "GALACTIC";
-
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
         "Target",
         "Target",
         "This is the SPICE NAIF name for the body whose translation is to be computed by "
         "the SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') "
-        "or a NAIF integer id code (such as '399')."
+        "or a NAIF integer id code (such as '399')"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
@@ -52,27 +51,35 @@ namespace {
         "Observer",
         "This is the SPICE NAIF name for the parent of the body whose translation is to "
         "be computed by the SpiceTranslation. It can either be a fully qualified name "
-        "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0')."
+        "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0')"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
         "Frame",
         "Reference Frame",
         "This is the SPICE NAIF name for the reference frame in which the position "
-        "should be retrieved. The default value is GALACTIC."
+        "should be retrieved. The default value is GALACTIC"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
+        "FixedDate",
+        "Fixed Date",
+        "A time to lock the position to. Setting this to an empty string will "
+        "unlock the time and return to position based on current simulation time"
     };
 
     struct [[codegen::Dictionary(SpiceTranslation)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
-        std::string target
-            [[codegen::annotation("A valid SPICE NAIF name or identifier")]];
+        std::variant<std::string, int> target;
 
         // [[codegen::verbatim(ObserverInfo.description)]]
-        std::string observer
-            [[codegen::annotation("A valid SPICE NAIF name or identifier")]];
+        std::variant<std::string, int> observer;
 
         std::optional<std::string> frame
             [[codegen::annotation("A valid SPICE NAIF name for a reference frame")]];
+
+        std::optional<std::string> fixedDate
+            [[codegen::annotation("A date to lock the position to")]];
 
         // A single kernel or list of kernels that this SpiceTranslation depends on. All
         // provided kernels will be loaded before any other operation is performed
@@ -84,16 +91,15 @@ namespace {
 namespace openspace {
 
 documentation::Documentation SpiceTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_translation_spicetranslation";
-    return doc;
+    return codegen::doc<Parameters>("space_translation_spicetranslation");
 }
 
 SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     : _target(TargetInfo)
     , _observer(ObserverInfo)
-    , _frame(FrameInfo, DefaultReferenceFrame)
-    , _cachedFrame(DefaultReferenceFrame)
+    , _frame(FrameInfo, "GALACTIC")
+    , _fixedDate(FixedDateInfo)
+    , _cachedFrame("GALACTIC")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -144,19 +150,47 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     });
     addProperty(_frame);
 
-    _target = p.target;
-    _observer = p.observer;
+    _fixedDate.onChange([this]() {
+        if (_fixedDate.value().empty()) {
+            _fixedEphemerisTime = std::nullopt;
+        }
+        else {
+            _fixedEphemerisTime = SpiceManager::ref().ephemerisTimeFromDate(_fixedDate);
+        }
+    });
+    _fixedDate = p.fixedDate.value_or(_fixedDate);
+    addProperty(_fixedDate);
+
+    if (std::holds_alternative<std::string>(p.target)) {
+        _target = std::get<std::string>(p.target);
+    }
+    else {
+        _target = std::to_string(std::get<int>(p.target));
+    }
+
+    if (std::holds_alternative<std::string>(p.observer)) {
+        _observer = std::get<std::string>(p.observer);
+    }
+    else {
+        _observer = std::to_string(std::get<int>(p.observer));
+    }
+
     _frame = p.frame.value_or(_frame);
 }
 
 glm::dvec3 SpiceTranslation::position(const UpdateData& data) const {
     double lightTime = 0.0;
+
+    double time = data.time.j2000Seconds();
+    if (_fixedEphemerisTime.has_value()) {
+        time = *_fixedEphemerisTime;
+    }
     return SpiceManager::ref().targetPosition(
         _cachedTarget,
         _cachedObserver,
         _cachedFrame,
         {},
-        data.time.j2000Seconds(),
+        time,
         lightTime
     ) * 1000.0;
 }

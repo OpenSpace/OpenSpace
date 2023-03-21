@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include "profile/timedialog.h"
 
 #include "profile/line.h"
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
@@ -37,33 +38,36 @@
 
 using namespace openspace;
 
-TimeDialog::TimeDialog(openspace::Profile& profile, QWidget* parent)
+TimeDialog::TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>* time)
     : QDialog(parent)
-    , _profile(profile)
+    , _time(time)
 {
     setWindowTitle("Time");
     createWidgets();
 
     QStringList types = { "Absolute", "Relative" };
     _typeCombo->addItems(types);
-    if (_profile.time().has_value()) {
-        _data = *_profile.time();
-        if (_data.type == Profile::Time::Type::Relative) {
-            if (_data.value == "") {
-                _data.value = "now";
+    if (_time->has_value()) {
+        _timeData = **_time;
+        if (_timeData.type == Profile::Time::Type::Relative) {
+            if (_timeData.value.empty()) {
+                _timeData.value = "0d";
             }
-            _relativeEdit->setSelection(0, _relativeEdit->text().length());
+            int len = static_cast<int>(_relativeEdit->text().length());
+            _relativeEdit->setSelection(0, len);
         }
         else {
             _absoluteEdit->setSelectedSection(QDateTimeEdit::YearSection);
         }
     }
     else {
-        _data.type = Profile::Time::Type::Relative;
-        _data.value = "now";
+        _timeData.type = Profile::Time::Type::Relative;
+        _timeData.value = "0d";
     }
-    _initializedAsAbsolute = (_data.type == Profile::Time::Type::Absolute);
-    enableAccordingToType(static_cast<int>(_data.type));
+    _startPaused->setChecked(_timeData.startPaused);
+
+    _initializedAsAbsolute = (_timeData.type == Profile::Time::Type::Absolute);
+    enableAccordingToType(static_cast<int>(_timeData.type));
 }
 
 void TimeDialog::createWidgets() {
@@ -81,6 +85,7 @@ void TimeDialog::createWidgets() {
     {
         _absoluteLabel = new QLabel("Absolute UTC:");
         layout->addWidget(_absoluteLabel);
+        
         _absoluteEdit = new QDateTimeEdit;
         _absoluteEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm:ss");
         _absoluteEdit->setDateTime(QDateTime::currentDateTime());
@@ -89,11 +94,20 @@ void TimeDialog::createWidgets() {
     {
         _relativeLabel = new QLabel("Relative Time:");
         layout->addWidget(_relativeLabel);
+        
         _relativeEdit = new QLineEdit;
         _relativeEdit->setToolTip(
             "String for relative time to actual (e.g. \"-1d\" for back 1 day)"
         );
         layout->addWidget(_relativeEdit);
+    }
+    {
+        _startPaused = new QCheckBox("Start with time paused");
+        _startPaused->setChecked(false);
+        _startPaused->setToolTip(
+            "If this is checked, the profile will start with the delta time paused"
+        );
+        layout->addWidget(_startPaused);
     }
     layout->addWidget(new Line);
     {
@@ -114,18 +128,18 @@ void TimeDialog::enableAccordingToType(int idx) {
     if (comboIdx == Profile::Time::Type::Relative) {
         _relativeEdit->setText("<font color='black'>Relative Time:</font>");
         if (_initializedAsAbsolute) {
-            _relativeEdit->setText("now");
+            _relativeEdit->setText("0d");
         }
         else {
-            _relativeEdit->setText(QString::fromStdString(_data.value));
+            _relativeEdit->setText(QString::fromStdString(_timeData.value));
         }
         _relativeEdit->setFocus(Qt::OtherFocusReason);
     }
     else {
         _relativeEdit->setText("<font color='gray'>Relative Time:</font>");
-        size_t tIdx = _data.value.find_first_of('T', 0);
-        QString importDate = QString::fromStdString(_data.value.substr(0, tIdx));
-        QString importTime = QString::fromStdString(_data.value.substr(tIdx + 1));
+        size_t tIdx = _timeData.value.find_first_of('T', 0);
+        QString importDate = QString::fromStdString(_timeData.value.substr(0, tIdx));
+        QString importTime = QString::fromStdString(_timeData.value.substr(tIdx + 1));
         _absoluteEdit->setDate(QDate::fromString(importDate, Qt::DateFormat::ISODate));
         _absoluteEdit->setTime(QTime::fromString(importTime));
         _relativeEdit->clear();
@@ -141,16 +155,17 @@ void TimeDialog::enableFormatForAbsolute(bool enableAbs) {
 }
 
 void TimeDialog::approved() {
-    constexpr const int Relative = static_cast<int>(Profile::Time::Type::Relative);
+    constexpr int Relative = static_cast<int>(Profile::Time::Type::Relative);
     if (_typeCombo->currentIndex() == Relative) {
         if (_relativeEdit->text().isEmpty()) {
-            _profile.clearTime();
+            *_time = std::nullopt;
         }
         else {
             Profile::Time t;
             t.type = Profile::Time::Type::Relative;
             t.value = _relativeEdit->text().toStdString();
-            _profile.setTime(t);
+            t.startPaused = _startPaused->isChecked();
+            *_time = t;
         }
     }
     else {
@@ -161,7 +176,8 @@ void TimeDialog::approved() {
             _absoluteEdit->date().toString("yyyy-MM-dd").toStdString(),
             _absoluteEdit->time().toString().toStdString()
         );
-        _profile.setTime(t);
+        t.startPaused = _startPaused->isChecked();
+        *_time = t;
     }
     accept();
 }

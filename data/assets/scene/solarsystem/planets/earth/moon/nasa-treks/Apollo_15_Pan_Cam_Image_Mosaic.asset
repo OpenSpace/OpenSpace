@@ -1,0 +1,54 @@
+-- This file was automatically generated using a script found at
+-- https://github.com/OpenSpace/scripts/treks-to-openspace. See the README.md file
+-- in that repository for more information on how to run the script to update these
+-- files. In particular in the case of errors, prefer to change that script rather
+-- than the individual files
+
+local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
+
+local treks_Apollo15_PanCam_Mosaic_25N311E_150cmp = {
+  Identifier = "Apollo15_PanCam_Mosaic_25N311E_150cmp",
+  Name = [[Apollo 15 Pan Cam Image Mosaic, Aristarchus Plateau 1]],
+  FilePath = asset.localResource("Apollo_15_Pan_Cam_Image_Mosaic/Aristarchus_Plateau_1.vrt"),
+  Description = [[]]
+}
+
+local treks_Apollo15_PanCam_Mosaic_28N307E_1mp = {
+  Identifier = "Apollo15_PanCam_Mosaic_28N307E_1mp",
+  Name = [[Apollo 15 Pan Cam Image Mosaic, Aristarchus Plateau 2]],
+  FilePath = asset.localResource("Apollo_15_Pan_Cam_Image_Mosaic/Aristarchus_Plateau_2.vrt"),
+  Description = [[]]
+}
+
+local treks_Apollo15_PanCam_Mosaic_19S129E_2mp = {
+  Identifier = "Apollo15_PanCam_Mosaic_19S129E_2mp",
+  Name = [[Apollo 15 Pan Cam Image Mosaic, Tsiolkovskiy Crater]],
+  FilePath = asset.localResource("Apollo_15_Pan_Cam_Image_Mosaic/Tsiolkovskiy_Crater.vrt"),
+  Description = [[]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo15_PanCam_Mosaic_25N311E_150cmp)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo15_PanCam_Mosaic_28N307E_1mp)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo15_PanCam_Mosaic_19S129E_2mp)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Apollo15_PanCam_Mosaic_25N311E_150cmp")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Apollo15_PanCam_Mosaic_28N307E_1mp")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Apollo15_PanCam_Mosaic_19S129E_2mp")
+end)
+
+asset.export("Apollo15_PanCam_Mosaic_25N311E_150cmp", treks_Apollo15_PanCam_Mosaic_25N311E_150cmp)
+asset.export("Apollo15_PanCam_Mosaic_28N307E_1mp", treks_Apollo15_PanCam_Mosaic_28N307E_1mp)
+asset.export("Apollo15_PanCam_Mosaic_19S129E_2mp", treks_Apollo15_PanCam_Mosaic_19S129E_2mp)
+
+
+asset.meta = {
+  Name = [[NASA Treks Layers for Moon Apollo_15_Pan_Cam_Image_Mosaic],
+  Version = "1.0",
+  Author = "NASA/Treks",
+  URL = "https://trek.nasa.gov/moon",
+  License = "NASA/Treks",
+  Description = [[Apollo_15_Pan_Cam_Image_Mosaic layers from NASA/Treks for Moon]]
+}

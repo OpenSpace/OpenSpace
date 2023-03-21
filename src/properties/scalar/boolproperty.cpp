@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@ BoolProperty::BoolProperty(Property::PropertyInfo info, bool value)
     : TemplateProperty<bool>(std::move(info), value)
 {}
 
-std::string BoolProperty::className() const {
+std::string_view BoolProperty::className() const {
     return "BoolProperty";
 }
 
@@ -41,9 +41,8 @@ int BoolProperty::typeLua() const {
     return LUA_TBOOLEAN;
 }
 
-bool BoolProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isboolean(state, -1) == 1);
-    return success ? (lua_toboolean(state, -1) == 1) : false;
+bool BoolProperty::fromLuaConversion(lua_State* state) const {
+    return ghoul::lua::value<bool>(state);
 }
 
 void BoolProperty::toLuaConversion(lua_State* state) const {

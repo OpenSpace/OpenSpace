@@ -1,0 +1,159 @@
+asset.require("./jwst")
+
+local point_jwst = {
+  Identifier = "event.jwst.point",
+  Name = "Point JWST",
+  Command = [[
+    local ra
+    local dec
+    local duration
+    if is_declared("args") then
+      ra = args.Ra
+      dec = args.Dec
+      duration = args.Duration
+    else
+      return
+    end
+
+    local function mathSign(number)
+      local res = 0
+      if number > 0 then
+        res = 1
+      elseif number < 0 then
+        res = -1
+      end
+      return res
+    end
+
+    local function length(v)
+      return math.sqrt(v[1]*v[1] + v[2]*v[2]+ v[3]*v[3])
+    end
+
+    local function normalize(v)
+      local l = length(v)
+      v[1] = v[1] / l
+      v[2] = v[2] / l
+      v[3] = v[3] / l
+    end
+
+    local function applyMatrix(m, v)
+      local res = { 0.0, 0.0, 0.0 }
+      res[1] = m[1]*v[1] + m[2]*v[2] + m[3]*v[3] -- ax + by + cz
+      res[2] = m[4]*v[1] + m[5]*v[2] + m[6]*v[3] -- dx + ey + fz
+      res[3] = m[7]*v[1] + m[8]*v[2] + m[9]*v[3] -- gx + hy + iz
+      return res
+    end
+
+    local function convertRaDec(ra, dec)
+      -- J2000 Galactic reference frame
+      -- Equatorial coordinates of the Galactic north pole
+      local A0 = math.rad(192.8595)
+      local D0 = math.rad(27.1284)
+      -- Galactic longitude of the equatorial north pole
+      local L0 = math.rad(122.9320)
+      -- distance = 9.2E15 m (set to size of view sphere)
+      local distance = 9.2E15
+
+      -- (Ra, Dec) -> (a, d)
+      local a = math.rad(ra)
+      local d = math.rad(dec)
+
+      -- Convert to galactic reference frame
+      local l = L0 - math.atan(
+        math.cos(d) * math.sin(a - A0),
+        math.sin(d) * math.cos(D0) - math.cos(d) * math.sin(D0) * math.cos(a - A0)
+      )
+      local b = math.asin(math.sin(d) * math.sin(D0) + math.cos(d) * math.cos(D0) * math.cos(a - A0))
+
+      -- Convert to cartesian
+      local rGalactic = {
+        distance * math.cos(b) * math.cos(l),
+        distance * math.cos(b) * math.sin(l),
+        distance * math.sin(b)
+      }
+
+      return rGalactic
+    end
+
+    local function calculateJWSTAngles(c)
+      -- Normalize
+      normalize(c)
+
+      -- Then Calculate the angle for X and Y seperatly
+      local newXAngle = math.asin(-c[2]) -- asin(-y)
+      local newYAngle = 0.0
+
+      local op1 = math.asin(c[1] / (math.cos(newXAngle))) -- asin(x/(cos(asin(-y))))
+      local op2 = math.acos(c[3] / (math.cos(newXAngle))) -- acos(z/(cos(asin(-y))))
+
+      -- Choose option 1 or 2
+      if math.abs(op1 - op2) < 0.00001 then
+        -- Same
+        newYAngle = op1
+      elseif math.abs(math.abs(op1) - math.abs(op2)) < 0.00001 then
+        -- Same but different signs
+        newYAngle = op1
+      elseif mathSign(op1) == mathSign(op2) then
+        -- Different and same signs
+        newYAngle = op2
+      else
+        -- Different and different signs
+        newYAngle = -op2
+      end
+
+      local res = { newXAngle, newYAngle }
+      return res
+    end
+
+    local coordinates = convertRaDec(ra, dec)
+    local JWSTPosition = openspace.worldPosition('JWSTModel')
+    local JWSTRotation = openspace.worldRotation('JWSTRotation')
+
+    local JWSTtoCoord = {
+      coordinates[1] - JWSTPosition[1],
+      coordinates[2] - JWSTPosition[2],
+      coordinates[3] - JWSTPosition[3]
+    }
+
+    local JWSTtoCoordRotated = applyMatrix(JWSTRotation, JWSTtoCoord)
+    local JWSTAngles = calculateJWSTAngles(JWSTtoCoordRotated)
+
+    -- Check if the new angle violate the sunshield
+    -- -45 deg to 5 deg is valid in x rotation
+    if JWSTAngles[1] < math.rad(-45) or JWSTAngles[1] > math.rad(5) then
+      openspace.printWarning('Coordinate violates the sunshield')
+    end
+
+    openspace.setPropertyValueSingle(
+      'Scene.JWSTModel.Rotation.Rotation',
+      { JWSTAngles[1], JWSTAngles[2],  0.0},
+      duration
+    )
+  ]],
+  Documentation = [[
+    Point the JWST model to a ra dec corrdinate in the sky. This action takes the Ra Dec
+    sky coordinate as arguments.
+  ]],
+  GuiPath = "/JWST/Events",
+  IsLocal = true
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(point_jwst)
+
+  openspace.event.registerEventAction(
+    "PointSpacecraft",
+    point_jwst.Identifier
+  )
+end)
+
+asset.onDeinitialize(function()
+  openspace.event.unregisterEventAction(
+    "PointSpacecraft",
+    point_jwst.Identifier
+  )
+
+  openspace.action.removeAction(point_jwst)
+end)
+
+asset.export("jwst.point", point_jwst.Identifier)

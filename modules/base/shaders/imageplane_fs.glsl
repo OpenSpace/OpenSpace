@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,17 +29,18 @@ in float vs_screenSpaceDepth;
 
 uniform sampler2D texture1;
 
+
 Fragment getFragment() {
-    Fragment frag;
+  Fragment frag;
 
-    if (gl_FrontFacing) {
-        frag.color = texture(texture1, vs_st);
-    }
-    else {
-        frag.color = vec4(0.1, 0.1, 0.1, 1.0);
-    }
+  if (gl_FrontFacing) {
+    frag.color = texture(texture1, vs_st);
+  }
+  else {
+    frag.color = vec4(0.1, 0.1, 0.1, 1.0);
+  }
 
-    frag.depth = vs_screenSpaceDepth;
+  frag.depth = vs_screenSpaceDepth;
 
-    return frag;
+  return frag;
 }

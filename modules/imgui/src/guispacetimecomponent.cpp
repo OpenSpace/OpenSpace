@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,21 +24,16 @@
 
 #include <modules/imgui/include/guispacetimecomponent.h>
 
-#include <modules/imgui/include/gui.h>
+#include <modules/imgui/imguimodule.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
-#include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/scripting/scriptengine.h>
-
-#include <numeric>
 
 namespace {
     const ImVec2 Size = ImVec2(350, 500);
@@ -64,9 +59,10 @@ namespace {
         }
     }
 
-    constexpr const char* AnchorProperty = "NavigationHandler.OrbitalNavigator.Anchor";
+    constexpr std::string_view AnchorProperty =
+        "NavigationHandler.OrbitalNavigator.Anchor";
 
-    constexpr const char* RetargetAnchorProperty =
+    constexpr std::string_view RetargetAnchorProperty =
         "NavigationHandler.OrbitalNavigator.RetargetAnchor";
 
 } // namespace
@@ -237,7 +233,7 @@ void GuiSpaceTimeComponent::render() {
         "Entering a date here and confirming with ENTER sets the current simulation time "
         "to the entered date. The format of the date has to be either ISO 8601 "
         "YYYY-MM-DDThh:mm:ss (2017-08-27T04:00:00) or YYYY MMM DD hh:mm:ss "
-        "(2017 MAY 01 12:00:00). The hours are in 24h and specified as UTC.",
+        "(2017 MAY 01 12:00:00). The hours are in 24h and specified as UTC",
         _tooltipDelay
     );
 
@@ -275,7 +271,7 @@ void GuiSpaceTimeComponent::render() {
     };
 
     const bool minusMonth = ImGui::Button("-Month");
-    showTooltip("OBS: A month here equals 30 days.", _tooltipDelay);
+    showTooltip("OBS: A month here equals 30 days", _tooltipDelay);
     if (minusMonth) {
         incrementTime(-30);
     }
@@ -336,23 +332,23 @@ void GuiSpaceTimeComponent::render() {
     if (plusMonth) {
         incrementTime(30);
     }
-    showTooltip("OBS: A month here equals 30 days.", _tooltipDelay);
+    showTooltip("OBS: A month here equals 30 days", _tooltipDelay);
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 //
     {
         const float dt = static_cast<float>(global::timeManager->targetDeltaTime());
         if (_firstFrame) {
-            const std::pair<double, std::string>& dtInfo = simplifyTime(dt);
+            const std::pair<double, std::string_view>& dtInfo = simplifyTime(dt);
             _deltaTime = static_cast<float>(dtInfo.first);
-            _deltaTimeUnit = timeUnitFromString(dtInfo.second.c_str());
+            _deltaTimeUnit = timeUnitFromString(dtInfo.second);
 
             _timeUnits = std::accumulate(
                 openspace::TimeUnits.begin(),
                 openspace::TimeUnits.end(),
                 std::string(""),
                 [](const std::string& a, const openspace::TimeUnit& unit) {
-                    return a + nameForTimeUnit(unit, true) + " / second" + '\0';
+                    return fmt::format("{}{} / second\0", a, nameForTimeUnit(unit, true));
                 }
             );
 

@@ -1,122 +1,110 @@
-local assetHelper = asset.require('util/asset_helper')
-local satelliteHelper = asset.require('util/tle_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local url = "http://celestrak.com/satcat/tle.php?CATNR=37849"
-local identifier = "SNPP"
-local filename = "SNPP.txt"
-local nodes = {}
-local tle = satelliteHelper.downloadTLEFile(asset, url, identifier, filename)
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (SNPP)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_snpp",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=37849&FORMAT=kvn",
+  Filename = "SNPP.txt",
+  Override = true
+})
 
+local SNPP = {
+  Identifier = "SNPP",
+  Parent = transforms.EarthInertial.Identifier,
+  InteractionSphere = 30,
+  Transform = {
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "SNPP.txt",
+      Format = "OMM"
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "GALACTIC",
+      DestinationFrame = "J2000",
+    }
+  },
+  Tag = { "earth_satellite", "SNPP" },
+  GUI = {
+    Name = "SNPP",
+    Path = "/Solar System/Planets/Earth/Satellites/SNPP"
+  }
+}
+
+local SNPPTrail = {
+  Identifier = "SNPP_trail",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "SNPP.txt",
+      Format = "OMM",
+      RenderBinMode = "PostDeferredTransparent"
+    },
+    Color = { 0.9, 0.6715, 0.0 },
+    Fade = 1.5,
+    Resolution = 320
+  },
+  Tag = { "earth_satellite", "SNPP" },
+  GUI = {
+    Name = "SNPP Trail",
+    Path = "/Solar System/Planets/Earth/Satellites/SNPP"
+  }
+}
+
+local SNPPLabel = {
+  Identifier = "SNPPLabel",
+  Parent = SNPP.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "SNPP",
+    FontSize = 70.0,
+    Size = 4.0,
+    MinMaxSize = { 1, 100 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 15.0 },
+    FadeWidths = { 1.0, 25.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "SNPP Label",
+    Path = "/Solar System/Planets/Earth"
+  }
+}
 
 asset.onInitialize(function ()
+  local s = openspace.space.readKeplerFile(omm .. "SNPP.txt", "OMM")
+  SNPPTrail.Renderable.Period = s[0].Period / (60 * 60 * 24)
 
-  local lineElement = satelliteHelper.makeSingleLineElement(tle, filename)
-  local period = satelliteHelper.getPeriodFromElement(lineElement)
-  local path = tle .. "/" .. filename
-
-  local SNPP = {
-    Identifier = "SNPP",
-    Parent = transforms.EarthInertial.Identifier,
-    InteractionSphere = 30,
-    Transform = {
-      Translation = {
-        Type = "TLETranslation",
-        Body = identifier,
-        Observer = transforms.EarthInertial.Identifier,
-        File = path,
-        LineNumber = 1
-      },
-      Rotation = {
-        Type = "SpiceRotation",
-        SourceFrame = "GALACTIC",
-        DestinationFrame = "J2000",
-      }
-    },
-    Tag = { "earth_satellite", "SNPP" },
-    GUI = {
-        Path = "/Solar System/Planets/Earth/Satellites/SNPP"
-    }
-  }
-
-
-  local SNPPTrail = {
-    Identifier = identifier .. "_trail",
-    Parent = transforms.EarthInertial.Identifier,
-    Renderable = {
-      Type = "RenderableTrailOrbit",
-      Translation = {
-        Type = "TLETranslation",
-        Body = identifier,
-        Observer = transforms.EarthInertial.Identifier,
-        File = path,
-        LineNumber = 1,
-        RenderBinMode = "PostDeferredTransparent"
-      },
-      Color = { 0.9, 0.6715, 0.0 },
-      Fade = 1.5,
-      Period = period,
-      Resolution = 320
-    },
-    Tag = { "earth_satellite", "SNPP" },
-    GUI = {
-      Name = "SNPP Trail",
-      Path = "/Solar System/Planets/Earth/Satellites/SNPP"
-    }
-  }
-
-  local SNPPLabel = {
-      Identifier = "SNPPLabel",
-      Parent = SNPP.Identifier,
-
-      Renderable = {
-        Enabled = false,
-        Type = "RenderableLabels",
-        LabelText = "SNPP",
-        FontSize = 100.0,
-        LabelSize = 4.0,
-        LabelMaxSize = 100.0,
-        LabelMinSize = 1.0,
-        LabelOrientationOption = "Camera View Direction",
-        BlendMode = "Additive",
-        EnableFading = true,
-        FadeStartUnit = "au",
-        FadeStartDistance = 0.15,
-        FadeStartSpeed = 1.0,
-        FadeEndUnit = "au",
-        FadeEndDistance = 15.0,
-        FadeEndSpeed = 25.0
-      },
-      Tag = { "solarsystem_labels" },
-      GUI = {
-        Name = "SNPP Label",
-        Path = "/Solar System/Planets/Earth"
-      }
-  }
-
-  table.insert(nodes, SNPP)
-  table.insert(nodes, SNPPTrail)
-  table.insert(nodes, SNPPLabel)
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end  
-
+  openspace.addSceneGraphNode(SNPP)
+  openspace.addSceneGraphNode(SNPPTrail)
+  openspace.addSceneGraphNode(SNPPLabel)
 end)
-
 
 asset.onDeinitialize(function ()
-  for _, node in ipairs(nodes) do
-    openspace.removeSceneGraphNode(node)
-  end  
+  openspace.removeSceneGraphNode(SNPPLabel)
+  openspace.removeSceneGraphNode(SNPPTrail)
+  openspace.removeSceneGraphNode(SNPP)
 end)
+
+asset.export(SNPP)
+asset.export(SNPPTrail)
+asset.export(SNPPLabel)
 
 
 asset.meta = {
   Name = "SNPP",
   Version = "1.0",
-  Description = [[ Trail for SNPP. trail from
-  CELESTRAK. Can be used in conjunction with VIIRS SNPP (Temporal) layer for Earth.]],
+  Description = [[Trail for SNPP. trail from Celestrak. Can be used in conjunction with
+    VIIRS SNPP (Temporal) layer for Earth]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/",
   License = "NASA"

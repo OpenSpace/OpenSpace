@@ -75,7 +75,7 @@ local goToPreviousSlide = function (deck, interpolationDuration)
   setCurrentSlide(deck, deck.CurrentSlideIndex - 1, interpolationDuration)
 end
 
-local toggleSlides = function (deck, interpolationDuration) 
+local toggleSlides = function (deck, interpolationDuration)
   deck.Visible = not deck.Visible
   if deck.Visible then
     for i, identifier in pairs(deck.SlideIdentifiers) do
@@ -87,7 +87,7 @@ local toggleSlides = function (deck, interpolationDuration)
         "ScreenSpace." .. identifier .. ".Opacity", opacity,
         interpolationDuration, "QuadraticEaseOut")
     end
-  else 
+  else
     for i, identifier in pairs(deck.SlideIdentifiers) do
       openspace.setPropertyValueSingle(
         "ScreenSpace." .. identifier .. ".Opacity", 0,
@@ -96,10 +96,10 @@ local toggleSlides = function (deck, interpolationDuration)
   end
 end
 
-asset.export('createDeck', createDeck)
-asset.export('removeDeck', removeDeck)
-asset.export('addSlide', addSlide)
-asset.export('setCurrentSlide', setCurrentSlide)
-asset.export('goToNextSlide', goToNextSlide)
-asset.export('goToPreviousSlide', goToPreviousSlide)
-asset.export('toggleSlides', toggleSlides)
+asset.export("createDeck", createDeck)
+asset.export("removeDeck", removeDeck)
+asset.export("addSlide", addSlide)
+asset.export("setCurrentSlide", setCurrentSlide)
+asset.export("goToNextSlide", goToNextSlide)
+asset.export("goToPreviousSlide", goToPreviousSlide)
+asset.export("toggleSlides", toggleSlides)

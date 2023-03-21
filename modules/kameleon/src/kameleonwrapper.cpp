@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,6 +39,8 @@
 #endif // WIN32
 
 #include <ccmc/Kameleon.h>
+#include <ccmc/Constants.h>
+#include <ccmc/FileReader.h>
 #include <ccmc/Model.h>
 #include <ccmc/Interpolator.h>
 #include <ccmc/BATSRUS.h>
@@ -50,8 +52,8 @@
 #endif // WIN32
 
 namespace {
-    constexpr const char* _loggerCat = "KameleonWrapper";
-    constexpr const float RE_TO_METER = 6371000;
+    constexpr std::string_view _loggerCat = "KameleonWrapper";
+    constexpr float RE_TO_METER = 6371000;
 } // namespace
 
 namespace openspace {
@@ -134,29 +136,29 @@ bool KameleonWrapper::open(const std::string& filename) {
         LDEBUG(fmt::format("y: {}", _yCoordVar));
         LDEBUG(fmt::format("z: {}", _zCoordVar));
 
-        _min = {
+        _min = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "actual_min").getAttributeFloat(),
             _model->getVariableAttribute(_yCoordVar, "actual_min").getAttributeFloat(),
             _model->getVariableAttribute(_zCoordVar, "actual_min").getAttributeFloat()
-        };
+        );
 
-        _max = {
+        _max = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "actual_max").getAttributeFloat(),
             _model->getVariableAttribute(_yCoordVar, "actual_max").getAttributeFloat(),
             _model->getVariableAttribute(_zCoordVar, "actual_max").getAttributeFloat()
-        };
+        );
 
-        _validMin = {
+        _validMin = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "valid_min").getAttributeFloat(),
             _model->getVariableAttribute(_yCoordVar, "valid_min").getAttributeFloat(),
             _model->getVariableAttribute(_zCoordVar, "valid_min").getAttributeFloat()
-        };
+        );
 
-        _validMax = {
+        _validMax = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "valid_max").getAttributeFloat(),
             _model->getVariableAttribute(_yCoordVar, "valid_max").getAttributeFloat(),
             _model->getVariableAttribute(_zCoordVar, "valid_max").getAttributeFloat()
-        };
+        );
 
         return true;
     }
@@ -200,7 +202,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     LDEBUG(fmt::format("{} Max: {}", var, varMax));
 
     // HISTOGRAM
-    constexpr const int NBins = 200;
+    constexpr int NBins = 200;
     std::vector<int> histogram(NBins, 0);
     // Explicitly mentioning the capture list provides either an error on MSVC (if NBins)
     // is not specified or a warning on Clang if it is specified. Sigh...
@@ -301,7 +303,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 
     int sum = 0;
     int stop = 0;
-    constexpr const float TruncationLimit = 0.9f;
+    constexpr float TruncationLimit = 0.9f;
     const int upperLimit = static_cast<int>(size * TruncationLimit);
     for (int i = 0; i < NBins; ++i) {
         sum += histogram[i];
@@ -473,7 +475,7 @@ float* KameleonWrapper::uniformSampledVectorValues(const std::string& xVar,
         zVar
     ));
 
-    constexpr const int NumChannels = 4;
+    constexpr int NumChannels = 4;
     const size_t size = NumChannels * outDimensions.x * outDimensions.y * outDimensions.z;
     float* data = new float[size];
 
@@ -698,11 +700,11 @@ glm::vec3 KameleonWrapper::modelBarycenterOffset() const {
         return glm::vec3(0.f);
     }
 
-    glm::vec3 offset = {
+    glm::vec3 offset = glm::vec3(
         _min.x + (std::abs(_min.x) + std::abs(_max.x)) / 2.f,
         _min.y + (std::abs(_min.y) + std::abs(_max.y)) / 2.f,
         _min.z + (std::abs(_min.z) + std::abs(_max.z)) / 2.f
-    };
+    );
     return offset;
 }
 
@@ -723,11 +725,11 @@ glm::vec3 KameleonWrapper::modelScale() const {
         return glm::vec3(1.f);
     }
 
-    glm::vec3 scale = {
+    glm::vec3 scale = glm::vec3(
         _max.x - _min.x,
         _max.y - _min.y,
         _max.z - _min.z
-    };
+    );
     return scale;
 }
 
@@ -786,7 +788,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
                                                                  TraceDirection direction,
                                                                   FieldlineEnd& end) const
 {
-    constexpr const int MaxSteps = 5000;
+    constexpr int MaxSteps = 5000;
 
     _model->loadVariable(xVar);
     const long int xID = _model->getVariableID(xVar);
@@ -876,7 +878,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
                                                                            float stepsize,
                                                                       float eCharge) const
 {
-    constexpr const int MaxSteps = 5000;
+    constexpr int MaxSteps = 5000;
 
     glm::vec3 step = glm::vec3(stepsize);
 
@@ -905,57 +907,57 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
         trajectory.push_back(pos);
 
         // Calculate new position with Lorentz force quation and Runge-Kutta 4th order
-        glm::vec3 B = {
+        glm::vec3 B = glm::vec3(
             _interpolator->interpolate(bxID, pos.x, pos.y, pos.z),
             _interpolator->interpolate(byID, pos.x, pos.y, pos.z),
             _interpolator->interpolate(bzID, pos.x, pos.y, pos.z)
-        };
+        );
 
-        glm::vec3 E = {
+        glm::vec3 E = glm::vec3(
             _interpolator->interpolate(jxID, pos.x, pos.y, pos.z),
             _interpolator->interpolate(jyID, pos.x, pos.y, pos.z),
             _interpolator->interpolate(jzID, pos.x, pos.y, pos.z)
-        };
+        );
         const glm::vec3 k1 = glm::normalize(eCharge * (E + glm::cross(v0, B)));
         const glm::vec3 k1Pos = pos + step / 2.f * v0 + step * step / 8.f * k1;
 
-        B = {
+        B = glm::vec3(
             _interpolator->interpolate(bxID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(byID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(bzID, k1Pos.x, k1Pos.y, k1Pos.z)
-        };
-        E = {
+        );
+        E = glm::vec3(
             _interpolator->interpolate(jxID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(jyID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(jzID, k1Pos.x, k1Pos.y, k1Pos.z)
-        };
+        );
         const glm::vec3 v1 = v0 + step / 2.f * k1;
         const glm::vec3 k2 = glm::normalize(eCharge * (E + glm::cross(v1, B)));
 
-        B = {
+        B = glm::vec3(
             _interpolator->interpolate(bxID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(byID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(bzID, k1Pos.x, k1Pos.y, k1Pos.z)
-        };
-        E = {
+        );
+        E = glm::vec3(
             _interpolator->interpolate(jxID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(jyID, k1Pos.x, k1Pos.y, k1Pos.z),
             _interpolator->interpolate(jzID, k1Pos.x, k1Pos.y, k1Pos.z)
-        };
+        );
         const glm::vec3 v2 = v0 + step / 2.f * k2;
         const glm::vec3 k3 = glm::normalize(eCharge * (E + glm::cross(v2, B)));
         const glm::vec3 k3Pos = pos + step * v0 + step * step / 2.f * k1;
 
-        B = {
+        B = glm::vec3(
             _interpolator->interpolate(bxID, k3Pos.x, k3Pos.y, k3Pos.z),
             _interpolator->interpolate(byID, k3Pos.x, k3Pos.y, k3Pos.z),
             _interpolator->interpolate(bzID, k3Pos.x, k3Pos.y, k3Pos.z)
-        };
-        E = {
+        );
+        E = glm::vec3(
             _interpolator->interpolate(jxID, k3Pos.x, k3Pos.y, k3Pos.z),
             _interpolator->interpolate(jyID, k3Pos.x, k3Pos.y, k3Pos.z),
             _interpolator->interpolate(jzID, k3Pos.x, k3Pos.y, k3Pos.z)
-        };
+        );
         const glm::vec3 v3 = v0 + step * k3;
         const glm::vec3 k4 = glm::normalize(eCharge * (E + glm::cross(v3, B)));
 

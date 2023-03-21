@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,17 +22,17 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   gaiamodule.h
   rendering/renderablegaiastars.h
   rendering/octreemanager.h
   rendering/octreeculler.h
-  tasks/readfilejob.h 
-  tasks/readfitstask.h 
+  tasks/readfilejob.h
+  tasks/readfitstask.h
   tasks/readspecktask.h
-  tasks/constructoctreetask.h 
+  tasks/constructoctreetask.h
   rendering/gaiaoptions.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})

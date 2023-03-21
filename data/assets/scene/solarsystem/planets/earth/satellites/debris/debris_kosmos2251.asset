@@ -1,15 +1,50 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('util/tle_helper')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-  Title = "Kosmos 2251 Debris",
-  Url = "http://www.celestrak.com/NORAD/elements/cosmos-2251-debris.txt",
-  TrailColor = { 0.66, 0.8, 0.5 }
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Kosmos 2251 Debris)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_cosmos-2251-debris",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=cosmos-2251-debris&FORMAT=kvn",
+  Filename = "cosmos-2251-debris.txt",
+  Override = true
+})
+
+local satellites = {
+  Identifier = "cosmos-2251-debris",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "cosmos-2251-debris.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.66, 0.8, 0.5 },
+    Fade = 1.5,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Kosmos 2251 Debris",
+    Path = "/Solar System/Planets/Earth/Satellites"
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(satellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(satellites)
+end)
+
+asset.export(satellites)
 
 
-local objectNames = {}
 
-shared.registerSatelliteGroupObjects(asset, group, tle, true)
+asset.meta = {
+  Name = "Satellites Debris - Kosmos 2251 Debris",
+  Version = "1.0",
+  Description = "Satellites asset for Debris - Kosmos 2251 Debris. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

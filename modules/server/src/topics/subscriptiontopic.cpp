@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,12 +33,10 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "SubscriptionTopic";
-    constexpr const char* PropertyKey = "property";
-    constexpr const char* EventKey = "event";
+    constexpr std::string_view _loggerCat = "SubscriptionTopic";
 
-    constexpr const char* StartSubscription = "start_subscription";
-    constexpr const char* StopSubscription = "stop_subscription";
+    constexpr std::string_view StartSubscription = "start_subscription";
+    constexpr std::string_view StopSubscription = "stop_subscription";
 } // namespace
 
 using nlohmann::json;
@@ -68,10 +66,10 @@ void SubscriptionTopic::resetCallbacks() {
 }
 
 void SubscriptionTopic::handleJson(const nlohmann::json& json) {
-    const std::string& event = json.at(EventKey).get<std::string>();
+    const std::string& event = json.at("event").get<std::string>();
 
     if (event == StartSubscription) {
-        std::string key = json.at(PropertyKey).get<std::string>();
+        std::string key = json.at("property").get<std::string>();
 
         _prop = property(key);
         resetCallbacks();

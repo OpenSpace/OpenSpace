@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,8 +24,10 @@
 
 #include <openspace/rendering/dashboard.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 
@@ -38,11 +40,12 @@ namespace {
         "If this value is 'false', this dashboard will be invisible, regardless of the "
         "state of the individual components"
     };
+
     constexpr openspace::properties::Property::PropertyInfo StartPositionOffsetInfo = {
         "StartPositionOffset",
         "Start Position Offset",
-        "A 2D vector controlling where the dashboard rendering starts."
-        "Adding an offset in x and y-direction on screen"
+        "A 2D vector controlling where the dashboard rendering starts. Adding an offset "
+        "in x and y-direction on screen"
     };
 } // namespace
 
@@ -128,7 +131,7 @@ void Dashboard::clearDashboardItems() {
 }
 
 void Dashboard::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_isEnabled) {
         return;
@@ -149,27 +152,9 @@ scripting::LuaLibrary Dashboard::luaLibrary() {
     return {
         "dashboard",
         {
-            {
-                "addDashboardItem",
-                &luascriptfunctions::addDashboardItem,
-                {},
-                "table",
-                "Adds a new dashboard item to the main dashboard."
-            },
-            {
-                "removeDashboardItem",
-                &luascriptfunctions::removeDashboardItem,
-                {},
-                "string",
-                "Removes the dashboard item with the specified identifier."
-            },
-            {
-                "clearDashboardItems",
-                &luascriptfunctions::clearDashboardItems,
-                {},
-                "",
-                "Removes all dashboard items from the main dashboard."
-            }
+            codegen::lua::AddDashboardItem,
+            codegen::lua::RemoveDashboardItem,
+            codegen::lua::ClearDashboardItems
         }
     };
 }

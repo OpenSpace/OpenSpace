@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "events/toggle_sun",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites"
   ],
@@ -35,28 +36,16 @@
   ],
   "keybindings": [
     {
-      "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "S",
-      "name": "Toggle satellite trails",
-      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "os.solarsystem.earth.togglesatellitetrails",
+      "key": "S"
     },
     {
-      "documentation": "Refocuses the camera on the ISS",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "I",
-      "name": "Focus ISS",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "os.solarsystem.earth.iss.focus",
+      "key": "I"
     },
     {
-      "documentation": "Retargets the camera on Earth",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "HOME",
-      "name": "Focus on Earth",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "os.solarsystem.earth.focus",
+      "key": "HOME"
     }
   ],
   "mark_nodes": [
@@ -69,7 +58,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles.",
+    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles",
     "license": "MIT License",
     "name": "Default",
     "url": "https://www.openspaceproject.com",
@@ -88,6 +77,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 1
   }
 }

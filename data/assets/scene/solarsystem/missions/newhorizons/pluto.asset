@@ -1,7 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local NewHorizonsKernels = asset.require('./kernels').NewHorizonsKernels
+local transforms = asset.require("./transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local NewHorizonsKernels = asset.require("./kernels").NewHorizonsKernels
 
 local assets = asset.syncedResource({
   Name = "Pluto Assets",
@@ -28,7 +27,7 @@ local images = asset.syncedResource({
   Name = "Pluto Images",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_plutoencounter_pluto_images",
-  Version = 1
+  Version = 2
 })
 
 local plutoRadius = 1.173E6
@@ -52,26 +51,22 @@ local PlutoProjection = {
   Renderable = {
     Type = "RenderablePlanetProjection",
     Radius = plutoRadius,
-    Geometry = {
-        Type = "SimpleSphere",
-        Radius = plutoRadius,
-        Segments = 400
-    },
+    Segments = 400,
     ColorTexturePaths = {
-      textures .. "/pluto.png",
-      textures .. "/NH_Pluto_mosaic_16384.png",
-      textures .. "/NH_Pluto_mosaic_8192.png",
-      textures .. "/pmap_cyl_k201.jpg",
-      textures .. "/pmap_cyl_k201_4096.jpg"
+      textures .. "pluto.png",
+      textures .. "NH_Pluto_mosaic_16384.png",
+      textures .. "NH_Pluto_mosaic_8192.png",
+      textures .. "pmap_cyl_k201.jpg",
+      textures .. "pmap_cyl_k201_4096.jpg"
     },
     HeightTexturePaths = {
-      textures .. "/NH_Pluto_DTM_16384.png",
-      textures .. "/NH_Pluto_DTM_8192.png"
+      textures .. "NH_Pluto_DTM_16384.png",
+      textures .. "NH_Pluto_DTM_8192.png"
     },
     MeridianShift = false,
     Projection = {
       Sequence       = images,
-      EventFile      = assets .. "/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
+      EventFile      = assets .. "core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
       -- SequenceType   = "hybrid",
       SequenceType   = "image-sequence",
       Observer       = "NEW HORIZONS",
@@ -104,7 +99,7 @@ local PlutoProjection = {
             DetectorType = "Scanner",
             StopCommand = "END_NOM",
             Spice = { "NH_RALPH_LEISA" }
-          },    
+          },
           RALPH_MVIC_PAN1 = {
             DetectorType = "Scanner",
             StopCommand = "END_NOM",
@@ -114,7 +109,7 @@ local PlutoProjection = {
             DetectorType = "Scanner",
             StopCommand = "END_NOM",
             Spice = { "NH_RALPH_MVIC_PAN2" }
-          }, 
+          },
           ALICE_Use_AIRGLOW = {
             DetectorType = "Scanner",
             StopCommand = "ALICE_END_PIXELLIST",
@@ -141,7 +136,7 @@ local PlutoProjection = {
             Spice = { "NH_REX" }
           }
         },
-        Target ={ 
+        Target ={
           Read  = {
             "TARGET_NAME",
             "INSTRUMENT_HOST_NAME",
@@ -158,7 +153,6 @@ local PlutoProjection = {
           }
         }
       },
-
       Instrument = {
         Name       = "NH_LORRI",
         Method     = "ELLIPSOID",
@@ -168,7 +162,6 @@ local PlutoProjection = {
         Near       = 0.2,
         Far        = 10000
       },
-      
       PotentialTargets = {
         "PLUTO",
         "CHARON",
@@ -192,7 +185,7 @@ local PlutoBarycenterLabel = {
     Type = "RenderablePlaneImageLocal",
     Billboard = true,
     Size = 5E4,
-    Texture = encounterTextures .. "/barycenter.png",
+    Texture = encounterTextures .. "barycenter.png",
     BlendMode = "Additive"
   },
   GUI = {
@@ -215,7 +208,7 @@ local PlutoText = {
     Size = 10^6.3,
     Origin = "Center",
     Billboard = true,
-    Texture = encounterTextures .. "/Pluto-Text.png",
+    Texture = encounterTextures .. "Pluto-Text.png",
     BlendMode = "Additive"
   },
   GUI = {
@@ -230,7 +223,7 @@ local PlutoShadow = {
   Renderable = {
     Type = "RenderableShadowCylinder",
     Opacity = 0.25,
-    TerminatorType = "PENUMBRAL", 
+    TerminatorType = "PENUMBRAL",
     LightSource = "SUN",
     Observer = "NEW HORIZONS",
     Body = "PLUTO",
@@ -243,9 +236,21 @@ local PlutoShadow = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  PlutoProjection,
-  PlutoBarycenterLabel,
-  PlutoText,
-  PlutoShadow
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PlutoProjection)
+  openspace.addSceneGraphNode(PlutoBarycenterLabel)
+  openspace.addSceneGraphNode(PlutoText)
+  openspace.addSceneGraphNode(PlutoShadow)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PlutoShadow)
+  openspace.removeSceneGraphNode(PlutoText)
+  openspace.removeSceneGraphNode(PlutoBarycenterLabel)
+  openspace.removeSceneGraphNode(PlutoProjection)
+end)
+
+asset.export(PlutoProjection)
+asset.export(PlutoBarycenterLabel)
+asset.export(PlutoText)
+asset.export(PlutoShadow)

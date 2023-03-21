@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,8 @@
 #include <modules/server/include/jsonconverters.h>
 #include <modules/volume/transferfunctionhandler.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/luaconsole.h>
@@ -42,18 +41,18 @@
 using nlohmann::json;
 
 namespace {
-    constexpr const char* _loggerCat = "GetPropertyTopic";
-    constexpr const char* AllPropertiesValue = "__allProperties";
-    constexpr const char* AllNodesValue = "__allNodes";
-    constexpr const char* AllScreenSpaceRenderablesValue = "__screenSpaceRenderables";
-    constexpr const char* PropertyKey = "property";
-    constexpr const char* RootPropertyOwner = "__rootOwner";
+    constexpr std::string_view _loggerCat = "GetPropertyTopic";
+    constexpr std::string_view AllPropertiesValue = "__allProperties";
+    constexpr std::string_view AllNodesValue = "__allNodes";
+    constexpr std::string_view AllScreenSpaceRenderablesValue =
+        "__screenSpaceRenderables";
+    constexpr std::string_view RootPropertyOwner = "__rootOwner";
 } // namespace
 
 namespace openspace {
 
 void GetPropertyTopic::handleJson(const nlohmann::json& json) {
-    std::string requestedKey = json.at(PropertyKey).get<std::string>();
+    std::string requestedKey = json.at("property").get<std::string>();
     LDEBUG("Getting property '" + requestedKey + "'...");
     nlohmann::json response;
     if (requestedKey == AllPropertiesValue) {
@@ -88,8 +87,7 @@ json GetPropertyTopic::allProperties() {
                 global::renderEngine,
                 global::luaConsole,
                 global::parallelPeer,
-                global::navigationHandler,
-                global::virtualPropertyManager,
+                global::navigationHandler
             }
         }
     };

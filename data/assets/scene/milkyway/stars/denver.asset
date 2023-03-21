@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "Stars Textures",
   Type = "HttpSynchronization",
@@ -27,12 +23,22 @@ local object = {
   Identifier = "Stars-Denver",
   Renderable = {
     Type = "RenderableStars",
-    File = speck .. "/denver_stars.speck",
-    Texture = textures .. "/halo.png",
-    ColorMap = colorLUT .. "/denver_colorbv.cmap",
+    File = speck .. "denver_stars.speck",
+    Texture = textures .. "halo.png",
+    ColorMap = colorLUT .. "denver_colorbv.cmap",
     MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based" -- or PSF
+    RenderMethod = "Texture Based", -- or PSF
+    DataMapping = {
+      Bv = "colorb_v",
+      Luminance = "lum",
+      AbsoluteMagnitude = "absmag",
+      ApparentMagnitude = "appmag",
+      Vx = "vx",
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed"
+    }
   },
   GUI = {
     Name = "Stars (Denver)",
@@ -40,7 +46,16 @@ local object = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {

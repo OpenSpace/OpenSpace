@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@ class ModuleEngine;
 /**
  * This class is the base class for an OpenSpace module. A module groups functionality
  * into a useful granularity to be mostly used self-sufficiently. Each OpenSpaceModule
- * needs a unique, nonempty <code>name</code>.
+ * needs a unique, nonempty `name`.
  */
 class OpenSpaceModule : public properties::PropertyOwner {
 public:
@@ -58,11 +58,11 @@ public:
     OpenSpaceModule(std::string name);
 
     /// Default destructor
-    virtual ~OpenSpaceModule() = default;
+    virtual ~OpenSpaceModule() override = default;
 
     /**
      * Initialization method that will register a token of the form
-     * <code>${MODULE_\<\<NAME\>\>}</code> for a specific <code>\<\<NAME\>\></code> that
+     * `${MODULE_<<NAME>>}` for a specific `<<NAME>>` that
      * is set in the OpenSpaceModule constructor. This method will call the
      * internalInitialize method for further customization for each subclass.
      */
@@ -112,7 +112,7 @@ public:
 
     /**
      * Returns the minimum required OpenGL version of this OpenSpaceModule. Unless
-     * overwritten, it returns an OpenGL version of <code>3.3</code>.
+     * overwritten, it returns an OpenGL version of `3.3`.
      *
      * \return The minimum required OpenGL version of this OpenSpaceModule
      */

@@ -1,0 +1,78 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Fossil Fuel: CO2 Release - 2011-2012"
+local Identifier = "noaa-sos-atmosphere-fossil_fuel"
+local Description = [[This dataset shows the result of emitting carbon dioxide from
+fossil fuel burning into the atmosphere over two years. A computer model of the
+atmosphere called TM5 was used to create this powerful visualization. TM5 simulates the
+movement of atmospheric gases globally, using winds and atmospheric mixing as derived
+from the global weather forecast. The model has been used for the main greenhouse gases
+carbon dioxide (CO2), methane (CH4), and nitrous oxide (N2O), chemically active species
+such as ozone (O3), and various aerosols. Like CarbonTracker, a measurement and modeling
+system to keep track of carbon sources and sinks around the world, this dataset was
+developed by the Carbon Cycle Greenhouse Gases group at NOAA's Earth System Research
+Laboratory. Unlike CarbonTracker, this simulation does not use information from actual
+observations and instead visualizes the transport of fossil fuel emissions.
+Visualizations such as this dataset and CarbonTracker, aim to improve our understanding
+of atmospheric carbon and how various sources and sinks may respond to the changing
+climate, increasing levels of atmospheric CO2 (via the CO2 fertilization effect), and
+human management of global resources]]
+local URL = "https://sos.noaa.gov/catalog/datasets/fossil-fuel-co2-release-2011-2012/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "TemporalTileLayer",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory .. "3100",
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "%Y%m%d_fossil.png"
+  },
+  Description = Description
+}
+
+local colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.removeScreenSpaceRenderable(colorbar)
+end)
+
+asset.export(layer)
+asset.export(colorbar)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

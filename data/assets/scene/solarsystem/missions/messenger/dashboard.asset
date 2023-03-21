@@ -1,13 +1,17 @@
-local assetHelper = asset.require('util/asset_helper')
+local distance = {
+  Type = "DashboardItemDistance",
+  Identifier = "MessengerDistance",
+  GuiName = "Messenger - Mercury Distance",
+  SourceType = "Node",
+  SourceNodeName = "Messenger",
+  DestinationType = "Node",
+  DestinationNodeName = "Mercury"
+}
 
-assetHelper.registerDashboardItems(asset, {
-  {
-    Type = "DashboardItemDistance",
-    Identifier = "MessengerDistance",
-    GuiName = "Messenger - Mercury Distance",
-    SourceType = "Node",
-    SourceNodeName = "Messenger",
-    DestinationType = "Node",
-    DestinationNodeName = "Mercury"
-  }
-})
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(distance)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(distance)
+end)

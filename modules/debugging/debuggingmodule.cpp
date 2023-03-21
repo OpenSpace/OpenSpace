@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,17 +26,30 @@
 
 #include <modules/debugging/rendering/renderabledebugplane.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/path.h>
+#include <openspace/navigation/pathnavigator.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
+
+#include "debuggingmodule_lua.inl"
 
 namespace openspace {
 
 DebuggingModule::DebuggingModule() : OpenSpaceModule(Name) {}
 
 void DebuggingModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableDebugPlane>("RenderableDebugPlane");
@@ -48,5 +61,17 @@ std::vector<documentation::Documentation> DebuggingModule::documentations() cons
     };
 }
 
+scripting::LuaLibrary DebuggingModule::luaLibrary() const {
+    return {
+        "debugging",
+        {
+            codegen::lua::RenderCameraPath,
+            codegen::lua::RemoveRenderedCameraPath,
+            codegen::lua::RenderPathControlPoints,
+            codegen::lua::RemovePathControlPoints,
+            codegen::lua::AddCartesianAxes
+        }
+    };
+}
 
 } // namespace openspace

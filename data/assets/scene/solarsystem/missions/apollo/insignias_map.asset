@@ -2,15 +2,13 @@
 -- The insignias are invisible by default, but can be enabled using shown or hidden using
 -- the exported functions `showInsignias(interpolationDuration)` and `hideInsignias(interpolationDuration)`.
 
-local asset_helper = asset.require('util/asset_helper')
-
 local insigniasPath =  asset.syncedResource({
   Name = "Apollo Insignias",
   Type = "HttpSynchronization",
   Identifier = "apollo_insignias",
   Version = 1
 })
-local moon = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local landingData = {
   {
@@ -75,7 +73,7 @@ for i = 1, #landingData do
       Size = size,
       Origin = "Center",
       Billboard = true,
-      Texture = insigniasPath .. "/" .. entry.Texture,
+      Texture = insigniasPath .. entry.Texture,
       Opacity = 0.0
     },
     GUI = {
@@ -85,36 +83,58 @@ for i = 1, #landingData do
   }
 end
 
-asset.onInitialize(function () 
-  openspace.bindShortcut(
-    'Show Apollo Landing Labels',
-    'openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1, 0.5)',
-    'Show patches of the Apollo missions on their respective landing sites',
-    '/Missions/Apollo'
-  )
+local show_apollo_labels = {
+  Identifier = "apollo_insignias.show_insignias",
+  Name = "Show Apollo Landing Labels",
+  Command = [[openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1, 0.5)]],
+  Documentation = "Show patches of the Apollo missions on their respective landing sites",
+  GuiPath = "/Missions/Apollo",
+  IsLocal = true
+}
 
-  openspace.bindShortcut(
-    'Hide Apollo Landing Labels',
-    'openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, 0.5)',
-    'Hide patches of the Apollo missions on their respective landing sites',
-    '/Missions/Apollo'
-  )
+local hide_apollo_labels = {
+  Identifier = "apollo_insignias.hide_insignias",
+  Name = "Hide Apollo Landing Labels",
+  Command = [[openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, 0.5)]],
+  Documentation = "Hide patches of the Apollo missions on their respective landing sites",
+  GuiPath = "/Missions/Apollo",
+  IsLocal = true
+}
+
+asset.onInitialize(function ()
+  openspace.action.registerAction(show_apollo_labels)
+  openspace.action.registerAction(hide_apollo_labels)
+  for _, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
 end)
 
-asset.export('showInsignia', function (missinNumber, interpolationDuration)
+asset.onDeinitialize(function ()
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node)
+  end
+
+  openspace.action.removeAction(show_apollo_labels)
+  openspace.action.removeAction(hide_apollo_labels)
+end)
+
+for _, node in ipairs(nodes) do
+  asset.export(node)
+end
+
+asset.export("showInsignia", function (missionNumber, interpolationDuration)
   openspace.setPropertyValue("Scene.Apollo" .. missionNumber .. "Insignia.Renderable.Opacity", 1, interpolationDuration)
 end)
 
-asset.export('hideInsignia', function (missinNumber, interpolationDuration)
+asset.export("hideInsignia", function (missionNumber, interpolationDuration)
   openspace.setPropertyValue("Scene.Apollo" .. missionNumber .. "Insignia.Renderable.Opacity", 0, interpolationDuration)
 end)
 
-asset.export('showInsignias', function (interpolationDuration)
+asset.export("showInsignias", function (interpolationDuration)
   openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1, interpolationDuration)
 end)
 
-asset.export('hideInsignias', function (interpolationDuration)
+asset.export("hideInsignias", function (interpolationDuration)
   openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, interpolationDuration)
 end)
-
-asset_helper.registerSceneGraphNodesAndExport(asset, nodes)

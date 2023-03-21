@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,21 +26,26 @@
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 in vec2 vs_st;
-in vec4 vs_position;
+in float vs_depth;
 
-uniform sampler2D texture1;
-uniform vec3 MultiplyColor = vec3(1.0, 1.0, 1.0);
-uniform float Alpha = 1.0;
+uniform sampler2D tex;
+uniform vec3 color = vec3(1.0);
+uniform float opacity = 1.0;
+uniform vec4 backgroundColor = vec4(0.0);
+uniform float gamma = 1.0;
+
 
 Fragment getFragment() {
-    Fragment frag;
+  Fragment frag;
 
-    frag.color = texture(texture1, vs_st) * vec4(MultiplyColor, Alpha);
-    if (frag.color.a == 0.0) {
-        discard;
-    }
+  vec4 texColor = texture(tex, vs_st) * vec4(color, opacity);
 
-    frag.depth = vs_position.z;
+  frag.color = texColor.a * texColor + (1.0 - texColor.a) * backgroundColor;
+  if (frag.color.a == 0.0) {
+    discard;
+  }
 
-    return frag;
+  frag.depth = vs_depth;
+  frag.color.rgb = pow(frag.color.rgb, vec3(1.0/(gamma)));
+  return frag;
 }

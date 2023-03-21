@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,8 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "Renderable ToyVolume";
+    constexpr std::string_view _loggerCat = "RenderableToyVolume";
+
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
@@ -73,8 +74,7 @@ namespace {
     {
         "Downscale",
         "Downscale Factor Volume Rendering",
-        "This value set the downscaling factor"
-        " when rendering the current volume."
+        "This value set the downscaling factor when rendering the current volume"
     };
 } // namespace
 
@@ -84,7 +84,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _size(SizeInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f))
     , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
-    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f )
+    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
     , _rotation(
         RotationInfo,
@@ -132,15 +132,16 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
         _rayCastSteps = static_cast<int>(dictionary.value<double>("Steps"));
     }
     else {
-        LINFO("Number of raycasting steps not specified for ToyVolume."
-            " Using default value.");
+        LINFO(
+            "Number of raycasting steps not specified for ToyVolume. Using default value"
+        );
     }
 }
 
 RenderableToyVolume::~RenderableToyVolume() {}
 
 void RenderableToyVolume::initializeGL() {
-    glm::vec4 color(glm::vec3(_color), _opacity);
+    glm::vec4 color(glm::vec3(_color), opacity());
     _raycaster = std::make_unique<ToyVolumeRaycaster>(color);
     _raycaster->initialize();
 
@@ -197,7 +198,7 @@ void RenderableToyVolume::update(const UpdateData& data) {
                 std::pow(10.f, static_cast<float>(_scalingExponent))
         );
 
-        glm::vec4 color(glm::vec3(_color), _opacity);
+        glm::vec4 color(glm::vec3(_color), opacity());
 
         _raycaster->setColor(color);
         _raycaster->setStepSize(_stepSize);

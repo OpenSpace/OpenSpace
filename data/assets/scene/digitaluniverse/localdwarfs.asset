@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "Local Dwarfs Textures",
   Type = "HttpSynchronization",
@@ -21,20 +17,23 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "localgroup.label",
+      Color = { 0.3, 0.3, 1.0 },
+      Size = 18.3,
+      MinMaxSize = { 7, 20 },
+      Unit = "Mpc"
+    },
     Color = { 0.5, 1.0, 0.2 },
-    ColorMap = speck .. "/localgroup.cmap",
+    ColorMap = speck .. "localgroup.cmap",
     ColorOption = { "association" },
     Opacity = 0.3,
-    File = speck .. "/localgroup.speck",
-    Texture = textures .. "/point4.png",
+    File = speck .. "localgroup.speck",
+    Texture = textures .. "point4.png",
     PolygonSides = 12,
-    LabelFile = speck .. "/localgroup.label",
-    TextColor = { 0.3, 0.3, 1.0 },
-    ScaleFactor = 465,
-    TextSize = 18.3,
-    TextMinSize = 7.3,
     Unit = "Mpc",
-    BillboardMaxSize = 20.0,
+    ScaleFactor = 465,
+    BillboardMinMaxSize = { 0.0, 20.0 },
     EnablePixelSizeControl = true
   },
   GUI = {
@@ -50,19 +49,27 @@ local object = {
         bevy of dwarf galaxies-smaller, often irregular galaxies, that contain
         hundreds of millions to a few billion stars. (Description from URL) <br><br>
         Data Reference: Properties of dwarf galaxies in the Local Group
-        (McConnachie+, 2012)]],
+        (McConnachie+, 2012)]]
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Local Group",
-  Version = "2.0",
-  Description = [[Digital Universe asset for the Local Goup]],
+  Version = "2.1",
+  Description = "Digital Universe asset for the Local Goup",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"LocalDwarfGalaxies"}
+  License = "AMNH Digital Universe"
 }

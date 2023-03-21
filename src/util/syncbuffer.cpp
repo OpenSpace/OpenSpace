@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,10 +34,10 @@ SyncBuffer::SyncBuffer(size_t n)
     _dataStream.resize(_n);
 }
 
-SyncBuffer::~SyncBuffer() {} // NOLINT
+SyncBuffer::~SyncBuffer() {}
 
 void SyncBuffer::encode(const std::string& s) {
-    ZoneScoped
+    ZoneScoped;
 
     int32_t anticpatedBufferSize = static_cast<int32_t>(
         _encodeOffset + (sizeof(char) * s.size()) + sizeof(int32_t)
@@ -58,7 +58,7 @@ void SyncBuffer::encode(const std::string& s) {
 }
 
 std::string SyncBuffer::decode() {
-    ZoneScoped
+    ZoneScoped;
 
     int32_t length;
     memcpy(

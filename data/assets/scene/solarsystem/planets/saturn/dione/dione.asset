@@ -1,8 +1,13 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
-asset.require('./trail')
-local labelsPath = asset.require('../saturn_globelabels').LabelsPath
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").sat375
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
 
 local Dione = {
   Identifier = "Dione",
@@ -19,28 +24,23 @@ local Dione = {
       SourceFrame = "IAU_ENCELADUS",
       DestinationFrame = "GALACTIC"
     }
-  },    
+  },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 561400,
     SegmentsPerPatch = 64,
     Layers = {},
     Labels = {
-      Enable = false,
-      FileName = labelsPath .. "/dione.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 32.0,
-      LabelsSize = 8.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 3500000.0,
-      FadeOutStartingDistance = 1000000.0,
-      LabelsForceDomeRendering = true,
-      LabelsDistanceEPS = 200000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      Enabled = false,
+      FileName = labelsPath .. "dione.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.7,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 500000.0, 3500000.0 },
+      DistanceEPS = 200000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
@@ -49,13 +49,51 @@ local Dione = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Dione })
+
+local DioneLabel = {
+  Identifier = "DioneLabel",
+  Parent = Dione.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Dione",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.3, 10.0 },
+    FadeWidths = { 0.15, 10.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Dione Label",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = "Label for Saturn's moon Dione"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Dione)
+  openspace.addSceneGraphNode(DioneLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DioneLabel)
+  openspace.removeSceneGraphNode(Dione)
+end)
+
+asset.export(Dione)
+
 
 
 asset.meta = {
   Name = "Dione",
   Version = "1.0",
-  Description = [[ Dione globe with labels]],
+  Description = "Dione globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

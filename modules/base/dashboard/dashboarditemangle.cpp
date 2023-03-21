@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,15 @@
 
 #include <modules/base/dashboard/dashboarditemangle.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/camera.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -40,11 +40,17 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
+    enum Type {
+        Node = 0,
+        Focus,
+        Camera
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source Type",
         "The type of position that is used as the triangle apex used to calculate the "
-        "angle. The default value is 'Camera'."
+        "angle. The default value is 'Camera'"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
@@ -53,7 +59,7 @@ namespace {
         "If a scene graph node is selected as type, this value specifies the name of the "
         "node that is to be used as the apex of the triangle used to calculate the "
         "angle. The computed angle is the incident angle to Source in the triangle ("
-        "Source, Reference, Destination)."
+        "Source, Reference, Destination)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReferenceTypeInfo = {
@@ -61,14 +67,14 @@ namespace {
         "Reference Type",
         "The type of position that is used as the destination of the reference line used "
         "to calculate the angle. The computed angle is the incident angle to Source in "
-        "the triangle (Source, Reference, Destination)."
+        "the triangle (Source, Reference, Destination)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReferenceNodeNameInfo = {
         "ReferenceNodeName",
         "Reference Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the reference direction to compute the angle."
+        "node that is to be used as the reference direction to compute the angle"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
@@ -76,18 +82,18 @@ namespace {
         "Destination Type",
         "The type of position that is used as the destination to calculate the angle. "
         "The computed angle is the incident angle to Source in the triangle ("
-        "Source, Reference, Destination). The default value for this is 'Focus'."
+        "Source, Reference, Destination). The default value for this is 'Focus'"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
         "DestinationNodeName",
         "Destination Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the destination for computing the angle."
+        "node that is to be used as the destination for computing the angle"
     };
 
     struct [[codegen::Dictionary(DashboardItemAngle)]] Parameters {
-        enum class Type {
+        enum class [[codegen::map(Type)]] Type {
             Node,
             Focus,
             Camera
@@ -112,8 +118,19 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemAngle::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_dashboarditem_angle";
+    documentation::Documentation doc =
+        codegen::doc<Parameters>("base_dashboarditem_angle");
+
+    // @TODO cleanup
+    // Insert the parent's documentation entries until we have a verifier that can deal
+    // with class hierarchy
+    documentation::Documentation parentDoc = DashboardTextItem::Documentation();
+    doc.entries.insert(
+        doc.entries.end(),
+        parentDoc.entries.begin(),
+        parentDoc.entries.end()
+    );
+
     return doc;
 }
 
@@ -151,23 +168,8 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
     });
-    _source.type.onChange([this]() {
-        _source.nodeName.setVisibility(
-            properties::Property::Visibility(_source.type == Type::Node)
-        );
-    });
     if (p.sourceType.has_value()) {
-        switch (*p.sourceType) {
-            case Parameters::Type::Node:
-                _source.type = Type::Node;
-                break;
-            case Parameters::Type::Focus:
-                _source.type = Type::Focus;
-                break;
-            default:
-                _source.type = Type::Camera;
-                break;
-        }
+        _source.type = codegen::map<Type>(*p.sourceType);
     }
     else {
         _source.type = Type::Camera;
@@ -194,22 +196,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
     });
-    _reference.type.onChange([this]() {
-        _reference.nodeName.setVisibility(
-            properties::Property::Visibility(_reference.type == Type::Node)
-        );
-    });
-    switch (p.referenceType) {
-        case Parameters::Type::Node:
-            _reference.type = Type::Node;
-            break;
-        case Parameters::Type::Focus:
-            _reference.type = Type::Focus;
-            break;
-        default:
-            _reference.type = Type::Camera;
-            break;
-    }
+    _reference.type = codegen::map<Type>(p.referenceType);
     addProperty(_reference.type);
 
     _reference.nodeName.onChange([this]() { _reference.node = nullptr; });
@@ -224,30 +211,15 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
             );
         }
     }
-    addProperty(_source.nodeName);
+    addProperty(_reference.nodeName);
 
     _destination.type.addOptions({
         { Type::Node, "Node" },
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
     });
-    _destination.type.onChange([this]() {
-        _destination.nodeName.setVisibility(
-            properties::Property::Visibility(_source.type == Type::Node)
-        );
-    });
     if (p.destinationType.has_value()) {
-        switch (*p.destinationType) {
-            case Parameters::Type::Node:
-                _destination.type = Type::Node;
-                break;
-            case Parameters::Type::Focus:
-                _destination.type = Type::Focus;
-                break;
-            default:
-                _destination.type = Type::Camera;
-                break;
-        }
+        _destination.type = codegen::map<Type>(*p.destinationType);
     }
     else {
         _destination.type = Type::Focus;
@@ -307,7 +279,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
 }
 
 void DashboardItemAngle::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(_source);
     std::pair<glm::dvec3, std::string> referenceInfo = positionAndLabel(_reference);
@@ -344,10 +316,9 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemAngle::size() const {
-    ZoneScoped
+    ZoneScoped;
 
-    constexpr const double Angle = 120;
-
+    constexpr double Angle = 120;
     return _font->boundingBox("Angle: " + std::to_string(Angle));
 }
 

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,13 +22,15 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   dashboard/dashboarditemangle.h
   dashboard/dashboarditemdate.h
   dashboard/dashboarditemdistance.h
+  dashboard/dashboarditemelapsedtime.h
   dashboard/dashboarditemframerate.h
+  dashboard/dashboarditeminputstate.h
   dashboard/dashboarditemmission.h
   dashboard/dashboarditemparallelconnection.h
   dashboard/dashboarditempropertyvalue.h
@@ -44,13 +46,16 @@ set(HEADER_FILES
   rendering/grids/renderablesphericalgrid.h
   rendering/renderablecartesianaxes.h
   rendering/renderabledisc.h
-  rendering/renderablelabels.h
+  rendering/renderablelabel.h
   rendering/renderablemodel.h
   rendering/renderablenodeline.h
   rendering/renderableplane.h
   rendering/renderableplaneimagelocal.h
   rendering/renderableplaneimageonline.h
+  rendering/renderableplanetimevaryingimage.h
+  rendering/renderableprism.h
   rendering/renderablesphere.h
+  rendering/renderabletimevaryingsphere.h
   rendering/renderabletrail.h
   rendering/renderabletrailorbit.h
   rendering/renderabletrailtrajectory.h
@@ -79,7 +84,9 @@ set(SOURCE_FILES
   dashboard/dashboarditemangle.cpp
   dashboard/dashboarditemdate.cpp
   dashboard/dashboarditemdistance.cpp
+  dashboard/dashboarditemelapsedtime.cpp
   dashboard/dashboarditemframerate.cpp
+  dashboard/dashboarditeminputstate.cpp
   dashboard/dashboarditemmission.cpp
   dashboard/dashboarditemparallelconnection.cpp
   dashboard/dashboarditempropertyvalue.cpp
@@ -95,17 +102,21 @@ set(SOURCE_FILES
   rendering/grids/renderablesphericalgrid.cpp
   rendering/renderablecartesianaxes.cpp
   rendering/renderabledisc.cpp
-  rendering/renderablelabels.cpp
+  rendering/renderablelabel.cpp
   rendering/renderablemodel.cpp
   rendering/renderablenodeline.cpp
   rendering/renderableplane.cpp
   rendering/renderableplaneimagelocal.cpp
   rendering/renderableplaneimageonline.cpp
+  rendering/renderableplanetimevaryingimage.cpp
+  rendering/renderableprism.cpp
   rendering/renderablesphere.cpp
+  rendering/renderabletimevaryingsphere.cpp
   rendering/renderabletrail.cpp
   rendering/renderabletrailorbit.cpp
   rendering/renderabletrailtrajectory.cpp
   rendering/screenspacedashboard.cpp
+  rendering/screenspacedashboard_lua.inl
   rendering/screenspaceframebuffer.cpp
   rendering/screenspaceimagelocal.cpp
   rendering/screenspaceimageonline.cpp
@@ -141,6 +152,8 @@ set(SHADER_FILES
   shaders/model_vs.glsl
   shaders/plane_fs.glsl
   shaders/plane_vs.glsl
+  shaders/prism_fs.glsl
+  shaders/prism_vs.glsl
   shaders/renderabletrail_fs.glsl
   shaders/renderabletrail_vs.glsl
   shaders/screenspace_fs.glsl
@@ -155,4 +168,15 @@ create_new_module(
   base_module
   STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+)
+target_precompile_headers(${base_module} PRIVATE
+  <openspace/documentation/documentation.h>
+  <openspace/documentation/verifier.h>
+  <openspace/properties/numericalproperty.h>
+  <openspace/rendering/renderable.h>
+  <ghoul/opengl/programobject.h>
+  <ghoul/opengl/shaderobject.h>
+  <ghoul/opengl/uniformcache.h>
+  <future>
+  <map>
 )

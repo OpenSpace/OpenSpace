@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +40,7 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    constexpr const char* _loggerCat = "IswaCygnet";
+    constexpr std::string_view _loggerCat = "IswaCygnet";
 
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
@@ -71,17 +71,17 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     _data.id = static_cast<int>(dictionary.value<double>("Id"));
     _data.updateTime = static_cast<int>(dictionary.value<double>("UpdateTime"));
 
-    _data.spatialScale = glm::dvec4(0.f);
+    _data.spatialScale = glm::dvec4(0.0);
     if (dictionary.hasValue<glm::dvec4>("SpatialScale")) {
         _data.spatialScale = dictionary.value<glm::dvec4>("SpatialScale");
     }
 
-    _data.gridMin = glm::dvec3(0.f);
+    _data.gridMin = glm::dvec3(0.0);
     if (dictionary.hasValue<glm::dvec3>("GridMin")) {
         _data.gridMin = dictionary.value<glm::dvec3>("GridMin");
     }
 
-    _data.gridMax = glm::dvec3(0.f);
+    _data.gridMax = glm::dvec3(0.0);
     if (dictionary.hasValue<glm::dvec3>("GridMax")) {
         _data.gridMax = dictionary.value<glm::dvec3>("GridMax");
     }
@@ -94,7 +94,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     }
 
 
-    double xOffset = 0.f;
+    double xOffset = 0.0;
     if (dictionary.hasValue<double>("XOffset")) {
         xOffset = dictionary.value<double>("XOffset");
     }

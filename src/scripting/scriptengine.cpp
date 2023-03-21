@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,25 +24,146 @@
 
 #include <openspace/scripting/scriptengine.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/json_helper.h>
 #include <openspace/util/syncbuffer.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <filesystem>
 #include <fstream>
 
 #include "scriptengine_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "ScriptEngine";
+    constexpr std::string_view _loggerCat = "ScriptEngine";
 
-    constexpr const int TableOffset = -3; // top-first argument-second argument
+    constexpr int TableOffset = -3; // top-first argument-second argument
+
+    struct [[codegen::Dictionary(Documentation)]] Parameters {
+        std::string name;
+        std::map<std::string, std::string> arguments;
+        std::optional<std::string> returnValue [[codegen::key("Return")]];
+        std::optional<std::string> documentation;
+    };
+
+    std::vector<std::string> luaFunctions(const openspace::scripting::LuaLibrary& library,
+                                          std::string prefix)
+    {
+        using namespace openspace::scripting;
+
+        std::vector<std::string> result;
+
+        std::string total = prefix;
+        if (!library.name.empty()) {
+            total += library.name + ".";
+        }
+
+        for (const LuaLibrary::Function& function : library.functions) {
+            result.push_back(total + function.name);
+        }
+
+        for (const LuaLibrary& sl : library.subLibraries) {
+            std::vector<std::string> r = luaFunctions(sl, total);
+            result.insert(result.end(), r.begin(), r.end());
+        }
+
+        for (const LuaLibrary::Function& function : library.documentations) {
+            result.push_back(total + function.name);
+        }
+
+        return result;
+    }
+
+    void toJson(const openspace::scripting::LuaLibrary& library, std::stringstream& json)
+    {
+        constexpr std::string_view replStr = R"("{}": "{}", )";
+        constexpr std::string_view replStr2 = R"("{}": "{}")";
+
+        using namespace openspace;
+        using namespace openspace::scripting;
+
+        json << "{";
+        json << fmt::format(replStr, "library", library.name);
+        json << "\"functions\": [";
+
+        for (const LuaLibrary::Function& f : library.functions) {
+            json << "{";
+            json << fmt::format(replStr, "name", f.name);
+            json << "\"arguments\": [";
+            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
+                json << "{";
+                json << fmt::format(replStr, "name", escapedJson(arg.name));
+                json << fmt::format(replStr, "type", escapedJson(arg.type));
+                json << fmt::format(
+                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
+                );
+                json << "}";
+
+                if (&arg != &f.arguments.back()) {
+                    json << ",";
+                }
+            }
+            json << "],";
+            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
+            json << fmt::format(replStr, "help", escapedJson(f.helpText));
+            json << fmt::format(
+                "\"sourceLocation\": {{ \"file\": \"{}\", \"line\": {} }}",
+                escapedJson(f.sourceLocation.file), f.sourceLocation.line
+            );
+            json << "}";
+            if (&f != &library.functions.back() || !library.documentations.empty()) {
+                json << ",";
+            }
+        }
+
+
+        for (const LuaLibrary::Function& f : library.documentations) {
+            json << "{";
+            json << fmt::format(replStr, "name", f.name);
+            json << "\"arguments\": [";
+            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
+                json << "{";
+                json << fmt::format(replStr, "name", escapedJson(arg.name));
+                json << fmt::format(replStr, "type", escapedJson(arg.type));
+                json << fmt::format(
+                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
+                );
+                json << "}";
+
+                if (&arg != &f.arguments.back()) {
+                    json << ",";
+                }
+            }
+            json << "],";
+            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
+            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
+            json << "}";
+            if (&f != &library.documentations.back()) {
+                json << ",";
+            }
+        }
+
+        json << "],";
+
+        json << "\"subLibraries\": [";
+        for (const LuaLibrary& sl : library.subLibraries) {
+            toJson(sl, json);
+            if (&sl != &library.subLibraries.back()) {
+                json << ",";
+            }
+        }
+        json << "]}";
+    }
+
+#include "scriptengine_codegen.cpp"
 } // namespace
 
 namespace openspace::scripting {
@@ -60,7 +181,7 @@ ScriptEngine::ScriptEngine()
 }
 
 void ScriptEngine::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Adding base library");
     addBaseLibrary();
@@ -70,19 +191,19 @@ void ScriptEngine::initialize() {
 }
 
 void ScriptEngine::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     _registeredLibraries.clear();
 }
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Create openspace base library");
     const int top = lua_gettop(state);
 
     lua_newtable(state);
-    lua_setglobal(state, OpenSpaceLibraryName);
+    lua_setglobal(state, OpenSpaceLibraryName.data());
 
     LDEBUG("Add OpenSpace modules");
     for (LuaLibrary& lib : _registeredLibraries) {
@@ -97,10 +218,9 @@ ghoul::lua::LuaState* ScriptEngine::luaState() {
 }
 
 void ScriptEngine::addLibrary(LuaLibrary library) {
-    ZoneScoped
+    ZoneScoped;
 
-    auto sortFunc = [](const LuaLibrary::Function& lhs, const LuaLibrary::Function& rhs)
-    {
+    auto sortFunc = [](const LuaLibrary::Function& lhs, const LuaLibrary::Function& rhs) {
         return lhs.name < rhs.name;
     };
 
@@ -111,50 +231,18 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
         [&library](const LuaLibrary& lib) { return lib.name == library.name; }
     );
 
-    if (it == _registeredLibraries.end()) {
-        // If not, we can add it after we sorted it
-        std::sort(library.functions.begin(), library.functions.end(), sortFunc);
-        _registeredLibraries.push_back(std::move(library));
-        std::sort(_registeredLibraries.begin(), _registeredLibraries.end());
-    }
-    else {
-        // otherwise, we merge the libraries
-
-        LuaLibrary merged = *it;
-        for (const LuaLibrary::Function& fun : library.functions) {
-            const auto itf = std::find_if(
-                merged.functions.begin(),
-                merged.functions.end(),
-                [&fun](const LuaLibrary::Function& function) {
-                    return fun.name == function.name;
-                }
-            );
-            if (itf != merged.functions.end()) {
-                // the function with the desired name is already present, but we don't
-                // want to overwrite it
-                LERROR(fmt::format(
-                    "Lua function '{}' in library '{}' has been defined twice",
-                    fun.name,
-                    library.name
-                ));
-                return;
-            }
-            else {
-                merged.functions.push_back(fun);
-            }
-        }
-
-        for (const std::filesystem::path& script : library.scripts) {
-            merged.scripts.push_back(script);
-        }
-
+    if (it != _registeredLibraries.end()) {
+        // if we found the library, we want to merge them
+        LuaLibrary cpy = *it;
+        cpy.merge(std::move(library));
         _registeredLibraries.erase(it);
-
-        // Sort the merged library before inserting it
-        std::sort(merged.functions.begin(), merged.functions.end(), sortFunc);
-        _registeredLibraries.push_back(std::move(merged));
-        std::sort(_registeredLibraries.begin(), _registeredLibraries.end());
+        library = cpy;
     }
+
+    // If not, we can add it after we sorted it
+    std::sort(library.functions.begin(), library.functions.end(), sortFunc);
+    _registeredLibraries.push_back(std::move(library));
+    std::sort(_registeredLibraries.begin(), _registeredLibraries.end());
 }
 
 bool ScriptEngine::hasLibrary(const std::string& name) {
@@ -167,12 +255,9 @@ bool ScriptEngine::hasLibrary(const std::string& name) {
 }
 
 bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback) {
-    ZoneScoped
+    ZoneScoped;
 
-    if (script.empty()) {
-        LWARNING("Script was empty");
-        return false;
-    }
+    ghoul_assert(!script.empty(), "Script must not be empty");
 
     if (_logScripts) {
         // Write command to log before it's executed
@@ -191,29 +276,34 @@ bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback)
     }
     catch (const ghoul::lua::LuaLoadingException& e) {
         LERRORC(e.component, e.message);
+        if (callback) {
+            callback(ghoul::Dictionary());
+        }
         return false;
     }
     catch (const ghoul::lua::LuaExecutionException& e) {
         LERRORC(e.component, e.message);
+        if (callback) {
+            callback(ghoul::Dictionary());
+        }
         return false;
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
+        if (callback) {
+            callback(ghoul::Dictionary());
+        }
         return false;
     }
 
     return true;
 }
 
-bool ScriptEngine::runScriptFile(const std::string& filename) {
-    ZoneScoped
+bool ScriptEngine::runScriptFile(const std::filesystem::path& filename) {
+    ZoneScoped;
 
-    if (filename.empty()) {
-        LWARNING("Filename was empty");
-        return false;
-    }
     if (!std::filesystem::is_regular_file(filename)) {
-        LERROR(fmt::format("Script with name '{}' did not exist", filename));
+        LERROR(fmt::format("Script with name {} did not exist", filename));
         return false;
     }
 
@@ -234,7 +324,7 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
 
 bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& name) {
     bool result = false;
-    lua_getglobal(state, OpenSpaceLibraryName);
+    lua_getglobal(state, OpenSpaceLibraryName.data());
     const bool hasOpenSpaceLibrary = lua_istable(state, -1);
     if (!hasOpenSpaceLibrary) {
         LFATAL("OpenSpace library was not created in initialize method");
@@ -259,7 +349,7 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
         case LUA_TSTRING:
             LERROR(fmt::format("Library name '{}' specifies a string", name));
             break;
-        case LUA_TTABLE: {
+        case LUA_TTABLE:
             if (hasLibrary(name)) {
                 LERROR(fmt::format(
                     "Library with name '{}' has been registered before", name
@@ -269,7 +359,6 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
                 LERROR(fmt::format("Library name '{}' specifies a table", name));
             }
             break;
-        }
         case LUA_TFUNCTION:
             LERROR(fmt::format("Library name '{}' specifies a function", name));
             break;
@@ -288,7 +377,7 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
 void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                                        Replace replace)
 {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(state, "State must not be nullptr");
     for (const LuaLibrary::Function& p : library.functions) {
@@ -302,11 +391,24 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
             lua_pop(state, 1);
         }
         ghoul::lua::push(state, p.name);
-        for (void* d : p.userdata) {
-            lua_pushlightuserdata(state, d);
-        }
-        lua_pushcclosure(state, p.function, static_cast<int>(p.userdata.size()));
+        lua_pushcfunction(state, p.function);
         lua_settable(state, TableOffset);
+    }
+
+    for (LuaLibrary& sl : library.subLibraries) {
+        ghoul::lua::push(state, sl.name);
+        lua_newtable(state);
+        lua_settable(state, TableOffset);
+
+        // Retrieve the table
+        ghoul::lua::push(state, sl.name);
+        lua_gettable(state, -2);
+
+        // Add the library functions into the table
+        addLibraryFunctions(state, sl, Replace::No);
+
+        // Pop the table
+        lua_pop(state, 1);
     }
 
     for (const std::filesystem::path& script : library.scripts) {
@@ -323,200 +425,45 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                 "Module '{}' did not provide a documentation in script file {}",
                 library.name, script
             ));
+            lua_pop(state, 1);
+            continue;
         }
-        else {
-            lua_pushnil(state);
-            while (lua_next(state, -2)) {
-                ghoul::lua::push(state, "Name");
-                lua_gettable(state, -2);
-                const std::string name = lua_tostring(state, -1);
-                lua_pop(state, 1);
 
-                ghoul::lua::push(state, "Arguments");
-                lua_gettable(state, -2);
-                const std::string arguments = lua_tostring(state, -1);
-                lua_pop(state, 1);
+        lua_pushnil(state);
+        while (lua_next(state, -2)) {
+            ghoul::Dictionary d = ghoul::lua::luaDictionaryFromState(state);
+            try {
+                const Parameters p = codegen::bake<Parameters>(d);
 
-                ghoul::lua::push(state, "Documentation");
-                lua_gettable(state, -2);
-                const std::string documentation = lua_tostring(state, -1);
-                lua_pop(state, 2);
-
-                library.documentations.push_back({ name, arguments, documentation });
+                LuaLibrary::Function func;
+                func.name = p.name;
+                for (const std::pair<const std::string, std::string>& pair : p.arguments)
+                {
+                    LuaLibrary::Function::Argument arg;
+                    arg.name = pair.first;
+                    arg.type = pair.second;
+                    func.arguments.push_back(arg);
+                }
+                func.returnType = p.returnValue.value_or(func.returnType);
+                func.helpText = p.documentation.value_or(func.helpText);
+                library.documentations.push_back(std::move(func));
             }
+            catch (const documentation::SpecificationError& e) {
+                logError(e);
+            }
+            lua_pop(state, 1);
         }
         lua_pop(state, 1);
     }
 }
 
-void ScriptEngine::addBaseLibrary() {
-    ZoneScoped
-
-    LuaLibrary lib = {
-        "",
-        {
-            {
-                "printTrace",
-                &luascriptfunctions::printTrace,
-                {},
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Trace'"
-            },
-            {
-                "printDebug",
-                &luascriptfunctions::printDebug,
-                {},
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Debug'"
-            },
-            {
-                "printInfo",
-                &luascriptfunctions::printInfo,
-                {},
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Info'"
-            },
-            {
-                "printWarning",
-                &luascriptfunctions::printWarning,
-                {},
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Warning'"
-            },
-            {
-                "printError",
-                &luascriptfunctions::printError,
-                {},
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Error'"
-            },
-            {
-                "printFatal",
-                &luascriptfunctions::printFatal,
-                {},
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Fatal'"
-            },
-            {
-                "absPath",
-                &luascriptfunctions::absolutePath,
-                {},
-                "string",
-                "Returns the absolute path to the passed path, resolving path tokens as "
-                "well as resolving relative paths"
-            },
-            {
-                "fileExists",
-                &luascriptfunctions::fileExists,
-                {},
-                "string",
-                "Checks whether the provided file exists."
-            },
-            {
-                "directoryExists",
-                &luascriptfunctions::directoryExists,
-                {},
-                "string",
-                "Chckes whether the provided directory exists."
-            },
-            {
-                "setPathToken",
-                &luascriptfunctions::setPathToken,
-                {},
-                "string, string",
-                "Registers a new path token provided by the first argument to the path "
-                "provided in the second argument"
-            },
-            {
-                "walkDirectory",
-                &luascriptfunctions::walkDirectory,
-                {},
-                "string [bool, bool]",
-                "Walks a directory and returns all contents (files and directories) of "
-                "the directory as absolute paths. The first argument is the path of the "
-                "directory that should be walked, the second argument determines if the "
-                "walk is recursive and will continue in contained directories. The third "
-                "argument determines whether the table that is returned is sorted."
-            },
-            {
-                "walkDirectoryFiles",
-                &luascriptfunctions::walkDirectoryFiles,
-                {},
-                "string [bool, bool]",
-                "Walks a directory and returns the files of the directory as absolute "
-                "paths. The first argument is the path of the directory that should be "
-                "walked, the second argument determines if the walk is recursive and "
-                "will continue in contained directories. The third argument determines "
-                "whether the table that is returned is sorted."
-            },
-            {
-                "walkDirectoryFolder",
-                &luascriptfunctions::walkDirectoryFolder,
-                {},
-                "string [bool, bool]",
-                "Walks a directory and returns the subfolders of the directory as "
-                "absolute paths. The first argument is the path of the directory that "
-                "should be walked, the second argument determines if the walk is "
-                "recursive and will continue in contained directories. The third "
-                "argument determines whether the table that is returned is sorted."
-            },
-            {
-                "directoryForPath",
-                &luascriptfunctions::directoryForPath,
-                {},
-                "string",
-                "This function extracts the directory part of the passed path. For "
-                "example, if the parameter is 'C:/OpenSpace/foobar/foo.txt', this "
-                "function returns 'C:/OpenSpace/foobar'."
-            },
-            {
-                "unzipFile",
-                &luascriptfunctions::unzipFile,
-                {},
-                "string, string [bool]",
-                "This function extracts the contents of a zip file. The first "
-                "argument is the path to the zip file. The second argument is the "
-                "directory where to put the extracted files. If the third argument is "
-                "true, then the compressed file will be deleted after the decompression "
-                 "is finished."
-            },
-            {
-                "saveLastChangeToProfile",
-                &luascriptfunctions::saveLastChangeToProfile,
-                {},
-                "",
-                "This function saves the last script log action into the profile "
-            },
-        }
-    };
-    addLibrary(lib);
-}
-
-void ScriptEngine::remapPrintFunction() {
-    //ghoul::lua::logStack(_state);
- //   lua_getglobal(_state, _luaGlobalNamespace.c_str());
-    //ghoul::lua::logStack(_state);
- //   lua_pushstring(_state, _printFunctionName.c_str());
-    //ghoul::lua::logStack(_state);
- //   lua_pushcfunction(_state, _printFunctionReplacement);
-    //ghoul::lua::logStack(_state);
- //   lua_settable(_state, _setTableOffset);
-    //ghoul::lua::logStack(_state);
-}
-
 bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(state, "State must not be nullptr");
     const int top = lua_gettop(state);
 
-    lua_getglobal(state, OpenSpaceLibraryName);
+    lua_getglobal(state, OpenSpaceLibraryName.data());
     if (library.name.empty()) {
         addLibraryFunctions(state, library, Replace::Yes);
         lua_pop(state, 1);
@@ -552,35 +499,18 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
 }
 
 std::vector<std::string> ScriptEngine::allLuaFunctions() const {
-    ZoneScoped
+    ZoneScoped;
 
     std::vector<std::string> result;
-
     for (const LuaLibrary& library : _registeredLibraries) {
-        for (const LuaLibrary::Function& function : library.functions) {
-            std::string total = "openspace.";
-            if (!library.name.empty()) {
-                total += library.name + ".";
-            }
-            total += function.name;
-            result.push_back(std::move(total));
-        }
-
-        for (const LuaLibrary::Documentation& doc : library.documentations) {
-            std::string total = "openspace.";
-            if (!library.name.empty()) {
-                total += library.name + ".";
-            }
-            total += doc.name;
-            result.push_back(std::move(total));
-        }
+        std::vector<std::string> r = luaFunctions(library, "openspace.");
+        result.insert(result.end(), r.begin(), r.end());
     }
-
     return result;
 }
 
 std::string ScriptEngine::generateJson() const {
-    ZoneScoped
+    ZoneScoped;
 
     // Create JSON
     std::stringstream json;
@@ -588,50 +518,20 @@ std::string ScriptEngine::generateJson() const {
 
     bool first = true;
     for (const LuaLibrary& l : _registeredLibraries) {
-        constexpr const char* replStr = R"("{}": "{}", )";
-        constexpr const char* replStr2 = R"("{}": "{}")";
-
         if (!first) {
             json << ",";
         }
         first = false;
 
-        json << "{";
-        json << fmt::format(replStr, "library", l.name);
-        json << "\"functions\": [";
-
-        for (const LuaLibrary::Function& f : l.functions) {
-            json << "{";
-            json << fmt::format(replStr, "name", f.name);
-            json << fmt::format(replStr, "arguments", escapedJson(f.argumentText));
-            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
-            json << "}";
-            if (&f != &l.functions.back() || !l.documentations.empty()) {
-                json << ",";
-            }
-        }
-
-        for (const LuaLibrary::Documentation& doc : l.documentations) {
-            json << "{";
-            json << fmt::format(replStr, "name", doc.name);
-            json << fmt::format(replStr, "arguments", escapedJson(doc.parameter));
-            json << fmt::format(replStr2, "help", escapedJson(doc.description));
-            json << "}";
-            if (&doc != &l.documentations.back()) {
-                json << ",";
-            }
-        }
-
-        json << "]}";
-
+        toJson(l, json);
     }
     json << "]";
 
     return json.str();
 }
 
-bool ScriptEngine::writeLog(const std::string& script) {
-    ZoneScoped
+void ScriptEngine::writeLog(const std::string& script) {
+    ZoneScoped;
 
     // Check that logging is enabled and initialize if necessary
     if (!_logFileExists) {
@@ -641,7 +541,7 @@ bool ScriptEngine::writeLog(const std::string& script) {
             _logFileExists = true;
 
             LDEBUG(fmt::format(
-                "Using script log of type '{}' to file '{}'", _logType, _logFilename
+                "Using script log file {}", std::filesystem::path(_logFilename)
             ));
 
             // Test file and clear previous input
@@ -649,15 +549,16 @@ bool ScriptEngine::writeLog(const std::string& script) {
 
             if (!file.good()) {
                 LERROR(fmt::format(
-                    "Could not open file '{}' for logging scripts", _logFilename
+                    "Could not open file {} for logging scripts",
+                    std::filesystem::path(_logFilename)
                 ));
 
-                return false;
+                return;
             }
         }
         else {
             _logScripts = false;
-            return false;
+            return;
         }
     }
 
@@ -665,44 +566,46 @@ bool ScriptEngine::writeLog(const std::string& script) {
     std::ofstream file(_logFilename, std::ofstream::app);
     if (!file.good()) {
         LERROR(fmt::format("Could not open file '{}' for logging scripts", _logFilename));
-        return false;
-    }
-
-    file << script << std::endl;
-    file.close();
-
-    return true;
-}
-
-void ScriptEngine::preSync(bool isMaster) {
-    ZoneScoped
-
-    if (!isMaster) {
         return;
     }
 
-    std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
-    while (!_incomingScripts.empty()) {
-        QueueItem item = std::move(_incomingScripts.front());
-        _incomingScripts.pop();
+    file << script << '\n';
+}
 
-        _scriptsToSync.push_back(item.script);
-        const bool remoteScripting = item.remoteScripting;
+void ScriptEngine::preSync(bool isMaster) {
+    ZoneScoped;
 
-        // Not really a received script but the master also needs to run the script...
-        _masterScriptQueue.push(item);
+    std::lock_guard guard(_clientScriptsMutex);
+    if (isMaster) {
+        while (!_incomingScripts.empty()) {
+            QueueItem item = std::move(_incomingScripts.front());
+            _incomingScripts.pop();
 
-        if (global::parallelPeer->isHost() && remoteScripting) {
-            global::parallelPeer->sendScript(item.script);
+            _scriptsToSync.push_back(item.script);
+            const bool remoteScripting = item.remoteScripting;
+
+            // Not really a received script but the master also needs to run the script...
+            _masterScriptQueue.push(item);
+
+            if (global::parallelPeer->isHost() && remoteScripting) {
+                global::parallelPeer->sendScript(item.script);
+            }
+            if (global::sessionRecording->isRecording()) {
+                global::sessionRecording->saveScriptKeyframeToTimeline(item.script);
+            }
         }
-        if (global::sessionRecording->isRecording()) {
-            global::sessionRecording->saveScriptKeyframe(item.script);
+    }
+    else {
+        while (!_incomingScripts.empty()) {
+            QueueItem item = std::move(_incomingScripts.front());
+            _incomingScripts.pop();
+            _clientScriptQueue.push(item.script);
         }
     }
 }
 
 void ScriptEngine::encode(SyncBuffer* syncBuffer) {
-    ZoneScoped
+    ZoneScoped;
 
     size_t nScripts = _scriptsToSync.size();
     syncBuffer->encode(nScripts);
@@ -713,21 +616,21 @@ void ScriptEngine::encode(SyncBuffer* syncBuffer) {
 }
 
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
-    ZoneScoped
+    ZoneScoped;
 
-    std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
+    std::lock_guard guard(_clientScriptsMutex);
     size_t nScripts;
     syncBuffer->decode(nScripts);
 
     for (size_t i = 0; i < nScripts; ++i) {
         std::string script;
         syncBuffer->decode(script);
-        _slaveScriptQueue.push(std::move(script));
+        _clientScriptQueue.push(std::move(script));
     }
 }
 
 void ScriptEngine::postSync(bool isMaster) {
-    ZoneScoped
+    ZoneScoped;
 
     if (isMaster) {
         while (!_masterScriptQueue.empty()) {
@@ -744,11 +647,11 @@ void ScriptEngine::postSync(bool isMaster) {
         }
     }
     else {
-        std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
-        while (!_slaveScriptQueue.empty()) {
+        std::lock_guard guard(_clientScriptsMutex);
+        while (!_clientScriptQueue.empty()) {
             try {
-                runScript(_slaveScriptQueue.front());
-                _slaveScriptQueue.pop();
+                runScript(_clientScriptQueue.front());
+                _clientScriptQueue.pop();
             }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
@@ -757,15 +660,92 @@ void ScriptEngine::postSync(bool isMaster) {
     }
 }
 
-void ScriptEngine::queueScript(const std::string& script,
+void ScriptEngine::queueScript(std::string script,
                                ScriptEngine::RemoteScripting remoteScripting,
                                ScriptCallback callback)
 {
-    ZoneScoped
+    ZoneScoped;
 
-    if (!script.empty()) {
-        _incomingScripts.push({ script, remoteScripting, callback });
+    if (script.empty()) {
+        return;
     }
+    _incomingScripts.push({ std::move(script), remoteScripting, std::move(callback) });
+}
+
+
+void ScriptEngine::addBaseLibrary() {
+    ZoneScoped;
+
+    LuaLibrary lib = {
+        .name = "",
+        .functions = {
+            {
+                "printTrace",
+                &luascriptfunctions::printTrace,
+                { { "", "*" } },
+                "",
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Trace'. For Boolean, numbers, and strings, the internal values are "
+                "printed, for all other types, the type is printed instead"
+            },
+            {
+                "printDebug",
+                &luascriptfunctions::printDebug,
+                { { "", "*" } },
+                "",
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Debug'. For Boolean, numbers, and strings, the internal values are "
+                "printed, for all other types, the type is printed instead"
+            },
+            {
+                "printInfo",
+                &luascriptfunctions::printInfo,
+                { { "", "*" } },
+                "",
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Info'. For Boolean, numbers, and strings, the internal values are "
+                "printed, for all other types, the type is printed instead"
+            },
+            {
+                "printWarning",
+                &luascriptfunctions::printWarning,
+                { { "", "*" } },
+                "",
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Warning'. For Boolean, numbers, and strings, the internal values are "
+                "printed, for all other types, the type is printed instead"
+            },
+            {
+                "printError",
+                &luascriptfunctions::printError,
+                { { "", "*" } },
+                "",
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Error'. For Boolean, numbers, and strings, the internal values are "
+                "printed, for all other types, the type is printed instead"
+            },
+            {
+                "printFatal",
+                &luascriptfunctions::printFatal,
+                { { "", "*" } },
+                "",
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Fatal'. For Boolean, numbers, and strings, the internal values are "
+                "printed, for all other types, the type is printed instead"
+            },
+            codegen::lua::AbsolutePath,
+            codegen::lua::SetPathToken,
+            codegen::lua::FileExists,
+            codegen::lua::ReadFile,
+            codegen::lua::DirectoryExists,
+            codegen::lua::WalkDirectory,
+            codegen::lua::WalkDirectoryFiles,
+            codegen::lua::WalkDirectoryFolders,
+            codegen::lua::DirectoryForPath,
+            codegen::lua::UnzipFile
+        }
+    };
+    addLibrary(lib);
 }
 
 } // namespace openspace::scripting

@@ -1,24 +1,36 @@
-local texturesPath = asset.require("./../../mars_textures").TexturesPath
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Mars Textures",
+  Type = "HttpSynchronization",
+  Identifier = "mars_textures",
+  Version = 1
+})
 
 local layer = {
   Identifier = "Mars_Texture",
   Name = "Mars Texture",
-  FilePath = texturesPath .. "/mars.jpg",
-  Description = [[ Default jpg texture for Mars]]
+  Enabled = asset.enabled,
+  FilePath = texturesPath .. "mars.jpg",
+  Description = "Default jpg texture for Mars"
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Mars Texutre",
   Version = "1.0",
-  Description = [[ Jpg texture for Mars, available for offline use.]],
+  Description = "Jpg texture for Mars, available for offline use",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

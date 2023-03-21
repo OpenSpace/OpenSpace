@@ -1,7 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local proceduralGlobes = asset.require('util/procedural_globe')
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local proceduralGlobes = asset.require("util/procedural_globe")
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
 local kernel375 = kernels.sat375
 local kernel393 = kernels.sat393
 
@@ -9,101 +8,17 @@ local kernel393 = kernels.sat393
 
 local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_other" }
+local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_other", "moon_minor", "moon_minor_saturn" }
 local trailColor = { 0.5, 0.3, 0.3 }
-local trailTags = { 
+local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_saturn",
-  "moonTrail_minor"
+  "moonTrail_minor",
+  "moonTrail_minor_saturn"
 }
 
 local otherGroup = {
-  {
-    Identifier = "Atlas",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "ATLAS",
-    Radii = { 41000, 35000, 19000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.60169,
-    Kernels = kernel393
-  },
-  {
-    Identifier = "Prometheus",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "PROMETHEUS",
-    Radii = { 136000, 79000, 59000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.61299,
-    Kernels = kernel393
-  },
-  {
-    Identifier = "Pandora",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "PANDORA",
-    Radii = { 104000, 81000, 64000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.62850,
-    Kernels = kernel393
-  },
-  {
-    Identifier = "Epimetheus",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "EPIMETHEUS",
-    Radii = { 130000, 114000, 106000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.69433,
-    Kernels = kernel393
-  },
-  {
-    Identifier = "Janus",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "JANUS",
-    Radii = { 203000, 185000, 153000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 0.69466,
-    Kernels = kernel393
-  },
   {
     Identifier = "Aegaeon",
     Parent = {
@@ -242,20 +157,70 @@ local otherGroup = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(
-  asset,
-  proceduralGlobes.createGlobes(otherGroup)
-)
+-- Generate all moon labels
+local moon_labels = {}
+
+for i, moon in ipairs(otherGroup) do
+  local moonName = moon.GUI.Name or moon.Identifier
+  moon_labels[i] = {
+    Identifier = moon.Identifier .. "Label",
+    Parent = moon.Identifier,
+    Renderable = {
+      Enabled = false,
+      Type = "RenderableLabel",
+      Text = moonName,
+      FontSize = 70.0,
+      Size = 5.5,
+      MinMaxSize = { 1, 20 },
+      OrientationOption = "Camera View Direction",
+      BlendMode = "Additive",
+      EnableFading = true,
+      FadeUnit = "Mm",
+      FadeDistances = { 250.0, 1500.0 },
+      FadeWidths = { 100.0, 1500.0 }
+    },
+    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+    GUI = {
+      Name = moonName .. " Label",
+      Path = "/Solar System/Planets/Saturn/Moons",
+      Description = "Label for Saturn's moon " .. moonName .. " (other group)"
+    }
+  }
+end
+
+local nodes = proceduralGlobes.createGlobes(otherGroup)
+
+asset.onInitialize(function()
+  for _, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+
+  for _, moon in ipairs(moon_labels) do
+    openspace.addSceneGraphNode(moon)
+  end
+end)
+
+asset.onDeinitialize(function()
+  for i = #moon_labels, 1, -1 do
+    openspace.removeSceneGraphNode(moon_labels[i])
+  end
+
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+
+for _, node in ipairs(nodes) do
+  asset.export(node)
+end
 
 
 asset.meta = {
   Name = "Saturn Other Group Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Saturn's Other Group
-    moons: Phoebe, Skathi, S2007S2, Skoll, S2004S13, Greip, Hyrrokkin, Jarnsaxa,
-    Mundilfari, S2006S1, S2004S17, Bergelmir, Narvi, Suttungr, Hati, S2004S12,
-    Farbauti, Thrymr, Aegir, S2007S3, Bestla, S2004S7, S2006S3, Fenrir, Kari, Ymir,
-    Loge, Fornjot. Blank globes and SPICE trails are generated for each moon.]],
+  Description = [[Procedural Globe asset containing Saturn's Other Group moons: Aegaeon,
+    Methone, Anthe, Pallene, Telesto, Calypso, Helene, Polydeuces. Blank globes and SPICE
+    trails are generated for each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

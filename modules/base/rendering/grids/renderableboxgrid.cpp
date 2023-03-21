@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,24 +36,35 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* ProgramName = "GridProgram";
-
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered."
+        "This value determines the color of the grid lines that are rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the spherical grid."
+        "This value specifies the line width of the spherical grid"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid Size",
         "This value species the size of each dimensions of the box"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
+        "DrawLabels",
+        "Draw Labels",
+        "Determines whether labels should be drawn or hidden"
+    };
+
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
+    {
+        "Labels",
+        "Labels",
+        "The labels for the grid"
     };
 
     struct [[codegen::Dictionary(RenderableBoxGrid)]] Parameters {
@@ -65,6 +76,13 @@ namespace {
 
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<glm::vec3> size;
+
+        // [[codegen::verbatim(DrawLabelInfo.description)]]
+        std::optional<bool> drawLabels;
+
+        // [[codegen::verbatim(LabelsInfo.description)]]
+        std::optional<ghoul::Dictionary> labels
+            [[codegen::reference("space_labelscomponent")]];
     };
 #include "renderableboxgrid_codegen.cpp"
 } // namespace
@@ -72,9 +90,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableBoxGrid::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_boxgrid";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_boxgrid");
 }
 
 RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
@@ -82,6 +98,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
     , _size(SizeInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(100.f))
+    , _drawLabels(DrawLabelInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -98,18 +115,34 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     _size = p.size.value_or(_size);
     _size.onChange([&]() { _gridIsDirty = true; });
     addProperty(_size);
+
+    if (p.labels.has_value()) {
+        _drawLabels = p.drawLabels.value_or(_drawLabels);
+        addProperty(_drawLabels);
+
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
+        _hasLabels = true;
+        addPropertySubOwner(_labels.get());
+    }
 }
 
 bool RenderableBoxGrid::isReady() const {
-    return _gridProgram != nullptr;
+    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
+}
+
+void RenderableBoxGrid::initialize() {
+    if (_hasLabels) {
+        _labels->initialize();
+        _labels->loadLabels();
+    }
 }
 
 void RenderableBoxGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "GridProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "GridProgram",
                 absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/grid_fs.glsl")
             );
@@ -133,7 +166,7 @@ void RenderableBoxGrid::deinitializeGL() {
     _vBufferID = 0;
 
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "GridProgram",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -150,13 +183,13 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+
+    const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewTransform;
 
     _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform(
-        "MVPTransform",
-        glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
-    );
-    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
+    _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
     // Change GL state:
@@ -180,6 +213,31 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
+
+    // Draw labels
+    if (_drawLabels && _hasLabels) {
+        const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+        const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+        glm::vec3 right = glm::cross(viewDirection, lookup);
+        const glm::vec3 up = glm::cross(right, viewDirection);
+
+        const glm::dmat4 worldToModelTransform = glm::inverse(modelTransform);
+        glm::vec3 orthoRight = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+        );
+
+        if (orthoRight == glm::vec3(0.0)) {
+            glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+            right = glm::cross(viewDirection, otherVector);
+            orthoRight = glm::normalize(
+                glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+            );
+        }
+        const glm::vec3 orthoUp = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
+        );
+        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+    }
 }
 
 void RenderableBoxGrid::update(const UpdateData&) {
@@ -236,6 +294,8 @@ void RenderableBoxGrid::update(const UpdateData&) {
         _varray.push_back({ v6.x, v6.y, v6.z });
         _varray.push_back({ v7.x, v7.y, v7.z });
         _varray.push_back({ v3.x, v3.y, v3.z });
+
+        setBoundingSphere(glm::length(glm::dvec3(urb)));
 
         glBindVertexArray(_vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);

@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
 
@@ -11,24 +10,33 @@ local UranusBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "URANUS BARYCENTER",
-      Observer = "SUN"
+      Observer = "SSB"
     }
   },
   GUI = {
     Name = "Uranus Barycenter",
     Path = "/Solar System/Planets/Uranus",
     Hidden = true,
-    Description = [[ Uranus Barycenter position]],
+    Description = "Uranus Barycenter position",
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { UranusBarycenter })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(UranusBarycenter)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(UranusBarycenter)
+end)
+
+asset.export(UranusBarycenter)
+
 
 
 asset.meta = {
   Name = "Uranus Transforms",
-  Version = "1.0",
-  Description = [[ Uranus Barycenter transform]],
+  Version = "1.1",
+  Description = "Uranus Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

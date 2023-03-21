@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <string_view>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl {
@@ -65,7 +66,7 @@ public:
         ghoul::Dictionary dictionary);
 
     Renderable(const ghoul::Dictionary& dictionary);
-    virtual ~Renderable() = default;
+    virtual ~Renderable() override = default;
 
     virtual void initialize();
     virtual void initializeGL();
@@ -79,8 +80,11 @@ public:
     double boundingSphere() const;
     double interactionSphere() const;
 
-    virtual void render(const RenderData& data, RendererTasks& rendererTask);
+    std::string_view typeAsString() const;
+
     virtual void update(const UpdateData& data);
+    virtual void render(const RenderData& data, RendererTasks& rendererTask);
+    virtual void renderSecondary(const RenderData& data, RendererTasks& rendererTask);
 
     // The 'surface' in this case is the interaction sphere of this renderable. In some
     // cases (i.e., planets) this corresponds directly to the physical surface, but in
@@ -94,7 +98,11 @@ public:
 
     RenderBin renderBin() const;
     void setRenderBin(RenderBin bin);
-    bool matchesRenderBinMask(int binMask);
+    bool matchesRenderBinMask(int binMask) const noexcept;
+
+    bool matchesSecondaryRenderBin(int binMask) const noexcept;
+
+    void setFade(float fade);
 
     bool isVisible() const;
 
@@ -105,7 +113,9 @@ public:
 protected:
     properties::BoolProperty _enabled;
     properties::FloatProperty _opacity;
+    properties::FloatProperty _fade;
     properties::StringProperty _renderableType;
+    properties::BoolProperty _dimInAtmosphere;
 
     void setBoundingSphere(double boundingSphere);
     void setInteractionSphere(double interactionSphere);
@@ -113,10 +123,18 @@ protected:
     void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();
 
+    /// Returns the full opacity constructed from the _opacity and _fade property values
+    float opacity() const;
+
     double _boundingSphere = 0.0;
     double _interactionSphere = 0.0;
     SceneGraphNode* _parent = nullptr;
     bool _shouldUpdateIfDisabled = false;
+    RenderBin _renderBin = RenderBin::Opaque;
+
+    // An optional renderbin that renderables can use for certain components, in cases
+    // where all parts of the renderable should not be rendered in the same bin
+    std::optional<RenderBin> _secondaryRenderBin;
 
 private:
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want
@@ -124,8 +142,6 @@ private:
     // parentage and that's no bueno
     friend ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         const ghoul::Dictionary&);
-
-    RenderBin _renderBin = RenderBin::Opaque;
 };
 
 } // namespace openspace

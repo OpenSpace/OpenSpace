@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,25 +31,25 @@
 #include <optional>
 
 namespace {
-    constexpr const openspace::properties::Property::PropertyInfo HasStartInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HasStartInfo = {
         "HasStart",
         "Has Start",
         "If enabled, this TimeFrame will be inactive before the Start"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo StartInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StartInfo = {
         "Start",
         "Start",
         "Specifies the time when this TimeFrame becomes active"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo HasEndInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HasEndInfo = {
         "HasEnd",
         "Has End",
         "If enabled, this TimeFrame will be inactive after the End"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo EndInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EndInfo = {
         "End",
         "End",
         "Specifies the time when this TimeFrame becomes inactive"
@@ -68,16 +68,14 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimeFrameInterval::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_time_frame_interval";
-    return doc;
+    return codegen::doc<Parameters>("base_time_frame_interval");
 }
 
 bool TimeFrameInterval::isActive(const Time& time) const {
-    if (_hasStart && time.j2000Seconds() < _start ) {
+    if (_hasStart && time.j2000Seconds() < _start) {
         return false;
     }
-    if (_hasEnd && time.j2000Seconds() >= _end ) {
+    if (_hasEnd && time.j2000Seconds() >= _end) {
         return false;
     }
     return true;

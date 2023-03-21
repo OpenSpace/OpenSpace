@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,7 @@
 #include <ghoul/fmt.h>
 
 namespace {
-    constexpr const char* _loggerCat = "LocalErrorHistogramManager";
+    constexpr std::string_view _loggerCat = "LocalErrorHistogramManager";
 } // namespace
 
 namespace openspace {
@@ -305,7 +305,7 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset,
     return true;
 }
 
-bool LocalErrorHistogramManager::loadFromFile(const std::string& filename) {
+bool LocalErrorHistogramManager::loadFromFile(const std::filesystem::path& filename) {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
         return false;
@@ -344,7 +344,7 @@ bool LocalErrorHistogramManager::loadFromFile(const std::string& filename) {
 }
 
 
-bool LocalErrorHistogramManager::saveToFile(const std::string& filename) {
+bool LocalErrorHistogramManager::saveToFile(const std::filesystem::path& filename) {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
         return false;

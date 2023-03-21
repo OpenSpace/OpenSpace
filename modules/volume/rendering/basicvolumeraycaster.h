@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,7 +53,7 @@ public:
         std::shared_ptr<ghoul::opengl::Texture> texture,
         std::shared_ptr<openspace::TransferFunction> transferFunction,
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
-    virtual ~BasicVolumeRaycaster();
+    ~BasicVolumeRaycaster() override;
 
     void initialize();
     void deinitialize();
@@ -76,11 +76,12 @@ public:
 
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
-    void setTransferFunction(std::shared_ptr<TransferFunction> transferFunction);
+    void setTransferFunction(std::shared_ptr<openspace::TransferFunction>
+        transferFunction);
 
     void setStepSize(float stepSize);
-    float opacity() const;
-    void setOpacity(float opacity);
+    float brightness() const;
+    void setBrightness(float brightness);
     float rNormalization() const;
     void setRNormalization(float rNormalization);
     float rUpperBound() const;
@@ -94,11 +95,11 @@ private:
 
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<TransferFunction> _transferFunction;
+    std::shared_ptr<openspace::TransferFunction> _transferFunction;
     BoxGeometry _boundingBox;
     VolumeGridType _gridType;
     glm::mat4 _modelTransform = glm::mat4(1.f);
-    float _opacity = 20.f;
+    float _brightness = 1.f;
     float _rNormalization = 0.f;
     float _rUpperBound = 1.f;
 

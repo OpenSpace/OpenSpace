@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,11 +40,12 @@ namespace openspace {
 GaiaModule::GaiaModule() : OpenSpaceModule(Name) {}
 
 void GaiaModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
 
-    auto fTask = FactoryManager::ref().factory<Task>();
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fRenderable, "No task factory existed");
     fTask->registerClass<ReadFitsTask>("ReadFitsTask");
     fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
@@ -61,12 +62,12 @@ std::vector<documentation::Documentation> GaiaModule::documentations() const {
 }
 
 scripting::LuaLibrary GaiaModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "gaia";
-    res.scripts = {
-        absPath("${MODULE_GAIA}/scripts/filtering.lua")
+    return {
+        .name = "gaia",
+        .scripts = {
+            absPath("${MODULE_GAIA}/scripts/filtering.lua")
+        }
     };
-    return res;
 }
 
 } // namespace openspace

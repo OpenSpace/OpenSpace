@@ -6,17 +6,17 @@ local folder  = asset.syncedResource({
 })
 
 local kernels = {
-  folder .. "/apollo15.0001.tsc",
+  folder .. "apollo15.0001.tsc",
 
-  -- folder .. '/AS15-P_v01.bc',
-  folder .. '/apollo15.0001.tf',
-  folder .. '/apollo15MetricAddendum002.ti',
-  -- folder .. '/apollo15PanoramicAddendum001.ti',
-  folder .. '/apollo15_metric.0002.ti',
-  -- folder .. '/apollo15_panoramic.0001.ti',
-  folder .. '/apollo15-1.bsp',
-  folder .. '/AS15-M_v01.bc',
-  -- folder .. '/AS15-M_v01.bsp',
+  -- folder .. "AS15-P_v01.bc",
+  folder .. "apollo15.0001.tf",
+  folder .. "apollo15MetricAddendum002.ti",
+  -- folder .. "apollo15PanoramicAddendum001.ti",
+  folder .. "apollo15_metric.0002.ti",
+  -- folder .. "apollo15_panoramic.0001.ti",
+  folder .. "apollo15-1.bsp",
+  folder .. "AS15-M_v01.bc",
+  -- folder .. "AS15-M_v01.bsp",
 }
 
 -- local kernels = {
@@ -32,7 +32,7 @@ local kernels = {
 -- folder .. "apollo15_panoramic.0001.ti",
 
 -- --tspk
--- folder .. "de421.bsp",  
+-- folder .. "de421.bsp",
 -- folder .. "moon_pa_de421_1900-2050.bpc",
 
 -- --iak

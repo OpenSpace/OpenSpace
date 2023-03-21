@@ -1,5 +1,29 @@
-local assetHelper = asset.require('util/asset_helper')
-local bookmarkHelper = asset.require('util/generate_bookmarks')
+local bookmarkHelper = asset.require("util/generate_bookmarks")
 
-local nodes = bookmarkHelper.getBookmarks('Local Bookmarks', '${ASSETS}/customization/localbookmarks.csv')
-assetHelper.registerSceneGraphNodesAndExport(asset, nodes);
+-- Most of the local bookmarks we are loading are relative to the Earth so we should
+-- ensure that it is loaded first
+asset.require("scene/solarsystem/planets/earth/earth")
+
+local nodes = bookmarkHelper.getBookmarks("Local Bookmarks", "${ASSETS}/customization/localbookmarks.csv")
+
+
+asset.onInitialize(function()
+  for _, n in ipairs(nodes) do
+    local success, error = pcall(openspace.addSceneGraphNode, n)
+    if not success then
+      openspace.printError(error)
+    end
+  end
+end)
+
+asset.onDeinitialize(function()
+  for _, n in ipairs(nodes) do
+    if openspace.hasSceneGraphNode(n.Identifier) then
+      openspace.removeSceneGraphNode(n)
+    end
+  end
+end)
+
+for _, n in ipairs(nodes) do
+  asset.export(n)
+end

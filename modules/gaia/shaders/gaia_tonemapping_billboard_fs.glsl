@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,21 +32,21 @@ const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
 
 
 Fragment getFragment() {
-    vec4 color = vec4(0.0);
+  vec4 color = vec4(0.0);
     
-    // BILLBOARDS
-    // Sample color. Tonemapping done in first shader pass.  
-    vec4 textureColor = texture( renderedTexture, uv );
+  // BILLBOARDS
+  // Sample color. Tonemapping done in first shader pass.  
+  vec4 textureColor = texture(renderedTexture, uv);
 
-    // Use the following to check for any intensity at all.
-    //color = (length(intensity.rgb) > 0.001) ? vec4(1.0) : vec4(0.0);
+  // Use the following to check for any intensity at all.
+  //color = (length(intensity.rgb) > 0.001) ? vec4(1.0) : vec4(0.0);
 
-    Fragment frag;
-    frag.color = textureColor;
-    // Place stars at back to begin with. 
-    frag.depth = DEFAULT_DEPTH;
-    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-    frag.blend = BLEND_MODE_NORMAL;
+  Fragment frag;
+  frag.color = textureColor;
+  // Place stars at back to begin with. 
+  frag.depth = DEFAULT_DEPTH;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+  frag.blend = BLEND_MODE_NORMAL;
 
-    return frag;
+  return frag;
 }

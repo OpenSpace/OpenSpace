@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('./kernels').PlutoKernels
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels").PlutoKernels
 asset.require("spice/base")
 
 
@@ -12,7 +11,7 @@ local PlutoBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "PLUTO BARYCENTER",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = kernels
     }
   },
@@ -22,13 +21,22 @@ local PlutoBarycenter = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoBarycenter })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PlutoBarycenter)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PlutoBarycenter)
+end)
+
+asset.export(PlutoBarycenter)
+
 
 
 asset.meta = {
   Name = "Pluto Transforms",
   Version = "1.0",
-  Description = [[ Pluto Barycenter transform]],
+  Description = "Pluto Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

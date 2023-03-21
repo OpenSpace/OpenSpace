@@ -1,69 +1,30 @@
---trail.asset
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
-
-local kernels = asset.syncedResource({
-  Name = "Mars 2020 Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "perseverance_kernels",
-  Version = 1
-})
-
-local perseverance_id = "-168"
-
-local m2020_kernels = {
-  kernels .. "/m2020.tf",
-
-  kernels .. "/m2020.tls",
-  kernels .. "/naif0012.tls",
-  
-  kernels .. "/m2020.tsc",
-  
-  kernels .. "/m2020_FMAresponse_JEZ_20200717_P000.cruise.bsp",
-  kernels .. "/m2020_FMAresponse_JEZ_20200717_P000.edl.bsp"
-}
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local spice = asset.require("./spice")
 
 local startTime = "2020 JUL 17 13:56:42"
 local approachMars = "2021 FEB 11 20:32:16"
 local endTime = "2021 FEB 18 20:32:16"
-
-local PerseveranceNode = { 
-  Identifier = "PerseveranceNode",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = perseverance_id,
-      Observer = "SUN",
-      Kernels = m2020_kernels
-    }
-  },
-  GUI = {
-    Name = "Perseverance Node",
-    Path = "/Solar System/Missions/Perseverance",
-    Hidden = true
-  }
-}
 
 local PerseveranceTrailSun = {
   Identifier = "PerseveranceTrailSun",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
-    Translation = { 
+    Translation = {
       Type = "SpiceTranslation",
-      Target = perseverance_id,
-      Observer = "SUN",
-      Kernels = m2020_kernels
+      Target = spice.ID,
+      Observer = "SSB",
+      Kernels = spice.Kernels
     },
     Color = { 0.2, 0.7, 0.1 },
     StartTime = startTime,
     EndTime = endTime,
-    SampleInterval = 100
+    SampleInterval = 100,
+    Enabled = false
   },
   GUI = {
-    Name = "Perseverance Trail",
+    Name = "Perseverance Trail (Sun)",
     Path = "/Solar System/Missions/Perseverance"
   }
 }
@@ -75,14 +36,15 @@ local PerseveranceTrailMars = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = perseverance_id,
-      Observer = "MARS",
-      Kernels = m2020_kernels
+      Target = spice.ID,
+      Observer = "MARS BARYCENTER",
+      Kernels = spice.Kernels
     },
     Color = { 0.7, 0.9, 0.6 },
     StartTime = approachMars,
-    EndTime = endTime,
-    SampleInterval = 100
+    EndTime = "2021 FEB 18 20:43:48",
+    SampleInterval = 100,
+    Enabled = false
   },
   GUI = {
     Name = "Perseverance Trail (Mars)",
@@ -90,8 +52,15 @@ local PerseveranceTrailMars = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  PerseveranceNode,
-  PerseveranceTrailSun,
-  PerseveranceTrailMars
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PerseveranceTrailSun)
+  openspace.addSceneGraphNode(PerseveranceTrailMars)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PerseveranceTrailMars)
+  openspace.removeSceneGraphNode(PerseveranceTrailSun)
+end)
+
+asset.export(PerseveranceTrailSun)
+asset.export(PerseveranceTrailMars)

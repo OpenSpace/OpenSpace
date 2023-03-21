@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,11 +55,11 @@ enum class WebsocketAction : uint8_t {
  */
 struct WebsocketInputState {
     /// The maximum number of supported axes
-    static constexpr const int MaxAxes = 10;
+    static constexpr int MaxAxes = 10;
     /// The maximum number of supported buttons
-    static constexpr const int MaxButtons = 32;
+    static constexpr int MaxButtons = 32;
 
-    /// Marks whether this websocket is connected. If this value is \c false, all other
+    /// Marks whether this websocket is connected. If this value is `false`, all other
     /// members of this struct are undefined
     bool isConnected = false;
 
@@ -69,19 +69,19 @@ struct WebsocketInputState {
     /// The number of axes that this websocket supports
     int nAxes = 0;
     /// The values for each axis. Each value is in the range [-1, 1]. Only the first
-    /// \c nAxes values are defined values, the rest are undefined
+    /// `nAxes` values are defined values, the rest are undefined
     std::array<float, MaxAxes> axes;
 
     /// The number of buttons that this websocket possesses
     int nButtons = 0;
-    /// The status of each button. Only the first \c nButtons values are defined, the rest
+    /// The status of each button. Only the first `nButtons` values are defined, the rest
     /// are undefined
     std::array<WebsocketAction, MaxButtons> buttons;
 };
 
 /// The maximum number of websockets that are supported by this system. This number is
 /// derived from the available GLFW constants
-constexpr const int MaxWebsockets = 16;
+constexpr int MaxWebsockets = 16;
 //struct WebsocketInputStates : public std::array<WebsocketInputState, MaxWebsockets> {
 struct WebsocketInputStates : public std::unordered_map<size_t, WebsocketInputState*> {
     /**
@@ -104,7 +104,7 @@ struct WebsocketInputStates : public std::unordered_map<size_t, WebsocketInputSt
      *
      * \param button The button that is to be checked
      * \param action The action which is checked for each button
-     * \return \c true if there is at least one websocket whose \param button is in the
+     * \return `true` if there is at least one websocket whose \p button is in the
      *         \p action state
      *
      * \pre \p button must be 0 or positive

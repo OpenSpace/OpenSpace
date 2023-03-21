@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ struct RawTile;
 
 /**
  * The responsibility of this class is to enqueue tile requests and fetching finished
- * <code>RawTile</code>s that has been asynchronously loaded.
+ * `RawTile`s that has been asynchronously loaded.
  */
 class AsyncTileDataProvider {
 public:
@@ -49,8 +49,6 @@ public:
      */
     AsyncTileDataProvider(std::string name,
         std::unique_ptr<RawTileDataReader> rawTileDataReader);
-
-    ~AsyncTileDataProvider();
 
     /**
      * Creates a job which asynchronously loads a raw tile. This job is enqueued.
@@ -82,7 +80,7 @@ protected:
     };
 
     /**
-     * \returns true if tile of index <code>tileIndex</code> is not already enqueued.
+     * \returns true if tile of index `tileIndex` is not already enqueued.
      */
     bool satisfiesEnqueueCriteria(const TileIndex& tileIndex);
 

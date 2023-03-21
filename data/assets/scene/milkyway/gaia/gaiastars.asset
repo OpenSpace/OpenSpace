@@ -1,18 +1,8 @@
-local assetHelper = asset.require("util/asset_helper")
-
-local textures = asset.syncedResource({
-  Name = "Stars Textures",
-  Type = "HttpSynchronization",
-  Identifier = "stars_textures",
-  Version = 1
-})
-
-local colorLUT = asset.syncedResource({
-  Name = "Stars Color Table",
-  Type = "HttpSynchronization",
-  Identifier = "stars_colormap",
-  Version = 1
-})
+local fullOS = openspace.systemCapabilities.fullOperatingSystem()
+if string.find(fullOS, "Darwin") then
+  openspace.printWarning("Gaia module (RenderableGaiaStars) not supported on mac")
+  return
+end
 
 -- Download a preprocessed binary octree of Radial Velocity subset values per star (preprocessed into 8 binary files).
 local starsFolder = asset.syncedResource({
@@ -22,16 +12,30 @@ local starsFolder = asset.syncedResource({
   Version = 1
 })
 
+local colormaps = asset.syncedResource({
+  Name = "Stars Color Table",
+  Type = "HttpSynchronization",
+  Identifier = "stars_colormap",
+  Version = 3
+})
+
+local textures = asset.syncedResource({
+  Name = "Stars Textures",
+  Type = "HttpSynchronization",
+  Identifier = "stars_textures",
+  Version = 1
+})
+
 local GaiaStars = {
   Identifier = "GaiaStars",
   Renderable = {
     Type = "RenderableGaiaStars",
-    File = starsFolder .. "/",
+    File = starsFolder,
     FileReaderOption = "StreamOctree",
-    RenderOption = "Motion",
+    RenderMode = "Motion",
     ShaderOption = "Point_SSBO",
-    Texture = textures .. "/halo.png",
-    ColorMap = colorLUT .. "/colorbv.cmap",
+    Texture = textures .. "halo.png",
+    ColorMap = colormaps .. "colorbv.cmap",
     LuminosityMultiplier = 35,
     MagnitudeBoost = 25,
     CutOffThreshold = 38,
@@ -43,18 +47,47 @@ local GaiaStars = {
     MaxCpuMemoryPercent = 0.4,
     FilterSize = 5,
     Sigma = 0.5,
-    AdditionalNodes = {3.0, 2.0},
-    FilterPosX = {0.0, 0.0},
-    FilterPosY = {0.0, 0.0},
-    FilterPosZ = {0.0, 0.0},
-    FilterGMag = {20.0, 20.0},
-    FilterBpRp = {0.0, 0.0},
-    FilterDist = {9.0, 9.0},
+    AdditionalNodes = { 3.0, 2.0 },
+    FilterPosX = { 0.0, 0.0 },
+    FilterPosY = { 0.0, 0.0 },
+    FilterPosZ = { 0.0, 0.0 },
+    FilterGMag = { 20.0, 20.0 },
+    FilterBpRp = { 0.0, 0.0 },
+    FilterDist = { 9.0, 9.0 },
   },
   GUI = {
     Name = "Gaia Stars",
-    Path = "/Milky Way"
+    Path = "/Milky Way",
+    Description = "Radial Velocity subset of GaiaDR2"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaStars })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GaiaStars)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GaiaStars)
+end)
+
+asset.export(GaiaStars)
+
+
+
+asset.meta = {
+  Name = "Gaia Stars",
+  Version = "1.0",
+  Description = [[This asset contains a subset of GaiaDR2. This subset contains 7.5M stars which have
+  accurate values for a number of columns]],
+  Author = "ESA/Gaia/DPAC",
+  URL = "https://gea.esac.esa.int/archive/documentation/GDR2/index.html",
+  License = [[The Gaia data are open and free to use, provided credit is given to
+    'ESA/Gaia/DPAC'. In general, access to, and use of, ESA's Gaia Archive (hereafter
+    called 'the website') constitutes acceptance of the following general terms and
+    conditions. Neither ESA nor any other party involved in creating, producing, or
+    delivering the website shall be liable for any direct, incidental, consequential,
+    indirect, or punitive damages arising out of user access to, or use of, the website.
+    The website does not guarantee the accuracy of information provided by external
+    sources and accepts no responsibility or liability for any consequences arising from
+    the use of such data]]
+}

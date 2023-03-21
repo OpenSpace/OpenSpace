@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,7 +52,7 @@ namespace documentation { struct Documentation; }
 class RenderableStars : public Renderable {
 public:
     explicit RenderableStars(const ghoul::Dictionary& dictionary);
-    ~RenderableStars();
+    ~RenderableStars() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -84,6 +84,18 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
 
+    properties::PropertyOwner _dataMappingContainer;
+    struct {
+        properties::StringProperty bvColor;
+        properties::StringProperty luminance;
+        properties::StringProperty absoluteMagnitude;
+        properties::StringProperty apparentMagnitude;
+        properties::StringProperty vx;
+        properties::StringProperty vy;
+        properties::StringProperty vz;
+        properties::StringProperty speed;
+    } _dataMapping;
+
     properties::OptionProperty _colorOption;
     properties::OptionProperty _otherDataOption;
     properties::StringProperty _otherDataColorMapPath;
@@ -113,7 +125,7 @@ private:
     properties::PropertyOwner _userProvidedTextureOwner;
     properties::PropertyOwner _parametersOwner;
     properties::PropertyOwner _moffatMethodOwner;
-    properties::Vec2Property _fadeInDistance;
+    properties::Vec2Property _fadeInDistances;
     properties::BoolProperty _disableFadeInDistance;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;

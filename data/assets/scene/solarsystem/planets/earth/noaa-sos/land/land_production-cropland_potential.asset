@@ -1,0 +1,72 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Agriculture: Cropland Yield (potential)"
+local Identifier = "noaa-sos-land-land_production-cropland_potential"
+local Description = [[A major component of the 2 Billion More Coming to Dinner film,
+these datasets show current and potential yields for the three top crops, corn, wheat and
+rice, measured in tons per hectare. Potential yield for a given area is determined by
+using the productivity of another region with analogous environmental conditions and
+optimized water and nutrient input as a benchmark. In this map, darker areas show smaller
+yields, while bright pink areas indicate higher yields]]
+local URL = "https://sos.noaa.gov/catalog/datasets/agriculture-cropland-yield-potential/"
+
+
+local syncedDirectory = asset.syncedResource({
+	Name = Name,
+	Type = "HttpSynchronization",
+	Identifier = Identifier,
+	Version = 1
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+local layer_countries = {
+  Identifier = Identifier .. "-countries",
+  Name = Name .. " (w/ countries)",
+  Enabled = asset.enabled,
+  FilePath = syncedDirectory .. "4096_countries.png",
+  Description = Description
+}
+
+local legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "legend.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_countries)
+  openspace.addScreenSpaceRenderable(legend)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_countries)
+  openspace.removeScreenSpaceRenderable(legend)
+end)
+
+asset.export(layer)
+asset.export(layer_countries)
+asset.export(legend)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

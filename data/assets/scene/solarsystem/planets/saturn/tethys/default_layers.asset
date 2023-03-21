@@ -1,18 +1,10 @@
-local colorLayersPath = "./layers/colorlayers"
-
-local colorLayer = asset.require(colorLayersPath .. "/tethys_texture")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Tethys.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/colorlayers/tethys_texture", true)
 
 
 asset.meta = {
   Name = "Default Tethys Layers",
   Version = "1.0",
-  Description = [[ Default Tethys layers are: Tethys Texture]],
+  Description = "Default Tethys layers are: Tethys Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

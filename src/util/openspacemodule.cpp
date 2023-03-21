@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,10 +36,9 @@
 
 #include <openspace/modulepath.h>
 
-
 namespace {
-    constexpr const char* _loggerCat = "OpenSpaceModule";
-    constexpr const char* ModuleBaseToken = "MODULE_";
+    constexpr std::string_view _loggerCat = "OpenSpaceModule";
+    constexpr std::string_view ModuleBaseToken = "MODULE_";
 } // namespace
 
 namespace openspace {
@@ -49,8 +48,8 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
 {}
 
 void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     std::string upperIdentifier = identifier();
     std::transform(
@@ -70,22 +69,22 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
 }
 
 void OpenSpaceModule::initializeGL() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     internalInitializeGL();
 }
 
 void OpenSpaceModule::deinitialize() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     internalDeinitialize();
 }
 
 void OpenSpaceModule::deinitializeGL() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     internalDeinitializeGL();
 }
@@ -125,7 +124,7 @@ std::string OpenSpaceModule::modulePath() const {
         return path.string();
     }
     else { // Otherwise, it might be one of the external directories
-        for (const char* dir : ModulePaths) {
+        for (std::string_view dir : ModulePaths) {
             const std::string& p = std::string(dir) + '/' + moduleIdentifier;
             if (std::filesystem::is_directory(absPath(p))) {
                 return absPath(p).string();

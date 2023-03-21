@@ -1,0 +1,81 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Tsunami Historical Series: Lisbon - 1755"
+local Identifier = "noaa-sos-oceans-tsunami_historical_series-lisbon"
+local Description = [[On the morning of November 1, 1755, a great earthquake shook
+Portugal's capital city of Lisbon as worshipers filled churches and cathedrals for the
+All Saints' Day Mass. In seconds it left the city in ruins and in minutes those ruins
+were on fire. The earthquake probably killed about 30,000 people, though some estimates
+double that figure. Many of the survivors fled to the wharves and keys of Lisbon's port,
+but they would find no safety there. The first tsunami wave surged up the Tagus estuary
+about an hour after the earthquake, reached a maximum runup of 12 meters (40 feet), and
+killed another 1000 people. At least two more tsunami waves surged into the city,
+completing the earthquake's destruction]]
+local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-lisbon-1755/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+local layer_coastal = {
+  Identifier = Identifier .. "-coastal",
+  Name = Name .. " (Coastal)",
+  FilePath = syncedDirectory .. "Tsunami_Coastal_Map_Lisbon_1755_4k.jpg",
+  Description = Description
+}
+
+local layer_energy_coastal = {
+  Identifier = Identifier .. "-energy_coastal",
+  Name = Name .. " (Energy Coastal)",
+  FilePath = syncedDirectory .. "Tsunami_Energy+Coastal_Map_Lisbon_1755_4k.jpg",
+  Description = Description
+}
+
+local layer_energy = {
+  Identifier = Identifier .. "-energy",
+  Name = Name .. " (Energy)",
+  FilePath = syncedDirectory .. "Tsunami_Energy_Map_Lisbon_1755_4k.jpg",
+  Description = Description
+}
+
+local layer_null = {
+  Identifier = Identifier .. "-null",
+  Name = Name .. " (Null)",
+  FilePath = syncedDirectory .. "Tsunami_Null_Coastal_Map_Lisbon_1755_4k.jpg",
+  Description = Description
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_coastal)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy_coastal)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_null)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_coastal)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_energy_coastal)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_energy)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_null)
+end)
+
+asset.export(layer_coastal)
+asset.export(layer_energy_coastal)
+asset.export(layer_energy)
+asset.export(layer_null)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

@@ -1,9 +1,9 @@
-asset.require('./static_server')
+asset.require("./static_server")
 
-local guiCustomization = asset.require('customization/gui')
+local guiCustomization = asset.require("customization/gui")
 
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "17b69f29a4a596d488ba8c9de953cc22fb0dce5c"
+local frontendHash = "4a27a71ccc7dd67f3efa6c54c6f04da71d99ffc2"
 local dataProvider = "data.openspaceproject.com/files/webgui"
 
 local frontend = asset.syncedResource({
@@ -15,9 +15,9 @@ local frontend = asset.syncedResource({
 
 asset.onInitialize(function ()
   -- Unzip the frontend bundle
-  local dest = frontend .. "/frontend"
+  local dest = frontend .. "frontend"
   if not openspace.directoryExists(dest) then
-    openspace.unzipFile(frontend .. "/frontend.zip", dest, true)
+    openspace.unzipFile(frontend .. "frontend.zip", dest, true)
   end
 
   -- Disable the server, add production gui endpoint, and restart server.
@@ -31,7 +31,7 @@ asset.onInitialize(function ()
 
   local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
   directories[#directories + 1] = "frontend"
-  directories[#directories + 1] = frontend .. '/frontend'
+  directories[#directories + 1] = frontend .. "frontend"
 
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
   openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")
@@ -39,12 +39,12 @@ asset.onInitialize(function ()
 
   -- The GUI contains date and simulation increment,
   -- so let's remove these from the dashboard.
-  if openspace.getPropertyValue('Modules.CefWebGui.Visible') then
-    if openspace.hasProperty('Dashboard.Date.Enabled') then
-      openspace.setPropertyValueSingle('Dashboard.Date.Enabled', false)
+  if openspace.getPropertyValue("Modules.CefWebGui.Visible") then
+    if openspace.hasProperty("Dashboard.Date.Enabled") then
+      openspace.setPropertyValueSingle("Dashboard.Date.Enabled", false)
     end
-    if openspace.hasProperty('Dashboard.SimulationIncrement.Enabled') then
-      openspace.setPropertyValueSingle('Dashboard.SimulationIncrement.Enabled', false)
+    if openspace.hasProperty("Dashboard.SimulationIncrement.Enabled") then
+      openspace.setPropertyValueSingle("Dashboard.SimulationIncrement.Enabled", false)
     end
   end
 end)
@@ -66,13 +66,13 @@ asset.onDeinitialize(function ()
     end
   end
   -- @TODO(maci, 2019-08-23) setting this value on exit was causing the server to restart
-  -- on macos, which in turn, stopped the application from exiting. 
+  -- on macos, which in turn, stopped the application from exiting.
   -- need to address in webguimodule.cpp
   --openspace.setPropertyValueSingle("Modules.WebGui.Directories", newDirectories)
 end)
 
 function setCefRoute(route)
-  local port = 4680
+  local port = openspace.getPropertyValue("Modules.WebGui.Port")
   -- As a developer, you can manually serve the webgui from port 4690
   -- with the command `npm start` in the web gui repository
   if guiCustomization.webguiDevelopmentMode then
@@ -90,7 +90,6 @@ asset.export("setCefRoute", setCefRoute)
 asset.meta = {
   Name = "WebGUI",
   Version = "0.1",
-  Description = [[ insert CEF rant ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

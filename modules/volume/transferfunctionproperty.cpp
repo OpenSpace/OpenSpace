@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@ TransferFunctionProperty::TransferFunctionProperty(Property::PropertyInfo info,
     : TemplateProperty<volume::TransferFunction>(std::move(info), value)
 {}
 
-std::string TransferFunctionProperty::className() const {
+std::string_view TransferFunctionProperty::className() const {
     return "TransferFunctionProperty";
 }
 
@@ -41,10 +41,9 @@ int TransferFunctionProperty::typeLua() const {
 }
 
 openspace::volume::TransferFunction
-TransferFunctionProperty::fromLuaConversion(lua_State* state, bool& success) const
-{
+TransferFunctionProperty::fromLuaConversion(lua_State* state) const {
     openspace::volume::TransferFunction tf;
-    success = tf.setEnvelopesFromLua(state);
+    tf.setEnvelopesFromLua(state);
     return tf;
 }
 

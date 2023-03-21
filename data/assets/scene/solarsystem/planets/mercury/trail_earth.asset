@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
 
 
@@ -12,7 +11,7 @@ local MercuryTrailEarth = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MERCURY BARYCENTER",
+      Target = "MERCURY",
       Observer = "EARTH"
     },
     Color = { 1.0, 0.5, 0.2 },
@@ -25,20 +24,28 @@ local MercuryTrailEarth = {
     Name = "Mercury trail from Earth",
     Path = "/Solar System/Planets/Mercury",
     Hidden = false,
-    Description = [[ Trail of Mercury as observed by the Earth.]],
+    Description = "Trail of Mercury as observed by the Earth",
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { MercuryTrailEarth })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MercuryTrailEarth)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MercuryTrailEarth)
+end)
+
+asset.export(MercuryTrailEarth)
+
 
 
 asset.meta = {
   Name = "Mercury Trail from Earth",
-  Version = "1.0",
-  Description = [[ Alternate trail of Mercury, as observed by the Earth rather then the
-    Sun.]],
+  Version = "1.1",
+  Description = [[Alternate trail of Mercury, as observed by the Earth rather then the
+    Sun]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"MercuryTrailEarth"}
+  License = "MIT license"
 }

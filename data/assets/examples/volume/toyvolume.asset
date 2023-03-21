@@ -1,6 +1,5 @@
 -- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_TOYVOLUME enabled
 
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local ToyVolume = {
@@ -18,5 +17,12 @@ local ToyVolume = {
   }
 }
 
-local objects = { ToyVolume }
-assetHelper.registerSceneGraphNodesAndExport(asset, objects)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(ToyVolume)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ToyVolume)
+end)
+
+asset.export(ToyVolume)

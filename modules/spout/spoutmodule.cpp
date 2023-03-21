@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <modules/spout/spoutmodule.h>
 
 #include <modules/spout/renderableplanespout.h>
+#include <modules/spout/renderablespherespout.h>
 #include <modules/spout/screenspacespout.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/templatefactory.h>
@@ -37,13 +38,16 @@ SpoutModule::SpoutModule() : OpenSpaceModule(Name) {}
 void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
 
 #ifdef WIN32
-    auto fSsRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
+        FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
     fSsRenderable->registerClass<ScreenSpaceSpout>("ScreenSpaceSpout");
 
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderablePlaneSpout>("RenderablePlaneSpout");
+    fRenderable->registerClass<RenderableSphereSpout>("RenderableSphereSpout");
 #endif // WIN32
 }
 

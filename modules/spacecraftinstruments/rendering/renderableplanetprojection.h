@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
@@ -38,13 +39,14 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 struct Image;
+class Sphere;
 
 namespace planetgeometry { class PlanetGeometry; }
 
 class RenderablePlanetProjection : public Renderable {
 public:
     RenderablePlanetProjection(const ghoul::Dictionary& dict);
-    ~RenderablePlanetProjection();
+    ~RenderablePlanetProjection() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -56,17 +58,14 @@ public:
 
     static documentation::Documentation Documentation();
 
-protected:
+private:
     void loadColorTexture();
     void loadHeightTexture();
+    void createSphere();
 
-    void attitudeParameters(double time);
-
-private:
-    void imageProjectGPU(const ghoul::opengl::Texture& projectionTexture);
-
-    void clearProjectionBufferAfterTime(double time);
-    void insertImageProjections(const std::vector<Image>& images);
+    glm::mat4 attitudeParameters(double time, const glm::vec3& up);
+    void imageProjectGPU(const ghoul::opengl::Texture& projectionTexture,
+        const glm::mat4& projectorMatrix);
 
     ProjectionComponent _projectionComponent;
 
@@ -85,7 +84,7 @@ private:
         projectionFading, baseTexture, projectionTexture, heightTexture)
         _mainUniformCache;
 
-    UniformCache(projectionTexture, projectorMatrix, modelTransform, scaling, boresight,
+    UniformCache(projectionTexture, projectorMatrix, modelTransform, boresight,
         radius, segments) _fboUniformCache;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
@@ -98,15 +97,12 @@ private:
     properties::IntProperty _projectionsInBuffer;
     properties::TriggerProperty _clearProjectionBuffer;
 
-    std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
+    properties::Vec3Property _radius;
+    properties::IntProperty _segments;
+    std::unique_ptr<Sphere> _sphere;
 
-    glm::vec2 _camScaling = glm::vec2(0.f);
-    glm::vec3 _up = glm::vec3(0.f);
     glm::mat4 _transform = glm::mat4(1.f);
     glm::mat4 _projectorMatrix = glm::mat4(1.f);
-
-    glm::dmat3 _stateMatrix = glm::dmat3(1.0);
-    glm::dmat3 _instrumentMatrix = glm::dmat3(1.0);
     glm::vec3 _boresight = glm::vec3(0.f);
 
     std::vector<Image> _imageTimes;

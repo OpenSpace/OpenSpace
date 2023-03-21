@@ -1,0 +1,63 @@
+asset.require("spice/base")
+local propertyHelper = asset.require("util/property_helper")
+local transforms = asset.require("./transforms")
+
+local textureSourcePath = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "euv_textures_bastille_event",
+  Identifier = "euv_textures_bastille_event",
+  Version = 1
+})
+
+local EUVLayer = {
+  Identifier = "EUV-Layer-bastille-day-2000",
+  Parent = transforms.SunIAU.Identifier,
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 696000000,
+  Renderable = {
+    Type = "RenderableTimeVaryingSphere",
+    Size = 6.96E8, -- Slightly bigger than the sun renderable,
+    Enabled = true,
+    TextureSource = textureSourcePath,
+    Opacity = 1,
+    Segments = 132
+  },
+  GUI = {
+    Name = "EUV Layer",
+    Path = "/Solar System/Sun",
+    Description = "Texture sequence of an extreme ultra violet (EUV) simulation, during the CME. This asset contains data from 2000-07-14 08:38 to 2000-07-14 19:48"
+  }
+}
+
+local toggle_EUV_layer = {
+  Identifier = "os.solarsystem.sun.toggleeuv",
+  Name = "Toggle EUV Layer",
+  Command = propertyHelper.invert("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled"),
+  Documentation = "Toggle EUV layer of sun",
+  GuiPath = "/Bastille-Day 2000",
+  IsLocal = false
+}
+
+asset.onInitialize(function ()
+  openspace.action.registerAction(toggle_EUV_layer)
+  openspace.addSceneGraphNode(EUVLayer)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(EUVLayer)
+  openspace.action.removeAction(toggle_EUV_layer)
+end)
+
+asset.export(EUVLayer)
+
+
+asset.meta = {
+  Name = "Predictive Science Inc. EUV texture sequence Bastille Days",
+  Version = "1.2",
+  Description = [[Texture sequence of an extreme ultraviolet (EUV) simulation during, 
+    the CME]],
+  Author = "CCMC, OpenSpace team",
+  URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+  License = "CC-BY"
+}

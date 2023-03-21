@@ -1,10 +1,10 @@
-local helper = asset.require('util/slide_deck_helper')
+local helper = asset.require("util/slide_deck_helper")
 local deck = nil
 
 asset.onInitialize(function ()
   deck = helper.createDeck("example", {
     UseRadiusAzimuthElevation = true,
-    RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
+    RadiusAzimuthElevation = { 1.0, 0.0, 0.0 }, -- use for dome
     UsePerspectiveProjection = true,
     FaceCamera = true,
     Scale = 0.7
@@ -15,22 +15,51 @@ asset.onInitialize(function ()
 
   local interpolationDuration = 0.5
 
-  function nextSlide()
+  -- Add global functions for controlling slide deck and bind to keys
+  rawset(_G, "nextSlide", function()
     helper.goToNextSlide(deck, interpolationDuration)
-  end
+  end)
 
-  function previousSlide()
+  rawset(_G, "previousSlide", function()
     helper.goToPreviousSlide(deck, interpolationDuration)
-  end
+  end)
 
-  function toggleSlides()
+  rawset(_G, "toggleSlides", function()
     helper.toggleSlides(deck, interpolationDuration)
-  end
+  end)
 
   helper.setCurrentSlide(deck, 1)
-  openspace.bindKey("KP_6", "nextSlide()", "Next slide", "Next slide", "/Slides")
-  openspace.bindKey("KP_4", "previousSlide()", "Previous slide", "Previous slide", "/Slides")
-  openspace.bindKey("KP_0", "toggleSlides()", "Toggle slides", "Toggle slides", "/Slides")
+
+  openspace.action.registerAction({
+    Identifier = "slide_deck.prevslide",
+    Name = "Previous slide",
+    Command = "previousSlide()",
+    Documentation = "Previous slide",
+    GuiPath = "/Slides",
+    IsLocal = false
+  })
+  openspace.bindKey("KP_4", "slide_deck.prevslide");
+
+  openspace.action.registerAction({
+    Identifier = "slide_deck.nextslide",
+    Name = "Next slide",
+    Command = "nextSlide()",
+    Documentation = "Next slide",
+    GuiPath = "/Slides",
+    IsLocal = false
+  })
+  openspace.bindKey("KP_6", "slide_deck.nextslide")
+
+  openspace.action.registerAction({
+    Identifier = "slide_deck.toggleslides",
+    Name = "Toggle slides",
+    Command = "toggleSlides()",
+    Documentation = "Toggle slides",
+    GuiPath = "/Slides",
+    IsLocal = false
+  })
+  openspace.bindKey("KP_0", "slide_deck.toggleslides")
+
 end)
 
 

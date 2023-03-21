@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,16 +32,14 @@
 #include <openspace/scripting/scriptengine.h>
 
 namespace {
-    constexpr const char* PropertyKey = "property";
-    //constexpr const char* ValueKey = "value";
-    constexpr const char* _loggerCat = "TriggerPropertyTopic";
+    constexpr std::string_view _loggerCat = "TriggerPropertyTopic";
 } // namespace
 
 namespace openspace {
 
 void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
     try {
-        const std::string& propertyKey = json.at(PropertyKey).get<std::string>();
+        const std::string& propertyKey = json.at("property").get<std::string>();
         global::scriptEngine->queueScript(
             fmt::format(
                 "openspace.setPropertyValueSingle(\"{}\", nil)", propertyKey

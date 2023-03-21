@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
@@ -33,6 +34,22 @@
 #include "scriptscheduler_lua.inl"
 
 namespace {
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "This enables or disables the ScriptScheduler. If disabled, no scheduled scripts "
+        "will be executed. If enabled, scheduled scripts will be executed at their given "
+        "time as normal"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
+        "ShouldRunAllTimeJump",
+        "Should Run All Time Jump",
+        "If 'true': In a time jump, all scheduled scripts between the old time and the "
+        "new time is executed. If 'false': In a time jump, no scripts scheduled between "
+        "the new time and the old time is executed"
+    };
+
     struct [[codegen::Dictionary(ScheduledScript)]] Parameters {
         // The time at which, when the in game time passes it, the two scripts will
         // be executed. If the traversal is forwards (towards + infinity), the
@@ -40,7 +57,7 @@ namespace {
         // executed instead
         std::string time;
 
-        // The Lua script that will be executed when the specified time is passed 
+        // The Lua script that will be executed when the specified time is passed
         // independent of its direction. This script will be executed before the
         // specific scripts if both versions are specified
         std::optional<std::string> script;
@@ -52,7 +69,11 @@ namespace {
         // The Lua script that is executed when OpenSpace passes the time in a
         // backward direction
         std::optional<std::string> backwardScript;
+
+        // The group that this script belongs to, default group is 0
+        std::optional<int> group;
     };
+
 #include "scriptscheduler_codegen.cpp"
 } // namespace
 
@@ -62,12 +83,17 @@ documentation::Documentation ScriptScheduler::Documentation() {
     // @TODO (abock, 2021-03-25)  This is not really correct. This function currently
     // returns the documentation for the ScheduledScript, not for the ScriptScheduler
     // itself. This should be cleaned up a bit
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_scheduledscript";
-    return doc;
+    return codegen::doc<Parameters>("core_scheduledscript");
 }
 
-using namespace openspace::interaction;
+ScriptScheduler::ScriptScheduler()
+    : properties::PropertyOwner({ "ScriptScheduler" })
+    , _enabled(EnabledInfo, true)
+    , _shouldRunAllTimeJump(ShouldRunAllTimeJumpInfo, true)
+{
+    addProperty(_enabled);
+    addProperty(_shouldRunAllTimeJump);
+}
 
 ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
@@ -76,6 +102,7 @@ ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dict)
     forwardScript = p.forwardScript.value_or(forwardScript);
     backwardScript = p.backwardScript.value_or(backwardScript);
     universalScript = p.script.value_or(universalScript);
+    group = p.group.value_or(group);
 }
 
 void ScriptScheduler::loadScripts(std::vector<ScheduledScript> scheduledScripts) {
@@ -89,36 +116,23 @@ void ScriptScheduler::loadScripts(std::vector<ScheduledScript> scheduledScripts)
         }
     );
 
-    // Move the scheduled scripts into their SOA alignment
-    // For the forward scripts, this is the forwards direction
-    // For the backward scripts, we insert them in the opposite order so that we can still
-    // return forward iterators to them in the progressTo method
     for (ScheduledScript& script : scheduledScripts) {
-        _timings.push_back(script.time);
-
-        std::string forward =
-            script.universalScript.empty() ?
-            std::move(script.forwardScript) :
-            std::move(script.universalScript) + ';' + std::move(script.forwardScript);
-        _forwardScripts.push_back(forward);
-
-        std::string backward =
-            script.universalScript.empty() ?
-            std::move(script.backwardScript) :
-            std::move(script.universalScript) + ';' + std::move(script.backwardScript);
-        _backwardScripts.insert(_backwardScripts.begin(), backward);
+        _scripts.push_back(script);
     }
+
+    // Re-sort so it is always in sorted order in regards to time
+    std::stable_sort(
+        _scripts.begin(),
+        _scripts.end(),
+        [](const ScheduledScript& lhs, const ScheduledScript& rhs) {
+            return lhs.time < rhs.time;
+        }
+    );
 
     // Ensure _currentIndex and _currentTime is accurate after new scripts was added
     const double lastTime = _currentTime;
     rewind();
     progressTo(lastTime);
-
-    ghoul_assert(
-        (_timings.size() == _forwardScripts.size()) &&
-        (_timings.size() == _backwardScripts.size()),
-        "The SOA data structure has been mistreated and has different number of values"
-    );
 }
 
 void ScriptScheduler::rewind() {
@@ -126,18 +140,34 @@ void ScriptScheduler::rewind() {
     _currentTime = -std::numeric_limits<double>::max();
 }
 
-void ScriptScheduler::clearSchedule() {
-    rewind();
-    _timings.clear();
-    _forwardScripts.clear();
-    _backwardScripts.clear();
+void ScriptScheduler::clearSchedule(std::optional<int> group) {
+    if (group.has_value()) {
+        for (auto it = _scripts.begin(); it < _scripts.end();) {
+            if (it->group == *group) {
+                it = _scripts.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+
+        // Ensure _currentIndex and _currentTime is accurate after scripts was removed
+        const double lastTime = _currentTime;
+        rewind();
+        progressTo(lastTime);
+    }
+    else {
+        rewind();
+        _scripts.clear();
+    }
 }
 
-std::pair<ScriptScheduler::ScriptIt, ScriptScheduler::ScriptIt>
-ScriptScheduler::progressTo(double newTime)
-{
-    if (newTime == _currentTime) {
-        return { _forwardScripts.end(), _forwardScripts.end() };
+std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
+    std::vector<std::string> result;
+    if (!_enabled || newTime == _currentTime || _scripts.empty()) {
+        // Update the new time
+        _currentTime = newTime;
+        return result;
     }
 
     if (newTime > _currentTime) {
@@ -145,143 +175,129 @@ ScriptScheduler::progressTo(double newTime)
         // vector that is still smaller than the newTime
         size_t prevIndex = _currentIndex;
         const auto it = std::upper_bound(
-            _timings.begin() + prevIndex, // We only need to start at the previous time
-            _timings.end(),
-            newTime
+            _scripts.begin() + prevIndex, // We only need to start at the previous time
+            _scripts.end(),
+            newTime,
+            [](const double value, const ScheduledScript& item) {
+                return value < item.time;
+            }
          );
 
         // How many values did we pass over?
-        const ptrdiff_t n = std::distance(_timings.begin() + prevIndex, it);
+        const ptrdiff_t n = std::distance(_scripts.begin() + prevIndex, it);
         _currentIndex = static_cast<int>(prevIndex + n);
 
         // Update the new time
         _currentTime = newTime;
 
-        return {
-            _forwardScripts.begin() + prevIndex,
-            _forwardScripts.begin() + _currentIndex
-        };
+        // Construct result
+        for (auto iter = _scripts.begin() + prevIndex;
+            iter < (_scripts.begin() + _currentIndex);
+            ++iter)
+        {
+            std::string script = iter->universalScript.empty() ?
+                iter->forwardScript :
+                iter->universalScript + "; " + iter->forwardScript;
+            result.push_back(script);
+        }
+
+        return result;
     }
     else {
         // Moving backward in time; the need to find the lowest entry that is still bigger
         // than the newTime
         const size_t prevIndex = _currentIndex;
         const auto it = std::lower_bound(
-            _timings.begin(),
-            _timings.begin() + prevIndex, // We can stop at the previous time
-            newTime
+            _scripts.begin(),
+            _scripts.begin() + prevIndex, // We can stop at the previous time
+            newTime,
+            [](const ScheduledScript& item, const double value) {
+                return item.time < value;
+            }
         );
 
         // How many values did we pass over?
-        const ptrdiff_t n = std::distance(it, _timings.begin() + prevIndex);
+        const ptrdiff_t n = std::distance(it, _scripts.begin() + prevIndex);
         _currentIndex = static_cast<int>(prevIndex - n);
 
         // Update the new time
         _currentTime = newTime;
 
-        return {
-            _backwardScripts.begin() + (_timings.size() - prevIndex),
-            _backwardScripts.begin() + (_timings.size() - _currentIndex)
-        };
+        // Construct result
+        auto start = _scripts.begin() + prevIndex - 1;
+        auto end = it;
+        for (auto iter = start; iter != _scripts.end() && iter >= end; --iter) {
+            std::string script = iter->universalScript.empty() ?
+                iter->backwardScript :
+                iter->universalScript + "; " + iter->backwardScript;
+            result.push_back(script);
+
+            if (iter == _scripts.begin()) {
+                break;
+            }
+        }
+
+        return result;
     }
 }
 
-void ScriptScheduler::setTimeReferenceMode(KeyframeTimeRef refType) {
+void ScriptScheduler::setTimeReferenceMode(interaction::KeyframeTimeRef refType) {
     _timeframeMode = refType;
-}
-
-void ScriptScheduler::triggerPlaybackStart() {
-    _playbackModeEnabled = true;
-}
-
-void ScriptScheduler::stopPlayback() {
-    _playbackModeEnabled = false;
 }
 
 double ScriptScheduler::currentTime() const {
     return _currentTime;
 }
 
-std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() const {
-    std::vector<ScheduledScript> result;
-    for (size_t i = 0; i < _timings.size(); ++i) {
-        ScheduledScript script;
-        script.time = _timings[i];
-        script.forwardScript = _forwardScripts[i];
-        script.backwardScript = _backwardScripts[i];
+void ScriptScheduler::setCurrentTime(double time) {
+    // Ensure _currentIndex and _currentTime is accurate after time jump
+    std::vector<std::string> scheduledScripts = progressTo(time);
 
-        result.push_back(std::move(script));
+    if (_shouldRunAllTimeJump) {
+        // Queue all scripts for the time jump
+        for (const std::string& script : scheduledScripts) {
+            global::scriptEngine->queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+    }
+}
+
+std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts(
+                                                           std::optional<int> group) const
+{
+    std::vector<ScheduledScript> result;
+    for (const ScheduledScript& script : _scripts) {
+        if (!group.has_value() || script.group == *group) {
+            result.push_back(script);
+        }
     }
     return result;
 }
 
 void ScriptScheduler::setModeApplicationTime() {
-    _timeframeMode = KeyframeTimeRef::Relative_applicationStart;
+    _timeframeMode = interaction::KeyframeTimeRef::Relative_applicationStart;
 }
 
 void ScriptScheduler::setModeRecordedTime() {
-    _timeframeMode = KeyframeTimeRef::Relative_recordedStart;
+    _timeframeMode = interaction::KeyframeTimeRef::Relative_recordedStart;
 }
 
 void ScriptScheduler::setModeSimulationTime() {
-    _timeframeMode = KeyframeTimeRef::Absolute_simTimeJ2000;
+    _timeframeMode = interaction::KeyframeTimeRef::Absolute_simTimeJ2000;
 }
 
 LuaLibrary ScriptScheduler::luaLibrary() {
     return {
         "scriptScheduler",
         {
-            {
-                "loadFile",
-                &luascriptfunctions::loadFile,
-                {},
-                "string",
-                "Load timed scripts from a Lua script file that returns a list of "
-                "scheduled scripts."
-            },
-            {
-                "loadScheduledScript",
-                &luascriptfunctions::loadScheduledScript,
-                {},
-                "string, string, (string, string)",
-                "Load a single scheduled script. The first argument is the time at which "
-                "the scheduled script is triggered, the second argument is the script "
-                "that is executed in the forward direction, the optional third argument "
-                "is the script executed in the backwards direction, and the optional "
-                "last argument is the universal script, executed in either direction."
-
-            },
-            {
-                "setModeApplicationTime",
-                &luascriptfunctions::setModeApplicationTime,
-                {},
-                "",
-                "Sets the time reference for scheduled scripts to application time "
-                "(seconds since OpenSpace application started)."
-            },
-            {
-                "setModeRecordedTime",
-                &luascriptfunctions::setModeRecordedTime,
-                {},
-                "",
-                "Sets the time reference for scheduled scripts to the time since the "
-                "recording was started (the same relative time applies to playback)."
-            },
-            {
-                "setModeSimulationTime",
-                &luascriptfunctions::setModeSimulationTime,
-                {},
-                "",
-                "Sets the time reference for scheduled scripts to the simulated "
-                "date & time (J2000 epoch seconds)."
-            },
-            {
-                "clear",
-                &luascriptfunctions::clear,
-                {},
-                "",
-                "Clears all scheduled scripts."
-            },
+            codegen::lua::LoadFile,
+            codegen::lua::LoadScheduledScript,
+            codegen::lua::SetModeApplicationTime,
+            codegen::lua::SetModeRecordedTime,
+            codegen::lua::SetModeSimulationTime,
+            codegen::lua::Clear
         }
     };
 }

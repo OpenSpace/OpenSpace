@@ -1,24 +1,34 @@
-local assetHelper = asset.require('util/asset_helper')
+local spacing = {
+  Type = "DashboardItemSpacing",
+  Identifier = "NewHorizonsSpacing",
+  GuiName = "New Horizons Spacing",
+  Spacing = 25
+}
 
-assetHelper.registerDashboardItems(asset, {
-  {
-    Type = "DashboardItemSpacing",
-    Identifier = "NewHorizonsSpacing",
-    GuiName = "New Horizons Spacing",
-    Spacing = 25
-  },
-  {
-    Type = "DashboardItemDistance",
-    Identifier = "NewHorizonsPlutoDistance",
-    GuiName = "New Horizons Pluto Distance",
-    SourceType = "Node",
-    SourceNodeName = "NewHorizons",
-    DestinationType = "Node Surface",
-    DestinationNodeName = "PlutoProjection"
-  },
-  {
-    Type = "DashboardItemInstruments",
-    Identifier = "NewHorizonsInstruments",
-    GuiName = "NewHorizons Instruments"
-  }
-})
+local distance = {
+  Type = "DashboardItemDistance",
+  Identifier = "NewHorizonsPlutoDistance",
+  GuiName = "New Horizons Pluto Distance",
+  SourceType = "Node",
+  SourceNodeName = "NewHorizons",
+  DestinationType = "Node Surface",
+  DestinationNodeName = "PlutoProjection"
+}
+
+local instruments = {
+  Type = "DashboardItemInstruments",
+  Identifier = "NewHorizonsInstruments",
+  GuiName = "NewHorizons Instruments"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(spacing)
+  openspace.dashboard.addDashboardItem(distance)
+  openspace.dashboard.addDashboardItem(instruments)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(instruments)
+  openspace.dashboard.removeDashboardItem(distance)
+  openspace.dashboard.removeDashboardItem(spacing)
+end)

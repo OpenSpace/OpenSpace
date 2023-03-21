@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,10 +30,19 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char _loggerCat[] = "TextureComponent";
+    constexpr std::string_view _loggerCat = "TextureComponent";
 } // namespace
 
 namespace openspace {
+
+TextureComponent::TextureComponent(int nDimensions)
+    : _nDimensions(nDimensions)
+{
+    ghoul_assert(
+        _nDimensions >= 1 && _nDimensions <= 4,
+        "nDimensions must be 1, 2, or 3"
+    );
+}
 
 const ghoul::opengl::Texture* TextureComponent::texture() const {
     return _texture.get();
@@ -43,11 +52,11 @@ ghoul::opengl::Texture* TextureComponent::texture() {
     return _texture.get();
 }
 
-void TextureComponent::setFilterMode(Texture::FilterMode filterMode) {
+void TextureComponent::setFilterMode(ghoul::opengl::Texture::FilterMode filterMode) {
     _filterMode = filterMode;
 }
 
-void TextureComponent::setWrapping(Texture::WrappingMode wrapping) {
+void TextureComponent::setWrapping(ghoul::opengl::Texture::WrappingMode wrapping) {
     _wrappingMode = wrapping;
 }
 
@@ -82,11 +91,12 @@ void TextureComponent::loadFromFile(const std::filesystem::path& path) {
         using namespace ghoul::io;
         using namespace ghoul::opengl;
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(path.string()).string()
+            absPath(path.string()).string(),
+            _nDimensions
         );
 
         if (texture) {
-            LDEBUG(fmt::format("Loaded texture from '{}'", absPath(path.string())));
+            LDEBUG(fmt::format("Loaded texture from {}", absPath(path.string())));
             _texture = std::move(texture);
 
             _textureFile = std::make_unique<ghoul::filesystem::File>(path);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@ uniform uint paddedBrickDim_#{id};
 uniform ivec3 nBricksInAtlas_#{id};
 uniform ivec3 atlasSize_#{id};
 uniform float stepSizeCoefficient_#{id} = 1.0;
+
 
 void atlasMapDataFunction_#{id}(ivec3 brickCoords, inout uint atlasIntCoord,
                                 inout uint level)

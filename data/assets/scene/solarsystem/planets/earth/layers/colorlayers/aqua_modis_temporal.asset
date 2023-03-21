@@ -1,44 +1,54 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "Aqua_Modis_Temporal",
   Name = "Aqua Modis (Temporal)",
+  Enabled = asset.enabled,
   Type = "TemporalTileLayer",
-  FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-    "MODIS_Aqua_CorrectedReflectance_TrueColor",
-    "2002-07-04",
-    "Yesterday",
-    "1d",
-    "250m",
-    "jpg"
-  ),
-  Description = [[ Temporal coverage: 03 July 2002 - Present. True Color: Red = Band 1,
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2002-07-04",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "MODIS_Aqua_CorrectedReflectance_TrueColor",
+      "250m",
+      "jpg"
+    )
+  },
+  Description = [[Temporal coverage: 03 July 2002 - Present. True Color: Red = Band 1,
     Green = Band 4, Blue = Band 3. These images are called true-color or natural color
     because this combination of wavelengths is similar to what the human eye would see.
     The images are natural-looking images of land surface, oceanic and atmospheric
     features. The downside of this set of bands is that they tend to produce a hazy image.
     The MODIS Corrected Reflectance imagery is available only as near real-time imagery.
-    The imagery can be visualized in Worldview and the Global Imagery Browse Services 
+    The imagery can be visualized in Worldview and the Global Imagery Browse Services
     (GIBS). The sensor resolution is 500 m and 250 m (Bands 1 and 2 have a sensor
     resolution of 250 m, Bands 3 - 7 have a sensor resolution of 500m, and Bands 8 - 36
     are 1 km. Band 1 is used to sharpen Band 3, 4, 6, and 7), imagery resolution is 250 m,
     and the temporal resolution is daily. (Description from NASA Worldview)]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Aqua Modis (Temporal)",
-  Version = "1.0",
-  Description = [[ GIBS hosted layer created with
-    openspace.globebrowsing.createTemporalGibsGdalXml ]],
+  Version = "1.1",
+  Description = "GIBS hosted layer",
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
-  License = "NASA",
-  Identifiers = {"Aqua_Modis_Temporal"}
+  License = "NASA"
 }

@@ -1,0 +1,62 @@
+local globeIdentifier = asset.require("scene/solarsystem/planets/earth/earth.asset").Earth.Identifier
+
+local path = asset.syncedResource({
+  Name = "Earth Textures Climate",
+  Type = "HttpSynchronization",
+  Identifier = "earth_textures_climate",
+  Version = 1
+})
+
+local layer_prototype = {
+  Identifier = "ERA5_Land_HighRes_Monthly_2M_Temperature_Temporal_prototype",
+  Name = "ERA5 Land HighRes Monthly 2M Temperature (Temporal) [Prototype]",
+  Type = "TemporalTileLayer",
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "1981-01-01",
+      End = "1990-10-01"
+    },
+    TemporalResolution = "1M",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = path .. "${OpenSpaceTimeId}-land.png"
+  },
+  Interpolation = true,
+  Colormap = path .. "rainbow.png",
+  Description = "Temporal coverage: 01 Jan 1981 - 31 Dec 2020"
+}
+
+local layer_folder = {
+  Identifier = "ERA5_Land_HighRes_Monthly_2M_Temperature_Temporal_folder",
+  Name = "ERA5 Land HighRes Monthly 2M Temperature (Temporal) [Folder]",
+  Type = "TemporalTileLayer",
+  Mode = "Folder",
+  Folder = {
+    Folder = path,
+    Format = "%Y-%m-%d-land.png"
+  },
+  Interpolation = true,
+  Colormap = path .. "rainbow.png",
+  Description = "Temporal coverage: 01 Jan 1981 - 31 Dec 2020"
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_prototype)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_folder)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_folder)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_prototype)
+end)
+
+asset.export("layer", layer_prototype)
+
+asset.meta = {
+  Name = "Climate Earth Layers",
+  Version = "1.0",
+  Description = "ERA5 data",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

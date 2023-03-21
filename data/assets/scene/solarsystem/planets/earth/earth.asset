@@ -1,6 +1,11 @@
-local transforms = asset.require('./transforms')
-local assetHelper = asset.require('util/asset_helper')
-local labelsPath = asset.require('./earth_globelabels').LabelsPath
+local transforms = asset.require("./transforms")
+
+local labelsPath = asset.syncedResource({
+  Name = "Earth Labels",
+  Type = "HttpSynchronization",
+  Identifier = "earth_labels",
+  Version = 1
+})
 
 -- local earthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
 local earthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
@@ -23,21 +28,16 @@ local Earth = {
       }
     },
     Labels = {
-      Enable = false,
-      FileName = labelsPath .. "/Earth.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 40.0,
-      LabelsSize = 4.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 300000.0,
-      FadeOutStartingDistance = 10000.0,
-      LabelsForceDomeRendering = true,
-      LabelsDistanceEPS = 1500000.0,
-      LabelsColor = { 1.0, 0.0, 0.0 }
+      Enabled = false,
+      FileName = labelsPath .. "Earth.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 5.0,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 10000.0, 300000.0 },
+      DistanceEPS = 1500000.0,
+      Color = { 1.0, 0.0, 0.0 }
     }
   },
   Tag = { "planet_solarSystem", "planet_terrestrial" },
@@ -53,21 +53,17 @@ local EarthLabel = {
   Parent = Earth.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
-    LabelText = "Earth",
-    FontSize = 100.0,
-    LabelSize = 8.6,
-    LabelMaxSize = 100.0,
-    LabelMinSize = 1.0,
-    LabelOrientationOption = "Camera View Direction",
+    Type = "RenderableLabel",
+    Text = "Earth",
+    FontSize = 70.0,
+    Size = 8.50,
+    MinMaxSize = { 1, 50 },
+    OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeStartUnit = "au",
-    FadeStartDistance = 1.5,
-    FadeStartSpeed = 1.0,
-    FadeEndUnit = "au",
-    FadeEndDistance = 15.0,
-    FadeEndSpeed = 25.0
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 30.0 },
+    FadeWidths = { 1.0, 40.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
@@ -77,15 +73,59 @@ local EarthLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Earth, EarthLabel })
+local focus_earth = {
+  Identifier = "os.solarsystem.earth.focus",
+  Name = "Focus on Earth",
+  Command = [[
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth'); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+  ]],
+  Documentation = "Set camera focus on the Earth",
+  GuiPath = "/Solar System/Earth",
+  isLocal = false
+}
+
+local toggle_earth_satellitetrails = {
+  Identifier = "os.solarsystem.earth.togglesatellitetrails",
+  Name = "Toggle satellite trails",
+  Command = [[
+    local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); 
+    for _,v in pairs(list) do 
+      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+    end
+  ]],
+  Documentation = "Toggle trails on or off for satellites around Earth",
+  GuiPath = "/Solar System/Earth",
+  isLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Earth)
+  openspace.addSceneGraphNode(EarthLabel)
+
+  openspace.action.registerAction(focus_earth)
+  openspace.action.registerAction(toggle_earth_satellitetrails)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(toggle_earth_satellitetrails)
+  openspace.action.removeAction(focus_earth)
+
+  openspace.removeSceneGraphNode(EarthLabel)
+  openspace.removeSceneGraphNode(Earth)
+end)
+
+asset.export(Earth)
+asset.export(EarthLabel)
+
 
 
 asset.meta = {
   Name = "Earth",
-  Version = "1.0",
-  Description = [[ Earth is a special planet with special needs ]],
+  Version = "1.1",
+  Description = "Earth is a special planet with special needs",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Earth", "EarthLabel"}
+  License = "MIT license"
 }

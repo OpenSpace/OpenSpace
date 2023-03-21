@@ -1,46 +1,52 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
-local textures = asset.require('./sun_textures').TexturesPath
 asset.require("spice/base")
 
 
+local textures = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Sun textures",
+  Identifier = "sun_textures",
+  Version = 4
+})
 
 local SunGlare = {
   Identifier = "SunGlare",
-  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SunIAU.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 1.3*10^10.5,
     Origin = "Center",
     Billboard = true,
-    Texture = textures .. "/halo.png",
+    Texture = textures .. "halo.png",
     BlendMode = "Additive",
     Opacity = 0.65,
-    RenderableType = "PreDeferredTransparency"
-  },
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "SUN",
-      Observer = "SSB"
-    }
+    RenderBinMode = "PreDeferredTransparent"
   },
   GUI = {
     Name = "Sun Glare",
     Path = "/Solar System/Sun",
-    Description = [[ Sun glare effect. Enabled by default instead of sun orb.]]
+    Description = "Sun glare effect. Enabled by default instead of sun orb"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { SunGlare })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SunGlare)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SunGlare)
+end)
+
+asset.export(SunGlare)
+
+
 
 
 asset.meta = {
   Name = "Sun Glare",
-  Version = "1.0",
-  Description = [[ Image plane with sun glare effect.]],
+  Version = "1.1",
+  Description = "Image plane with sun glare effect",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"SunGlare"}
+  License = "MIT license"
 }

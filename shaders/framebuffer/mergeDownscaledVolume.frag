@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,14 +24,26 @@
 
 #version __CONTEXT__
 
+in vec2 texCoord;
 layout (location = 0) out vec4 finalColor;
 
 uniform sampler2D downscaledRenderedVolume;
 uniform sampler2D downscaledRenderedVolumeDepth;
-
-in vec2 texCoord;
+uniform vec4 viewport;
+uniform vec2 resolution;
 
 void main() {
-    finalColor   = texture(downscaledRenderedVolume, texCoord);
-    gl_FragDepth = texture(downscaledRenderedVolumeDepth, texCoord).r;
+  // Modify the texCoord based on the Viewport and Resolution. This modification is
+  // necessary in case of side-by-side stereo as we only want to access the part of the
+  // feeding texture that we are currently responsible for.  Otherwise we would map the
+  // entire feeding texture into our half of the result texture, leading to a doubling of
+  // the "missing" half.  If you don't believe me, load a configuration file with the
+  // side_by_side stereo mode enabled, disable FXAA, and remove this modification.
+  // The same calculation is done in the HDR resolving shader
+  vec2 st = texCoord;
+  st.x = st.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
+  st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
+
+  finalColor = texture(downscaledRenderedVolume, st);
+  gl_FragDepth = texture(downscaledRenderedVolumeDepth, st).r;
 }

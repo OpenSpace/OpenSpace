@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,11 +33,12 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* MainTemplateFilename = "${WEB}/kameleondocumentation/main.hbs";
-    constexpr const char* HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
-    constexpr const char* JsFilename = "${WEB}/kameleondocumentation/script.js";
-    constexpr const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
-    constexpr const char* CssFilename = "${WEB}/common/style.css";
+    constexpr std::string_view MainTemplateFilename =
+        "${WEB}/kameleondocumentation/main.hbs";
+    constexpr std::string_view HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
+    constexpr std::string_view JsFilename = "${WEB}/kameleondocumentation/script.js";
+    constexpr std::string_view BootstrapFilename = "${WEB}/common/bootstrap.min.css";
+    constexpr std::string_view CssFilename = "${WEB}/common/style.css";
 
     struct [[codegen::Dictionary(KameleonDocumentationTask)]] Parameters {
         // The CDF file to extract data from
@@ -52,9 +53,7 @@ namespace {
 namespace openspace::kameleonvolume {
 
 documentation::Documentation KameleonDocumentationTask::documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "kameleon_documentation_task";
-    return doc;
+    return codegen::doc<Parameters>("kameleon_documentation_task");
 }
 
 KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,19 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___OSTIME___H__
-#define __OPENSPACE_UI_LAUNCHER___OSTIME___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___TIMEDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___TIMEDIALOG___H__
 
 #include <QDialog>
 
 #include <openspace/scene/profile.h>
 
+class QCheckBox;
 class QComboBox;
 class QDateTimeEdit;
 class QLabel;
 class QLineEdit;
 
-class TimeDialog : public QDialog {
+class TimeDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -44,7 +45,7 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    TimeDialog(openspace::Profile& profile, QWidget* parent);
+    TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>* time);
 
 private slots:
     void enableAccordingToType(int);
@@ -54,8 +55,8 @@ private:
     void createWidgets();
     void enableFormatForAbsolute(bool enableAbs);
 
-    openspace::Profile& _profile;
-    openspace::Profile::Time _data;
+    std::optional<openspace::Profile::Time>* _time = nullptr;
+    openspace::Profile::Time _timeData;
     bool _initializedAsAbsolute = true;
 
     QComboBox* _typeCombo = nullptr;
@@ -63,6 +64,7 @@ private:
     QDateTimeEdit* _absoluteEdit = nullptr;
     QLabel* _relativeLabel = nullptr;
     QLineEdit* _relativeEdit = nullptr;
+    QCheckBox* _startPaused = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___OSTIME___H__
+#endif // __OPENSPACE_UI_LAUNCHER___TIMEDIALOG___H__

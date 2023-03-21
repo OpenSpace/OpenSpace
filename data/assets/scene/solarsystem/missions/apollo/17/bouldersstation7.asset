@@ -1,21 +1,12 @@
-local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
-local asset_helper = asset.require('util/asset_helper')
-local moon_asset = asset.require('scene/solarsystem/planets/earth/moon/moon')
-local models = asset.require('./boulder_models').models
+local sun = asset.require("scene/solarsystem/sun/sun")
+local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sun_transforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
-  {
-    Identifier = "Camera",
-    Type = "CameraLightSource",
-    Intensity = 0.5
-  }
-}
+local models = asset.syncedResource({
+  Name = "Apollo Boulders Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_boulders",
+  Version = 2
+})
 
 local Station7BoulderHolder = {
   Identifier = "Station_7_Boulder",
@@ -47,13 +38,16 @@ local Station7BoulderModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    Geometry = {{
-      Type = "MultiModelGeometry",
-      GeometryFile = models .. "/b7model.obj",
-      ColorTexture = models .. "/b7model_u1_v1.jpeg"
-    }},
+    GeometryFile = models .. "b7model.obj",
     RotationVector = { 1.945950,274.378387,212.903214 },
-    LightSources = LightSources,
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
     PerformShading = false,
     DisableFaceCulling = true
   },
@@ -63,6 +57,15 @@ local Station7BoulderModel = {
   }
 }
 
-asset_helper.registerSceneGraphNodesAndExport(asset, {
-  Station7BoulderHolder, Station7BoulderModel
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Station7BoulderHolder)
+  openspace.addSceneGraphNode(Station7BoulderModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Station7BoulderModel)
+  openspace.removeSceneGraphNode(Station7BoulderHolder)
+end)
+
+asset.export(Station7BoulderHolder)
+asset.export(Station7BoulderModel)

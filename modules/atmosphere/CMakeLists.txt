@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   rendering/atmospheredeferredcaster.h
@@ -40,30 +40,17 @@ set(SHADER_FILES
   shaders/atmosphere_common.glsl
   shaders/atmosphere_deferred_vs.glsl 
   shaders/atmosphere_deferred_fs.glsl
-  shaders/deltaE_calc_vs.glsl
+  shaders/calculation_gs.glsl
+  shaders/calculation_vs.glsl
   shaders/deltaE_calc_fs.glsl
-  shaders/deltaJ_calc_vs.glsl
   shaders/deltaJ_calc_fs.glsl
-  shaders/deltaJ_calc_gs.glsl
-  shaders/deltaS_calc_vs.glsl
-  shaders/deltaS_calc_gs.glsl
   shaders/deltaS_calc_fs.glsl
-  shaders/deltaS_sup_calc_vs.glsl
-  shaders/deltaS_sup_calc_gs.glsl
   shaders/deltaS_sup_calc_fs.glsl
-  shaders/inScattering_calc_vs.glsl
-  shaders/inScattering_calc_gs.glsl
   shaders/inScattering_calc_fs.glsl
-  shaders/inScattering_sup_calc_vs.glsl
-  shaders/inScattering_sup_calc_gs.glsl
   shaders/inScattering_sup_calc_fs.glsl
-  shaders/irradiance_calc_vs.glsl
   shaders/irradiance_calc_fs.glsl
-  shaders/irradiance_final_vs.glsl
   shaders/irradiance_final_fs.glsl
-  shaders/irradiance_sup_calc_vs.glsl
   shaders/irradiance_sup_calc_fs.glsl
-  shaders/transmittance_calc_vs.glsl
   shaders/transmittance_calc_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})

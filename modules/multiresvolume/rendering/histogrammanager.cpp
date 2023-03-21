@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -121,7 +121,7 @@ std::vector<float> HistogramManager::readValues(TSP* tsp, unsigned int brickInde
     return voxelValues;
 }
 
-bool HistogramManager::loadFromFile(const std::string& filename) {
+bool HistogramManager::loadFromFile(const std::filesystem::path& filename) {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
         return false;
@@ -151,7 +151,7 @@ bool HistogramManager::loadFromFile(const std::string& filename) {
     return true;
 }
 
-bool HistogramManager::saveToFile(const std::string& filename) {
+bool HistogramManager::saveToFile(const std::filesystem::path& filename) {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
         return false;

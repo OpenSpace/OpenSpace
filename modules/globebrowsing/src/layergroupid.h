@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,155 +26,234 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 
 #include <ghoul/misc/stringconversion.h>
+#include <array>
 #include <string>
 
-namespace openspace::globebrowsing::layergroupid {
+namespace openspace::globebrowsing::layers {
 
-static constexpr const int NUM_LAYER_GROUPS = 5;
-static constexpr const char* LAYER_GROUP_IDENTIFIERS[NUM_LAYER_GROUPS] = {
-    "HeightLayers",
-    "ColorLayers",
-    "Overlays",
-    "NightLayers",
-    "WaterMasks"
+struct Group {
+    enum class ID {
+        HeightLayers = 0,
+        ColorLayers,
+        Overlays,
+        NightLayers,
+        WaterMasks,
+        Unknown
+    };
+
+    ID id;
+    std::string_view identifier;
+    std::string_view name;
 };
 
-static constexpr const char* LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
-    "Height Layers",
-    "Color Layers",
-    "Overlays",
-    "Night Layers",
-    "Water Masks"
+constexpr std::array<Group, 5> Groups = {
+    Group {
+        .id = Group::ID::HeightLayers,
+        .identifier = "HeightLayers",
+        .name = "Height Layers"
+    },
+    Group {
+        .id = Group::ID::ColorLayers,
+        .identifier = "ColorLayers",
+        .name = "Color Layers"
+    },
+    Group {
+        .id = Group::ID::Overlays,
+        .identifier = "Overlays",
+        .name = "Overlays"
+    },
+    Group {
+        .id = Group::ID::NightLayers,
+        .identifier = "NightLayers",
+        .name = "Night Layers"
+    },
+    Group {
+        .id = Group::ID::WaterMasks,
+        .identifier = "WaterMasks",
+        .name = "Water Masks"
+    }
 };
 
-enum GroupID {
-    HeightLayers,
-    ColorLayers,
-    Overlays,
-    NightLayers,
-    WaterMasks,
-    Unknown,
+
+
+struct Layer {
+    enum class ID {
+        DefaultTileLayer = 0,
+        SingleImageTileLayer,
+        ImageSequenceTileLayer,
+        SizeReferenceTileLayer,
+        TemporalTileLayer,
+        TileIndexTileLayer,
+        ByIndexTileLayer,
+        ByLevelTileLayer,
+        SolidColor,
+        SpoutImageTileLayer,
+        Unknown
+    };
+
+    ID id;
+    std::string_view identifier;
 };
 
-static constexpr const int NUM_LAYER_TYPES = 8;
-static constexpr const char* LAYER_TYPE_NAMES[NUM_LAYER_TYPES] = {
-    "DefaultTileLayer",
-    "SingleImageTileLayer",
-    "SizeReferenceTileLayer",
-    "TemporalTileLayer",
-    "TileIndexTileLayer",
-    "ByIndexTileLayer",
-    "ByLevelTileLayer",
-    "SolidColor",
+constexpr std::array<Layer, 10> Layers = {
+    Layer {
+        .id = Layer::ID::DefaultTileLayer,
+        .identifier = "DefaultTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::SingleImageTileLayer,
+        .identifier = "SingleImageTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::ImageSequenceTileLayer,
+        .identifier = "ImageSequenceTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::SizeReferenceTileLayer,
+        .identifier = "SizeReferenceTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::TemporalTileLayer,
+        .identifier = "TemporalTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::TileIndexTileLayer,
+        .identifier = "TileIndexTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::ByIndexTileLayer,
+        .identifier = "ByIndexTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::ByLevelTileLayer,
+        .identifier = "ByLevelTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::SolidColor,
+        .identifier = "SolidColor"
+    },
+    Layer {
+        .id = Layer::ID::SpoutImageTileLayer,
+        .identifier = "SpoutImageTileLayer"
+    }
 };
 
-/**
- This enumeration is specified explicitly since it is used in the shader as well.
- */
-enum class TypeID {
-    Unknown = -1,
-    DefaultTileLayer = 0,
-    SingleImageTileLayer = 1,
-    SizeReferenceTileLayer = 2,
-    TemporalTileLayer = 3,
-    TileIndexTileLayer = 4,
-    ByIndexTileLayer = 5,
-    ByLevelTileLayer = 6,
-    SolidColor = 7,
+
+
+struct Adjustment {
+    enum class ID {
+        None = 0,
+        ChromaKey,
+        TransferFunction,
+    };
+
+    ID id;
+    std::string_view identifier;
 };
 
-static constexpr int NUM_ADJUSTMENT_TYPES = 3;
-static constexpr const char* ADJUSTMENT_TYPE_NAMES[NUM_ADJUSTMENT_TYPES] = {
-    "None",
-    "ChromaKey",
-    "TransferFunction",
+constexpr std::array<Adjustment, 3> Adjustments = {
+    Adjustment {
+        .id = Adjustment::ID::None,
+        .identifier = "None"
+    },
+    Adjustment {
+        .id = Adjustment::ID::ChromaKey,
+        .identifier = "ChromaKey"
+    },
+    Adjustment {
+        .id = Adjustment::ID::TransferFunction,
+        .identifier = "TransferFunction"
+    }
 };
 
-/**
- This enumeration is specified explicitly since it is used in the shader as well.
- */
-enum class AdjustmentTypeID {
-    None = 0,
-    ChromaKey = 1,
-    TransferFunction = 2,
+
+
+struct Blend {
+    enum class ID {
+        Normal = 0,
+        Multiply = 1,
+        Add = 2,
+        Subtract = 3,
+        Color = 4,
+    };
+
+    ID id;
+    std::string_view identifier;
 };
 
-static constexpr int NUM_BLEND_MODES = 5;
-static constexpr const char* BLEND_MODE_NAMES[NUM_BLEND_MODES] = {
-    "Normal",
-    "Multiply",
-    "Add",
-    "Subtract",
-    "Color",
+constexpr std::array<Blend, 5> Blends = {
+    Blend { .id = Blend::ID::Normal, .identifier = "Normal" },
+    Blend { .id = Blend::ID::Multiply, .identifier = "Multiply" },
+    Blend { .id = Blend::ID::Add, .identifier = "Add" },
+    Blend { .id = Blend::ID::Subtract, .identifier = "Subtract" },
+    Blend { .id = Blend::ID::Color, .identifier = "Color" }
 };
 
-/**
- This enumeration is specified explicitly since it is used in the shader as well.
- */
-enum class BlendModeID {
-    Normal = 0,
-    Multiply = 1,
-    Add = 2,
-    Subtract = 3,
-    Color = 4,
-};
-
-} // namespace openspace::globebrowsing::layergroupid
+} // namespace openspace::globebrowsing::layers
 
 namespace ghoul {
 
 template <>
-constexpr openspace::globebrowsing::layergroupid::TypeID from_string(
-                                                                  std::string_view string)
+constexpr openspace::globebrowsing::layers::Layer::ID from_string(std::string_view string)
 {
-    for (int i = 0; i < openspace::globebrowsing::layergroupid::NUM_LAYER_TYPES; ++i) {
-        if (string == openspace::globebrowsing::layergroupid::LAYER_TYPE_NAMES[i]) {
-            return static_cast<openspace::globebrowsing::layergroupid::TypeID>(i);
+    auto it = std::find_if(
+        openspace::globebrowsing::layers::Layers.begin(),
+        openspace::globebrowsing::layers::Layers.end(),
+        [&string](const openspace::globebrowsing::layers::Layer& li) {
+            return li.identifier == string;
         }
-    }
-    return openspace::globebrowsing::layergroupid::TypeID::Unknown;
+    );
+    return it != openspace::globebrowsing::layers::Layers.end() ?
+        it->id :
+        openspace::globebrowsing::layers::Layer::ID::Unknown;
 }
 
 template <>
-constexpr openspace::globebrowsing::layergroupid::GroupID from_string(
-                                                                  std::string_view string)
+constexpr openspace::globebrowsing::layers::Group::ID from_string(std::string_view string)
 {
-    for (int i = 0; i < openspace::globebrowsing::layergroupid::NUM_LAYER_GROUPS; ++i) {
-        if (string == openspace::globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[i])
-        {
-            return static_cast<openspace::globebrowsing::layergroupid::GroupID>(i);
+    auto it = std::find_if(
+        openspace::globebrowsing::layers::Groups.begin(),
+        openspace::globebrowsing::layers::Groups.end(),
+        [&string](const openspace::globebrowsing::layers::Group& gi) {
+            return gi.identifier == string;
         }
-    }
-    return openspace::globebrowsing::layergroupid::GroupID::Unknown;
+    );
+    return it != openspace::globebrowsing::layers::Groups.end() ?
+        it->id :
+        openspace::globebrowsing::layers::Group::ID::Unknown;
 }
 
 template <>
-constexpr openspace::globebrowsing::layergroupid::AdjustmentTypeID from_string(
+constexpr openspace::globebrowsing::layers::Adjustment::ID from_string(
                                                                   std::string_view string)
 {
-    for (int i = 0; i < openspace::globebrowsing::layergroupid::NUM_ADJUSTMENT_TYPES; ++i)
-    {
-        if (string == openspace::globebrowsing::layergroupid::ADJUSTMENT_TYPE_NAMES[i]) {
-            return
-                static_cast<openspace::globebrowsing::layergroupid::AdjustmentTypeID>(i);
+    auto it = std::find_if(
+        openspace::globebrowsing::layers::Adjustments.begin(),
+        openspace::globebrowsing::layers::Adjustments.end(),
+        [&string](const openspace::globebrowsing::layers::Adjustment& ai) {
+            return ai.identifier == string;
         }
-    }
-    return openspace::globebrowsing::layergroupid::AdjustmentTypeID::None;
+    );
+    return it != openspace::globebrowsing::layers::Adjustments.end() ?
+        it->id :
+        openspace::globebrowsing::layers::Adjustment::ID::None;
 }
 
 template <>
-constexpr openspace::globebrowsing::layergroupid::BlendModeID from_string(
-                                                                  std::string_view string)
+constexpr openspace::globebrowsing::layers::Blend::ID from_string(std::string_view string)
 {
-    for (int i = 0; i < openspace::globebrowsing::layergroupid::NUM_BLEND_MODES; ++i) {
-        if (string == openspace::globebrowsing::layergroupid::BLEND_MODE_NAMES[i]) {
-            return static_cast<openspace::globebrowsing::layergroupid::BlendModeID>(i);
+    auto it = std::find_if(
+        openspace::globebrowsing::layers::Blends.begin(),
+        openspace::globebrowsing::layers::Blends.end(),
+        [&string](const openspace::globebrowsing::layers::Blend& bi) {
+            return bi.identifier == string;
         }
-    }
-    return openspace::globebrowsing::layergroupid::BlendModeID::Normal;
+    );
+    return it != openspace::globebrowsing::layers::Blends.end() ?
+        it->id :
+        openspace::globebrowsing::layers::Blend::ID::Normal;
 }
 
 } // ghoul
-
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__

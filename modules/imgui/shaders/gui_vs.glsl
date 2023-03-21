@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,8 +33,9 @@ out vec4 out_color;
 
 uniform mat4 ortho;
 
+
 void main() {
-    out_uv = in_uv;
-    out_color = in_color;
-    gl_Position = ortho * vec4(in_position.xy, 0.0, 1.0);
+  out_uv = in_uv;
+  out_color = in_color;
+  gl_Position = ortho * vec4(in_position.xy, 0.0, 1.0);
 }

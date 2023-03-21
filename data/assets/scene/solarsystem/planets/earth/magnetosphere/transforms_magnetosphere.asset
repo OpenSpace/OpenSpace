@@ -1,0 +1,42 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+asset.require("spice/base")
+
+local GSMKernel = asset.localResource("../kernels/GSM.ti")
+
+local GSMReferenceFrame = {
+  Identifier = "GSMReferenceFrame",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "GSM", --Geocentric Solar Magnetospheric
+      DestinationFrame = "GALACTIC",
+      Kernels = GSMKernel
+    }
+  },
+  GUI = {
+    Name = "GSM Reference Frame",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GSMReferenceFrame)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GSMReferenceFrame)
+end)
+
+asset.export(GSMReferenceFrame)
+
+
+asset.meta = {
+  Name = "Earth magnetosphere transforms",
+  Version = "1.1",
+  Description = "Earth transforms: GSMReferenceFrame. Geocentric Solar Magnetospheric",
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -104,7 +104,7 @@ public:
      * \param time The time in which the subphases have to be active in order to be
      *        included
      * \param maxDepth The maximum levels of subphases that will be considered. If this
-     *        value is equal to <code>-1</code>, an infinite depth will be considered.
+     *        value is equal to `-1`, an infinite depth will be considered.
      * \return A list of MissionPhases that cover the provided \p time
      */
     Trace phaseTrace(double time, int maxDepth = -1) const;

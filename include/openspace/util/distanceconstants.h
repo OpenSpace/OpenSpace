@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@ namespace openspace::distanceconstants {
     constexpr double LightMonth = LightYear / 12;
     constexpr double LightDay = LightYear / 365;
     constexpr double LightHour = LightDay / 24;
+    constexpr double LightSecond = 299792458.0;
     constexpr double AstronomicalUnit = 1.495978707E11;
     constexpr double Parsec = 3.0856776E16;
 

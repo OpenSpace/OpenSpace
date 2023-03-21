@@ -1,10 +1,14 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local transforms = asset.require("./transforms")
 asset.require("spice/base")
-asset.require('./trail')
-local labelsPath = asset.require('./pluto_globelabels').LabelsPath
+asset.require("./trail")
 
 
+local labelsPath = asset.syncedResource({
+  Name = "Pluto Labels",
+  Type = "HttpSynchronization",
+  Identifier = "pluto_labels",
+  Version = 1
+})
 
 local Pluto = {
   Identifier = "Pluto",
@@ -27,24 +31,19 @@ local Pluto = {
     SegmentsPerPatch = 64,
     Layers = {},
     Labels = {
-      Enable = false,
-      FileName = labelsPath .. "/pluto.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 28.0,
-      LabelsSize = 8.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 4000000.0,
-      FadeOutStartingDistance = 650000.0,
-      LabelsForceDomeRendering = true,
-      LabelsDistanceEPS = 500000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      Enabled = false,
+      FileName = labelsPath .. "pluto.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.5,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 650000.0, 4000000.0 },
+      DistanceEPS = 500000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "planet_solarSystem", "planet_terrestrial" },
+  Tag = { "planet_solarSystem", "planet_terrestrial", "dwarf_planet" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto"
   }
@@ -55,29 +54,45 @@ local PlutoLabel = {
   Parent = Pluto.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
-    LabelText = "Pluto",
-    FontSize = 100.0,
-    LabelSize = 8.9,
-    LabelMaxSize = 100.0,
-    LabelMinSize = 1.0,
+    Type = "RenderableLabel",
+    Text = "Pluto",
+    FontSize = 70.0,
+    Size = 9.10,
+    MinMaxSize = { 1, 100 },
     BlendMode = "Additive",
-    LabelOrientationOption = "Camera View Direction"
+    OrientationOption = "Camera View Direction",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.0, 120.0 },
+    FadeWidths = { 1.0, 150.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Pluto Label",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Description = "Label for Pluto, visible at the solarsystem overview zoom level"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Pluto, PlutoLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Pluto)
+  openspace.addSceneGraphNode(PlutoLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PlutoLabel)
+  openspace.removeSceneGraphNode(Pluto)
+end)
+
+asset.export(Pluto)
+asset.export(PlutoLabel)
+
 
 
 asset.meta = {
   Name = "Pluto",
   Version = "1.0",
-  Description = [[ Pluto globe, and main planet label.]],
+  Description = "Pluto globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

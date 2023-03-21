@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 asset.require("spice/base")
 
@@ -13,10 +12,11 @@ local Sun = {
     Layers = {},
     PerformShading = false
   },
+  ApproachFactor = 15.0,
   GUI = {
     Name = "Sun",
     Path = "/Solar System/Sun",
-    Description = "Globe for the sun in our solar system."
+    Description = "Globe for the sun in our solar system"
   }
 }
 
@@ -25,39 +25,54 @@ local SunLabel = {
   Parent = Sun.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
-    LabelText = "Sun",
-    FontSize = 100.0,
-    LabelSize = 13.127,
-    LabelMaxSize = 100.0,
-    LabelMinSize = 1.0,
-    LabelOrientationOption = "Camera View Direction",
+    Type = "RenderableLabel",
+    Text = "Sun",
+    FontSize = 70.0,
+    Size = 14.17,
+    MinMaxSize = { 1, 50 },
+    OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeStartUnit = "Pm",
-    FadeStartDistance = 2.841,
-    FadeStartSpeed = 1.375,
-    FadeEndUnit = "pc",
-    FadeEndDistance = 1.326,
-    FadeEndSpeed = 1.0
+    FadeUnit = "pc",
+    FadeDistances = { 1.33, 15.0 },
+    FadeWidths = { 1.0, 20.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Sun Label",
     Path = "/Solar System/Sun",
-    Description = "Label for the sun in our solar system."
+    Description = "Label for the sun in our solar system"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Sun, SunLabel })
+local LightSource = {
+  Type = "SceneGraphLightSource",
+  Identifier = "Sun",
+  Node = Sun.Identifier,
+  Intensity = 1.0
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Sun)
+  openspace.addSceneGraphNode(SunLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SunLabel)
+  openspace.removeSceneGraphNode(Sun)
+end)
+
+asset.export(Sun)
+asset.export(SunLabel)
+asset.export("LightSource", LightSource)
+
 
 
 asset.meta = {
   Name = "Sun",
-  Version = "1.0",
-  Description = [[ The Sun and label]],
+  Version = "1.1",
+  Description = "The Sun and label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Sun" , "SunLabel"}
+  License = "MIT license"
 }

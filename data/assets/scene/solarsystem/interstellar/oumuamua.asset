@@ -1,11 +1,10 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local trajectory = asset.syncedResource({
   Name = "'Oumuamua Trajectory",
   Type = "HttpSynchronization",
   Identifier = "oumuamua_horizons",
-  Version = 1
+  Version = 2
 })
 
 local OumuamuaTrail = {
@@ -15,17 +14,24 @@ local OumuamuaTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trajectory .. "/horizons_oumuamua.dat"
+      HorizonsTextFile = trajectory .. "horizons_oumuamua.hrz"
+      -- Target: 1I/'Oumuamua (A/2017 U1)
+      -- Observer: SSB
+      -- Start time: 2014-Jan-01 00:00:00 (first data point)
+      -- End time: 2050-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "2014 JAN 01 00:00:00",
-    EndTime = "2023 JAN 01 00:00:00",
-    SampleInterval = 7000,
+    EndTime = "2050 JAN 01 00:00:00",
+    SampleInterval = 86400,
     TimeStampSubsampleFactor = 1
   },
   GUI = {
     Name = "'Oumuamua Trail",
-    Path = "/Solar System/Interstellar"
+    Path = "/Solar System/Interstellar",
+    Description = [[Trail of 'Oumuamua from 2014 JAN 01 00:00:00 to 2050 JAN 01 00:00:00.
+      Data from JPL Horizons]],
   }
 }
 
@@ -35,23 +41,37 @@ local OumuamuaPosition = {
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trajectory .. "/horizons_oumuamua.dat"
+      HorizonsTextFile = trajectory .. "horizons_oumuamua.hrz"
     },
   },
   GUI = {
     Name = "'Oumuamua",
-    Path = "/Solar System/Interstellar"
+    Path = "/Solar System/Interstellar",
+    Description = [[Position of 'Oumuamua from 2014 JAN 01 00:00:00 to 2050 JAN 01
+      00:00:00. Data from JPL Horizons]],
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { OumuamuaPosition, OumuamuaTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OumuamuaPosition)
+  openspace.addSceneGraphNode(OumuamuaTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OumuamuaTrail)
+  openspace.removeSceneGraphNode(OumuamuaPosition)
+end)
+
+asset.export(OumuamuaPosition)
+asset.export(OumuamuaTrail)
+
 
 
 asset.meta = {
   Name = "'Oumuamua",
-  Version = "1.0",
-  Description = [[ This asset contains the trail and position of 'Oumuamua from 2014
-    JAN 01 00:00:00 to 2023 JAN 01 00:00:00. Data from JPL Horizons']],
+  Version = "1.2",
+  Description = [[This asset contains the trail and position of 'Oumuamua from 2014
+    JAN 01 00:00:00 to 2050 JAN 01 00:00:00. Data from JPL Horizons]],
   Author = "OpenSpace Team",
   URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
   License = "NASA"

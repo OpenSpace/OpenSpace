@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@ namespace {
         "'rotation' that takes the current simulation time in seconds past the J2000 "
         "epoch as the first argument, the current wall time as milliseconds past the "
         "J2000 epoch as the second argument and computes the rotation returned as 9 "
-        "values."
+        "values"
     };
 
     struct [[codegen::Dictionary(LuaRotation)]] Parameters {
@@ -56,9 +56,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LuaRotation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_rotation_lua";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_rotation_lua");
 }
 
 LuaRotation::LuaRotation()
@@ -81,7 +79,7 @@ LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary) : LuaRotation() {
 }
 
 glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
-    ghoul::lua::runScriptFile(_state, _luaScriptFile);
+    ghoul::lua::runScriptFile(_state, _luaScriptFile.value());
 
     // Get the scaling function
     lua_getglobal(_state, "rotation");
@@ -89,7 +87,9 @@ glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaRotation",
-            fmt::format("Script '{}' does nto have a function 'rotation'", _luaScriptFile)
+            fmt::format(
+                "Script '{}' does not have a function 'rotation'", _luaScriptFile.value()
+            )
         );
         return glm::dmat3(1.0);
     }

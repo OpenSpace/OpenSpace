@@ -1,6 +1,8 @@
-asset.require('spice/base')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local assetHelper = asset.require('util/asset_helper')
+asset.require("spice/base")
+asset.require("./actions")
+local sun = asset.require("scene/solarsystem/sun/sun")
+local mars = asset.require("scene/solarsystem/planets/mars/mars")
+asset.require("scene/solarsystem/planets/mars/default_layers")
 
 local models = asset.syncedResource({
   Name = "Insight Models Chutes",
@@ -17,11 +19,11 @@ local ikernels = asset.syncedResource({
 })
 
 local iKernels = {
-  ikernels .. '/nsyt_spk_cruise_od063_v1_approach2surface_SC_Lander.tsc',
-  ikernels .. '/insight_v02.tfr',
-  ikernels .. '/mar085s.bsp',
-  ikernels .. '/nsyt_spk_cruise_POST_approach2surface_SC_Lander.bsp',
-  ikernels .. '/nsyt_spk_cruise_POST_approach2surface_SC_Lander.bck',
+  ikernels .. "nsyt_spk_cruise_od063_v1_approach2surface_SC_Lander.tsc",
+  ikernels .. "insight_v02.tfr",
+  ikernels .. "mar085s.bsp",
+  ikernels .. "nsyt_spk_cruise_POST_approach2surface_SC_Lander.bsp",
+  ikernels .. "nsyt_spk_cruise_POST_approach2surface_SC_Lander.bck",
 }
 
 local RotationMatrix = {
@@ -31,12 +33,7 @@ local RotationMatrix = {
 }
 
 local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
+  sun.LightSource,
   {
     Type = "SceneGraphLightSource",
     Identifier = "Mars",
@@ -60,33 +57,118 @@ local legDeployTime = "2018 NOV 26 19:43:06.68" -- entry + 243s
 local landerSeperationTime = "2018 NOV 26 19:44:51.68" -- entry + 348s
 local touchdownTime = "2018 NOV 26 19:45:32.68" -- entry + 389s
 local panelDeployTime = "2018 NOV 26 19:45:33.68" -- entry + 390s
-local foreverTime = "2018 NOV 26 20:17:50.68" -- entry + 2327s
 
 local kernelTouchdownTime = "2018 NOV 26 19:45:32.3"
 local spiceRotationEndTime = "2018 NOV 26 19:51:39"
 
-local InsightParent = {
-  Identifier = "InsightParent",
-  Parent = "MarsBarycenter",
-  Transform = {
-    Translation = {
+local TranslationKeyframes = {
+  ["1850 JAN 01 00:00:00"] = {
       Type = "SpiceTranslation",
       Target = "INSIGHT",
       Observer = "MARS",
-      Frame = "GALACTIC",
-      Kernels = iKernels
+      Frame = "IAU_MARS",
+      Kernels = iKernels,
+      FixedDate = "2018 NOV 26 19:39:03"
+  },
+  ["2018 NOV 26 19:39:02"] = {
+      Type = "SpiceTranslation",
+      Target = "INSIGHT",
+      Observer = "MARS",
+      Frame = "IAU_MARS",
+      Kernels = iKernels,
+      FixedDate = "2018 NOV 26 19:39:03"
+  },
+  ["2018 NOV 26 19:39:03"] = {
+    Type = "SpiceTranslation",
+    Target = "INSIGHT",
+    Observer = "MARS",
+    Frame = "IAU_MARS",
+    Kernels = iKernels
+  },
+  ["2018 NOV 26 19:39:04"] = {
+    Type = "SpiceTranslation",
+    Target = "INSIGHT",
+    Observer = "MARS",
+    Frame = "IAU_MARS",
+    Kernels = iKernels
+  },
+ ["2018 NOV 26 19:45:34"] = {
+    Type = "SpiceTranslation",
+    Target = "INSIGHT",
+    Observer = "MARS",
+    Frame = "IAU_MARS",
+    Kernels = iKernels
+  },
+  ["2018 NOV 26 19:45:35"] = {
+      Type = "SpiceTranslation",
+      Target = "INSIGHT",
+      Observer = "MARS",
+      Frame = "IAU_MARS",
+      Kernels = iKernels,
+      FixedDate = "2018 NOV 26 19:45:34"
+  }
+}
+
+local RotationKeyframes = {
+  ["1850 JAN 01 00:00:00"] = {
+    Type = "SpiceRotation",
+    SourceFrame = "INSIGHT_LANDER_CRUISE",
+    DestinationFrame = "IAU_MARS",
+    FixedDate = "2018 NOV 26 19:39:02",
+    Kernels = iKernels
+  },
+  ["2018 NOV 26 19:39:02"] = {
+    Type = "SpiceRotation",
+    SourceFrame = "INSIGHT_LANDER_CRUISE",
+    DestinationFrame = "IAU_MARS",
+    FixedDate = "2018 NOV 26 19:39:02",
+    Kernels = iKernels
+  },
+  ["2018 NOV 26 19:39:03"] = {
+    Type = "SpiceRotation",
+    SourceFrame = "INSIGHT_LANDER_CRUISE",
+    DestinationFrame = "IAU_MARS",
+    Kernels = iKernels
+  },
+  ["2018 NOV 26 19:39:04"] = {
+    Type = "SpiceRotation",
+    SourceFrame = "INSIGHT_LANDER_CRUISE",
+    DestinationFrame = "IAU_MARS",
+    Kernels = iKernels
+  },
+ ["2018 NOV 26 19:45:34"] = {
+    Type = "SpiceRotation",
+    SourceFrame = "INSIGHT_LANDER_CRUISE",
+    DestinationFrame = "IAU_MARS",
+    Kernels = iKernels
+  },
+  ["2018 NOV 26 19:45:35"] = {
+    Type = "SpiceRotation",
+    SourceFrame = "INSIGHT_LANDER_CRUISE",
+    DestinationFrame = "IAU_MARS",
+    FixedDate = "2018 NOV 26 19:45:34"
+  },
+}
+
+
+local InsightParent = {
+  Identifier = "InsightParent",
+  Parent = mars.Mars.Identifier,
+  Transform = {
+    Translation ={
+      Type = "TimelineTranslation",
+      Keyframes = TranslationKeyframes,
     },
     Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "INSIGHT_LANDER_CRUISE",
-      DestinationFrame = "GALACTIC"
+      Type = "TimelineRotation",
+      Keyframes = RotationKeyframes,
     }
   },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = spiceRotationEndTime
-  },
+  -- TimeFrame = {
+  --   Type = "TimeFrameInterval",
+  --   Start = entryTimeStart,
+  --   End = spiceRotationEndTime
+  -- },
   GUI = {
     Hidden = true,
     Name = "InsightParent",
@@ -101,7 +183,7 @@ local Insight = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0.0, 0.0, -3.1415}
+      Rotation = { 0.0, 0.0, -math.pi }
     }
   },
   GUI = {
@@ -115,13 +197,12 @@ local Insight_Entry_CapsuleA = {
   Parent =  Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/cruise_insight_doubleside2_newcapsule_diffuse.obj",
+    GeometryFile = models .. "cruise_insight_doubleside2_newcapsule_diffuse.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = entryTimeStart,
     End = landerSeperationTime
   },
   GUI = {
@@ -136,13 +217,12 @@ local Insight_Entry_Capsule_Ring = {
   Parent =  Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_cruise_cone_ring_foil_gold.obj",
+    GeometryFile = models .. "insight_cruise_cone_ring_foil_gold.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = entryTimeStart,
     End = landerSeperationTime
   },
   GUI = {
@@ -157,13 +237,12 @@ local Insight_Entry_Capsule_Plugs = {
   Parent =  Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_cruise_cone_capsule_diffuse.obj",
+    GeometryFile = models .. "insight_cruise_cone_capsule_diffuse.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = entryTimeStart,
     End = landerSeperationTime
   },
   GUI = {
@@ -178,13 +257,12 @@ local Insight_Entry_Heatshield = {
   Parent =  Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_cruise_heatshield_foil_gold.obj",
+    GeometryFile = models .. "insight_cruise_heatshield_foil_gold.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = entryTimeStart,
     End = heatShieldSeperationTime
   },
   GUI = {
@@ -199,7 +277,7 @@ local Insight_Parachute_0 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_chute_frame01_diff1.obj",
+    GeometryFile = models .. "insight_chute_frame01_diff1.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
@@ -220,7 +298,7 @@ local Insight_Parachute_Cords_0 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_chute_frame01_cords1.obj",
+    GeometryFile = models .. "insight_chute_frame01_cords1.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
@@ -241,7 +319,7 @@ local Insight_Parachute_20 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_chute_frame20_diff1.obj",
+    GeometryFile = models .. "insight_chute_frame20_diff1.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
@@ -262,7 +340,7 @@ local Insight_Parachute_Cords_20 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_chute_frame20_cords1.obj",
+    GeometryFile = models .. "insight_chute_frame20_cords1.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
@@ -283,7 +361,7 @@ local Insight_Parachute_40 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/chute_doubleside_frame40_diff.obj",
+    GeometryFile = models .. "chute_doubleside_frame40_diff.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
@@ -304,7 +382,7 @@ local Insight_Parachute_Cords_40 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_chute_frame40_cords1.obj",
+    GeometryFile = models .. "insight_chute_frame40_cords1.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
@@ -325,14 +403,9 @@ local Insight_Lander_A001 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_deck_AO01.obj",
+    GeometryFile = models .. "insight_lander_deck_AO01.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -346,14 +419,9 @@ local Insight_Lander_A002 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_deck_AO02.obj",
+    GeometryFile = models .. "insight_lander_deck_AO02.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -367,14 +435,9 @@ local Insight_Lander_A003 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_deck_AO03.obj",
+    GeometryFile = models .. "insight_lander_deck_AO03.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -388,14 +451,9 @@ local Insight_Lander_A004 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_deck_AO04.obj",
+    GeometryFile = models .. "insight_lander_deck_AO04.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -409,14 +467,9 @@ local Insight_Lander_A005 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_deck_AO05.obj",
+    GeometryFile = models .. "insight_lander_deck_AO05.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -430,14 +483,9 @@ local Insight_Lander_A006 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_deck_AO06.obj",
+    GeometryFile = models .. "insight_lander_deck_AO06.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -451,14 +499,9 @@ local Insight_Lander_A007 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_deck_AO07.obj",
+    GeometryFile = models .. "insight_lander_deck_AO07.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -472,14 +515,9 @@ local Insight_Lander_A008 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_deck_AO08.obj",
+    GeometryFile = models .. "insight_lander_deck_AO08.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -493,14 +531,9 @@ local Insight_Lander_foil1 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_deck_foil1.obj",
+    GeometryFile = models .. "insight_lander_deck_foil1.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -514,14 +547,9 @@ local Insight_Lander_Tex01 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_deck_tex01.obj",
+    GeometryFile = models .. "insight_lander_deck_tex01.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -535,14 +563,9 @@ local Insight_Lander_Tex02 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_deck_tex02.obj",
+    GeometryFile = models .. "insight_lander_deck_tex02.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -556,7 +579,7 @@ local Insight_Legs_Stowed_tex = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_legs_stow_tex01.obj",
+    GeometryFile = models .. "insight_lander_legs_stow_tex01.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
@@ -577,7 +600,7 @@ local Insight_Legs_Stowed_AO06 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_legs_stow_AO06.obj",
+    GeometryFile = models .. "insight_lander_legs_stow_AO06.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
@@ -598,14 +621,13 @@ local Insight_Legs_Deployed_tex = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_legs_deploy_tex01.obj",
+    GeometryFile = models .. "insight_lander_legs_deploy_tex01.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = legDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -619,14 +641,13 @@ local Insight_Legs_Deployed_AO06 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_legs_deploy_AO06.obj",
+    GeometryFile = models .. "insight_lander_legs_deploy_AO06.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = legDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -640,14 +661,9 @@ local Insight_Panels_Stowed_tex = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_panels_stow_tex01.obj",
+    GeometryFile = models .. "insight_lander_panels_stow_tex01.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -661,14 +677,9 @@ local Insight_Panels_Stowed_tex2 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_panels_stow_tex02.obj",
+    GeometryFile = models .. "insight_lander_panels_stow_tex02.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -682,14 +693,9 @@ local Insight_Panels_Stowed_AO01 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_panels_stow_AO01.obj",
+    GeometryFile = models .. "insight_lander_panels_stow_AO01.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -703,14 +709,13 @@ local Insight_Panels_Deployed_tex = {
   Parent = Insight.Identifier,
   Renderable = {
       Type = "RenderableModel",
-      GeometryFile = models .. "/insight_lander_panels_deploy_tex01.obj",
+      GeometryFile = models .. "insight_lander_panels_deploy_tex01.obj",
       ModelTransform = RotationMatrix,
       LightSources = LightSources
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = panelDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -724,17 +729,16 @@ local Insight_Panels_Deployed_tex2 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_panels_deploy_tex02.obj",
+    GeometryFile = models .. "insight_lander_panels_deploy_tex02.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = panelDeployTime,
-    End = foreverTime
   },
   GUI = {
-    Hidden = true,
+    -- Hidden = true,
     Name = "Insight panels_deploy_tex2",
     Path = "/Solar System/Missions/Insight"
   }
@@ -745,14 +749,13 @@ local Insight_Panels_Deployed_AO06 = {
   Parent = Insight.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/insight_lander_panels_deploy_AO01.obj",
+    GeometryFile = models .. "insight_lander_panels_deploy_AO01.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = panelDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -769,7 +772,7 @@ local Insight_Trail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "-189",
+      Target = -189,
       Observer = "MARS",
       Frame = "IAU_MARS",
       Kernels = iKernels
@@ -790,7 +793,7 @@ local Insight_Trail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local nodes = {
   InsightParent, Insight, Insight_Entry_CapsuleA, Insight_Entry_Capsule_Ring,
   Insight_Entry_Capsule_Plugs, Insight_Entry_Heatshield, Insight_Parachute_0,
   Insight_Parachute_Cords_0, Insight_Parachute_20, Insight_Parachute_Cords_20,
@@ -802,4 +805,20 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
   Insight_Panels_Stowed_tex, Insight_Panels_Stowed_tex2, Insight_Panels_Stowed_AO01,
   Insight_Panels_Deployed_tex, Insight_Panels_Deployed_tex2,
   Insight_Panels_Deployed_AO06, Insight_Trail
-})
+}
+
+asset.onInitialize(function()
+  for _, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+
+for _, node in ipairs(nodes) do
+  asset.export(node)
+end

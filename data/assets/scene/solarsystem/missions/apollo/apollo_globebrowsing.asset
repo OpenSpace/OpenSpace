@@ -1,5 +1,4 @@
---apollo_globebrowsing.asset
-local moon_transforms = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local heightmaps = asset.syncedResource({
   Name = "Apollo Globebrowsing Heightmaps",
@@ -29,9 +28,45 @@ local stations = asset.syncedResource({
   Version = 1
 })
 
+
+local apollo_moon_togglekaguyalayer = {
+  Identifier = "os.missions.apollo.moon.togglekaguyalayer",
+  Name = "Toggle Kaguya layer",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled', not openspace.getPropertyValue('Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled'));
+  ]],
+  Documentation = "Toggles Moon Kaguya color layer",
+  GuiPath = "/Missions/Apollo",
+  IsLocal = false
+}
+
+local apollo_moon_disableapollosites= {
+  Identifier = "os.missions.apollo.moon.disableapollosites",
+  Name = "Disable Apollo sites",
+  Command = [[
+    openspace.setPropertyValue('Scene.Moon.Renderable.Layers.ColorLayers.A17_*.Enabled', false); 
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', false); 
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', false); 
+    openspace.setPropertyValueSingle('Scene.Apollo11MoonTrail.Renderable.Enabled', false); 
+    openspace.setPropertyValueSingle('Scene.Apollo11LemTrail.Renderable.Enabled', false); 
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled', false);
+  ]],
+  Documentation = "Disable apollo site on moon when leaving",
+  GuiPath = "/Missions/Apollo",
+  IsLocal = false
+} 
+
 asset.onInitialize(function ()
   openspace.globebrowsing.addBlendingLayersFromDirectory(heightmaps, moon_transforms.Moon.Identifier)
   openspace.globebrowsing.addBlendingLayersFromDirectory(basemaps, moon_transforms.Moon.Identifier)
   openspace.globebrowsing.addBlendingLayersFromDirectory(naclighting, moon_transforms.Moon.Identifier)
   openspace.globebrowsing.addBlendingLayersFromDirectory(stations, moon_transforms.Moon.Identifier)
+
+  openspace.action.registerAction(apollo_moon_togglekaguyalayer)
+  openspace.action.registerAction(apollo_moon_disableapollosites)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.action.removeAction(apollo_moon_disableapollosites)
+  openspace.action.removeAction(apollo_moon_togglekaguyalayer)
 end)

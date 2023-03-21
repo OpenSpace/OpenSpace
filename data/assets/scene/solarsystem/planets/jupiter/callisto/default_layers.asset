@@ -1,19 +1,10 @@
-local colorLayersPath = "./layers/colorlayers"
-
-local colorLayer = asset.require(colorLayersPath .. "/callisto_texture")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Callisto.Renderable.Layers.ColorLayers." ..
-    colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/colorlayers/callisto_texture", true)
 
 
 asset.meta = {
   Name = "Default Callisto Layers",
   Version = "1.0",
-  Description = [[ Default Callisto layers are: Callisto Texture]],
+  Description = "Default Callisto layers are: Callisto Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -1,29 +1,52 @@
-local assetHelper = asset.require('util/asset_helper')
-local sharedSssb = asset.require('./sssb_shared')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'apollo_asteroid',
-  'sssb_data_apollo_asteroid')
-local object = sharedSssb.createSssbGroupObject('sssb_data_apollo_asteroid.csv',
-  "Apollo Asteroids", filepath, { 0.7, 0.7, 1.0 })
-object.Renderable.Enabled = false
-object.Renderable.SegmentQuality = 6
-object.Renderable.TrailFade = 10
+local sssb = asset.syncedResource({
+  Name = "Small SolarSystem Body Data (Apollo Asteroid)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_apollo_asteroid",
+  Version = 1
+})
 
-object.GUI.Description = [[ Earth-crossing Near-Earth-Asteroids with semi-major axes
-  larger than Earth's. ]]
+local object = {
+  Identifier = "sssb_apollo_asteroid",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_apollo_asteroid.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 6,
+    Color = { 0.7, 0.7, 1.0 },
+    TrailFade = 10
+  },
+  GUI = {
+    Name = "Apollo Asteroids",
+    Path = "/Solar System/Small Bodies",
+    Description = [[Earth-crossing Near-Earth-Asteroids with semi-major axes larger than
+      Earth's.]]
+  }
+}
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Apollo Asteroids",
-  Version = "1.0",
-  Description = [[ RenderableSmallBody asset with data from from JPL Horizons
-    contiaining the Apollo group.]],
+  Version = "1.1",
+  Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
+    the Apollo group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
   License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
     All documents available from this server may be protected under the U.S. and
-    Foreign Copyright Laws.]],
-  Identifiers = {"sssb_sssb_data_apollo_asteroid"}
+    Foreign Copyright Laws]]
 }

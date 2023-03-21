@@ -1,0 +1,70 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Aerosols: Sulfate"
+local Identifier = "noaa-sos-atmosphere-aerosol-sulfate"
+local Description = [[With so many uncertainties attached to climate change, it is
+important to look at all of the factors. As early as 1896, scientists have been analyzing
+the presence of black carbon in the atmosphere. This group of three datasets looks at the
+presence of aerosols in the Earth's atmosphere. The first dataset contains only black
+carbon optical thickness, the second has sulfate optical thickness and the third has a
+combination of both black carbon and sulfate optical thickness. The data is from January
+31, 2007 and extends out 120 hours through February 4, 2007. Black carbon is commonly
+known as soot. It is generated from burning fossil fuels and biomass fuels. Soot is the
+result of incomplete combustion, especially of coal, diesel fuels, biofuels and other
+biomass burnings. Sulfate is the result of sulfur dioxide and sulfur trioxide interacting
+with other compounds in the atmosphere. Sulfate aerosols in the atmosphere are associated
+with the combustion of fossil fuels and also the eruption of volcanoes like Mt.
+Pinatubo]]
+local URL = "https://sos.noaa.gov/catalog/datasets/aerosols-sulfate/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ImageSequenceTileLayer",
+  FolderPath = syncedDirectory .. "2048_png",
+  Description = Description
+}
+
+local colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(colorbar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.removeScreenSpaceRenderable(colorbar)
+end)
+
+asset.export(layer)
+asset.export(colorbar)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

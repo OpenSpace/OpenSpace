@@ -1,6 +1,5 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").sat375
 
 
 
@@ -23,17 +22,26 @@ local TethysTrail = {
   GUI = {
     Name = "Tethys Trail",
     Path = "/Solar System/Planets/Saturn/Moons",
-    Description = [[ Trail of Saturn's moon Tethys as observed by Saturn.]],
+    Description = "Trail of Saturn's moon Tethys as observed by Saturn",
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { TethysTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(TethysTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TethysTrail)
+end)
+
+asset.export(TethysTrail)
+
 
 
 asset.meta = {
   Name = "Tethys Trail",
   Version = "1.0",
-  Description = [[ Main trail for Tethys. Data from NASA Spice (see base spice asset)]],
+  Description = "Main trail for Tethys. Data from NASA Spice (see base spice asset)",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

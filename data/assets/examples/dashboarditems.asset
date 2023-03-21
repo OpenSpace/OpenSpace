@@ -1,50 +1,100 @@
-local assetHelper = asset.require('util/asset_helper')
+local angle = {
+  Type = "DashboardItemAngle",
+  Identifier = "Angle",
+  GuiName = "Angle",
+  ReferenceType = "Node",
+  ReferenceNodeName = "Earth",
+  DestinationType = "Node",
+  DestinationNodeName = "Moon"
+}
 
-assetHelper.registerDashboardItems(asset, {
-  {
-    Type = "DashboardItemAngle",
-    Identifier = "Angle",
-    GuiName = "Angle",
-    ReferenceType = "Node",
-    ReferenceNodeName = "Earth",
-    DestinationType = "Node",
-    DestinationNodeName = "Moon"
-  },
-  {
-    Type = "DashboardItemDate",
-    Identifier = "Date",
-    GuiName = "Date"
-  },
-  {
-    Type = "DashboardItemSimulationIncrement",
-    Identifier = "SimulationIncrement",
-    GuiName = "Simulation Increment"
-  },
-  {
-    Type = "DashboardItemDistance",
-    Identifier = "Distance",
-    GuiName = "Distance"
-  },
-  {
-    Type = "DashboardItemFramerate",
-    Identifier = "Framerate",
-    GuiName = "Framerate"
-  },
-  {
-    Type = "DashboardItemParallelConnection",
-    Identifier = "ParallelConnection",
-    GuiName = "Parallel Connection"
-  },
-  {
-    Type = "DashboardItemMission",
-    Identifier = "Mission",
-    GuiName = "Mission"
-  },
-  {
-    Type = "DashboardItemPropertyValue",
-    Identifier = "asd",
-    GuiName = "adasd",
-    URI = "Scene.Earth.Renderable.Enabled",
-    DisplayString = "Earth is enabled: {}"
-  }
-})
+local date = {
+  Type = "DashboardItemDate",
+  Identifier = "Date",
+  GuiName = "Date"
+}
+
+local simulation_increment = {
+  Type = "DashboardItemSimulationIncrement",
+  Identifier = "SimulationIncrement",
+  GuiName = "Simulation Increment"
+}
+
+local distance = {
+  Type = "DashboardItemDistance",
+  Identifier = "Distance",
+  GuiName = "Distance"
+}
+
+local framerate = {
+  Type = "DashboardItemFramerate",
+  Identifier = "Framerate",
+  GuiName = "Framerate"
+}
+
+local parallel_connection = {
+  Type = "DashboardItemParallelConnection",
+  Identifier = "ParallelConnection",
+  GuiName = "Parallel Connection"
+}
+
+local mission = {
+  Type = "DashboardItemMission",
+  Identifier = "Mission",
+  GuiName = "Mission"
+}
+
+local property_value = {
+  Type = "DashboardItemPropertyValue",
+  Identifier = "asd",
+  GuiName = "adasd",
+  URI = "Scene.Earth.Renderable.Enabled",
+  DisplayString = "Earth is enabled: {}"
+}
+
+local elapsed_time = {
+  Type = "DashboardItemElapsedTime",
+  Identifier = "ElapsedTime",
+  ReferenceTime = "2022-10-12 12:00:00"
+}
+
+local input_state = {
+  Type = "DashboardItemInputState",
+  Identifier = "InputState"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(angle)
+  openspace.dashboard.addDashboardItem(date)
+  openspace.dashboard.addDashboardItem(simulation_increment)
+  openspace.dashboard.addDashboardItem(distance)
+  openspace.dashboard.addDashboardItem(framerate)
+  openspace.dashboard.addDashboardItem(parallel_connection)
+  openspace.dashboard.addDashboardItem(mission)
+  openspace.dashboard.addDashboardItem(property_value)
+  openspace.dashboard.addDashboardItem(elapsed_time)
+  openspace.dashboard.addDashboardItem(input_state)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(input_state)
+  openspace.dashboard.removeDashboardItem(elapsed_time)
+  openspace.dashboard.removeDashboardItem(property_value)
+  openspace.dashboard.removeDashboardItem(mission)
+  openspace.dashboard.removeDashboardItem(parallel_connection)
+  openspace.dashboard.removeDashboardItem(framerate)
+  openspace.dashboard.removeDashboardItem(distance)
+  openspace.dashboard.removeDashboardItem(simulation_increment)
+  openspace.dashboard.removeDashboardItem(date)
+  openspace.dashboard.removeDashboardItem(angle)
+end)
+
+asset.export(elapsed_time)
+asset.export(property_value)
+asset.export(mission)
+asset.export(parallel_connection)
+asset.export(framerate)
+asset.export(distance)
+asset.export(simulation_increment)
+asset.export(date)
+asset.export(angle)

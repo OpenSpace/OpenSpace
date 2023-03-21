@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,20 +30,19 @@
 
 class AssetTreeItem {
 public:
-    static constexpr const int CheckboxColumn = 1;
+    static constexpr int CheckboxColumn = 1;
 
     /**
-     * Constructor for assetTreeItem class
+     * Constructor for assetTreeItem class.
      *
      * \param data QVector containing the data contained in this tree view item
      * \param parentItem The parent that contains this (and possibly other) children
      *                   in the tree structure (optional).
      */
-    explicit AssetTreeItem(const std::vector<QVariant>& data,
-        AssetTreeItem* parentItem = nullptr);
+    AssetTreeItem(std::vector<QVariant> data, AssetTreeItem* parentItem = nullptr);
 
     /**
-     * Destructor for assetTreeItem class
+     * Destructor for assetTreeItem class.
      */
     ~AssetTreeItem();
 
@@ -51,28 +50,25 @@ public:
       * Returns pointer to this tree item's child at position \p row.
       *
       * \param row int of the row number of the child to get pointer
-      * \param parentItem The parent that contains this (and possibly other) children
-      *                   in the tree structure (optional).
-      * \return pointer to the child #assetTreeItem
       */
-    AssetTreeItem* child(int row);
+    AssetTreeItem* child(int row) const;
 
     /**
-      * Returns the number of children this item has
+      * Returns the number of children this item has.
       *
       * \return The number of children
       */
     int childCount() const;
 
     /**
-      * Returns the number of data columns of this item
+      * Returns the number of data columns of this item.
       *
       * \return The number of data columns
       */
     int columnCount() const;
 
     /**
-      * Returns the data at column \p column of this item
+      * Returns the data at column \p column of this item.
       *
       * \param column Column number from which to retrieve data
       * \return The data contained in the column
@@ -80,7 +76,7 @@ public:
     QVariant data(int column) const;
 
     /**
-      * Inserts children item(s) to the current item
+      * Inserts children item(s) to the current item.
       *
       * \param position where in this item's children to insert new children
       * \param count number of children to insert
@@ -91,7 +87,7 @@ public:
     bool insertChildren(int position, int count, int columns);
 
     /**
-      * Inserts data column(s) in the current item
+      * Inserts data column(s) in the current item.
       *
       * \param position column number at which to insert column(s)
       * \param columns number of columns to insert
@@ -100,21 +96,21 @@ public:
     bool insertColumns(int position, int columns);
 
     /**
-      * Returns a pointer to the current item's parent
+      * Returns a pointer to the current item's parent.
       *
       * \return pointer to the \p assetTreeItem parent
       */
     AssetTreeItem* parent();
 
     /**
-      * Returns the row number / child number of this item's parent
+      * Returns the row number / child number of this item's parent.
       *
       * \return The row number of this item's parent
       */
     int row() const;
 
     /**
-      * Returns the data at column \p column of this item
+      * Returns the data at column \p column of this item.
       *
       * \param position The position of the child(ren) to remove from the current
       *                 item (which is parent)
@@ -124,13 +120,13 @@ public:
     bool removeChildren(int position, int count);
 
     /**
-      * Set data at column \p column
+      * Set data at column \p column.
       *
       * \param column The data column number to set
       * \param value The #QVariant data element to store at column \p column
       * \return true if the data set was successful
       */
-    bool setData(int column, const QVariant &value);
+    bool setData(int column, const QVariant& value);
 
     /**
       * Returns the checked state of this item. If an asset is selected to be included
@@ -141,7 +137,7 @@ public:
     bool isChecked() const;
 
     /**
-      * Sets the checked state of this item (whether or not it is selected for a profile)
+      * Sets the checked state of this item (whether or not it is selected for a profile).
       *
       * \param set bool for whether or not this is checked
       */
@@ -164,23 +160,23 @@ public:
     bool isCategory() const;
 
     /**
-      * Sets status of whether or not the asset exists in the current filesystem.
-      * It is possible that an imported profile lists an asset from another system
-      * that is not included on the current filesystem.
+      * Sets status of whether or not the asset exists in the current filesystem. It is
+      * possible that an imported profile lists an asset from another system that is not
+      * included on the current filesystem.
       *
       * \param set to true if the asset file exists in the current filesystem
       */
     void setExistsInFilesystem(bool fileExists);
 
     /**
-      * Returns bool for whether or not the asset exists in the current filesystem
+      * Returns bool for whether or not the asset exists in the current filesystem.
       *
       * \return true if the asset exists in the current filesystem
       */
     bool doesExistInFilesystem() const;
 
     /**
-      * Returns the asset name of the current item
+      * Returns the asset name of the current item.
       *
       * \return The asset name
       */

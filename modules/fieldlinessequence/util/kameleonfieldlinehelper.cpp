@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <modules/fieldlinessequence/util/commons.h>
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
+#include <openspace/util/spicemanager.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <memory>
@@ -40,6 +41,7 @@
 
 #include <ccmc/Kameleon.h>
 #include <ccmc/KameleonInterpolator.h>
+#include <ccmc/Tracer.h>
 #include <modules/kameleon/include/kameleonhelper.h>
 
 #ifdef _MSC_VER
@@ -49,12 +51,12 @@
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
 namespace {
-    constexpr const char* _loggerCat = "FieldlinesSequence[ Kameleon ]";
+    constexpr std::string_view _loggerCat = "FieldlinesSequence[ Kameleon ]";
 
-    constexpr const char* TAsPOverRho = "T = p/rho";
-    constexpr const char* JParallelB  = "Current: mag(J||B)";
+    constexpr std::string_view TAsPOverRho = "T = p/rho";
+    constexpr std::string_view JParallelB  = "Current: mag(J||B)";
     // [nPa]/[amu/cm^3] * ToKelvin => Temperature in Kelvin
-    constexpr const float ToKelvin = 72429735.6984f;
+    constexpr float ToKelvin = 72429735.6984f;
 } // namespace
 
 namespace openspace::fls {
@@ -88,12 +90,13 @@ namespace openspace::fls {
  *        vector at each line vertex
  */
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
-                                 const std::vector<glm::vec3>& seedPoints,
+                                 const std::unordered_map<std::string,
+                                 std::vector<glm::vec3>>& seedMap,
+                                 double manualTimeOffset,
                                  const std::string& tracingVar,
                                  std::vector<std::string>& extraVars,
                                  std::vector<std::string>& extraMagVars)
 {
-
 #ifndef OPENSPACE_MODULE_KAMELEON_ENABLED
     LERROR("CDF inputs provided but Kameleon module is deactivated");
     return false;
@@ -104,9 +107,18 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     );
 
     state.setModel(fls::stringToModel(kameleon->getModelName()));
-    state.setTriggerTime(kameleonHelper::getTime(kameleon.get()));
+    double cdfDoubleTime = kameleonHelper::getTime(kameleon.get(), manualTimeOffset);
+    state.setTriggerTime(cdfDoubleTime);
 
-    if (addLinesToState(kameleon.get(), seedPoints, tracingVar, state)) {
+    // get time as string.
+    std::string cdfStringTime = SpiceManager::ref().dateFromEphemerisTime(
+        cdfDoubleTime, "YYYYMMDDHRMNSC::RND"
+    );
+
+    // use time as string for picking seedpoints from seedm
+    std::vector<glm::vec3> seedPoints = seedMap.at(cdfStringTime);
+    bool success = addLinesToState(kameleon.get(), seedPoints, tracingVar, state);
+    if (success) {
         // The line points are in their RAW format (unscaled & maybe spherical)
         // Before we scale to meters (and maybe cartesian) we must extract
         // the extraQuantites, as the iterpolator needs the unaltered positions
@@ -151,7 +163,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         default:
             LERROR(
                 "OpenSpace's fieldlines sequence currently only supports CDFs from the "
-                "BATSRUS and ENLIL models!"
+                "BATSRUS and ENLIL models"
             );
             return false;
     }
@@ -163,15 +175,14 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
     }
 
     bool success = false;
-    LINFO("Tracing field lines!");
+    LINFO("Tracing field lines");
     // LOOP THROUGH THE SEED POINTS, TRACE LINES, CONVERT POINTS TO glm::vec3 AND STORE //
     for (const glm::vec3& seed : seedPoints) {
         //--------------------------------------------------------------------------//
         // We have to create a new tracer (or actually a new interpolator) for each //
         // new line, otherwise some issues occur                                    //
         //--------------------------------------------------------------------------//
-        std::unique_ptr<ccmc::Interpolator> interpolator =
-                std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
+        auto interpolator = std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
         ccmc::Tracer tracer(kameleon, interpolator.get());
         tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
         ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(
@@ -224,8 +235,7 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
     const size_t nXtraScalars = extraScalarVars.size();
     const size_t nXtraMagnitudes = extraMagVars.size() / 3;
 
-    std::unique_ptr<ccmc::Interpolator> interpolator =
-            std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
+    auto interpolator = std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
 
     // ------ Extract all the extraQuantities from kameleon and store in state! ------ //
     for (const glm::vec3& p : state.vertexPositions()) {
@@ -301,20 +311,22 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
         std::string& str = extraScalarVars[i];
         bool success = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!success &&
-            (model == fls::Model::Batsrus && (str == TAsPOverRho || str == "T")))
+            (model == fls::Model::Batsrus &&
+                (str == TAsPOverRho || str == "T" || str == "t"))
+            )
         {
-            LDEBUG("BATSRUS doesn't contain variable T for temperature. Trying to "
-                   "calculate it using the ideal gas law: T = pressure/density");
-            constexpr const char* p = "p";
-            constexpr const char* r = "rho";
+            LDEBUG(
+                "BATSRUS doesn't contain variable T for temperature. Trying to calculate "
+                "it using the ideal gas law: T = pressure/density"
+            );
+            constexpr const char p[] = "p";
+            constexpr const char r[] = "rho";
             success = kameleon->doesVariableExist(p) && kameleon->loadVariable(p) &&
                       kameleon->doesVariableExist(r) && kameleon->loadVariable(r);
             str = TAsPOverRho;
         }
         if (!success) {
-            LWARNING(fmt::format(
-                "Failed to load extra variable: '{}'. Ignoring", str
-            ));
+            LWARNING(fmt::format("Failed to load extra variable: '{}'. Ignoring", str));
             extraScalarVars.erase(extraScalarVars.begin() + i);
             --i;
         }
@@ -353,8 +365,8 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
             }
             if (!success) {
                 LWARNING(fmt::format(
-                    "Failed to load at least one of the magnitude variables: {}, {}, {} "
-                    "& {}. Removing ability to store corresponding magnitude",
+                    "Failed to load at least one of the magnitude variables: {}, {}, {}. "
+                    "Removing ability to store corresponding magnitude",
                     s1, s2, s3
                 ));
                 extraMagVars.erase(

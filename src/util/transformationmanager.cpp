@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,7 +60,7 @@ TransformationManager::TransformationManager() {
     };
 }
 
-TransformationManager::~TransformationManager() { // NOLINT
+TransformationManager::~TransformationManager() {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleon = nullptr;
 #endif
@@ -93,17 +93,17 @@ glm::dmat3 TransformationManager::kameleonTransformationMatrix(
                                               [[maybe_unused]] double ephemerisTime) const
 {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-    ccmc::Position in0 = {1.f, 0.f, 0.f};
-    ccmc::Position in1 = {0.f, 1.f, 0.f};
-    ccmc::Position in2 = {0.f, 0.f, 1.f};
+    ccmc::Position in0 = ccmc::Position(1.f, 0.f, 0.f);
+    ccmc::Position in1 = ccmc::Position(0.f, 1.f, 0.f);
+    ccmc::Position in2 = ccmc::Position(0.f, 0.f, 1.f);
 
     ccmc::Position out0;
     ccmc::Position out1;
     ccmc::Position out2;
 
-    _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in0, &out0);
-    _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in1, &out1);
-    _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in2, &out2);
+    ccmc::Kameleon::_cxform(from.c_str(), to.c_str(), ephemerisTime, &in0, &out0);
+    ccmc::Kameleon::_cxform(from.c_str(), to.c_str(), ephemerisTime, &in1, &out1);
+    ccmc::Kameleon::_cxform(from.c_str(), to.c_str(), ephemerisTime, &in2, &out2);
 
     return glm::dmat3(
         out0.c0, out0.c1, out0.c2,

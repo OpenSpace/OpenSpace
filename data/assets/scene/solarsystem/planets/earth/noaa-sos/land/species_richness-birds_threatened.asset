@@ -1,0 +1,72 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Species Richness - Birds Threatened"
+local Identifier = "noaa-sos-land-species_richness-birds_threatened"
+local Description = [[Understanding the biodiversity of our planet is critical for
+developing conservation strategies. This series of datasets shows the biodiversity of
+birds, mammals, and amphibians. Said simply, these maps show how many kinds of birds or
+mammals or amphibians live in each area around the world. These maps look at just the
+animals on land and don't include any marine animals. Also included are corresponding
+maps of where the threatened species live, the ones at greatest risk of extinction.
+Knowing where these threatened species live can help direct conservation efforts to
+ensure that the places with the most vulnerable species are being protected]]
+local URL = "https://sos.noaa.gov/catalog/datasets/species-richness-birds-threatened/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+local layer_4096 = {
+  Identifier = Identifier,
+  Name = Name,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+local layer_with_background = {
+  Identifier = Identifier .. "-background",
+  Name = Name .. " (w/ Background)",
+  FilePath = syncedDirectory .. "4096-background.png",
+  Description = Description
+}
+
+local labels = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "labels.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+
+asset.onInitialize(function ()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_4096)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_with_background)
+  openspace.addScreenSpaceRenderable(labels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_4096)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_with_background)
+  openspace.removeScreenSpaceRenderable(labels)
+end)
+
+asset.export(layer_4096)
+asset.export(layer_with_background)
+asset.export(labels)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

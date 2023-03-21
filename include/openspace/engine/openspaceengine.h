@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,13 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/engine/globalscallbacks.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/property.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/touch.h>
@@ -58,13 +64,22 @@ struct ShutdownInformation {
 
 struct CommandlineArguments {
     std::string configurationName;
-    std::string configurationOverride;
+    std::vector<std::string> configurationOverride;
 };
 
-class OpenSpaceEngine {
+class OpenSpaceEngine : public properties::PropertyOwner {
 public:
+    // A mode that specifies which part of the system is currently in control.
+    // The mode can be used to limit certain features, like setting time, navigation
+    // or triggering scripts
+    enum class Mode {
+        UserControl = 0,
+        SessionRecordingPlayback,
+        CameraPath
+    };
+
     OpenSpaceEngine();
-    ~OpenSpaceEngine();
+    ~OpenSpaceEngine() override;
 
     void registerPathTokens();
     void initialize();
@@ -78,27 +93,40 @@ public:
     void drawOverlays();
     void postDraw();
     void resetPropertyChangeFlags();
-    void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
-    void charCallback(unsigned int codepoint, KeyModifier modifier);
-    void mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);
-    void mousePositionCallback(double x, double y);
-    void mouseScrollWheelCallback(double posX, double posY);
+    void keyboardCallback(Key key, KeyModifier mod, KeyAction action,
+        IsGuiWindow isGuiWindow);
+    void charCallback(unsigned int codepoint, KeyModifier modifier,
+        IsGuiWindow isGuiWindow);
+    void mouseButtonCallback(MouseButton button, MouseAction action,
+        KeyModifier mods, IsGuiWindow isGuiWindow);
+    void mousePositionCallback(double x, double y, IsGuiWindow isGuiWindow);
+    void mouseScrollWheelCallback(double posX, double posY, IsGuiWindow isGuiWindow);
     void touchDetectionCallback(TouchInput input);
     void touchUpdateCallback(TouchInput input);
     void touchExitCallback(TouchInput input);
-    void handleDragDrop(const std::string& file);
+    void handleDragDrop(std::filesystem::path file);
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
-    void scheduleLoadSingleAsset(std::string assetPath);
+    properties::Property::Visibility visibility() const;
+    bool showHiddenSceneGraphNodes() const;
     void toggleShutdownMode();
+
+    Mode currentMode() const;
+    bool setMode(Mode newMode);
+    void resetMode();
+
+    using CallbackHandle = int;
+    using ModeChangeCallback = std::function<void()>;
+
+    CallbackHandle addModeChangeCallback(ModeChangeCallback cb);
+    void removeModeChangeCallback(CallbackHandle handle);
 
     // Guaranteed to return a valid pointer
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
 
-    void writeSceneDocumentation();
-    void writeStaticDocumentation();
+    void writeDocumentation();
     void createUserDirectoriesIfNecessary();
 
     /**
@@ -108,13 +136,16 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    void loadSingleAsset(const std::string& assetPath);
+    void loadAssets();
     void loadFonts();
 
     void runGlobalCustomizationScripts();
-    void configureLogging();
-    std::string generateFilePath(std::string openspaceRelativePath);
     void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
+
+    properties::BoolProperty _printEvents;
+    properties::OptionProperty _visibility;
+    properties::BoolProperty _showHiddenSceneGraphNodes;
+    properties::BoolProperty _disableAllMouseInputs;
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
@@ -122,13 +153,7 @@ private:
     std::unique_ptr<LoadingScreen> _loadingScreen;
     std::unique_ptr<VersionChecker> _versionChecker;
 
-    bool _hasScheduledAssetLoading = false;
-    std::string _scheduledAssetPathToLoad;
-
-    glm::vec2 _mousePosition;
-
-    //grabs json from each module to pass to the documentation engine.
-    std::string _documentationJson;
+    glm::vec2 _mousePosition = glm::vec2(0.f);
 
     std::future<void> _writeDocumentationTask;
 
@@ -136,16 +161,65 @@ private:
 
     // The first frame might take some more time in the update loop, so we need to know to
     // disable the synchronization; otherwise a hardware sync will kill us after 1 minute
-    bool _isFirstRenderingFirstFrame = true;
+    bool _isRenderingFirstFrame = true;
+
+    Mode _currentMode = Mode::UserControl;
+    Mode _modeLastFrame = Mode::UserControl;
+
+    int _nextCallbackHandle = 0;
+    std::vector<std::pair<CallbackHandle, ModeChangeCallback>> _modeChangeCallbacks;
 };
+
+/**
+ * Sets the camera position using the time contents of a profile. The function will
+ * set an absolute position or a go-to-geolocation command using the globebrowsing
+ * module.
+ * \param p The Profile to be read.
+ */
+void setCameraFromProfile(const Profile& p);
+
+/**
+ * Reads a list of modules from a profile, and executes scripts based on whether or
+ * not the corresponding module is loaded.
+ *
+ * \param p The Profile to be read.
+ */
+void setModulesFromProfile(const Profile& p);
+
+/**
+ * Registers actions from the contents of a profile.
+ *
+ * \param p The Profile to be read.
+ */
+void setActionsFromProfile(const Profile& p);
+
+/**
+ * Registers keybindings from the contents of a profile.
+ *
+ * \param p The Profile to be read.
+ */
+void setKeybindingsFromProfile(const Profile& p);
+
+/**
+ * Reads list of nodes from profile to be marked as interesting nodes.
+ * If any nodes are listed, a script to mark these will be queued with the
+ * script engine.
+ *
+ * \param p The Profile to be read.
+ */
+void setMarkInterestingNodesFromProfile(const Profile& p);
+
+/**
+ * Reads list of "additional scripts" that are added to the profile to be run
+ * at the end of the initialization. Any openspace lua commands are allowed,
+ * and will be added to the script queue.
+ *
+ * \param p The Profile to be read.
+ */
+void setAdditionalScriptsFromProfile(const Profile& p);
 
 } // namespace openspace
 
-// Lua functions - exposed for testing
-namespace openspace::luascriptfunctions {
-
-int createSingleColorImage(lua_State* L);
-
-} // openspace::luascriptfunctions
+std::filesystem::path createSingleColorImage(std::string name, glm::dvec3 color);
 
 #endif // __OPENSPACE_CORE___OPENSPACEENGINE___H__

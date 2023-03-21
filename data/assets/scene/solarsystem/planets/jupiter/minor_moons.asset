@@ -1,18 +1,76 @@
-asset.require('./minor/ananke_group')
-asset.require('./minor/carme_group')
-asset.require('./minor/carpo_group')
-asset.require('./minor/himalia_group')
-asset.require('./minor/inner_group')
-asset.require('./minor/other_groups')
-asset.require('./minor/pasiphae_group')
-asset.require('./minor/themisto_group')
+asset.require("./minor/ananke_group")
+asset.require("./minor/carme_group")
+asset.require("./minor/carpo_group")
+asset.require("./minor/himalia_group")
+asset.require("./minor/inner_group")
+asset.require("./minor/other_groups")
+asset.require("./minor/pasiphae_group")
+asset.require("./minor/themisto_group")
+
+local minormoons_on = {
+  Identifier = "os.solarsystem.jupiter.minormoonson",
+  Name = "Turn ON minor moons and trails",
+  Command = [[
+    local trails = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Enabled');
+    local trails_fade = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Fade');
+
+    local moons = openspace.getProperty('{moon_minor_jupiter}.Renderable.Enabled');
+    local moons_fade = openspace.getProperty('{moon_minor_jupiter}.Renderable.Fade');
+
+    for i, v in pairs(trails_fade) do 
+      openspace.setPropertyValueSingle(trails[i], true)
+      openspace.setPropertyValueSingle(v, 1, 2, 'Linear') 
+    end
+
+    for i, v in pairs(moons_fade) do 
+      openspace.setPropertyValueSingle(moons[i], true)
+      openspace.setPropertyValueSingle(v, 1, 2, 'Linear') 
+    end
+  ]],
+  Documentation = "Turn ON Jupiter's minor moons and their trails",
+  GuiPath = "/Solar System/Jupiter",
+  IsLocal = true
+}
+
+local minormoons_off = {
+  Identifier = "os.solarsystem.jupiter.minormoonsoff",
+  Name = "Turn OFF minors moon and trails",
+  Command = [[
+    local trails = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Enabled');
+    local trails_fade = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Fade');
+
+    local moons = openspace.getProperty('{moon_minor_jupiter}.Renderable.Enabled');
+    local moons_fade = openspace.getProperty('{moon_minor_jupiter}.Renderable.Fade');
+
+    for i, v in pairs(trails_fade) do 
+      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)" ) 
+    end
+
+    for i, v in pairs(moons_fade) do
+      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)" ) 
+    end
+  ]],
+  Documentation = "Turn OFF Jupiter's minor moons and their trails",
+  GuiPath = "/Solar System/Jupiter",
+  IsLocal = true
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(minormoons_on)
+  openspace.action.registerAction(minormoons_off)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(minormoons_off)
+  openspace.action.removeAction(minormoons_on)
+end)
 
 
 asset.meta = {
   Name = "Jupiter Minor Moons",
-  Version = "1.0",
-  Description = [[ Meta asset containing eight moon groups: Ananke, Carme, Carpo,
-     Himalia, Pasiphae, Themisto, Inner, and Other]],
+  Version = "1.1",
+  Description = [[Meta asset containing eight moon groups: Ananke, Carme, Carpo, Himalia,
+    Pasiphae, Themisto, Inner, and Other]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

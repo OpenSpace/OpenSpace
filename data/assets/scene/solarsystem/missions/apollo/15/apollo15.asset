@@ -1,10 +1,16 @@
-local assetHelper = asset.require('util/asset_helper')
-local moon_transforms = asset.require('scene/solarsystem/planets/earth/moon/moon')
-local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
-asset.require('spice/base')
-local models = asset.require('scene/solarsystem/missions/apollo/csm_model').models
+local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local sun = asset.require("scene/solarsystem/sun/sun")
+asset.require("spice/base")
+asset.require("../actions")
 
-local kernels = asset.require('scene/solarsystem/missions/apollo/15/kernels').kernels
+local models = asset.syncedResource({
+  Name = "Apollo Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_models",
+  Version = 4
+})
+
+local kernels = asset.require("scene/solarsystem/missions/apollo/15/kernels").kernels
 
 
 -- local models = asset.syncedResource({
@@ -13,22 +19,6 @@ local kernels = asset.require('scene/solarsystem/missions/apollo/15/kernels').ke
 --   Identifier = "apollo_models",
 --   Version = 1
 -- })
-
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sun_transforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
--- {
---   Identifier = "Camera",
---   Type = "CameraLightSource",
---   Intensity = 0.5,
---   Enabled = false
--- }
-}
-
 
 local Apollo15 = {
   Identifier = "Apollo15",
@@ -49,14 +39,10 @@ local Apollo15 = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/ApolloCSM.fbx",
+    GeometryFile = models .. "ApolloCSM.osmodel",
+    ModelScale = 0.0001,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sun_transforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     },
     PerformShading = true,
     DisableFaceCulling = true
@@ -95,6 +81,15 @@ local Apollo15Trail = {
   }
 }
 
-local list = { Apollo15, Apollo15Trail }
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Apollo15)
+  openspace.addSceneGraphNode(Apollo15Trail)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, list)
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Apollo15Trail)
+  openspace.removeSceneGraphNode(Apollo15)
+end)
+
+asset.export(Apollo15)
+asset.export(Apollo15Trail)

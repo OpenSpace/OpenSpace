@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,18 +32,22 @@ uniform vec3 xColor;
 uniform vec3 yColor;
 uniform vec3 zColor;
 
+
 Fragment getFragment() {
-    Fragment frag;
+  Fragment frag;
 
-    vec3 colorComponents = step(0.01f, vs_positionModelSpace);
+  // We compare against a small value as the first vertex doesn't have a positional
+  // information (or rather it is 0) and we don't want to miss out on the color close to
+  // the origin
+  vec3 colorComponents = step(2e-32, vs_positionModelSpace);
 
-    frag.color.rgb = colorComponents.x * xColor +
-        colorComponents.y * yColor +
-        colorComponents.z * zColor;
-    frag.color.a = 1.0;
+  frag.color.rgb = colorComponents.x * xColor +
+    colorComponents.y * yColor +
+    colorComponents.z * zColor;
+  frag.color.a = 1.0;
 
-    frag.depth = vs_screenSpaceDepth;
-    frag.gPosition = vs_positionViewSpace;
-    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-    return frag;
+  frag.depth = vs_screenSpaceDepth;
+  frag.gPosition = vs_positionViewSpace;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+  return frag;
 }

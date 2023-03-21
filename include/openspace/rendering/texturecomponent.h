@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,13 +35,14 @@ namespace openspace {
 
 class TextureComponent {
 public:
-    using Texture = ghoul::opengl::Texture;
+    // nDimensions must be 1, 2, 3
+    TextureComponent(int nDimensions);
 
-    const Texture* texture() const;
-    Texture* texture();
+    const ghoul::opengl::Texture* texture() const;
+    ghoul::opengl::Texture* texture();
 
-    void setFilterMode(Texture::FilterMode filterMode);
-    void setWrapping(Texture::WrappingMode wrapping);
+    void setFilterMode(ghoul::opengl::Texture::FilterMode filterMode);
+    void setWrapping(ghoul::opengl::Texture::WrappingMode wrapping);
     void setShouldWatchFileForChanges(bool value);
     void setShouldPurgeFromRAM(bool value);
 
@@ -57,15 +58,20 @@ public:
 
 private:
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
-    std::unique_ptr<Texture> _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-    Texture::FilterMode _filterMode = Texture::FilterMode::LinearMipMap;
-    Texture::WrappingMode _wrappingMode = Texture::WrappingMode::Repeat;
+    ghoul::opengl::Texture::FilterMode _filterMode =
+        ghoul::opengl::Texture::FilterMode::LinearMipMap;
+    ghoul::opengl::Texture::WrappingMode _wrappingMode =
+        ghoul::opengl::Texture::WrappingMode::Repeat;
+
     bool _shouldWatchFile = true;
     bool _shouldPurgeFromRAM = true;
 
     bool _fileIsDirty = false;
     bool _textureIsDirty = false;
+
+    const int _nDimensions;
 };
 
 } // namespace openspace

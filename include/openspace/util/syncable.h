@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@ class SyncBuffer;
 /**
  * Interface for synchronizable data
  *
- * Used by <code>SyncEngine</code>
+ * Used by `SyncEngine`
  */
 class Syncable {
 public:
@@ -43,10 +43,10 @@ protected:
     // from the used of implementations of the interface
     friend class SyncEngine;
 
-    virtual void preSync(bool /*isMaster*/) {};
+    virtual void preSync(bool /*isMaster*/) {}
     virtual void encode(SyncBuffer* /*syncBuffer*/) = 0;
     virtual void decode(SyncBuffer* /*syncBuffer*/) = 0;
-    virtual void postSync(bool /*isMaster*/) {};
+    virtual void postSync(bool /*isMaster*/) {}
 };
 
 } // namespace openspace

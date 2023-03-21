@@ -1,9 +1,13 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
-local textures = asset.require('./sun_textures').TexturesPath
 asset.require("spice/base")
 
 
+local textures = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Sun textures",
+  Identifier = "sun_textures",
+  Version = 4
+})
 
 local SunMarker = {
   Identifier = "SunMarker",
@@ -14,25 +18,33 @@ local SunMarker = {
     Size = 3.0E11,
     Origin = "Center",
     Billboard = true,
-    Texture = textures .. "/marker.png",
+    Texture = textures .. "marker.png",
     BlendMode = "Additive"
   },
   GUI = {
     Name = "Sun Marker",
     Path = "/Solar System/Sun",
-    Description = [[ Sun marker with name, sized for Solar System view]]
+    Description = "Sun marker with name, sized for Solar System view"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { SunMarker })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SunMarker)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SunMarker)
+end)
+
+asset.export(SunMarker)
+
 
 
 asset.meta = {
   Name = "Sun marker",
-  Version = "1.0",
-  Description = [[ Marker for the sun, with a stick and label.]],
+  Version = "1.1",
+  Description = "Marker for the Sun, with a stick and label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"SunMarker"}
+  License = "MIT license"
 }

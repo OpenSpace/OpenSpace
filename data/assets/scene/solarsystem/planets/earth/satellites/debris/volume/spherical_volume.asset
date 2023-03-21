@@ -4,7 +4,6 @@
 -- the volume data itself needs to be generated,
 -- using the task 'data/tasks/volume/debristasks/generate_debris_volume.task'
 
-local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 local maxApogee = 10946320;
@@ -28,11 +27,29 @@ local volume = {
   },
   Transform = {
     Scale = {
-      Type = "StaticScale",   
+      Type = "StaticScale",
       Scale = maxApogee    --do not multiply this. That will not show real representation.
     }
   }
 }
 
-local objects = { volume }
-assetHelper.registerSceneGraphNodes(asset, objects)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(volume)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(volume)
+end)
+
+asset.export(volume)
+
+
+
+asset.meta = {
+  Name = "Satellites Debris - Volume Spherical",
+  Version = "1.0",
+  Description = "Satellites asset for Debris - Volume Spherical. Example asset",
+  Author = "OpenSpace Team",
+  URL = "",
+  License = "MIT"
+}

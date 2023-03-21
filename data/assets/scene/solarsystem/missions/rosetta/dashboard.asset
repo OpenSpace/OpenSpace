@@ -1,24 +1,34 @@
-local assetHelper = asset.require('util/asset_helper')
+local spacing = {
+  Type = "DashboardItemSpacing",
+  Identifier = "RosettaSpacing",
+  GuiName = "Rosetta Spacing",
+  Spacing = 25
+}
 
-assetHelper.registerDashboardItems(asset, {
-  {
-    Type = "DashboardItemSpacing",
-    Identifier = "RosettaSpacing",
-    GuiName = "Rosetta Spacing",
-    Spacing = 25
-  },
-  {
-    Type = "DashboardItemDistance",
-    Identifier = "Rosetta67PDistance",
-    GuiName = "Rosetta 67P Distance",
-    SourceType = "Node",
-    SourceNodeName = "Rosetta",
-    DestinationType = "Node",
-    DestinationNodeName = "67P"
-  },
-  {
-    Type = "DashboardItemInstruments",
-    Identifier = "RosettaInstruments",
-    GuiName = "Rosetta Instruments",
-  }
-})
+local distance = {
+  Type = "DashboardItemDistance",
+  Identifier = "Rosetta67PDistance",
+  GuiName = "Rosetta 67P Distance",
+  SourceType = "Node",
+  SourceNodeName = "Rosetta",
+  DestinationType = "Node",
+  DestinationNodeName = "67P"
+}
+
+local instruments = {
+  Type = "DashboardItemInstruments",
+  Identifier = "RosettaInstruments",
+  GuiName = "Rosetta Instruments",
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(spacing)
+  openspace.dashboard.addDashboardItem(distance)
+  openspace.dashboard.addDashboardItem(instruments)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(instruments)
+  openspace.dashboard.removeDashboardItem(distance)
+  openspace.dashboard.removeDashboardItem(spacing)
+end)

@@ -9,5 +9,17 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.dashboard.removeDashboardItem(item.Identifier)
+  openspace.dashboard.removeDashboardItem(item)
 end)
+
+asset.export(item)
+
+
+asset.meta = {
+  Name = "Dashboard - GlobeLocation",
+  Version = "1.0",
+  Description = "This asset provides a GlobeLocation dashboard item",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

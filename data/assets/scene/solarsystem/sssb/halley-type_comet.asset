@@ -1,29 +1,51 @@
-local assetHelper = asset.require('util/asset_helper')
-local sharedSssb = asset.require('./sssb_shared')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'halley-type_comet',
-  'sssb_data_halley-type_comet')
-local object = sharedSssb.createSssbGroupObject('sssb_data_halley-type_comet.csv',
-  "Halley-type Comets", filepath, { 0.66, 0.66, 0.66 })
-object.Renderable.Enabled = false
-object.Renderable.SegmentQuality = 9
-object.Renderable.TrailFade = 18
+local sssb = asset.syncedResource({
+  Name = "Small SolarSystem Body Data (Halley-type Comet)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_halley-type_comet",
+  Version = 1
+})
 
-object.GUI.Description = [[ Periodic comets with an orbital period between 20 and 200
-  years. ]]
+local object = {
+  Identifier = "sssb_halley-type_comet",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_halley-type_comet.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 9,
+    Color = { 0.66, 0.66, 0.66 },
+    TrailFade = 18
+  },
+  GUI = {
+    Name = "Halley-type Comets",
+    Path = "/Solar System/Small Bodies",
+    Description = "Periodic comets with an orbital period between 20 and 200 years."
+  }
+}
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Halley-Type Comets",
-  Version = "1.0",
-  Description = [[ RenderableSmallBody asset with data from from JPL Horizons
-    contiaining the Halley-Type group.]],
+  Version = "1.1",
+  Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
+    the Halley-Type group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
   License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
     All documents available from this server may be protected under the U.S. and
-    Foreign Copyright Laws.]],
-  Identifiers = {"sssb_sssb_data_halley-type_comet"}
+    Foreign Copyright Laws]]
 }

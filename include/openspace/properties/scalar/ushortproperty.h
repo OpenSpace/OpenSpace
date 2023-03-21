@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,26 +25,15 @@
 #ifndef __OPENSPACE_CORE___USHORTPROPERTY___H__
 #define __OPENSPACE_CORE___USHORTPROPERTY___H__
 
- /**
- * \file ushortproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class UShortProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>unsigned short</code>.
-
- * @} @}
- */
-
 #include <openspace/properties/numericalproperty.h>
 #include <limits>
 
 namespace openspace::properties {
 
+/**
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type `unsigned short`.
+ */
 class UShortProperty : public NumericalProperty<unsigned short> {
 public:
     UShortProperty(Property::PropertyInfo info, unsigned short value = 0,
@@ -52,13 +41,10 @@ public:
         unsigned short maxValue = std::numeric_limits<unsigned short>::max(),
         unsigned short stepValue = 1);
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<unsigned short>::operator=;
-
-protected:
-    unsigned short fromLuaConversion(lua_State* state, bool& success) const override;
 };
 
 } // namespace openspace::properties

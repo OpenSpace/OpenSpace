@@ -1,0 +1,20 @@
+local image = asset.syncedResource({
+  Name = "Crab Nebula Image",
+  Type = "HttpSynchronization",
+  Identifier = "crab_image",
+  Version = 1
+})
+
+asset.export("image", image)
+
+asset.meta = {
+  Name = "Crab Nebula",
+  Version = "1.0",
+  Description = "Crab Nebula Image",
+  Author = [[
+    NASA, ESA and Allison Loll/Jeff Hester (Arizona State University).
+    Acknowledgement: Davide De Martin (ESA/Hubble)
+  ]],
+  URL = "https://esahubble.org/images/ann0820/",
+  License = "CC BY 4.0"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <modules/globebrowsing/src/lrucache.h>
 #include <glm/glm.hpp>
@@ -58,7 +58,7 @@ TEST_CASE("LRUCache: Get", "[lrucache]") {
     openspace::globebrowsing::cache::LRUCache<int, std::string, DefaultHasher> lru(4);
     lru.put(1, "hej");
     lru.put(12, "san");
-    REQUIRE(lru.get(1) == "hej");
+    CHECK(lru.get(1) == "hej");
 }
 
 TEST_CASE("LRUCache: CleaningCache", "[lrucache]") {
@@ -68,8 +68,8 @@ TEST_CASE("LRUCache: CleaningCache", "[lrucache]") {
     lru.put(123, 33.4);
     lru.put(1234, 4.5);
     lru.put(12345, 6.7);
-    REQUIRE_FALSE(lru.exist(1));
-    REQUIRE(lru.exist(12));
+    CHECK_FALSE(lru.exist(1));
+    CHECK(lru.exist(12));
 }
 
 TEST_CASE("LRUCache: StructKey", "[lrucache]") {
@@ -86,13 +86,13 @@ TEST_CASE("LRUCache: StructKey", "[lrucache]") {
 
 
     lru.put(key1, val1);
-    REQUIRE(lru.exist(key1));
-    REQUIRE(lru.get(key1) == val1);
+    CHECK(lru.exist(key1));
+    CHECK(lru.get(key1) == val1);
 
     // Putting key2 should replace key1
     lru.put(key2, val2);
-    REQUIRE(key1 == key2);
-    REQUIRE(lru.exist(key2));
-    REQUIRE(lru.get(key1) == val2);
-    REQUIRE(lru.get(key2) == val2);
+    CHECK(key1 == key2);
+    CHECK(lru.exist(key2));
+    CHECK(lru.get(key1) == val2);
+    CHECK(lru.get(key2) == val2);
 }

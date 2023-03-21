@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,8 +23,6 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/camerainteractionstates.h>
-
-#include <openspace/interaction/inputstate.h>
 
 namespace openspace::interaction {
 
@@ -84,6 +82,18 @@ void CameraInteractionStates::resetVelocities() {
     _truckMovementState.velocity.setHard({ 0.0, 0.0 });
     _localRollState.velocity.setHard({ 0.0, 0.0 });
     _globalRollState.velocity.setHard({ 0.0, 0.0 });
+}
+
+bool CameraInteractionStates::hasNonZeroVelocities() {
+    glm::dvec2 sum = globalRotationVelocity();
+    sum += localRotationVelocity();
+    sum += truckMovementVelocity();
+    sum += localRotationVelocity();
+    sum += localRollVelocity();
+    sum += globalRollVelocity();
+    // Epsilon size based on that even if no interaction is happening,
+    // there might still be some residual velocity in the variables
+    return glm::length(sum) > 0.001;
 }
 
 glm::dvec2 CameraInteractionStates::globalRotationVelocity() const{

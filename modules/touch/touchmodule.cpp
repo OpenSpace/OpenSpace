@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,49 +28,197 @@
 #include <modules/touch/include/win32_touch.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/moduleengine.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionmonitor.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <ghoul/logging/logmanager.h>
-#include <sstream>
-#include <string>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
+#include <algorithm>
 
 using namespace TUIO;
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TouchActiveInfo = {
-        "TouchActive",
-        "True if we want to use touch input as 3d navigation",
-        "Use this if we want to turn on or off Touch input navigation. "
-        "Disabling this will reset all current touch inputs to the navigation. "
+    constexpr std::string_view _loggerCat = "TouchModule";
+
+    constexpr openspace::properties::Property::PropertyInfo EnableTouchInfo = {
+        "EnableTouchInteraction",
+        "Enable Touch Interaction",
+        "Use this property to turn on/off touch input navigation in the 3D scene. "
+        "Disabling will reset all current touch inputs to the navigation."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
+        "DetectedTouchEvent",
+        "Detected Touch Event",
+        "True when there is an active touch event",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        DefaultDirectTouchRenderableTypesInfo =
+    {
+        "DefaultDirectTouchRenderableTypes",
+        "Default Direct Touch Renderable Types",
+        "A list of renderable types that will automatically use the \'direct "
+        "manipulation\' scheme when interacted with, keeping the finger on a static "
+        "position on the interaction sphere of the object when touching. Good for "
+        "relatively spherical objects.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 }
 namespace openspace {
+
+TouchModule::TouchModule()
+    : OpenSpaceModule("Touch")
+    , _touchIsEnabled(EnableTouchInfo, true)
+    , _hasActiveTouchEvent(EventsInfo, false)
+    , _defaultDirectTouchRenderableTypes(DefaultDirectTouchRenderableTypesInfo)
+{
+    addPropertySubOwner(_touch);
+    addPropertySubOwner(_markers);
+    addProperty(_touchIsEnabled);
+    _touchIsEnabled.onChange([&]() {
+        _touch.resetAfterInput();
+        _lastTouchInputs.clear();
+    });
+
+    _hasActiveTouchEvent.setReadOnly(true);
+    addProperty(_hasActiveTouchEvent);
+
+    _defaultDirectTouchRenderableTypes.onChange([&]() {
+        _sortedDefaultRenderableTypes.clear();
+        for (const std::string& s : _defaultDirectTouchRenderableTypes.value()) {
+            ghoul::TemplateFactory<Renderable>* fRenderable =
+                FactoryManager::ref().factory<Renderable>();
+
+            if (!fRenderable->hasClass(s)) {
+                LWARNING(fmt::format(
+                    "In property 'DefaultDirectTouchRenderableTypes': '{}' is not a "
+                    "registered renderable type. Ignoring", s
+                ));
+                continue;
+            }
+
+            _sortedDefaultRenderableTypes.insert(s);
+        }
+    });
+    addProperty(_defaultDirectTouchRenderableTypes);
+}
+
+TouchModule::~TouchModule() {
+    // intentionally left empty
+}
+
+bool TouchModule::isDefaultDirectTouchType(std::string_view renderableType) const {
+    return _sortedDefaultRenderableTypes.find(std::string(renderableType)) !=
+        _sortedDefaultRenderableTypes.end();
+}
+
+void TouchModule::internalInitialize(const ghoul::Dictionary&){
+    _ear.reset(new TuioEar());
+
+    global::callback::initializeGL->push_back([&]() {
+        LDEBUG("Initializing TouchMarker OpenGL");
+        _markers.initialize();
+#ifdef WIN32
+        // We currently only support one window of touch input internally
+        // so here we grab the first window-handle and use it.
+        void* nativeWindowHandle = global::windowDelegate->getNativeWindowHandle(0);
+        if (nativeWindowHandle) {
+            _win32TouchHook = std::make_unique<Win32TouchHook>(nativeWindowHandle);
+        }
+#endif
+    });
+
+    global::callback::deinitializeGL->push_back([&]() {
+        LDEBUG("Deinitialize TouchMarker OpenGL");
+        _markers.deinitialize();
+    });
+
+    // These are handled in UI thread, which (as of 20th dec 2019) is in main/rendering
+    // thread so we don't need a mutex here
+    global::callback::touchDetected->push_back(
+        [this](TouchInput i) {
+            addTouchInput(i);
+            return true;
+        }
+    );
+
+    global::callback::touchUpdated->push_back(
+        [this](TouchInput i) {
+            updateOrAddTouchInput(i);
+            return true;
+        }
+    );
+
+    global::callback::touchExit->push_back(
+        std::bind(&TouchModule::removeTouchInput, this, std::placeholders::_1)
+    );
+
+
+    global::callback::preSync->push_back([&]() {
+        if (!_touchIsEnabled) {
+            return;
+        }
+
+        OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+        if (mode == OpenSpaceEngine::Mode::CameraPath ||
+            mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+        {
+            // Reset everything, to avoid problems once we process inputs again
+            _lastTouchInputs.clear();
+            _touch.resetAfterInput();
+            clearInputs();
+            return;
+        }
+
+        _touch.setCamera(global::navigationHandler->camera());
+
+        bool gotNewInput = processNewInput();
+        if (gotNewInput && global::windowDelegate->isMaster()) {
+            _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
+        }
+        else if (_touchPoints.empty()) {
+            _touch.resetAfterInput();
+        }
+
+        // Update last processed touch inputs
+        _lastTouchInputs.clear();
+        for (const TouchInputHolder& points : _touchPoints) {
+            _lastTouchInputs.emplace_back(points.latestInput());
+        }
+        // Calculate the new camera state for this frame
+        _touch.step(global::windowDelegate->deltaTime());
+        clearInputs();
+    });
+
+    global::callback::render->push_back([&]() {
+        _markers.render(_touchPoints);
+    });
+}
 
 bool TouchModule::processNewInput() {
     // Get new input from listener
     std::vector<TouchInput> earInputs = _ear->takeInput();
     std::vector<TouchInput> earRemovals = _ear->takeRemovals();
 
-    for(const TouchInput& input : earInputs) {
+    for (const TouchInput& input : earInputs) {
         updateOrAddTouchInput(input);
     }
-    for(const TouchInput& removal : earRemovals) {
+    for (const TouchInput& removal : earRemovals) {
         removeTouchInput(removal);
     }
 
-     // Set touch property to active (to void mouse input, mainly for mtdev bridges)
-    _touch.touchActive(!_touchPoints.empty());
+    bool touchHappened = !_touchPoints.empty();
+    _hasActiveTouchEvent = touchHappened;
 
-    if (!_touchPoints.empty()) {
+    // Set touch property to active (to void mouse input, mainly for mtdev bridges)
+    if (touchHappened) {
         global::interactionMonitor->markInteraction();
     }
 
-    // Erase old input id's that no longer exists
+    // Erase old input ids that no longer exist
     _lastTouchInputs.erase(
         std::remove_if(
             _lastTouchInputs.begin(),
@@ -86,7 +234,7 @@ bool TouchModule::processNewInput() {
             }
         ),
         _lastTouchInputs.end()
-    );
+     );
 
     if (_tap) {
         _touch.tap();
@@ -98,9 +246,11 @@ bool TouchModule::processNewInput() {
     if (_touchPoints.size() == _lastTouchInputs.size() &&
         !_touchPoints.empty())
     {
+        // @TODO (emmbr26, 2023-02-03) Looks to me like this code will always return
+        // true? That's a bit weird and should probably be investigated
         bool newInput = true;
-        // go through list and check if the last registrered time is newer than the one in
-        // lastProcessed (last frame)
+        // Go through list and check if the last registrered time is newer than the
+        // last processed touch inputs (last frame)
         std::for_each(
             _lastTouchInputs.begin(),
             _lastTouchInputs.end(),
@@ -111,11 +261,12 @@ bool TouchModule::processNewInput() {
                     [&input](const TouchInputHolder& inputHolder) {
                         return inputHolder.holdsInput(input);
                     }
-            );
-            if (!holder->isMoving()) {
-                newInput = true;
+                );
+                if (!holder->isMoving()) {
+                    newInput = true;
+                }
             }
-        });
+        );
         return newInput;
     }
     else {
@@ -142,7 +293,7 @@ void TouchModule::addTouchInput(TouchInput input) {
 
 void TouchModule::updateOrAddTouchInput(TouchInput input) {
     for (TouchInputHolder& inputHolder : _touchPoints) {
-        if (inputHolder.holdsInput(input)){
+        if (inputHolder.holdsInput(input)) {
             inputHolder.tryAddInput(input);
             return;
         }
@@ -152,13 +303,13 @@ void TouchModule::updateOrAddTouchInput(TouchInput input) {
 
 void TouchModule::removeTouchInput(TouchInput input) {
     _deferredRemovals.emplace_back(input);
-    //Check for "tap" gesture:
+    // Check for "tap" gesture:
     for (TouchInputHolder& inputHolder : _touchPoints) {
         if (inputHolder.holdsInput(input)) {
             inputHolder.tryAddInput(input);
             const double totalTime = inputHolder.gestureTime();
             const float totalDistance = inputHolder.gestureDistance();
-            //Magic values taken from tuioear.cpp:
+            // Magic values taken from tuioear.cpp:
             const bool isWithinTapTime = totalTime < 0.18;
             const bool wasStationary = totalDistance < 0.0004f;
             if (isWithinTapTime && wasStationary && _touchPoints.size() == 1 &&
@@ -169,91 +320,6 @@ void TouchModule::removeTouchInput(TouchInput input) {
             return;
         }
     }
-}
-
-TouchModule::TouchModule()
-    : OpenSpaceModule("Touch")
-    , _touchActive(TouchActiveInfo, true)
-{
-    addPropertySubOwner(_touch);
-    addPropertySubOwner(_markers);
-    addProperty(_touchActive);
-    _touchActive.onChange([&] {
-        _touch.resetAfterInput();
-        _lastTouchInputs.clear();
-    });
-}
-
-TouchModule::~TouchModule() {
-    // intentionally left empty
-}
-
-void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
-    _ear.reset(new TuioEar());
-
-    global::callback::initializeGL->push_back([&]() {
-        LDEBUGC("TouchModule", "Initializing TouchMarker OpenGL");
-        _markers.initialize();
-#ifdef WIN32
-        // We currently only support one window of touch input internally
-        // so here we grab the first window-handle and use it.
-        void* nativeWindowHandle = global::windowDelegate->getNativeWindowHandle(0);
-        if (nativeWindowHandle) {
-            _win32TouchHook = std::make_unique<Win32TouchHook>(nativeWindowHandle);
-        }
-#endif
-    });
-
-    global::callback::deinitializeGL->push_back([&]() {
-        LDEBUGC("TouchMarker", "Deinitialize TouchMarker OpenGL");
-        _markers.deinitialize();
-    });
-
-    // These are handled in UI thread, which (as of 20th dec 2019) is in main/rendering
-    // thread so we don't need a mutex here
-    global::callback::touchDetected->push_back(
-        [this](TouchInput i) {
-            addTouchInput(i);
-            return true;
-        }
-    );
-
-    global::callback::touchUpdated->push_back(
-        [this](TouchInput i) {
-            updateOrAddTouchInput(i);
-            return true;
-        }
-    );
-
-    global::callback::touchExit->push_back(
-        std::bind(&TouchModule::removeTouchInput, this, std::placeholders::_1)
-    );
-
-
-    global::callback::preSync->push_back([&]() {
-        _touch.setCamera(global::navigationHandler->camera());
-        _touch.setFocusNode(global::navigationHandler->orbitalNavigator().anchorNode());
-
-        if (processNewInput() && global::windowDelegate->isMaster() && _touchActive) {
-            _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
-        }
-        else if (_touchPoints.empty()) {
-            _touch.resetAfterInput();
-        }
-
-        // update lastProcessed
-        _lastTouchInputs.clear();
-        for (const TouchInputHolder& points : _touchPoints) {
-            _lastTouchInputs.emplace_back(points.latestInput());
-        }
-        // calculate the new camera state for this frame
-        _touch.step(global::windowDelegate->deltaTime());
-        clearInputs();
-    });
-
-    global::callback::render->push_back([&]() {
-        _markers.render(_touchPoints);
-    });
 }
 
 } // namespace openspace

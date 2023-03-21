@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,9 +44,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimeRange::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_util_timerange";
-    return doc;
+    return codegen::doc<Parameters>("core_util_timerange");
 }
 
 TimeRange::TimeRange(double startTime, double endTime)

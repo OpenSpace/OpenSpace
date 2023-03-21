@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,64 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/engine/globals.h>
+namespace {
 
-namespace openspace::luascriptfunctions::asset {
+/**
+ * Adds an asset to the current scene. The parameter passed into this function is the path
+ * to the file that should be loaded.
+ */
+[[codegen::luawrap]] void add(std::string assetName) {
+    openspace::global::openSpaceEngine->assetManager().add(assetName);
+}
 
-int add(lua_State* state) {
-    ghoul::lua::checkArgumentsAndThrow(state, 1, "lua::add");
+/**
+ * Removes the asset with the specfied name from the scene. The parameter to this function
+ * is the same that was originally used to load this asset, i.e. the path to the asset
+ * file.
+ */
+[[codegen::luawrap]] void remove(std::string assetName) {
+    openspace::global::openSpaceEngine->assetManager().remove(assetName);
+}
 
-    AssetManager* assetManager =
-        reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
-
-    const std::string& assetName = ghoul::lua::value<std::string>(
-        state,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-
-    if (global::renderEngine->scene()) {
-        assetManager->add(assetName);
+/**
+ * Returns true if the referenced asset already has been loaded. Otherwise false is
+ * returned. The parameter to this function is the path of the asset that should be
+ * tested.
+ */
+[[codegen::luawrap]] bool isLoaded(std::string assetName) {
+    using namespace openspace;
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
+    for (const Asset* a : as) {
+        if (a->path() == assetName) {
+            return true;
+        }
     }
-    else {
-        // The scene might not exist yet if OpenSpace was started without specifying an
-        // initial asset
-        global::openSpaceEngine->scheduleLoadSingleAsset(assetName);
+    return false;
+}
+
+/**
+ * Returns the paths to all loaded assets, loaded directly or indirectly, as a table
+ * containing the paths to all loaded assets.
+ */
+[[codegen::luawrap]] std::vector<std::string> allAssets() {
+    using namespace openspace;
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
+    std::vector<std::string> res;
+    res.reserve(as.size());
+    for (const Asset* a : as) {
+        res.push_back(a->path().string());
     }
-
-
-    ghoul_assert(lua_gettop(state) == 0, "Incorrect number of items left on stack");
-    return 0;
+    return res;
 }
 
-int remove(lua_State* state) {
-    ghoul::lua::checkArgumentsAndThrow(state, 1, "lua::remove");
+#include "assetmanager_lua_codegen.cpp"
 
-    AssetManager* assetManager =
-        reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
-
-    const std::string& assetName = ghoul::lua::value<std::string>(
-        state,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    assetManager->remove(assetName);
-
-    ghoul_assert(lua_gettop(state) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-int removeAll(lua_State* state) {
-    ghoul::lua::checkArgumentsAndThrow(state, 0, "lua::removeAll");
-
-    AssetManager* assetManager =
-        reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
-
-    assetManager->removeAll();
-
-    return 0;
-}
-
-} // namespace openspace::luascriptfunctions
+} // namespace

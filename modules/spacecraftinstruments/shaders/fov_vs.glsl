@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,12 +30,11 @@ layout(location = 0) in vec3 in_point_position;
 layout (location = 1) in int colorInformation;
 
 out vec4 vs_color;
-out vec4 vs_positionScreenSpace;
+out float vs_depth;
 
 uniform mat4 modelViewProjectionTransform;
-
-uniform vec3 defaultColorStart;
-uniform vec3 defaultColorEnd;
+uniform vec3 colorStart;
+uniform vec3 colorEnd;
 uniform vec3 activeColor;
 uniform vec3 targetInFieldOfViewColor;
 uniform vec3 intersectionStartColor;
@@ -54,37 +53,45 @@ const int VertexColorTypeSquare = 6;
 
 
 void main() {
-    vec4 position = vec4(in_point_position, 1);
-    vec4 positionClipSpace = modelViewProjectionTransform * position;
+  vec4 positionClipSpace = modelViewProjectionTransform * vec4(in_point_position, 1.0);
 
-    vs_positionScreenSpace = z_normalization(positionClipSpace);
-    gl_Position = vs_positionScreenSpace;
+  vec4 pos = z_normalization(positionClipSpace);
+  vs_depth = pos.w;
+  gl_Position = pos;
 
-    vec3 color;
-    switch (colorInformation) { 
-        case VertexColorTypeDefaultStart:
-            color = defaultColorStart;
-            break;
-        case VertexColorTypeDefaultEnd:
-            color = defaultColorEnd;
-            break;
-        case VertexColorTypeInFieldOfView:
-            color = activeColor * interpolation + targetInFieldOfViewColor * (1 - interpolation);
-            break;
-        case VertexColorTypeActive:
-            color = activeColor;
-            break;
-        case VertexColorTypeIntersectionStart:
-            color = intersectionStartColor;
-            break;
-        case VertexColorTypeIntersectionEnd:
-            color = activeColor * interpolation + intersectionEndColor * (1 - interpolation);
-            break;
-        case VertexColorTypeSquare:
-            color = activeColor * interpolation + squareColor * (1 - interpolation);
-            break;
-        default:
-            color = vec3(1.0, 0.0, 1.0);
-    }
-    vs_color = vec4(color, 1.0);
+  vec3 color;
+  switch (colorInformation) { 
+    case VertexColorTypeDefaultStart:
+      vs_color = vec4(colorStart, 1.0);
+      break;
+    case VertexColorTypeDefaultEnd:
+      vs_color = vec4(colorEnd, 1.0);
+      break;
+    case VertexColorTypeInFieldOfView:
+      vs_color = vec4(
+        activeColor * interpolation + targetInFieldOfViewColor * (1.0 - interpolation),
+        1.0
+      );
+      break;
+    case VertexColorTypeActive:
+      vs_color = vec4(activeColor, 1.0);
+      break;
+    case VertexColorTypeIntersectionStart:
+      vs_color = vec4(intersectionStartColor, 1.0);
+      break;
+    case VertexColorTypeIntersectionEnd:
+      vs_color = vec4(
+        activeColor * interpolation + intersectionEndColor * (1.0 - interpolation),
+        1.0
+      );
+      break;
+    case VertexColorTypeSquare:
+      vs_color = vec4(
+        activeColor * interpolation + squareColor * (1.0 - interpolation),
+        1.0
+      );
+      break;
+    default:
+      vs_color = vec4(1.0, 0.0, 1.0, 1.0);
+  }
 }

@@ -1,0 +1,100 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
+
+local circle = asset.syncedResource({
+  Name = "Circle",
+  Type = "HttpSynchronization",
+  Identifier = "circle_image",
+  Version = 1
+})
+
+local kernels = asset.syncedResource({
+  Name = "Lagrange Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "earth_lagrange_kernels",
+  Version = 1
+})
+
+local L5Position = {
+  Identifier = "L5Position",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = 395, -- L5
+      Observer = "SSB",
+      Kernels = kernels .. "L5_de431.bsp"
+    }
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
+  GUI = {
+    Name = "L5 Position",
+    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Hidden = true
+  }
+}
+
+local L5 = {
+  Identifier = "L5",
+  Parent = L5Position.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    RenderBinMode = "Opaque",
+    Billboard = true,
+    Size = 800E6,
+    Texture = circle .. "circle.png",
+    BlendMode = "Additive"
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
+  GUI = {
+    Name = "L5",
+    Path = "/Solar System/Planets/Earth/Lagrange points",
+  }
+}
+
+local L5Label = {
+  Identifier = "L5Label",
+  Parent = L5Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Text = "L5",
+    FontSize = 50,
+    Size = 8.5,
+    MinMaxSize = { 1.0, 100.0 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = false
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
+  GUI = {
+    Name = "L5 Label",
+    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Description = "Main label for L5"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(L5Position)
+  openspace.addSceneGraphNode(L5)
+  openspace.addSceneGraphNode(L5Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(L5Label)
+  openspace.removeSceneGraphNode(L5)
+  openspace.removeSceneGraphNode(L5Position)
+end)
+
+asset.export(L5Position)
+asset.export(L5)
+asset.export(L5Label)
+
+
+asset.meta = {
+  Name = "Lagrange point L5",
+  Version = "1.0",
+  Description = "Lagrange point L5 node and label",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

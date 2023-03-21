@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,6 @@ namespace openspace {
 
 class HongKangParser : public SequenceParser {
 public:
-    HongKangParser();
     HongKangParser(std::string name, std::string fileName, std::string spacecraft,
         const ghoul::Dictionary& translationDictionary,
         std::vector<std::string> potentialTargets);
@@ -48,7 +47,6 @@ private:
     std::string _name;
     std::string _fileName;
     std::string _spacecraft;
-    std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
     std::vector<std::string> _potentialTargets;
 };
 

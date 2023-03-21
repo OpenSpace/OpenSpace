@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,26 +27,23 @@
 #include <openspace/engine/globals.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/logging/logmanager.h>
-#include <cstring>
 
 namespace openspace {
 
-std::map<std::string, ImageSubset>& SequenceParser::getSubsetMap() {
+std::map<std::string, ImageSubset>& SequenceParser::subsetMap() {
     return _subsetMap;
 }
 
 const std::vector<std::pair<std::string, TimeRange>>&
-SequenceParser::getInstrumentTimes() const
+SequenceParser::instrumentTimes() const
 {
     return _instrumentTimes;
 }
-const std::vector<std::pair<double, std::string>>&
-SequenceParser::getTargetTimes() const
-{
+const std::vector<std::pair<double, std::string>>& SequenceParser::targetTimes() const {
     return _targetTimes;
 }
 
-const std::vector<double>& SequenceParser::getCaptureProgression() const {
+const std::vector<double>& SequenceParser::captureProgression() const {
     return _captureProgression;
 }
 

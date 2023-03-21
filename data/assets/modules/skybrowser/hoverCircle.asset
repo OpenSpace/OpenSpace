@@ -1,0 +1,50 @@
+-- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_SPOUT enabled
+
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+local imageFolder = asset.syncedResource({
+  Name = "Hover Circle Image",
+  Type = "HttpSynchronization",
+  Identifier = "misc_ring_image",
+  Version = 1
+})
+
+local circle = {
+  Identifier = "hoverCircle",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 3.0E15,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imageFolder .. "ring.png"
+  },
+  GUI = {
+    Name = "Hover Circle",
+    Description = [[A circular marker that shows the position on the night sky
+      of the object hovered in the sky browser UI. The circle will hide/show up
+      dynamically, depending on the interaction with the items in the UI]],
+    Path = "/SkyBrowser"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(circle)
+  openspace.skybrowser.setHoverCircle('hoverCircle')
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(circle)
+end)
+
+asset.export(circle)
+
+asset.meta = {
+  Name = "SkyBrowser Hover Circle",
+  Version = "1.0",
+  Description = [[Includes a circular marker that shows the position on the night sky
+    of the object hovered in the sky browser UI]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

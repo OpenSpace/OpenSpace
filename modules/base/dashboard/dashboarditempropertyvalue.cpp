@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ namespace {
         "Display String",
         "The String that is being displayed. It must either be empty (in which case only "
         "the value itself will be displayed), or it must contain extact one instance of "
-        "{}, which will be replaced with the value of the property during rendering."
+        "{}, which will be replaced with the value of the property during rendering"
     };
 
     struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {
@@ -62,9 +62,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemPropertyValue::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_dashboarditem_propertyvalue";
-    return doc;
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_propertyvalue",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemPropertyValue::DashboardItemPropertyValue(
@@ -84,7 +85,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
 }
 
 void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_propertyIsDirty) {
         _property = openspace::property(_propertyUri);
@@ -92,16 +93,18 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
     }
 
     if (_property) {
-        std::string value;
-        _property->getStringValue(value);
-
-        RenderFont(*_font, penPosition, fmt::format(_displayString.value(), value));
+        std::string value = _property->stringValue();
+        RenderFont(
+            *_font,
+            penPosition,
+            fmt::format(fmt::runtime(_displayString.value()), value)
+        );
         penPosition.y -= _font->height();
     }
 }
 
 glm::vec2 DashboardItemPropertyValue::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     return _font->boundingBox(_displayString.value());
 }

@@ -1,7 +1,5 @@
 -- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_SYNC enabled
 
-local assetHelper = asset.require("util/asset_helper")
-
 asset.syncedResource({
   Name = "Example Single",
   Type = "UrlSynchronization",
@@ -33,12 +31,6 @@ asset.syncedResource({
   Identifier = "example_medium",
   Url = "http://ipv4.download.thinkbroadband.com/5MB.zip",
   Override = true
-})
-
-asset.syncedResource({
-  Name = "Example No ident",
-  Type = "UrlSynchronization",
-  Url = "http://ipv4.download.thinkbroadband.com/5MB.zip"
 })
 
 asset.syncedResource({

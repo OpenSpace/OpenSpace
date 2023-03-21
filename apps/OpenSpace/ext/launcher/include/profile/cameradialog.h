@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,14 @@
 
 #include <QDialog>
 
-namespace openspace { class Profile; }
+#include <openspace/scene/profile.h>
+#include <optional>
 
 class QLabel;
 class QLineEdit;
 class QTabWidget;
 
-class CameraDialog : public QDialog {
+class CameraDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -43,7 +44,7 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    CameraDialog(openspace::Profile& profile, QWidget* parent);
+    CameraDialog(QWidget* parent, std::optional<openspace::Profile::CameraType>* camera);
 
 private slots:
     void approved();
@@ -57,7 +58,7 @@ private:
     void addErrorMsg(QString errorDescription);
     bool areRequiredFormsFilledAndValid();
 
-    openspace::Profile& _profile;
+    std::optional<openspace::Profile::CameraType>* _camera = nullptr;
     QTabWidget* _tabWidget = nullptr;
     struct {
         QLineEdit* anchor = nullptr;

@@ -1,0 +1,79 @@
+local fade_up_trails = {
+  Identifier = "os.fade_up_trails",
+  Name = "Show All Trails",
+  Command = [[
+    local capList = openspace.getProperty("Scene.*Trail.Renderable.Fade");
+    for _,v in ipairs(capList) do
+      openspace.setPropertyValueSingle(v, 1, 2);
+    end
+    local list = openspace.getProperty("Scene.*trail.Renderable.Fade");
+    for _,v in ipairs(list) do
+      openspace.setPropertyValueSingle(v, 1, 2);
+    end
+  ]],
+  Documentation = "Fade up all enabled trails in the Scene",
+  GuiPath = "/Trails",
+  IsLocal = true
+}
+asset.export("fade_up_trails", fade_up_trails.Identifier)
+
+local fade_down_trails = {
+  Identifier = "os.fade_down_trails",
+  Name = "Hide All Trails",
+  Command = [[
+    local capList = openspace.getProperty("Scene.*Trail.Renderable.Fade");
+    for _,v in ipairs(capList) do
+      openspace.setPropertyValueSingle(v, 0, 2);
+    end
+    local list = openspace.getProperty("Scene.*trail.Renderable.Fade");
+    for _,v in ipairs(list) do
+      openspace.setPropertyValueSingle(v, 0, 2);
+    end
+  ]],
+  Documentation = "Fade down all enabled trails in the Scene",
+  GuiPath = "/Trails",
+  IsLocal = true
+}
+asset.export("fade_down_trails", fade_down_trails.Identifier)
+
+local toggle_trails = {
+  Identifier = "os.toggle_trails",
+  Name = "Toggle All Trails",
+  Command = [[
+    local capList = openspace.getProperty("*Trail.Renderable.Fade");
+    local list = openspace.getProperty("*trail.Renderable.Fade");
+    if (#capList == 0) and (#list == 0) then
+      openspace.printWarning("No trails to toggle");
+    else
+      local prop;
+      if #capList > 0 then
+        prop = capList[1];
+      else
+        prop = list[1];
+      end
+      local currentFade = openspace.getPropertyValue(prop);
+      local newFade = 0;
+      if currentFade < 1 then
+        newFade = 1;
+      end
+      openspace.setPropertyValue("Scene.*Trail.Renderable.Fade", newFade, 2);
+      openspace.setPropertyValue("Scene.*trail.Renderable.Fade", newFade, 2);
+    end
+  ]],
+  Documentation = "Toggle fade for all trails in the Scene",
+  GuiPath = "/Trails",
+  IsLocal = true
+}
+asset.export("toggle_trails", toggle_trails.Identifier)
+
+asset.onInitialize(function()
+  openspace.action.registerAction(fade_up_trails)
+  openspace.action.registerAction(fade_down_trails)
+  openspace.action.registerAction(toggle_trails)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(toggle_trails)
+  openspace.action.removeAction(fade_down_trails)
+  openspace.action.removeAction(fade_up_trails)
+end)

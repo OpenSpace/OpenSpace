@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "Galaxy Superclusters Textures",
   Type = "HttpSynchronization",
@@ -21,19 +17,22 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "superclust.label",
+      Color = { 0.9, 0.9, 0.9 },
+      Size = 22.44,
+      MinMaxSize = { 8, 20 },
+      Unit = "Mpc"
+    },
     DrawElements = false,
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    File = speck .. "/superclust.speck",
-    Texture = textures .. "/point3A.png",
-    LabelFile = speck .. "/superclust.label",
-    TextColor = { 0.9, 0.9, 0.9 },
-    ScaleFactor = 531.0,
-    TextSize = 22.44,
-    TextMinSize = 8.0,
+    File = speck .. "superclust.speck",
+    Texture = textures .. "point3A.png",
     Unit = "Mpc",
+    ScaleFactor = 531.0,
     DrawLabels = true,
-    --BillboardMaxSize = 7.2,
+    -- BillboardMinMaxSize = { 0.0, 7.2 },
     EnablePixelSizeControl = true
   },
   GUI = {
@@ -48,15 +47,23 @@ local object = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Galaxy Superclusters",
-  Version = "2.0",
-  Description = [[Digital Universe asset for Galaxy Superclusters.]],
+  Version = "2.1",
+  Description = "Digital Universe asset for Galaxy Superclusters",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"GalaxySuperclusters"}
+  License = "AMNH Digital Universe"
 }

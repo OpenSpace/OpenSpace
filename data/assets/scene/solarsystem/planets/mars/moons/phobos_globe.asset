@@ -1,0 +1,62 @@
+local transforms = asset.require('../transforms')
+
+local kernels = asset.syncedResource({
+  Name = "Mars Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "mars_kernels",
+  Version = 1
+})
+
+
+local PhobosGlobe = {
+  Identifier = "Phobos_Globe",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_PHOBOS",
+      DestinationFrame = "GALACTIC",
+      Kernels = kernels .. "mar097.bsp"
+    },
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PHOBOS",
+      Observer = "MARS BARYCENTER",
+      Kernels = kernels .. "mar097.bsp"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 13030, 11400, 9140 },
+--Radius source
+--https://naif.jpl.nasa.gov/pub/naif/generic_kernels/dsk/satellites/willner_etal_phobos.pdf
+    SegmentsPerPatch = 90,
+    Layers = {}
+  },
+  Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
+  GUI = {
+    Name = "Phobos_Globe",
+    Path = "/Solar System/Planets/Mars",
+    Description = "One of two moons of Mars"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PhobosGlobe)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PhobosGlobe)
+end)
+
+asset.export(PhobosGlobe)
+
+
+asset.meta = {
+  Name = "Phobos Globe",
+  Version = "1.0",
+  Description = "RenderableGlobe for Phobos",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

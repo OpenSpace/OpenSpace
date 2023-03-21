@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,8 @@
 #define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___SEQUENCEPARSER___H__
 
 #include <modules/spacecraftinstruments/util/decoder.h>
-#include <openspace/util/timerange.h>
 #include <modules/spacecraftinstruments/util/image.h>
-
+#include <openspace/util/timerange.h>
 #include <map>
 #include <memory>
 #include <string>
@@ -40,11 +39,12 @@ class SequenceParser {
 public:
     virtual ~SequenceParser() = default;
     virtual bool create() = 0;
-    std::map<std::string, ImageSubset>& getSubsetMap();
-    const std::vector<std::pair<std::string, TimeRange>>& getInstrumentTimes() const;
-    const std::vector<std::pair<double, std::string>>& getTargetTimes() const ;
+
+    std::map<std::string, ImageSubset>& subsetMap();
+    const std::vector<std::pair<std::string, TimeRange>>& instrumentTimes() const;
+    const std::vector<std::pair<double, std::string>>& targetTimes() const ;
     std::map<std::string, std::unique_ptr<Decoder>>& translations();
-    const std::vector<double>& getCaptureProgression() const;
+    const std::vector<double>& captureProgression() const;
 
 protected:
     std::map<std::string, ImageSubset> _subsetMap;

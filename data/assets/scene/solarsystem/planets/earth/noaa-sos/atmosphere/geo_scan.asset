@@ -1,0 +1,55 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Geostationary Satellites: Scanning Pattern"
+local Identifier = "noaa-sos-atmosphere-geo_scan"
+local Description = [[Geostationary satellites are a key tool for scientists to monitor
+and observe the Earth's atmosphere. They are called geostationary due to their movement.
+Geostationary satellites orbit around the Earth at the same rate as the Earth rotates so
+that the satellites are over the same spot on Earth all the time. This allows them to
+collect a continuous stream of data for one location so that "movies" of the data can be
+made. The satellites are positioned 22,300 miles above the Earth's surface in order to
+view the Earth's full disk and to maintain their geostationary orbit. Geostationary
+satellites travel at about 7000mph in order to maintain their geostationary orbit. Over
+the United States there are two such satellites, the GOES (Geostationary Operational
+Environmental Satellite) - East and GOES-West. There are many such satellites
+worldwide]]
+local URL = "https://sos.noaa.gov/catalog/datasets/geostationary-satellites-scanning-pattern/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1,
+  UnzipFiles = true
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ImageSequenceTileLayer",
+  FolderPath = syncedDirectory .. "2048",
+  Description = Description
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export(layer)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

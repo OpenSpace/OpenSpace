@@ -1,24 +1,34 @@
-local assetHelper = asset.require('util/asset_helper')
+local spacing = {
+  Type = "DashboardItemSpacing",
+  Identifier = "OsirisRexSpacing",
+  GuiName = "OSIRIS-REx Spacing",
+  Spacing = 25
+}
 
-assetHelper.registerDashboardItems(asset, {
-  {
-    Type = "DashboardItemSpacing",
-    Identifier = "OsirisRexSpacing",
-    GuiName = "OSIRIS-REx Spacing",
-    Spacing = 25
-  },
-  {
-    Type = "DashboardItemDistance",
-    Identifier = "OsirisRexBennuDistance",
-    GuiName = "OSIRIS-REx Bennu Distance",
-    SourceType = "Node",
-    SourceNodeName = "OsirisRex",
-    DestinationType = "Node",
-    DestinationNodeName = "BennuBarycenter"
-  },
-  {
-    Type = "DashboardItemInstruments",
-    Identifier = "OsirisRexInstruments",
-    GuiName = "OSIRIS-REx Instruments",
-  }
-})
+local distance = {
+  Type = "DashboardItemDistance",
+  Identifier = "OsirisRexBennuDistance",
+  GuiName = "OSIRIS-REx Bennu Distance",
+  SourceType = "Node",
+  SourceNodeName = "OsirisRex",
+  DestinationType = "Node",
+  DestinationNodeName = "BennuBarycenter"
+}
+
+local instruments = {
+  Type = "DashboardItemInstruments",
+  Identifier = "OsirisRexInstruments",
+  GuiName = "OSIRIS-REx Instruments",
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(spacing)
+  openspace.dashboard.addDashboardItem(distance)
+  openspace.dashboard.addDashboardItem(instruments)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(instruments)
+  openspace.dashboard.removeDashboardItem(distance)
+  openspace.dashboard.removeDashboardItem(spacing)
+end)

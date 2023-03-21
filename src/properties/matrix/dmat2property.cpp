@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,16 +41,12 @@ DMat2Property::DMat2Property(Property::PropertyInfo info, glm::dmat2x2 value,
     )
 {}
 
-std::string DMat2Property::className() const {
+std::string_view DMat2Property::className() const {
     return "DMat2Property";
 }
 
 int DMat2Property::typeLua() const {
     return LUA_TTABLE;
-}
-
-glm::dmat2x2 DMat2Property::fromLuaConversion(lua_State* state, bool& success) const {
-    return ghoul::lua::tryGetValue<glm::dmat2x2>(state, success);
 }
 
 }  // namespace openspace::properties

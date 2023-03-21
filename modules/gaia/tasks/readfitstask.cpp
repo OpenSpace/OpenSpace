@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,9 +38,9 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyFilterColumnNames = "FilterColumnNames";
+    constexpr std::string_view KeyFilterColumnNames = "FilterColumnNames";
 
-    constexpr const char* _loggerCat = "ReadFitsTask";
+    constexpr std::string_view _loggerCat = "ReadFitsTask";
 
     struct [[codegen::Dictionary(ReadFitsTask)]] Parameters {
         // If SingleFileProcess is set to true then this specifies the path to a single
@@ -109,7 +109,7 @@ std::string ReadFitsTask::description() {
         "Read the specified fits file (or all fits files in specified folder): {}\n and "
         "write raw star data into: {}\nAll columns required for default rendering and "
         "filtering parameters will always be read but user can define additional filter "
-        "columns to read.", _inFileOrFolderPath, _outFileOrFolderPath
+        "columns to read", _inFileOrFolderPath, _outFileOrFolderPath
     );
 }
 
@@ -147,7 +147,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
         LINFO("Number of values per star: " + std::to_string(nValuesPerStar));
 
         if (nValues == 0) {
-            LERROR("Error writing file - No values were read from file.");
+            LERROR("Error writing file - No values were read from file");
         }
         outFileStream.write(
             reinterpret_cast<const char*>(&nValues),
@@ -193,7 +193,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
             }
         }
     }
-    
+
     size_t nInputFiles = allInputFiles.size();
     LINFO("Files to read: " + std::to_string(nInputFiles));
 
@@ -261,7 +261,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
         jobManager.enqueueJob(readFileJob);
     }
 
-    LINFO("All files added to queue!");
+    LINFO("All files added to queue");
 
     // Check for finished jobs.
     while (finishedJobs < nInputFiles) {
@@ -295,7 +295,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
             }
         }
     }
-    LINFO(fmt::format("A total of {} stars were written to binary files.", totalStars));
+    LINFO(fmt::format("A total of {} stars were written to binary files", totalStars));
 }
 
 int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int index,
@@ -310,7 +310,7 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
         LINFO("Write " + std::to_string(nValues) + " values to " + outPath);
 
         if (nValues == 0) {
-            LERROR("Error writing file - No values were read from file.");
+            LERROR("Error writing file - No values were read from file");
         }
         // If this is the first write then write number of values per star!
         if (isFirstWrite[index]) {
@@ -331,15 +331,13 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
         return nValues / nValuesPerStar;
     }
     else {
-        LERROR(fmt::format("Error opening file: {} as output data file.", outPath));
+        LERROR(fmt::format("Error opening file: {} as output data file", outPath));
         return 0;
     }
 }
 
 documentation::Documentation ReadFitsTask::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "gaiamission_fitsfiletorawdata";
-    return doc;
+    return codegen::doc<Parameters>("gaiamission_fitsfiletorawdata");
 }
 
 } // namespace openspace

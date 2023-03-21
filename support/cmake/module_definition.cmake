@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,9 +22,8 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake)
 
 include(GenerateExportHeader)
 
@@ -33,7 +32,7 @@ include(GenerateExportHeader)
 # The library will have the name openspace-module-<name> and has all of their
 # dependencies set correctly.
 # The 'library_mode' determines whether the module is linked STATIC or SHARED
-# Dependencies will have to be set in a file called "include.cmake" 
+# Dependencies will have to be set in a file called "include.cmake"
 function (create_new_module module_name output_library_name library_mode)
   # Create a library name of the style: openspace-module-${name}
   create_library_name(${module_name} library_name)
@@ -47,7 +46,7 @@ function (create_new_module module_name output_library_name library_mode)
   # Set compile settings that are common to all modules
   set_openspace_compile_settings(${library_name})
 
-  target_include_directories(${library_name} PUBLIC ${OPENSPACE_BASE_DIR})
+  target_include_directories(${library_name} PUBLIC ${PROJECT_SOURCE_DIR})
   create_define_name(${module_name} define_name)
   target_compile_definitions(${library_name} PUBLIC "${define_name}")
 
@@ -68,24 +67,10 @@ function (create_new_module module_name output_library_name library_mode)
   # instead
   # This value is used in handle_modules.cmake::handle_modules
   set_property(GLOBAL PROPERTY CurrentModuleClassName "${module_name}Module")
-  
+
   set(${output_library_name} ${library_name} PARENT_SCOPE)
 endfunction ()
 
-
-
-function (register_external_libraries libraries)
-  # This is an ugly hack as we can't inject a variable into a scope two parents above
-  # would love to: set(${module_external_librarys} "${libraries}" PARENT_PARENT_SCOPE)
-  # instead
-  set(libs "")
-  foreach (library ${libraries})
-    get_filename_component(lib ${library} ABSOLUTE)
-    list(APPEND libs ${lib})
-  endforeach()
-
-  set_property(GLOBAL PROPERTY CurrentModuleExternalLibraries ${libs})
-endfunction ()
 
 
 # Gets and returns the <name>module.h and <name>module.cpp files and provides them with a
@@ -108,9 +93,6 @@ endfunction ()
 function (handle_module_dependencies target_name module_name)
   # We always want to link against Ghoul and the core library
   target_link_libraries(${library_name} PRIVATE Ghoul openspace-core)
-  # We currently can't reuse the precompiled header because that one has the Kameleon
-  # definition stuck into it
-  #target_precompile_headers(${library_name} REUSE_FROM openspace-core)
   target_precompile_headers(${library_name} PRIVATE
     [["ghoul/fmt.h"]]
     [["ghoul/glm.h"]]
@@ -119,12 +101,13 @@ function (handle_module_dependencies target_name module_name)
     [["ghoul/misc/exception.h"]]
     [["ghoul/misc/invariants.h"]]
     [["ghoul/misc/profiling.h"]]
-    <algorithm>
+    [["ghoul/opengl/ghoul_gl.h"]]
     <array>
-    <map>
+    <filesystem>
     <memory>
     <string>
-    <utility>
+    <string_view>
+    <variant>
     <vector>
   )
 

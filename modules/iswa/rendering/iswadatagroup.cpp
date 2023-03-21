@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "IswaDataGroup";
+    constexpr std::string_view _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
 
     constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {
@@ -79,7 +79,6 @@ namespace {
         "Data Options",
         "" // @TODO Missing documentation
     };
-
 } // namespace
 
 namespace openspace{
@@ -134,7 +133,7 @@ void IswaDataGroup::registerProperties() {
         // else if autofilter is turned off, register backgroundValues
         }
         else {
-            _backgroundValues.setVisibility(properties::Property::Visibility::All);
+            _backgroundValues.setVisibility(properties::Property::Visibility::Always);
             //_backgroundValues.setVisible(true);
         }
         ghoul::Dictionary d;

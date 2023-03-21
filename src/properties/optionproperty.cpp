@@ -3,7 +3,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +25,11 @@
 
 #include <openspace/properties/optionproperty.h>
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "OptionProperty";
+    constexpr std::string_view _loggerCat = "OptionProperty";
 } // namespace
 
 namespace openspace::properties {
@@ -45,7 +46,7 @@ OptionProperty::OptionProperty(PropertyInfo info, DisplayType displayType)
     , _displayType(displayType)
 {}
 
-std::string OptionProperty::className() const {
+std::string_view OptionProperty::className() const {
     return "OptionProperty";
 }
 
@@ -58,7 +59,7 @@ const std::vector<OptionProperty::Option>& OptionProperty::options() const {
 }
 
 void OptionProperty::addOption(int value, std::string desc) {
-    Option option = { std::move(value), std::move(desc) };
+    Option option = { .value = std::move(value), .description = std::move(desc) };
 
     for (const Option& o : _options) {
         if (o.value == option.value) {
@@ -72,6 +73,8 @@ void OptionProperty::addOption(int value, std::string desc) {
         }
     }
     _options.push_back(std::move(option));
+    // Set default value to option added first
+    NumericalProperty::setValue(_options[0].value);
 }
 
 void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options) {
@@ -100,7 +103,7 @@ void OptionProperty::setValue(int value) {
             // @TODO(abock): This should be setValue(value) instead or otherwise the
             //               stored indices and option values start to drift if the
             //               operator T of the OptionProperty is used
-            NumericalProperty::setValue(static_cast<int>(i));
+            NumericalProperty::setValue(static_cast<int>(value));
             return;
         }
     }
@@ -110,12 +113,26 @@ void OptionProperty::setValue(int value) {
 }
 
 bool OptionProperty::hasOption() const {
-    return value() >= 0 && value() < static_cast<int>(_options.size());
+    auto it = std::find_if(
+        _options.begin(),
+        _options.end(),
+        [setValue = value()](const Option& option) {
+            return option.value == setValue;
+        }
+    );
+    return it !=_options.end();
 }
 
 
 const OptionProperty::Option& OptionProperty::option() const {
-    return _options[value()];
+    auto it = std::find_if(
+        _options.begin(),
+        _options.end(),
+        [setValue = value()](const Option& option) {
+            return option.value == setValue;
+        }
+    );
+    return *it;
 }
 
 std::string OptionProperty::getDescriptionByValue(int value) {
@@ -142,9 +159,9 @@ std::string OptionProperty::generateAdditionalJsonDescription() const {
     for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];
         std::string v = std::to_string(o.value);
-        std::string vSan = sanitizeString(v);
+        std::string vSan = escapedJson(v);
         std::string d = o.description;
-        std::string dSan = sanitizeString(d);
+        std::string dSan = escapedJson(d);
 
         result += '{';
         result += fmt::format(R"("{}": "{}")", vSan, dSan);

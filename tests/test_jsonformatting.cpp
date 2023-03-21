@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <openspace/json.h>
 #include <openspace/util/json_helper.h>
@@ -49,20 +50,20 @@ TEMPLATE_TEST_CASE("FormatJson", "[formatjson]", glm::vec2, glm::vec3,
     luaValue.replace(0, 1, "[");
     luaValue.replace(luaValue.size() - 1, 1, "]");
 
-    REQUIRE(json == luaValue);
+    CHECK(json == luaValue);
 }
 
 TEST_CASE("FormatJson - Bool", "[formatjson]") {
     bool trueVal = true;
     bool falseVal = false;
 
-    REQUIRE(openspace::formatJson(trueVal) == "true");
-    REQUIRE(openspace::formatJson(falseVal) == "false");
+    CHECK(openspace::formatJson(trueVal) == "true");
+    CHECK(openspace::formatJson(falseVal) == "false");
 }
 
 TEST_CASE("FormatJson - Infinity & Nan", "[formatjson]") {
-    REQUIRE(openspace::formatJson(std::numeric_limits<double>::infinity()) == "null");
-    REQUIRE(openspace::formatJson(std::numeric_limits<double>::quiet_NaN()) == "null");
+    CHECK(openspace::formatJson(std::numeric_limits<double>::infinity()) == "null");
+    CHECK(openspace::formatJson(std::numeric_limits<double>::quiet_NaN()) == "null");
 }
 
 // @TODO(emmbr 2021-04-29) Add more tests at some point, if we find it necessary

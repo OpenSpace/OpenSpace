@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,7 +60,7 @@ public:
     std::vector<KeyType> keysToEnqueuedJobs();
 
     /**
-     * Bumps the job identified with <code>key</code> to the beginning of the queue.
+     * Bumps the job identified with `key` to the beginning of the queue.
      * In case the job was not already enqueued the function simply returns false and
      * no state is changed.
      * \param key is the identifier of the job to bump.

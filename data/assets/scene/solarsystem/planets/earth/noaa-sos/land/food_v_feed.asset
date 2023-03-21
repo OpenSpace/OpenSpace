@@ -1,0 +1,71 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Agriculture: Food vs. Feed"
+local Identifier = "noaa-sos-land-food_v_feed"
+local Description = [[Not all cropland is used for producing food directly for people. A
+lot of the food crops grown are actually used as feed for animals. This map shows which
+regions produce crops that are mostly consumed directly by humans (in green), which
+regions produce about the same amount of human food and animal feed (in orange), and
+where most of the crops are used as animal feed (in red)]]
+local URL = "https://sos.noaa.gov/catalog/datasets/agriculture-food-vs-feed/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  FilePath = syncedDirectory .. "4096.png",
+  Description = Description
+}
+
+local layer_countries = {
+  Identifier = Identifier .. "-countries",
+  Name = Name .. " (w/ countries)",
+  Enabled = asset.enabled,
+  FilePath = syncedDirectory .. "4096_countries.png",
+  Description = Description
+}
+
+local label = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "label.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_countries)
+  openspace.addScreenSpaceRenderable(label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_countries)
+  openspace.removeScreenSpaceRenderable(label)
+end)
+
+asset.export(layer)
+asset.export(layer_countries)
+asset.export(label)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

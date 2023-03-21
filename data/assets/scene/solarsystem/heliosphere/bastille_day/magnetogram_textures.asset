@@ -1,0 +1,69 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+-- synced directories
+local magnetogramDirectory = asset.require("./magnetogram").TexturesPath;
+local magnetograms;
+
+local switch_color_layer = {
+  Identifier = "os.events.bastilleday.magnetogramtexture.switchcolorlayer",
+  Name = "Next sun texture",
+  Command = [[
+    local textureList = openspace.globebrowsing.getLayers("Sun", "ColorLayers");
+    if (magnetogramsTextureIndex == -1) then
+      magnetogramsTextureIndex = 2;
+    end;
+    magnetogramsTextureIndex = magnetogramsTextureIndex + 1;
+    if (magnetogramsTextureIndex >= #textureList) then
+      magnetogramsTextureIndex = 0;
+    end
+    openspace.setPropertyValue("Scene.Sun.Renderable.Layers.ColorLayers.*.Enabled", false);
+    if (magnetogramsTextureIndex == 0) then
+      openspace.setPropertyValueSingle("Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled", true);
+    else
+      str = "Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-" .. magnetogramsTextureIndex .. ".Enabled";
+      openspace.setPropertyValueSingle(str, true);
+    end;
+  ]],
+  Documentation = "Display next sun texture in list of textures",
+  GuiPath = "/Bastille-Day 2000",
+  IsLocal = false
+}
+
+asset.onInitialize(function ()
+  magnetograms = openspace.walkDirectoryFiles(magnetogramDirectory);
+  rawset(_G, "magnetogramsTextureIndex", -1)
+  for i, imagename in ipairs(magnetograms) do
+    openspace.globebrowsing.addLayer(
+      "Sun",
+      "ColorLayers",
+      {
+        Identifier = "magnetogram-" .. i,
+        Name = imagename,   --"Magnetogram-" .. i,
+        Description = "",
+        FilePath = imagename,
+        Enabled = false
+      }
+    )
+  end
+
+  openspace.action.registerAction(switch_color_layer)
+end)
+
+asset.onDeinitialize(function ()
+  for i, imagename in ipairs(magnetograms) do
+    openspace.globebrowsing.deleteLayer("Sun", "ColorLayers", "magnetogram-" .. i)
+  end
+  openspace.action.removeAction(switch_color_layer)
+end)
+
+
+asset.meta = {
+  Name = "Bastille Day magnetogram textures",
+  Version = "1.1",
+  Description = [[This asset adds multiple magnetogram textures to the Sun. In addition
+  it provides an action to cycle through the textures. See magnetogram.asset for details 
+  of the textures]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

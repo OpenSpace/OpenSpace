@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,14 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <openspace/properties/optionproperty.h>
 
 TEST_CASE("OptionProperty: No Option", "[optionproperty]") {
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
-    REQUIRE_FALSE(p.hasOption());
+    CHECK_FALSE(p.hasOption());
 }
 
 TEST_CASE("OptionProperty: Single Option Single Zero", "[optionproperty]") {
@@ -39,8 +39,8 @@ TEST_CASE("OptionProperty: Single Option Single Zero", "[optionproperty]") {
 
     p = 0;
 
-    REQUIRE(p.option().value == 0);
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().value == 0);
+    CHECK(p.option().description == "a");
 }
 
 TEST_CASE("OptionProperty: Single Option Single Negative", "[optionproperty]") {
@@ -49,8 +49,8 @@ TEST_CASE("OptionProperty: Single Option Single Negative", "[optionproperty]") {
     p.addOption(-1, "a");
     p = -1;
 
-    REQUIRE(p.option().value == -1);
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().value == -1);
+    CHECK(p.option().description == "a");
 }
 
 TEST_CASE("OptionProperty: Single Option Single Positive", "[optionproperty]") {
@@ -59,8 +59,8 @@ TEST_CASE("OptionProperty: Single Option Single Positive", "[optionproperty]") {
     p.addOptions({ { 1, "a" } });
     p = 1;
 
-    REQUIRE(p.option().value == 1);
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().value == 1);
+    CHECK(p.option().description == "a");
 }
 
 TEST_CASE("OptionProperty: Single Option Multiple Zero", "[optionproperty]") {
@@ -69,8 +69,8 @@ TEST_CASE("OptionProperty: Single Option Multiple Zero", "[optionproperty]") {
     p.addOptions({ "a" });
     p = 0;
 
-    REQUIRE(p.option().value == 0);
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().value == 0);
+    CHECK(p.option().description == "a");
 }
 
 TEST_CASE("OptionProperty: Single Option Multiple Negative", "[optionproperty]") {
@@ -79,8 +79,8 @@ TEST_CASE("OptionProperty: Single Option Multiple Negative", "[optionproperty]")
     p.addOptions({ { -1, "a" } });
     p = -1;
 
-    REQUIRE(p.option().value == -1);
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().value == -1);
+    CHECK(p.option().description == "a");
 }
 
 TEST_CASE("OptionProperty: Single Option Multiple Positive", "[optionproperty]") {
@@ -89,8 +89,8 @@ TEST_CASE("OptionProperty: Single Option Multiple Positive", "[optionproperty]")
     p.addOptions({ { 1, "a" } });
     p = 1;
 
-    REQUIRE(p.option().value == 1);
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().value == 1);
+    CHECK(p.option().description == "a");
 }
 
 TEST_CASE("OptionProperty: Single Options Zero Based Consecutive", "[optionproperty]") {
@@ -101,16 +101,16 @@ TEST_CASE("OptionProperty: Single Options Zero Based Consecutive", "[optionprope
     p.addOption(2, "c");
 
     p = 0;
-    REQUIRE(p.option().value == 0);
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().value == 0);
+    CHECK(p.option().description == "a");
 
     p = 1;
-    REQUIRE(p.option().value == 1);
-    REQUIRE(p.option().description == "b");
+    CHECK(p.option().value == 1);
+    CHECK(p.option().description == "b");
 
     p = 2;
-    REQUIRE(p.option().value == 2);
-    REQUIRE(p.option().description == "c");
+    CHECK(p.option().value == 2);
+    CHECK(p.option().description == "c");
 }
 
 TEST_CASE("OptionProperty: Single Options Zero Based Non Consecutive", "[optionproperty]")
@@ -122,16 +122,16 @@ TEST_CASE("OptionProperty: Single Options Zero Based Non Consecutive", "[optionp
     p.addOption(4, "c");
 
     p = 0;
-    REQUIRE(p.option().value == 0);
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().value == 0);
+    CHECK(p.option().description == "a");
 
     p = 2;
-    REQUIRE(p.option().value == 2);
-    REQUIRE(p.option().description == "b");
+    CHECK(p.option().value == 2);
+    CHECK(p.option().description == "b");
 
     p = 4;
-    REQUIRE(p.option().value == 4);
-    REQUIRE(p.option().description == "c");
+    CHECK(p.option().value == 4);
+    CHECK(p.option().description == "c");
 }
 
 TEST_CASE("OptionProperty: Single Options Negative Based Consecutive", "[optionproperty]")
@@ -143,16 +143,16 @@ TEST_CASE("OptionProperty: Single Options Negative Based Consecutive", "[optionp
     p.addOption(-3, "c");
 
     p = -1;
-    REQUIRE(p.option().value == -1);
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().value == -1);
+    CHECK(p.option().description == "a");
 
     p = -2;
-    REQUIRE(p.option().value == -2);
-    REQUIRE(p.option().description == "b");
+    CHECK(p.option().value == -2);
+    CHECK(p.option().description == "b");
 
     p = -3;
-    REQUIRE(p.option().value == -3);
-    REQUIRE(p.option().description == "c");
+    CHECK(p.option().value == -3);
+    CHECK(p.option().description == "c");
 }
 
 TEST_CASE(
@@ -166,16 +166,16 @@ TEST_CASE(
     p.addOption(-5, "c");
 
     p = -1;
-    REQUIRE(p.option().value == -1);
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().value == -1);
+    CHECK(p.option().description == "a");
 
     p = -3;
-    REQUIRE(p.option().value == -3);
-    REQUIRE(p.option().description == "b");
+    CHECK(p.option().value == -3);
+    CHECK(p.option().description == "b");
 
     p = -5;
-    REQUIRE(p.option().value == -5);
-    REQUIRE(p.option().description == "c");
+    CHECK(p.option().value == -5);
+    CHECK(p.option().description == "c");
 }
 
 TEST_CASE("OptionProperty: Single Options Zero Based Alternating", "[optionproperty]") {
@@ -186,16 +186,16 @@ TEST_CASE("OptionProperty: Single Options Zero Based Alternating", "[optionprope
     p.addOption(-4, "c");
 
     p = 0;
-    REQUIRE(p.option().value == 0);
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().value == 0);
+    CHECK(p.option().description == "a");
 
     p = 2;
-    REQUIRE(p.option().value == 2);
-    REQUIRE(p.option().description == "b");
+    CHECK(p.option().value == 2);
+    CHECK(p.option().description == "b");
 
     p = -4;
-    REQUIRE(p.option().value == -4);
-    REQUIRE(p.option().description == "c");
+    CHECK(p.option().value == -4);
+    CHECK(p.option().description == "c");
 }
 
 TEST_CASE("OptionProperty: Single Options Non Zero Based Alternating", "[optionproperty]")
@@ -207,14 +207,14 @@ TEST_CASE("OptionProperty: Single Options Non Zero Based Alternating", "[optionp
     p.addOption(-10, "c");
 
     p = -20;
-    REQUIRE(p.option().value == -20);
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().value == -20);
+    CHECK(p.option().description == "a");
 
     p = 2;
-    REQUIRE(p.option().value == 2);
-    REQUIRE(p.option().description == "b");
+    CHECK(p.option().value == 2);
+    CHECK(p.option().description == "b");
 
     p = -10;
-    REQUIRE(p.option().value == -10);
-    REQUIRE(p.option().description == "c");
+    CHECK(p.option().value == -10);
+    CHECK(p.option().description == "c");
 }

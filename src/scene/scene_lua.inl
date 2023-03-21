@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,20 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/easing.h>
-
-namespace openspace {
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/matrix/dmat2property.h>
+#include <openspace/properties/matrix/dmat3property.h>
+#include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/matrix/mat2property.h>
+#include <openspace/properties/matrix/mat3property.h>
+#include <openspace/properties/matrix/mat4property.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/longproperty.h>
+#include <openspace/properties/scalar/shortproperty.h>
+#include <openspace/properties/scalar/uintproperty.h>
+#include <openspace/properties/scalar/ulongproperty.h>
+#include <openspace/properties/scalar/ushortproperty.h>
+#include <openspace/properties/vector/dvec2property.h>
+#include <openspace/properties/vector/dvec3property.h>
+#include <openspace/properties/vector/dvec4property.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/ivec3property.h>
+#include <openspace/properties/vector/ivec4property.h>
+#include <openspace/properties/vector/uvec2property.h>
+#include <openspace/properties/vector/uvec3property.h>
+#include <openspace/properties/vector/uvec4property.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 
 namespace {
 
 template <class T>
-properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
-    const std::string& tagToMatch)
+openspace::properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
+                                                            const std::string& tagToMatch)
 {
+    using namespace openspace;
+
     properties::PropertyOwner* tagMatchOwner = nullptr;
     properties::PropertyOwner* owner = prop->owner();
 
@@ -57,23 +81,20 @@ properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
     return tagMatchOwner;
 }
 
-void applyRegularExpression(lua_State* L, const std::string& regex,
-    const std::vector<properties::Property*>& properties,
-    double interpolationDuration,
-    const std::string& groupName,
-    ghoul::EasingFunction easingFunction)
+std::vector<openspace::properties::Property*> findMatchesInAllProperties(
+                                                                const std::string& regex,
+                         const std::vector<openspace::properties::Property*>& properties,
+                                                            const std::string& groupName)
 {
-    using ghoul::lua::errorLocation;
-    using ghoul::lua::luaTypeToString;
+    using namespace openspace;
 
+    std::vector<properties::Property*> matches;
     const bool isGroupMode = !groupName.empty();
     bool isLiteral = false;
 
-    const int type = lua_type(L, -1);
-
     // Extract the property and node name to be searched for from regex
-    std::string propertyName = "";
-    std::string nodeName = "";
+    std::string propertyName;
+    std::string nodeName;
     size_t wildPos = regex.find_first_of("*");
     if (wildPos != std::string::npos) {
         nodeName = regex.substr(0, wildPos);
@@ -82,25 +103,25 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
         // If none then malformed regular expression
         if (propertyName.empty() && nodeName.empty()) {
             LERRORC(
-                "applyRegularExpression",
+                "findMatchesInAllProperties",
                 fmt::format(
-                    "Malformed regular expression: '{}': "
-                    "Empty both before and after '*'", regex
+                    "Malformed regular expression: '{}': Empty both before and after '*'",
+                    regex
                 )
             );
-            return;
+            return matches;
         }
 
         // Currently do not support several wildcards
         if (regex.find_first_of("*", wildPos + 1) != std::string::npos) {
             LERRORC(
-                "applyRegularExpression",
+                "findMatchesInAllProperties",
                 fmt::format(
-                    "Malformed regular expression: '{}': "
-                    "Currently only one '*' is supported", regex
+                    "Malformed regular expression: '{}': Currently only one '*' is "
+                    "supported", regex
                 )
             );
-            return;
+            return matches;
         }
     }
     // Literal or tag
@@ -113,15 +134,14 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
 
     // Stores whether we found at least one matching property. If this is false at the end
     // of the loop, the property name regex was probably misspelled.
-    bool foundMatching = false;
     for (properties::Property* prop : properties) {
         // Check the regular expression for all properties
-        const std::string& id = prop->fullyQualifiedIdentifier();
+        const std::string id = prop->fullyQualifiedIdentifier();
 
         if (isLiteral && id != propertyName) {
             continue;
         }
-        else if (!propertyName.empty()){
+        else if (!propertyName.empty()) {
             size_t propertyPos = id.find(propertyName);
             if (propertyPos != std::string::npos) {
                 // Check that the propertyName fully matches the property in id
@@ -137,10 +157,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 // Check tag
                 if (isGroupMode) {
                     properties::PropertyOwner* matchingTaggedOwner =
-                        findPropertyOwnerWithMatchingGroupTag(
-                            prop,
-                            groupName
-                        );
+                        findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;
                     }
@@ -153,14 +170,10 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
         else if (!nodeName.empty()) {
             size_t nodePos = id.find(nodeName);
             if (nodePos != std::string::npos) {
-
                 // Check tag
                 if (isGroupMode) {
                     properties::PropertyOwner* matchingTaggedOwner =
-                        findPropertyOwnerWithMatchingGroupTag(
-                            prop,
-                            groupName
-                        );
+                        findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;
                     }
@@ -174,18 +187,43 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 continue;
             }
         }
+        matches.push_back(prop);
+    }
+    return matches;
+}
 
+void applyRegularExpression(lua_State* L, const std::string& regex,
+                          const std::vector<openspace::properties::Property*>& properties,
+                                                             double interpolationDuration,
+                                                             const std::string& groupName,
+                                                     ghoul::EasingFunction easingFunction,
+                                                                   std::string postScript)
+{
+    using namespace openspace;
+    using ghoul::lua::errorLocation;
+    using ghoul::lua::luaTypeToString;
+
+    const int type = lua_type(L, -1);
+
+    std::vector<properties::Property*> matchingProps = findMatchesInAllProperties(
+        regex,
+        properties,
+        groupName
+    );
+
+    // Stores whether we found at least one matching property. If this is false at the
+    // end of the loop, the property name regex was probably misspelled.
+    bool foundMatching = false;
+    for (properties::Property* prop : matchingProps) {
         // Check that the types match
         if (type != prop->typeLua()) {
             LERRORC(
                 "property_setValue",
                 fmt::format(
-                    "{}: Property '{}' does not accept input of type '{}'. "
-                    "Requested type: '{}'",
-                    errorLocation(L),
-                    prop->fullyQualifiedIdentifier(),
-                    luaTypeToString(type),
-                    luaTypeToString(prop->typeLua())
+                    "{}: Property '{}' does not accept input of type '{}'. Requested "
+                    "type: '{}'",
+                    errorLocation(L), prop->fullyQualifiedIdentifier(),
+                    luaTypeToString(type), luaTypeToString(prop->typeLua())
                 )
             );
         }
@@ -194,6 +232,13 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
             // value change if the types agree
             foundMatching = true;
 
+            // The setLuaInterpolationTarget and setLuaValue functions will remove the
+            // value from the stack, so we need to push it to the end
+            lua_pushvalue(L, -1);
+
+            if (global::sessionRecording->isRecording()) {
+                global::sessionRecording->savePropertyBaseline(*prop);
+            }
             if (interpolationDuration == 0.0) {
                 global::renderEngine->scene()->removePropertyInterpolation(prop);
                 prop->setLuaValue(L);
@@ -203,6 +248,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 global::renderEngine->scene()->addPropertyInterpolation(
                     prop,
                     static_cast<float>(interpolationDuration),
+                    std::move(postScript),
                     easingFunction
                 );
             }
@@ -213,9 +259,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
         LERRORC(
             "property_setValue",
             fmt::format(
-                "{}: No property matched the requested URI '{}'",
-                errorLocation(L),
-                regex
+                "{}: No property matched the requested URI '{}'", errorLocation(L), regex
             )
         );
     }
@@ -224,7 +268,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
 // Checks to see if URI contains a group tag (with { } around the first term). If so,
 // returns true and sets groupName with the tag
 bool doesUriContainGroupTag(const std::string& command, std::string& groupName) {
-    std::string name = command.substr(0, command.find_first_of("."));
+    const std::string name = command.substr(0, command.find_first_of("."));
     if (name.front() == '{' && name.back() == '}') {
         groupName = name.substr(1, name.length() - 2);
         return true;
@@ -239,13 +283,12 @@ std::string removeGroupNameFromUri(const std::string& uri) {
 }
 
 } // namespace
-} // namespace openspace
 
 namespace openspace::luascriptfunctions {
 
-int setPropertyCall_single(properties::Property& prop, const std::string& uri,
-    lua_State* L, double duration,
-    ghoul::EasingFunction easingFunction)
+int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
+                           lua_State* L, double duration,
+                           ghoul::EasingFunction easingFunction, std::string postScript)
 {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
@@ -257,14 +300,15 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
             fmt::format(
                 "{}: Property '{}' does not accept input of type '{}'. "
                 "Requested type: '{}'",
-                errorLocation(L),
-                uri,
-                luaTypeToString(type),
+                errorLocation(L), uri, luaTypeToString(type),
                 luaTypeToString(prop.typeLua())
             )
         );
     }
     else {
+        if (global::sessionRecording->isRecording()) {
+            global::sessionRecording->savePropertyBaseline(prop);
+        }
         if (duration == 0.0) {
             global::renderEngine->scene()->removePropertyInterpolation(&prop);
             prop.setLuaValue(L);
@@ -274,6 +318,7 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
             global::renderEngine->scene()->addPropertyInterpolation(
                 &prop,
                 static_cast<float>(duration),
+                std::move(postScript),
                 easingFunction
             );
         }
@@ -281,77 +326,106 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
     return 0;
 }
 
-/**
- * \ingroup LuaScripts
- * setPropertyValue(string, *):
- * Sets all property(s) identified by the URI (with potential wildcards) in the first
- * argument. The second argument can be any type, but it has to match the type that the
- * property (or properties) expect.
- * If the first term (separated by '.') in the uri is bracketed with { }, then this
- * term is treated as a group tag name, and the function will search through all
- * property owners to find those that are tagged with this group name, and set their
- * property values accordingly.
- */
-
-int property_setValue(lua_State* L) {
-    using ghoul::lua::errorLocation;
-    using ghoul::lua::luaTypeToString;
-
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::property_setValue");
+template <bool optimization>
+int propertySetValue(lua_State* L) {
+    int nParameters = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 2, 6 },
+        "lua::property_setValue"
+    );
     defer { lua_settop(L, 0); };
 
-    std::string uriOrRegex = ghoul::lua::value<std::string>(L, 1);
-    std::string optimization;
+    std::string uriOrRegex =
+        ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No);
     double interpolationDuration = 0.0;
     std::string easingMethodName;
     ghoul::EasingFunction easingMethod = ghoul::EasingFunction::Linear;
+    std::string postScript;
 
-    if (lua_gettop(L) >= 3) {
-        if (lua_type(L, 3) == LUA_TNUMBER) {
-            interpolationDuration = ghoul::lua::value<double>(L, 3);
-        }
-        else {
-            optimization = ghoul::lua::value<std::string>(L, 3);
-        }
+    // Extracting the parameters. These are the options that we have:
+    // 1. <uri> <value>
+    // 2. <uri> <value> <duration>
+    // 3. <uri> <value> <duration> <easing>
+    // 4. <uri> <value> <duration> <easing> <postscript>
 
-        if (lua_gettop(L) >= 4) {
-            if (lua_type(L, 4) == LUA_TNUMBER) {
-                interpolationDuration = ghoul::lua::value<double>(L, 4);
-            }
-            else {
-                easingMethodName = ghoul::lua::value<std::string>(L, 4);
-            }
-        }
-
-        if (lua_gettop(L) == 5) {
-            optimization = ghoul::lua::value<std::string>(L, 5);
-        }
-
+    if (nParameters >= 3) {
         // Later functions expect the value to be at the last position on the stack
         lua_pushvalue(L, 2);
-    }
 
-    if ((interpolationDuration == 0.0) && !easingMethodName.empty()) {
-        LWARNINGC(
-            "property_setValue",
-            "Easing method specified while interpolation duration is equal to 0"
-        );
+        if (ghoul::lua::hasValue<double>(L, 3)) {
+            interpolationDuration =
+                ghoul::lua::value<double>(L, 3, ghoul::lua::PopValue::No);
+        }
+        else {
+            std::string msg = fmt::format(
+                "Unexpected type {} in argument 3",
+                ghoul::lua::luaTypeToString(lua_type(L, 3))
+            );
+            return ghoul::lua::luaError(L, msg);
+        }
+    }
+    if (nParameters >= 4) {
+        if (ghoul::lua::hasValue<std::string>(L, 4)) {
+            easingMethodName =
+                ghoul::lua::value<std::string>(L, 4, ghoul::lua::PopValue::No);
+        }
+        else {
+            std::string msg = fmt::format(
+                "Unexpected type {} in argument 4",
+                ghoul::lua::luaTypeToString(lua_type(L, 4))
+            );
+            return ghoul::lua::luaError(L, msg);
+        }
+    }
+    if (nParameters == 5) {
+        if (ghoul::lua::hasValue<std::string>(L, 5)) {
+            postScript =
+                ghoul::lua::value<std::string>(L, 5, ghoul::lua::PopValue::No);
+        }
+        else {
+            std::string msg = fmt::format(
+                "Unexpected type {} in argument 5",
+                ghoul::lua::luaTypeToString(lua_type(L, 5))
+            );
+            return ghoul::lua::luaError(L, msg);
+        }
     }
 
     if (!easingMethodName.empty()) {
-        bool correctName = ghoul::isValidEasingFunctionName(easingMethodName.c_str());
+        bool correctName = ghoul::isValidEasingFunctionName(easingMethodName);
         if (!correctName) {
             LWARNINGC(
-                "property_setValue",
+                "propertySetValue",
                 fmt::format("{} is not a valid easing method", easingMethodName)
             );
         }
         else {
-            easingMethod = ghoul::easingFunctionFromName(easingMethodName.c_str());
+            easingMethod = ghoul::easingFunctionFromName(easingMethodName);
         }
     }
 
-    if (optimization.empty()) {
+    if (optimization) {
+        properties::Property* prop = property(uriOrRegex);
+        if (!prop) {
+            LERRORC(
+                "property_setValue",
+                fmt::format(
+                    "{}: Property with URI '{}' was not found",
+                    ghoul::lua::errorLocation(L), uriOrRegex
+                )
+            );
+            return 0;
+        }
+        return setPropertyCallSingle(
+            *prop,
+            uriOrRegex,
+            L,
+            interpolationDuration,
+            easingMethod,
+            std::move(postScript)
+        );
+    }
+    else {
         std::string groupName;
         if (doesUriContainGroupTag(uriOrRegex, groupName)) {
             // Remove group name from start of regex and replace with '*'
@@ -364,132 +438,51 @@ int property_setValue(lua_State* L) {
             allProperties(),
             interpolationDuration,
             groupName,
-            easingMethod
-        );
-        return 0;
-    }
-    else if (optimization == "regex") {
-        applyRegularExpression(
-            L,
-            uriOrRegex,
-            allProperties(),
-            interpolationDuration,
-            "",
-            easingMethod
-        );
-    }
-    else if (optimization == "single") {
-        properties::Property* prop = property(uriOrRegex);
-        if (!prop) {
-            LERRORC(
-                "property_setValue",
-                fmt::format(
-                    "{}: Property with URI '{}' was not found",
-                    errorLocation(L),
-                    uriOrRegex
-                )
-            );
-            return 0;
-        }
-        return setPropertyCall_single(
-            *prop,
-            uriOrRegex,
-            L,
-            interpolationDuration,
-            easingMethod
-        );
-    }
-    else {
-        LERRORC(
-            "lua::property_setGroup",
-            fmt::format(
-                "{}: Unexpected optimization '{}'",
-                errorLocation(L),
-                optimization
-            )
+            easingMethod,
+            std::move(postScript)
         );
     }
     return 0;
 }
 
-int property_setValueSingle(lua_State* L) {
-    const int n = lua_gettop(L);
-    if (n == 3) {
-        // If we pass three arguments, the third one is the interpolation factor and the
-        // user did not specify an easing factor, so we have to add that manually before
-        // adding the single optimization
-        ghoul::lua::push(L, ghoul::nameForEasingFunction(ghoul::EasingFunction::Linear));
-    }
+int propertyGetValue(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetValue");
+    const std::string uri = ghoul::lua::value<std::string>(L);
 
-    ghoul::lua::push(L, "single");
-    return property_setValue(L);
-}
-
-/**
- * \ingroup LuaScripts
- * hasProperty(string):
- * Returns whether a property with the given URI exists
- */
-int property_hasProperty(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_hasProperty");
-
-    std::string uri = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-
-    openspace::properties::Property* prop = property(uri);
-    ghoul::lua::push(L, prop != nullptr);
-    return 1;
-}
-
-/**
- * \ingroup LuaScripts
- * getPropertyValue(string):
- * Returns the value of the property identified by the passed URI as a Lua object that can
- * be passed to the setPropertyValue method.
- */
-int property_getValue(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getValue");
-
-    std::string uri = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-
-    openspace::properties::Property* prop = property(uri);
+    properties::Property* prop = property(uri);
     if (!prop) {
         LERRORC(
-            "property_getValue",
+            "propertyGetValue",
             fmt::format(
                 "{}: Property with URI '{}' was not found",
-                ghoul::lua::errorLocation(L),
-                uri
+                ghoul::lua::errorLocation(L), uri
             )
         );
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
     }
     else {
         prop->getLuaValue(L);
     }
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
-/**
-* \ingroup LuaScripts
-* getProperty
-* Returns a list of property identifiers that match the passed regular expression
-*/
-int property_getProperty(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getProperty");
+}  // namespace openspace::luascriptfunctions
 
-    std::string regex = ghoul::lua::value<std::string>(L, 1);
-    lua_pop(L, 1);
+namespace {
+
+/**
+ * Returns whether a property with the given URI exists
+ */
+[[codegen::luawrap]] bool hasProperty(std::string uri) {
+    openspace::properties::Property* prop = openspace::property(uri);
+    return prop != nullptr;
+}
+
+/**
+ * Returns a list of property identifiers that match the passed regular expression
+ */
+[[codegen::luawrap]] std::vector<std::string> getProperty(std::string regex) {
+    using namespace openspace;
 
     std::string groupName;
     if (doesUriContainGroupTag(regex, groupName)) {
@@ -499,8 +492,8 @@ int property_getProperty(lua_State* L) {
 
     // Extract the property and node name to be searched for from regex
     bool isLiteral = false;
-    std::string propertyName = "";
-    std::string nodeName = "";
+    std::string propertyName;
+    std::string nodeName;
     size_t wildPos = regex.find_first_of("*");
     if (wildPos != std::string::npos) {
         nodeName = regex.substr(0, wildPos);
@@ -508,26 +501,18 @@ int property_getProperty(lua_State* L) {
 
         // If none then malformed regular expression
         if (propertyName.empty() && nodeName.empty()) {
-            LERRORC(
-                "property_getProperty",
-                fmt::format(
-                    "Malformed regular expression: '{}': "
-                    "Empty both before and after '*'", regex
-                )
-            );
-            return 0;
+            throw ghoul::lua::LuaError(fmt::format(
+                "Malformed regular expression: '{}': Empty both before and after '*'",
+                regex
+            ));
         }
 
         // Currently do not support several wildcards
         if (regex.find_first_of("*", wildPos + 1) != std::string::npos) {
-            LERRORC(
-                "property_getProperty",
-                fmt::format(
-                    "Malformed regular expression: '{}': "
-                    "Currently only one '*' is supported", regex
-                )
-            );
-            return 0;
+            throw ghoul::lua::LuaError(fmt::format(
+                "Malformed regular expression: '{}': Currently only one '*' is supported",
+                regex
+            ));
         }
     }
     // Literal or tag
@@ -564,10 +549,7 @@ int property_getProperty(lua_State* L) {
                 // Check tag
                 if (!groupName.empty()) {
                     properties::PropertyOwner* matchingTaggedOwner =
-                        findPropertyOwnerWithMatchingGroupTag(
-                            prop,
-                            groupName
-                        );
+                        findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;
                     }
@@ -584,10 +566,7 @@ int property_getProperty(lua_State* L) {
                 // Check tag
                 if (!groupName.empty()) {
                     properties::PropertyOwner* matchingTaggedOwner =
-                        findPropertyOwnerWithMatchingGroupTag(
-                            prop,
-                            groupName
-                        );
+                        findPropertyOwnerWithMatchingGroupTag(prop, groupName);
                     if (!matchingTaggedOwner) {
                         continue;
                     }
@@ -605,93 +584,93 @@ int property_getProperty(lua_State* L) {
         res.push_back(id);
     }
 
-    lua_newtable(L);
-    int number = 1;
-    for (const std::string& s : res) {
-        lua_pushstring(L, s.c_str());
-        lua_rawseti(L, -2, number);
-        ++number;
-    }
-
-    return 1;
+    return res;
 }
 
-int loadScene(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadScene");
-
-    const std::string& sceneFile = ghoul::lua::value<std::string>(L, 1);
-    global::openSpaceEngine->scheduleLoadSingleAsset(sceneFile);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-int addSceneGraphNode(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addSceneGraphNode");
-
-    ghoul::Dictionary d;
+/**
+ * Loads the SceneGraphNode described in the table and adds it to the SceneGraph.
+ */
+[[codegen::luawrap]] void addSceneGraphNode(ghoul::Dictionary node) {
+    using namespace openspace;
     try {
-        ghoul::lua::luaDictionaryFromState(L, d);
-    }
-    catch (const ghoul::lua::LuaFormatException& e) {
-        LERRORC("addSceneGraphNode", e.what());
-        return ghoul::lua::luaError(L, "Error loading dictionary from lua state");
-    }
-
-    try {
-        SceneGraphNode* node = global::renderEngine->scene()->loadNode(d);
-        if (!node) {
+        SceneGraphNode* n = global::renderEngine->scene()->loadNode(node);
+        if (!n) {
             LERRORC("Scene", "Could not load scene graph node");
-            return ghoul::lua::luaError(L, "Error loading scene graph node");
+            throw ghoul::lua::LuaError("Error loading scene graph node");
         }
 
-        global::renderEngine->scene()->initializeNode(node);
+        global::renderEngine->scene()->initializeNode(n);
     }
     catch (const documentation::SpecificationError& e) {
-        LERRORC("Scene", ghoul::to_string(e.result));
-        return ghoul::lua::luaError(
-            L,
+        std::string cat =
+            node.hasValue<std::string>("Identifier") ?
+            node.value<std::string>("Identifier") :
+            "Scene";
+        logError(e, cat);
+
+        throw ghoul::lua::LuaError(
             fmt::format("Error loading scene graph node: {}", e.what())
         );
     }
     catch (const ghoul::RuntimeError& e) {
-        return ghoul::lua::luaError(
-            L,
+        throw ghoul::lua::LuaError(
             fmt::format("Error loading scene graph node: {}", e.what())
         );
     }
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
 }
 
-int removeSceneGraphNode(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
+/**
+ * Removes the SceneGraphNode identified by name or by extracting the 'Identifier' key if
+ * the parameter is a table.
+ */
+[[codegen::luawrap]] void removeSceneGraphNode(
+    std::variant<std::string, ghoul::Dictionary> node)
+{
+    using namespace openspace;
+    std::string identifier;
+    if (std::holds_alternative<std::string>(node)) {
+        identifier = std::get<std::string>(node);
+    }
+    else {
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(node);
+        if (!d.hasValue<std::string>("Identifier")) {
+            throw ghoul::lua::LuaError(
+                "Table passed to removeSceneGraphNode does not contain an Identifier"
+            );
+        }
+        identifier = d.value<std::string>("Identifier");
+    }
 
-    std::string name = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
+    if (identifier == "Root") {
+        throw ghoul::lua::LuaError("Cannot remove the 'Root' scene graph node");
+    }
 
-    SceneGraphNode* foundNode = sceneGraphNode(name);
+    SceneGraphNode* foundNode = sceneGraphNode(identifier);
     if (!foundNode) {
-        LERRORC(
-            "removeSceneGraphNode",
-            fmt::format("Did not find a match for identifier: {} ", name)
+        throw ghoul::lua::LuaError(
+            fmt::format("Did not find a match for identifier: {} ", identifier)
         );
-        return 0;
     }
 
     SceneGraphNode* parent = foundNode->parent();
     if (!parent) {
-        LERRORC(
-            "removeSceneGraphNode",
-            fmt::format("Cannot remove root node")
-        );
-        return 0;
+        throw ghoul::lua::LuaError("Cannot remove root node");
     }
 
     // Remove the node and all its children
     std::function<void(SceneGraphNode*)> removeNode =
         [&removeNode](SceneGraphNode* localNode) {
+        if (localNode == global::navigationHandler->anchorNode()) {
+            global::navigationHandler->orbitalNavigator().setFocusNode(
+                sceneGraph()->root()
+            );
+            global::navigationHandler->orbitalNavigator().startRetargetAnchor();
+        }
+
+        if (localNode == global::navigationHandler->orbitalNavigator().aimNode()) {
+            global::navigationHandler->orbitalNavigator().setAimNode("");
+        }
+
         std::vector<SceneGraphNode*> children = localNode->children();
 
         ghoul::mm_unique_ptr<SceneGraphNode> n = localNode->parent()->detachChild(
@@ -709,23 +688,20 @@ int removeSceneGraphNode(lua_State* L) {
     };
 
     removeNode(foundNode);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
 }
 
-int removeSceneGraphNodesFromRegex(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNodesFromRegex");
-
-    std::string name = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
-
+/**
+ * Removes all SceneGraphNodes with identifiers matching the input regular expression.
+ */
+[[codegen::luawrap]] void removeSceneGraphNodesFromRegex(std::string name) {
+    using namespace openspace;
     const std::vector<SceneGraphNode*>& nodes =
         global::renderEngine->scene()->allSceneGraphNodes();
 
     // Extract the property and node name to be searched for from name
     bool isLiteral = false;
-    std::string propertyName = "";
-    std::string nodeName = "";
+    std::string propertyName;
+    std::string nodeName;
     size_t wildPos = name.find_first_of("*");
     if (wildPos != std::string::npos) {
         nodeName = name.substr(0, wildPos);
@@ -733,26 +709,23 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
 
         // If none then malformed regular expression
         if (propertyName.empty() && nodeName.empty()) {
-            LERRORC(
-                "removeSceneGraphNodesFromRegex",
+            throw ghoul::lua::LuaError(
                 fmt::format(
-                    "Malformed regular expression: '{}': "
-                    "Empty both before and after '*'", name
+                    "Malformed regular expression: '{}': Empty both before and after '*'",
+                    name
                 )
             );
-            return 0;
         }
 
         // Currently do not support several wildcards
         if (name.find_first_of("*", wildPos + 1) != std::string::npos) {
-            LERRORC(
-                "removeSceneGraphNodesFromRegex",
+            throw ghoul::lua::LuaError(
                 fmt::format(
                     "Malformed regular expression: '{}': "
-                    "Currently only one '*' is supported", name
+                    "Currently only one '*' is supported",
+                    name
                 )
             );
-            return 0;
         }
     }
     // Literal or tag
@@ -802,10 +775,7 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
         foundMatch = true;
         SceneGraphNode* parent = node->parent();
         if (!parent) {
-            LERRORC(
-                "removeSceneGraphNodesFromRegex",
-                fmt::format("Cannot remove root node")
-            );
+            throw ghoul::lua::LuaError("Cannot remove root node");
         }
         else {
             markedList.push_back(node);
@@ -813,19 +783,16 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
     }
 
     if (!foundMatch) {
-        LERRORC(
-            "removeSceneGraphNodesFromRegex",
+        throw ghoul::lua::LuaError(
             fmt::format("Did not find a match for identifier: {}", name)
         );
-        return 0;
     }
 
     // Add all the children
     std::function<void(SceneGraphNode*, std::vector<SceneGraphNode*>&)> markNode =
         [&markNode](SceneGraphNode* node, std::vector<SceneGraphNode*>& marked)
     {
-        std::vector<SceneGraphNode*> children = node->children();
-        for (SceneGraphNode* child : children) {
+        for (SceneGraphNode* child : node->children()) {
             markNode(child, marked);
         }
 
@@ -841,6 +808,15 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
     // Remove all marked nodes
     std::function<void(SceneGraphNode*)> removeNode =
         [&removeNode, &markedList](SceneGraphNode* localNode) {
+
+        if (localNode == global::navigationHandler->anchorNode()) {
+            global::navigationHandler->setFocusNode(sceneGraph()->root());
+        }
+
+        if (localNode == global::navigationHandler->orbitalNavigator().aimNode()) {
+            global::navigationHandler->orbitalNavigator().setAimNode("");
+        }
+
         std::vector<SceneGraphNode*> children = localNode->children();
 
         ghoul::mm_unique_ptr<SceneGraphNode> n = localNode->parent()->detachChild(
@@ -865,41 +841,326 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
     while (!markedList.empty()) {
         removeNode(markedList[0]);
     }
-
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
 }
 
-int hasSceneGraphNode(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasSceneGraphNode");
-
-    std::string nodeName = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-        );
+// Checks whether the specifies SceneGraphNode is present in the current scene.
+[[codegen::luawrap]] bool hasSceneGraphNode(std::string nodeName) {
+    using namespace openspace;
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(nodeName);
-
-    ghoul::lua::push(L, node != nullptr);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
+    return node != nullptr;
 }
 
-int addInterestingTime(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addInterestingTime");
-
-    std::string name = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No);
-    std::string time = ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No);
-    lua_pop(L, 2);
-
-    global::renderEngine->scene()->addInterestingTime(
+/**
+ * Adds an interesting time to the current scene. The first argument is the name of the
+ * time and the second argument is the time itself in the format YYYY-MM-DDThh:mm:ss.uuu
+ */
+[[codegen::luawrap]] void addInterestingTime(std::string name, std::string time) {
+    openspace::global::renderEngine->scene()->addInterestingTime(
         { std::move(name), std::move(time) }
     );
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
 }
 
-}  // namespace openspace::luascriptfunctions
+/**
+ * Returns the world position of the scene graph node with the given string as identifier.
+ */
+[[codegen::luawrap]] glm::dvec3 worldPosition(std::string identifier) {
+    using namespace openspace;
+    SceneGraphNode* node = sceneGraphNode(identifier);
+    if (!node) {
+        throw ghoul::lua::LuaError(
+            fmt::format("Did not find a match for identifier: {} ", identifier)
+        );
+    }
+
+    glm::dvec3 pos = node->worldPosition();
+    return pos;
+}
+
+/**
+ * Returns the world rotation matrix of the scene graph node with the given string as
+ * identifier.
+ */
+[[codegen::luawrap]] glm::dmat3 worldRotation(std::string identifier) {
+    using namespace openspace;
+    SceneGraphNode* node = sceneGraphNode(identifier);
+    if (!node) {
+        throw ghoul::lua::LuaError(
+            fmt::format("Did not find a match for identifier: {} ", identifier)
+        );
+    }
+
+    glm::dmat3 rot = node->worldRotationMatrix();
+    return rot;
+}
+
+/**
+ * The scene graph node identified by the first string is reparented to be a child of the
+ * scene graph node identified by the second string.
+ */
+[[codegen::luawrap]] void setParent(std::string identifier, std::string newParent) {
+    using namespace openspace;
+    SceneGraphNode* node = sceneGraphNode(identifier);
+    if (!node) {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Did not find a match for identifier: {} ", identifier
+        ));
+    }
+    SceneGraphNode* newParentNode = sceneGraphNode(newParent);
+    if (!newParentNode) {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Did not find a match for new parent identifier: {} ", newParent
+        ));
+    }
+
+    node->setParent(*newParentNode);
+    global::renderEngine->scene()->markNodeRegistryDirty();
+}
+
+/**
+ * Returns the bounding sphere of the scene graph node with the given string as
+ * identifier.
+ */
+[[codegen::luawrap]] double boundingSphere(std::string identifier) {
+    using namespace openspace;
+    SceneGraphNode* node = sceneGraphNode(identifier);
+    if (!node) {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Did not find a match for identifier: {} ", identifier
+        ));
+    }
+
+    double bs = node->boundingSphere();
+    return bs;
+}
+
+/**
+ * Returns the interaction sphere of the scene graph node with the given string as
+ * identifier.
+ */
+[[codegen::luawrap]] double interactionSphere(std::string identifier) {
+    using namespace openspace;
+    SceneGraphNode* node = sceneGraphNode(identifier);
+    if (!node) {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Did not find a match for identifier: {} ", identifier
+        ));
+    }
+
+    double is = node->interactionSphere();
+    return is;
+}
+
+template <typename T>
+void createCustomProperty(openspace::properties::Property::PropertyInfo info,
+                          std::optional<std::string> onChange)
+{
+    T* p = new T(info);
+    if (onChange.has_value() && !onChange->empty()) {
+        p->onChange(
+            [p, script = *onChange]() {
+                using namespace ghoul::lua;
+                LuaState s;
+                openspace::global::scriptEngine->initializeLuaState(s);
+                ghoul::lua::push(s, p->value());
+                lua_setglobal(s, "value");
+                ghoul::lua::runScript(s, script);
+            }
+        );
+    }
+    openspace::global::userPropertyOwner->addProperty(p);
+}
+
+enum class [[codegen::enum]] CustomPropertyType {
+    DMat2Property,
+    DMat3Property,
+    DMat4Property,
+    Mat2Property,
+    Mat3Property,
+    Mat4Property,
+    BoolProperty,
+    DoubleProperty,
+    FloatProperty,
+    IntProperty,
+    StringProperty,
+    StringListProperty,
+    LongProperty,
+    ShortProperty,
+    UShortProperty,
+    UIntProperty,
+    ULongProperty,
+    DVec2Property,
+    DVec3Property,
+    DVec4Property,
+    IVec2Property,
+    IVec3Property,
+    IVec4Property,
+    UVec2Property,
+    UVec3Property,
+    UVec4Property,
+    Vec2Property,
+    Vec3Property,
+    Vec4Property
+};
+
+/**
+ * Creates a new property that lives in the `UserProperty` group.
+ * 
+ * \param identifier The identifier that is going to be used for the new property
+ * \param type The type of the property, has to be one of "DMat2Property",
+ *        "DMat3Property", "DMat4Property", "Mat2Property", "Mat3Property",
+ *        "Mat4Property", "BoolProperty", "DoubleProperty", "FloatProperty",
+ *        "IntProperty", "StringProperty", "StringListProperty", "LongProperty",
+ *        "ShortProperty", "UIntProperty", "ULongProperty", "DVec2Property",
+ *        "DVec3Property", "DVec4Property", "IVec2Property", "IVec3Property",
+ *        "IVec4Property", "UVec2Property", "UVec3Property", "UVec4Property",
+ *        "Vec2Property", "Vec3Property", "Vec4Property"
+ * \param guiName The name that the property uses in the user interface. If this value is
+ *        not provided, the `identifier` is used instead
+ * \param description A description what the property is used for
+ * \param onChange A Lua script that will be executed whenever the property changes
+ */
+[[codegen::luawrap]] void addCustomProperty(std::string identifier,
+                                            CustomPropertyType type,
+                                            std::optional<std::string> guiName,
+                                            std::optional<std::string> description,
+                                            std::optional<std::string> onChange)
+{
+    using namespace openspace;
+    using namespace openspace::properties;
+
+    if (identifier.empty()) {
+        throw ghoul::lua::LuaError("Identifier must not empty");
+    }
+
+    if (global::userPropertyOwner->hasProperty(identifier)) {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Failed to register property '{}' since a user-defined property with that "
+            "name already exists",
+            identifier
+        ));
+    }
+
+    // @TODO (abock, 2022-05-01)  These if statements here are a bit gnarly since it
+    // requires us to update them as soon as we add a new property type. It would be nicer
+    // to have a factory function for this but right now this is the only place where that
+    // factory would be used.
+
+    const char* gui =
+        guiName.has_value() && !guiName->empty() ?
+        guiName->c_str() :
+        identifier.c_str();
+
+    Property::PropertyInfo info = {
+        identifier.c_str(),
+        gui,
+        description.has_value() ? description->c_str() : ""
+    };
+    switch (type) {
+        case CustomPropertyType::DMat2Property:
+            createCustomProperty<DMat2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DMat3Property:
+            createCustomProperty<DMat3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DMat4Property:
+            createCustomProperty<DMat4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Mat2Property:
+            createCustomProperty<Mat2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Mat3Property:
+            createCustomProperty<Mat3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Mat4Property:
+            createCustomProperty<Mat4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::BoolProperty:
+            createCustomProperty<BoolProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DoubleProperty:
+            createCustomProperty<DoubleProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::FloatProperty:
+            createCustomProperty<FloatProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::IntProperty:
+            createCustomProperty<IntProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::StringProperty:
+            createCustomProperty<StringProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::StringListProperty:
+            createCustomProperty<StringListProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::LongProperty:
+            createCustomProperty<LongProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::ShortProperty:
+            createCustomProperty<ShortProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UIntProperty:
+            createCustomProperty<UIntProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::ULongProperty:
+            createCustomProperty<ULongProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UShortProperty:
+            createCustomProperty<UShortProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DVec2Property:
+            createCustomProperty<DVec2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DVec3Property:
+            createCustomProperty<DVec3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::DVec4Property:
+            createCustomProperty<DVec4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::IVec2Property:
+            createCustomProperty<IVec2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::IVec3Property:
+            createCustomProperty<IVec3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::IVec4Property:
+            createCustomProperty<IVec4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UVec2Property:
+            createCustomProperty<UVec2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UVec3Property:
+            createCustomProperty<UVec3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UVec4Property:
+            createCustomProperty<UVec4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Vec2Property:
+            createCustomProperty<Vec2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Vec3Property:
+            createCustomProperty<Vec3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Vec4Property:
+            createCustomProperty<Vec4Property>(info, std::move(onChange));
+            return;
+    }
+    throw std::runtime_error("Missing case label");
+}
+
+[[codegen::luawrap]] void removeCustomProperty(std::string identifier) {
+    using namespace openspace;
+    properties::Property* p = global::userPropertyOwner->property(identifier);
+    if (p) {
+        global::userPropertyOwner->removeProperty(p);
+        delete p;
+    }
+    else {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Could not find user-defined property '{}'", identifier
+        ));
+    }
+}
+
+} // namespace
+
+#include "scene_lua_codegen.cpp"

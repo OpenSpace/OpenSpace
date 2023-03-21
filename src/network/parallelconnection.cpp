@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,12 +32,10 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ParallelConnection";
+    constexpr std::string_view _loggerCat = "ParallelConnection";
 } // namespace
 
 namespace openspace {
-
-const unsigned int ParallelConnection::ProtocolVersion = 5;
 
 ParallelConnection::Message::Message(MessageType t, std::vector<char> c)
     : type(t)
@@ -52,8 +50,9 @@ ParallelConnection::DataMessage::DataMessage(datamessagestructures::Type t,
     , content(std::move(c))
 {}
 
-ParallelConnection::ConnectionLostError::ConnectionLostError()
+ParallelConnection::ConnectionLostError::ConnectionLostError(bool shouldLogError_)
     : ghoul::RuntimeError("Parallel connection lost", "ParallelConnection")
+    , shouldLogError(shouldLogError_)
 {}
 
 ParallelConnection::ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> socket)
@@ -61,18 +60,18 @@ ParallelConnection::ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> soc
 {}
 
 bool ParallelConnection::isConnectedOrConnecting() const {
-    return _socket->isConnected() || _socket->isConnecting();
+    return _socket != nullptr && (_socket->isConnected() || _socket->isConnecting());
 }
 
 void ParallelConnection::sendDataMessage(const DataMessage& dataMessage) {
-    const uint32_t dataMessageTypeOut = static_cast<uint32_t>(dataMessage.type);
+    const uint8_t dataMessageTypeOut = static_cast<uint8_t>(dataMessage.type);
     const double dataMessageTimestamp = dataMessage.timestamp;
 
     std::vector<char> messageContent;
     messageContent.insert(
         messageContent.end(),
         reinterpret_cast<const char*>(&dataMessageTypeOut),
-        reinterpret_cast<const char*>(&dataMessageTypeOut) + sizeof(uint32_t)
+        reinterpret_cast<const char*>(&dataMessageTypeOut) + sizeof(uint8_t)
     );
 
     messageContent.insert(
@@ -90,7 +89,7 @@ void ParallelConnection::sendDataMessage(const DataMessage& dataMessage) {
 }
 
 bool ParallelConnection::sendMessage(const Message& message) {
-    const uint32_t messageTypeOut = static_cast<uint32_t>(message.type);
+    const uint8_t messageTypeOut = static_cast<uint8_t>(message.type);
     const uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
     std::vector<char> header;
 
@@ -100,12 +99,12 @@ bool ParallelConnection::sendMessage(const Message& message) {
 
     header.insert(header.end(),
         reinterpret_cast<const char*>(&ProtocolVersion),
-        reinterpret_cast<const char*>(&ProtocolVersion) + sizeof(uint32_t)
+        reinterpret_cast<const char*>(&ProtocolVersion) + sizeof(uint8_t)
     );
 
     header.insert(header.end(),
         reinterpret_cast<const char*>(&messageTypeOut),
-        reinterpret_cast<const char*>(&messageTypeOut) + sizeof(uint32_t)
+        reinterpret_cast<const char*>(&messageTypeOut) + sizeof(uint8_t)
     );
 
     header.insert(header.end(),
@@ -123,6 +122,7 @@ bool ParallelConnection::sendMessage(const Message& message) {
 }
 
 void ParallelConnection::disconnect() {
+    _shouldDisconnect = true;
     if (_socket) {
         _socket->disconnect();
     }
@@ -136,7 +136,9 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
     // Header consists of...
     constexpr size_t HeaderSize =
         2 * sizeof(char) + // OS
-        3 * sizeof(uint32_t); // Protocol version, message type and message size
+        sizeof(uint8_t) +  // Protocol version
+        sizeof(uint8_t) +  // Message type
+        sizeof(uint32_t);  // message size
 
     // Create basic buffer for receiving first part of messages
     std::vector<char> headerBuffer(HeaderSize);
@@ -144,20 +146,27 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
 
     // Receive the header data
     if (!_socket->get(headerBuffer.data(), HeaderSize)) {
-        LERROR("Failed to read header from socket. Disconencting.");
-        throw ConnectionLostError();
+        // The `get` call is blocking until something happens, so we might end up here if
+        // the socket properly closed or if the loading legitimately failed
+        if (_shouldDisconnect) {
+            throw ConnectionLostError(false);
+        }
+        else {
+            LERROR("Failed to read header from socket. Disconnecting");
+            throw ConnectionLostError();
+        }
     }
 
     // Make sure that header matches this version of OpenSpace
     if (!(headerBuffer[0] == 'O' && headerBuffer[1] == 'S')) {
-        LERROR("Expected to read message header 'OS' from socket.");
+        LERROR("Expected to read message header 'OS' from socket");
         throw ConnectionLostError();
     }
 
     size_t offset = 2;
-    const uint32_t protocolVersionIn =
-        *reinterpret_cast<uint32_t*>(headerBuffer.data() + offset);
-    offset += sizeof(uint32_t);
+    const uint8_t protocolVersionIn =
+        *reinterpret_cast<uint8_t*>(headerBuffer.data() + offset);
+    offset += sizeof(uint8_t);
 
     if (protocolVersionIn != ProtocolVersion) {
         LERROR(fmt::format(
@@ -168,9 +177,9 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
         throw ConnectionLostError();
     }
 
-    const uint32_t messageTypeIn =
-        *reinterpret_cast<uint32_t*>(headerBuffer.data() + offset);
-    offset += sizeof(uint32_t);
+    const uint8_t messageTypeIn =
+        *reinterpret_cast<uint8_t*>(headerBuffer.data() + offset);
+    offset += sizeof(uint8_t);
 
     const uint32_t messageSizeIn =
         *reinterpret_cast<uint32_t*>(headerBuffer.data() + offset);
@@ -181,7 +190,7 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
     // Receive the payload
     messageBuffer.resize(messageSize);
     if (!_socket->get(messageBuffer.data(), messageSize)) {
-        LERROR("Failed to read message from socket. Disconencting.");
+        LERROR("Failed to read message from socket. Disconnecting");
         throw ConnectionLostError();
     }
 

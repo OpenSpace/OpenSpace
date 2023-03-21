@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,8 +24,6 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
 in vec3 in_position;
 in vec4 in_bvLumAbsMagAppMag;
 in vec3 in_velocity;
@@ -35,10 +33,11 @@ out vec4 vs_bvLumAbsMagAppMag;
 out vec3 vs_velocity;
 out float vs_speed;
 
-void main() {
-    vs_bvLumAbsMagAppMag = in_bvLumAbsMagAppMag;
-    vs_velocity          = in_velocity;
-    vs_speed             = in_speed;
 
-    gl_Position = vec4(in_position, 1.0);
+void main() {
+  vs_bvLumAbsMagAppMag = in_bvLumAbsMagAppMag;
+  vs_velocity = in_velocity;
+  vs_speed = in_speed;
+
+  gl_Position = vec4(in_position, 1.0);
 }

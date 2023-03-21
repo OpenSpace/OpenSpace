@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,43 +30,43 @@ layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-out vec4 vs_normal;
+out vec3 vs_normal;
 out vec2 vs_st;
-out vec4 vs_positionScreenSpace;
+out float vs_depth;
 
 uniform mat4 modelTransform;
 uniform mat4 modelViewProjectionTransform;
-
-uniform bool _hasHeightMap;
-uniform float _heightExaggeration;
+uniform bool hasHeightMap;
+uniform float heightExaggeration;
 uniform sampler2D heightTexture;
+uniform bool meridianShift;
 
-uniform bool _meridianShift;
 
 void main() {
-    vs_st = in_st;
+  vs_st = in_st;
 
-    vec4 tmp = in_position;
-    
-    // this is wrong for the normal. 
-    // The normal transform is the transposed inverse of the model transform
-    vs_normal = normalize(modelTransform * vec4(in_normal,0));
-    
-    if (_hasHeightMap) {
-        vec2 st = vs_st;
-        if (_meridianShift) {
-            st += vec2(0.5, 0.0);
-        }
-        float height = texture(heightTexture, st).s;
-        vec3 displacementDirection = (normalize(tmp.xyz));
-        float displacementFactor = height * _heightExaggeration;
-        tmp.xyz += displacementDirection * displacementFactor;
+  vec3 tmp = in_position.xyz;
+  
+  // This is wrong for the normal. 
+  // The normal transform is the transposed inverse of the model transform
+  vs_normal = normalize(modelTransform * vec4(in_normal, 0.0)).xyz;
+  
+  if (hasHeightMap) {
+    vec2 st = vs_st;
+    if (meridianShift) {
+      st += vec2(0.5, 0.0);
     }
+    float height = texture(heightTexture, st).s;
+    vec3 displacementDirection = normalize(tmp);
+    float displacementFactor = height * heightExaggeration;
+    tmp += displacementDirection * displacementFactor;
+  }
 
-    // convert from psc to homogeneous coordinates
-    vec4 position = vec4(tmp.xyz, 1);
-    vec4 positionClipSpace = modelViewProjectionTransform * position;
-    vs_positionScreenSpace = z_normalization(positionClipSpace);
+  // convert from psc to homogeneous coordinates
+  vec4 position = vec4(tmp, 1.0);
+  vec4 positionClipSpace = modelViewProjectionTransform * position;
+  vec4 p = z_normalization(positionClipSpace);
 
-    gl_Position = vs_positionScreenSpace;
+  vs_depth = p.w;
+  gl_Position = p;
 }

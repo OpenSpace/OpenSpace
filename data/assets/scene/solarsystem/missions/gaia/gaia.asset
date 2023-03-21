@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("./transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 local model = asset.syncedResource({
   Name = "Gaia Model",
@@ -20,25 +19,20 @@ local Gaia = {
       XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
       YAxis = "Sun",
-      YAxisInverted = true
+      YAxisInvert = true
     },
     Scale = {
       Type = "StaticScale",
       Scale = 10.0
     }
   },
-  -- X Orthogonal 
+  -- X Orthogonal
   Renderable = {
     Type = "RenderableModel",
     Body = "GAIA",
-    GeometryFile = model .. "/gaia.obj",
+    GeometryFile = model .. "gaia.obj",
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 0.3
-      },
+      sun.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -52,4 +46,12 @@ local Gaia = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Gaia })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Gaia)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Gaia)
+end)
+
+asset.export(Gaia)

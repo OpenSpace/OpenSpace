@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,14 +39,20 @@ using TopicId = size_t;
 
 class Topic;
 
-class Connection {
+// @TODO (abock, 2022-05-06) This is not really elegant as there is no need for a
+// Connection to be held by a shared_ptr, but there was a problem with the LuaScriptTopic
+// otherwise (issue #1940).
+// The problem there is that the LuaScriptTopic is keeping a copy of the _connection in
+// its lambda to return a script back to the caller. The script is only queued, so is
+// executed a bit longer. If the UI gets reloaded in between the creation of the lambda
+// and the execution, the _connection will be an invalid pointer and the program will
+// crash. Making this a shared_ptr circumvents that problem my having the lamdba retain
+// ownership of the _connection and keeping it alive until the message is sent. The
+// message doesn't go anywhere since noone is listening, but it's better than a crash.
+class Connection : public std::enable_shared_from_this<Connection> {
 public:
-    Connection(
-        std::unique_ptr<ghoul::io::Socket> s,
-        std::string address,
-        bool authorized = false,
-        const std::string& password = ""
-    );
+    Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address,
+        bool authorized = false, const std::string& password = "");
 
     void handleMessage(const std::string& message);
     void sendMessage(const std::string& message);

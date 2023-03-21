@@ -58,7 +58,12 @@ local addCartesianAxes = function (specification)
 
   local name = specification.Name or specification.Identifier
   local parent = specification.Parent or "Root"
-  local scale = specification.Scale or 1.0
+  local scale = specification.Scale or { 1.0, 1.0, 1.0 }
+
+  if type(scale) == "number" then
+    scale = { scale, scale, scale }
+  end
+
   local position = specification.Position or { 0.0, 0.0, 0.0 }
   local rotation = specification.Rotation or { 0.0, 0.0, 0.0 }
 
@@ -67,7 +72,7 @@ local addCartesianAxes = function (specification)
     Parent = parent,
     Transform = {
       Scale = {
-        Type = "StaticScale",
+        Type = "NonUniformStaticScale",
         Scale = scale
       },
       Translation = {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ namespace {
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed. The size of the image will also automatically set the default "
-        "size of this plane."
+        "size of this plane"
     };
 
     struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {
@@ -58,9 +58,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ScreenSpaceImageOnline::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_screenspace_image_online";
-    return doc;
+    return codegen::doc<Parameters>("base_screenspace_image_online");
 }
 
 ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
@@ -85,7 +83,7 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     addProperty(_texturePath);
 }
 
-ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {} // NOLINT
+ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {}
 
 bool ScreenSpaceImageOnline::deinitializeGL() {
     _texture = nullptr;
@@ -120,6 +118,7 @@ void ScreenSpaceImageOnline::update() {
                     ghoul::io::TextureReader::ref().loadTexture(
                         reinterpret_cast<void*>(imageFile.buffer),
                         imageFile.size,
+                        2,
                         imageFile.format
                     );
 
@@ -127,6 +126,10 @@ void ScreenSpaceImageOnline::update() {
                     // Images don't need to start on 4-byte boundaries, for example if the
                     // image is only RGB
                     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+                    if (texture->format() == ghoul::opengl::Texture::Format::Red) {
+                        texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
+                    }
 
                     texture->uploadTexture();
                     texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
@@ -159,7 +162,7 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
         [url](const std::string& err) {
             LDEBUGC(
                 "ScreenSpaceImageOnline",
-                "Download to memory failer for screen space image: " + err
+                "Download to memory failed for screen space image: " + err
             );
         }
     );

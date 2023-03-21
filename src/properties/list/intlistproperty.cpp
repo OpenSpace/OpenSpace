@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,53 +36,12 @@ IntListProperty::IntListProperty(Property::PropertyInfo info, std::vector<int> v
     : ListProperty(std::move(info), std::move(values))
 {}
 
-std::string IntListProperty::className() const {
+std::string_view IntListProperty::className() const {
     return "IntListProperty";
 }
 
 int IntListProperty::typeLua() const {
     return LUA_TTABLE;
-}
-
-std::vector<int> IntListProperty::fromLuaConversion(lua_State* state,
-                                                    bool& success) const
-{
-    if (!lua_istable(state, -1)) {
-        success = false;
-        LERRORC(className(), "Conversion from Lua failed. The input was not a table");
-        return {};
-    }
-
-    std::vector<int> result;
-    lua_pushnil(state);
-    while (lua_next(state, -2) != 0) {
-        if (lua_isnumber(state, -1)) {
-            result.emplace_back(static_cast<int>(lua_tonumber(state, -1)));
-        }
-        else {
-            success = false;
-            LERRORC(
-                className(),
-                "Conversion from Lua failed. The input table contains non-number values"
-            );
-            return {};
-        }
-        lua_pop(state, 1);
-    }
-    success = true;
-    return result;
-}
-
-void IntListProperty::toLuaConversion(lua_State* state) const {
-    lua_createtable(state, static_cast<int>(_value.size()), 0);
-
-    int i = 1;
-    for (int v : _value) {
-        ghoul::lua::push(state, i);
-        ghoul::lua::push(state, v);
-        lua_settable(state, -3);
-        ++i;
-    }
 }
 
 std::string IntListProperty::toStringConversion() const {

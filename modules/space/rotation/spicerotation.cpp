@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,20 +36,27 @@ namespace {
         "SourceFrame",
         "Source",
         "This value specifies the source frame that is used as the basis for the "
-        "coordinate transformation. This has to be a valid SPICE name."
+        "coordinate transformation. This has to be a valid SPICE name"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationInfo = {
         "DestinationFrame",
         "Destination",
         "This value specifies the destination frame that is used for the coordinate "
-        "transformation. This has to be a valid SPICE name."
+        "transformation. This has to be a valid SPICE name"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeFrameInfo = {
         "TimeFrame",
         "Time Frame",
-        "The time frame in which the spice kernels are valid."
+        "The time frame in which the spice kernels are valid"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
+        "FixedDate",
+        "Fixed Date",
+        "A time to lock the rotation to. Setting this to an empty string will "
+        "unlock the time and return to rotation based on current simulation time"
     };
 
     struct [[codegen::Dictionary(SpiceRotation)]] Parameters {
@@ -66,6 +73,10 @@ namespace {
         // [[codegen::verbatim(TimeFrameInfo.description)]]
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];
+
+        // [[codegen::verbatim(FixedDateInfo.description)]]
+        std::optional<std::string> fixedDate
+            [[codegen::annotation("A time to lock the rotation to")]];
     };
 #include "spicerotation_codegen.cpp"
 } // namespace
@@ -73,14 +84,13 @@ namespace {
 namespace openspace {
 
 documentation::Documentation SpiceRotation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_transform_rotation_spice";
-    return doc;
+    return codegen::doc<Parameters>("space_transform_rotation_spice");
 }
 
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     : _sourceFrame(SourceInfo)
     , _destinationFrame(DestinationInfo)
+    , _fixedDate(FixedDateInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -98,6 +108,17 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
         }
     }
 
+    _fixedDate.onChange([this]() {
+        if (_fixedDate.value().empty()) {
+            _fixedEphemerisTime = std::nullopt;
+        }
+        else {
+            _fixedEphemerisTime = SpiceManager::ref().ephemerisTimeFromDate(_fixedDate);
+        }
+    });
+    _fixedDate = p.fixedDate.value_or(_fixedDate);
+    addProperty(_fixedDate);
+
     if (dictionary.hasKey(TimeFrameInfo.identifier)) {
         ghoul::Dictionary timeFrameDictionary =
             dictionary.value<ghoul::Dictionary>(TimeFrameInfo.identifier);
@@ -113,16 +134,21 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 
     _sourceFrame.onChange([this]() { requireUpdate(); });
     _destinationFrame.onChange([this]() { requireUpdate(); });
+
 }
 
 glm::dmat3 SpiceRotation::matrix(const UpdateData& data) const {
     if (_timeFrame && !_timeFrame->isActive(data.time)) {
         return glm::dmat3(1.0);
     }
+    double time = data.time.j2000Seconds();
+    if (_fixedEphemerisTime.has_value()) {
+        time = *_fixedEphemerisTime;
+    }
     return SpiceManager::ref().positionTransformMatrix(
         _sourceFrame,
         _destinationFrame,
-        data.time.j2000Seconds()
+        time
     );
 }
 

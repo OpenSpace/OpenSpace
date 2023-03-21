@@ -1,5 +1,0 @@
-Name="HiRISE Local Set"
-Identifier="OnMarsHiRISELS"
-Description=[[ This map contains a subet set of the HiRISE imagaery, only containing locations where a corresponding HiRISE digital terrain model (DTM) was available.]]
-ColorFile="HiRISELS.vrt"
-HeightFile="HiRISE_DEM.wms"

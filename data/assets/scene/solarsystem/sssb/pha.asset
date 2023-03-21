@@ -1,35 +1,55 @@
-local assetHelper = asset.require('util/asset_helper')
-local sharedSssb = asset.require('./sssb_shared')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'pha', 'sssb_data_pha')
-local object = sharedSssb.createSssbGroupObject('sssb_data_pha.csv',
-  "Potentially Hazardous Asteroids",
-  filepath,
-  { 0.98, 0.09, 0.06}
-)
-object.Renderable.Enabled = false
-object.Renderable.SegmentQuality = 3
-object.Renderable.TrailFade = 17
+local sssb = asset.syncedResource({
+  Name = "Small SolarSystem Body Data (Potentially hazardous Asteroids)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_pha",
+  Version = 1
+})
 
-object.GUI.Description = [[ Asteroids that are deemed potentially hazardous to Earth
-  based on their close approaches. All asteroids with an Earth Minimum Orbit
-  Intersection Distance (MOID) of 0.05 au or less, and with an absolute magnitude (H)
-  of 22.0 or less. ]]
+local object = {
+  Identifier = "sssb_pha",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_pha.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 3,
+    Color = { 0.98, 0.09, 0.06 },
+    TrailFade = 17
+  },
+  GUI = {
+    Name = "Potentially Hazardous Asteroids",
+    Path = "/Solar System/Small Bodies",
+    Description = [[Asteroids that are deemed potentially hazardous to Earth based on
+      their close approaches. All asteroids with an Earth Minimum Orbit Intersection
+      Distance (MOID) of 0.05 AU or less, and with an absolute magnitude (H) of 22.0 or
+      less.]]
+  }
+}
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Potentially-Hazardous Asteroids",
-  Version = "1.0",
-  Description = [[ RenderableSmallBody asset with data from from JPL Horizons
-    contiaining Potentially Hazardous group. ]],
+  Version = "1.1",
+  Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
+    Potentially Hazardous group. ]],
   Author = [[JPL Small-Body Database hosted by California Institute of
     Technology]],
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
-  License = [[JPL-authored documents are sponsored by NASA under Contract
-    NAS7-030010. All documents available from this server may be protected
-    under the U.S. and Foreign Copyright Laws.]],
-  Identifiers = {"sssb_sssb_data_pha"}
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All
+    documents available from this server may be protected under the U.S. and Foreign
+    Copyright Laws]]
 }

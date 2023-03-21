@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,12 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
-
-# Use <PackageName>_ROOT variables
-# https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
-cmake_policy(SET CMP0074 NEW)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   include/kameleonwrapper.h
@@ -58,22 +53,34 @@ mark_as_advanced(BUILD_SHARED_LIBS) # Change to set instead of option
 option(KAMELEON_USE_HDF5 "Kameleon use HDF5" OFF)
 set(KAMELEON_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/kameleon)
 set(KAMELEON_INCLUDES ${KAMELEON_ROOT_DIR}/src)
-add_subdirectory(${KAMELEON_ROOT_DIR})
+add_subdirectory(${KAMELEON_ROOT_DIR} SYSTEM)
 target_include_directories(${kameleon_module} SYSTEM PUBLIC ${KAMELEON_INCLUDES})
 target_link_libraries(${kameleon_module} PRIVATE ccmc)
 mark_as_advanced(CDF_BUILD_ZLIB CDF_INCLUDES CDF_LIBRARY CDF_USE_STATIC_LIBS
   CDF_USE_ZLIB HDF5_DIR HDF5_USE_STATIC_LIBRARIES KAMELEON_LIBRARY_ONLY KAMELEON_USE_HDF5
 )
-disable_external_warnings(ccmc)
-set_folder_location(ccmc "External")
+set_target_properties(ccmc PROPERTIES FOLDER "External")
 if (TARGET cdf)
-  disable_external_warnings(cdf)
-  set_folder_location(cdf "External")
+  if (MSVC)
+    target_compile_options(cdf PRIVATE "/W0")
+    target_compile_definitions(cdf PRIVATE "_SCL_SECURE_NO_WARNINGS")
+  else ()
+    target_compile_options(cdf PRIVATE "-w")
+  endif ()
+
+  set_target_properties(cdf PROPERTIES FOLDER "External")
 endif ()
 
-if (WIN32)
-  target_compile_options(ccmc PRIVATE /MP)
-  if (TARGET cdf)
-    target_compile_options(cdf PRIVATE /MP)
-  endif ()
-endif ()
+target_precompile_headers(cdf PRIVATE
+  [["stdio.h"]]
+  [["stdlib.h"]]
+  [["string.h"]]
+)
+
+target_precompile_headers(ccmc PRIVATE
+  "$<$<COMPILE_LANGUAGE:CXX>:iostream>"
+  "$<$<COMPILE_LANGUAGE:CXX>:map>"
+  "$<$<COMPILE_LANGUAGE:CXX>:unordered_map>"
+  "$<$<COMPILE_LANGUAGE:CXX>:vector>"
+  "$<$<COMPILE_LANGUAGE:CXX>:boost/unordered_map.hpp>"
+)
