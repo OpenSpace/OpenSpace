@@ -519,6 +519,65 @@ void RawTileDataReader::initialize() {
         }
     }
 
+    if (module.isMRFCachingEnabled()) {
+        ZoneScopedN("MRF Caching");
+
+        static int cnt = 0;
+        std::string fn = "/" + std::to_string(cnt++) + ".mrf";
+        std::string path = absPath(module.wmsCacheLocation().append(fn)).string();
+
+        if (!std::filesystem::exists(path)) {
+            auto* driver = GetGDALDriverManager()->GetDriverByName("MRF");
+            if (driver != nullptr) {
+                auto src = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
+                if (!src) {
+                    throw ghoul::RuntimeError(fmt::format(
+                        "Failed to load dataset: {}. GDAL Error: {}",
+                        _datasetFilePath, CPLGetLastErrorMsg()
+                    ));
+                }
+
+                {
+                    // Check if there is a geotransform present, if not assume its bounds are
+                    // [-180, 180] W<->E and [-90, 90] N<->S
+                    double geoTransform[6];
+                    auto err = src->GetGeoTransform(geoTransform);
+                    if (err != CPLErr::CE_None) {
+                        geoTransform[0] = -180.0;
+                        geoTransform[1] = 360.0 / src->GetRasterXSize();
+                        geoTransform[2] = 0.0;
+                        geoTransform[3] = 90.0;
+                        geoTransform[4] = 0.0;
+                        geoTransform[5] = -180.0 / src->GetRasterYSize(); // Negative for north-up
+                        err = src->SetGeoTransform(geoTransform);
+                        if (err != CPLErr::CE_None) {
+                            auto msg = CPLGetLastErrorMsg();
+                            throw ghoul::RuntimeError(fmt::format(
+                                "Failed to set default Geo Transform of dataset: {}. GDAL Error: {}",
+                                _datasetFilePath, CPLGetLastErrorMsg()
+                            ));
+                        }
+                    }
+                }
+
+                char** createOpts = NULL;
+                createOpts = CSLSetNameValue(createOpts, "CACHEDSOURCE", content.c_str());
+                createOpts = CSLSetNameValue(createOpts, "NOCOPY", "true");
+                auto dst = static_cast<GDALDataset*>(driver->CreateCopy(path.c_str(), src, FALSE, createOpts, NULL, NULL));
+                if (!dst) {
+                    throw ghoul::RuntimeError(fmt::format(
+                        "Failed to create MRF Caching dataset dataset: {}. GDAL Error: {}",
+                        path, CPLGetLastErrorMsg()
+                    ));
+                }
+                GDALClose(dst);
+                GDALClose(src);
+            }
+        }
+
+        content = path.c_str();
+    }
+
     {
         ZoneScopedN("GDALOpen");
         _dataset = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
