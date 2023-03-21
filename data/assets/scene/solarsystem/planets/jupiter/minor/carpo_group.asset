@@ -46,6 +46,7 @@ local carpoGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
+      Name = "S/2018 J 4",
       Path = "/Solar System/Planets/Jupiter/Moons/Carpo Group"
     },
     TrailColor = trailColor,

@@ -101,7 +101,25 @@ local inuitGroup = {
     TrailColor = trailColor,
     OrbitPeriod = 894.86,
     Kernels = kernel
-  }
+  },
+  {
+    Identifier = "S2004S29",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "660",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2004 S 29",
+      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 858.77,
+    Kernels = kernel
+  },
 }
 
 -- Generate all moon labels
