@@ -218,6 +218,7 @@ local anankeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
+      Name = "S/2021 J 1",
       Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
     },
     TrailColor = trailColor,
@@ -235,6 +236,7 @@ local anankeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
+      Name = "S/2021 J 2",
       Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
     },
     TrailColor = trailColor,
@@ -252,6 +254,7 @@ local anankeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
+      Name = "S/2021 J 3",
       Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
     },
     TrailColor = trailColor,
@@ -269,11 +272,66 @@ local anankeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
+      Name = "S/2022 J 3",
       Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
     },
     TrailColor = trailColor,
     OrbitPeriod = 617.82,
     Kernels = kernel346
+  },
+  {
+    Identifier = "S2017J3",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "564",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2017 J 3",
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 606.3,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2017J7",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "568",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2017 J 7",
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 602.6,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2017J9",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "570",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2017 J 9",
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 639.2,
+    Kernels = kernel
   }
 }
 

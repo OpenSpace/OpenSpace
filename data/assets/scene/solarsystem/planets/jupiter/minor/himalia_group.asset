@@ -114,6 +114,7 @@ local himaliaGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
+      Name = "S/2011 J 3",
       Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
     },
     TrailColor = trailColor,
@@ -131,11 +132,46 @@ local himaliaGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
+      Name = "S/2018 J 2",
       Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
     },
     TrailColor = trailColor,
     OrbitPeriod = 250.88,
     Kernels = kernel346
+  },
+  {
+    Identifier = "Pandia",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "565",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 251.911,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Ersa",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "571",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 249.229,
+    Kernels = kernel
   }
 }
 

@@ -374,11 +374,30 @@ local pasiphaeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
+      Name = "S/2016 J 4",
       Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
     },
     TrailColor = trailColor,
     OrbitPeriod = 743.69,
     Kernels = kernel346
+  },
+  {
+    Identifier = "S2017J6",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "567",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2017 J 6",
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 683.0,
+    Kernels = kernel
   }
 }
 
