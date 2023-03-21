@@ -360,6 +360,9 @@ void VideoPlayer::stepFrameBackward() {
     commandAsyncMpv(cmd);
 }
 
+void VideoPlayer::initialize() {
+    initializeMpv();
+}
 
 void VideoPlayer::initializeMpv() {
     _mpvHandle = mpv_create();

@@ -51,6 +51,8 @@ public:
     VideoPlayer(const ghoul::Dictionary& dictionary);
     ~VideoPlayer();
 
+    void initialize();
+
     // Video interaction
     void pause();
     void play();
