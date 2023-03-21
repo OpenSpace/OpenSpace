@@ -73,7 +73,9 @@ namespace {
         // [[codegen::verbatim(PortInfo.description)]]
         std::optional<int> port;
 
-        enum class SurroundMode {
+        enum class [[codegen::map(openspace::SonificationModule::SurroundMode)]]
+            SurroundMode
+        {
             Horizontal,
             HorizontalWithElevation,
             Circular,
@@ -137,25 +139,8 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
     _port = p.port.value_or(_port);
 
     if (p.surroundMode.has_value()) {
-        switch (*p.surroundMode) {
-            case Parameters::SurroundMode::Horizontal:
-                _surroundMode = SurroundMode::Horizontal;
-                break;
-            case Parameters::SurroundMode::HorizontalWithElevation:
-                _surroundMode = SurroundMode::HorizontalWithElevation;
-                break;
-            case Parameters::SurroundMode::Circular:
-                _surroundMode = SurroundMode::Circular;
-                break;
-            case Parameters::SurroundMode::CircularWithElevation:
-                _surroundMode = SurroundMode::CircularWithElevation;
-                break;
-            case Parameters::SurroundMode::None:
-                _surroundMode = SurroundMode::None;
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
+        Parameters::SurroundMode mode = Parameters::SurroundMode(*p.surroundMode);
+        _surroundMode = codegen::map<SurroundMode>(mode);
     }
 
     // Fill sonification list
