@@ -224,6 +224,8 @@ void RenderableVideoSphere::initializeGL() {
     );
 
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+
+    _videoPlayer.initialize();
 }
 
 void RenderableVideoSphere::deinitializeGL() {

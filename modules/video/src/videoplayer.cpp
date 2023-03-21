@@ -29,10 +29,12 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/openglstatecache.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "VideoPlayer";
@@ -358,6 +360,9 @@ void VideoPlayer::stepFrameBackward() {
     commandAsyncMpv(cmd);
 }
 
+void VideoPlayer::initialize() {
+    initializeMpv();
+}
 
 void VideoPlayer::initializeMpv() {
     _mpvHandle = mpv_create();
@@ -530,8 +535,7 @@ void VideoPlayer::renderMpv() {
             /* TODO: remove this comment in case we never encounter this issue again */
             // We have to set the Viewport on every cycle because
             // mpv_render_context_render internally rescales the fb of the context(?!)...
-            glm::ivec2 window = global::windowDelegate->currentDrawBufferResolution();
-            glViewport(0, 0, window.x, window.y);
+            global::renderEngine->openglStateCache().resetViewportState();
 
             // We also need to reset the render target
             glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);

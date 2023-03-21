@@ -138,7 +138,7 @@ int VideoTileProvider::minLevel() {
 }
 
 int VideoTileProvider::maxLevel() {
-    // This is the level where above the tile is marked as unavailable and is no longer 
+    // This is the level where above the tile is marked as unavailable and is no longer
     // displayed. Since we want to display the tiles at all times we set the max level
     return 1337;
 }
@@ -147,7 +147,9 @@ float VideoTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-void VideoTileProvider::internalInitialize() {}
+void VideoTileProvider::internalInitialize() {
+    _videoPlayer.initialize();
+}
 
 VideoTileProvider::~VideoTileProvider() {}
 

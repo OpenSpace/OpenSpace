@@ -88,6 +88,12 @@ void ScreenSpaceVideo::render() {
     ScreenSpaceRenderable::render();
 }
 
+bool ScreenSpaceVideo::initializeGL() {
+    _videoPlayer.initialize();
+
+    return ScreenSpaceRenderable::initializeGL();
+}
+
 bool ScreenSpaceVideo::deinitializeGL() {
     _videoPlayer.destroy();
 
