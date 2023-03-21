@@ -79,7 +79,7 @@
     {
       "name": "Modules.CefWebGui.GuiUrl",
       "type": "setPropertyValueSingle",
-      "value": "http://localhost:8000/homeOneScreen/"
+      "value": "http://localhost:4680/stort-installation/homeOneScreen/"
     }
   ],
   "time": {

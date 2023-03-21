@@ -1,7 +1,10 @@
 -- Specifying which other assets should be loaded in this scene
 
--- The bsae OpenSpace content
+-- The base OpenSpace content
 asset.require("base")
+
+-- Host the interface
+asset.require("installationspecific/host_interface")
 
 -- Action for GUI scale
 asset.require("installationspecific/guiscaleaction")
