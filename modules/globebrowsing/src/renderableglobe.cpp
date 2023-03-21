@@ -48,6 +48,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <numeric>
@@ -807,6 +808,10 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     }
 
     _lastChangedLayer = nullptr;
+
+    // Reset
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableGlobe::renderSecondary(const RenderData& data, RendererTasks&) {

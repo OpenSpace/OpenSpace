@@ -55,7 +55,7 @@ public:
     void pause();
     void play();
     void goToStart();
-   
+
     void seekToTime(double time, bool pauseAfter = false);
     void toggleMute();
 
@@ -124,7 +124,7 @@ private:
     // Video properties. Try to read all these values from the video
     std::string _videoFile;
     double _currentVideoTime = 0.0;
-    double _fps = 24.0; // If when we read it it is 0, use 24 fps 
+    double _fps = 24.0; // If when we read it it is 0, use 24 fps
     double _videoDuration = 0.0;
     glm::ivec2 _videoResolution = glm::ivec2(2048, 1024); // Used for the fbos
     bool _isPaused = false;
