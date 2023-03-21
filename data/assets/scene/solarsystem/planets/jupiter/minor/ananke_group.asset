@@ -332,6 +332,42 @@ local anankeGroup = {
     TrailColor = trailColor,
     OrbitPeriod = 639.2,
     Kernels = kernel
+  },
+  {
+    Identifier = "S2003J2",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55501",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 2",
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 602.02,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J12",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55505",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 12",
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 646.64,
+    Kernels = kernel
   }
 }
 

@@ -472,6 +472,42 @@ local carmeGroup = {
     TrailColor = trailColor,
     OrbitPeriod = 686.6,
     Kernels = kernel
+  },
+  {
+    Identifier = "S2003J9",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55503",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 9",
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 767.6,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J10",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55504",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 10",
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 705.96,
+    Kernels = kernel
   }
 }
 

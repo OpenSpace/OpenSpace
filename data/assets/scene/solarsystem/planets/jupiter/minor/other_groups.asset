@@ -18,24 +18,6 @@ local trailTags = {
 
 local otherGroups = {
   {
-    Identifier = "S2003J12",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55066",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2003 J 12",
-      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 482.69,
-    Kernels = kernel
-  },
-  {
     Identifier = "Eupheme",
     Parent = {
       Identifier = parentIdentifier,
@@ -69,78 +51,6 @@ local otherGroups = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 699.12,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2003J10",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55065",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2003 J 10",
-      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 700.13,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2003J23",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55071",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2003 J 23",
-      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 700.54,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2003J9",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55064",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2003 J 9",
-      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 752.84,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2003J2",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55060",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2003 J 2",
-      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 981.55,
     Kernels = kernel
   },
   {

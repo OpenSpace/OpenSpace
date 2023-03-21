@@ -741,6 +741,96 @@ local norseGroup = {
     TrailColor = trailColor,
     OrbitPeriod = 1295.8,
     Kernels = kernel452
+  },
+  {
+    Identifier = "S2004S28",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "65077",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2004 S 28",
+      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 1197.2,
+    Kernels = kernel452
+  },
+  {
+    Identifier = "S2004S21",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "65079",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2004 S 21",
+      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 1365.1,
+    Kernels = kernel452
+  },
+  {
+    Identifier = "S2004S36",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "65081",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2004 S 36",
+      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 1354.2,
+    Kernels = kernel452
+  },
+  {
+    Identifier = "S2004S37",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "65082",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2004 S 37",
+      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 752.88,
+    Kernels = kernel452
+  },
+  {
+    Identifier = "S2004S39",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "65084",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2004 S 39",
+      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 1277.5,
+    Kernels = kernel452
   }
 }
 

@@ -3,6 +3,7 @@ local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels")
 local kernel415 = kernels.sat415
 local kernel441 = kernels.sat441
+local kernel452 = kernels.sat452
 
 
 
@@ -154,6 +155,24 @@ local otherGroup = {
     TrailColor = trailColor,
     OrbitPeriod = 2.736915,
     Kernels = kernel441
+  },
+  {
+    Identifier = "S2004S24",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "65070",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2004 S 24",
+      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 1293.85,
+    Kernels = kernel452
   }
 }
 
