@@ -60,12 +60,29 @@ namespace {
         "The network port that the sonification osc messages will be sent to"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SurroundModeInfo = {
+        "SurroundMode",
+        "Surround Mode",
+        "The type of surround system that the sonification is played on"
+    };
+
     struct [[codegen::Dictionary(SonificationModule)]] Parameters {
         // [[codegen::verbatim(IpAddressInfo.description)]]
         std::optional<std::string> ipAddress;
 
         // [[codegen::verbatim(PortInfo.description)]]
         std::optional<int> port;
+
+        enum class SurroundMode {
+            Horizontal,
+            HorizontalWithElevation,
+            Circular,
+            CircularWithElevation,
+            None
+        };
+
+        // [[codegen::verbatim(SurroundModeInfo.description)]]
+        std::optional<SurroundMode> surroundMode;
     };
 #include "sonificationmodule_codegen.cpp"
 } // namespace
@@ -77,13 +94,29 @@ SonificationModule::SonificationModule()
     , _enabled(EnabledInfo, false)
     , _ipAddress(IpAddressInfo, DefaultSuperColliderIp.data())
     , _port(PortInfo, DefaultSuperColliderPort, 1025, 65536)
+    , _mode(
+        SurroundModeInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
 {
     _ipAddress.setReadOnly(true);
     _port.setReadOnly(true);
 
+    // Add options to the drop down menues
+    _mode.addOptions({
+        { 0, "Horizontal" },
+        { 1, "Horizontal With Elevation" },
+        { 2, "Circular" },
+        { 3, "Circular With Elevation" },
+        { 4, "None" }
+    });
+
+    _mode.onChange([this]() { guiChangeSurroundMode(); });
+
     addProperty(_enabled);
     addProperty(_ipAddress);
     addProperty(_port);
+    addProperty(_mode);
 }
 
 SonificationModule::~SonificationModule() {
@@ -93,11 +126,37 @@ SonificationModule::~SonificationModule() {
     }
 }
 
+void SonificationModule::guiChangeSurroundMode() {
+    _surroundMode = static_cast<SurroundMode>(_mode.value());
+}
+
 void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _ipAddress = p.ipAddress.value_or(_ipAddress);
     _port = p.port.value_or(_port);
+
+    if (p.surroundMode.has_value()) {
+        switch (*p.surroundMode) {
+            case Parameters::SurroundMode::Horizontal:
+                _surroundMode = SurroundMode::Horizontal;
+                break;
+            case Parameters::SurroundMode::HorizontalWithElevation:
+                _surroundMode = SurroundMode::HorizontalWithElevation;
+                break;
+            case Parameters::SurroundMode::Circular:
+                _surroundMode = SurroundMode::Circular;
+                break;
+            case Parameters::SurroundMode::CircularWithElevation:
+                _surroundMode = SurroundMode::CircularWithElevation;
+                break;
+            case Parameters::SurroundMode::None:
+                _surroundMode = SurroundMode::None;
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    }
 
     // Fill sonification list
     SonificationBase* sonification = new CompareSonification(_ipAddress, _port);
@@ -131,6 +190,10 @@ void SonificationModule::internalDeinitialize() {
     // Wait before joining the thread
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     _updateThread.join();
+}
+
+SonificationModule::SurroundMode SonificationModule::surroundMode() const {
+    return _surroundMode;
 }
 
 void SonificationModule::update(std::atomic<bool>& isRunning) {

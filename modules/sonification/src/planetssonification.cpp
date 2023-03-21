@@ -169,42 +169,42 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
 
     _planets.push_back(Planet("Earth"));
     _planets.back().moons.reserve(1);
-    _planets.back().moons.push_back({ "Moon", 0.0 });
+    _planets.back().moons.push_back({ "Moon", std::vector<double>(NumDataItems)});
 
     _planets.push_back(Planet("Mars"));
     _planets.back().moons.reserve(2);
-    _planets.back().moons.push_back({ "Phobos", 0.0 });
-    _planets.back().moons.push_back({ "Deimos", 0.0 });
+    _planets.back().moons.push_back({ "Phobos", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Deimos", std::vector<double>(NumDataItems) });
 
     _planets.push_back(Planet("Jupiter"));
     _planets.back().moons.reserve(4);
-    _planets.back().moons.push_back({ "Io", 0.0 });
-    _planets.back().moons.push_back({ "Europa", 0.0 });
-    _planets.back().moons.push_back({ "Ganymede", 0.0 });
-    _planets.back().moons.push_back({ "Callisto", 0.0 });
+    _planets.back().moons.push_back({ "Io", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Europa", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Ganymede", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Callisto", std::vector<double>(NumDataItems) });
 
     _planets.push_back(Planet("Saturn"));
     _planets.back().moons.reserve(8);
-    _planets.back().moons.push_back({ "Dione", 0.0 });
-    _planets.back().moons.push_back({ "Enceladus", 0.0 });
-    _planets.back().moons.push_back({ "Hyperion", 0.0 });
-    _planets.back().moons.push_back({ "Iapetus", 0.0 });
-    _planets.back().moons.push_back({ "Mimas", 0.0 });
-    _planets.back().moons.push_back({ "Rhea", 0.0 });
-    _planets.back().moons.push_back({ "Tethys", 0.0 });
-    _planets.back().moons.push_back({ "Titan", 0.0 });
+    _planets.back().moons.push_back({ "Dione", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Enceladus", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Hyperion", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Iapetus", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Mimas", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Rhea", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Tethys", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Titan", std::vector<double>(NumDataItems) });
 
     _planets.push_back(Planet("Uranus"));
     _planets.back().moons.reserve(5);
-    _planets.back().moons.push_back({ "Ariel", 0.0 });
-    _planets.back().moons.push_back({ "Miranda", 0.0 });
-    _planets.back().moons.push_back({ "Oberon", 0.0 });
-    _planets.back().moons.push_back({ "Titania", 0.0 });
-    _planets.back().moons.push_back({ "Umbriel", 0.0 });
+    _planets.back().moons.push_back({ "Ariel", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Miranda", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Oberon", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Titania", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Umbriel", std::vector<double>(NumDataItems) });
 
     _planets.push_back(Planet("Neptune"));
     _planets.back().moons.reserve(1);
-    _planets.back().moons.push_back({ "Triton", 0.0 });
+    _planets.back().moons.push_back({ "Triton", std::vector<double>(NumDataItems) });
 
     // Add onChange for the properties
     _toggleAll.onChange([this]() { onToggleAllChanged(); });
@@ -393,10 +393,13 @@ void PlanetsSonification::sendSettings(int planetIndex) {
     std::vector<OscDataType> data;
 
     // Distance
-    data.push_back(_planets[planetIndex].distance);
+    data.push_back(_planets[planetIndex].data[DistanceIndex]);
 
-    // Angle
-    data.push_back(_planets[planetIndex].angle);
+    // Horizontal Angle
+    data.push_back(_planets[planetIndex].data[HAngleIndex]);
+
+    // Vertical Angle
+    data.push_back(_planets[planetIndex].data[VAngleIndex]);
 
     // Settings
     osc::Blob settingsBlob = createSettingsBlob(planetIndex);
@@ -404,7 +407,14 @@ void PlanetsSonification::sendSettings(int planetIndex) {
 
     // Moons
     for (size_t m = 0; m < _planets[planetIndex].moons.size(); ++m) {
-        data.push_back(_planets[planetIndex].moons[m].second);
+        // Distance
+        data.push_back(_planets[planetIndex].moons[m].second[DistanceIndex]);
+
+        // Horizontal Angle
+        data.push_back(_planets[planetIndex].moons[m].second[HAngleIndex]);
+
+        // Vertical Angle
+        data.push_back(_planets[planetIndex].moons[m].second[VAngleIndex]);
     }
 
     data.shrink_to_fit();
@@ -524,37 +534,85 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
         _planets[planetIndex].identifier,
         DistanceUnit::Kilometer
     );
-    double angle =
-        SonificationBase::calculateAngleTo(camera, _planets[planetIndex].identifier);
+    double HAngle = SonificationBase::calculateAngleTo(
+        camera,
+        _planets[planetIndex].identifier
+    );
 
-    if (abs(distance) < std::numeric_limits<double>::epsilon()) {
+    double VAngle = SonificationBase::calculateElevationAngleTo(
+        camera,
+        _planets[planetIndex].identifier
+    );
+
+    if (std::abs(distance) < std::numeric_limits<double>::epsilon()) {
         return false;
     }
 
     // Also calculate angle to moons if this planet is in focus
     bool updateMoons = false;
     for (int m = 0; m < _planets[planetIndex].moons.size(); ++m) {
-        double moonAngle = SonificationBase::calculateAngleFromAToB(
+        // Distance
+        double dist = SonificationBase::calculateDistanceTo(
+            camera,
+            _planets[planetIndex].moons[m].first,
+            DistanceUnit::Kilometer
+        );
+
+        if (std::abs(dist) < std::numeric_limits<double>::epsilon()) {
+            return false;
+        }
+
+        if (std::abs(_planets[planetIndex].moons[m].second[DistanceIndex] - dist) >
+            _distancePrecision)
+        {
+            updateMoons = true;
+            _planets[planetIndex].moons[m].second[DistanceIndex] = dist;
+        }
+
+        // Horizontal angle
+        double moonHAngle = SonificationBase::calculateAngleFromAToB(
             camera,
             _planets[planetIndex].identifier,
             _planets[planetIndex].moons[m].first
         );
 
-        if (abs(_planets[planetIndex].moons[m].second - moonAngle) > _anglePrecision) {
+        if (std::abs(_planets[planetIndex].moons[m].second[HAngleIndex] - moonHAngle) >
+            _anglePrecision)
+        {
             updateMoons = true;
-            _planets[planetIndex].moons[m].second = moonAngle;
+            _planets[planetIndex].moons[m].second[HAngleIndex] = moonHAngle;
+        }
+
+        // Vertical angle
+        double moonVAngle = SonificationBase::calculateElevationAngleFromAToB(
+            camera,
+            _planets[planetIndex].identifier,
+            _planets[planetIndex].moons[m].first
+        );
+
+        if (std::abs(_planets[planetIndex].moons[m].second[VAngleIndex] - moonVAngle) >
+            _anglePrecision)
+        {
+            updateMoons = true;
+            _planets[planetIndex].moons[m].second[VAngleIndex] = moonVAngle;
         }
     }
 
     // Check if this data is new, otherwise don't send it
+    double prevDistance = _planets[planetIndex].data[DistanceIndex];
+    double prevHAngle = _planets[planetIndex].data[HAngleIndex];
+    double prevVAngle = _planets[planetIndex].data[VAngleIndex];
+
     bool shouldSendData = false;
-    if (abs(_planets[planetIndex].distance - distance) > _distancePrecision ||
-        abs(_planets[planetIndex].angle - angle) > _anglePrecision ||
+    if (std::abs(prevDistance - distance) > _distancePrecision ||
+        std::abs(prevHAngle - HAngle) > _anglePrecision ||
+        std::abs(prevVAngle - VAngle) > _anglePrecision ||
         updateMoons)
     {
         // Update the saved data for the planet
-        _planets[planetIndex].distance = distance;
-        _planets[planetIndex].angle = angle;
+        _planets[planetIndex].data[DistanceIndex] = distance;
+        _planets[planetIndex].data[HAngleIndex] = HAngle;
+        _planets[planetIndex].data[VAngleIndex] = VAngle;
         shouldSendData = true;
     }
 

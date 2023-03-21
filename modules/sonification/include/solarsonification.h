@@ -49,6 +49,11 @@ public:
     virtual void stop() override;
 
 private:
+    const int NumDataItems = 3;
+    const int DistanceIndex = 0;
+    const int HAngleIndex = 1;
+    const int VAngleIndex = 2;
+
     // Struct to hold data for all the planets
     struct Planet {
         Planet(std::string id = "") {
@@ -56,8 +61,9 @@ private:
         }
 
         std::string identifier;
-        double distance = 0.0;
-        double angle = 0.0;
+
+        // Distance, horizontal angle, vertical angle
+        std::vector<double> data = std::vector<double>(3);
     };
 
     /**

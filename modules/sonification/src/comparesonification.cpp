@@ -128,42 +128,42 @@ CompareSonification::CompareSonification(const std::string& ip, int port)
 
     _planets.push_back(Planet("Earth"));
     _planets.back().moons.reserve(1);
-    _planets.back().moons.push_back({ "Moon", 0.0 });
+    _planets.back().moons.push_back({ "Moon", std::vector<double>(NumDataItems)});
 
     _planets.push_back(Planet("Mars"));
     _planets.back().moons.reserve(2);
-    _planets.back().moons.push_back({ "Phobos", 0.0 });
-    _planets.back().moons.push_back({ "Deimos", 0.0 });
+    _planets.back().moons.push_back({ "Phobos", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Deimos", std::vector<double>(NumDataItems) });
 
     _planets.push_back(Planet("Jupiter"));
     _planets.back().moons.reserve(4);
-    _planets.back().moons.push_back({ "Io", 0.0 });
-    _planets.back().moons.push_back({ "Europa", 0.0 });
-    _planets.back().moons.push_back({ "Ganymede", 0.0 });
-    _planets.back().moons.push_back({ "Callisto", 0.0 });
+    _planets.back().moons.push_back({ "Io", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Europa", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Ganymede", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Callisto", std::vector<double>(NumDataItems) });
 
     _planets.push_back(Planet("Saturn"));
     _planets.back().moons.reserve(8);
-    _planets.back().moons.push_back({ "Dione", 0.0 });
-    _planets.back().moons.push_back({ "Enceladus", 0.0 });
-    _planets.back().moons.push_back({ "Hyperion", 0.0 });
-    _planets.back().moons.push_back({ "Iapetus", 0.0 });
-    _planets.back().moons.push_back({ "Mimas", 0.0 });
-    _planets.back().moons.push_back({ "Rhea", 0.0 });
-    _planets.back().moons.push_back({ "Tethys", 0.0 });
-    _planets.back().moons.push_back({ "Titan", 0.0 });
+    _planets.back().moons.push_back({ "Dione", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Enceladus", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Hyperion", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Iapetus", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Mimas", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Rhea", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Tethys", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Titan", std::vector<double>(NumDataItems) });
 
     _planets.push_back(Planet("Uranus"));
     _planets.back().moons.reserve(5);
-    _planets.back().moons.push_back({ "Ariel", 0.0 });
-    _planets.back().moons.push_back({ "Miranda", 0.0 });
-    _planets.back().moons.push_back({ "Oberon", 0.0 });
-    _planets.back().moons.push_back({ "Titania", 0.0 });
-    _planets.back().moons.push_back({ "Umbriel", 0.0 });
+    _planets.back().moons.push_back({ "Ariel", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Miranda", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Oberon", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Titania", std::vector<double>(NumDataItems) });
+    _planets.back().moons.push_back({ "Umbriel", std::vector<double>(NumDataItems) });
 
     _planets.push_back(Planet("Neptune"));
     _planets.back().moons.reserve(1);
-    _planets.back().moons.push_back({ "Triton", 0.0 });
+    _planets.back().moons.push_back({ "Triton", std::vector<double>(NumDataItems) });
 
     // Add options to the drop down menues
     _firstPlanet.addOptions({
@@ -309,7 +309,9 @@ bool CompareSonification::getData(const Camera* camera, Planet& planet) {
         planet.identifier,
         DistanceUnit::Kilometer
     );
-    double angle = SonificationBase::calculateAngleTo(camera, planet.identifier);
+    double HAngle = SonificationBase::calculateAngleTo(camera, planet.identifier);
+    double VAngle =
+        SonificationBase::calculateElevationAngleTo(camera, planet.identifier);
 
     if (abs(distance) < std::numeric_limits<double>::epsilon()) {
         return false;
@@ -317,27 +319,58 @@ bool CompareSonification::getData(const Camera* camera, Planet& planet) {
 
     // Also calculate angle to moons
     bool updateMoons = false;
-    for (std::pair<std::string, double>& moon : planet.moons) {
-        double moonAngle = SonificationBase::calculateAngleFromAToB(
+    for (std::pair<std::string, std::vector<double>>& moon : planet.moons) {
+        // Distance
+        double dist = SonificationBase::calculateDistanceTo(
+            camera,
+            moon.first,
+            DistanceUnit::Kilometer
+        );
+
+        if (std::abs(dist) < std::numeric_limits<double>::epsilon()) {
+            return false;
+        }
+
+        if (std::abs(moon.second[DistanceIndex] - dist) > _distancePrecision) {
+            updateMoons = true;
+            moon.second[DistanceIndex] = dist;
+        }
+
+        // Horizontal angle
+        double moonHAngle = SonificationBase::calculateAngleFromAToB(
             camera,
             planet.identifier,
             moon.first
         );
 
-        if (abs(moon.second - moonAngle) > _anglePrecision) {
-            moon.second = moonAngle;
+        if (abs(moon.second[HAngleIndex] - moonHAngle) > _anglePrecision) {
+            moon.second[HAngleIndex] = moonHAngle;
             updateMoons = true;
+        }
+
+        // Vertical angle
+        double moonVAngle = SonificationBase::calculateElevationAngleFromAToB(
+            camera,
+            planet.identifier,
+            moon.first
+        );
+
+        if (moon.second[VAngleIndex] - moonVAngle > _anglePrecision) {
+            updateMoons = true;
+            moon.second[VAngleIndex] = moonVAngle;
         }
     }
 
     // Check if this data is new, otherwise don't send it
     bool isNewData = false;
-    if (abs(planet.distance - distance) > _distancePrecision ||
-        abs(planet.angle - angle) > _anglePrecision || updateMoons)
+    if (abs(planet.data[DistanceIndex] - distance) > _distancePrecision ||
+        abs(planet.data[HAngleIndex] - HAngle) > _anglePrecision ||
+        abs(planet.data[VAngleIndex] - VAngle) > _anglePrecision || updateMoons)
     {
         // Update the saved data for the planet
-        planet.distance = distance;
-        planet.angle = angle;
+        planet.data[DistanceIndex] = distance;
+        planet.data[HAngleIndex] = HAngle;
+        planet.data[VAngleIndex] = VAngle;
         isNewData = true;
     }
     return isNewData;

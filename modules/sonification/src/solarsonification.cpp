@@ -113,14 +113,14 @@ SolarSonification::SolarSonification(const std::string& ip, int port)
     , _neptuneEnabled(EnableNeptuneInfo, false)
 {
     // Fill the _planets list
-    _planets.push_back(Planet("Mercury"));
-    _planets.push_back(Planet("Venus"));
+    /*_planets.push_back(Planet("Mercury"));
+    _planets.push_back(Planet("Venus"));*/
     _planets.push_back(Planet("Earth"));
-    _planets.push_back(Planet("Mars"));
+    /*_planets.push_back(Planet("Mars"));
     _planets.push_back(Planet("Jupiter"));
     _planets.push_back(Planet("Saturn"));
     _planets.push_back(Planet("Uranus"));
-    _planets.push_back(Planet("Neptune"));
+    _planets.push_back(Planet("Neptune"));*/
 
     // Add onChange functions to the properties
     _toggleAll.onChange([this]() { onToggleAllChanged(); });
@@ -191,8 +191,11 @@ bool SolarSonification::getData(const Camera* camera, Planet& planet) {
         planet.identifier,
         DistanceUnit::Kilometer
     );
-    double angle =
+    double HAngle =
         SonificationBase::calculateAngleFromAToB(camera, "Sun", planet.identifier);
+
+    double VAngle =
+        SonificationBase::calculateElevationAngleFromAToB(camera, "Sun", planet.identifier);
 
     if (abs(distance) < std::numeric_limits<double>::epsilon()) {
         return false;
@@ -200,12 +203,14 @@ bool SolarSonification::getData(const Camera* camera, Planet& planet) {
 
     // Check if this data is new, otherwise don't send it
     bool isNewData = false;
-    if (abs(planet.distance - distance) > DistancePrecision ||
-        abs(planet.angle - angle) > AnglePrecision)
+    if (abs(planet.data[DistanceIndex] - distance) > DistancePrecision ||
+        abs(planet.data[HAngleIndex] - HAngle) > AnglePrecision ||
+        abs(planet.data[VAngleIndex] - VAngle) > AnglePrecision)
     {
         // Update the saved data for the planet
-        planet.distance = distance;
-        planet.angle = angle;
+        planet.data[DistanceIndex] = distance;
+        planet.data[HAngleIndex] = HAngle;
+        planet.data[VAngleIndex] = VAngle;
         isNewData = true;
     }
     return isNewData;
