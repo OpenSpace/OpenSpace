@@ -77,7 +77,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
-        "Domain Limits",
+        "Domain Limits Enabled",
         "Enable/Disable domain limits"
     };
     constexpr openspace::properties::Property::PropertyInfo DomainXInfo = {
@@ -103,7 +103,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
-        "Flow Direction",
+        "Flow Enabled",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
         "illustrate magnetic flow"
     };
@@ -135,7 +135,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
         "MaskingEnabled",
-        "Masking",
+        "Masking Enabled",
         "Enable/disable masking. Use masking to show lines where a given quantity is "
         "within a given range, for example, if you only want to see where the "
         "temperature is between 10 and 20 degrees. Also used for masking out line "
@@ -684,9 +684,6 @@ void RenderableFieldlinesSequenceNew::initializeGL() {
 
 void RenderableFieldlinesSequenceNew::setupProperties() {
     addProperty(_colorABlendEnabled);
-    addProperty(_domainEnabled);
-    addProperty(_flowEnabled);
-    addProperty(_maskingEnabled); //hasExtra
     addProperty(_lineWidth);
 
     // Add Property Groups
@@ -705,11 +702,13 @@ void RenderableFieldlinesSequenceNew::setupProperties() {
     _colorGroup.addProperty(_selectedColorRange);
     _colorGroup.addProperty(_colorTablePath);
 
+    _domainGroup.addProperty(_domainEnabled);
     _domainGroup.addProperty(_domainX);
     _domainGroup.addProperty(_domainY);
     _domainGroup.addProperty(_domainZ);
     _domainGroup.addProperty(_domainR);
 
+    _flowGroup.addProperty(_flowEnabled);
     _flowGroup.addProperty(_flowReversed);
     _flowColor.setViewOption(properties::Property::ViewOptions::Color);
     _flowGroup.addProperty(_flowColor);
@@ -717,6 +716,7 @@ void RenderableFieldlinesSequenceNew::setupProperties() {
     _flowGroup.addProperty(_flowParticleSpacing);
     _flowGroup.addProperty(_flowSpeed);
 
+    _maskingGroup.addProperty(_maskingEnabled); //hasExtra
     _maskingGroup.addProperty(_maskingQuantity);
     _selectedMaskingRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     _maskingGroup.addProperty(_selectedMaskingRange);
