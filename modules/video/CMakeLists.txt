@@ -30,6 +30,7 @@ set(HEADER_FILES
   include/videoplayer.h
   include/screenspacevideo.h
   include/renderablevideosphere.h
+  include/renderablevideoplane.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -40,6 +41,7 @@ set(SOURCE_FILES
   src/videoplayer.cpp
   src/screenspacevideo.cpp
   src/renderablevideosphere.cpp
+  src/renderablevideoplane.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

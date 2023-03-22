@@ -22,74 +22,65 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOSPHERE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOSPHERE___H__
+#include <modules/video/include/renderablevideoplane.h>
 
-#include <openspace/rendering/renderable.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 
-#include <modules/video/include/videoplayer.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/opengl/uniformcache.h>
+namespace {
+    struct [[codegen::Dictionary(RenderableVideoPlane)]] Parameters {
 
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+    };
+#include "renderablevideoplane_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
-class Sphere;
-struct RenderData;
-struct UpdateData;
+documentation::Documentation RenderableVideoPlane::Documentation() {
+    return codegen::doc<Parameters>("renderable_video_plane");
+}
 
-namespace documentation { struct Documentation; }
+RenderableVideoPlane::RenderableVideoPlane(const ghoul::Dictionary& dictionary)
+    : RenderablePlane(dictionary)
+    , _videoPlayer(dictionary)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-class RenderableVideoSphere : public Renderable {
-public:
-    RenderableVideoSphere(const ghoul::Dictionary& dictionary);
+    addPropertySubOwner(_videoPlayer);
+}
 
-    void initializeGL() override;
-    void deinitializeGL() override;
+void RenderableVideoPlane::initializeGL() {
+    RenderablePlane::initializeGL();
+    _videoPlayer.initialize();
+}
 
-    bool isReady() const override;
+void RenderableVideoPlane::deinitializeGL() {
+    _videoPlayer.destroy();
+    RenderablePlane::deinitializeGL();
+}
 
-    virtual void render(const RenderData& data, RendererTasks& rendererTask) override;
-    virtual void update(const UpdateData& data) override;
+bool RenderableVideoPlane::isReady() const {
+    return RenderablePlane::isReady() && _videoPlayer.isInitialized();
+}
 
-    static documentation::Documentation Documentation();
+void RenderableVideoPlane::render(const RenderData& data, RendererTasks& rendererTask) {
+    if (!_videoPlayer.isInitialized()) {
+        return;
+    }
 
-protected:
-    void bindTexture();
-    void unbindTexture();
+    RenderablePlane::render(data, rendererTask);
+}
 
-private:
-    VideoPlayer _videoPlayer;
+void RenderableVideoPlane::update(const UpdateData& data) {
+    _videoPlayer.update();
 
-    properties::OptionProperty _orientation;
+    if (!_videoPlayer.isInitialized()) {
+        return;
+    }
+}
 
-    properties::FloatProperty _size;
-    properties::IntProperty _segments;
-
-    properties::BoolProperty _mirrorTexture;
-    properties::BoolProperty _disableFadeInDistance;
-
-    properties::FloatProperty _fadeInThreshold;
-    properties::FloatProperty _fadeOutThreshold;
-
-    ghoul::opengl::ProgramObject* _shader = nullptr;
-
-    std::unique_ptr<Sphere> _sphere;
-
-    UniformCache(opacity, modelViewProjection, modelViewRotation, colorTexture,
-        _mirrorTexture) _uniformCache;
-
-    bool _sphereIsDirty = false;
-};
-
+void RenderableVideoPlane::bindTexture() {
+    _videoPlayer.frameTexture()->bind();
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOSPHERE___H__
