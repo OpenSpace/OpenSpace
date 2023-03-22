@@ -117,9 +117,9 @@ private:
     properties::PropertyOwner _lightSourcePropertyOwner;
 
     // Framebuffer and screen space quad
-    GLuint _framebuffer;
-    GLuint _quadVao;
-    GLuint _quadVbo;
+    GLuint _framebuffer = 0;
+    GLuint _quadVao = 0;
+    GLuint _quadVbo = 0;
 
     // Opacity program
     ghoul::opengl::ProgramObject* _quadProgram = nullptr;

@@ -413,8 +413,8 @@ RenderEngine::RenderEngine()
 
 RenderEngine::~RenderEngine() {}
 
-FramebufferRenderer* RenderEngine::renderer() {
-    return &_renderer;
+const FramebufferRenderer& RenderEngine::renderer() const {
+    return _renderer;
 }
 
 void RenderEngine::initialize() {

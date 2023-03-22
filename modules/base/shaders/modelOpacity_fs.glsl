@@ -32,7 +32,7 @@ uniform float opacity = 1.0;
 uniform sampler2D colorTexture;
 uniform sampler2D depthTexture;
 
-uniform vec4 viewport;
+uniform ivec4 viewport;
 uniform vec2 resolution;
 
 Fragment getFragment() {

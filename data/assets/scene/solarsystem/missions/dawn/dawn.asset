@@ -1,6 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-local M_PI = 3.141592657
 
 local kernels = asset.syncedResource({
   Name = "Dawn Kernels",
@@ -88,7 +87,7 @@ local DawnPosition = {
     -- Rotation for model version 2
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { M_PI/2.0, 0.0, M_PI/2.0 }
+      Rotation = { math.pi/2.0, 0.0, math.pi/2.0 }
     }
   },
   GUI = {
@@ -209,7 +208,7 @@ local DawnFramingCamera2 = {
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, M_PI/2.0, 0 }
+      Rotation = { 0, math.pi/2.0, 0 }
     }
   },
   GUI = {

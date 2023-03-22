@@ -71,36 +71,36 @@ public:
      * depending on where in the render cycle you are. Especially after the Deferred
      * Caster Tasks.
      *
-     * \return GLuint identifier of the currently NOT used pingPongTexture
+     * \return identifier of the currently NOT used pingPongTexture
      */
-    GLuint additionalColorTexture1();
+    GLuint additionalColorTexture1() const;
 
     /**
      * Gives access to the exitColorTexture. This texture is available for all RenderBins.
      * However, it cannot be used at the same time as the Raycaster Tasks. The size of the
      * texture is the resolution of the viewport.
      *
-     * \return GLuint identifier of the exitColorTexture
+     * \return identifier of the exitColorTexture
      */
-    GLuint additionalColorTexture2();
+    GLuint additionalColorTexture2() const;
 
     /**
      * Gives access to the fxaaTexture. This texture is available for all RenderBins.
      * However, it cannot be used at the same time as the FXAA Task. The size of the
      * texture is the resolution of the viewport.
      *
-     * \return GLuint identifier of the fxaaTexture
+     * \return identifier of the fxaaTexture
      */
-    GLuint additionalColorTexture3();
+    GLuint additionalColorTexture3() const;
 
     /**
      * Gives access to the exitDepthTexture. This texture is available for all RenderBins.
      * However, it cannot be used at the same time as the Raycaster Tasks. The size of the
      * texture is the resolution of the viewport.
      *
-     * \return GLuint identifier of the exitDepthTexture
+     * \return identifier of the exitDepthTexture
      */
-    GLuint additionalDepthTexture();
+    GLuint additionalDepthTexture() const;
 
     //=============================//
     //=====  Access G-buffer  =====//
@@ -111,36 +111,36 @@ public:
      * the majority of rendering the scene and might be already in use. Use CAUTION when
      * using this function. The size of the texture is the resolution of the viewport.
      *
-     * \return GLuint identifier of the color texture of the G-buffer
+     * \return identifier of the color texture of the G-buffer
      */
-    GLuint gBufferColorTexture();
+    GLuint gBufferColorTexture() const;
 
     /**
      * Gives access to the position texture of the G-buffer. NOTE: This texture is used for
      * the majority of rendering the scene and might be already in use. Use CAUTION when
      * using this function. The size of the texture is the resolution of the viewport.
      *
-     * \return GLuint identifier of the position texture of the G-buffer
+     * \return identifier of the position texture of the G-buffer
      */
-    GLuint gBufferPositionTexture();
+    GLuint gBufferPositionTexture() const;
 
     /**
      * Gives access to the normal texture of the G-buffer. NOTE: This texture is used for
      * the majority of rendering the scene and might be already in use. Use CAUTION when
      * using this function. The size of the texture is the resolution of the viewport.
      *
-     * \return GLuint identifier of the normal texture of the G-buffer
+     * \return identifier of the normal texture of the G-buffer
      */
-    GLuint gBufferNormalTexture();
+    GLuint gBufferNormalTexture() const;
 
     /**
      * Gives access to the depth texture of the G-buffer. NOTE: This texture is used for
      * the majority of rendering the scene and might be already in use. Use CAUTION when
      * using this function. The size of the texture is the resolution of the viewport.
      *
-     * \return GLuint identifier of the depth texture of the G-buffer
+     * \return identifier of the depth texture of the G-buffer
      */
-    GLuint gBufferDepthTexture();
+    GLuint gBufferDepthTexture() const;
 
     void initialize();
     void deinitialize();

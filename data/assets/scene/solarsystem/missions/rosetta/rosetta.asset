@@ -1,7 +1,6 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./67p")
-local M_PI = 3.141592657
 
 local models = asset.syncedResource({
   Name = "Rosetta Models",
@@ -101,7 +100,7 @@ local Rosetta = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0.0, M_PI/2.0, 0.0 }
+      Rotation = { 0.0, math.pi/2.0, 0.0 }
     }
   },
   Renderable = {
@@ -153,7 +152,7 @@ local Philae = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0.0, M_PI/2.0, 0.0 }
+      Rotation = { 0.0, math.pi/2.0, 0.0 }
     }
   },
   Renderable = {

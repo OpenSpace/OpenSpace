@@ -586,7 +586,7 @@ void RenderableModel::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         4 * sizeof(GLfloat),
-        (void*)(2 * sizeof(GLfloat))
+        reinterpret_cast<void*>(2 * sizeof(GLfloat))
     );
 
     // Generate textures and the frame buffer
@@ -597,25 +597,25 @@ void RenderableModel::initializeGL() {
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
-        global::renderEngine->renderer()->additionalColorTexture1(),
+        global::renderEngine->renderer().additionalColorTexture1(),
         0
     );
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT1,
-        global::renderEngine->renderer()->additionalColorTexture2(),
+        global::renderEngine->renderer().additionalColorTexture2(),
         0
     );
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT2,
-        global::renderEngine->renderer()->additionalColorTexture3(),
+        global::renderEngine->renderer().additionalColorTexture3(),
         0
     );
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_DEPTH_ATTACHMENT,
-        global::renderEngine->renderer()->additionalDepthTexture(),
+        global::renderEngine->renderer().additionalDepthTexture(),
         0
     );
 
@@ -772,17 +772,17 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     }
 
     // Only render two pass if the model is in any way transparent
-    bool shouldRenderTwise = false;
+    bool shouldRenderTwice = false;
     const float o = opacity();
     if ((o >= 0.f && o < 1.f) || _geometry->isTransparent()) {
         setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-        shouldRenderTwise = true;
+        shouldRenderTwice = true;
     }
     else {
         setRenderBin(_originalRenderBin);
     }
 
-    if (!shouldRenderTwise) {
+    if (!shouldRenderTwice) {
         // Reset manual depth test
         _program->setUniform(
             _uniformCache.performManualDepthTest,
@@ -801,7 +801,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glFramebufferTexture(
             GL_FRAMEBUFFER,
             GL_COLOR_ATTACHMENT0,
-            global::renderEngine->renderer()->additionalColorTexture1(),
+            global::renderEngine->renderer().additionalColorTexture1(),
             0
         );
         // Check status
@@ -826,7 +826,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         gBufferDepthTextureUnit.activate();
         glBindTexture(
             GL_TEXTURE_2D,
-            global::renderEngine->renderer()->gBufferDepthTexture()
+            global::renderEngine->renderer().gBufferDepthTexture()
         );
         _program->setUniform(
             _uniformCache.gBufferDepthTexture,
@@ -863,7 +863,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         colorTextureUnit.activate();
         glBindTexture(
             GL_TEXTURE_2D,
-            global::renderEngine->renderer()->additionalColorTexture1()
+            global::renderEngine->renderer().additionalColorTexture1()
         );
         _quadProgram->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
 
@@ -871,7 +871,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         depthTextureUnit.activate();
         glBindTexture(
             GL_TEXTURE_2D,
-            global::renderEngine->renderer()->additionalDepthTexture()
+            global::renderEngine->renderer().additionalDepthTexture()
         );
         _quadProgram->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
 
@@ -886,10 +886,10 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glm::ivec4 viewport = glm::ivec4(vp[0], vp[1], vp[2], vp[3]);
         _quadProgram->setUniform(
             _uniformOpacityCache.viewport,
-            static_cast<float>(viewport[0]),
-            static_cast<float>(viewport[1]),
-            static_cast<float>(viewport[2]),
-            static_cast<float>(viewport[3])
+            viewport[0],
+            viewport[1],
+            viewport[2],
+            viewport[3]
         );
 
         // Draw

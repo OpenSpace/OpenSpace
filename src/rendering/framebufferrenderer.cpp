@@ -90,47 +90,47 @@ namespace openspace {
 //============================//
 //=====  Reuse textures  =====//
 //============================//
-// Gives access to the currently NOT used pingPongTexture
-GLuint FramebufferRenderer::additionalColorTexture1() {
+GLuint FramebufferRenderer::additionalColorTexture1() const {
+    // Gives access to the currently NOT used pingPongTexture
     int unusedPingPongIndex = _pingPongIndex == 0 ? 1 : 0;
     return _pingPongBuffers.colorTexture[unusedPingPongIndex];
 }
 
-// Gives access to the exitColorTexture
-GLuint FramebufferRenderer::additionalColorTexture2() {
+GLuint FramebufferRenderer::additionalColorTexture2() const {
+    // Gives access to the exitColorTexture
     return _exitColorTexture;
 }
 
-// Gives access to the fxaaTexture
-GLuint FramebufferRenderer::additionalColorTexture3() {
+GLuint FramebufferRenderer::additionalColorTexture3() const {
+    // Gives access to the fxaaTexture
     return _fxaaBuffers.fxaaTexture;
 }
 
-// Gives access to the exitDepthTexture
-GLuint FramebufferRenderer::additionalDepthTexture() {
+GLuint FramebufferRenderer::additionalDepthTexture() const {
+    // Gives access to the exitDepthTexture
     return _exitDepthTexture;
 }
 
 //=============================//
 //=====  Access G-buffer  =====//
 //=============================//
-// / Gives access to the color texture of the G-buffer
-GLuint FramebufferRenderer::gBufferColorTexture() {
+GLuint FramebufferRenderer::gBufferColorTexture() const {
+    // Gives access to the color texture of the G-buffer
     return _gBuffers.colorTexture;
 }
 
-//  Gives access to the position texture of the G-buffer
-GLuint FramebufferRenderer::gBufferPositionTexture() {
+GLuint FramebufferRenderer::gBufferPositionTexture() const {
+    // Gives access to the position texture of the G-buffer
     return _gBuffers.positionTexture;
 }
 
-//  Gives access to the normal texture of the G-buffer
-GLuint FramebufferRenderer::gBufferNormalTexture() {
+GLuint FramebufferRenderer::gBufferNormalTexture() const {
+    // Gives access to the normal texture of the G-buffer
     return _gBuffers.normalTexture;
 }
 
-//  Gives access to the depth texture of the G-buffer
-GLuint FramebufferRenderer::gBufferDepthTexture() {
+GLuint FramebufferRenderer::gBufferDepthTexture() const {
+    // Gives access to the depth texture of the G-buffer
     return _gBuffers.depthTexture;
 }
 
