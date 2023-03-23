@@ -1372,8 +1372,9 @@ namespace openspace {
         // sets one new temporary key frame position per iteration
         while (it != secondLineEndIt && temporaryKeyFrameIndex < _nPointsOnFieldlines - 1) {
 
-            std::vector<glm::vec3>::iterator backIt = it == secondLineBeginIt ?
-                backIt = (firstLineEndIt - 1) : (it - 1);   // needed for the gap
+            bool itAtSecondLineBegiIt = it == secondLineBeginIt; 
+            std::vector<glm::vec3>::iterator backIt = itAtSecondLineBegiIt ? 
+                (firstLineEndIt - 1) : (it - 1); // needed for the gap
 
             float distanceSinceLastLineVertex =
                 traversedDistanceTemporaryKeyFrame + desiredVertexSpacing - traversedDistanceLine;
