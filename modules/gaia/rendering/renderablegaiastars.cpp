@@ -53,6 +53,66 @@ namespace {
     constexpr size_t PositionSize = 3;
     constexpr size_t ColorSize = 2;
     constexpr size_t VelocitySize = 3;
+    //TODO: add other dataSize variable. --- complete, stored in Renderable classs
+
+    constexpr openspace::properties::Property::PropertyInfo MappingPxInfo = {
+        "MappingPx",
+        "Mapping (px)",
+        "The name of the variable in the file that is used as the star position "
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingPyInfo = {
+        "MappingPy",
+        "Mapping (py)",
+        "The name of the variable in the file that is used as the star position "
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingPzInfo = {
+        "MappingPz",
+        "Mapping (pz)",
+        "The name of the variable in the file that is used as the star position "
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingAbsMagnitudeInfo = {
+        "MappingAbsMagnitude",
+        "Mapping (absolute magnitude)",
+        "The name of the variable in the file that is used as the absolute "
+        "magnitude variable"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingColorInfo = {
+        "ColorValue",
+        "Mapping (color)",
+        "The name of the variable in the file that is used as the color "
+        "variable"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingVxInfo = {
+        "MappingVx",
+        "Mapping (vx)",
+        "The name of the variable in the file that is used as the star velocity "
+        "along the x-axis"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingVyInfo = {
+        "MappingVy",
+        "Mapping (vy)",
+        "The name of the variable in the file that is used as the star velocity "
+        "along the y-axis"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingVzInfo = {
+        "MappingVz",
+        "Mapping (vz)",
+        "The name of the variable in the file that is used as the star velocity "
+        "along the z-axis"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingSpeedInfo = {
+        "MappingSpeed",
+        "Mapping (speed)",
+        "The name of the variable in the file that is used as the speed"
+    };
 
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "File",
@@ -306,7 +366,8 @@ namespace {
             Speck,
             BinaryRaw,
             BinaryOctree,
-            StreamOctree
+            StreamOctree,
+            Csv
         };
         // [[codegen::verbatim(FileReaderOptionInfo.description)]]
         FileReader fileReaderOption;
@@ -403,6 +464,29 @@ namespace {
 
         // [codegen::verbatim(ReportGlErrorsInfo.description)]]
         std::optional<bool> reportGlErrors;
+
+        struct DataMapping {
+            // [[codegen::verbatim(MappingPxInfo.description)]]
+            std::optional<std::string> px;
+            // [[codegen::verbatim(MappingPyInfo.description)]]
+            std::optional<std::string> py;
+            // [[codegen::verbatim(MappingPzInfo.description)]]
+            std::optional<std::string> pz;
+            // [[codegen::verbatim(MappingAbsMagnitudeInfo.description)]]
+            std::optional<std::string> absoluteMagnitude;
+            // [[codegen::verbatim(MappingColorInfo.description)]]
+            std::optional<std::string> color;
+            // [[codegen::verbatim(MappingVxInfo.description)]]
+            std::optional<std::string> vx;
+            // [[codegen::verbatim(MappingVyInfo.description)]]
+            std::optional<std::string> vy;
+            // [[codegen::verbatim(MappingVzInfo.description)]]
+            std::optional<std::string> vz;
+            // [[codegen::verbatim(MappingSpeedInfo.description)]]
+            std::optional<std::string> speed;
+        };
+
+        DataMapping dataMapping;
     };
 #include "renderablegaiastars_codegen.cpp"
 }  // namespace
@@ -451,10 +535,67 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _maxCpuMemoryPercent(MaxCpuMemoryPercentInfo, 0.5f, 0.f, 1.f)
     , _reportGlErrors(ReportGlErrorsInfo, false)
     , _accumulatedIndices(1, 0)
+    , _OptionalDataSize{ 0 }
+    , _fileHeaders{}
+    , _dataMappingContainer({ "DataMapping", "Data Mapping" })
+    , _dataMapping{ 
+        properties::StringProperty(MappingPxInfo),
+        properties::StringProperty(MappingPyInfo),
+        properties::StringProperty(MappingPzInfo),
+        properties::StringProperty(MappingAbsMagnitudeInfo),
+        properties::StringProperty(MappingColorInfo),
+        properties::StringProperty(MappingVxInfo),
+        properties::StringProperty(MappingVyInfo),
+        properties::StringProperty(MappingVzInfo),
+        properties::StringProperty(MappingSpeedInfo) 
+    }
 {
     using File = ghoul::filesystem::File;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
+    _dataMapping.px = p.dataMapping.px.value_or("px");
+    _dataMapping.py = p.dataMapping.py.value_or("py");
+    _dataMapping.pz = p.dataMapping.pz.value_or("pz");
+    _dataMapping.absMag = p.dataMapping.absoluteMagnitude.value_or("Gmag");
+    _dataMapping.color = p.dataMapping.color.value_or("color");
+    _dataMapping.vx = p.dataMapping.vx.value_or("vx");
+    _dataMapping.vy = p.dataMapping.vy.value_or("vy");
+    _dataMapping.vz = p.dataMapping.vz.value_or("vz");
+    _dataMapping.speed = p.dataMapping.speed.value_or("speed");
+
+    _dataMapping.px.setReadOnly(true);
+    _dataMapping.py.setReadOnly(true);
+    _dataMapping.pz.setReadOnly(true);
+    _dataMapping.absMag.setReadOnly(true);
+    _dataMapping.color .setReadOnly(true);
+    _dataMapping.vx.setReadOnly(true);
+    _dataMapping.vy.setReadOnly(true);
+    _dataMapping.vz.setReadOnly(true);
+    _dataMapping.speed.setReadOnly(true);
+    
+    _dataMappingContainer.addProperty(_dataMapping.px);
+    _dataMappingContainer.addProperty(_dataMapping.py);
+    _dataMappingContainer.addProperty(_dataMapping.pz);
+    _dataMappingContainer.addProperty(_dataMapping.absMag);
+    _dataMappingContainer.addProperty(_dataMapping.color);
+    _dataMappingContainer.addProperty(_dataMapping.vx);
+    _dataMappingContainer.addProperty(_dataMapping.vy);
+    _dataMappingContainer.addProperty(_dataMapping.vz);
+    _dataMappingContainer.addProperty(_dataMapping.speed);
+
+    //The order should follow position - absmag - color - velocity - speed so that the rendering works properly. 
+    // Because it assumes a certain order on the required parameters to work properly. 
+    _requiredValues.push_back(_dataMapping.px.value());
+    _requiredValues.push_back(_dataMapping.py.value());
+    _requiredValues.push_back(_dataMapping.pz.value());
+    _requiredValues.push_back(_dataMapping.absMag.value());
+    _requiredValues.push_back(_dataMapping.color.value());
+    _requiredValues.push_back(_dataMapping.vx.value());
+    _requiredValues.push_back(_dataMapping.vy.value());
+    _requiredValues.push_back(_dataMapping.vz.value());
+    _requiredValues.push_back(_dataMapping.speed.value());
+
+    addPropertySubOwner(_dataMappingContainer);
 
     _filePath = absPath(p.file).string();
     _dataFile = std::make_unique<File>(_filePath.value());
@@ -475,7 +616,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         { gaia::FileReaderOption::Speck, "Speck" },
         { gaia::FileReaderOption::BinaryRaw, "BinaryRaw" },
         { gaia::FileReaderOption::BinaryOctree, "BinaryOctree" },
-        { gaia::FileReaderOption::StreamOctree, "StreamOctree" }
+        { gaia::FileReaderOption::StreamOctree, "StreamOctree" },
+        { gaia::FileReaderOption::Csv, "Csv"} 
     });
     _fileReaderOption = codegen::map<gaia::FileReaderOption>(p.fileReaderOption);
 
@@ -1095,7 +1237,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
                 GL_STREAM_DRAW
             );
 
-            // Update buffer with one insert per chunk/node.
+            //Update buffer with one insert per chunk/node.
             //The key in map holds the offset index.
             for (const auto& [offset, subData] : updateData) {
                 // Fill chunk by appending zeroes so we overwrite possible earlier values.
@@ -1132,7 +1274,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
                 for (const auto& [offset, subData] : updateData) {
                     // Fill chunk by appending zeroes.
                     std::vector<float> vectorData(subData.begin(), subData.end());
-                    vectorData.resize(_chunkSize, 0.f);
+                    vectorData.resize(_chunkSize, 0.f); //TODO: change _chunkSize to pos+col+vel chunksize and do this for other data instead.
                     glBufferSubData(
                         GL_ARRAY_BUFFER,
                         offset * velChunkSize * sizeof(GLfloat),
@@ -1142,7 +1284,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
                 }
             }
         }
-
+        //TODO: add other data to GPU, however check where this should be added as we have different render modes to adhere to
+        //which leads to different size in the update buffer call
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
@@ -1676,8 +1819,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _nRenderValuesPerStar = PositionSize + ColorSize;
         }
         else { // (renderOption == gaia::RenderOption::Motion)
-            _nRenderValuesPerStar = PositionSize + ColorSize + VelocitySize;
+            _nRenderValuesPerStar = PositionSize + ColorSize + VelocitySize + _OptionalDataSize;
         }
+        //TODO: add other data to _nRenderValuesPerStar -- complete
 
         // Calculate memory budgets.
         _chunkSize = _octreeManager.maxStarsPerNode() * _nRenderValuesPerStar;
@@ -1835,11 +1979,20 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 LDEBUG(fmt::format(
                     "Generating Velocity Vertex Buffer Object id '{}'", _vboVel
                 ));
+            }//TODO: generate other data buffer -- complete
+            if (_vboOpt == 0) {
+                glGenBuffers(1, &_vboOpt);
+                LDEBUG(fmt::format(
+                    "Generating Optional Vertex Buffer Object id '{}'", _vboVel
+                ));
             }
 
             // Bind our different VBOs to our vertex array layout.
             glBindVertexArray(_vao);
 
+
+            //TODO: bind other data VBO to vao layout, also rewrite this as an if statement instead of copying the same code 3 times
+            //also create a function instead with argument int vboposition, and name for attribute location const char* ? maybe..
             switch (renderOption) {
                 case gaia::RenderMode::Static: {
                     glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
@@ -1919,6 +2072,19 @@ void RenderableGaiaStars::update(const UpdateData&) {
                     glVertexAttribPointer(
                         velocityAttrib,
                         VelocitySize,
+                        GL_FLOAT,
+                        GL_FALSE,
+                        0,
+                        nullptr
+                    );
+
+                    glBindBuffer(GL_ARRAY_BUFFER, _vboOpt);
+                    GLint optionalAttrib = _program->attributeLocation("in_opt");
+                    glEnableVertexAttribArray(optionalAttrib);
+
+                    glVertexAttribPointer(
+                        optionalAttrib,
+                        _OptionalDataSize,
                         GL_FLOAT,
                         GL_FALSE,
                         0,
@@ -2158,17 +2324,111 @@ bool RenderableGaiaStars::readDataFile() {
             // Read Octree structure from file, without data.
             nReadStars = readBinaryOctreeStructureFile(file.string());
             break;
+        case gaia::FileReaderOption::Csv:
+            nReadStars = readCSVFile(file);
+            break;
         default:
             LERROR("Wrong FileReaderOption - no data file loaded");
             break;
     }
 
+    if (fileReaderOption == gaia::FileReaderOption::Csv)
+    {
+        _OptionalDataSize = _fileHeaders.size() - PositionSize - ColorSize - VelocitySize;
+    }
+
     //_octreeManager->printStarsPerNode();
     _nRenderedStars.setMaxValue(nReadStars);
     LINFO(fmt::format("Dataset contains a total of {} stars", nReadStars));
-    _totalDatasetSizeInBytes = nReadStars * (PositionSize + ColorSize + VelocitySize) * 4;
+    //TODO: add other data size and change 4 to sizeof(float)? -- complete
+    _totalDatasetSizeInBytes = nReadStars * (PositionSize + ColorSize + VelocitySize + _OptionalDataSize) * sizeof(GLfloat);
 
     return nReadStars > 0;
+}
+
+std::vector<float> RenderableGaiaStars::constructCSVData(std::vector<float>& readValues) {
+    int nRenderValues = readValues.size();
+    std::vector<float> renderValues(nRenderValues);
+
+    // Gaia DR1 data from AMNH measures positions in Parsec, but
+    // RenderableGaiaStars expects kiloParsec (because fits file from Vienna had
+    // in kPc).
+    // Thus we need to convert positions twice atm.
+
+    //OBS order matters unless changes are made to the internal rendering system!
+    size_t speedidx{ _fileHeaders[_dataMapping.speed.value()] };
+    int index{ 0 };
+    renderValues[index++] = readValues[_fileHeaders[_dataMapping.px.value()]] / 1000.f; // Pos X
+    renderValues[index++] = readValues[_fileHeaders[_dataMapping.py.value()]] / 1000.f; // Pos Y
+    renderValues[index++] = readValues[_fileHeaders[_dataMapping.pz.value()]] / 1000.f; // Pos Z
+    renderValues[index++] = readValues[_fileHeaders[_dataMapping.absMag.value()]]; // AbsMag
+    renderValues[index++] = readValues[_fileHeaders[_dataMapping.color.value()]]; // color
+    renderValues[index++] = readValues[_fileHeaders[_dataMapping.vx.value()]] * readValues[speedidx]; // Vel X
+    renderValues[index++] = readValues[_fileHeaders[_dataMapping.vy.value()]] * readValues[speedidx]; // Vel Y
+    renderValues[index++] = readValues[_fileHeaders[_dataMapping.vz.value()]] * readValues[speedidx]; // Vel Z
+    renderValues[index++] = readValues[speedidx];
+
+    //Add the remaining values in file to render values
+    for (const auto& [header, idx] : _fileHeaders) {
+        //if header name is not among required values we will add it to render values.
+        if (std::find(_requiredValues.begin(), _requiredValues.end(), header) == _requiredValues.end()) {
+            renderValues[index++] = readValues[idx];
+        }
+    }
+
+    return renderValues;
+}
+
+int RenderableGaiaStars::readCSVFile(const std::filesystem::path& filePath)
+{
+    //Read data from csv file and convert it to float values
+    std::vector<std::vector<std::string>> dataTable = ghoul::loadCSVFile(filePath.string(), true);
+
+    //Read the fileheaders from table to local variable. 
+    std::vector<std::string> headers = std::move(dataTable[0]);
+    int idx{ 0 };
+    for (const auto& s : headers) {
+        _fileHeaders[s] = idx++;
+    }
+
+    _octreeManager.setValuesPerStar(_fileHeaders.size() - (PositionSize + ColorSize + VelocitySize));
+
+    //Insert star data into octree, one star per row of data.
+    for (const std::vector<std::string>& row : dataTable)
+    {
+        //Convert row of data from string values to floats
+        std::vector<float> starValues{};
+        std::transform(row.begin(), row.end(), std::back_inserter(starValues),
+            [](const std::string& s) {
+                return std::stof(s); //string to float
+            });
+        //Do not include any stars with NaN values, TODO: NaN valued stars should be colored differently in the shader, e.g., blender pink?
+        bool hasNaN = std::any_of(starValues.begin(), starValues.end(), [](float f) {return std::isnan(f); });
+        if(!hasNaN && starValues.size() > 0) //Do not include any rows without values, e.g., after std::move header file from table.
+            _octreeManager.insert(constructCSVData(starValues));
+    }
+    
+    //Update header-index pairs as the stored renderValues has changed the order to: pos, col, vel, optionals
+    //(optionals are also changed as they are read in alphabetical order from the map)
+    std::map<std::string, size_t> tmp;
+    //Update required parameter indices
+    int newidx{ 0 };
+    for (const auto& s : _requiredValues) {
+        tmp[s] = newidx++;
+    }
+    //Update optional parameter indices
+    for (const auto& [header, idx] : _fileHeaders) {
+        //if header name is not among required we update the index.
+        if (std::find(_requiredValues.begin(), _requiredValues.end(), header) == _requiredValues.end()) {
+            tmp[header] = newidx++;
+        }
+    }
+
+    _fileHeaders = std::move(tmp);
+    _octreeManager._fileHeaders = _fileHeaders;
+    _octreeManager.sliceLodData();
+
+    return static_cast<int>(dataTable.size());
 }
 
 int RenderableGaiaStars::readFitsFile(const std::filesystem::path& filePath) {

@@ -45,6 +45,7 @@ public:
         std::vector<float> posData;
         std::vector<float> colData;
         std::vector<float> velData;
+        std::vector<float> optData;
         std::vector<std::pair<float, size_t>> magOrder;
         float originX;
         float originY;
@@ -176,10 +177,25 @@ public:
      */
     long long cpuRamBudget() const;
 
+    /// <summary>
+    /// Sets the number of values per star, assumes octree has already called code initOctree(),
+    /// Obs, anything that depends on optional data size must make sure this is called before.
+    /// Should be enough to call once data is loaded and only if data is changed.
+    /// </summary>
+    /// <param name="n"></param>
+    void setValuesPerStar(int n);
+
+    //TODO: determine if this is needed in the octree manager aswell or just in the renderable.
+    std::map<std::string, size_t> _fileHeaders;
+
 private:
     const size_t POS_SIZE = 3;
     const size_t COL_SIZE = 2;
     const size_t VEL_SIZE = 3;
+    const size_t REQUIRED_DATA_SIZE{ POS_SIZE + COL_SIZE + VEL_SIZE };
+    
+    //Should be treated as a constant?
+    size_t OPTIONAL_DATA_SIZE{ 0 };
 
     // MAX_DIST [kPc] - Determines the depth of Octree together with MAX_STARS_PER_NODE.
     // A smaller distance is better (i.e. a smaller total depth) and a smaller MAX_STARS
@@ -354,6 +370,7 @@ private:
      * set to false for that parent node and next parent in line will be checked.
      */
     void propagateUnloadedNodes(std::vector<std::shared_ptr<OctreeNode>> ancestorNodes);
+
 
     std::shared_ptr<OctreeNode> _root;
     std::unique_ptr<OctreeCuller> _culler;

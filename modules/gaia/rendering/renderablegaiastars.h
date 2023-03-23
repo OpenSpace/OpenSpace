@@ -39,6 +39,9 @@
 #include <ghoul/opengl/bufferbinding.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <ghoul/misc/csvreader.h>
+#include <algorithm>
+#include <openspace/util/distanceconversion.h>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -109,11 +112,44 @@ private:
      */
     int readBinaryOctreeStructureFile(const std::filesystem::path& folderPath);
 
+    /*
+    * Read CSV file and construct an octree
+    */
+    int readCSVFile(const std::filesystem::path& filepath);
+
     /**
      * Checks for any OpenGL errors and reports these to the log if _reportGlErrors is
      * set to true.
      */
     void checkGlErrors(const std::string& identifier) const;
+
+    /// <summary>
+    /// Prepare data into internal format that the renderer accept, add optional properties after.
+    /// Layout of data pos - absmag, color - vel - speed - optional 
+    /// </summary>
+    /// <param name="readValues"></param>
+    /// <returns></returns>
+    std::vector<float> constructCSVData(std::vector<float>& readValues);
+
+    /*Thesis 2023*/
+    std::map<std::string, size_t> _fileHeaders;
+    properties::PropertyOwner _dataMappingContainer;
+    struct {
+        properties::StringProperty px;
+        properties::StringProperty py;
+        properties::StringProperty pz;
+        properties::StringProperty absMag;
+        properties::StringProperty color;
+        properties::StringProperty vx;
+        properties::StringProperty vy;
+        properties::StringProperty vz;
+        properties::StringProperty speed;
+    } _dataMapping;
+    //should be treated as const after reading data.
+    std::vector<std::string> _requiredValues;
+
+    size_t _OptionalDataSize;
+    /*End of thesis 2023*/
 
     properties::StringProperty _filePath;
     std::unique_ptr<ghoul::filesystem::File> _dataFile;
@@ -204,6 +240,7 @@ private:
     GLuint _vboPos = 0;
     GLuint _vboCol = 0;
     GLuint _vboVel = 0;
+    GLuint _vboOpt = 0; //TODO: add _vboOther -- complete
     GLuint _ssboIdx = 0;
     GLuint _ssboData = 0;
     GLuint _vaoQuad = 0;

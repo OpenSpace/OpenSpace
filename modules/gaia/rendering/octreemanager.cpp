@@ -60,7 +60,7 @@ void OctreeManager::initOctree(long long cpuRamBudget, int maxDist, int maxStars
     _numInnerNodes = 0;
     _numLeafNodes = 0;
     _totalDepth = 0;
-    _valuesPerStar = POS_SIZE + COL_SIZE + VEL_SIZE;
+    _valuesPerStar = POS_SIZE + COL_SIZE + VEL_SIZE; //TODO: add total size -- see setValuesPerStar function.
     _maxCpuRamBudget = cpuRamBudget;
     _cpuRamBudget = cpuRamBudget;
     _parentNodeOfCamera = 8;
@@ -72,30 +72,17 @@ void OctreeManager::initOctree(long long cpuRamBudget, int maxDist, int maxStars
         MAX_STARS_PER_NODE = static_cast<size_t>(maxStarsPerNode);
     }
 
-    for (size_t i = 0; i < 8; ++i) {
-        _numLeafNodes++;
-        _root->Children[i] = std::make_shared<OctreeNode>();
-        _root->Children[i]->posData = std::vector<float>();
-        _root->Children[i]->colData = std::vector<float>();
-        _root->Children[i]->velData = std::vector<float>();
-        _root->Children[i]->magOrder = std::vector<std::pair<float, size_t>>();
-        _root->Children[i]->isLeaf = true;
-        _root->Children[i]->isLoaded = false;
-        _root->Children[i]->hasLoadedDescendant = false;
-        _root->Children[i]->bufferIndex = DEFAULT_INDEX;
-        _root->Children[i]->octreePositionIndex = 80 + i;
-        _root->Children[i]->numStars = 0;
-        _root->Children[i]->halfDimension = MAX_DIST / 2.f;
-        _root->Children[i]->originX = (i % 2 == 0) ?
-            _root->Children[i]->halfDimension :
-            -_root->Children[i]->halfDimension;
-        _root->Children[i]->originY = (i % 4 < 2) ?
-            _root->Children[i]->halfDimension :
-            -_root->Children[i]->halfDimension;
-        _root->Children[i]->originZ = (i < 4) ?
-            _root->Children[i]->halfDimension :
-            -_root->Children[i]->halfDimension;
-    }
+    //Compensate _numLeafNodes (-1) and _numInnerNodes (+1) as those are changed in createNodeChildren,
+    //function uses halfDimension so this must be set beforehand to MAX_DIST.
+    _root->halfDimension = MAX_DIST;
+    createNodeChildren(*_root);
+    _numLeafNodes++;
+    _numInnerNodes--;
+}
+
+void OctreeManager::setValuesPerStar(int n) {
+    OPTIONAL_DATA_SIZE = n;
+    _valuesPerStar = POS_SIZE + COL_SIZE + VEL_SIZE + OPTIONAL_DATA_SIZE;
 }
 
 void OctreeManager::initBufferIndexStack(long long maxNodes, bool useVBO,
@@ -550,6 +537,11 @@ void OctreeManager::writeToFile(std::ofstream& outFileStream, bool writeData) {
         sizeof(int32_t)
     );
     outFileStream.write(reinterpret_cast<const char*>(&MAX_DIST), sizeof(int32_t));
+    //TODO: if we are going to store headers in file, it should probably be written here and not in function writeNodeToFile 
+    //std::vector<std::string> headers(_fileHeaders.size());
+    //for (const auto& [header, idx] : _fileHeaders) {
+    //    headers[idx] = header;
+    //}
 
     // Use pre-traversal (Morton code / Z-order).
     for (size_t i = 0; i < 8; ++i) {
@@ -571,6 +563,7 @@ void OctreeManager::writeNodeToFile(std::ofstream& outFileStream, const OctreeNo
         std::vector<float> nodeData = node.posData;
         nodeData.insert(nodeData.end(), node.colData.begin(), node.colData.end());
         nodeData.insert(nodeData.end(), node.velData.begin(), node.velData.end());
+        //TODO: write all the data to file
         int32_t nDataSize = static_cast<int32_t>(nodeData.size());
         size_t nBytes = nDataSize * sizeof(nodeData[0]);
 
@@ -588,6 +581,7 @@ void OctreeManager::writeNodeToFile(std::ofstream& outFileStream, const OctreeNo
     }
 }
 
+//TODO update reading from file so that we take the headers order into consideration
 int OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData,
                                 const std::string& folderPath)
 {
@@ -626,6 +620,8 @@ int OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData,
         }
     }
 
+    //TODO: update with all data values --- this check should probably be removed as the data can be any size now, however we might want to check and make sure
+    //that the required parameters exists.
     if (_valuesPerStar != (POS_SIZE + COL_SIZE + VEL_SIZE)) {
         LERROR("Read file doesn't have the same structure of render parameters");
     }
@@ -668,6 +664,7 @@ int OctreeManager::readNodeFromFile(std::ifstream& inFileStream, OctreeNode& nod
             node.posData = std::vector<float>(fetchedData.begin(), posEnd);
             node.colData = std::vector<float>(posEnd, colEnd);
             node.velData = std::vector<float>(colEnd, velEnd);
+            //TODO: read rest of the data
         }
     }
 
@@ -704,6 +701,7 @@ void OctreeManager::writeNodeToMultipleFiles(const std::string& outFilePrefix,
     std::vector<float> nodeData = node.posData;
     nodeData.insert(nodeData.end(), node.colData.begin(), node.colData.end());
     nodeData.insert(nodeData.end(), node.velData.begin(), node.velData.end());
+    //TODO: add rest of data to save.
     int32_t nDataSize = static_cast<int32_t>(nodeData.size());
     size_t nBytes = nDataSize * sizeof(nodeData[0]);
 
@@ -766,7 +764,7 @@ void OctreeManager::fetchChildrenNodes(OctreeNode& parentNode,
         if (!parentNode.Children[i]->isLoaded &&
             (parentNode.Children[i]->numStars > 0) &&
             _cpuRamBudget > static_cast<long long>(parentNode.Children[i]->numStars
-            * (POS_SIZE + COL_SIZE + VEL_SIZE) * 4))
+            * (REQUIRED_DATA_SIZE + OPTIONAL_DATA_SIZE) * sizeof(GLfloat)))//TODO: recalculate rambudget of stars
         {
             fetchNodeDataFromFile(*parentNode.Children[i]);
         }
@@ -808,7 +806,7 @@ void OctreeManager::fetchNodeDataFromFile(OctreeNode& node) {
         node.posData = std::vector<float>(readData.begin(), posEnd);
         node.colData = std::vector<float>(posEnd, colEnd);
         node.velData = std::vector<float>(colEnd, velEnd);
-
+        //TODO: read rest of data
         // Keep track of nodes that are loaded and update CPU RAM budget.
         node.isLoaded = true;
         if (!_datasetFitInMemory) {
@@ -867,6 +865,13 @@ void OctreeManager::removeNode(OctreeNode& node) {
     node.colData.shrink_to_fit();
     node.velData.clear();
     node.velData.shrink_to_fit();
+    node.optData.clear();
+    node.optData.shrink_to_fit();
+    //TODO: clear rest of the data and shrink to fit. -- complete
+
+    //TODO: there is a clearNodeData function that also clears data recursively, should this be called here? -- 
+    //no probably not as we only want that to happen when we clear the whole tree, Also I believe this function is called in reverse tree order so down->up
+    //which would make the recursive call redundant.
 }
 
 void OctreeManager::propagateUnloadedNodes(
@@ -959,6 +964,7 @@ size_t OctreeManager::getChildIndex(float posX, float posY, float posZ, float or
 bool OctreeManager::insertInNode(OctreeNode& node, const std::vector<float>& starValues,
                                  int depth)
 {
+    
     if (node.isLeaf && node.numStars < MAX_STARS_PER_NODE) {
         // Node is a leaf and it's not yet full -> insert star.
         storeStarData(node, starValues);
@@ -987,6 +993,11 @@ bool OctreeManager::insertInNode(OctreeNode& node, const std::vector<float>& sta
             auto velBegin = node.velData.begin() + n * VEL_SIZE;
             auto velEnd = velBegin + VEL_SIZE;
             tmpValues.insert(tmpValues.end(), velBegin, velEnd);
+            //TODO: get the rest of the data in parent and add to tmpValues -- complete
+            //Optional data.
+            auto optBegin = node.optData.begin() + n * OPTIONAL_DATA_SIZE;
+            auto optEnd = optBegin + OPTIONAL_DATA_SIZE;
+            tmpValues.insert(tmpValues.end(), optBegin, optEnd);
 
             // Find out which child that will inherit the data and store it.
             size_t index = getChildIndex(
@@ -1036,18 +1047,24 @@ void OctreeManager::sliceNodeLodCache(OctreeNode& node) {
         std::vector<float> tmpPos;
         std::vector<float> tmpCol;
         std::vector<float> tmpVel;
+        std::vector<float> tmpOpt;
+        
         // Ordered map contain the MAX_STARS_PER_NODE brightest stars in all children!
         for (auto const& [absMag, placement] : node.magOrder) {
             auto posBegin = node.posData.begin() + placement * POS_SIZE;
             auto colBegin = node.colData.begin() + placement * COL_SIZE;
             auto velBegin = node.velData.begin() + placement * VEL_SIZE;
+            auto optBegin = node.optData.begin() + placement * OPTIONAL_DATA_SIZE;
             tmpPos.insert(tmpPos.end(), posBegin, posBegin + POS_SIZE);
             tmpCol.insert(tmpCol.end(), colBegin, colBegin + COL_SIZE);
             tmpVel.insert(tmpVel.end(), velBegin, velBegin + VEL_SIZE);
+            tmpOpt.insert(tmpOpt.end(), optBegin, optBegin + OPTIONAL_DATA_SIZE);
+            //TODO: get the starting point of the rest of the data and insert into tmp variable, then move the data like below.  -- complete
         }
         node.posData = std::move(tmpPos);
         node.colData = std::move(tmpCol);
         node.velData = std::move(tmpVel);
+        node.optData = std::move(tmpOpt);
         node.numStars = node.magOrder.size(); // = MAX_STARS_PER_NODE
 
         for (int i = 0; i < 8; ++i) {
@@ -1073,9 +1090,12 @@ void OctreeManager::storeStarData(OctreeNode& node, const std::vector<float>& st
 
     auto posEnd = starValues.begin() + POS_SIZE;
     auto colEnd = posEnd + COL_SIZE;
+    auto velEnd = colEnd + VEL_SIZE;
     node.posData.insert(node.posData.end(), starValues.begin(), posEnd);
     node.colData.insert(node.colData.end(), posEnd, colEnd);
-    node.velData.insert(node.velData.end(), colEnd, starValues.end());
+    node.velData.insert(node.velData.end(), colEnd, velEnd);
+    node.optData.insert(node.optData.end(), velEnd, starValues.end());
+    //TODO: Store rest of node data in vector -- complete
 }
 
 std::string OctreeManager::printStarsPerNode(const OctreeNode& node,
@@ -1279,6 +1299,9 @@ void OctreeManager::clearNodeData(OctreeNode& node) {
     node.colData.shrink_to_fit();
     node.velData.clear();
     node.velData.shrink_to_fit();
+    node.optData.clear();
+    node.optData.shrink_to_fit();
+    //TODO clear all data --- complete
 
     // Clear magnitudes as well!
     //std::vector<std::pair<float, size_t>>().swap(node->magOrder);
@@ -1305,6 +1328,8 @@ void OctreeManager::createNodeChildren(OctreeNode& node) {
         node.Children[i]->posData = std::vector<float>();
         node.Children[i]->colData = std::vector<float>();
         node.Children[i]->velData = std::vector<float>();
+        node.Children[i]->optData = std::vector<float>();
+        //TODO: create other data vector --- complete
         node.Children[i]->magOrder = std::vector<std::pair<float, size_t>>();
         node.Children[i]->halfDimension = node.halfDimension / 2.f;
 
@@ -1385,6 +1410,15 @@ std::vector<float> OctreeManager::constructInsertData(const OctreeNode& node,
             if (_useVBO) {
                 insertData.resize(
                     (POS_SIZE + COL_SIZE + VEL_SIZE) * MAX_STARS_PER_NODE, 0.f
+                );
+            }
+            //TODO: insert all data and append with zeros if using VBO -- ish complete but should be investigated.
+            //As I understand it we should insert data after velocity but if we use VBO we must also append the 0s 
+            //so we insert optional data afterwards and append with new 0s
+            insertData.insert(insertData.end(), node.optData.begin(), node.optData.end());
+            if (_useVBO) {
+                insertData.resize(
+                    (REQUIRED_DATA_SIZE + OPTIONAL_DATA_SIZE) * MAX_STARS_PER_NODE, 0.f
                 );
             }
         }
