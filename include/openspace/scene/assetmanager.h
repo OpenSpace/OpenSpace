@@ -29,7 +29,7 @@
 #include <filesystem>
 #include <optional>
 #include <unordered_map>
-#include <unordered_set>
+#include <list>
 
 namespace openspace {
 
@@ -164,10 +164,10 @@ private:
 
     /// This list contains all of the assets that are queued to be loading in the next
     /// update call
-    std::unordered_set<std::string> _assetAddQueue;
+    std::list<std::string> _assetAddQueue;
 
     /// The list contains all of the assets that should be removed in the next update call
-    std::unordered_set<std::string> _assetRemoveQueue;
+    std::list<std::string> _assetRemoveQueue;
 
     /// This list contains all assets that need to be initialized in the next update call
     std::vector<Asset*> _toBeInitialized;
