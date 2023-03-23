@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RINGSCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
 #include <modules/globebrowsing/src/shadowcomponent.h>
 #include <openspace/properties/stringproperty.h>
@@ -34,7 +35,6 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <openspace/rendering/fadeable.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
