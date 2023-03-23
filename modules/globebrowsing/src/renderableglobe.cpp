@@ -754,7 +754,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                 // Render from light source point of view
                 renderChunks(lightRenderData, rendererTask, {}, true);
                 if (_hasRings && _ringsComponent.isEnabled() &&
-                    _ringsComponent.opacity() > 0.f)
+                    _ringsComponent.isVisible())
                 {
                     _ringsComponent.draw(
                         lightRenderData,
@@ -769,7 +769,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                 // Render again from original point of view
                 renderChunks(data, rendererTask, _shadowComponent.shadowMapData());
                 if (_hasRings && _ringsComponent.isEnabled() &&
-                    _ringsComponent.opacity() > 0.f)
+                    _ringsComponent.isVisible())
                 {
                     _ringsComponent.draw(
                         data,
@@ -781,7 +781,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
             else {
                 renderChunks(data, rendererTask);
                 if (_hasRings && _ringsComponent.isEnabled() &&
-                    _ringsComponent.opacity() > 0.f)
+                    _ringsComponent.isVisible())
                 {
                     _ringsComponent.draw(
                         data,
