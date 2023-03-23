@@ -77,6 +77,8 @@ void RenderableVideoPlane::update(const UpdateData& data) {
     if (!_videoPlayer.isInitialized()) {
         return;
     }
+
+    RenderablePlane::update(data);
 }
 
 void RenderableVideoPlane::bindTexture() {
