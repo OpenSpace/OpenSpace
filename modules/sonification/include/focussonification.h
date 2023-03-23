@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SONIFICATION___TIMESONIFICATION___H__
-#define __OPENSPACE_MODULE_SONIFICATION___TIMESONIFICATION___H__
+#ifndef __OPENSPACE_MODULE_SONIFICATION___FOCUSSONIFICATION___H__
+#define __OPENSPACE_MODULE_SONIFICATION___FOCUSSONIFICATION___H__
 
 #include <modules/sonification/include/sonificationbase.h>
 
@@ -32,14 +32,14 @@
 
 namespace openspace {
 
-class TimeSonification : public SonificationBase {
+class FocusSonification : public SonificationBase {
 public:
-    TimeSonification(const std::string& ip, int port);
-    virtual ~TimeSonification() override = default;
+    FocusSonification(const std::string& ip, int port);
+    virtual ~FocusSonification() override = default;
 
     /**
-     * Main update function for the sonification. Checks the current delta time and sends
-     * it via the osc connection in the unit of days/second.
+     * Main update function for the sonification. Checks the current focus node and sends
+     * it via the osc connection.
      *
      * \param camera pointer to the camera in the scene (not used in this sonification)
      */
@@ -51,15 +51,9 @@ public:
     virtual void stop() override;
 
 private:
-    void reCalculateTimeUnit();
-
-    properties::OptionProperty _unitOption;
-    TimeUnit _unit;
-    bool _unitDirty = false;
-
-    double _timeSpeed;
+    std::string _prevFocus;
 };
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_SONIFICATION___TIMESONIFICATION___H__
+#endif __OPENSPACE_MODULE_SONIFICATION___FOCUSSONIFICATION___H__

@@ -22,44 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SONIFICATION___TIMESONIFICATION___H__
-#define __OPENSPACE_MODULE_SONIFICATION___TIMESONIFICATION___H__
+#include <modules/sonification/include/focussonification.h>
 
-#include <modules/sonification/include/sonificationbase.h>
+#include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/scene/scenegraphnode.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/util/timeconversion.h>
+namespace {
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
+        FocusSonificationInfo =
+    {
+       "FocusSonification",
+       "Focus Sonification",
+       "Sonification that keeps track of the current focus node in the scene"
+    };
+
+} // namespace
 
 namespace openspace {
 
-class TimeSonification : public SonificationBase {
-public:
-    TimeSonification(const std::string& ip, int port);
-    virtual ~TimeSonification() override = default;
+FocusSonification::FocusSonification(const std::string& ip, int port)
+    : SonificationBase(FocusSonificationInfo, ip, port)
+{}
 
-    /**
-     * Main update function for the sonification. Checks the current delta time and sends
-     * it via the osc connection in the unit of days/second.
-     *
-     * \param camera pointer to the camera in the scene (not used in this sonification)
-     */
-    virtual void update(const Camera*) override;
+void FocusSonification::update(const Camera*) {
+    if (!_enabled) {
+        return;
+    }
 
-    /**
-     * Function to stop the sonification
-     */
-    virtual void stop() override;
+    const SceneGraphNode* focusNode =
+        global::navigationHandler->orbitalNavigator().anchorNode();
 
-private:
-    void reCalculateTimeUnit();
+    if (!focusNode) {
+        return;
+    }
 
-    properties::OptionProperty _unitOption;
-    TimeUnit _unit;
-    bool _unitDirty = false;
+    if (focusNode->identifier() != _prevFocus) {
+        std::string label = "/Focus";
+        std::vector<OscDataType> data(1);
+        data[0] = focusNode->identifier();
 
-    double _timeSpeed;
-};
+        _connection->send(label, data);
+
+        _prevFocus = focusNode->identifier();
+    }
+}
+
+void FocusSonification::stop() {}
 
 } // namespace openspace
-
-#endif __OPENSPACE_MODULE_SONIFICATION___TIMESONIFICATION___H__
