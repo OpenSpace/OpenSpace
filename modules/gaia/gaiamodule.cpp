@@ -46,7 +46,7 @@ void GaiaModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
 
     ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fRenderable, "No task factory existed");
+    ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<ReadFitsTask>("ReadFitsTask");
     fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
     fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
