@@ -655,6 +655,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     // Components
     _hasRings = p.rings.has_value();
     if (_hasRings) {
+        _ringsComponent.setParentFadeable(this);
         _ringsComponent.initialize();
         addPropertySubOwner(_ringsComponent);
     }
@@ -752,7 +753,9 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
                 // Render from light source point of view
                 renderChunks(lightRenderData, rendererTask, {}, true);
-                if (_hasRings && _ringsComponent.isEnabled()) {
+                if (_hasRings && _ringsComponent.isEnabled() &&
+                    _ringsComponent.opacity() > 0.f)
+                {
                     _ringsComponent.draw(
                         lightRenderData,
                         RingsComponent::RenderPass::GeometryOnly
@@ -765,7 +768,9 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
                 // Render again from original point of view
                 renderChunks(data, rendererTask, _shadowComponent.shadowMapData());
-                if (_hasRings && _ringsComponent.isEnabled()) {
+                if (_hasRings && _ringsComponent.isEnabled() &&
+                    _ringsComponent.opacity() > 0.f)
+                {
                     _ringsComponent.draw(
                         data,
                         RingsComponent::RenderPass::GeometryAndShading,
@@ -775,7 +780,9 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
             }
             else {
                 renderChunks(data, rendererTask);
-                if (_hasRings && _ringsComponent.isEnabled()) {
+                if (_hasRings && _ringsComponent.isEnabled() &&
+                    _ringsComponent.opacity() > 0.f)
+                {
                     _ringsComponent.draw(
                         data,
                         RingsComponent::RenderPass::GeometryAndShading
