@@ -475,8 +475,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
                 _uniformCacheAdvancedRings.ringTextureTransparency,
                 ringTextureTransparencyUnit
             );
-            float o = opacity();
-            _shader->setUniform(_uniformCacheAdvancedRings.opacityValue, o);
+            _shader->setUniform(_uniformCacheAdvancedRings.opacityValue, opacity());
 
             // Adding the model transformation to the final shadow matrix so we have a
             // complete transformation from the model coordinates to the clip space of
@@ -526,8 +525,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
                 _uniformCache.modelViewProjectionMatrix,
                 modelViewProjectionTransform
             );
-            float o = opacity();
-            _shader->setUniform(_uniformCache.opacityValue, o);
+            _shader->setUniform(_uniformCache.opacityValue, opacity());
 
             ringTextureUnit.activate();
             _texture->bind();
