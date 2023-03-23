@@ -56,6 +56,16 @@ public:
     virtual void stop() = 0;
 
     /**
+    * \return identifier of the sonification
+    */
+    std::string identifier() const;
+
+    /**
+    * \return if the sonification is enabled or not
+    */
+    bool enabled() const;
+
+    /**
      * Calculate the distance from the camera to the node with the given identifier, in
      * the given distance unit
      *
@@ -135,6 +145,7 @@ public:
         std::variant<std::string, glm::dvec3> nodeIdOrPosB);
 
 protected:
+    std::string _identifier;
     properties::BoolProperty _enabled;
     OscConnection* _connection = nullptr;
 

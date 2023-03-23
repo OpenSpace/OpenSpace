@@ -73,9 +73,7 @@ namespace {
         // [[codegen::verbatim(PortInfo.description)]]
         std::optional<int> port;
 
-        enum class [[codegen::map(openspace::SonificationModule::SurroundMode)]]
-            SurroundMode
-        {
+        enum class [[codegen::map(openspace::SonificationModule::SurroundMode)]] SurroundMode {
             Horizontal,
             HorizontalWithElevation,
             Circular,
@@ -175,6 +173,19 @@ void SonificationModule::internalDeinitialize() {
     // Wait before joining the thread
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     _updateThread.join();
+}
+
+const std::vector<SonificationBase*>& SonificationModule::sonifications() const {
+    return _sonifications;
+}
+
+const SonificationBase* SonificationModule::sonification(std::string id) const {
+    for (const SonificationBase* s : _sonifications) {
+        if (s->identifier() == id) {
+            return s;
+        }
+    }
+    return nullptr;
 }
 
 SonificationModule::SurroundMode SonificationModule::surroundMode() const {

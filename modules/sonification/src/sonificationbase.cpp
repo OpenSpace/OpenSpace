@@ -49,6 +49,7 @@ SonificationBase::SonificationBase(properties::PropertyOwner::PropertyOwnerInfo 
     : properties::PropertyOwner(info)
     , _enabled(EnabledInfo, false)
 {
+    _identifier = info.identifier;
     _connection = new OscConnection(ip, port);
 
     addProperty(_enabled);
@@ -62,6 +63,14 @@ SonificationBase::SonificationBase(properties::PropertyOwner::PropertyOwnerInfo 
 
 SonificationBase::~SonificationBase() {
     delete _connection;
+}
+
+std::string SonificationBase::identifier() const {
+    return _identifier;
+}
+
+bool SonificationBase::enabled() const {
+    return _enabled;
 }
 
 double SonificationBase::calculateDistanceTo(const Camera* camera,

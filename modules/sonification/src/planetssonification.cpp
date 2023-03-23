@@ -24,6 +24,9 @@
 
 #include <modules/sonification/include/planetssonification.h>
 
+#include <modules/sonification/sonificationmodule.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -620,7 +623,26 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
 }
 
 void PlanetsSonification::update(const Camera* camera) {
-    if (!_enabled) {
+    SonificationModule* module = global::moduleEngine->module<SonificationModule>();
+    if (!module) {
+        LERROR("Could not find the SonificationModule");
+        return;
+    }
+    const SonificationBase* solar = module->sonification("SolarSonification");
+    if (!solar) {
+        LERROR("Could not find the SolarSonification");
+        return;
+    }
+    const SonificationBase* compare = module->sonification("CompareSonification");
+    if (!compare) {
+        LERROR("Could not find the CompareSonification");
+        return;
+    }
+
+    bool solarEnabled = solar->enabled();
+    bool compareEnabled = compare->enabled();
+
+    if (!_enabled && !solarEnabled && !compareEnabled) {
         return;
     }
 

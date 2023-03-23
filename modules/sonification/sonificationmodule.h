@@ -81,6 +81,8 @@ public:
     virtual void internalInitialize(const ghoul::Dictionary& dictionary) override;
     virtual void internalDeinitialize() override;
 
+    const std::vector<SonificationBase*>& sonifications() const;
+    const SonificationBase* sonification(std::string id) const;
     SurroundMode surroundMode() const;
 
 private:
