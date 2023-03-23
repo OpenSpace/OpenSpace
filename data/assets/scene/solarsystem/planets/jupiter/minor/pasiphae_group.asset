@@ -249,7 +249,7 @@ local pasiphaeGroup = {
       Identifier = parentIdentifier,
       Spice = parentSpice
     },
-    Spice = "55062",
+    Spice = "55502",
     Radii = { 2000, 2000, 2000 },
     Tags = tags,
     TrailTags = trailTags,

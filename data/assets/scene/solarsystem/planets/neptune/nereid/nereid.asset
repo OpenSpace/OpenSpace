@@ -10,7 +10,7 @@ local Nereid = {
     Spice = "NEPTUNE BARYCENTER"
   },
   Spice = "NEREID",
-  Radii = { 357000, 340000, 3400000 },
+  Radii = { 357000, 340000, 340000 },
   Tags = { "moon_solarSystem", "moon_giants", "moon_neptune" },
   TrailTags = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_neptune" },
   GUI = {

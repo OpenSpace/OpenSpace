@@ -5,6 +5,7 @@ local Kernels = asset.syncedResource({
   Version = 2
 })
 
+asset.export("nep095", Kernels .. "nep095.bsp")
 asset.export("nep097", Kernels .. "nep097.bsp")
 asset.export("nep101xl_802", Kernels .. "nep101xl-802.bsp")
 asset.export("nep102", Kernels .. "nep102.bsp")

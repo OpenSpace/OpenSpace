@@ -1,5 +1,6 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("./transforms")
+local kernel095 = asset.require("./kernels").nep095
 local kernel = asset.require("./kernels").nep097
 
 
@@ -32,7 +33,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.294,
-    Kernels = kernel
+    Kernels = kernel095
   },
   {
     Identifier = "Thalassa",
@@ -49,7 +50,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.311,
-    Kernels = kernel
+    Kernels = kernel095
   },
   {
     Identifier = "Despina",
@@ -66,7 +67,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.335,
-    Kernels = kernel
+    Kernels = kernel095
   },
   {
     Identifier = "Galatea",
@@ -83,7 +84,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.429,
-    Kernels = kernel
+    Kernels = kernel095
   },
   {
     Identifier = "Larissa",
@@ -100,7 +101,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.555,
-    Kernels = kernel
+    Kernels = kernel095
   },
   {
     Identifier = "Hippocamp",
@@ -135,7 +136,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.122,
-    Kernels = kernel
+    Kernels = kernel095
   }
 }
 

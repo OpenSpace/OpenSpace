@@ -93,7 +93,7 @@ local anankeGroup = {
       Identifier = parentIdentifier,
       Spice = parentSpice
     },
-    Spice = "55068",
+    Spice = "55506",
     Radii = { 2000, 2000, 2000 },
     Tags = tags,
     TrailTags = trailTags,

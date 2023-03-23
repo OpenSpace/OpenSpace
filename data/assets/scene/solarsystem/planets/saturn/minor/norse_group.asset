@@ -59,7 +59,7 @@ local norseGroup = {
       Identifier = parentIdentifier,
       Spice = parentSpice
     },
-    Spice = "65055",
+    Spice = "65091",
     Radii = { 6000, 6000, 6000 },
     Tags = tags,
     TrailTags = trailTags,
@@ -94,7 +94,7 @@ local norseGroup = {
       Identifier = parentIdentifier,
       Spice = parentSpice
     },
-    Spice = "65041",
+    Spice = "65087",
     Radii = { 6000, 6000, 6000 },
     Tags = tags,
     TrailTags = trailTags,
@@ -180,7 +180,7 @@ local norseGroup = {
       Identifier = parentIdentifier,
       Spice = parentSpice
     },
-    Spice = "65048",
+    Spice = "65089",
     Radii = { 6000, 6000, 6000 },
     Tags = tags,
     TrailTags = trailTags,
@@ -198,7 +198,7 @@ local norseGroup = {
       Identifier = parentIdentifier,
       Spice = parentSpice
     },
-    Spice = "65045",
+    Spice = "65088",
     Radii = { 4000, 4000, 4000 },
     Tags = tags,
     TrailTags = trailTags,
@@ -284,7 +284,7 @@ local norseGroup = {
       Identifier = parentIdentifier,
       Spice = parentSpice
     },
-    Spice = "65040",
+    Spice = "65086",
     Radii = { 5000, 5000, 5000 },
     Tags = tags,
     TrailTags = trailTags,
@@ -353,7 +353,7 @@ local norseGroup = {
       Identifier = parentIdentifier,
       Spice = parentSpice
     },
-    Spice = "65056",
+    Spice = "65092",
     Radii = { 5000, 5000, 5000 },
     Tags = tags,
     TrailTags = trailTags,
@@ -388,7 +388,7 @@ local norseGroup = {
       Identifier = parentIdentifier,
       Spice = parentSpice
     },
-    Spice = "65035",
+    Spice = "65085",
     Radii = { 6000, 6000, 6000 },
     Tags = tags,
     TrailTags = trailTags,
@@ -406,7 +406,7 @@ local norseGroup = {
       Identifier = parentIdentifier,
       Spice = parentSpice
     },
-    Spice = "65050",
+    Spice = "65090",
     Radii = { 6000, 6000, 6000 },
     Tags = tags,
     TrailTags = trailTags,
