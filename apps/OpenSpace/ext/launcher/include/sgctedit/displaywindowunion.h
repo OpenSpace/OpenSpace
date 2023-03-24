@@ -53,8 +53,8 @@ public:
      * \param parent The parent to which this widget belongs
      */
     DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
-        int nMaxWindows, const std::array<QColor, 4>& windowColors,
-        bool resetToDefault, QWidget* parent = nullptr);
+        int nMaxWindows, const std::array<QColor, 4>& windowColors, bool resetToDefault,
+        QWidget* parent = nullptr);
     
     /**
      * Returns a vector of pointers to the WindowControl objects for all visible windows.
@@ -82,6 +82,14 @@ public:
      * turn, send out all of the corresponding signals described below.
      */
     void removeWindow();
+
+    /**
+     * Returns the number of windows that are displayed (there can be more window
+     * objects than are currently displayed).
+     *
+     * \return the number of displayed windows in the current configuration
+     */
+    unsigned int numWindowsDisplayed();
 
 signals:
     /**

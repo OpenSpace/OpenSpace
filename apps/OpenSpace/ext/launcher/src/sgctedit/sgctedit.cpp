@@ -92,17 +92,27 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
     setWindowTitle("Window Configuration Editor");
     unsigned int nWindows = _cluster.nodes.front().windows.size();
     bool firstWindowGuiIsEnabled = (nWindows > 1) ? true : false;
-    createWidgets(createMonitorInfoSet(), nWindows, false);
+    std::vector<QRect> monitorSizes = createMonitorInfoSet();
+    createWidgets(monitorSizes, nWindows, false);
     unsigned int existingWindowsControlSize = _displayWidget->windowControls().size();
     for (unsigned int i = 0; i < nWindows; ++i) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
         WindowControl* wCtrl = _displayWidget->windowControls()[i];
         if (i < existingWindowsControlSize && wCtrl) {
+            unsigned int monitorNum = w.monitor.value();
             unsigned int posX = 0;
             unsigned int posY = 0;
+            wCtrl->setMonitorSelection(monitorNum);
             if (w.pos.has_value()) {
                 posX = w.pos.value().x;
                 posY = w.pos.value().y;
+                // Convert offsets to coordinates relative to the selected monitor bounds,
+                // since window offsets are stored n the sgct config file relative to the
+                // coordinates of the total "canvas" of all displays
+                if (monitorSizes.size() > monitorNum) {
+                    posX -= monitorSizes[monitorNum].x();
+                    posY -= monitorSizes[monitorNum].y();
+                }
             }
             QRectF newDims(
                 posX,
@@ -367,12 +377,21 @@ void SgctEdit::apply() {
 }
 
 void SgctEdit::generateConfiguration() {
+    _cluster.scene = sgct::config::Scene();
     _cluster.scene->orientation = _settingsWidget->orientation();
-
-    if (!_didImportValues) {
-        _cluster.masterAddress = "localhost";
+    if (_cluster.nodes.size() == 0) {
+        _cluster.nodes.push_back(sgct::config::Node());
     }
+    sgct::config::Node& node = _cluster.nodes.back();
 
+    generateConfigSetupVsync();
+    generateConfigUsers();
+    generateConfigAddresses(node);
+    generateConfigResizeWindowsAccordingToSelected(node);
+    generateConfigIndividualWindowSettings(node);
+}
+
+void SgctEdit::generateConfigSetupVsync() {
     if (_settingsWidget->vsync()) {
         if (!_cluster.settings || !_cluster.settings.value().display ||
             !_cluster.settings.value().display.value().swapInterval)
@@ -387,18 +406,26 @@ void SgctEdit::generateConfiguration() {
     else {
         _cluster.settings = std::nullopt;
     }
+}
 
-    if (_cluster.nodes.size() == 0) {
-        _cluster.nodes.push_back(sgct::config::Node());
-    }
-    sgct::config::Node& node = _cluster.nodes.back();
-
+void SgctEdit::generateConfigUsers() {
     if (!_didImportValues) {
+        sgct::config::User user;
+        user.eyeSeparation = 0.065f;
+        user.position = { 0.f, 0.f, 4.f };
+        _cluster.users = { user };
+    }
+}
+
+void SgctEdit::generateConfigAddresses(sgct::config::Node& node) {
+    if (!_didImportValues) {
+        _cluster.masterAddress = "localhost";
         node.address = "localhost";
         node.port = 20401;
     }
+}
 
-    // Save Windows
+void SgctEdit::generateConfigResizeWindowsAccordingToSelected(sgct::config::Node& node) {
     std::vector<WindowControl*> windowControls = _displayWidget->activeWindowControls();
     for (unsigned int wIdx = 0; wIdx < windowControls.size(); ++wIdx) {
         if (node.windows.size() <= wIdx) {
@@ -409,11 +436,16 @@ void SgctEdit::generateConfiguration() {
                 node.windows[wIdx]
             );
         }
-        node.windows[wIdx].id = wIdx;
     }
-    
+    while (node.windows.size() > windowControls.size()) {
+        node.windows.pop_back();
+    }
+}
+
+void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) {
     for (unsigned int i = 0; i < node.windows.size(); ++i) {
-        //First apply default settings to each window...
+        // First apply default settings to each window...
+        node.windows[i].id = i;
         node.windows[i].draw2D = true;
         node.windows[i].draw3D = true;
         node.windows[i].viewports.back().isTracked = true;
@@ -425,7 +457,7 @@ void SgctEdit::generateConfiguration() {
             ),
             node.windows[i].tags.end()
         );
-        //if "show UI on first window" option is enabled, then modify the settings
+        // If "show UI on first window" option is enabled, then modify the settings
         // depending on if this is the first window or not
         if (_settingsWidget->showUiOnFirstWindow()) {
             if (i == 0) {
@@ -435,13 +467,6 @@ void SgctEdit::generateConfiguration() {
             node.windows[i].draw2D = (i == 0);
             node.windows[i].draw3D = (i != 0);
         }
-    }
-
-    if (!_didImportValues) {
-        sgct::config::User user;
-        user.eyeSeparation = 0.065f;
-        user.position = { 0.f, 0.f, 4.f };
-        _cluster.users = { user };
     }
 }
 

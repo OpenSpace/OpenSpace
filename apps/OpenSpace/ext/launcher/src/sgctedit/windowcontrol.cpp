@@ -641,6 +641,10 @@ void WindowControl::setDimensions(QRectF newDims) {
     _offsetY->setValue(_windowDimensions.y());
 }
 
+void WindowControl::setMonitorSelection(int monitorIndex) {
+    _monitor->setCurrentIndex(monitorIndex);
+}
+
 void WindowControl::showWindowLabel(bool show) {
     _windowNumber->setVisible(show);
 }
@@ -732,10 +736,11 @@ sgct::config::Projections WindowControl::generateProjectionInformation() const {
 
 void WindowControl::generateWindowInformation(sgct::config::Window& window) const {
     window.size = { _sizeX->text().toInt(), _sizeY->text().toInt() };
+    window.monitor = _monitor->currentIndex();
     QRect resolution = _monitorResolutions[_monitor->currentIndex()];
     window.pos = {
-        _offsetX->text().toInt(),
-        _offsetY->text().toInt()
+        resolution.x() + _offsetX->text().toInt(),
+        resolution.y() + _offsetY->text().toInt()
     };
 
     sgct::config::Viewport vp;
@@ -747,10 +752,6 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
     window.viewports.push_back(vp);
     
     window.isDecorated = _windowDecoration->isChecked();
-    if (window.isFullScreen) {
-        window.monitor = _monitor->currentIndex();
-    }
-
     if (!_windowName->text().isEmpty()) {
         window.name = _windowName->text().toStdString();
     }

@@ -81,6 +81,13 @@ public:
      * \param newDims The x, y dimensions to set the window to
      */
     void setDimensions(QRectF newDims);
+                                   
+    /**
+     * Sets the monitor selection combobox
+     *
+     * \param monitorIndex The zero-based monitor index to set the combobox selection to
+     */
+    void setMonitorSelection(int monitorIndex);
 
     /**
      * Sets the window name in the text edit box

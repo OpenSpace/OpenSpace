@@ -162,6 +162,9 @@
               "draw3d": {
                 "$ref": "sgct.schema.json#/$defs/draw3d"
               },
+              "monitor": {
+                "$ref": "sgct.schema.json#/$defs/monitor"
+              },
               "id": {
                 "$ref": "sgct.schema.json#/$defs/id"
               },
@@ -198,13 +201,14 @@
                 },
                 "title": "Viewports"
               }
-            }
+            },
+	    "required": [ "pos", "size", "monitor", "viewports" ]
   	},
           "title": "Windows",
           "description": "Specifies a single window that is used to render content into. There can be an arbitrary(-ish) number of windows for each node and they all will be created and initialized at start time. Each window has at least one Viewport that specifies exactly where in the window the rendering occurs with which parameters"
         }
       },
-      "required": [ "address", "port" ],
+      "required": [ "address", "port", "windows" ],
       "additionalProperties": false,
       "description": "Defines a single computing node that is contained in the described cluster. In general this corresponds to a single computer, but it is also possible to create multiple nodes on a local machine by using the 127.0.0.x IP address with x from 0 to 255. It is not possible to create multiple nodes on the same remote computer, however"
     },

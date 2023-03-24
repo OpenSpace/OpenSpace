@@ -39,7 +39,12 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorSizeList
                                        bool resetToDefault, QWidget* parent)
     : QWidget(parent)
 {
-    createWidgets(nMaxWindows, monitorSizeList, windowColors, resetToDefault);
+    createWidgets(
+        nMaxWindows,
+        monitorSizeList,
+        windowColors,
+        resetToDefault
+    );
     showWindows();
 }
 
@@ -51,7 +56,6 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
     // Add all window controls (some will be hidden from GUI initially)
     for (int i = 0; i < nMaxWindows; ++i) {
         const int monitorNumForThisWindow = (nMaxWindows > 3 && i >= 2) ? 1 : 0;
-
         WindowControl* ctrl = new WindowControl(
             monitorNumForThisWindow,
             i,
@@ -147,6 +151,10 @@ void DisplayWindowUnion::removeWindow() {
         _nWindowsDisplayed--;
         showWindows();
     }
+}
+
+unsigned int DisplayWindowUnion::numWindowsDisplayed() {
+    return _nWindowsDisplayed;
 }
 
 void DisplayWindowUnion::showWindows() {
