@@ -46,7 +46,7 @@ namespace openspace::scripting {
  * executing scripts (#runScript and #runScriptFile). Before usage, it has to be
  * #initialize%d and #deinitialize%d. New ScriptEngine::Library%s consisting of
  * ScriptEngine::Library::Function%s have to be added which can then be called using the
- * <code>openspace</code> namespac prefix in Lua. The same functions can be exposed to
+ * `openspace` namespace prefix in Lua. The same functions can be exposed to
  * other Lua states by passing them to the #initializeLuaState method.
  */
 class ScriptEngine : public Syncable, public DocumentationGenerator {

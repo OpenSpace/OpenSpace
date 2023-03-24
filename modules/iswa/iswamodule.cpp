@@ -44,7 +44,7 @@ namespace openspace {
 
 IswaModule::IswaModule() : OpenSpaceModule(Name) {
     global::callback::initialize->push_back([]() {
-        ZoneScopedN("IswaModule")
+        ZoneScopedN("IswaModule");
         IswaManager::initialize();
     });
 }

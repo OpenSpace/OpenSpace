@@ -43,8 +43,8 @@ class AssetManager;
  * this asset.
  * An asset goes through three external states. Starting out as unloaded when the instance
  * is newly created but the file has not been processed. In this case the #isLoaded,
- * #isSynchronized and the #isInitialized functions all return \c false. After the asset
- * has been loaded it is in the \c Loaded state (#isLoaded = true,
+ * #isSynchronized and the #isInitialized functions all return `false`. After the asset
+ * has been loaded it is in the `Loaded` state (#isLoaded = true,
  * #isSynchronized = false, #isInitialized = false). After all registered synchronizations
  * finish successfully, the Asset transitions into the Synchronized state
  * (#isLoaded = true, #isSynchronized = true, #isInitialized = false) and after the final
@@ -129,27 +129,27 @@ public:
 
     /**
      * If the asset has not yet been loaded, this function loads the asset and returns the
-     * success state. If the loading succeeded, the Asset transitions into the \c Loaded
+     * success state. If the loading succeeded, the Asset transitions into the `Loaded`
      * state. The \p parent that is provided is the Asset that caused this load operation
-     * to be triggered and might be \c nullptr if this asset does not have any parents. If
+     * to be triggered and might be `nullptr` if this asset does not have any parents. If
      * this Asset has been previously loaded (even with a different \p parent), this
      * function does nothing.
      *
-     * \param parent The parent asset (or \c nullptr) that triggered this loading
+     * \param parent The parent asset (or `nullptr`) that triggered this loading
      */
     void load(Asset* parent);
 
     /**
-     * Returns \c true if this Asset has at least one parent that is in the Loaded state.
+     * Returns `true` if this Asset has at least one parent that is in the Loaded state.
      *
-     * \return \c true if this Asset has at least one parent that is in the Loaded state
+     * \return `true` if this Asset has at least one parent that is in the Loaded state
      */
     bool hasLoadedParent();
 
     /**
-     * Returns \c true if this Asset has been successfully #load ed.
+     * Returns `true` if this Asset has been successfully #load ed.
      *
-     * /return \c true if this Asset has been successfully loaded
+     * /return `true` if this Asset has been successfully loaded
      */
     bool isLoaded() const;
 
@@ -163,7 +163,7 @@ public:
     void unload();
 
     /**
-     * Starts the registered synchronizations of this asset and returns \c true if all its
+     * Starts the registered synchronizations of this asset and returns `true` if all its
      * synchronizations and required assets' synchronizations could start. When all
      * synchronizations have completed successfully, this Asset transitions into the
      * Synchronized state.
@@ -173,15 +173,15 @@ public:
     void startSynchronizations();
 
     /**
-     * Returns \c true if this Asset's synchronizations (if any) have completed
+     * Returns `true` if this Asset's synchronizations (if any) have completed
      * successfully.
      *
-     * \return \c true if this Asset is in the Synchronized or Initialized state
+     * \return `true` if this Asset is in the Synchronized or Initialized state
      */
     bool isSynchronized() const;
 
     /**
-     * Initializes this asset and returns \c true if the initialized succeeded, i.e. if
+     * Initializes this asset and returns `true` if the initialized succeeded, i.e. if
      * this and all required assets initialized without errors. After this call, if it has
      * been successful, this Asset is in the Initialized state. If the Asset has already
      * been initialized, calling this function does nothing.
@@ -189,10 +189,10 @@ public:
     void initialize();
 
     /**
-     * Returns \c true if this Asset has been #initialize d successfully.
+     * Returns `true` if this Asset has been #initialize d successfully.
      *
-     * \return \c true if this Asset has been #initialize d successfully. It returns
-     *         \c false both if this initialization failed as well as if thie #initialize
+     * \return `true` if this Asset has been #initialize d successfully. It returns
+     *         `false` both if this initialization failed as well as if thie #initialize
      *         function has not been called on this Asset
      */
     bool isInitialized() const;
@@ -201,7 +201,7 @@ public:
      * Returns whether any of the parents of this Asset is currently in an initialized
      * state, meaning that any parent is still interested in this Asset at all.
      *
-     * \return \c true if there is at least one initialized parent, \c false otherwise
+     * \return `true` if there is at least one initialized parent, `false` otherwise
      */
     bool hasInitializedParent() const;
 
@@ -222,10 +222,10 @@ public:
     void require(Asset* child);
 
     /**
-     * Returns \c true if the loading of the Asset has failed in any way so that
+     * Returns `true` if the loading of the Asset has failed in any way so that
      * recovering from the error is impossible.
      *
-     * \return \c true if the Asset handling failed in any way, \c false otherwise
+     * \return `true` if the Asset handling failed in any way, `false` otherwise
      */
     bool isFailed() const;
 
@@ -257,9 +257,9 @@ public:
 
     /**
      * Returns the meta information of this asset back to the caller. If no such
-     * information exists, a \c std::nullopt will be returned.
+     * information exists, a `std::nullopt` will be returned.
      *
-     * \return The MetaInformation about this asset or \c std::nullopt
+     * \return The MetaInformation about this asset or `std::nullopt`
      */
     std::optional<MetaInformation> metaInformation() const;
 

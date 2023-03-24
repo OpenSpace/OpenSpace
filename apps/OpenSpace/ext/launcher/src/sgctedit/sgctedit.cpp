@@ -277,6 +277,11 @@ sgct::config::Cluster SgctEdit::generateConfiguration() const {
         window.tags.push_back("GUI");
         window.draw2D = true;
         window.draw3D = false;
+
+        // Disable 2D rendering on all non-GUI windows
+        for (size_t w = 1; w < node.windows.size(); ++w) {
+            node.windows[w].draw2D = false;
+        }
     }
 
     cluster.nodes.push_back(node);

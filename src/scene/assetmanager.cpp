@@ -100,7 +100,7 @@ namespace {
 
         // A list of all identifiers that are exposed by this asset. This list is needed
         // to populate the descriptions in the main user interface
-        std::optional<std::vector<std::string>> identifiers;
+        std::optional<std::vector<std::string>> identifiers [[codegen::identifier()]];
     };
 
 #include "assetmanager_codegen.cpp"
@@ -141,7 +141,7 @@ AssetManager::~AssetManager() {
 }
 
 void AssetManager::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     for (Asset* asset : _rootAssets) {
         if (!asset->hasInitializedParent()) {
@@ -153,11 +153,11 @@ void AssetManager::deinitialize() {
 }
 
 void AssetManager::update() {
-    ZoneScoped
+    ZoneScoped;
 
     // Delete all the assets that have been marked for deletion in the previous frame
     {
-        ZoneScopedN("Deleting assets")
+        ZoneScopedN("Deleting assets");
 
         _toBeDeleted.clear();
     }
@@ -165,7 +165,7 @@ void AssetManager::update() {
     // Initialize all assets that have been loaded and synchronized but that not yet
     // initialized
     for (auto it = _toBeInitialized.cbegin(); it != _toBeInitialized.cend(); ++it) {
-        ZoneScopedN("Initializing queued assets")
+        ZoneScopedN("Initializing queued assets");
         Asset* a = *it;
 
         if (a->isInitialized() || !a->isSynchronized()) {
@@ -187,7 +187,7 @@ void AssetManager::update() {
 
     // Add all assets that have been queued for loading since the last `update` call
     for (const std::string& asset : _assetAddQueue) {
-        ZoneScopedN("Adding queued assets")
+        ZoneScopedN("Adding queued assets");
 
         std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
         Asset* a = nullptr;
@@ -224,7 +224,7 @@ void AssetManager::update() {
 
     // Remove assets
     for (const std::string& asset : _assetRemoveQueue) {
-        ZoneScopedN("Removing queued assets")
+        ZoneScopedN("Removing queued assets");
         std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
 
         const auto it = std::find_if(
@@ -300,24 +300,15 @@ void AssetManager::update() {
 void AssetManager::add(const std::string& path) {
     ghoul_precondition(!path.empty(), "Path must not be empty");
     // First check if the path is already in the remove queue. If so, remove it from there
-    const auto it = _assetRemoveQueue.find(path);
-    if (it != _assetRemoveQueue.end()) {
-        _assetRemoveQueue.erase(it);
-    }
-
-    _assetAddQueue.insert(path);
+    _assetRemoveQueue.remove(path);
+    _assetAddQueue.push_back(path);
 }
 
 void AssetManager::remove(const std::string& path) {
     ghoul_precondition(!path.empty(), "Path must not be empty");
-
     // First check if the path is already in the add queue. If so, remove it from there
-    const auto it = _assetAddQueue.find(path);
-    if (it != _assetAddQueue.end()) {
-        _assetAddQueue.erase(it);
-    }
-
-    _assetRemoveQueue.insert(path);
+    _assetAddQueue.remove(path);
+    _assetRemoveQueue.push_back(path);
 }
 
 std::vector<const Asset*> AssetManager::allAssets() const {
@@ -493,7 +484,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 1);
             ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::localResourceLua");
@@ -517,7 +508,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
@@ -561,7 +552,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* parent = ghoul::lua::userData<Asset>(L, 2);
@@ -623,7 +614,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
@@ -649,7 +640,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
@@ -731,7 +722,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
@@ -753,7 +744,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
-            ZoneScoped
+            ZoneScoped;
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
@@ -831,7 +822,7 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
 }
 
 void AssetManager::callOnInitialize(Asset* asset) const {
-    ZoneScoped
+    ZoneScoped;
     ghoul_precondition(asset, "Asset must not be nullptr");
 
     auto it = _onInitializeFunctionRefs.find(asset);
@@ -854,7 +845,7 @@ void AssetManager::callOnInitialize(Asset* asset) const {
 }
 
 void AssetManager::callOnDeinitialize(Asset* asset) const {
-    ZoneScoped
+    ZoneScoped;
     ghoul_precondition(asset, "Asset must not be nullptr");
 
     auto it = _onDeinitializeFunctionRefs.find(asset);

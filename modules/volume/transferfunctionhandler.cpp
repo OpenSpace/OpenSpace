@@ -63,7 +63,7 @@ namespace {
 namespace openspace::volume {
 
 TransferFunctionHandler::TransferFunctionHandler(const properties::StringProperty& prop)
-    : properties::PropertyOwner({ "TransferFunctionHandler" })
+    : properties::PropertyOwner({ "TransferFunctionHandler", "Tranfer Function Handler" })
     , _transferFunctionPath(prop)
     , _dataUnit(DataUnitInfo)
     , _minValue(MinValueInfo)

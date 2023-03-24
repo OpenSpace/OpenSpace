@@ -26,6 +26,7 @@
 #include <modules/video/include/videotileprovider.h>
 #include <modules/video/include/screenspacevideo.h>
 #include <modules/video/include/renderablevideosphere.h>
+#include <modules/video/include/renderablevideoplane.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/documentation/documentation.h>
@@ -78,6 +79,7 @@ void VideoModule::internalInitialize(const ghoul::Dictionary& dict) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderableVideoSphere>("RenderableVideoSphere");
+    fRenderable->registerClass<RenderableVideoPlane>("RenderableVideoPlane");
 }
 
 std::vector<documentation::Documentation> VideoModule::documentations() const {
@@ -91,7 +93,7 @@ scripting::LuaLibrary VideoModule::luaLibrary() const {
     return {
         "video",
         {
-           
+
         }
     };
 }

@@ -362,7 +362,7 @@ bool RenderableLabel::isReady() const {
 }
 
 void RenderableLabel::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
 }

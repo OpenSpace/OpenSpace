@@ -34,8 +34,6 @@
  * @{
 
  * \class ShortProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>short</code>.
 
  * @} @}
  */
@@ -45,6 +43,10 @@
 
 namespace openspace::properties {
 
+/**
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type `short`.
+ */
 class ShortProperty : public NumericalProperty<short> {
 public:
     ShortProperty(Property::PropertyInfo info, short value = short(0),
@@ -56,9 +58,6 @@ public:
     int typeLua() const override;
 
     using TemplateProperty<short>::operator=;
-
-protected:
-    short fromLuaConversion(lua_State* state, bool& success) const override;
 };
 
 } // namespace openspace::properties

@@ -49,8 +49,4 @@ int DMat2Property::typeLua() const {
     return LUA_TTABLE;
 }
 
-glm::dmat2x2 DMat2Property::fromLuaConversion(lua_State* state, bool& success) const {
-    return ghoul::lua::tryGetValue<glm::dmat2x2>(state, success);
-}
-
 }  // namespace openspace::properties

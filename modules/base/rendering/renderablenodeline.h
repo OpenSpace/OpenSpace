@@ -83,6 +83,9 @@ private:
     properties::StringProperty _end;
     properties::Vec3Property _lineColor;
     properties::FloatProperty _lineWidth;
+    properties::FloatProperty _startOffset;
+    properties::FloatProperty _endOffset;
+    properties::BoolProperty _useRelativeOffsets;
 };
 
 } // namespace openspace

@@ -88,7 +88,7 @@ private:
 
     bool _sphereIsDirty = false;
 };
-    
+
 
 } // namespace openspace
 
