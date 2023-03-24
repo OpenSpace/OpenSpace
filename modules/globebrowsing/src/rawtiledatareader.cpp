@@ -522,11 +522,12 @@ void RawTileDataReader::initialize() {
     if (module.isMRFCachingEnabled()) {
         ZoneScopedN("MRF Caching");
 
-        static int cnt = 0;
-        std::string fn = "/" + std::to_string(cnt++) + ".mrf";
-        std::string path = absPath(module.wmsCacheLocation().append(fn)).string();
+        std::string datasetIdentifier = std::to_string(std::hash<std::string>{}(_datasetFilePath));;
+        std::string root = absPath(module.mrfCacheLocation().append("/").append(datasetIdentifier)).string();
+        std::string mrf = root.append(".mrf");
+        std::string cache = root.append(".mrfcache");
 
-        if (!std::filesystem::exists(path)) {
+        if (!std::filesystem::exists(mrf)) {
             auto* driver = GetGDALDriverManager()->GetDriverByName("MRF");
             if (driver != nullptr) {
                 auto src = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
@@ -539,7 +540,7 @@ void RawTileDataReader::initialize() {
 
                 {
                     // Check if there is a geotransform present, if not assume its bounds are
-                    // [-180, 180] W<->E and [-90, 90] N<->S
+                    // [-180, 180] W<->E and [-90, 90] N<->S and North-up
                     double geoTransform[6];
                     auto err = src->GetGeoTransform(geoTransform);
                     if (err != CPLErr::CE_None) {
@@ -563,8 +564,23 @@ void RawTileDataReader::initialize() {
                 char** createOpts = NULL;
                 createOpts = CSLSetNameValue(createOpts, "CACHEDSOURCE", content.c_str());
                 createOpts = CSLSetNameValue(createOpts, "NOCOPY", "true");
-                auto dst = static_cast<GDALDataset*>(driver->CreateCopy(path.c_str(), src, FALSE, createOpts, NULL, NULL));
+                createOpts = CSLSetNameValue(createOpts, "uniform_scale", "2");
+                //createOpts = CSLSetNameValue(createOpts, "compress", "PNG");
+                if (root.find("dem") != std::string::npos) {
+                    createOpts = CSLSetNameValue(createOpts, "compress", "LERC");
+                }
+                else {
+                    createOpts = CSLSetNameValue(createOpts, "compress", "JPEG");
+                    createOpts = CSLSetNameValue(createOpts, "quality", "75");
+                }
+
+                createOpts = CSLSetNameValue(createOpts, "blocksize", "256");
+                createOpts = CSLSetNameValue(createOpts, "indexname", cache.c_str());
+                createOpts = CSLSetNameValue(createOpts, "DATANAME", cache.c_str());
+
+                auto dst = static_cast<GDALDataset*>(driver->CreateCopy(mrf.c_str(), src, FALSE, createOpts, NULL, NULL));
                 if (!dst) {
+                    auto msg = CPLGetLastErrorMsg();
                     throw ghoul::RuntimeError(fmt::format(
                         "Failed to create MRF Caching dataset dataset: {}. GDAL Error: {}",
                         path, CPLGetLastErrorMsg()
@@ -575,7 +591,7 @@ void RawTileDataReader::initialize() {
             }
         }
 
-        content = path.c_str();
+        content = mrf.c_str();
     }
 
     {
