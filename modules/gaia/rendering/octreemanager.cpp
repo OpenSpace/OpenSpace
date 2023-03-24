@@ -1400,28 +1400,25 @@ std::vector<float> OctreeManager::constructInsertData(const OctreeNode& node,
     if (_useVBO) {
         insertData.resize(POS_SIZE * MAX_STARS_PER_NODE, 0.f);
     }
-    if (mode != gaia::RenderMode::Static) {
-        insertData.insert(insertData.end(), node.colData.begin(), node.colData.end());
-        if (_useVBO) {
-            insertData.resize((POS_SIZE + COL_SIZE) * MAX_STARS_PER_NODE, 0.f);
-        }
-        if (mode == gaia::RenderMode::Motion) {
-            insertData.insert(insertData.end(), node.velData.begin(), node.velData.end());
-            if (_useVBO) {
-                insertData.resize(
-                    (POS_SIZE + COL_SIZE + VEL_SIZE) * MAX_STARS_PER_NODE, 0.f
-                );
-            }
-            //TODO: insert all data and append with zeros if using VBO -- ish complete but should be investigated.
-            //As I understand it we should insert data after velocity but if we use VBO we must also append the 0s 
-            //so we insert optional data afterwards and append with new 0s
-            insertData.insert(insertData.end(), node.optData.begin(), node.optData.end());
-            if (_useVBO) {
-                insertData.resize(
-                    (REQUIRED_DATA_SIZE + OPTIONAL_DATA_SIZE) * MAX_STARS_PER_NODE, 0.f
-                );
-            }
-        }
+
+    insertData.insert(insertData.end(), node.colData.begin(), node.colData.end());
+    if (_useVBO) {
+        insertData.resize((POS_SIZE + COL_SIZE) * MAX_STARS_PER_NODE, 0.f);
+    }
+    insertData.insert(insertData.end(), node.velData.begin(), node.velData.end());
+    if (_useVBO) {
+        insertData.resize(
+            (REQUIRED_DATA_SIZE) * MAX_STARS_PER_NODE, 0.f
+        );
+    }
+    //TODO: insert all data and append with zeros if using VBO -- ish complete but should be investigated.
+    //As I understand it we should insert data after velocity but if we use VBO we must also append the 0s 
+    //so we insert optional data afterwards and append with new 0s
+    insertData.insert(insertData.end(), node.optData.begin(), node.optData.end());
+    if (_useVBO) {
+        insertData.resize(
+            (REQUIRED_DATA_SIZE + OPTIONAL_DATA_SIZE) * MAX_STARS_PER_NODE, 0.f
+        );
     }
 
     // Update deltaStars.

@@ -124,6 +124,40 @@ private:
     void checkGlErrors(const std::string& identifier) const;
 
     /// <summary>
+    /// Bind data to a vbo buffer specified by attribute name, obs defaults to   
+    /// attribute, size, GL_FLOAT, GL_FALSE, 0, nullptr in the glVertexAttribPointer call.
+    /// </summary>\
+    /// <param name="vbo">buffer id</param>
+    /// <param name="attribute">name to bind data to</param>
+    void bindVBOData(std::unique_ptr<ghoul::opengl::ProgramObject>& program, GLint vbo, const char* attribute, size_t size);
+
+    /// <summary>
+    /// Add or remove shaderspecific properties in the GUI depending on the current shader option used.
+    /// </summary>
+    /// <param name="shaderoption"></param>
+    void updateGUIProperties(int shaderoption);
+
+    /// <summary>
+    /// Construct and initialize vertex, geometry and fragment shaders depending on user-defined shader option.
+    /// </summary>
+    void initializeShaders(int shaderoption, bool firstcall = false);
+    
+    /// <summary>
+    /// Construct and initialize tonemapping vertex and fragment shaders depending on user-defined shader option.
+    /// </summary>
+    void initializeTmShaders(int shaderoption);
+
+    /// <summary>
+    /// Render stars using VBOs
+    /// </summary>
+    void renderWithVBO(const std::map<int, std::vector<float>>& updateData, int maxStarsPerNode);
+    
+    /// <summary>
+    /// Render stars using SSBO
+    /// </summary>
+    void renderWithSSBO(const std::map<int, std::vector<float>>& updateData, int nChunksToRender);
+
+    /// <summary>
     /// Prepare data into internal format that the renderer accept, add optional properties after.
     /// Layout of data pos - absmag, color - vel - speed - optional 
     /// </summary>

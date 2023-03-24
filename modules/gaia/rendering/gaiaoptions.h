@@ -28,8 +28,8 @@
 namespace openspace::gaia {
 
 enum RenderMode {
-    Static = 0,
-    Color = 1,
+    //Static = 0,
+    //Color = 1,
     Motion = 2
 };
 
