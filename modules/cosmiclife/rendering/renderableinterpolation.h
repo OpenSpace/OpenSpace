@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_COSMICLIFE___RENDERABLECOSMICPOINTS___H__
-#define __OPENSPACE_MODULE_COSMICLIFE___RENDERABLECOSMICPOINTS___H__
+#ifndef __OPENSPACE_MODULE_COSMICLIFE___RENDERABLEINTERPOLATION___H__
+#define __OPENSPACE_MODULE_COSMICLIFE___RENDERABLEINTERPOLATION___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -56,10 +56,10 @@ namespace openspace {
 
     namespace documentation { struct Documentation; }
 
-    class RenderableCosmicPoints : public Renderable {
+    class RenderableInterpolation : public Renderable {
     public:
-        explicit RenderableCosmicPoints(const ghoul::Dictionary& dictionary);
-        ~RenderableCosmicPoints() = default;
+        explicit RenderableInterpolation(const ghoul::Dictionary& dictionary);
+        ~RenderableInterpolation() = default;
 
         void initialize() override;
         void initializeGL() override;
@@ -73,13 +73,19 @@ namespace openspace {
         static documentation::Documentation Documentation();
 
     private:
-        std::vector<float> createDataSlice();
+        struct Point {
+            float x;
+            float y;
+            float z;
+        };
+
+        std::vector<float> createDataSlice(speck::Dataset& dataset);
         void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
             const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
-        float computeFadeFactor(float distanceNodeToCamera) const;
-
+        speck::Dataset interpolationFunc(const speck::Dataset& d1, const speck::Dataset& d2, float iv);
+        speck::Dataset::Entry interpol(const speck::Dataset::Entry& e1, const speck::Dataset::Entry& e2, float iv);
         // bool variables
-        bool _hasSpeckFile = false;
+        bool _hasSpeckFile = true;
         bool _dataIsDirty = true;
         bool _textColorIsDirty = true;
         bool _hasSpriteTexture = false;
@@ -99,14 +105,19 @@ namespace openspace {
         properties::OptionProperty _colorOption;
         properties::Vec2Property _optionColorRangeData;
         properties::OptionProperty _datavarSizeOption;
-        properties::Vec2Property _fadeInDistances;
-        properties::BoolProperty _disableFadeInDistance;
         properties::Vec2Property _billboardMinMaxSize;
         properties::FloatProperty _correctionSizeEndDistance;
         properties::FloatProperty _correctionSizeFactor;
         properties::BoolProperty _useLinearFiltering;
         properties::TriggerProperty _setRangeFromData;
         properties::OptionProperty _renderOption;
+
+        properties::FloatProperty _interpolationValue;
+
+
+
+        std::vector<Point> _MDS_points;
+        std::vector<Point> _Umap_points;
 
 
 
@@ -126,7 +137,7 @@ namespace openspace {
         std::shared_ptr<ghoul::fontrendering::Font> _font;
 
         // String variables
-        std::string _speckFile;
+        std::vector<std::string> _speckFile;//_files
         std::string _colorMapFile;
         std::string _colorOptionString;
         std::string _datavarSizeOptionString;
@@ -135,7 +146,9 @@ namespace openspace {
         DistanceUnit _unit = DistanceUnit::Parsec;
 
         // speck files
-        speck::Dataset _dataset;
+        //speck::Dataset _dataset;
+        std::vector<speck::Dataset> _datasets;
+        speck::Dataset _interpolationDataset;
         speck::ColorMap _colorMap;
 
         // range data, do we need conversion map?
@@ -151,4 +164,4 @@ namespace openspace {
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_COSMICLIFE___RENDERABLECOSMICPOINTS___H__
+#endif // __OPENSPACE_MODULE_COSMICLIFE___RENDERABLEINTERPOLATION___H__

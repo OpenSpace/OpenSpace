@@ -8,7 +8,7 @@
  * software and associated documentation files (the "Software"), to deal in the Software *
  * without restriction, including without limitation the rights to use, copy, modify,    *
  * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
- * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * permit persons to whom the Software is furnished so, subject to the following   *
  * conditions:                                                                           *
  *                                                                                       *
  * The above copyright notice and this permission notice shall be included in all copies *
@@ -55,8 +55,8 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableCosmicPoints";
-    constexpr const char* ProgramObjectName = "RenderableCosmicPoints";
+    constexpr const char* _loggerCat = "RenderableInterpolation";
+    constexpr const char* ProgramObjectName = "RenderableInterpolation";
 
 
     constexpr const std::array<const char*, 20> UniformNames = {
@@ -123,19 +123,6 @@ namespace {
         "Debug option for rendering of billboards."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
-        "FadeInDistances",
-        "Fade-In Start and End Distances",
-        "These values determine the initial and final distances from the center of "
-        "which the object will start and end fading-in."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
-        "DisableFadeIn",
-        "Disable Fade-in Effect",
-        "Enables/Disables the Fade-in effect."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
         "EnablePixelSizeControl",
         "Enable Pixel Size Control",
@@ -177,10 +164,19 @@ namespace {
         "Set the data range based on the available data"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo InterpolationValueInfo = {
+        "InterpolationValue",
+        "Interpolation value",
+        "Set data interpolation between 0-1"
+    };
+
     struct [[codegen::Dictionary(RenderableInterpolation)]] Parameters {
         // The path to the SPECK file that contains information about the astronomical
         // object being rendered
         std::optional<std::string> file;
+
+        //comment
+        std::optional<std::string> file2;
 
         // [[codegen::verbatim(ColorInfo.description)]]
         glm::vec3 color [[codegen::color()]];
@@ -231,12 +227,6 @@ namespace {
         // Transformation matrix to be applied to each astronomical object
         std::optional<glm::dmat4x4> transformationMatrix;
 
-        // [[codegen::verbatim(FadeInDistancesInfo.description)]]
-        std::optional<glm::dvec2> fadeInDistances;
-
-        // [[codegen::verbatim(DisableFadeInInfo.description)]]
-        std::optional<bool> disableFadeIn;
-
         // [[codegen::verbatim(BillboardMinMaxSizeInfo.description)]]
         std::optional<glm::vec2> billboardMinMaxSize;
 
@@ -252,17 +242,21 @@ namespace {
         // [[codegen::verbatim(UseLinearFiltering.description)]]
         std::optional<bool> useLinearFiltering;
 
+        // [[codegen::verbatim(InterpolationValueInfo.description)]]
+        std::optional<float> interpolationValue;
     };
 #include "renderableinterpolation_codegen.cpp"
 }  // namespace
 
+
+
 namespace openspace {
 
-    documentation::Documentation RenderableCosmicPoints::Documentation() {
-        return codegen::doc<Parameters>("cosmiclife_renderablecosmicpoints");
+    documentation::Documentation RenderableInterpolation::Documentation() {
+        return codegen::doc<Parameters>("cosmiclife_renderableinterpolation");
     }
 
-    RenderableCosmicPoints::RenderableCosmicPoints(const ghoul::Dictionary& dictionary)
+    RenderableInterpolation::RenderableInterpolation(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
         , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
         , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -274,13 +268,6 @@ namespace openspace {
             SizeOptionInfo,
             properties::OptionProperty::DisplayType::Dropdown
         )
-        , _fadeInDistances(
-            FadeInDistancesInfo,
-            glm::vec2(0.f),
-            glm::vec2(0.f),
-            glm::vec2(100.f)
-        )
-        , _disableFadeInDistance(DisableFadeInInfo, true)
         , _billboardMinMaxSize(
             BillboardMinMaxSizeInfo,
             glm::vec2(0.f, 400.f),
@@ -291,14 +278,39 @@ namespace openspace {
         , _correctionSizeFactor(CorrectionSizeFactorInfo, 8.f, 0.f, 20.f)
         , _useLinearFiltering(UseLinearFiltering, false)
         , _setRangeFromData(SetRangeFromData)
-        , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)  
+        , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+        , _interpolationValue(InterpolationValueInfo,0,0.f,1.f)
+
+        //, _MDS_points(MDS_pointsInfo, glm::vec2(1.f), glm::vec2(1.f))
+        //, _Umap_points(Umap_pointsInfo, glm::vec2(1.f), glm::vec2(1.f))
     {
         const Parameters p = codegen::bake<Parameters>(dictionary);
+        //const Point v = codegen::bake<Point>(dictionary);
 
-        if (p.file.has_value()) {
-            _speckFile = absPath(*p.file).string();
-        }
-        _hasSpeckFile = p.file.has_value();
+        //if (p.file.has_value()) {
+        //    //Point MDS_point;
+            _speckFile.push_back(absPath(*p.file).string());
+        //    //MDS_points.push_back(MDS_point);
+        //}
+
+        //if (p.file2.has_value()) {
+        //    //Point Umap_point;
+            _speckFile.push_back(absPath(*p.file2).string());
+        //    //Umap_points.push_back(Umap_point);
+        //    
+        //}
+        _hasSpeckFile = p.file.has_value() && p.file2.has_value();
+
+
+        _interpolationValue = p.interpolationValue.value_or(_interpolationValue);
+        _interpolationValue.onChange([this]() {
+            _interpolationValue = _interpolationValue.value();
+            _dataIsDirty = true;
+            LDEBUG(std::to_string(_interpolationValue));
+            });
+        addProperty(_interpolationValue); //puts it on the GUI 
+
+        _hasSpeckFile = p.file2.has_value();
 
         _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
         _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
@@ -391,16 +403,6 @@ namespace openspace {
             _hasDatavarSize = true;
         }
 
-
-        if (p.fadeInDistances.has_value()) {
-            _fadeInDistances = *p.fadeInDistances;
-            _fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-            addProperty(_fadeInDistances);
-
-            _disableFadeInDistance = false;
-            addProperty(_disableFadeInDistance);
-        }
-
         _pixelSizeControl = p.enablePixelSizeControl.value_or(_pixelSizeControl);
         addProperty(_pixelSizeControl);
 
@@ -419,11 +421,11 @@ namespace openspace {
 
         _setRangeFromData.onChange([this]() {
             const int colorMapInUse =
-                _hasColorMapFile ? _dataset.index(_colorOptionString) : 0;
+                _hasColorMapFile ? _interpolationDataset.index(_colorOptionString) : 0;
 
             float minValue = std::numeric_limits<float>::max();
             float maxValue = -std::numeric_limits<float>::max();
-            for (const speck::Dataset::Entry& e : _dataset.entries) {
+            for (const speck::Dataset::Entry& e : _interpolationDataset.entries) {
                 float color = e.data[colorMapInUse];
                 minValue = std::min(minValue, color);
                 maxValue = std::max(maxValue, color);
@@ -437,19 +439,29 @@ namespace openspace {
         _useLinearFiltering.onChange([&]() { _dataIsDirty = true; });
         addProperty(_useLinearFiltering);
 
-
-        // registerUpdateRenderBinFromOpacity();
-
     }
 
-    bool RenderableCosmicPoints::isReady() const {
-        return (_program && (!_dataset.entries.empty()));
+    bool RenderableInterpolation::isReady() const {
+        bool hasAllDataSetData = std::all_of(_datasets.begin(), _datasets.end(), [](const speck::Dataset& dataset) {
+            return !dataset.entries.empty();
+            });
+        return (_program && hasAllDataSetData);
     }
 
-    void RenderableCosmicPoints::initialize() {
-        if (_hasSpeckFile) {
-            _dataset = speck::data::loadFileWithCache(_speckFile);
+    void RenderableInterpolation::initialize() {
+        for (const std::string& path : _speckFile) {
+            _datasets.push_back(speck::data::loadFileWithCache(path));
         }
+        
+
+        //for (auto entry : _datasets[0].)
+        //{
+        //    //entry.position
+        //}
+
+        /*if (_hasSpeckFile) {
+            _dataset = speck::data::loadFileWithCache(_speckFile[0]);
+        }*/
 
         if (_hasColorMapFile) {
             _colorMap = speck::color::loadFileWithCache(_colorMapFile);
@@ -466,7 +478,7 @@ namespace openspace {
         setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
     }
 
-    void RenderableCosmicPoints::initializeGL() {
+    void RenderableInterpolation::initializeGL() {
 
         _program = CosmicLifeModule::ProgramObjectManager.request(
             ProgramObjectName,
@@ -486,7 +498,7 @@ namespace openspace {
 
     // vao = vertex array object
     // vbo = vertex buffer object
-    void RenderableCosmicPoints::deinitializeGL() {
+    void RenderableInterpolation::deinitializeGL() {
         glDeleteBuffers(1, &_vbo);
         _vbo = 0;
         glDeleteVertexArrays(1, &_vao);
@@ -506,7 +518,7 @@ namespace openspace {
         _spriteTexture = nullptr;
     }
 
-    void RenderableCosmicPoints::renderPoints(const RenderData& data,
+    void RenderableInterpolation::renderPoints(const RenderData& data,
         const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight,
         const glm::dvec3& orthoUp,
@@ -574,7 +586,7 @@ namespace openspace {
         _program->setUniform(_uniformCache.hasColormap, _hasColorMapFile);
 
         glBindVertexArray(_vao);
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_interpolationDataset.entries.size())); //TODO: this is where data is uploaded to GPU 
         glBindVertexArray(0);
         _program->deactivate();
 
@@ -583,23 +595,8 @@ namespace openspace {
     }
 
 
-    void RenderableCosmicPoints::render(const RenderData& data, RendererTasks&) {
-        float fadeInVar = 1.f;
-        if (!_disableFadeInDistance) {
-            float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
-            const glm::vec2 fadeRange = _fadeInDistances;
-            const float a = static_cast<float>(
-                1.f / ((fadeRange.y - fadeRange.x) * toMeter(_unit))
-                );
-            const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-            const float funcValue = a * distCamera + b;
-            // fadeInVar *= funcValue < 1.f ? 1.f : funcValue;
-
-            if (funcValue < 0.01f) {
-                return;
-            }
-        }
-
+    void RenderableInterpolation::render(const RenderData& data, RendererTasks&) {
+        
         glm::dmat4 modelMatrix =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
             glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -626,17 +623,37 @@ namespace openspace {
         glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
         if (_hasSpeckFile) {
-            renderPoints(data, modelMatrix, orthoRight, orthoUp, fadeInVar);
+            renderPoints(data, modelMatrix, orthoRight, orthoUp, 1);
         }
     }
 
-    void RenderableCosmicPoints::update(const UpdateData&) {
+    speck::Dataset::Entry RenderableInterpolation::interpol(const speck::Dataset::Entry& e1, const speck::Dataset::Entry& e2, float iv) {
+        speck::Dataset::Entry result {e1};
+        result.position = glm::vec3{e1.position.x - iv * (e1.position.x - e2.position.x),
+            e1.position.y - iv * (e1.position.y - e2.position.y),
+            e1.position.z - iv * (e1.position.z - e2.position.z)
+        };
+        //interpolate color
+        return result;
+    }
+
+    speck::Dataset RenderableInterpolation::interpolationFunc(const speck::Dataset& d1, const speck::Dataset& d2, float iv) {
+        speck::Dataset result{ d1 };
+
+        for (int i = 0; i < d1.entries.size(); i++) {
+            result.entries[i] = interpol(d1.entries[i], d2.entries[i], iv);
+        }
+        return result;
+    }
+    void RenderableInterpolation::update(const UpdateData&) {
         if (_dataIsDirty && _hasSpeckFile) {
             ZoneScopedN("Data dirty")
                 TracyGpuZone("Data dirty")
                 LDEBUG("Regenerating data");
 
-            std::vector<float> slice = createDataSlice();
+            //todo interpolation
+            _interpolationDataset = interpolationFunc(_datasets[0], _datasets[1], _interpolationValue);
+            std::vector<float> slice = createDataSlice(_interpolationDataset);
 
             int size = static_cast<int>(slice.size());
 
@@ -777,30 +794,30 @@ namespace openspace {
     }
 
 
-    std::vector<float> RenderableCosmicPoints::createDataSlice() {
+    std::vector<float> RenderableInterpolation::createDataSlice(speck::Dataset& dataset) {
 
-        if (_dataset.entries.empty()) {
+        if (_interpolationDataset.entries.empty()) {
             return std::vector<float>();
         }
 
         std::vector<float> result;
         if (_hasColorMapFile) {
-            result.reserve(8 * _dataset.entries.size());
+            result.reserve(8 * _interpolationDataset.entries.size());
         }
         else {
-            result.reserve(4 * _dataset.entries.size());
+            result.reserve(4 * _interpolationDataset.entries.size());
         }
 
         // what datavar in use for the index color
-        int colorMapInUse = _hasColorMapFile ? _dataset.index(_colorOptionString) : 0;
+        int colorMapInUse = _hasColorMapFile ? _interpolationDataset.index(_colorOptionString) : 0;
 
         // what datavar in use for the size scaling (if present)
         int sizeScalingInUse =
-            _hasDatavarSize ? _dataset.index(_datavarSizeOptionString) : -1;
+            _hasDatavarSize ? _interpolationDataset.index(_datavarSizeOptionString) : -1;
 
         float minColorIdx = std::numeric_limits<float>::max();
         float maxColorIdx = -std::numeric_limits<float>::max();
-        for (const speck::Dataset::Entry& e : _dataset.entries) {
+        for (const speck::Dataset::Entry& e : _interpolationDataset.entries) {
             if (e.data.size() > 0) {
                 float color = e.data[colorMapInUse];
                 minColorIdx = std::min(color, minColorIdx);
@@ -815,7 +832,7 @@ namespace openspace {
         double maxRadius = 0.0;
 
         float biggestCoord = -1.f;
-        for (const speck::Dataset::Entry& e : _dataset.entries) {
+        for (const speck::Dataset::Entry& e : _interpolationDataset.entries) {
             glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::vec4(
                 e.position, 1.0
             ));
@@ -942,11 +959,8 @@ namespace openspace {
             }
         }
         setBoundingSphere(maxRadius);
-        _fadeInDistances.setMaxValue(glm::vec2(10.f * biggestCoord));
         return result;
     }
-
-
 
 
 
