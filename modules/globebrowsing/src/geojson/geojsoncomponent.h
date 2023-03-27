@@ -81,9 +81,6 @@ private:
     void readFile();
     void parseSingleFeature(const geos::io::GeoJSONFeature& feature);
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _linesAndPolygonsProgram = nullptr;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram = nullptr;
-
     std::vector<GlobeGeometryFeature> _geometryFeatures;
 
     properties::BoolProperty _enabled;
@@ -113,6 +110,9 @@ private:
     rendering::helper::LightSourceRenderData _lightsourceRenderData;
 
     properties::PropertyOwner _lightSourcePropertyOwner;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _linesAndPolygonsProgram = nullptr;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram = nullptr;
 };
 
 } // namespace openspace::globebrowsing

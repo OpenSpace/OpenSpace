@@ -296,22 +296,19 @@ void GeoJsonComponent::initializeGL() {
     ZoneScoped;
 
     _linesAndPolygonsProgram = global::renderEngine->buildRenderProgram(
-        "GeoJsonLinesAndPolygonProgram",
+        "GeoLinesAndPolygonProgram",
         absPath("${MODULE_GLOBEBROWSING}/shaders/geojson_vs.glsl"),
         absPath("${MODULE_GLOBEBROWSING}/shaders/geojson_fs.glsl")
     );
 
     _pointsProgram = global::renderEngine->buildRenderProgram(
-        "GeoJsonPointsProgram",
+        "GeoPointsProgram",
         absPath("${MODULE_GLOBEBROWSING}/shaders/geojson_points_vs.glsl"),
         absPath("${MODULE_GLOBEBROWSING}/shaders/geojson_points_fs.glsl")
     );
 
     for (GlobeGeometryFeature& g : _geometryFeatures) {
-        //g.initializeGL(
-        //    g.isPoints() ? _pointsProgram.get() : _linesAndPolygonsProgram.get()
-        //);
-        g.initializeGL( _linesAndPolygonsProgram.get());
+        g.initializeGL(_pointsProgram.get(), _linesAndPolygonsProgram.get());
     }
 }
 
@@ -335,7 +332,8 @@ bool GeoJsonComponent::isReady() const {
             return g.isReady();
         }
     );
-    return _linesAndPolygonsProgram != nullptr && isReady;
+    return isReady &&
+        (_linesAndPolygonsProgram != nullptr) && (_pointsProgram != nullptr);
 }
 
 void GeoJsonComponent::render(const RenderData& data) {
@@ -358,14 +356,14 @@ void GeoJsonComponent::render(const RenderData& data) {
         }
     }
 
-    if (_drawWireframe) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
+    //if (_drawWireframe) {
+    //    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //}
 
     glBindVertexArray(0);
-    _linesAndPolygonsProgram->deactivate();
 
     // Restore GL State
+    global::renderEngine->openglStateCache().resetPolygonAndClippingState();
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
 }
@@ -428,8 +426,6 @@ void GeoJsonComponent::readFile() {
 }
 
 void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& feature) {
-    ghoul_assert(!feature->isCollection(), "Geometry can not be a collection");
-
     // Read the geometry
     const geos::geom::Geometry* geom = feature.getGeometry();
 
@@ -444,7 +440,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
                 geom->getGeometryN(i),
                 static_cast<int>(_geometryFeatures.size())
             );
-            g.initializeGL(_linesAndPolygonsProgram.get());
+            g.initializeGL(_pointsProgram.get(), _linesAndPolygonsProgram.get());
             _geometryFeatures.push_back(std::move(g));
         }
         catch (const ghoul::MissingCaseException&) {

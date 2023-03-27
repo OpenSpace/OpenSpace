@@ -24,9 +24,11 @@
 
 #include <modules/globebrowsing/src/geojson/globegeometryfeature.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -107,8 +109,24 @@ void GlobeGeometryFeature::setOffsets(const glm::vec3& value) {
     _offsets = value;
 }
 
-void GlobeGeometryFeature::initializeGL(ghoul::opengl::ProgramObject* shaderProgram) {
-    _program = shaderProgram;
+void GlobeGeometryFeature::initializeGL(ghoul::opengl::ProgramObject* pointsProgram,
+                                   ghoul::opengl::ProgramObject* linesAndPolygonsProgram)
+{
+    _pointsProgram = pointsProgram;
+    _linesAndPolygonsProgram = linesAndPolygonsProgram;
+
+    if (isPoints()) {
+        GlobeBrowsingModule* m = global::moduleEngine->module<GlobeBrowsingModule>();
+        if (m->hasDefaultGeoPointTexture()) {
+            _pointTexture = std::make_unique<TextureComponent>(2);
+            _pointTexture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _pointTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+
+            // TODO: option to use texture from properties
+            _pointTexture->loadFromFile(m->defaultGeoPointTexture());
+            _pointTexture->uploadToGpu();
+        }
+    }
 }
 
 void GlobeGeometryFeature::deinitializeGL() {
@@ -116,10 +134,16 @@ void GlobeGeometryFeature::deinitializeGL() {
         glDeleteVertexArrays(1, &r.vaoId);
         glDeleteBuffers(1, &r.vboId);
     }
+
+    _pointTexture = nullptr;
 }
 
 bool GlobeGeometryFeature::isReady() const {
-    return _program != nullptr;
+    return (_linesAndPolygonsProgram != nullptr) && (_pointsProgram != nullptr);
+}
+
+bool GlobeGeometryFeature::isPoints() const {
+    return _type == GeometryType::Point;
 }
 
 void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geometry* geo,
@@ -252,83 +276,129 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
 
     const glm::dmat4 projectionTransform = renderData.camera.projectionMatrix();
 
-    _program->activate();
-    _program->setUniform("modelViewTransform", modelViewTransform);
-    _program->setUniform("projectionTransform", projectionTransform);
-    _program->setUniform("normalTransform", normalTransform);
-
-    _program->setUniform("nLightSources", lightSourceData.nLightSources);
-    _program->setUniform("lightIntensities", lightSourceData.intensitiesBuffer);
-    _program->setUniform("lightDirectionsViewSpace", lightSourceData.directionsViewSpaceBuffer);
-
-    // TODO: use different shader programs for lines, triangles, etc?
-
-    _program->setUniform("pointSize", _properties.pointSize());
-
 #ifndef __APPLE__
     glLineWidth(_properties.lineWidth());
 #else
     glLineWidth(1.f);
 #endif
 
-    // TODO: this could be optimised as to not loop through all objects twice,
-    // but only the ones for which it's actually needed
+    // @TODO: optimise as to not loop through all objects twice (based on
+    // the render pass), but only the ones for which it's actually needed
     for (const RenderFeature& r : _renderFeatures) {
         if (r.isExtrusionFeature && !_properties.extrude()) {
             continue;
         }
 
+        ghoul::opengl::ProgramObject* shader = (r.type == RenderType::Points) ?
+            _pointsProgram : _linesAndPolygonsProgram;
+
+        shader->activate();
+        shader->setUniform("modelViewTransform", modelViewTransform);
+        shader->setUniform("projectionTransform", projectionTransform);
+        shader->setUniform("normalTransform", normalTransform);
+
+        shader->setUniform("nLightSources", lightSourceData.nLightSources);
+        shader->setUniform("lightIntensities", lightSourceData.intensitiesBuffer);
+        shader->setUniform(
+            "lightDirectionsViewSpace",
+            lightSourceData.directionsViewSpaceBuffer
+        );
+
+        shader->setUniform("opacity", opacity);
+
         glBindVertexArray(r.vaoId);
 
-        _program->setUniform("color", _properties.color());
-        _program->setUniform("opacity", opacity);
-        _program->setUniform("performShading", false);
-
         switch (r.type) {
-        case RenderType::Lines:
-            glEnable(GL_LINE_SMOOTH);
-            glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(r.nVertices));
-            glDisable(GL_LINE_SMOOTH);
-            break;
-        case RenderType::Points:
-            glEnable(GL_PROGRAM_POINT_SIZE);
-            glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(r.nVertices));
-            glDisable(GL_PROGRAM_POINT_SIZE);
-            // TODO: support sprites for the points
-            break;
-        case RenderType::Polygon: {
-            _program->setUniform("color", _properties.fillColor());
-            _program->setUniform("opacity", fillOpacity);
-            _program->setUniform("performShading", true);
+            case RenderType::Lines:
+                renderLines(r, shader);
+                break;
+            case RenderType::Points:
+                renderPoints(r, shader);
+                break;
+            case RenderType::Polygon: {
+                shader->setUniform("opacity", fillOpacity);
 
-            bool shouldRenderTwice = (fillOpacity < 1.0);
-            if (shouldRenderTwice) {
-                glEnable(GL_CULL_FACE);
-                if (pass == 0) {
-                    // First draw back faces
-                    glCullFace(GL_FRONT);
-                }
-                else {
-                    // Then front faces
-                    glCullFace(GL_BACK);
-                }
+                bool shouldRenderTwice = (fillOpacity < 1.0);
+                renderPolygons(r, shader, shouldRenderTwice, pass);
+                break;
             }
-            else {
-                glDisable(GL_CULL_FACE);
-            }
-            glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(r.nVertices));
-            break;
+            default:
+                throw ghoul::MissingCaseException();
+                break;
         }
-        default:
-            throw ghoul::MissingCaseException();
-            break;
-        }
+
+        shader->deactivate();
     }
 
     glBindVertexArray(0);
 
+    // TODO: move to correct render function
     // Reset after every geometry
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
+}
+
+void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
+                                        ghoul::opengl::ProgramObject* shader) const
+{
+    ghoul_assert(feature.type == RenderType::Points, "Trying to render faulty geometry");
+    _pointsProgram->setUniform("color", _properties.color());
+    _pointsProgram->setUniform("pointSize", _properties.pointSize());
+
+    //if (_pointTexture) {
+    //    ghoul::opengl::TextureUnit unit;
+    //    unit.activate();
+    //    _pointTexture->bind();
+    //    shader->setUniform("texture", unit);
+    //}
+    //else {
+    //    glBindTexture(GL_TEXTURE_2D, 0);
+    //}
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(feature.nVertices));
+    glDisable(GL_PROGRAM_POINT_SIZE);
+    // TODO: support sprites for the points
+}
+
+void GlobeGeometryFeature::renderLines(const RenderFeature& feature,
+                                       ghoul::opengl::ProgramObject* shader) const
+{
+    ghoul_assert(feature.type == RenderType::Lines, "Trying to render faulty geometry");
+
+    _linesAndPolygonsProgram->setUniform("color", _properties.color());
+    _linesAndPolygonsProgram->setUniform("performShading", false);
+
+    glEnable(GL_LINE_SMOOTH);
+    glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(feature.nVertices));
+    glDisable(GL_LINE_SMOOTH);
+}
+
+void GlobeGeometryFeature::renderPolygons(const RenderFeature& feature,
+                                          ghoul::opengl::ProgramObject* shader,
+                                          bool shouldRenderTwice, int renderPass) const
+{
+    ghoul_assert(
+        feature.type == RenderType::Polygon,
+        "Trying to render faulty geometry"
+    );
+
+    _linesAndPolygonsProgram->setUniform("color", _properties.fillColor());
+    _linesAndPolygonsProgram->setUniform("performShading", true);
+
+    if (shouldRenderTwice) {
+        glEnable(GL_CULL_FACE);
+        if (renderPass == 0) {
+            // First draw back faces
+            glCullFace(GL_FRONT);
+        }
+        else {
+            // Then front faces
+            glCullFace(GL_BACK);
+        }
+    }
+    else {
+        glDisable(GL_CULL_FACE);
+    }
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(feature.nVertices));
 }
 
 bool GlobeGeometryFeature::shouldUpdateDueToHeightMapChange() const {
@@ -363,11 +433,13 @@ void GlobeGeometryFeature::update(bool dataIsDirty, bool preventHeightUpdates) {
         //LINFO("Update from data change"); // TODO: remove
         updateGeometry();
     }
+
+    if (_pointTexture) {
+        _pointTexture->update();
+    }
 }
 
 void GlobeGeometryFeature::updateGeometry() {
-    ghoul_assert(_globe != nullptr, "Globe must exists");
-
     // Update vertex data and compute model coordinates based on globe
     _renderFeatures.clear();
 
@@ -388,7 +460,7 @@ GlobeGeometryFeature::subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
     std::vector<glm::vec3> positions;
 
     double edgeLength = glm::distance(v1, v0);
-    int nSegments = std::ceil(edgeLength / MaxDistance);
+    int nSegments = static_cast<int>(std::ceil(edgeLength / MaxDistance));
 
     for (int seg = 0; seg < nSegments; ++seg) {
         double t = static_cast<double>(seg) / static_cast<double>(nSegments);
@@ -470,8 +542,8 @@ GlobeGeometryFeature::createPointAndLineGeometry()
         feature.nVertices = vertices.size();
 
         // Figure out if we're rendering lines or points
-        feature.type = (_type == GeometryType::Point) ?
-            RenderType::Points : RenderType::Lines;
+        bool isPoints = _type == GeometryType::Point;
+        feature.type = isPoints ? RenderType::Points : RenderType::Lines;
 
         // Generate buffers
         if (feature.vaoId == 0) {
@@ -480,6 +552,7 @@ GlobeGeometryFeature::createPointAndLineGeometry()
         if (feature.vboId == 0) {
             glGenBuffers(1, &feature.vboId);
         }
+
         bufferVertexData(feature, vertices);
 
         _renderFeatures.push_back(std::move(feature));
@@ -753,8 +826,6 @@ glm::dvec3 GlobeGeometryFeature::adjustHeightOfModelCoordinate(const glm::dvec3&
 glm::dvec3 GlobeGeometryFeature::computeOffsetedModelCoordinate(
                                                               const Geodetic3& geo) const
 {
-    ghoul_assert(_globe != nullptr, "Globe must exist");
-
     // Account for lat long offset
     double offsetLatRadians = glm::radians(_offsets.x);
     double offsetLonRadians = glm::radians(_offsets.y);
@@ -785,7 +856,8 @@ std::vector<double> GlobeGeometryFeature::getCurrentReferencePointsHeights() con
 void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
                                             const std::vector<Vertex>& vertexData)
 {
-    ghoul_assert(_program != nullptr, "Shader program must be initialized");
+    ghoul_assert(_pointsProgram != nullptr, "Shader program must be initialized");
+    ghoul_assert(_linesAndPolygonsProgram != nullptr, "Shader program must be initialized");
 
     glBindVertexArray(feature.vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, feature.vboId);
@@ -796,27 +868,53 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
         GL_STATIC_DRAW
     );
 
-    GLint positionAttrib = _program->attributeLocation("in_position");
-    glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(
-        positionAttrib,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        6 * sizeof(float),
-        nullptr
-    );
+    if (feature.type == RenderType::Points) {
+        GLint positionAttrib = _pointsProgram->attributeLocation("in_position");
+        glEnableVertexAttribArray(positionAttrib);
+        glVertexAttribPointer(
+            positionAttrib,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            6 * sizeof(float),
+            nullptr
+        );
 
-    GLint normalAttrib = _program->attributeLocation("in_normal");
-    glEnableVertexAttribArray(normalAttrib);
-    glVertexAttribPointer(
-        normalAttrib,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        6 * sizeof(float),
-        reinterpret_cast<void*>(3 * sizeof(float))
-    );
+        GLint normalAttrib = _pointsProgram->attributeLocation("in_normal");
+        glEnableVertexAttribArray(normalAttrib);
+        glVertexAttribPointer(
+            normalAttrib,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            6 * sizeof(float),
+            reinterpret_cast<void*>(3 * sizeof(float))
+        );
+    }
+    else {
+        GLint positionAttrib =
+            _linesAndPolygonsProgram->attributeLocation("in_position");
+        glEnableVertexAttribArray(positionAttrib);
+        glVertexAttribPointer(
+            positionAttrib,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            6 * sizeof(float),
+            nullptr
+        );
+
+        GLint normalAttrib = _linesAndPolygonsProgram->attributeLocation("in_normal");
+        glEnableVertexAttribArray(normalAttrib);
+        glVertexAttribPointer(
+            normalAttrib,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            6 * sizeof(float),
+            reinterpret_cast<void*>(3 * sizeof(float))
+        );
+    }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);

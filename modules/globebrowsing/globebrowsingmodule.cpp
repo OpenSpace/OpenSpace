@@ -131,6 +131,14 @@ namespace {
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo
+        DefaultGeoPointTextureInfo =
+    {
+        "DefaultGeoPointTexture",
+        "Default Geo Point Texture",
+        "A path to a texture to use as default for GeoJson points"
+    };
+
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
     {
@@ -207,6 +215,9 @@ namespace {
         // mode *enabled*, you can set this value to 'true' to silence a warning that you
         // would otherwise get at startup
         std::optional<bool> noWarning;
+
+        // [[codegen::verbatim(DefaultGeoPointTextureInfo.description)]]
+        std::optional<std::string> defaultGeoPointTexture;
     };
 #include "globebrowsingmodule_codegen.cpp"
 } // namespace
@@ -220,12 +231,15 @@ GlobeBrowsingModule::GlobeBrowsingModule()
     , _wmsCacheLocation(WMSCacheLocationInfo, "${BASE}/cache_gdal")
     , _wmsCacheSizeMB(WMSCacheSizeInfo, 1024)
     , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
+    , _defaultGeoPointTexturePath(DefaultGeoPointTextureInfo)
 {
     addProperty(_wmsCacheEnabled);
     addProperty(_offlineMode);
     addProperty(_wmsCacheLocation);
     addProperty(_wmsCacheSizeMB);
     addProperty(_tileCacheSizeMB);
+
+    addProperty(_defaultGeoPointTexturePath);
 }
 
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
@@ -238,6 +252,20 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     _wmsCacheSizeMB = p.wmsCacheSize.value_or(_wmsCacheSizeMB);
     _tileCacheSizeMB = p.tileCacheSize.value_or(_tileCacheSizeMB);
     const bool noWarning = p.noWarning.value_or(false);
+    _defaultGeoPointTexturePath = absPath(*p.defaultGeoPointTexture).string();
+
+    if (p.defaultGeoPointTexture.has_value()) {
+        std::filesystem::path path = _defaultGeoPointTexturePath.value();
+        if (std::filesystem::exists(path)) {
+            _hasDefaultGeoPointTexture = true;
+        }
+        else {
+            LWARNINGC("GlobeBrowsingModule", fmt::format(
+                "The provided texture file '{}' for the default geo point texture "
+                "does not exist", path
+            ));
+        }
+    }
 
     if (!_wmsCacheEnabled && _offlineMode && !noWarning) {
         LWARNINGC(
@@ -248,7 +276,6 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
             "'true'"
         );
     }
-
 
     // Initialize
     global::callback::initializeGL->emplace_back([&]() {
@@ -691,6 +718,14 @@ std::string GlobeBrowsingModule::wmsCacheLocation() const {
 uint64_t GlobeBrowsingModule::wmsCacheSize() const {
     uint64_t size = _wmsCacheSizeMB;
     return size * 1024 * 1024;
+}
+
+bool GlobeBrowsingModule::hasDefaultGeoPointTexture() const {
+    return _hasDefaultGeoPointTexture;
+}
+
+std::string_view GlobeBrowsingModule::defaultGeoPointTexture() const {
+    return _defaultGeoPointTexturePath;
 }
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {

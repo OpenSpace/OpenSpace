@@ -22,26 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_normal;
+in float vs_depth;
+flat in vec3 vs_normal;
+in vec4 vs_positionViewSpace;
 
-out float vs_depth;
-out vec3 vs_normal;
-out vec4 vs_positionViewSpace;
+uniform vec3 color;
+uniform float opacity;
 
-uniform dmat4 modelViewTransform;
-uniform dmat4 projectionTransform;
-uniform mat3 normalTransform;
+uniform float ambientIntensity = 0.2;
+uniform float diffuseIntensity = 0.8;
+uniform bool performShading = true;
 
-void main() {
-    vs_positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1.0));
-    vec4 positionScreenSpace = vec4(projectionTransform * vs_positionViewSpace);
-    vs_depth = positionScreenSpace.w;
-    vs_normal = normalize(normalTransform * in_normal);
-    gl_Position = positionScreenSpace;
+uniform unsigned int nLightSources;
+uniform vec3 lightDirectionsViewSpace[8];
+uniform float lightIntensities[8];
 
-    // Set z to 0 to disable near and far plane, unique handling for perspective in space
-    gl_Position.z = 0.f;
+const vec3 LightColor = vec3(1.0);
+
+Fragment getFragment() {
+  Fragment frag;
+
+  if (opacity == 0.0) {
+    discard;
+  }
+  frag.color = vec4(color, opacity);
+
+  // Simple diffuse phong shading based on light sources
+  if (performShading && nLightSources > 0) {
+    // @TODO: Fix faulty triangle normals. This should not have to be inverted
+    vec3 n = -normalize(vs_normal);
+
+    // Ambient color
+    vec3 shadedColor = ambientIntensity  * color;
+
+    for (int i = 0; i < nLightSources; ++i) {
+      vec3 l = lightDirectionsViewSpace[i];
+
+        // Diffuse
+        vec3 diffuseColor = diffuseIntensity * max(dot(n,l), 0.0) * color;
+
+        // Light contribution
+        shadedColor += lightIntensities[i] * (LightColor * diffuseColor);
+    }
+    frag.color.xyz = shadedColor;
+  }
+
+  frag.depth = vs_depth;
+  frag.gPosition = vs_positionViewSpace;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+  return frag;
 }

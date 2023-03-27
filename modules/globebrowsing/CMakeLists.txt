@@ -127,6 +127,8 @@ set(SHADER_FILES
   shaders/advanced_rings_fs.glsl
   shaders/blending.glsl
   shaders/geojson_fs.glsl
+  shaders/geojson_points_fs.glsl
+  shaders/geojson_points_vs.glsl
   shaders/geojson_vs.glsl
   shaders/globalrenderer_vs.glsl
   shaders/localrenderer_vs.glsl

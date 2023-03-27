@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <openspace/rendering/helper.h>
+#include <openspace/rendering/texturecomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
 #include <vector>
@@ -96,9 +97,11 @@ public:
     void setEnabled(bool value);
     void setOffsets(const glm::vec3& offsets);
 
-    void initializeGL(ghoul::opengl::ProgramObject* shaderProgram);
+    void initializeGL(ghoul::opengl::ProgramObject* pointsProgram,
+        ghoul::opengl::ProgramObject* linesAndPolygonsProgram);
     void deinitializeGL();
     bool isReady() const;
+    bool isPoints() const;
 
     void createFromSingleGeosGeometry(const geos::geom::Geometry* geo, int index);
 
@@ -115,6 +118,16 @@ public:
     void updateGeometry();
 
 private:
+    void renderPoints(const RenderFeature& feature,
+        ghoul::opengl::ProgramObject* shader) const;
+
+    void renderLines(const RenderFeature& feature,
+        ghoul::opengl::ProgramObject* shader) const;
+
+    void renderPolygons(const RenderFeature& feature,
+        ghoul::opengl::ProgramObject* shader, bool shouldRenderTwice,
+        int renderPass) const;
+
     /**
      * Subdivide line between position v0 and v1 so that it fullfils the MaxDistance
      * criteria. And interpolate the height value from * h0 to h1, as well as add the
@@ -180,9 +193,10 @@ private:
     std::vector<Geodetic3> _heightUpdateReferencePoints;
     std::vector<double> _lastControlHeights;
 
+    std::unique_ptr<TextureComponent> _pointTexture;
 
-    // Note that the parent is the owner to this program
-    ghoul::opengl::ProgramObject* _program = nullptr;
+    ghoul::opengl::ProgramObject* _linesAndPolygonsProgram = nullptr;
+    ghoul::opengl::ProgramObject* _pointsProgram = nullptr;
 };
 
 } // namespace openspace::globebrowsing

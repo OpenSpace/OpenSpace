@@ -97,6 +97,9 @@ public:
     std::string wmsCacheLocation() const;
     uint64_t wmsCacheSize() const; // bytes
 
+    bool hasDefaultGeoPointTexture() const;
+    std::string_view defaultGeoPointTexture() const;
+
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
@@ -127,6 +130,9 @@ private:
     std::map<std::string, Capabilities> _capabilitiesMap;
 
     std::multimap<std::string, UrlInfo> _urlList;
+
+    bool _hasDefaultGeoPointTexture = false;
+    properties::StringProperty _defaultGeoPointTexturePath;
 };
 
 } // namespace openspace
