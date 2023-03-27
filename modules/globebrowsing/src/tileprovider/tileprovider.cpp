@@ -73,7 +73,7 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
                                                             layers::Layer::ID layerTypeID,
                                                       const ghoul::Dictionary& dictionary)
 {
-    ZoneScoped
+    ZoneScoped;
 
     std::string_view type = layers::Layers[static_cast<int>(layerTypeID)].identifier;
 
@@ -86,9 +86,9 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
 }
 
 void TileProvider::initializeDefaultTile() {
-    ZoneScoped
+    ZoneScoped;
 
-        ghoul_assert(!DefaultTile.texture, "Default tile should not have been created");
+    ghoul_assert(!DefaultTile.texture, "Default tile should not have been created");
     using namespace ghoul::opengl;
 
     // Create pixel data
@@ -118,10 +118,12 @@ void TileProvider::deinitializeDefaultTile() {
     DefaultTileTexture = nullptr;
 }
 
-TileProvider::TileProvider() : properties::PropertyOwner({ "TileProvider" }) {}
+TileProvider::TileProvider()
+    : properties::PropertyOwner({ "TileProvider", "Tile Provider"})
+{}
 
 void TileProvider::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(!isInitialized, "TileProvider can only be initialized once");
 
@@ -145,7 +147,7 @@ void TileProvider::initialize() {
 }
 
 void TileProvider::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     internalDeinitialize();
 }
@@ -154,7 +156,7 @@ void TileProvider::internalInitialize() {}
 void TileProvider::internalDeinitialize() {}
 
 ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(isInitialized, "TileProvider was not initialized");
 
@@ -169,7 +171,10 @@ ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParen
         ti.level--;
     };
 
-    TileUvTransform uvTransform = { glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f) };
+    TileUvTransform uvTransform = {
+        .uvOffset = glm::vec2(0.f, 0.f),
+        .uvScale = glm::vec2(1.f, 1.f)
+    };
 
     // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller
     for (int i = 0; i < parents && tileIndex.level > 1; i++) {
@@ -208,7 +213,7 @@ ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParen
 }
 
 ChunkTilePile TileProvider::chunkTilePile(TileIndex tileIndex, int pileSize) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(isInitialized, "TileProvider was not initialized");
     ghoul_assert(pileSize >= 0, "pileSize must be positive");
@@ -221,8 +226,8 @@ ChunkTilePile TileProvider::chunkTilePile(TileIndex tileIndex, int pileSize) {
             if (i == 0) {
                 // First iteration
                 chunkTilePile[i]->tile = DefaultTile;
-                chunkTilePile[i]->uvTransform.uvOffset = { 0.f, 0.f };
-                chunkTilePile[i]->uvTransform.uvScale = { 1.f, 1.f };
+                chunkTilePile[i]->uvTransform.uvOffset = glm::vec2(0.f, 0.f);
+                chunkTilePile[i]->uvTransform.uvScale = glm::vec2(1.f, 1.f);
             }
             else {
                 // We are iterating through the array one-by-one, so we are guaranteed

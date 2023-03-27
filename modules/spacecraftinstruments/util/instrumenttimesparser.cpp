@@ -127,12 +127,12 @@ bool InstrumentTimesParser::create() {
                 _captureProgression.push_back(tr.start);
 
                 Image image = {
-                    tr,
-                    std::string(),
-                    { instrumentID },
-                    _target,
-                    true,
-                    false
+                    .timeRange = tr,
+                    .path = std::string(),
+                    .activeInstruments = { instrumentID },
+                    .target = _target,
+                    .isPlaceholder = true,
+                    .projected = false
                 };
                 _subsetMap[_target]._subset.push_back(std::move(image));
             }

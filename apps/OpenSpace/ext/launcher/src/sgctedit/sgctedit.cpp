@@ -39,7 +39,7 @@
 #include <filesystem>
 
 namespace {
-    constexpr QRect MonitorWidgetSize = { 0, 0, 500, 500 };
+    constexpr QRect MonitorWidgetSize = QRect(0, 0, 500, 500);
     constexpr int MaxNumberWindows = 4;
 
     // Returns true if the windows are not ordered correctly. 'Correct' in this means that
@@ -48,10 +48,10 @@ namespace {
     // https://github.com/OpenSpace/OpenSpace/issues/507
     // is fixed
     bool hasWindowIssues(const sgct::config::Cluster& cluster) {
-        sgct::ivec2 size = {
+        sgct::ivec2 size = sgct::ivec2(
             std::numeric_limits<int>::max(),
             std::numeric_limits<int>::max()
-        };
+        );
         for (const sgct::config::Window& window : cluster.nodes.front().windows) {
             if (window.size.x <= size.x && window.size.y <= size.y) {
                 size = window.size;
@@ -96,7 +96,7 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes) {
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setSizeConstraint(QLayout::SetFixedSize);
 
-    sgct::quat orientation = { 0.f, 0.f, 0.f, 0.f };
+    sgct::quat orientation = sgct::quat(0.f, 0.f, 0.f, 0.f);
     if (_cluster.scene.has_value() && _cluster.scene->orientation.has_value()) {
         orientation = *_cluster.scene->orientation;
     }
@@ -277,13 +277,18 @@ sgct::config::Cluster SgctEdit::generateConfiguration() const {
         window.tags.push_back("GUI");
         window.draw2D = true;
         window.draw3D = false;
+
+        // Disable 2D rendering on all non-GUI windows
+        for (size_t w = 1; w < node.windows.size(); ++w) {
+            node.windows[w].draw2D = false;
+        }
     }
 
     cluster.nodes.push_back(node);
 
     sgct::config::User user;
     user.eyeSeparation = 0.065f;
-    user.position = { 0.f, 0.f, 4.f };
+    user.position = sgct::vec3(0.f, 0.f, 4.f);
     cluster.users = { user };
 
     return cluster;

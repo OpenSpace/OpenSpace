@@ -1,7 +1,5 @@
 -- This is a blank scene that that just sets up the default menus/dasboard/keys, etc.
 
-local propertyHelper = asset.require("util/property_helper")
-
 -- Specifying which other assets should be loaded in this scene
 asset.require("spice/base")
 
@@ -17,6 +15,12 @@ asset.require("util/dpiscaling")
 
 -- Load the images required for the launcher to show up
 asset.require("util/launcher_images")
+
+-- Modules and component settings
+asset.require("modules/exoplanets/exoplanets")
+asset.require("modules/skybrowser/skybrowser")
+asset.require("modules/touch/default_settings")
+
 
 asset.onInitialize(function ()
   webGui.setCefRoute("onscreen")

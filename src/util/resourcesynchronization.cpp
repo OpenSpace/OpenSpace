@@ -41,7 +41,7 @@ namespace {
 
         // A unique identifier that is used to reference this specific
         // ResourceSynchronization object
-        std::string identifier;
+        std::string identifier [[codegen::identifier()]];
 
         // A user readable name of this synchronization
         std::string name;

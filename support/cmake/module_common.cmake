@@ -39,7 +39,7 @@ endfunction ()
 
 function (create_module_header_filepath module_name module_path header_filepath)
   string(TOLOWER ${module_name} module_name)
-  string(REPLACE "${OPENSPACE_BASE_DIR}/" "" module_path ${module_path})
+  string(REPLACE "${PROJECT_SOURCE_DIR}/" "" module_path ${module_path})
   set(header_filepath "${module_path}/${module_name}module.h" PARENT_SCOPE)
 endfunction ()
 

@@ -231,9 +231,9 @@ bool SessionRecording::startRecording(const std::string& filename) {
         // Record the current delta time as the first property to save in the file.
         // This needs to be saved as a baseline whether or not it changes during recording
         _timestamps3RecordStarted = {
-            _timestampRecordStarted,
-            0.0,
-            global::timeManager->time().j2000Seconds()
+            .timeOs = _timestampRecordStarted,
+            .timeRec = 0.0,
+            .timeSim = global::timeManager->time().j2000Seconds()
         };
 
         recordCurrentTimePauseState();
@@ -973,7 +973,7 @@ bool SessionRecording::isPropertyAllowedForBaseline(const std::string& propStrin
 }
 
 void SessionRecording::preSynchronization() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_state == SessionState::Recording) {
         saveCameraKeyframeToTimeline();
@@ -1003,7 +1003,7 @@ void SessionRecording::preSynchronization() {
 }
 
 void SessionRecording::render() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!(_renderPlaybackInformation && isPlayingBack())) {
         return;

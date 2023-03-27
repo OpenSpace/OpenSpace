@@ -588,16 +588,23 @@ double SpiceManager::ephemerisTimeFromDate(const char* timeString) const {
 
 std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime, const char* format)
 {
-    char Buffer[128];
-    std::memset(Buffer, char(0), 128);
+    constexpr int BufferSize = 128;
+    char Buffer[BufferSize];
+    std::memset(Buffer, char(0), BufferSize);
 
-    timout_c(ephemerisTime, format, 128, Buffer);
+    timout_c(ephemerisTime, format, BufferSize, Buffer);
     if (failed_c()) {
         throwSpiceError(fmt::format(
             "Error converting ephemeris time '{}' to date with format '{}'",
             ephemerisTime, format
         ));
     }
+    if (Buffer[0] == '*') {
+        // The conversion failed and we need to use et2utc
+        constexpr int SecondsPrecision = 3;
+        et2utc_c(ephemerisTime, "C", SecondsPrecision, BufferSize, Buffer);
+    }
+
 
     return std::string(Buffer);
 }
@@ -1142,7 +1149,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
                                               double ephemerisTime,
                                               double& lightTime) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(!target.empty(), "Target must not be empty");
     ghoul_assert(!observer.empty(), "Observer must not be empty");

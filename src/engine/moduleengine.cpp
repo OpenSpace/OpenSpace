@@ -59,7 +59,7 @@ ModuleEngine::ModuleEngine()
 void ModuleEngine::initialize(
                      const std::map<std::string, ghoul::Dictionary>& moduleConfigurations)
 {
-    ZoneScoped
+    ZoneScoped;
 
     std::vector<OpenSpaceModule*> modules = AllModules();
 
@@ -82,12 +82,7 @@ void ModuleEngine::initialize(
             m->initialize(configuration);
         }
         catch (const documentation::SpecificationError& e) {
-            for (const documentation::TestResult::Offense& o : e.result.offenses) {
-                LERRORC(e.component, o.offender + ": " + ghoul::to_string(o.reason));
-            }
-            for (const documentation::TestResult::Warning& w : e.result.warnings) {
-                LWARNINGC(e.component, w.offender + ": " + ghoul::to_string(w.reason));
-            }
+            logError(e);
             throw;
         }
 
@@ -96,7 +91,7 @@ void ModuleEngine::initialize(
 }
 
 void ModuleEngine::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Initializing OpenGL of modules");
     for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
@@ -107,7 +102,7 @@ void ModuleEngine::initializeGL() {
 }
 
 void ModuleEngine::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Deinitializing modules");
 
@@ -127,7 +122,7 @@ void ModuleEngine::deinitialize() {
 }
 
 void ModuleEngine::deinitializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Deinitializing OpenGL of modules");
     for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
@@ -139,7 +134,7 @@ void ModuleEngine::deinitializeGL() {
 }
 
 void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(mod, "Module must not be nullptr");
 
@@ -171,7 +166,7 @@ std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
 }
 
 ghoul::systemcapabilities::Version ModuleEngine::requiredOpenGLVersion() const {
-    ghoul::systemcapabilities::Version version = { 0, 0, 0 };
+    ghoul::systemcapabilities::Version version = { .major = 0, .minor = 0, .release = 0 };
 
     for (const std::unique_ptr<OpenSpaceModule>& m : _modules) {
         version = std::max(version, m->requiredOpenGLVersion());

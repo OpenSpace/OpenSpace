@@ -301,7 +301,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrightnessPercentInfo = {
-        "BrightnessPercen",
+        "BrightnessPercent",
         "App Brightness Contribution",
         "App Brightness Contribution"
     };

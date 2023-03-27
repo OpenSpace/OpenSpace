@@ -81,10 +81,10 @@ private:
 
     std::vector<QRectF> _monitorDimensionsScaled;
     std::array<QRectF, 4> _windowRendering = {
-        QRectF{ 0.f, 0.f, 0.f, 0.f },
-        QRectF{ 0.f, 0.f, 0.f, 0.f },
-        QRectF{ 0.f, 0.f, 0.f, 0.f },
-        QRectF{ 0.f, 0.f, 0.f, 0.f }
+        QRectF(0.f, 0.f, 0.f, 0.f),
+        QRectF(0.f, 0.f, 0.f, 0.f),
+        QRectF(0.f, 0.f, 0.f, 0.f),
+        QRectF(0.f, 0.f, 0.f, 0.f)
     };
     int _nWindows = 1;
     const std::array<QColor, 4> _colorsForWindows;

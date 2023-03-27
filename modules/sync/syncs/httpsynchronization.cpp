@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/httprequest.h>
+#include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <ghoul/logging/logmanager.h>
 #include <unordered_map>
 
@@ -38,10 +39,20 @@ namespace {
     struct [[codegen::Dictionary(HttpSynchronization)]] Parameters {
         // The unique identifier for this resource that is used to request a set of files
         // from the synchronization servers
-        std::string identifier;
+        std::string identifier [[codegen::identifier()]];
 
         // The version of this resource that should be requested
         int version;
+
+        // Determines whether .zip files that are downloaded should automatically be
+        // unzipped. If this value is not specified, no unzipping is performed
+        std::optional<bool> unzipFiles;
+
+        // The destination for the unzipping. If this value is specified, all zip files
+        // contained in the synchronization will be unzipped into the same specified
+        // folder. If this value is specified, but 'unzipFiles' is false, no extaction
+        // will be performed
+        std::optional<std::string> unzipFilesDestination;
     };
 #include "httpsynchronization_codegen.cpp"
 } // namespace
@@ -63,6 +74,10 @@ HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
 
     _identifier = p.identifier;
     _version = p.version;
+    _unzipFiles = p.unzipFiles.value_or(_unzipFiles);
+    if (p.unzipFilesDestination.has_value()) {
+        _unzipFilesDestination = *p.unzipFilesDestination;
+    }
 }
 
 HttpSynchronization::~HttpSynchronization() {
@@ -232,6 +247,33 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         if (ec) {
             LERROR(fmt::format("Error renaming {} to {}", tempName, originalName));
             failed = true;
+        }
+
+        if (_unzipFiles && originalName.extension() == ".zip") {
+            std::string source = originalName.string();
+            std::string dest =
+                _unzipFilesDestination.has_value() ?
+                (originalName.parent_path() / *_unzipFilesDestination).string() :
+                originalName.replace_extension().string();;
+
+            struct zip_t* z = zip_open(source.c_str(), 0, 'r');
+            const bool is64 = zip_is64(z);
+            zip_close(z);
+
+            if (is64) {
+                LERROR(fmt::format(
+                    "Error while unzipping {}: Zip64 archives are not supported", source
+                ));
+                continue;
+            }
+
+            int ret = zip_extract(source.c_str(), dest.c_str(), nullptr, nullptr);
+            if (ret != 0) {
+                LERROR(fmt::format("Error {} while unzipping {}", ret, source));
+                continue;
+            }
+
+            std::filesystem::remove(source);
         }
     }
     if (failed) {

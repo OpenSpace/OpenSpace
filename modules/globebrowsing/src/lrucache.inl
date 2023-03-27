@@ -59,7 +59,7 @@ bool LRUCache<KeyType, ValueType, HasherType>::exist(const KeyType& key) const {
 
 template<typename KeyType, typename ValueType, typename HasherType>
 bool LRUCache<KeyType, ValueType, HasherType>::touch(const KeyType& key) {
-    ZoneScoped
+    ZoneScoped;
 
     const auto it = _itemMap.find(key);
     if (it != _itemMap.end()) {

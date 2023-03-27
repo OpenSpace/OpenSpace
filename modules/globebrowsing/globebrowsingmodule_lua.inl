@@ -151,24 +151,26 @@ namespace {
  * Rearranges the order of a single layer on a globe. The first parameter is the
  * identifier of the globe, the second parameter specifies the name of the layer group,
  * the third parameter is the original position of the layer that should be moved and the
- * last parameter is the new position in the list. The first position in the list has
- * index 0, and the last position is given by the number of layers minus one. The new
- * position may be -1 to place the layer at the top or any number bigger than the number
- * of layers to place it at the bottom.
+ * last parameter is the new position in the list. The third and fourth parameters can
+ * also acccept names, in which case these refer to identifiers of the layer to be moved.
+ * If the last parameter is a name, the source layer is moved below that destination
+ * layer. The first position in the list has index 0, and the last position is given by
+ * the number of layers minus one.
  */
-[[codegen::luawrap]] void moveLayer(std::string globeIdentifier, std::string layer,
-                                    int oldPosition, int newPosition)
+[[codegen::luawrap]] void moveLayer(std::string globeIdentifier, std::string layerGroup,
+                                    std::variant<int, std::string> source,
+                                    std::variant<int, std::string> destination)
 {
     using namespace openspace;
     using namespace globebrowsing;
 
-    if (oldPosition == newPosition) {
+    if (source == destination) {
         return;
     }
 
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
+        throw ghoul::lua::LuaError(fmt::format("Unknown globe: {}", globeIdentifier));
     }
 
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
@@ -176,13 +178,62 @@ namespace {
         throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
     }
 
-    layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layer);
+    layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layerGroup);
     if (group == layers::Group::ID::Unknown) {
-        throw ghoul::lua::LuaError("Unknown layer groupd: " + layer);
+        throw ghoul::lua::LuaError(fmt::format("Unknown layer group: {}", layerGroup));
+    }
+    
+    LayerGroup& lg = globe->layerManager().layerGroup(group);
+    if (std::holds_alternative<int>(source) && std::holds_alternative<int>(destination)) {
+        // Short circut here, no need to get the layers
+        lg.moveLayer(std::get<int>(source), std::get<int>(destination));
+        return;
     }
 
-    LayerGroup& lg = globe->layerManager().layerGroup(group);
-    lg.moveLayer(oldPosition, newPosition);
+    std::vector<Layer*> layers = lg.layers();
+
+    int sourceIdx = 0;
+    if (std::holds_alternative<int>(source)) {
+        sourceIdx = std::get<int>(source);
+    }
+    else {
+        auto it = std::find_if(
+            layers.cbegin(), layers.cend(),
+            [s = std::get<std::string>(source)](Layer* l) {
+                return l->identifier() == s;
+            }
+        );
+        if (it == layers.cend()) {
+            throw ghoul::lua::LuaError(fmt::format(
+                "Could not find source layer '{}'", std::get<std::string>(source)
+            ));
+        }
+
+        sourceIdx = static_cast<int>(std::distance(layers.cbegin(), it));
+    }
+
+    int destinationIdx = 0;
+    if (std::holds_alternative<int>(destination)) {
+        destinationIdx = std::get<int>(destination);
+    }
+    else {
+        auto it = std::find_if(
+            layers.cbegin(), layers.cend(),
+            [d = std::get<std::string>(destination)](Layer* l) {
+                return l->identifier() == d;
+            }
+        );
+        if (it == layers.cend()) {
+            throw ghoul::lua::LuaError(fmt::format(
+                "Could not find destination layer '{}'", std::get<std::string>(source)
+            ));
+        }
+
+        // +1 since we want to move the layer _below_ the specified layer
+        destinationIdx = static_cast<int>(std::distance(layers.cbegin(), it));
+    }
+
+    lg.moveLayer(sourceIdx, destinationIdx);
 }
 
 /**

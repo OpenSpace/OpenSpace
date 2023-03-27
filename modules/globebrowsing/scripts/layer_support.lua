@@ -10,7 +10,7 @@ openspace.globebrowsing.documentation = {
     {
         Name = "createGibsGdalXml",
         Arguments = { layerName = "String", date = "String", resolution = "String", format = "String" },
-        Documentation = 
+        Documentation =
             "Creates an XML configuration for a GIBS dataset." ..
             "Arguments are: layerName, date, resolution, format." ..
             "For all specifications, see " ..
@@ -88,13 +88,13 @@ openspace.globebrowsing.documentation = {
     }
 }
 
-openspace.globebrowsing.addGibsLayer = function(layer, resolution, format, startDate, endDate)
+openspace.globebrowsing.addGibsLayer = function(layerName, resolution, format, startDate, endDate)
     if endDate == 'Present' then
         endDate = ''
     end
 
     local layer = {
-        Identifier = layerName, 
+        Identifier = layerName,
         Type = "TemporalTileLayer",
         Mode = "Prototyped",
         Prototyped = {
@@ -207,7 +207,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
         file_func()
     else
         openspace.printError('Error loading file "' .. file .. '": '.. error)
-        return nil, nil, nil, nil
+        return nil
     end
 
     -- Hoist the global variables into local space
@@ -220,11 +220,11 @@ openspace.globebrowsing.parseInfoFile = function (file)
 
     -- Now we can start
     local name = Name or Identifier
-    local identifier = Identifier or Name
+    local identifier = Identifier
 
-    if name == nil and identifier == nil then
-        openspace.printError('Error loading file "' .. file .. '": No "Name" or "Identifier" found')
-        return nil, nil, nil, nil
+    if identifier == "" then
+        openspace.printError('Error loading file "' .. file .. '": No "Identifier" found')
+        return nil
     end
 
     local color = nil
@@ -287,11 +287,12 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
     for _, file in pairs(files) do
         if file and file:find('.info') and ends_with(file, '.info') then
             local t = openspace.globebrowsing.parseInfoFile(file)
-            if t.Color then
+
+            if t and t.Color then
                 openspace.printInfo("Adding color layer '" .. t.Color["Identifier"] .. "'")
                 openspace.globebrowsing.addLayer(node_name, "ColorLayers", t.Color)
             end
-            if t.Height then
+            if t and t.Height then
                 openspace.printInfo("Adding height layer '" .. t.Height["Identifier"] .. "'")
                 openspace.globebrowsing.addLayer(node_name, "HeightLayers", t.Height)
             end
@@ -306,7 +307,7 @@ openspace.globebrowsing.addFocusNodesFromDirectory = function (dir, node_name)
         if file and file:find('.info') then
             local t = openspace.globebrowsing.parseInfoFile(file)
 
-            if node_name and t.Location then
+            if node_name and t and t.Location then
                 openspace.printInfo("Creating focus node for '" .. node_name .. "'")
 
                 local lat = t.Location.Center[1]

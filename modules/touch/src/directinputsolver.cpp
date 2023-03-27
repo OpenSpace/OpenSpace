@@ -212,6 +212,13 @@ bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
                               const std::vector<SelectedBody>& selectedBodies,
                               std::vector<double>* parameters, const Camera& camera)
 {
+    ZoneScopedN("Direct touch input solver");
+
+    ghoul_assert(
+        selectedBodies.size() >= list.size(),
+        "Number of touch inputs must match the number of 'selected bodies'"
+    );
+
     int nFingers = std::min(static_cast<int>(list.size()), 3);
     _nDof = std::min(nFingers * 2, 6);
 
@@ -229,12 +236,12 @@ bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
     }
 
     FunctionData fData = {
-        selectedPoints,
-        screenPoints,
-        _nDof,
-        &camera,
-        selectedBodies.at(0).node,
-        _lmstat
+        .selectedPoints = selectedPoints,
+        .screenPoints = screenPoints,
+        .nDOF = _nDof,
+        .camera = &camera,
+        .node = selectedBodies.at(0).node,
+        .stats = _lmstat
     };
     void* dataPtr = reinterpret_cast<void*>(&fData);
 

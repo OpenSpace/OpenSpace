@@ -89,7 +89,7 @@ namespace {
 namespace openspace::interaction {
 
 NavigationHandler::NavigationHandler()
-    : properties::PropertyOwner({ "NavigationHandler" })
+    : properties::PropertyOwner({ "NavigationHandler", "Navigation Handler" })
     , _disableKeybindings(DisableKeybindingsInfo, false)
     , _disableMouseInputs(DisableMouseInputInfo, false)
     , _disableJoystickInputs(DisableJoystickInputInfo, false)
@@ -107,7 +107,7 @@ NavigationHandler::NavigationHandler()
 NavigationHandler::~NavigationHandler() {}
 
 void NavigationHandler::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     global::parallelPeer->connectionEvent().subscribe(
         "NavigationHandler",
@@ -120,7 +120,7 @@ void NavigationHandler::initialize() {
 }
 
 void NavigationHandler::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     global::parallelPeer->connectionEvent().unsubscribe("NavigationHandler");
 }
@@ -380,6 +380,14 @@ bool NavigationHandler::disabledKeybindings() const {
     return _disableKeybindings;
 }
 
+bool NavigationHandler::disabledMouse() const {
+    return _disableMouseInputs;
+}
+
+bool NavigationHandler::disabledJoystick() const {
+    return _disableJoystickInputs;
+}
+
 NavigationState NavigationHandler::navigationState() const {
     const SceneGraphNode* referenceFrame = _orbitalNavigator.followingAnchorRotation() ?
         _orbitalNavigator.anchorNode() :
@@ -434,9 +442,11 @@ NavigationState NavigationHandler::navigationState(
     );
 }
 
-void NavigationHandler::saveNavigationState(const std::string& filepath,
+void NavigationHandler::saveNavigationState(const std::filesystem::path& filepath,
                                             const std::string& referenceFrameIdentifier)
 {
+    ghoul_precondition(!filepath.empty(), "File path must not be empty");
+
     NavigationState state;
     if (!referenceFrameIdentifier.empty()) {
         const SceneGraphNode* referenceFrame = sceneGraphNode(referenceFrameIdentifier);
@@ -453,14 +463,18 @@ void NavigationHandler::saveNavigationState(const std::string& filepath,
         state = navigationState();
     }
 
-    if (!filepath.empty()) {
-        std::filesystem::path absolutePath = absPath(filepath);
-        LINFO(fmt::format("Saving camera position: {}", absolutePath));
+    std::filesystem::path absolutePath = absPath(filepath);
+    LINFO(fmt::format("Saving camera position: {}", absolutePath));
 
-        std::ofstream ofs(absolutePath);
-        ofs << "return " << ghoul::formatLua(state.dictionary());
-        ofs.close();
+    std::ofstream ofs(absolutePath);
+
+    if (!ofs.good()) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Error saving navigation state to {}", filepath
+        ));
     }
+
+    ofs << "return " << ghoul::formatLua(state.dictionary());
 }
 
 void NavigationHandler::loadNavigationState(const std::string& filepath) {
@@ -631,7 +645,10 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::TriggerIdleBehavior,
             codegen::lua::ListAllJoysticks,
             codegen::lua::TargetNextInterestingAnchor,
-            codegen::lua::TargetPreviousInterestingAnchor
+            codegen::lua::TargetPreviousInterestingAnchor,
+            codegen::lua::DistanceToFocus,
+            codegen::lua::DistanceToFocusBoundingSphere,
+            codegen::lua::DistanceToFocusInteractionSphere
         }
     };
 }

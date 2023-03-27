@@ -335,7 +335,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
 }
 
 void DashboardItemDistance::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(
         _source,
@@ -354,7 +354,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     else {
         const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
         const double convertedD = convertMeters(d, unit);
-        dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
+        dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
     std::fill(_buffer.begin(), _buffer.end(), char(0));
@@ -375,7 +375,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemDistance::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     const double d = glm::length(1e20);
     std::pair<double, std::string_view> dist;
@@ -385,7 +385,7 @@ glm::vec2 DashboardItemDistance::size() const {
     else {
         DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
         double convertedD = convertMeters(d, unit);
-        dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
+        dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
     return _font->boundingBox(

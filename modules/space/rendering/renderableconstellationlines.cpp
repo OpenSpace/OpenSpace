@@ -103,8 +103,8 @@ documentation::Documentation RenderableConstellationLines::Documentation() {
 RenderableConstellationLines::RenderableConstellationLines(
                                                       const ghoul::Dictionary& dictionary)
     : RenderableConstellationsBase(dictionary)
-    , _speckFile(SpeckInfo)
     , _drawElements(DrawElementsInfo, true)
+    , _speckFile(SpeckInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -139,12 +139,28 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
         {
             pair.second.isEnabled = true;
         }
+
+        if (_hasLabels) {
+            for (speck::Labelset::Entry& e : _labels->labelSet().entries) {
+                e.isEnabled = true;
+            }
+        }
     }
     else {
         // Enable all constellations that are selected
         for (ConstellationKeyValuePair& pair : _renderingConstellationsMap)
         {
-            pair.second.isEnabled = _selection.isSelected(pair.second.name);
+            bool isSelected = _selection.isSelected(pair.second.name);
+            pair.second.isEnabled = isSelected;
+
+            if (_hasLabels) {
+                for (speck::Labelset::Entry& e : _labels->labelSet().entries) {
+                    if (constellationFullName(e.identifier) == pair.second.name) {
+                        e.isEnabled = isSelected;
+                        break;
+                    }
+                }
+            }
         }
     }
 }
@@ -382,7 +398,6 @@ bool RenderableConstellationLines::readSpeckFile() {
 
                 // Try to read three values for the position
                 glm::vec3 pos;
-                bool success = true;
                 auto reading = scn::scan(line, "{} {} {}", pos.x, pos.y, pos.z);
                 if (reading) {
                     pos *= scale;
@@ -391,7 +406,6 @@ bool RenderableConstellationLines::readSpeckFile() {
                     constellationLine.vertices.push_back(pos.z);
                 }
                 else {
-                    success = false;
                     LERROR(fmt::format(
                         "Failed reading position on line {} of mesh {} in file: '{}'. "
                         "Stopped reading constellation data", l, lineIndex, fileName

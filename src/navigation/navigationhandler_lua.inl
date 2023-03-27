@@ -70,17 +70,6 @@ namespace {
 [[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState) {
     using namespace openspace;
 
-    documentation::TestResult r = documentation::testSpecification(
-        interaction::NavigationState::Documentation(),
-        navigationState
-    );
-
-    if (!r.success) {
-        throw ghoul::lua::LuaError(
-            fmt::format("Could not set camera state: {}", ghoul::to_string(r))
-        );
-    }
-
     global::navigationHandler->setNavigationStateNextFrame(
         interaction::NavigationState(navigationState)
     );
@@ -404,6 +393,46 @@ joystickAxis(std::string joystickName, int axis)
 [[codegen::luawrap]] std::vector<std::string> listAllJoysticks() {
     using namespace openspace;
     return global::navigationHandler->listAllJoysticks();
+}
+
+/**
+ * Returns the distance in meters to the current focus node
+ */
+[[codegen::luawrap]] double distanceToFocus() {
+    using namespace openspace;
+
+    const SceneGraphNode * focus = global::navigationHandler->anchorNode();
+    Camera * camera = global::navigationHandler->camera();
+
+    return glm::distance(camera->positionVec3(), focus->worldPosition());
+}
+
+/**
+ * Returns the distance in meters to the current focus node's bounding sphere
+ */
+[[codegen::luawrap]] double distanceToFocusBoundingSphere() {
+    using namespace openspace;
+
+    const SceneGraphNode* focus = global::navigationHandler->anchorNode();
+    Camera* camera = global::navigationHandler->camera();
+
+    double distance = glm::distance(camera->positionVec3(), focus->worldPosition());
+
+    return distance - focus->boundingSphere();
+}
+
+/**
+ * Returns the distance in meters to the current focus node's interaction sphere
+ */
+[[codegen::luawrap]] double distanceToFocusInteractionSphere() {
+    using namespace openspace;
+
+    const SceneGraphNode* focus = global::navigationHandler->anchorNode();
+    Camera* camera = global::navigationHandler->camera();
+
+    double distance = glm::distance(camera->positionVec3(), focus->worldPosition());
+
+    return distance - focus->interactionSphere();
 }
 
 #include "navigationhandler_lua_codegen.cpp"

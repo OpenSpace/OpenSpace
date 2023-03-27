@@ -98,10 +98,10 @@ namespace {
 
     struct [[codegen::Dictionary(WebGuiModule)]] Parameters {
         // [[codegen::verbatim(PortInfo.description)]]
-        std::optional<int> port;
+        std::optional<int> port [[codegen::key("HttpPort")]];
 
         // [[codegen::verbatim(AddressInfo.description)]]
-        std::optional<std::string> address;
+        std::string address;
 
         // [[codegen::verbatim(WebSocketInterfaceInfo.description)]]
         std::optional<std::string> webSocketInterface;
@@ -163,12 +163,7 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
     const Parameters p = codegen::bake<Parameters>(configuration);
 
     _port = p.port.value_or(_port);
-    if (p.address.has_value()) {
-        _address = p.address.value();
-    }
-    else {
-        _address = "192.168.1.8"; //global::windowDelegate
-    }
+    _address = p.address;
     _webSocketInterface = p.webSocketInterface.value_or(_webSocketInterface);
 
     auto startOrStop = [this]() {
@@ -229,7 +224,7 @@ void WebGuiModule::notifyEndpointListeners(const std::string& endpoint, bool exi
 }
 
 void WebGuiModule::startProcess() {
-    ZoneScoped
+    ZoneScoped;
 
     _endpoints.clear();
 

@@ -34,10 +34,10 @@ class QPushButton;
 class ScriptlogDialog final : public QDialog {
 Q_OBJECT
 public:
-    ScriptlogDialog(QWidget* parent);
+    ScriptlogDialog(QWidget* parent, std::string filter = "");
 
 signals:
-    void scriptsSelected(std::string script);
+    void scriptsSelected(std::vector<std::string> script);
 
 private:
     void createWidgets();
@@ -50,7 +50,10 @@ private:
     QListWidget* _scriptlogList = nullptr;
     QLineEdit* _filter = nullptr;
     QPushButton* _reloadFile = nullptr;
+    std::string _scriptLogFile;
     std::vector<std::string> _scripts;
+
+    std::string _fixedFilter;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SCRIPTLOGDIALOG___H__

@@ -3,7 +3,7 @@ asset.require("./static_server")
 local guiCustomization = asset.require("customization/gui")
 
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "748c523b158be5a63d6907b054909c1ac53818d0"
+local frontendHash = "4a27a71ccc7dd67f3efa6c54c6f04da71d99ffc2"
 local dataProvider = "data.openspaceproject.com/files/webgui"
 
 local frontend = asset.syncedResource({
@@ -72,7 +72,7 @@ asset.onDeinitialize(function ()
 end)
 
 function setCefRoute(route)
-  local port = 4680
+  local port = openspace.getPropertyValue("Modules.WebGui.Port")
   -- As a developer, you can manually serve the webgui from port 4690
   -- with the command `npm start` in the web gui repository
   if guiCustomization.webguiDevelopmentMode then
@@ -90,7 +90,6 @@ asset.export("setCefRoute", setCefRoute)
 asset.meta = {
   Name = "WebGUI",
   Version = "0.1",
-  Description = "insert CEF rant",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

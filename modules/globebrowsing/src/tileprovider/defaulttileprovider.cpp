@@ -84,7 +84,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     : _filePath(FilePathInfo, "")
     , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
 {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -116,7 +116,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 }
 
 void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) {
-    ZoneScoped
+    ZoneScoped;
 
     _asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
         name,
@@ -129,13 +129,16 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) 
 }
 
 Tile DefaultTileProvider::tile(const TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(_asyncTextureDataProvider, "No data provider");
     if (tileIndex.level > maxLevel()) {
         return Tile{ nullptr, std::nullopt, Tile::Status::OutOfRange };
     }
-    const cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    const cache::ProviderTileKey key = {
+        .tileIndex = tileIndex,
+        .providerID = uniqueIdentifier
+    };
     cache::MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     Tile tile = tileCache->get(key);
@@ -154,7 +157,10 @@ Tile::Status DefaultTileProvider::tileStatus(const TileIndex& index) {
         return Tile::Status::OutOfRange;
     }
 
-    const cache::ProviderTileKey key = { index, uniqueIdentifier };
+    const cache::ProviderTileKey key = {
+        .tileIndex = index,
+        .providerID = uniqueIdentifier
+    };
     cache::MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     return tileCache->get(key).status;
@@ -171,7 +177,10 @@ void DefaultTileProvider::update() {
 
     std::optional<RawTile> tile = _asyncTextureDataProvider->popFinishedRawTile();
     if (tile) {
-        const cache::ProviderTileKey key = { tile->tileIndex, uniqueIdentifier };
+        const cache::ProviderTileKey key = {
+            .tileIndex = tile->tileIndex,
+            .providerID = uniqueIdentifier
+        };
         cache::MemoryAwareTileCache* tileCache =
             global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
         ghoul_assert(!tileCache->exist(key), "Tile must not be existing in cache");

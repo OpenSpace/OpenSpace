@@ -29,6 +29,7 @@
 #include <modules/base/dashboard/dashboarditemdistance.h>
 #include <modules/base/dashboard/dashboarditemelapsedtime.h>
 #include <modules/base/dashboard/dashboarditemframerate.h>
+#include <modules/base/dashboard/dashboarditeminputstate.h>
 #include <modules/base/dashboard/dashboarditemmission.h>
 #include <modules/base/dashboard/dashboarditemparallelconnection.h>
 #include <modules/base/dashboard/dashboarditempropertyvalue.h>
@@ -109,6 +110,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fDashboard->registerClass<DashboardItemDistance>("DashboardItemDistance");
     fDashboard->registerClass<DashboardItemElapsedTime>("DashboardItemElapsedTime");
     fDashboard->registerClass<DashboardItemFramerate>("DashboardItemFramerate");
+    fDashboard->registerClass<DashboardItemInputState>("DashboardItemInputState");
     fDashboard->registerClass<DashboardItemMission>("DashboardItemMission");
     fDashboard->registerClass<DashboardItemParallelConnection>(
         "DashboardItemParallelConnection"

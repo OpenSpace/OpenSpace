@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <openspace/properties/list/doublelistproperty.h>
 #include <openspace/properties/list/intlistproperty.h>
@@ -94,9 +94,7 @@ TEST_CASE("StringListProperty: Invalid Set Lua Value - Not List", "[stringlistpr
     ghoul::lua::LuaState L;
     ghoul::lua::push(L, 2); // Not a list
 
-    bool success = p.setLuaValue(L);
-
-    CHECK(!success);
+    CHECK_THROWS(p.setLuaValue(L));
 }
 
 TEST_CASE("StringListProperty: Get Lua Value", "[stringlistproperty]") {
@@ -192,9 +190,7 @@ TEST_CASE("IntListProperty: Set Lua Value - Non-number", "[intlistproperty]") {
 
     ghoul::lua::LuaState L;
     ghoul::lua::push(L, std::vector{ "not a number", "oops" });
-    bool success = p.setLuaValue(L);
-
-    CHECK(success == false);
+    CHECK_THROWS(p.setLuaValue(L));
     CHECK(p.value() == std::vector<int>());
 }
 
@@ -204,9 +200,7 @@ TEST_CASE("IntListProperty: Invalid Set Lua Value - Not List", "[intlistproperty
     ghoul::lua::LuaState L;
     ghoul::lua::push(L, 2); // Not a list
 
-    bool success = p.setLuaValue(L);
-
-    CHECK(!success);
+    CHECK_THROWS(p.setLuaValue(L));
 }
 
 TEST_CASE("IntListProperty: Get Lua Value", "[intlistproperty]") {
@@ -302,9 +296,7 @@ TEST_CASE("DoubleListProperty: Set Lua Value - Non-number", "[doublelistproperty
 
     ghoul::lua::LuaState L;
     ghoul::lua::push(L, std::vector{"not a number", "oops"});
-    bool success = p.setLuaValue(L);
-
-    CHECK(success == false);
+    CHECK_THROWS(p.setLuaValue(L));
     CHECK(p.value() == std::vector<double>());
 }
 
@@ -314,8 +306,7 @@ TEST_CASE("DoubleListProperty: Invalid Set Lua Value - Not List", "[doublelistpr
     ghoul::lua::LuaState L;
     ghoul::lua::push(L, 2); // Not a list
 
-    bool success = p.setLuaValue(L);
-    CHECK(!success);
+    CHECK_THROWS(p.setLuaValue(L));
 }
 
 TEST_CASE("DoubleListProperty: Get Lua Value", "[doublelistproperty]") {

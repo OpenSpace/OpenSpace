@@ -54,11 +54,11 @@ void JoystickCameraStates::updateStateFromInput(
         return;
     }
 
-    std::pair<bool, glm::dvec2> globalRotation = { false, glm::dvec2(0.0) };
-    std::pair<bool, double> zoom = { false, 0.0 };
-    std::pair<bool, glm::dvec2> localRoll = { false, glm::dvec2(0.0) };
-    std::pair<bool, glm::dvec2> globalRoll = { false, glm::dvec2(0.0) };
-    std::pair<bool, glm::dvec2> localRotation = { false, glm::dvec2(0.0) };
+    std::pair<bool, glm::dvec2> globalRotation = std::pair(false, glm::dvec2(0.0));
+    std::pair<bool, double> zoom = std::pair(false, 0.0);
+    std::pair<bool, glm::dvec2> localRoll = std::pair(false, glm::dvec2(0.0));
+    std::pair<bool, glm::dvec2> globalRoll = std::pair(false, glm::dvec2(0.0));
+    std::pair<bool, glm::dvec2> localRotation = std::pair(false, glm::dvec2(0.0));
 
     for (const JoystickInputState& joystickInputState : joystickInputStates) {
         if (joystickInputState.name.empty()) {
@@ -73,7 +73,7 @@ void JoystickCameraStates::updateStateFromInput(
 
         int nAxes = joystickInputStates.numAxes(joystickInputState.name);
         for (int i = 0;
-             i < std::min(static_cast<size_t>(nAxes), joystick->axisMapping.size());
+             i < std::min(nAxes, static_cast<int>(joystick->axisMapping.size()));
              ++i)
         {
             AxisInformation t = joystick->axisMapping[i];

@@ -39,8 +39,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "RenderablePlanetProjection";
-
     constexpr std::array<const char*, 12> MainUniformNames = {
         "sun_pos", "modelTransform", "modelViewProjectionTransform", "hasBaseMap",
         "hasHeightMap", "heightExaggeration", "meridianShift", "ambientBrightness",
@@ -52,7 +50,6 @@ namespace {
         "boresight", "radius", "segments"
     };
 
-    constexpr std::string_view KeyRadius = "Geometry.Radius";
     constexpr std::string_view NoImageText = "No Image";
 
     constexpr openspace::properties::Property::PropertyInfo ColorTexturePathsInfo = {
@@ -256,15 +253,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     _meridianShift = p.meridianShift.value_or(_meridianShift);
     addProperty(_meridianShift);
 
-    // @TODO (abock, 2021-03-26)  Poking into the Geometry dictionary is not really
-    // optimal as we don't have local control over how the dictionary is checked. We
-    // should instead ask the geometry whether it has a radius or not
-    double radius = std::pow(10.0, 9.0);
-    if (dict.hasValue<double>(KeyRadius)) {
-        radius = dict.value<double>(KeyRadius);
-    }
-    setBoundingSphere(radius);
-
     addPropertySubOwner(_projectionComponent);
 
     _heightExaggeration.setExponent(3.f);
@@ -291,6 +279,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     else {
         _radius = std::get<glm::vec3>(p.radius);
     }
+    setBoundingSphere(glm::compMax(_radius.value()));
     _radius.onChange([&]() { createSphere(); });
     addProperty(_radius);
 

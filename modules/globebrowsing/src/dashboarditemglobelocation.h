@@ -25,20 +25,18 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___DASHBOARDITEMGLOBELOCATION___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___DASHBOARDITEMGLOBELOCATION___H__
 
-#include <openspace/rendering/dashboarditem.h>
+#include <openspace/rendering/dashboardtextitem.h>
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 
-namespace ghoul::fontrendering { class Font; }
-
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class DashboardItemGlobeLocation : public DashboardItem {
+class DashboardItemGlobeLocation : public DashboardTextItem {
 public:
     DashboardItemGlobeLocation(const ghoul::Dictionary& dictionary);
     ~DashboardItemGlobeLocation() override = default;
@@ -55,13 +53,9 @@ private:
         DegreeMinuteSeconds
     };
 
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
-
     properties::OptionProperty _displayFormat;
     properties::IntProperty _significantDigits;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
     std::string _formatString;
     std::vector<char> _buffer;
 };

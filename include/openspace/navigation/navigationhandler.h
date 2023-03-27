@@ -91,6 +91,8 @@ public:
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
     bool disabledKeybindings() const;
+    bool disabledMouse() const;
+    bool disabledJoystick() const;
 
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
@@ -138,7 +140,7 @@ public:
     NavigationState navigationState() const;
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
 
-    void saveNavigationState(const std::string& filepath,
+    void saveNavigationState(const std::filesystem::path& filepath,
         const std::string& referenceFrameIdentifier);
 
     void loadNavigationState(const std::string& filepath);

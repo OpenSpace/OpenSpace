@@ -42,19 +42,6 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DisplayFormatInfo = {
         "DisplayFormat",
         "Display Format",
@@ -68,12 +55,6 @@ namespace {
     };
 
     struct [[codegen::Dictionary(DashboardItemGlobeLocation)]] Parameters {
-        // [[codegen::verbatim(FontNameInfo.description)]]
-        std::optional<std::string> fontName;
-
-        // [[codegen::verbatim(FontSizeInfo.description)]]
-        std::optional<float> fontSize;
-
         enum class DisplayFormat {
             DecimalDegrees,
             DegreeMinuteSeconds
@@ -91,31 +72,19 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemGlobeLocation::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_dashboarditem_globelocation");
+    return codegen::doc<Parameters>(
+        "globebrowsing_dashboarditem_globelocation",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemGlobeLocation::DashboardItemGlobeLocation(
                                                       const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, "Mono")
-    , _fontSize(FontSizeInfo, 10.f, 10.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary)
     , _displayFormat(DisplayFormatInfo)
     , _significantDigits(SignificantDigitsInfo, 4, 1, 12)
-    , _font(global::fontManager->font("Mono", 10))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    _fontName = p.fontName.value_or(_fontName);
-    _fontName.onChange([this]() {
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    _fontSize = p.fontSize.value_or(_fontSize);
-    _fontSize.onChange([this]() {
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
 
     auto updateFormatString = [this]() {
         switch (_displayFormat.value()) {
@@ -169,7 +138,7 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
 }
 
 void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
 
@@ -231,7 +200,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemGlobeLocation::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     return _font->boundingBox(
         fmt::format("Position: {}, {}  Altitude: {}", 1.f, 1.f, 1.f)

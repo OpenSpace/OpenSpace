@@ -151,7 +151,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     const double targetDt = global::timeManager->targetDeltaTime();
     const double currentDt = global::timeManager->deltaTime();
@@ -167,17 +167,17 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
         const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
 
         const double convTarget = convertTime(targetDt, TimeUnit::Second, unit);
-        targetDeltaTime = {
+        targetDeltaTime = std::pair(
             convTarget,
             std::string(nameForTimeUnit(unit, convTarget != 1.0))
-        };
+        );
 
         if (targetDt != currentDt) {
             const double convCurrent = convertTime(currentDt, TimeUnit::Second, unit);
-            currentDeltaTime = {
+            currentDeltaTime = std::pair(
                 convCurrent,
                 std::string(nameForTimeUnit(unit, convCurrent != 1.0))
-            };
+            );
         }
     }
 
@@ -215,7 +215,7 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemSimulationIncrement::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     double t = global::timeManager->targetDeltaTime();
     std::pair<double, std::string> deltaTime;
@@ -225,10 +225,10 @@ glm::vec2 DashboardItemSimulationIncrement::size() const {
     else {
         TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
         double convertedT = convertTime(t, TimeUnit::Second, unit);
-        deltaTime = {
+        deltaTime = std::pair(
             convertedT,
             std::string(nameForTimeUnit(unit, convertedT != 1.0))
-        };
+        );
     }
 
     return _font->boundingBox(

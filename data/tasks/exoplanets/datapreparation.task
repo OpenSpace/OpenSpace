@@ -5,7 +5,7 @@ return {
 
     InputDataFile = "${DATA}/tasks/exoplanets/downloaded_exo_data.csv",
     InputSPECK = "${SYNC}/http/digitaluniverse_exoplanets_speck/2/expl.speck",
-    TeffToBvFile = "${SYNC}/http/exoplanets_data/2/teff_bv.txt",
+    TeffToBvFile = "${SYNC}/http/exoplanets_data/3/teff_bv.txt",
     OutputBIN = dataFolder .. "/exoplanets_data.bin",
     OutputLUT = dataFolder .. "/lookup.txt"
   }

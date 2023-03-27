@@ -108,7 +108,18 @@ Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
 }
 
 Scene::~Scene() {
-    clear();
+    LINFO("Clearing current scene graph");
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
+        if (node->identifier() == "Root") {
+            continue;
+        }
+        // There might still be scene graph nodes around that weren't removed by the asset
+        // manager as they would have been added manually by the user. This also serves as
+        // a backstop for assets that forgot to implement the onDeinitialize functions
+        node->deinitializeGL();
+        node->deinitialize();
+    }
+    _rootDummy.clearChildren();
     _rootDummy.setScene(nullptr);
 }
 
@@ -163,7 +174,7 @@ void Scene::markNodeRegistryDirty() {
 }
 
 void Scene::updateNodeRegistry() {
-    ZoneScoped
+    ZoneScoped;
 
     sortTopologically();
     _dirtyNodeRegistry = false;
@@ -251,7 +262,7 @@ bool Scene::isInitializing() const {
 }
 
 void Scene::update(const UpdateData& data) {
-    ZoneScoped
+    ZoneScoped;
 
     std::vector<SceneGraphNode*> initializedNodes = _initializer->takeInitializedNodes();
     for (SceneGraphNode* node : initializedNodes) {
@@ -277,11 +288,11 @@ void Scene::update(const UpdateData& data) {
 }
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
-    ZoneScoped
+    ZoneScoped;
     ZoneName(
         renderBinToString(data.renderBinMask),
         strlen(renderBinToString(data.renderBinMask))
-    )
+    );
 
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
@@ -296,7 +307,7 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
     }
 
     {
-        ZoneScopedN("Get Error Hack")
+        ZoneScopedN("Get Error Hack");
 
         // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
         // thread and the CPU thread from diverging too much, particularly the uploading
@@ -307,11 +318,6 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         // buffer, or something else like that preventing a large spike in uploads
         glGetError();
     }
-}
-
-void Scene::clear() {
-    LINFO("Clearing current scene graph");
-    _rootDummy.clearChildren();
 }
 
 const std::unordered_map<std::string, SceneGraphNode*>& Scene::nodesByIdentifier() const {
@@ -433,6 +439,7 @@ std::chrono::steady_clock::time_point Scene::currentTimeForInterpolation() {
 }
 
 void Scene::addPropertyInterpolation(properties::Property* prop, float durationSeconds,
+                                     std::string postScript,
                                      ghoul::EasingFunction easingFunction)
 {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
@@ -459,6 +466,7 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
         if (info.prop == prop) {
             info.beginTime = now;
             info.durationSeconds = durationSeconds;
+            info.postScript = std::move(postScript);
             info.easingFunction = func;
             // If we found it, we can break since we make sure that each property is only
             // represented once in this
@@ -467,12 +475,12 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
     }
 
     PropertyInterpolationInfo i = {
-        prop,
-        now,
-        durationSeconds,
-        func
+        .prop = prop,
+        .beginTime = now,
+        .durationSeconds = durationSeconds,
+        .postScript = std::move(postScript),
+        .easingFunction = func
     };
-
     _propertyInterpolationInfos.push_back(std::move(i));
 }
 
@@ -500,20 +508,19 @@ void Scene::removePropertyInterpolation(properties::Property* prop) {
 }
 
 void Scene::updateInterpolations() {
-    ZoneScoped
+    ZoneScoped;
 
     using namespace std::chrono;
 
     steady_clock::time_point now = currentTimeForInterpolation();
     // First, let's update the properties
     for (PropertyInterpolationInfo& i : _propertyInterpolationInfos) {
-        long long usPassed = duration_cast<std::chrono::microseconds>(
-            now - i.beginTime
-        ).count();
+        long long us =
+            duration_cast<std::chrono::microseconds>(now - i.beginTime).count();
 
         const float t = glm::clamp(
             static_cast<float>(
-                static_cast<double>(usPassed) /
+                static_cast<double>(us) /
                 static_cast<double>(i.durationSeconds * 1000000)
             ),
             0.f,
@@ -531,6 +538,13 @@ void Scene::updateInterpolations() {
         i.isExpired = (t == 1.f);
 
         if (i.isExpired) {
+            if (!i.postScript.empty()) {
+                global::scriptEngine->queueScript(
+                    std::move(i.postScript),
+                    scripting::ScriptEngine::RemoteScripting::No
+                );
+            }
+
             global::eventEngine->publishEvent<events::EventInterpolationFinished>(i.prop);
         }
     }
@@ -578,7 +592,8 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
             allProperties(),
             0.0,
             groupName,
-            ghoul::EasingFunction::Linear
+            ghoul::EasingFunction::Linear,
+            ""
         );
         // Clear lua state stack
         lua_settop(L, 0);
@@ -748,13 +763,23 @@ std::vector<properties::Property*> Scene::propertiesMatchingRegex(
     return findMatchesInAllProperties(propertyString, allProperties(), "");
 }
 
+std::vector<std::string> Scene::allTags() {
+    std::set<std::string> result;
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
+        const std::vector<std::string>& tags = node->tags();
+        result.insert(tags.begin(), tags.end());
+    }
+
+    return std::vector<std::string>(result.begin(), result.end());
+}
+
 scripting::LuaLibrary Scene::luaLibrary() {
     return {
         "",
         {
             {
                 "setPropertyValue",
-                &luascriptfunctions::propertySetValue,
+                &luascriptfunctions::propertySetValue<false>,
                 {},
                 "",
                 "Sets all property(s) identified by the URI (with potential wildcards) "
@@ -766,20 +791,16 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "function if a 'duration' has been specified. If 'duration' is 0, this "
                 "parameter value is ignored. Otherwise, it can be one of many supported "
                 "easing functions. See easing.h for available functions. The fifth "
-                "argument must be either empty, 'regex', or 'single'. If the fifth"
-                "argument is empty (the default), the URI is interpreted using a "
-                "wildcard in which '*' is expanded to '(.*)' and bracketed components "
-                "'{ }' are interpreted as group tag names. Then, the passed value will "
-                "be set on all properties that fit the regex + group name combination. "
-                "If the fifth argument is 'regex' neither the '*' expansion, nor the "
-                "group tag expansion is performed and the first argument is used as an "
-                "ECMAScript style regular expression that matches against the fully "
-                "qualified IDs of properties. If the fifth argument is 'single' no "
-                "substitutions are performed and exactly 0 or 1 properties are changed"
+                "argument is another Lua script that will be executed when the "
+                "interpolation provided in parameter 3 finishes.\n"
+                "The URI is interpreted using a wildcard in which '*' is expanded to "
+                "'(.*)' and bracketed components '{ }' are interpreted as group tag "
+                "names. Then, the passed value will be set on all properties that fit "
+                "the regex + group name combination."
             },
             {
                 "setPropertyValueSingle",
-                &luascriptfunctions::propertySetValueSingle,
+                &luascriptfunctions::propertySetValue<true>,
                 {},
                 "",
                 "Sets the property identified by the URI in the first argument. The "
@@ -789,9 +810,19 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the value is interpolated at each step in between. The fourth "
                 "parameter is an optional easing function if a 'duration' has been "
                 "specified. If 'duration' is 0, this parameter value is ignored. "
-                "Otherwise, it has to be 'linear', 'easein', 'easeout', or 'easeinout'. "
+                "Otherwise, it has to be one of the easing functions defined in the list below. "
                 "This is the same as calling the setValue method and passing 'single' as "
-                "the fourth argument to setPropertyValue"
+                "the fourth argument to setPropertyValue. The fifth argument is another "
+                "Lua script that will be executed when the interpolation provided in "
+                "parameter 3 finishes. "
+                "\n Avaiable easing functions: "
+                "Linear, QuadraticEaseIn, QuadraticEaseOut, QuadraticEaseInOut, "
+                "CubicEaseIn, CubicEaseOut, CubicEaseInOut, QuarticEaseIn, "
+                "QuarticEaseOut, QuarticEaseInOut, QuinticEaseIn, QuinticEaseOut, "
+                "QuinticEaseInOut, SineEaseIn, SineEaseOut, SineEaseInOut, CircularEaseIn, "
+                "CircularEaseOut, CircularEaseInOut, ExponentialEaseIn, ExponentialEaseOut, "
+                "ExponentialEaseInOut, ElasticEaseIn, ElasticEaseOut, ElasticEaseInOut, "
+                "BounceEaseIn, BounceEaseOut, BounceEaseInOut"
             },
             {
                 "getPropertyValue",

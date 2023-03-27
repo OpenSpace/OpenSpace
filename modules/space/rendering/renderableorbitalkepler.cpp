@@ -304,7 +304,7 @@ void RenderableOrbitalKepler::updateBuffers() {
 
     _numObjects = parameters.size();
 
-    if (_startRenderIdx < 0 || _startRenderIdx >= _numObjects) {
+    if (_startRenderIdx >= _numObjects) {
         throw ghoul::RuntimeError(fmt::format(
             "Start index {} out of range [0, {}]", _startRenderIdx, _numObjects
         ));

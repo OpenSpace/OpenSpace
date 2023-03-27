@@ -22,28 +22,22 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
-cmake_policy(SET CMP0120 NEW)
+cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
+cmake_policy(VERSION 3.25)
 
 project(OpenSpace)
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 18)
+set(OPENSPACE_VERSION_MINOR 19)
 set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "Beta-11")
+set(OPENSPACE_VERSION_STRING "<dev>")
 
-set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
-set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
-set(GHOUL_BASE_DIR "${OPENSPACE_BASE_DIR}/ext/ghoul")
-
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
+include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
 
 begin_header("Configuring OpenSpace project")
 
-# Bail out if the user tries to generate a 32 bit project.
+# Bail out if the user tries to generate a 32 bit project
 if (NOT ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
   message(FATAL_ERROR "OpenSpace can only be generated for 64 bit architectures.")
 endif ()
@@ -51,9 +45,7 @@ endif ()
 ##########################################################################################
 # Cleanup project                                                                        #
 ##########################################################################################
-set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
-
-if (NOT EXISTS "${OPENSPACE_BASE_DIR}/ext/ghoul/CMakeLists.txt")
+if (NOT EXISTS "${PROJECT_SOURCE_DIR}/ext/ghoul/CMakeLists.txt")
   message(FATAL_ERROR "Git submodules are missing. Please run "
     "git submodule update --init --recursive to download the missing dependencies."
   )
@@ -68,11 +60,13 @@ mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY CMAKE_BUILD_TYPE CMAKE_DEBUG_POST
 )
 
 # Set build output directories
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BASE_DIR}/bin)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/support/cmake)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
-# "OpenSpace Helper" is not a valid CMake target name under OLD
-cmake_policy(SET CMP0037 NEW)
+if (MSVC)
+  # Force all builds to be multi-threaded and increase number of sections in obj files
+  add_definitions(/MP /bigobj)
+endif ()
 
 ##########################################################################################
 # Main                                                                                   #
@@ -106,8 +100,6 @@ else ()
   set(OPENSPACE_GIT_STATUS "")
 endif ()
 
-option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
-
 if (MSVC)
   option(OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION "Raise exceptions when encountering Inf's or Nan's in floating point numbers" OFF)
 
@@ -134,31 +126,26 @@ if (MSVC)
   set(GHOUL_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS ${OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS} CACHE BOOL "" FORCE)
 endif ()
 
-if (UNIX)
-  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++ -lc++abi")
-  else ()
-    if (NOT CMAKE_BUILD_TYPE)
-      #Can set to "RelWithDebInfo" or "Debug" also, but problems occur if this is blank by default
-      set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type" FORCE)
-    endif ()
-    if (NOT DEFINED CMAKE_CXX_FLAGS OR CMAKE_CXX_FLAGS MATCHES "")
-      set(CMAKE_CXX_FLAGS " ")
-    endif ()
-    STRING(FIND ${CMAKE_CXX_FLAGS} "GLM_ENABLE_EXPERIMENTAL" GLM_FLAG_POS)
-    if (${GLM_FLAG_POS} EQUAL -1)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGLM_ENABLE_EXPERIMENTAL" CACHE STRING "" FORCE)
-    endif ()
-    set(OpenGL_GL_PREFERENCE "GLVND" CACHE STRING "OpenGL Preference setting necessary for linux" FORCE)
-    #Fix for gcc tolerating space in target name
-    if (NOT DEFINED CMAKE_C_FLAGS OR CMAKE_C_FLAGS MATCHES "")
-      set(CMAKE_C_FLAGS " ")
-    endif ()
-    STRING(FIND ${CMAKE_C_FLAGS} "_GNU_SOURCE" GNUSOURCE_FLAG_POS)
-    if (${GNUSOURCE_FLAG_POS} EQUAL -1)
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE" CACHE STRING "" FORCE)
-    endif ()
+if (UNIX AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  if (NOT CMAKE_BUILD_TYPE)
+    # Can set to "RelWithDebInfo" or "Debug" also, but problems occur if this is blank by default
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type" FORCE)
+  endif ()
+  if (NOT DEFINED CMAKE_CXX_FLAGS OR CMAKE_CXX_FLAGS MATCHES "")
+    set(CMAKE_CXX_FLAGS " ")
+  endif ()
+  STRING(FIND ${CMAKE_CXX_FLAGS} "GLM_ENABLE_EXPERIMENTAL" GLM_FLAG_POS)
+  if (${GLM_FLAG_POS} EQUAL -1)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGLM_ENABLE_EXPERIMENTAL" CACHE STRING "" FORCE)
+  endif ()
+  set(OpenGL_GL_PREFERENCE "GLVND" CACHE STRING "OpenGL Preference setting necessary for linux" FORCE)
+  # Fix for GCC tolerating space in target name
+  if (NOT DEFINED CMAKE_C_FLAGS OR CMAKE_C_FLAGS MATCHES "")
+    set(CMAKE_C_FLAGS " ")
+  endif ()
+  STRING(FIND ${CMAKE_C_FLAGS} "_GNU_SOURCE" GNUSOURCE_FLAG_POS)
+  if (${GNUSOURCE_FLAG_POS} EQUAL -1)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE" CACHE STRING "" FORCE)
   endif ()
 endif ()
 
@@ -176,12 +163,13 @@ add_custom_target(
 add_dependencies(run_codegen codegen)
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
-  COMMAND codegen ARGS "${OPENSPACE_BASE_DIR}/modules" "${OPENSPACE_BASE_DIR}/src"
+  COMMAND codegen ARGS "modules" "src"
+  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   VERBATIM
 )
-set_folder_location(codegen-lib "support")
-set_folder_location(codegen "support")
-set_folder_location(run_codegen "support")
+set_target_properties(codegen-lib PROPERTIES FOLDER "support")
+set_target_properties(codegen PROPERTIES FOLDER "support")
+set_target_properties(run_codegen PROPERTIES FOLDER "support")
 
 
 # Qt
@@ -218,12 +206,12 @@ end_header("End: Configuring Modules")
 
 
 add_subdirectory(support/coding/codegen/tests)
-set_folder_location(run_test_codegen "Unit Tests/support")
-set_folder_location(codegentest "Unit Tests")
+set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")
+set_target_properties(codegentest PROPERTIES FOLDER "Unit Tests")
 
 
 begin_header("Configuring Applications")
-add_subdirectory("${OPENSPACE_APPS_DIR}")
+add_subdirectory(apps)
 end_header("End: Configuring Applications")
 
 
@@ -235,7 +223,7 @@ endif ()
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 if (OPENSPACE_HAVE_TESTS)
   begin_header("Generating OpenSpace unit test")
-  add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests")
+  add_subdirectory(tests)
   end_header()
 endif (OPENSPACE_HAVE_TESTS)
 
@@ -250,7 +238,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   set(PROJECT_ARCH "x86_64")
 
   if (WIN32)
-    set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
+    set(RESOURCE_FILE openspace.rc)
   endif ()
 
   # Add the CEF binary distribution's cmake/ directory to the module path and
@@ -266,6 +254,6 @@ endif ()
 ##########################################################################################
 
 # Manage the CPack packaging
-include(${OPENSPACE_CMAKE_EXT_DIR}/packaging.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/packaging.cmake)
 
 end_header("End: Configuring OpenSpace project")

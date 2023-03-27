@@ -126,7 +126,7 @@ ImGUIModule::ImGUIModule()
     }
 
     global::callback::draw2D->emplace_back([&]() {
-        ZoneScopedN("ImGUI")
+        ZoneScopedN("ImGUI");
 
         if (!_isEnabled) {
             return;
@@ -156,7 +156,7 @@ ImGUIModule::ImGUIModule()
         [&](Key key, KeyModifier mod, KeyAction action,
             IsGuiWindow isGuiWindow) -> bool
         {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled) {
                 return false;
@@ -169,7 +169,7 @@ ImGUIModule::ImGUIModule()
         [&](unsigned int codepoint, KeyModifier modifier,
             IsGuiWindow isGuiWindow) -> bool
         {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled) {
                 return false;
@@ -191,7 +191,7 @@ ImGUIModule::ImGUIModule()
         [&](MouseButton button, MouseAction action, KeyModifier,
             IsGuiWindow isGuiWindow) -> bool
         {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow) {
                 return false;
@@ -210,7 +210,7 @@ ImGUIModule::ImGUIModule()
 
     global::callback::mouseScrollWheel->emplace_back(
         [&](double, double posY, IsGuiWindow isGuiWindow) -> bool {
-            ZoneScopedN("ImGUI")
+            ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled) {
                 return false;
@@ -322,13 +322,13 @@ void ImGUIModule::internalInitializeGL() {
         );
 
         ImGuiStyle& style = ImGui::GetStyle();
-        style.WindowPadding = { 4.f, 4.f };
+        style.WindowPadding = ImVec2(4.f, 4.f);
         style.WindowRounding = 0.f;
-        style.FramePadding = { 3.f, 3.f };
+        style.FramePadding = ImVec2(3.f, 3.f);
         style.FrameRounding = 0.f;
-        style.ItemSpacing = { 3.f, 2.f };
-        style.ItemInnerSpacing = { 3.f, 2.f };
-        style.TouchExtraPadding = { 1.f, 1.f };
+        style.ItemSpacing = ImVec2(3.f, 2.f);
+        style.ItemInnerSpacing = ImVec2(3.f, 2.f);
+        style.TouchExtraPadding = ImVec2(1.f, 1.f);
         style.IndentSpacing = 15.f;
         style.ScrollbarSize = 10.f;
         style.ScrollbarRounding = 0.f;
@@ -713,7 +713,7 @@ bool ImGUIModule::touchDetectedCallback(TouchInput input) {
         return false;
     }
     if (_validTouchStates.empty()) {
-        io.MousePos = { windowPos.x, windowPos.y };
+        io.MousePos = ImVec2(windowPos.x, windowPos.y);
         io.MouseClicked[0] = true;
     }
     _validTouchStates.push_back(input);

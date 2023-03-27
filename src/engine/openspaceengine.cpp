@@ -147,7 +147,7 @@ namespace openspace {
 class Scene;
 
 OpenSpaceEngine::OpenSpaceEngine()
-    : properties::PropertyOwner({ "OpenSpaceEngine" })
+    : properties::PropertyOwner({ "OpenSpaceEngine", "OpenSpace Engine" })
     , _printEvents(PrintEventsInfo, false)
     , _visibility(VisibilityInfo)
     , _showHiddenSceneGraphNodes(ShowHiddenSceneInfo, false)
@@ -202,7 +202,7 @@ void OpenSpaceEngine::registerPathTokens() {
 }
 
 void OpenSpaceEngine::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
@@ -265,12 +265,7 @@ void OpenSpaceEngine::initialize() {
         }
         catch (const documentation::SpecificationError& e) {
             LERROR("Failed loading of log");
-            for (const documentation::TestResult::Offense& o : e.result.offenses) {
-                LERRORC(o.offender, ghoul::to_string(o.reason));
-            }
-            for (const documentation::TestResult::Warning& w : e.result.warnings) {
-                LWARNINGC(w.offender, ghoul::to_string(w.reason));
-            }
+            logError(e);
             throw;
         }
     }
@@ -384,7 +379,7 @@ void OpenSpaceEngine::initialize() {
     global::renderEngine->initialize();
 
     for (const std::function<void()>& func : *global::callback::initialize) {
-        ZoneScopedN("[Module] initialize")
+        ZoneScopedN("[Module] initialize");
 
         func();
     }
@@ -393,7 +388,7 @@ void OpenSpaceEngine::initialize() {
 }
 
 void OpenSpaceEngine::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
@@ -486,7 +481,11 @@ void OpenSpaceEngine::initializeGL() {
     bool debugActive = global::configuration->openGLDebugContext.isActive;
 
     // Debug output is not available before 4.3
-    const ghoul::systemcapabilities::Version minVersion = { 4, 3, 0 };
+    const ghoul::systemcapabilities::Version minVersion = {
+        .major = 4,
+        .minor = 3,
+        .release = 0
+    };
     if (debugActive && OpenGLCap.openGLVersion() < minVersion) {
         LINFO("OpenGL Debug context requested, but insufficient version available");
         debugActive = false;
@@ -664,7 +663,7 @@ void OpenSpaceEngine::initializeGL() {
 
 
     for (const std::function<void()>& func : *global::callback::initializeGL) {
-        ZoneScopedN("[Module] initializeGL")
+        ZoneScopedN("[Module] initializeGL");
         func();
     }
 
@@ -674,7 +673,7 @@ void OpenSpaceEngine::initializeGL() {
 }
 
 void OpenSpaceEngine::loadAssets() {
-    ZoneScoped
+    ZoneScoped;
 
     LTRACE("OpenSpaceEngine::loadAsset(begin)");
 
@@ -684,20 +683,6 @@ void OpenSpaceEngine::loadAssets() {
         global::windowDelegate->setSynchronization(true);
         global::windowDelegate->setBarrier(true);
     };
-
-    if (_scene) {
-        ZoneScopedN("Reset scene")
-
-        global::syncEngine->removeSyncables(global::timeManager->syncables());
-        if (_scene && _scene->camera()) {
-            global::syncEngine->removeSyncables(_scene->camera()->syncables());
-        }
-        global::renderEngine->setScene(nullptr);
-        global::renderEngine->setCamera(nullptr);
-        global::navigationHandler->setCamera(nullptr);
-        _scene->clear();
-        global::rootPropertyOwner->removePropertySubOwner(_scene.get());
-    }
 
     std::unique_ptr<SceneInitializer> sceneInitializer;
     if (global::configuration->useMultithreadedInitialization) {
@@ -746,7 +731,7 @@ void OpenSpaceEngine::loadAssets() {
             _assetManager->allSynchronizations();
 
         for (const ResourceSynchronization* sync : allSyncs) {
-            ZoneScopedN("Update resource synchronization")
+            ZoneScopedN("Update resource synchronization");
 
             if (sync->isSyncing()) {
                 LoadingScreen::ProgressInfo progressInfo;
@@ -884,7 +869,7 @@ void OpenSpaceEngine::loadAssets() {
 }
 
 void OpenSpaceEngine::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
@@ -928,7 +913,7 @@ void OpenSpaceEngine::deinitialize() {
 }
 
 void OpenSpaceEngine::deinitializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     LTRACE("OpenSpaceEngine::deinitializeGL(begin)");
 
@@ -968,7 +953,7 @@ void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
 }
 
 void OpenSpaceEngine::runGlobalCustomizationScripts() {
-    ZoneScoped
+    ZoneScoped;
 
     LINFO("Running Global initialization scripts");
     ghoul::lua::LuaState state;
@@ -1021,7 +1006,7 @@ void OpenSpaceEngine::loadFonts() {
 }
 
 void OpenSpaceEngine::writeDocumentation() {
-    ZoneScoped
+    ZoneScoped;
 
     // Write documentation to json files if config file supplies path for doc files
     std::string path = global::configuration->documentation.path;
@@ -1100,8 +1085,8 @@ void OpenSpaceEngine::writeDocumentation() {
 }
 
 void OpenSpaceEngine::preSynchronization() {
-    ZoneScoped
-    TracyGpuZone("preSynchronization")
+    ZoneScoped;
+    TracyGpuZone("preSynchronization");
 
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
 
@@ -1162,7 +1147,7 @@ void OpenSpaceEngine::preSynchronization() {
     }
 
     for (const std::function<void()>& func : *global::callback::preSync) {
-        ZoneScopedN("[Module] preSync")
+        ZoneScopedN("[Module] preSync");
 
         func();
     }
@@ -1188,8 +1173,8 @@ void OpenSpaceEngine::preSynchronization() {
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
-    ZoneScoped
-    TracyGpuZone("postSynchronizationPreDraw")
+    ZoneScoped;
+    TracyGpuZone("postSynchronizationPreDraw");
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(begin)");
 
     bool master = global::windowDelegate->isMaster();
@@ -1228,7 +1213,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     }
 
     for (const std::function<void()>& func : *global::callback::postSyncPreDraw) {
-        ZoneScopedN("[Module] postSyncPreDraw")
+        ZoneScopedN("[Module] postSyncPreDraw");
 
         func();
     }
@@ -1258,14 +1243,14 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
-    ZoneScoped
-    TracyGpuZone("Render")
+    ZoneScoped;
+    TracyGpuZone("Render");
     LTRACE("OpenSpaceEngine::render(begin)");
 
     global::renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
 
     for (const std::function<void()>& func : *global::callback::render) {
-        ZoneScopedN("[Module] render")
+        ZoneScopedN("[Module] render");
 
         func();
     }
@@ -1274,8 +1259,8 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
 }
 
 void OpenSpaceEngine::drawOverlays() {
-    ZoneScoped
-    TracyGpuZone("Draw2D")
+    ZoneScoped;
+    TracyGpuZone("Draw2D");
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
 
     const bool isGuiWindow =
@@ -1290,7 +1275,7 @@ void OpenSpaceEngine::drawOverlays() {
     }
 
     for (const std::function<void()>& func : *global::callback::draw2D) {
-        ZoneScopedN("[Module] draw2D")
+        ZoneScopedN("[Module] draw2D");
         func();
     }
 
@@ -1298,14 +1283,14 @@ void OpenSpaceEngine::drawOverlays() {
 }
 
 void OpenSpaceEngine::postDraw() {
-    ZoneScoped
-    TracyGpuZone("postDraw")
+    ZoneScoped;
+    TracyGpuZone("postDraw");
     LTRACE("OpenSpaceEngine::postDraw(begin)");
 
     global::renderEngine->postDraw();
 
     for (const std::function<void()>& func : *global::callback::postDraw) {
-        ZoneScopedN("[Module] postDraw")
+        ZoneScopedN("[Module] postDraw");
 
         func();
     }
@@ -1339,7 +1324,7 @@ void OpenSpaceEngine::postDraw() {
 }
 
 void OpenSpaceEngine::resetPropertyChangeFlags() {
-    ZoneScoped
+    ZoneScoped;
 
     std::vector<SceneGraphNode*> nodes =
         global::renderEngine->scene()->allSceneGraphNodes();
@@ -1360,7 +1345,7 @@ void OpenSpaceEngine::resetPropertyChangeFlagsOfSubowners(properties::PropertyOw
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action,
                                        IsGuiWindow isGuiWindow)
 {
-    ZoneScoped
+    ZoneScoped;
 
     if (_loadingScreen) {
         // If the loading screen object exists, we are currently loading and want key
@@ -1369,6 +1354,18 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
             _shouldAbortLoading = true;
         }
 
+        return;
+    }
+
+    // We need to do this check before the callback functions as we would otherwise
+    // immediately cancel a shutdown if someone pressed the ESC key. Similar argument for
+    // only checking for the Press action.  Since the 'Press' of ESC will trigger the
+    // shutdown, the 'Release' in some frame later would cancel it immediately again
+    if (action == KeyAction::Press && _shutdown.inShutdown) {
+        _shutdown.inShutdown = false;
+        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+            events::EventApplicationShutdown::State::Aborted
+        );
         return;
     }
 
@@ -1399,7 +1396,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier,
                                    IsGuiWindow isGuiWindow)
 {
-    ZoneScoped
+    ZoneScoped;
 
     using F = global::callback::CharacterCallback;
     for (const F& func : *global::callback::character) {
@@ -1411,12 +1408,19 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier,
 
     global::luaConsole->charCallback(codepoint, modifier);
     global::interactionMonitor->markInteraction();
+
+    if (_shutdown.inShutdown) {
+        _shutdown.inShutdown = false;
+        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+            events::EventApplicationShutdown::State::Aborted
+        );
+    }
 }
 
 void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action,
                                           KeyModifier mods, IsGuiWindow isGuiWindow)
 {
-    ZoneScoped
+    ZoneScoped;
 
     if (_disableAllMouseInputs) {
         return;
@@ -1451,10 +1455,17 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
 
     global::navigationHandler->mouseButtonCallback(button, action);
     global::interactionMonitor->markInteraction();
+
+    if (_shutdown.inShutdown) {
+        _shutdown.inShutdown = false;
+        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+            events::EventApplicationShutdown::State::Aborted
+            );
+    }
 }
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y, IsGuiWindow isGuiWindow) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_disableAllMouseInputs) {
         return;
@@ -1474,7 +1485,7 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y, IsGuiWindow isGu
 void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY,
                                                IsGuiWindow isGuiWindow)
 {
-    ZoneScoped
+    ZoneScoped;
 
     if (_disableAllMouseInputs) {
         return;
@@ -1493,7 +1504,7 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY,
 }
 
 void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
-    ZoneScoped
+    ZoneScoped;
 
     using F = std::function<bool (TouchInput)>;
     for (const F& func : *global::callback::touchDetected) {
@@ -1505,7 +1516,7 @@ void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
 }
 
 void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
-    ZoneScoped
+    ZoneScoped;
 
     using F = std::function<bool(TouchInput)>;
     for (const F& func : *global::callback::touchUpdated) {
@@ -1517,7 +1528,7 @@ void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
 }
 
 void OpenSpaceEngine::touchExitCallback(TouchInput input) {
-    ZoneScoped
+    ZoneScoped;
 
     using F = std::function<void(TouchInput)>;
     for (const F& func : *global::callback::touchExit) {
@@ -1571,13 +1582,13 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
 }
 
 std::vector<std::byte> OpenSpaceEngine::encode() {
-    ZoneScoped
+    ZoneScoped;
 
     return global::syncEngine->encodeSyncables();
 }
 
 void OpenSpaceEngine::decode(std::vector<std::byte> data) {
-    ZoneScoped
+    ZoneScoped;
 
     global::syncEngine->decodeSyncables(std::move(data));
 }
@@ -1678,7 +1689,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::DownloadFile,
             codegen::lua::CreateSingleColorImage,
             codegen::lua::IsMaster,
-            codegen::lua::Version
+            codegen::lua::Version,
+            codegen::lua::ReadCSVFile
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")

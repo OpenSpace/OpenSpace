@@ -45,12 +45,6 @@ namespace {
         "The speck label file with the data for the labels"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UnitInfo = {
-        "Unit",
-        "Unit",
-        "Distance unit for the label data"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
@@ -243,6 +237,10 @@ void LabelsComponent::render(const RenderData& data,
     glm::vec4 textColor = glm::vec4(glm::vec3(_color), _opacity * fadeInVariable);
 
     for (const speck::Labelset::Entry& e : _labelset.entries) {
+        if (!e.isEnabled) {
+            continue;
+        }
+
         glm::vec3 scaledPos(e.position);
         scaledPos *= scale;
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(

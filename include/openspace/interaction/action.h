@@ -57,7 +57,7 @@ struct Action {
     /// This variable defines a subdivision of where this action is placed in a user
     /// interface. The individual path components are separated by '/' with a leading '/'
     /// for the root path
-    std::string guiPath;
+    std::string guiPath = "/";
 
     /// If this value is set to `Yes`, the execution of this action is synchronized to
     /// other OpenSpace instances, for example other nodes in a cluster environment, or

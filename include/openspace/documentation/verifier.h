@@ -59,7 +59,7 @@ struct Verifier {
      *         TestResult::offenders will either contain \p key or, in the case of a
      *         TableVerifier, a list of all offending subkeys as fully qualified names.
      *
-     * \post If the return values' TestResult::success is \c true, its
+     * \post If the return values' TestResult::success is `true`, its
      *      TestResult::offenders is empty
      */
     virtual TestResult operator()(const ghoul::Dictionary& dictionary,
@@ -96,7 +96,7 @@ struct Verifier {
 /**
  * The base class Verifier for all Verifier%s that have to test against a specific value
  * type. This Verifier tests whether a given key exists and whether it has the same type
- * as the template parameter \c T.
+ * as the template parameter `T`.
  * \tparam T The type against which the key's value is tested
  */
 template <typename T>
@@ -105,15 +105,15 @@ struct TemplateVerifier : public Verifier {
 
     /**
      * Tests whether the \p key contained in the ghoul::Dictionary \p dictionary exists
-     * and has the same type as \c T.
+     * and has the same type as `T`.
      *
      * \param dictionary The ghoul::Dictionary that contains the \p key to be tested
      * \param key The key inside the \p dictinoary that is to be tested
      * \return A TestResult that contains the information whether the \p key exists in the
-     *         \p dictionary and whether the key's value's type agrees with \c T.
+     *         \p dictionary and whether the key's value's type agrees with `T`.
      *
-     * \post The return values' TestResult::success is either \c true and
-     *       TestResult::offenders is empty, or it is \c false and TestResult::offenders
+     * \post The return values' TestResult::success is either `true` and
+     *       TestResult::offenders is empty, or it is `false` and TestResult::offenders
      *       contains \p key
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
@@ -124,7 +124,7 @@ struct TemplateVerifier : public Verifier {
 
 /**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
- * \c bool. No implicit conversion is considered in this testing.
+ * `bool`. No implicit conversion is considered in this testing.
  */
 struct BoolVerifier : public TemplateVerifier<bool> {
     std::string type() const override;
@@ -132,7 +132,7 @@ struct BoolVerifier : public TemplateVerifier<bool> {
 
 /**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
- * \c double. No implicit conversion is considered in this testing.
+ * `double`. No implicit conversion is considered in this testing.
  */
 struct DoubleVerifier : public TemplateVerifier<double> {
     std::string type() const override;
@@ -140,9 +140,8 @@ struct DoubleVerifier : public TemplateVerifier<double> {
 
 /**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
- * \c int. It will also return \c true if the key's value is of type \c double, but is a
- * integer value (for example, <code>0.0</code>, <code>12.0</code>, but not
- * <code>0.5</code>).
+ * `int`. It will also return `true` if the key's value is of type `double`, but is a
+ * integer value (for example, `0.0`, `12.0`, but not `0.5`).
  */
 struct IntVerifier : public TemplateVerifier<int> {
     TestResult operator()(const ghoul::Dictionary& dict,
@@ -153,7 +152,7 @@ struct IntVerifier : public TemplateVerifier<int> {
 
 /**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
- * <code>std::string</code>. No implicit conversion is considered in this testing.
+ * `std::string`. No implicit conversion is considered in this testing.
  */
 struct StringVerifier : public TemplateVerifier<std::string> {
     StringVerifier(bool mustBeNotEmpty = false);
@@ -170,10 +169,27 @@ private:
 };
 
 /**
+ * A Verifier that checks whether a given string is a valid identifier, meaning that is
+ * does not contain any whitespaces or dots
+ */
+struct IdentifierVerifier : public StringVerifier {
+    IdentifierVerifier();
+
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
+
+    std::string documentation() const override;
+
+    std::string type() const override;
+};
+
+/**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
  * refers to an existing file on disk.
  */
 struct FileVerifier : public StringVerifier {
+    FileVerifier();
+
     TestResult operator()(const ghoul::Dictionary& dict,
         const std::string& key) const override;
 
@@ -185,6 +201,8 @@ struct FileVerifier : public StringVerifier {
 * refers to an existing directory on disk.
 */
 struct DirectoryVerifier : public StringVerifier {
+    DirectoryVerifier();
+
     TestResult operator()(const ghoul::Dictionary& dict,
         const std::string& key) const override;
 
@@ -196,6 +214,8 @@ struct DirectoryVerifier : public StringVerifier {
  * a valid date time
  */
 struct DateTimeVerifier : public StringVerifier {
+    DateTimeVerifier();
+
     TestResult operator()(const ghoul::Dictionary& dict,
         const std::string& key) const override;
 
@@ -208,9 +228,9 @@ struct DateTimeVerifier : public StringVerifier {
  * recursively to check the contained table. If this list is empty, a simple type testing
  * is performed instead. If the testing finds any offending keys, it will return those
  * keys with fully qualified names, that is, the name of the table will be prepended to
- * the offending keys. Example: If the key \c Table is tested and a passed
- * DocumentationEntry checks for a nested key \c a and this does not comply, this Verifier
- * will return <code>Table.a</code> as an offender.
+ * the offending keys. Example: If the key `Table` is tested and a passed
+ * DocumentationEntry checks for a nested key `a` and this does not comply, this Verifier
+ * will return `Table.a` as an offender.
  */
 struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
     /**
@@ -236,7 +256,7 @@ struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
      * \return A TestResult containing the results of the testing. If DocumentationEntry%s
      *         were specified in the constructor and one of those values find an offending
      *         key inside the table, it's name will be returned with a fully qualified
-     *         name by prepending the name (= \key) of the table.
+     *         name by prepending the name (= \p key) of the table.
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -248,7 +268,7 @@ struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
 };
 
 /**
- * A Verifier that checks whether all values contained in a Table are of type \c string.
+ * A Verifier that checks whether all values contained in a Table are of type `string`.
  */
 struct StringListVerifier : public TableVerifier {
     /**
@@ -262,7 +282,7 @@ struct StringListVerifier : public TableVerifier {
 };
 
 /**
- * A Verifier that checks whether all values contained in a Table are of type \c int.
+ * A Verifier that checks whether all values contained in a Table are of type `int`.
  */
 struct IntListVerifier : public TableVerifier {
     /**
@@ -280,26 +300,26 @@ struct IntListVerifier : public TableVerifier {
 //----------------------------------------------------------------------------------------
 
 /**
- * This struct is the base class for all Verifier%s that check for \c glm vector types.
+ * This struct is the base class for all Verifier%s that check for `glm` vector types.
  * The template parameter for the subclasses is the containing type, not the full vector
- * type. For example to check for <code>glm::dvec3</code>, one would create a
- * <code>Vector3Verifier<double></code>.
+ * type. For example to check for `glm::dvec3`, one would create a
+ * `Vector3Verifier<double>`.
  */
 struct VectorVerifier {};
 
-/// This Verifier checks whether the value is of type <code>glm::tvec2<T></code>
+/// This Verifier checks whether the value is of type `glm::tvec2<T>`
 template <typename T>
 struct Vector2Verifier : public TemplateVerifier<glm::tvec2<T>>, public VectorVerifier {
     std::string type() const override;
 };
 
-/// This Verifier checks whether the value is of type <code>glm::tvec3<T></code>
+/// This Verifier checks whether the value is of type `glm::tvec3<T>`
 template <typename T>
 struct Vector3Verifier : public TemplateVerifier<glm::tvec3<T>>, public VectorVerifier {
     std::string type() const override;
 };
 
-/// This Verifier checks whether the value is of type <code>glm::tvec4<T></code>
+/// This Verifier checks whether the value is of type `glm::tvec4<T>`
 template <typename T>
 struct Vector4Verifier : public TemplateVerifier<glm::tvec4<T>>, public VectorVerifier {
     std::string type() const override;
@@ -321,7 +341,7 @@ struct Color4Verifier : public Vector4Verifier<double> {
 
 /**
  * A Verifier that checks whether all values contained in a Table are of
- * type <code>glm::tvec2<T></code>
+ * type `glm::tvec2<T>`
  */
 template <typename T>
 struct Vector2ListVerifier : public TableVerifier {
@@ -338,7 +358,7 @@ struct Vector2ListVerifier : public TableVerifier {
 
 /**
  * A Verifier that checks whether all values contained in a Table are of
- * type <code>glm::tvec3<T></code>
+ * type `glm::tvec3<T>`
  */
 template <typename T>
 struct Vector3ListVerifier : public TableVerifier {
@@ -355,7 +375,7 @@ struct Vector3ListVerifier : public TableVerifier {
 
 /**
  * A Verifier that checks whether all values contained in a Table are of
- * type <code>glm::tvec4<T></code>
+ * type `glm::tvec4<T>`
  */
 template <typename T>
 struct Vector4ListVerifier : public TableVerifier {
@@ -375,15 +395,15 @@ struct Vector4ListVerifier : public TableVerifier {
 //----------------------------------------------------------------------------------------
 
 /**
- * This struct is the base class for all Verifier%s that check for \c glm matrix types.
+ * This struct is the base class for all Verifier%s that check for `glm` matrix types.
  * The template parameter for the subclasses is the containing type, not the full matrix
- * type. For example to check for <code>glm::dmat4x3</code>, one would create a
- * <code>Matrix4x3Verifier<double></code>.
+ * type. For example to check for `glm::dmat4x3`, one would create a
+ * `Matrix4x3Verifier<double>`.
  */
 struct MatrixVerifier {};
 
 /**
- * This Verifier checks whether the value is of type <code>glm::mat2x2<T></code>
+ * This Verifier checks whether the value is of type `glm::mat2x2<T>`
  */
 template <typename T>
 struct Matrix2x2Verifier : public TemplateVerifier<glm::tmat2x2<T>>, public MatrixVerifier
@@ -392,7 +412,7 @@ struct Matrix2x2Verifier : public TemplateVerifier<glm::tmat2x2<T>>, public Matr
 };
 
 /**
- * This Verifier checks whether the value is of type <code>glm::mat2x3<T></code>
+ * This Verifier checks whether the value is of type `glm::mat2x3<T>`
  */
 template <typename T>
 struct Matrix2x3Verifier : public TemplateVerifier<glm::tmat2x3<T>>, public MatrixVerifier
@@ -401,7 +421,7 @@ struct Matrix2x3Verifier : public TemplateVerifier<glm::tmat2x3<T>>, public Matr
 };
 
 /**
- * This Verifier checks whether the value is of type <code>glm::mat2x4<T></code>
+ * This Verifier checks whether the value is of type `glm::mat2x4<T>`
  */
 template <typename T>
 struct Matrix2x4Verifier : public TemplateVerifier<glm::tmat2x4<T>>, public MatrixVerifier
@@ -410,7 +430,7 @@ struct Matrix2x4Verifier : public TemplateVerifier<glm::tmat2x4<T>>, public Matr
 };
 
 /**
- * This Verifier checks whether the value is of type <code>glm::mat3x2<T></code>
+ * This Verifier checks whether the value is of type `glm::mat3x2<T>`
  */
 template <typename T>
 struct Matrix3x2Verifier : public TemplateVerifier<glm::tmat3x2<T>>, public MatrixVerifier
@@ -419,7 +439,7 @@ struct Matrix3x2Verifier : public TemplateVerifier<glm::tmat3x2<T>>, public Matr
 };
 
 /**
- * This Verifier checks whether the value is of type <code>glm::mat3x3<T></code>
+ * This Verifier checks whether the value is of type `glm::mat3x3<T>`
  */
 template <typename T>
 struct Matrix3x3Verifier : public TemplateVerifier<glm::tmat3x3<T>>, public MatrixVerifier
@@ -428,7 +448,7 @@ struct Matrix3x3Verifier : public TemplateVerifier<glm::tmat3x3<T>>, public Matr
 };
 
 /**
- * This Verifier checks whether the value is of type <code>glm::mat3x4<T></code>
+ * This Verifier checks whether the value is of type `glm::mat3x4<T>`
  */
 template <typename T>
 struct Matrix3x4Verifier : public TemplateVerifier<glm::tmat3x4<T>>, public MatrixVerifier
@@ -437,7 +457,7 @@ struct Matrix3x4Verifier : public TemplateVerifier<glm::tmat3x4<T>>, public Matr
 };
 
 /**
- * This Verifier checks whether the value is of type <code>glm::mat4x2<T></code>
+ * This Verifier checks whether the value is of type `glm::mat4x2<T>`
  */
 template <typename T>
 struct Matrix4x2Verifier : public TemplateVerifier<glm::tmat4x2<T>>, public MatrixVerifier
@@ -446,7 +466,7 @@ struct Matrix4x2Verifier : public TemplateVerifier<glm::tmat4x2<T>>, public Matr
 };
 
 /**
- * This Verifier checks whether the value is of type <code>glm::mat4x3<T></code>
+ * This Verifier checks whether the value is of type `glm::mat4x3<T>`
  */
 template <typename T>
 struct Matrix4x3Verifier : public TemplateVerifier<glm::tmat4x3<T>>, public MatrixVerifier
@@ -455,7 +475,7 @@ struct Matrix4x3Verifier : public TemplateVerifier<glm::tmat4x3<T>>, public Matr
 };
 
 /**
- * This Verifier checks whether the value is of type <code>glm::mat4x4<T></code>
+ * This Verifier checks whether the value is of type `glm::mat4x4<T>`
  */
 template <typename T>
 struct Matrix4x4Verifier : public TemplateVerifier<glm::tmat4x4<T>>, public MatrixVerifier
@@ -471,15 +491,15 @@ struct Matrix4x4Verifier : public TemplateVerifier<glm::tmat4x4<T>>, public Matr
  * This is the abstract base class of all binary operator-based verifiers. This class
  * takes two template parameters. The first is the Verifier that one would use to only
  * check for the type of the object, for example IntVerifier. The second argument is a
- * function object that has its <code>operator()</code> function overloaded and returns a
- * boolean value. In these cases, the \c std function objects <code>std::less</code>,
- * <code>std::equal_to</code>, etc are used.
+ * function object that has its `operator()` function overloaded and returns a boolean
+ * value. In these cases, the `std` function objects `std::less`, `std::equal_to, etc are
+ * used.
  *
- * This verifier will apply the \c Operator to the stored value and the incoming value
- * (after type checking) and will check if the \c Operator returns \c true or \c false.
+ * This verifier will apply the `Operator` to the stored value and the incoming value
+ * (after type checking) and will check if the `Operator` returns `true` or `false`.
  * The incoming value is used as the first argument and the stored value as the second
- * argument to the \c Operator. If the type checking fails, the offense reason
- * TestResult::Offense::Reason::WrongType is returned. If the \c Operator fails, the
+ * argument to the `Operator`. If the type checking fails, the offense reason
+ * TestResult::Offense::Reason::WrongType is returned. If the `Operator` fails, the
  * reason TestResult::Offense::Verification is returned instead.
  */
 template <typename T, typename Operator>
@@ -488,34 +508,34 @@ struct OperatorVerifier : public T {
      * Constructor for an OperatorVerifier. As all operators need to compare the incoming
      * value to a stored value, we require the comparison \p value to be passed in here.
      * \param value The value against which the tested value is compared using the
-     * \c Operator
+     *        `Operator`
      */
     OperatorVerifier(typename T::Type value);
 
     /**
      * First checks whether the \p dictionary contains the passed \p key and whether the
-     * \p key%'s value is correct using the template paramater \c T as a verifier. Then,
+     * \p key%'s value is correct using the template paramater `T` as a verifier. Then,
      * the \p key%'s value is checked against the stored OperatorVerifier::value using the
-     * \c Operator.
+     * `Operator`.
      *
      * \param dictionary The ghoul::Dictionary that contains the \p key to be tested
      * \param key The key inside the \p dictinoary that is to be tested
      * \return A TestResult containing the results of the specification testing. If the
      *         \p key%'s value has the wrong type, it will be added to the TestResult's
      *         offense list with the reason TestResult::Offense::Reason::WrongType; if the
-     *         \c Operator returns false, it will be added with the reason
+     *         `Operator` returns false, it will be added with the reason
      *         TestResult::Offense::Verification instead.
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
 
-    /// The stored value which is passed to the \c Operator as a second argument
+    /// The stored value which is passed to the `Operator` as a second argument
     typename T::Type value;
 };
 
 /**
  * This Verifier checks whether the incoming value is strictly smaller than the stored
- * value. Due to the operator type restrictions, \c T cannot be a subclass of (or the same
+ * value. Due to the operator type restrictions, `T` cannot be a subclass of (or the same
  * as) BoolVerifier, StringVerifier, TableVerifier, or VectorVerifier.
  */
 template <typename T>
@@ -535,7 +555,7 @@ struct LessVerifier : public OperatorVerifier<T, std::less<typename T::Type>> {
 
 /**
  * This Verifier checks whether the incoming value is smaller than or equal to the stored
- * value. Due to the operator type restrictions, \c T cannot be a subclass of (or the same
+ * value. Due to the operator type restrictions, `T` cannot be a subclass of (or the same
  * as) BoolVerifier, StringVerifier, TableVerifier, or VectorVerifier.
  */
 template <typename T>
@@ -556,7 +576,7 @@ struct LessEqualVerifier : public OperatorVerifier<T, std::less_equal<typename T
 
 /**
  * This Verifier checks whether the incoming value is strictly greater than the stored
- * value. Due to the operator type restrictions, \c T cannot be a subclass of (or the same
+ * value. Due to the operator type restrictions, `T` cannot be a subclass of (or the same
  * as) BoolVerifier, StringVerifier, TableVerifier, or VectorVerifier.
  */
 template <typename T>
@@ -577,7 +597,7 @@ struct GreaterVerifier : public OperatorVerifier<T, std::greater<typename T::Typ
 
 /**
  * This Verifier checks whether the incoming value is greater than or equal to the stored
- * value. Due to the operator type restrictions, \c T cannot be a subclass of (or the same
+ * value. Due to the operator type restrictions, `T` cannot be a subclass of (or the same
  * as) BoolVerifier, StringVerifier, TableVerifier, or VectorVerifier.
  */
 template <typename T>
@@ -600,7 +620,7 @@ struct GreaterEqualVerifier : public OperatorVerifier<T,
 
 /**
  * This Verifier checks whether the incoming value is equal to the stored value. Due to
- * the operator type restrictions, \c T cannot be a subclass of (or the same as)
+ * the operator type restrictions, `T` cannot be a subclass of (or the same as)
  * TableVerifier.
  */
 template <typename T>
@@ -616,7 +636,7 @@ struct EqualVerifier : public OperatorVerifier<T, std::equal_to<typename T::Type
 
 /**
  * This Verifier checks whether the incoming value is unequal to the store value. Due to
- * the operator type restrictions, \c T cannot be a subclass of (or the same as)
+ * the operator type restrictions, `T` cannot be a subclass of (or the same as)
  * TableVerifier.
  */
 template <typename T>
@@ -636,8 +656,8 @@ struct UnequalVerifier : public OperatorVerifier<T, std::not_equal_to<typename T
 
 /**
  * This Verifier checks whether the incoming value is of the correct type, using the
- * Verifier passed as a template parameter \c T and then checks whether it is part of a
- * list that is passed to the constructor. To the missing equality operator, \c T cannot
+ * Verifier passed as a template parameter `T` and then checks whether it is part of a
+ * list that is passed to the constructor. To the missing equality operator, `T` cannot
  * be a subclass of (or the same as) TableVerifier.
  */
 template <typename T>
@@ -654,7 +674,7 @@ struct InListVerifier : public T {
 
     /**
      * Tests whether the \p key exists in the \p dictionary, whether it has the correct
-     * type by invoking the template parameter \c T, and then tests if the \p key's value
+     * type by invoking the template parameter `T`, and then tests if the \p key's value
      * is part of the list passed to the constructor.
      *
      * \param dictionary The ghoul::Dictionary that contains the \p key
@@ -676,8 +696,8 @@ struct InListVerifier : public T {
 
 /**
  * This Verifier checks whether the incoming value is of the correct type, using the
- * Verifier passed as a template parameter \c T and then checks whether it is not part of
- * a list that is passed to the constructor. To the missing equality operator, \c T cannot
+ * Verifier passed as a template parameter `T` and then checks whether it is not part of
+ * a list that is passed to the constructor. To the missing equality operator, `T` cannot
  * be a subclass of (or the same as) TableVerifier.
  */
 template <typename T>
@@ -694,7 +714,7 @@ struct NotInListVerifier : public T {
 
     /**
      * Tests whether the \p key exists in the \p dictionary, whether it has the correct
-     * type by invoking the template parameter \c T, and then tests if the \p key's value
+     * type by invoking the template parameter `T`, and then tests if the \p key's value
      * is not part of the list passed to the constructor.
      *
      * \param dictionary The ghoul::Dictionary that contains the \p key
@@ -719,9 +739,9 @@ struct NotInListVerifier : public T {
 
 /**
  * This Verifier checks whether the incoming value is of the correct type, using the
- * Verifier passed as a template parameter \c T and then checks whether it is greater or
+ * Verifier passed as a template parameter `T` and then checks whether it is greater or
  * equal to a lower limit and less or equal to a higher limit. To the missing comparison
- * operators, \c T cannot be a subclass of (or the same as) BoolVerifier, StringVerifier,
+ * operators, `T` cannot be a subclass of (or the same as) BoolVerifier, StringVerifier,
  * TableVerifier, or VectorVerifier. Both the lower and the higher limit are inclusive).
  */
 template <typename T>
@@ -742,7 +762,7 @@ struct InRangeVerifier : public T {
     /**
      * Constructs a InRangeVerifier that checks whether the incoming value is of the
      * correct type and whether the value is greater or equal to \p lower and less or
-     * equal to \upper.
+     * equal to \p upper.
      *
      * \param lower The (inclusive) lower limit of the range
      * \param upper The (inclusive) upper limit of the range
@@ -753,7 +773,7 @@ struct InRangeVerifier : public T {
 
     /**
      * Tests whether the \p key exists in the \p dictionary, whether it has the correct
-     * type by invoking the template parameter \c T, and then tests if the \p key's value
+     * type by invoking the template parameter `T`, and then tests if the \p key's value
      * is between the lower and upper limits (both inclusive) that were passed to the
      * constructor.
      *
@@ -777,9 +797,9 @@ struct InRangeVerifier : public T {
 
 /**
  * This Verifier checks whether the incoming value is of the correct type, using the
- * Verifier passed as a template parameter \c T and then checks whether it is outside the
+ * Verifier passed as a template parameter `T` and then checks whether it is outside the
  * (exclusive) range defined by a lower and upper limit. To the missing comparison
- * operators, \c T cannot be a subclass of (or the same as) BoolVerifier, StringVerifier,
+ * operators, `T` cannot be a subclass of (or the same as) BoolVerifier, StringVerifier,
  * TableVerifier, or VectorVerifier. Both the lower and the higher limit are exclusive).
  */
 template <typename T>
@@ -810,7 +830,7 @@ struct NotInRangeVerifier : public T {
 
     /**
      * Tests whether the \p key exists in the \p dictionary, whether it has the correct
-     * type by invoking the template parameter \c T, and then tests if the \p key's value
+     * type by invoking the template parameter `T`, and then tests if the \p key's value
      * is outside the lower and upper limits (both exclusive) that were passed to the
      * constructor.
      *
@@ -864,16 +884,16 @@ struct AnnotationVerifier : public T {
 };
 
 /**
- * This Verifier is a marker that performs the same testing as the \c T parameter, but
+ * This Verifier is a marker that performs the same testing as the `T` parameter, but
  * also adds a warning to the test result informing the user of the deprecation.
- * Furthermore, the documentation will contain the word <code>(deprecated)</code> in
- * addition to the documentation returned by \c T
+ * Furthermore, the documentation will contain the word `(deprecated)` in
+ * addition to the documentation returned by `T`
  * \tparam T The Verifier that is to be marked deprecated
  */
 template <typename T>
 struct DeprecatedVerifier : public T {
     /**
-     * Tests the \p dictionary%s \p key using the Verifier \c T and adds a warning to the
+     * Tests the \p dictionary%s \p key using the Verifier `T` and adds a warning to the
      * TestResult informing the caller of the deprecation.
      *
      * \param dictionary The ghoul::Dictionary whose \p key should be tested
@@ -884,9 +904,9 @@ struct DeprecatedVerifier : public T {
                           const std::string& key) const override;
 
     /**
-     * Returns the documentation as reported by \c T and adds the word
-     * <code>(deprecated)</code> to it.
-     * \return The deprecated version of \c T%'s documentation
+     * Returns the documentation as reported by `T` and adds the word
+     * `(deprecated)` to it.
+     * \return The deprecated version of `T`%'s documentation
      */
     std::string documentation() const override;
 };
@@ -902,12 +922,13 @@ struct DeprecatedVerifier : public T {
 struct ReferencingVerifier : public TableVerifier {
     /**
      * Creates a ReferencingVerifier that references a documentation with the provided
-     * identifier \p id. The ReferencingVerifier will use the static DocumentationEngine
-     * to retrieve Documentation%s and find the \p identifier among them.
+     * identifier \p identifier. The ReferencingVerifier will use the static
+     * DocumentationEngine to retrieve Documentation%s and find the \p identifier among
+     * them.
      *
      * \param identifier The identifier of the Documentation that this Verifier references
      */
-    ReferencingVerifier(std::string id);
+    ReferencingVerifier(std::string identifier);
 
     /**
      * Checks whether the \p key in the \p dictionary exists and is of type Table (similar
@@ -938,9 +959,9 @@ struct ReferencingVerifier : public TableVerifier {
 //----------------------------------------------------------------------------------------
 
 /**
- * This Verifier takes two Verifiers and performs a boolean \c and operation on their
+ * This Verifier takes two Verifiers and performs a boolean `and` operation on their
  * results. In essence, a value only passes this Verifier if it passes both Verifier%s
- * that are passed in the constructor. Opposed to the <code>C++</code> <code>&&</code>
+ * that are passed in the constructor. Opposed to the `C++` `&&`
  * operator, the AndVerifier does not perform any short-circut evaluation.
  */
 struct AndVerifier : public Verifier {
@@ -963,10 +984,10 @@ struct AndVerifier : public Verifier {
      * \param dictionary The ghoul::Dictionary that is to be tested
      * \param key The key contained in \p dictionary that is to be tested
      * \return A TestResult object that contains the test results. If the value fails
-     *         any passed  Verifiers, TestResult::success is \c false and the
+     *         any passed  Verifiers, TestResult::success is `false` and the
      *         TestResult::offenses list contains \p with a reason of
      *         TestResult::Offense::Reason::Verification. If \p key%'s value passes both
-     *         Verifier%s, the result's TestResult::success is \c true and the
+     *         Verifier%s, the result's TestResult::success is `true` and the
      *         TestResult::offenses is empty.
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
@@ -979,10 +1000,10 @@ struct AndVerifier : public Verifier {
 };
 
 /**
- * This Verifier takes two Verifiers and performs a boolean \c or operation on their
+ * This Verifier takes two Verifiers and performs a boolean `or` operation on their
  * results. In essence, a value only passes this Verifier if it passes either of the two
- * Verifier%s that are passed in the constructor. Opposed to the <code>C++</code>
- * <code>||</code> operator, the OrVerifier does not perform any short-circut evaluation.
+ * Verifier%s that are passed in the constructor. Opposed to the `C++` `||` operator, the
+ * OrVerifier does not perform any short-circut evaluation.
  */
 struct OrVerifier : public Verifier {
     /**
@@ -993,11 +1014,11 @@ struct OrVerifier : public Verifier {
      *
      * \pre values must contain at least two values
      *
-     * \todo:  The use of the variant to use both raw pointers and shared pointers is
-     *         definitely undesired. At the momement we are not handling the ownership of
-     *         the verifiers very well and this must be cleaned up when doing a pass over
-     *         the entire ownership model of the documentation/verifiers. For now it was
-     *         necessary to make the codegen work in all cases without complications there
+     * \todo The use of the variant to use both raw pointers and shared pointers is
+     *       definitely undesired. At the momement we are not handling the ownership of
+     *       the verifiers very well and this must be cleaned up when doing a pass over
+     *       the entire ownership model of the documentation/verifiers. For now it was
+     *       necessary to make the codegen work in all cases without complications there
      */
     OrVerifier(const std::vector<std::variant<Verifier*,
         std::shared_ptr<Verifier>>> values);
@@ -1011,10 +1032,10 @@ struct OrVerifier : public Verifier {
      * \param dictionary The ghoul::Dictionary that is to be tested
      * \param key The key contained in \p dictionary that is to be tested
      * \return A TestResult object that contains the test results. If the value fails
-     *         all Verifiers, TestResult::success is \c false and the
+     *         all Verifiers, TestResult::success is `false` and the
      *         TestResult::offenses list contains \p with a reason of
      *         TestResult::Offense::Reason::Verification. If \p key%'s value passes either
-     *         of the two Verifier%s, the result's TestResult::success is \c true and the
+     *         of the two Verifier%s, the result's TestResult::success is `true` and the
      *         TestResult::offenses is empty.
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
@@ -1026,130 +1047,130 @@ struct OrVerifier : public Verifier {
     std::vector<std::shared_ptr<Verifier>> values;
 };
 
-/// A short-hand definition for a Verifier checking for <code>glm::bvec2</code>
+/// A short-hand definition for a Verifier checking for `glm::bvec2`
 using BoolVector2Verifier = Vector2Verifier<bool>;
-/// A short-hand definition for a Verifier checking for <code>glm::ivec2</code>
+/// A short-hand definition for a Verifier checking for `glm::ivec2`
 using IntVector2Verifier = Vector2Verifier<int>;
-/// A short-hand definition for a Verifier checking for <code>glm::dvec2</code>
+/// A short-hand definition for a Verifier checking for `glm::dvec2`
 using DoubleVector2Verifier = Vector2Verifier<double>;
-/// A short-hand definition for a Verifier checking for <code>glm::bvec3</code>
+/// A short-hand definition for a Verifier checking for `glm::bvec3`
 using BoolVector3Verifier = Vector3Verifier<bool>;
-/// A short-hand definition for a Verifier checking for <code>glm::ivec3</code>
+/// A short-hand definition for a Verifier checking for `glm::ivec3`
 using IntVector3Verifier = Vector3Verifier<int>;
-/// A short-hand definition for a Verifier checking for <code>glm::dvec3</code>
+/// A short-hand definition for a Verifier checking for `glm::dvec3`
 using DoubleVector3Verifier = Vector3Verifier<double>;
-/// A short-hand definition for a Verifier checking for <code>glm::bvec4</code>
+/// A short-hand definition for a Verifier checking for `glm::bvec4`
 using BoolVector4Verifier = Vector4Verifier<bool>;
-/// A short-hand definition for a Verifier checking for <code>glm::ivec4</code>
+/// A short-hand definition for a Verifier checking for `glm::ivec4`
 using IntVector4Verifier = Vector4Verifier<int>;
-/// A short-hand definition for a Verifier checking for <code>glm::dvec4</code>
+/// A short-hand definition for a Verifier checking for `glm::dvec4`
 using DoubleVector4Verifier = Vector4Verifier<double>;
 
-/// A short-hand definition for a Verifier checking for <code>glm::dmat2x2</code>
+/// A short-hand definition for a Verifier checking for `glm::dmat2x2`
 using DoubleMatrix2x2Verifier = Matrix2x2Verifier<double>;
 using DoubleMatrix2Verifier = DoubleMatrix2x2Verifier;
-/// A short-hand definition for a Verifier checking for <code>glm::dmat2x3</code>
+/// A short-hand definition for a Verifier checking for `glm::dmat2x3`
 using DoubleMatrix2x3Verifier = Matrix2x3Verifier<double>;
-/// A short-hand definition for a Verifier checking for <code>glm::dmat2x4</code>
+/// A short-hand definition for a Verifier checking for `glm::dmat2x4`
 using DoubleMatrix2x4Verifier = Matrix2x4Verifier<double>;
-/// A short-hand definition for a Verifier checking for <code>glm::dmat3x2</code>
+/// A short-hand definition for a Verifier checking for `glm::dmat3x2`
 using DoubleMatrix3x2Verifier = Matrix3x2Verifier<double>;
-/// A short-hand definition for a Verifier checking for <code>glm::dmat3x3</code>
+/// A short-hand definition for a Verifier checking for `glm::dmat3x3`
 using DoubleMatrix3x3Verifier = Matrix3x3Verifier<double>;
 using DoubleMatrix3Verifier = DoubleMatrix3x3Verifier;
-/// A short-hand definition for a Verifier checking for <code>glm::dmat3x4</code>
+/// A short-hand definition for a Verifier checking for `glm::dmat3x4`
 using DoubleMatrix3x4Verifier = Matrix3x4Verifier<double>;
-/// A short-hand definition for a Verifier checking for <code>glm::dmat4x2</code>
+/// A short-hand definition for a Verifier checking for `glm::dmat4x2`
 using DoubleMatrix4x2Verifier = Matrix4x2Verifier<double>;
-/// A short-hand definition for a Verifier checking for <code>glm::dmat4x3</code>
+/// A short-hand definition for a Verifier checking for `glm::dmat4x3`
 using DoubleMatrix4x3Verifier = Matrix4x3Verifier<double>;
-/// A short-hand definition for a Verifier checking for <code>glm::dmat4x4</code>
+/// A short-hand definition for a Verifier checking for `glm::dmat4x4`
 using DoubleMatrix4x4Verifier = Matrix4x4Verifier<double>;
 using DoubleMatrix4Verifier = DoubleMatrix4x4Verifier;
 
-/// A short-hand definition for a LessVerifier with a type check for \c int
+/// A short-hand definition for a LessVerifier with a type check for `int`
 using IntLessVerifier = LessVerifier<IntVerifier>;
-/// A short-hand definition for a LessVerifier with a type check for \c double
+/// A short-hand definition for a LessVerifier with a type check for `double`
 using DoubleLessVerifier = LessVerifier<DoubleVerifier>;
-/// A short-hand definition for a LessEqualVerifier with a type check for \c int
+/// A short-hand definition for a LessEqualVerifier with a type check for `int`
 using IntLessEqualVerifier = LessEqualVerifier<IntVerifier>;
-/// A short-hand definition for a LessEqualVerifier with a type check for \c double
+/// A short-hand definition for a LessEqualVerifier with a type check for `double`
 using DoubleLessEqualVerifier = LessEqualVerifier<DoubleVerifier>;
-/// A short-hand definition for a GreaterVerifier with a type check for \c int
+/// A short-hand definition for a GreaterVerifier with a type check for `int`
 using IntGreaterVerifier = GreaterVerifier<IntVerifier>;
-/// A short-hand definition for a GreaterVerifier with a type check for \c double
+/// A short-hand definition for a GreaterVerifier with a type check for `double`
 using DoubleGreaterVerifier = GreaterVerifier<DoubleVerifier>;
-/// A short-hand definition for a GreaterEqualVerifier with a type check for \c int
+/// A short-hand definition for a GreaterEqualVerifier with a type check for `int`
 using IntGreaterEqualVerifier = GreaterEqualVerifier<IntVerifier>;
-/// A short-hand definition for a GreaterEqualVerifier with a type check for \c double
+/// A short-hand definition for a GreaterEqualVerifier with a type check for `double`
 using DoubleGreaterEqualVerifier = GreaterEqualVerifier<DoubleVerifier>;
-/// A short-hand definition for a EqualVerifier with a type check for \c bool
+/// A short-hand definition for a EqualVerifier with a type check for `bool`
 using BoolEqualVerifier = EqualVerifier<BoolVerifier>;
-/// A short-hand definition for a EqualVerifier with a type check for \c int
+/// A short-hand definition for a EqualVerifier with a type check for `int`
 using IntEqualVerifier = EqualVerifier<IntVerifier>;
-/// A short-hand definition for a EqualVerifier with a type check for \c double
+/// A short-hand definition for a EqualVerifier with a type check for `double`
 using DoubleEqualVerifier = EqualVerifier<DoubleVerifier>;
-/// A short-hand definition for a EqualVerifier with a type check for \c string
+/// A short-hand definition for a EqualVerifier with a type check for `string`
 using StringEqualVerifier = EqualVerifier<StringVerifier>;
-/// A short-hand definition for a UnequalVerifier with a type check for \c bool
+/// A short-hand definition for a UnequalVerifier with a type check for `bool`
 using BoolUnequalVerifier = UnequalVerifier<BoolVerifier>;
-/// A short-hand definition for a UnequalVerifier with a type check for \c int
+/// A short-hand definition for a UnequalVerifier with a type check for `int`
 using IntUnequalVerifier = UnequalVerifier<IntVerifier>;
-/// A short-hand definition for a UnequalVerifier with a type check for \c double
+/// A short-hand definition for a UnequalVerifier with a type check for `double`
 using DoubleUnequalVerifier = UnequalVerifier<DoubleVerifier>;
-/// A short-hand definition for a UnequalVerifier with a type check for \c string
+/// A short-hand definition for a UnequalVerifier with a type check for `string`
 using StringUnequalVerifier = UnequalVerifier<StringVerifier>;
 
-/// A short-hand definition for a InListVerifier with a type check for \c bool
+/// A short-hand definition for a InListVerifier with a type check for `bool`
 using BoolInListVerifier = InListVerifier<BoolVerifier>;
-/// A short-hand definition for a InListVerifier with a type check for \c int
+/// A short-hand definition for a InListVerifier with a type check for `int`
 using IntInListVerifier = InListVerifier<IntVerifier>;
-/// A short-hand definition for a InListVerifier with a type check for \c double
+/// A short-hand definition for a InListVerifier with a type check for `double`
 using DoubleInListVerifier = InListVerifier<DoubleVerifier>;
-/// A short-hand definition for a InListVerifier with a type check for \c string
+/// A short-hand definition for a InListVerifier with a type check for `string`
 using StringInListVerifier = InListVerifier<StringVerifier>;
-/// A short-hand definition for a NotInListVerifier with a type check for \c bool
+/// A short-hand definition for a NotInListVerifier with a type check for `bool`
 using BoolNotInListVerifier = NotInListVerifier<BoolVerifier>;
-/// A short-hand definition for a NotInListVerifier with a type check for \c int
+/// A short-hand definition for a NotInListVerifier with a type check for `int`
 using IntNotInListVerifier = NotInListVerifier<IntVerifier>;
-/// A short-hand definition for a NotInListVerifier with a type check for \c double
+/// A short-hand definition for a NotInListVerifier with a type check for `double`
 using DoubleNotInListVerifier = NotInListVerifier<DoubleVerifier>;
-/// A short-hand definition for a NotInListVerifier with a type check for \c string
+/// A short-hand definition for a NotInListVerifier with a type check for `string`
 using StringNotInListVerifier = NotInListVerifier<StringVerifier>;
 
-/// A short-hand definition for a InRangeVerifier with a type check for \c int
+/// A short-hand definition for a InRangeVerifier with a type check for `int`
 using IntInRangeVerifier = InRangeVerifier<IntVerifier>;
-/// A short-hand definition for a InRangeVerifier with a type check for \c double
+/// A short-hand definition for a InRangeVerifier with a type check for `double`
 using DoubleInRangeVerifier = InRangeVerifier<DoubleVerifier>;
-/// A short-hand definition for a InRangeVerifier with a type check for \c vec2
+/// A short-hand definition for a InRangeVerifier with a type check for `vec2`
 using Vec2InRangeVerifier = InRangeVerifier<DoubleVector2Verifier>;
-/// A short-hand definition for a NotInRangeVerifier with a type check for \c int
+/// A short-hand definition for a NotInRangeVerifier with a type check for `int`
 using IntNotInRangeVerifier = NotInRangeVerifier<IntVerifier>;
-/// A short-hand definition for a NotInRangeVerifier with a type check for \c double
+/// A short-hand definition for a NotInRangeVerifier with a type check for `double`
 using DoubleNotInRangeVerifier = NotInRangeVerifier<DoubleVerifier>;
 
-/// A short-hand definition for a AnnotationVerifier with a type check for \c bool
+/// A short-hand definition for a AnnotationVerifier with a type check for `bool`
 using BoolAnnotationVerifier = AnnotationVerifier<BoolVerifier>;
-/// A short-hand definition for a AnnotationVerifier with a type check for \c int
+/// A short-hand definition for a AnnotationVerifier with a type check for `int`
 using IntAnnotationVerifier = AnnotationVerifier<IntVerifier>;
-/// A short-hand definition for a AnnotationVerifier with a type check for \c double
+/// A short-hand definition for a AnnotationVerifier with a type check for `double`
 using DoubleAnnotationVerifier = AnnotationVerifier<DoubleVerifier>;
-/// A short-hand definition for a AnnotationVerifier with a type check for \c string
+/// A short-hand definition for a AnnotationVerifier with a type check for `string`
 using StringAnnotationVerifier = AnnotationVerifier<StringVerifier>;
 /// A short-hand definition for a AnnotationVerifier with a type check for
-/// <code>ghoul::Dictionary</code>
+/// `ghoul::Dictionary`
 using TableAnnotationVerifier = AnnotationVerifier<TableVerifier>;
 
-/// A short-hand definition for a DeprecatedVerifier with a type check for \c bool
+/// A short-hand definition for a DeprecatedVerifier with a type check for `bool`
 using BoolDeprecatedVerifier = DeprecatedVerifier<BoolVerifier>;
-/// A short-hand definition for a DeprecatedVerifier with a type check for \c int
+/// A short-hand definition for a DeprecatedVerifier with a type check for `int`
 using IntDeprecatedVerifier = DeprecatedVerifier<IntVerifier>;
-/// A short-hand definition for a DeprecatedVerifier with a type check for \c double
+/// A short-hand definition for a DeprecatedVerifier with a type check for `double`
 using DoubleDeprecatedVerifier = DeprecatedVerifier<DoubleVerifier>;
-/// A short-hand definition for a DeprecatedVerifier with a type check for \c string
+/// A short-hand definition for a DeprecatedVerifier with a type check for `string`
 using StringDeprecatedVerifier = DeprecatedVerifier<StringVerifier>;
 /// A short-hand definition for a DeprecatedVerifier with a type check for
-/// <code>ghoul::Dictionary</code>
+/// `ghoul::Dictionary`
 using TableDeprecatedVerifier = DeprecatedVerifier<TableVerifier>;
 
 // Definitions of external templates that are instantiated in the cpp file

@@ -27,8 +27,7 @@ namespace {
 // Returns true if a camera path is currently running, and false otherwise.
 [[codegen::luawrap]] bool isFlying() {
     using namespace openspace;
-    bool hasFinished = global::navigationHandler->pathNavigator().hasFinished();
-    return !hasFinished;
+    return global::openSpaceEngine->currentMode() == OpenSpaceEngine::Mode::CameraPath;
 }
 
 // Continue playing a paused camera path.
@@ -173,7 +172,7 @@ namespace {
         );
     }
     catch (const documentation::SpecificationError& e) {
-        LERRORC("flyToNavigationState", ghoul::to_string(e.result));
+        logError(e, "flyToNavigationState");
         throw ghoul::lua::LuaError(fmt::format("Unable to create a path: {}", e.what()));
     }
 

@@ -128,7 +128,7 @@ namespace {
 namespace openspace {
 
 LuaConsole::LuaConsole()
-    : properties::PropertyOwner({ "LuaConsole" })
+    : properties::PropertyOwner({ "LuaConsole", "Lua Console" })
     , _isVisible(VisibleInfo, false)
     , _remoteScripting(RemoveScriptingInfo, false)
     , _backgroundColor(
@@ -169,7 +169,7 @@ LuaConsole::LuaConsole()
 LuaConsole::~LuaConsole() {}
 
 void LuaConsole::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
@@ -234,7 +234,7 @@ void LuaConsole::initialize() {
 }
 
 void LuaConsole::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
@@ -528,7 +528,11 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                         // We only want to remove the autocomplete info if we just
                         // entered the 'default' openspace namespace
                         if (command.substr(0, pos + 1) == "openspace.") {
-                            _autoCompleteInfo = { NoAutoComplete, false, "" };
+                            _autoCompleteInfo = {
+                                .lastIndex = NoAutoComplete,
+                                .hasInitialValue = false,
+                                .initialValue = ""
+                            };
                         }
                     }
                 }
@@ -542,7 +546,11 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         // If any other key is pressed, we want to remove our previous findings
         // The special case for Shift is necessary as we want to allow Shift+TAB
         if (!modifierShift) {
-            _autoCompleteInfo = { NoAutoComplete, false, "" };
+            _autoCompleteInfo = {
+                .lastIndex = NoAutoComplete,
+                .hasInitialValue = false,
+                .initialValue = ""
+            };
         }
     }
 
@@ -595,7 +603,7 @@ void LuaConsole::charCallback(unsigned int codepoint,
 }
 
 void LuaConsole::update() {
-    ZoneScoped
+    ZoneScoped;
 
     // Compute the height by simulating _historyFont number of lines and checking
     // what the bounding box for that text would be.
@@ -631,7 +639,7 @@ void LuaConsole::update() {
 }
 
 void LuaConsole::render() {
-    ZoneScoped
+    ZoneScoped;
 
     using namespace ghoul::fontrendering;
 

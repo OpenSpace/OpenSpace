@@ -185,10 +185,10 @@ void RenderableSkyTarget::applyRoll() {
 }
 
 void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
-    ZoneScoped
+    ZoneScoped;
     const bool showRectangle = _verticalFov > _showRectangleThreshold;
 
-    glm::vec4 color = { glm::vec3(_borderColor) / 255.f, 1.0 };
+    glm::vec4 color = glm::vec4(glm::vec3(_borderColor) / 255.f, 1.0);
 
     _shader->activate();
     _shader->setUniform("opacity", opacity());

@@ -31,7 +31,7 @@ namespace {
     constexpr int WindowOpacity = 170;
 
     QRectF computeUnion(const std::vector<QRect>& monitorResolutions) {
-        QRectF res = { 0.f, 0.f, 0.f, 0.f };
+        QRectF res = QRectF(0.f, 0.f, 0.f, 0.f);
         for (const QRect& m : monitorResolutions) {
             res |= m;
         }
@@ -145,12 +145,12 @@ void MonitorBox::paintEvent(QPaintEvent*) {
 void MonitorBox::windowDimensionsChanged(unsigned int mIdx, unsigned int wIdx,
                                          const QRectF& newDimensions)
 {
-    _windowRendering[wIdx] = {
+    _windowRendering[wIdx] = QRectF(
         _monitorDimensionsScaled[mIdx].x() + newDimensions.left() * _monitorScaleFactor,
         _monitorDimensionsScaled[mIdx].y() + newDimensions.top() * _monitorScaleFactor,
         newDimensions.width() * _monitorScaleFactor,
         newDimensions.height() * _monitorScaleFactor
-    };
+    );
     update();
 }
 

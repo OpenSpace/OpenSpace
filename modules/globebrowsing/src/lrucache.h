@@ -33,7 +33,7 @@ namespace openspace::globebrowsing::cache {
 
 /**
  * Templated class implementing a Least-Recently-Used Cache.
- * <code>KeyType</code> needs to be an enumerable type.
+ * `KeyType` needs to be an enumerable type.
  */
 template <typename KeyType, typename ValueType, typename HasherType>
 class LRUCache {

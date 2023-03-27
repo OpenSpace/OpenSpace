@@ -65,9 +65,11 @@ private:
 
     /**
      * Checks all defined filter ranges and \returns true if any of the corresponding
-     * <code>filterValues</code> are outside of the defined range.
-     * \returns false if value should be inserted into Octree.
+     * `filterValues` are outside of the defined range.
+     *
      * \param filterValues are all read filter values in binary file.
+     *
+     * \returns false if value should be inserted into Octree.
      */
     bool checkAllFilters(const std::vector<float>& filterValues);
 

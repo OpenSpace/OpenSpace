@@ -1,38 +1,4 @@
 {
-  "actions": [
-    {
-      "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Solar System/Earth",
-      "identifier": "profile.toggle.satellite",
-      "is_local": false,
-      "name": "Toggle satellite trails",
-      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-    },
-    {
-      "documentation": "Refocuses the camera on the ISS",
-      "gui_path": "/Solar System/Earth",
-      "identifier": "profile.focus.iss",
-      "is_local": false,
-      "name": "Focus ISS",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    },
-    {
-      "documentation": "Retargets the camera on Earth",
-      "gui_path": "/Solar System/Earth",
-      "identifier": "profile.focus.earth",
-      "is_local": false,
-      "name": "Focus on Earth",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    },
-    {
-      "documentation": "Toggle on/off minor moon trails for all planets in the solar system",
-      "gui_path": "/Trails",
-      "identifier": "profile.toggle.minormoons",
-      "is_local": false,
-      "name": "Toggle Minor Moon Trails",
-      "script": "local list = openspace.getProperty('{moonTrail_minor}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-    }
-  ],
   "assets": [
     "base",
     "events/toggle_sun",
@@ -79,19 +45,19 @@
   ],
   "keybindings": [
     {
-      "action": "profile.toggle.satellite",
+      "action": "os.solarsystem.earth.togglesatellitetrails",
       "key": "S"
     },
     {
-      "action": "profile.focus.iss",
+      "action": "os.solarsystem.earth.iss.focus",
       "key": "I"
     },
     {
-      "action": "profile.focus.earth",
+      "action": "os.solarsystem.earth.focus",
       "key": "HOME"
     },
     {
-      "action": "profile.toggle.minormoons",
+      "action": "os_default.toggle_minormoon_trails",
       "key": "SHIFT+H"
     }
   ],
