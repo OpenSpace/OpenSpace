@@ -168,8 +168,6 @@ namespace {
             Decimeter,
             Meter,
             Kilometer,
-
-            // Weird units
             Thou,
             Inch,
             Foot,

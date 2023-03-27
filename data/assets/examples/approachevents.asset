@@ -36,8 +36,7 @@ local obj = {
     LightSources = {
       sun.LightSource
     },
-    PerformShading = true,
-    EnableFaceCulling = true
+    PerformShading = true
   },
   InteractionSphere = 900,
   ApproachFactor = 50.0,

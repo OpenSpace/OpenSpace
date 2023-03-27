@@ -49,6 +49,7 @@ local Vesta = {
     }
   },
   BoundingSphere = 262000,
+  InteractionSphere = 262000,
   Renderable = {
     Type = "RenderableModelProjection",
     GeometryFile = models .. "VestaComet_5000.obj",

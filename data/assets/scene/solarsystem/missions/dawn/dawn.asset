@@ -188,37 +188,7 @@ local DawnFramingCamera2 = {
   }
 }
 
--- To make sure the size is correct
---[[local MeassureStick = {
-  Identifier = "MeassureStick",
-  Parent = DawnPosition.Identifier,
-  Renderable = {
-    Type = "RenderablePrism",
-    Segments = 16,
-    Lines = 16,
-    Radius = 0.855,
-    LineWidth = 1.0,
-    Color = { 1.0, 1.0, 1.0 },
-    Length = 19.7
-  },
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { -9.85, 0, 0 }
-    },
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = { 0, math.pi/2.0, 0 }
-    }
-  },
-  GUI = {
-    Name = "MeassureStick",
-    Path = "/Solar System/Missions/Dawn",
-  }
-}]]
-
 local nodes = {
-  --MeassureStick,
   DawnPosition,
   Dawn,
   DawnTrail,

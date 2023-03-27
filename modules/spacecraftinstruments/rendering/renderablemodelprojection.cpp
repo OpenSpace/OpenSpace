@@ -78,8 +78,6 @@ namespace {
             Decimeter,
             Meter,
             Kilometer,
-
-            // Weird units
             Thou,
             Inch,
             Foot,
@@ -221,6 +219,9 @@ void RenderableModelProjection::initializeGL() {
     double bs = boundingSphere();
     _geometry->initialize();
     setBoundingSphere(bs); // ignore bounding sphere set by geometry.
+
+    // Set Interaction sphere size to be 10% of the bounding sphere
+    setInteractionSphere(_boundingSphere * 0.1);
 }
 
 void RenderableModelProjection::deinitializeGL() {
@@ -241,14 +242,6 @@ ghoul::opengl::Texture& RenderableModelProjection::baseTexture() const {
 }
 
 void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
-    // Update boundingsphere
-    setBoundingSphere(_geometry->boundingRadius() * _modelScale *
-        glm::compMax(data.modelTransform.scale)
-    );
-
-    // Set Interaction sphere size to be 10% of the bounding sphere
-    setInteractionSphere(_boundingSphere * 0.1);
-
     if (_projectionComponent.needsClearProjection()) {
         _projectionComponent.clearAllProjections();
     }

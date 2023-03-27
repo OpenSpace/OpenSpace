@@ -61,8 +61,7 @@ local issModel = {
     LightSources = {
       sun.LightSource
     },
-    PerformShading = true,
-    EnableFaceCulling = true
+    PerformShading = true
   },
   Tag = { "earth_satellite", "ISS" },
   GUI = {

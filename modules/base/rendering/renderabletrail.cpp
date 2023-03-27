@@ -437,7 +437,6 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         // Reset
         global::renderEngine->openglStateCache().resetBlendState();
         global::renderEngine->openglStateCache().resetDepthState();
-
         return;
     }
 

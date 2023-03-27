@@ -81,7 +81,7 @@ Fragment getFragment() {
     }
   }
 
-  // Frag color is the normal values
+  // Frag color is the values of the normal vector
   if (has_texture_normal) {
     vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;
     normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);

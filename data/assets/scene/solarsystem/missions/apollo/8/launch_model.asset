@@ -55,8 +55,7 @@ local Apollo8LaunchModel = {
     LightSources = {
       sun.LightSource
     },
-    PerformShading = true,
-    EnableFaceCulling = true
+    PerformShading = true
   },
   GUI = {
     Hidden = true,

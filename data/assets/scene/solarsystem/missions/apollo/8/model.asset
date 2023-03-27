@@ -67,8 +67,7 @@ local Apollo8Model = {
     LightSources = {
       sun.LightSource
     },
-    PerformShading = true,
-    EnableFaceCulling = true
+    PerformShading = true
   },
   GUI = {
     Hidden = true,

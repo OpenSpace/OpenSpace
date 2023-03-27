@@ -57,10 +57,10 @@ local Comet67P = {
     Type = "RenderableModelProjection",
     GeometryFile = models .. "67P_rotated_5_130.obj",
     Projection = {
-      Sequence   = { imagesDestination },
+      Sequence = { imagesDestination },
       SequenceType = "image-sequence",
-      Observer   = "ROSETTA",
-      Target     = "CHURYUMOV-GERASIMENKO",
+      Observer = "ROSETTA",
+      Target = "CHURYUMOV-GERASIMENKO",
       Aberration = "NONE",
       TextureMap = true,
       ShadowMap = true,
@@ -68,12 +68,12 @@ local Comet67P = {
       DataInputTranslation = {
         Instrument = {
           NAVCAM = {
-            DetectorType  = "Camera",
-            Spice  = { "ROS_NAVCAM-A" }
+            DetectorType = "Camera",
+            Spice = { "ROS_NAVCAM-A" }
           }
         },
         Target = {
-          Read  = {
+          Read = {
             "TARGET_NAME",
             "INSTRUMENT_HOST_NAME",
             "INSTRUMENT_ID",
@@ -95,11 +95,11 @@ local Comet67P = {
       },
 
       Instrument = {
-        Name       = "ROS_NAVCAM-A",
-        Method     = "ELLIPSOID",
+        Name = "ROS_NAVCAM-A",
+        Method = "ELLIPSOID",
         Aberration = "NONE",
-        Fovy       = 5.00,
-        Aspect     = 1
+        Fovy = 5.00,
+        Aspect = 1
       }
     },
   },
@@ -189,6 +189,6 @@ end)
 
 asset.export("Barycenter", Barycenter) -- @TODO: This double export should disappear
 asset.export(Barycenter)
-asset.export("Comet67P", Comet67P)  -- @TODO: This double export should disappear
+asset.export("Comet67P", Comet67P) -- @TODO: This double export should disappear
 asset.export(Comet67P)
 asset.export(Trail67P)

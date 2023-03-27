@@ -80,8 +80,7 @@ local JWSTModel = {
     LightSources = {
       sun.LightSource
     },
-    PerformShading = true,
-    EnableFaceCulling = true
+    PerformShading = true
   },
   GUI = {
     Name = "James Webb Space Telescope Model",

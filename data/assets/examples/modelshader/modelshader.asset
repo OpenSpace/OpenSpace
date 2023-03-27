@@ -25,7 +25,6 @@ local model = {
       sun.LightSource
     },
     PerformShading = true,
-    EnableFaceCulling = true,
     VertexShader = asset.localResource("model_vs.glsl"),
     FragmentShader = asset.localResource("model_fs.glsl"),
   },
