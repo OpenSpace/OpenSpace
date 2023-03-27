@@ -39,11 +39,9 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr std::array<const char*, 11> MainUniformNames = {
-        "modelViewTransform", "projectionTransform", "meshTransform",
-        "meshNormalTransform", "has_texture_diffuse", "baseTexture", "baseColor",
-        "projectionTexture", "performShading", "projectionFading",
-        "directionToSunViewSpace"
+    constexpr std::array<const char*, 7> MainUniformNames = {
+        "performShading", "directionToSunViewSpace", "modelViewTransform",
+        "projectionTransform", "projectionFading", "baseTexture", "projectionTexture"
     };
 
     constexpr std::array<const char*, 6> FboUniformNames = {
@@ -96,10 +94,6 @@ namespace {
         // given ModelScale
         std::optional<bool> invertModelScale;
 
-        // Set if invisible parts (parts with no textures or materials) of the model
-        // should be forced to render or not.
-        std::optional<bool> forceRenderInvisible;
-
         // Contains information about projecting onto this planet.
         ghoul::Dictionary projection
             [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
@@ -122,21 +116,11 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (p.forceRenderInvisible.has_value()) {
-        _forceRenderInvisible = *p.forceRenderInvisible;
-
-        if (!_forceRenderInvisible) {
-            // Asset file have specifically said to not render invisible parts,
-            // do not notify in the log if invisible parts are detected and dropped
-            _notifyInvisibleDropped = false;
-        }
-    }
-
     std::filesystem::path file = absPath(p.geometryFile.string());
     _geometry = ghoul::io::ModelReader::ref().loadModel(
         file.string(),
-        ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
-        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
+        ghoul::io::ModelReader::ForceRenderInvisible::No,
+        ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
     );
 
     _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
@@ -216,9 +200,8 @@ void RenderableModelProjection::initializeGL() {
 
     _projectionComponent.initializeGL();
 
-    double bs = boundingSphere();
     _geometry->initialize();
-    setBoundingSphere(bs); // ignore bounding sphere set by geometry.
+    setBoundingSphere(_geometry->boundingRadius() * _modelScale);
 
     // Set Interaction sphere size to be 10% of the bounding sphere
     setInteractionSphere(_boundingSphere * 0.1);
@@ -280,7 +263,8 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 transform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(_modelScale));
     const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * transform;
 
     // malej 2023-FEB-23: The light sources should probably not be hard coded

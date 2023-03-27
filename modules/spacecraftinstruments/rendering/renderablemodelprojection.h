@@ -73,10 +73,9 @@ private:
     ProjectionComponent _projectionComponent;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    UniformCache(modelViewTransform, projectionTransform, meshTransform,
-        meshNormalTransform, has_texture_diffuse, baseTexture, baseColor,
-        projectionTexture, performShading, projectionFading,
-        directionToSunViewSpace) _mainUniformCache;
+    UniformCache(performShading, directionToSunViewSpace, modelViewTransform,
+        projectionTransform, projectionFading, baseTexture,
+        projectionTexture) _mainUniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
     UniformCache(projectionTexture, depthTexture, needShadowMap, ProjectorMatrix,
@@ -87,8 +86,6 @@ private:
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
     double _modelScale = 1.0;
     bool _invertModelScale = false;
-    bool _forceRenderInvisible = false;
-    bool _notifyInvisibleDropped = true;
 
     glm::dmat3 _instrumentMatrix = glm::dmat3(1.0);
 
