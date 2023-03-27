@@ -99,6 +99,7 @@ public:
 
     bool isMRFCachingEnabled() const;
     std::string mrfCacheLocation() const;
+    std::string mrfCacheCompression() const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -124,6 +125,7 @@ private:
 
     properties::BoolProperty _mrfCacheEnabled;
     properties::StringProperty _mrfCacheLocation;
+    properties::StringProperty _mrfCacheCompression;
 
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 

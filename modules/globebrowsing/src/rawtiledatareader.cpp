@@ -565,13 +565,15 @@ void RawTileDataReader::initialize() {
                 createOpts = CSLSetNameValue(createOpts, "CACHEDSOURCE", content.c_str());
                 createOpts = CSLSetNameValue(createOpts, "NOCOPY", "true");
                 createOpts = CSLSetNameValue(createOpts, "uniform_scale", "2");
-                //createOpts = CSLSetNameValue(createOpts, "compress", "PNG");
                 if (root.find("dem") != std::string::npos) {
                     createOpts = CSLSetNameValue(createOpts, "compress", "LERC");
                 }
                 else {
-                    createOpts = CSLSetNameValue(createOpts, "compress", "JPEG");
-                    createOpts = CSLSetNameValue(createOpts, "quality", "75");
+                    auto compress = module.mrfCacheCompression();
+                    createOpts = CSLSetNameValue(createOpts, "compress", compress.c_str());
+                    if (compress == "JPEG") {
+                        createOpts = CSLSetNameValue(createOpts, "quality", "75");
+                    }
                 }
 
                 createOpts = CSLSetNameValue(createOpts, "blocksize", "256");
@@ -583,15 +585,17 @@ void RawTileDataReader::initialize() {
                     auto msg = CPLGetLastErrorMsg();
                     throw ghoul::RuntimeError(fmt::format(
                         "Failed to create MRF Caching dataset dataset: {}. GDAL Error: {}",
-                        path, CPLGetLastErrorMsg()
+                        mrf, msg
                     ));
                 }
                 GDALClose(dst);
                 GDALClose(src);
+
+                content = mrf.c_str();
+            } else {
+                throw ghoul::RuntimeError("Failed to create MRF driver");
             }
         }
-
-        content = mrf.c_str();
     }
 
     {
