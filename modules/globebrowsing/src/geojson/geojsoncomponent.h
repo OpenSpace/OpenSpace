@@ -36,14 +36,16 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/rendering/helper.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
 #include <vector>
 
-namespace openspace { 
+namespace openspace {
     struct RenderData;
     class LightSource;
-}
+} // namespace::openspace
+
 namespace openspace::documentation { struct Documentation; }
 namespace openspace::rendering::helper { struct VertexXYZNormal; }
 namespace ghoul::opengl { class ProgramObject; }
@@ -79,7 +81,8 @@ private:
     void readFile();
     void parseSingleFeature(const geos::io::GeoJSONFeature& feature);
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _linesAndPolygonsProgram = nullptr;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram = nullptr;
 
     std::vector<GlobeGeometryFeature> _geometryFeatures;
 
@@ -107,9 +110,7 @@ private:
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
 
-    // Buffers for uniform uploading
-    std::vector<float> _lightIntensitiesBuffer;
-    std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
+    rendering::helper::LightSourceRenderData _lightsourceRenderData;
 
     properties::PropertyOwner _lightSourcePropertyOwner;
 };

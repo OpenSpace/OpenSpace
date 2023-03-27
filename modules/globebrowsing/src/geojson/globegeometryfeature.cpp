@@ -217,7 +217,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
     std::vector<Geodetic3> envelopeGeoCoords = coordsToGeodetic({ coords });
     _heightUpdateReferencePoints.insert(
         _heightUpdateReferencePoints.end(),
-        envelopeGeoCoords.begin(), 
+        envelopeGeoCoords.begin(),
         envelopeGeoCoords.end()
     );
 
@@ -229,7 +229,10 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
     }
 }
 
-void GlobeGeometryFeature::render(int pass, float mainOpacity) {
+void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
+                                 float mainOpacity,
+                         const rendering::helper::LightSourceRenderData& lightSourceData)
+{
     ghoul_assert(pass >= 0 && pass < 2, "Render pass variable out of accepted range");
 
     if (!_isEnabled) {
@@ -238,6 +241,25 @@ void GlobeGeometryFeature::render(int pass, float mainOpacity) {
 
     float opacity = mainOpacity * _properties.opacity();
     float fillOpacity = mainOpacity * _properties.fillOpacity();
+
+    const glm::dmat4 globeModelTransform = _globe.modelTransform();
+    const glm::dmat4 modelViewTransform =
+        renderData.camera.combinedViewMatrix() * globeModelTransform;
+
+    const glm::mat3 normalTransform = glm::mat3(
+        glm::transpose(glm::inverse(modelViewTransform))
+    );
+
+    const glm::dmat4 projectionTransform = renderData.camera.projectionMatrix();
+
+    _program->activate();
+    _program->setUniform("modelViewTransform", modelViewTransform);
+    _program->setUniform("projectionTransform", projectionTransform);
+    _program->setUniform("normalTransform", normalTransform);
+
+    _program->setUniform("nLightSources", lightSourceData.nLightSources);
+    _program->setUniform("lightIntensities", lightSourceData.intensitiesBuffer);
+    _program->setUniform("lightDirectionsViewSpace", lightSourceData.directionsViewSpaceBuffer);
 
     // TODO: use different shader programs for lines, triangles, etc?
 

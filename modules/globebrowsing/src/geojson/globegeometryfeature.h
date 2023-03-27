@@ -35,7 +35,10 @@
 #include <vector>
 
 namespace openspace::documentation { struct Documentation; }
-namespace rendering::helper { struct VertexXYZNormal; }
+namespace rendering::helper {
+    struct VertexXYZNormal;
+    struct LightSourceRenderData;
+}
 namespace geos::geom { class Geometry; }
 
 namespace openspace::globebrowsing {
@@ -100,7 +103,9 @@ public:
     void createFromSingleGeosGeometry(const geos::geom::Geometry* geo, int index);
 
     // 2 pass rendering to get correct culling for polygons
-    void render(int pass, float mainOpacity);
+    void render(const RenderData& renderData, int pass, float mainOpacity,
+        const rendering::helper::LightSourceRenderData& lightSourceData);
+
     void bufferVertexData(const RenderFeature& feature,
         const std::vector<Vertex>& vertexData);
 
@@ -130,7 +135,7 @@ private:
     void createExtrudedGeometry(const std::vector<std::vector<glm::vec3>>& edgeVertices);
 
     /**
-     * Create the triangle geometry for the polygon part of the feature (the area 
+     * Create the triangle geometry for the polygon part of the feature (the area
      * contained by the shape)
      */
     void createPolygonGeometry();
@@ -142,7 +147,7 @@ private:
     double getHeightToReferenceSurface(const Geodetic2& geo) const;
 
     /// Position in model space. Target height is target height above reference surface
-    glm::dvec3 adjustHeightOfModelCoordinate(const glm::dvec3& pos, 
+    glm::dvec3 adjustHeightOfModelCoordinate(const glm::dvec3& pos,
         double targetHeight) const;
 
     /**
@@ -175,8 +180,9 @@ private:
     std::vector<Geodetic3> _heightUpdateReferencePoints;
     std::vector<double> _lastControlHeights;
 
+
     // Note that the parent is the owner to this program
-    ghoul::opengl::ProgramObject* _program;
+    ghoul::opengl::ProgramObject* _program = nullptr;
 };
 
 } // namespace openspace::globebrowsing

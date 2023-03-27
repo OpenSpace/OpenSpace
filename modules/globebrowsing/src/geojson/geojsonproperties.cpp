@@ -76,8 +76,8 @@ namespace {
                     "Failed reading color property. Expected 3 values, got {}", val.size()
                 ));
             }
-            // @TODO Use verifiers to verify color values 
-            // @TODO Parse values given in RGB in ranges 0-255? 
+            // @TODO Use verifiers to verify color values
+            // @TODO Parse values given in RGB in ranges 0-255?
             color = glm::vec3(
                 static_cast<float>(val.at(0).getNumber()),
                 static_cast<float>(val.at(1).getNumber()),
@@ -117,7 +117,7 @@ namespace {
         "The color of the filled portion of a rendered polygon."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = { 
+    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
         "PointSize",
         "Point Size",
         "The size of any rendered points."

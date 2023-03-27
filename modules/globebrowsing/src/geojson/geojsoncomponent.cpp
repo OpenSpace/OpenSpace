@@ -157,7 +157,7 @@ namespace {
 
         // [[codegen::verbatim(SelectionInfo.description)]]
         std::optional<std::vector<std::string>> selection;
-        
+
         // These properties will be used as default values for the geoJson rendering,
         // meaning that they will be used when there is no value given for the
         // individual geoJson features
@@ -295,14 +295,23 @@ void GeoJsonComponent::initialize() {
 void GeoJsonComponent::initializeGL() {
     ZoneScoped;
 
-    _program = global::renderEngine->buildRenderProgram(
-        "GeoJsonLinesProgram",
+    _linesAndPolygonsProgram = global::renderEngine->buildRenderProgram(
+        "GeoJsonLinesAndPolygonProgram",
         absPath("${MODULE_GLOBEBROWSING}/shaders/geojson_vs.glsl"),
         absPath("${MODULE_GLOBEBROWSING}/shaders/geojson_fs.glsl")
     );
 
+    _pointsProgram = global::renderEngine->buildRenderProgram(
+        "GeoJsonPointsProgram",
+        absPath("${MODULE_GLOBEBROWSING}/shaders/geojson_points_vs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/geojson_points_fs.glsl")
+    );
+
     for (GlobeGeometryFeature& g : _geometryFeatures) {
-        g.initializeGL(_program.get());
+        //g.initializeGL(
+        //    g.isPoints() ? _pointsProgram.get() : _linesAndPolygonsProgram.get()
+        //);
+        g.initializeGL( _linesAndPolygonsProgram.get());
     }
 }
 
@@ -311,8 +320,11 @@ void GeoJsonComponent::deinitializeGL() {
         g.deinitializeGL();
     }
 
-    global::renderEngine->removeRenderProgram(_program.get());
-    _program = nullptr;
+    global::renderEngine->removeRenderProgram(_linesAndPolygonsProgram.get());
+    _linesAndPolygonsProgram = nullptr;
+
+    global::renderEngine->removeRenderProgram(_pointsProgram.get());
+    _pointsProgram = nullptr;
 }
 
 bool GeoJsonComponent::isReady() const {
@@ -323,44 +335,13 @@ bool GeoJsonComponent::isReady() const {
             return g.isReady();
         }
     );
-    return _program != nullptr && isReady;
+    return _linesAndPolygonsProgram != nullptr && isReady;
 }
 
 void GeoJsonComponent::render(const RenderData& data) {
-    const glm::dmat4 globeModelTransform = _globeNode.modelTransform();
-    const glm::dmat4 modelViewTransform =
-        data.camera.combinedViewMatrix() * globeModelTransform;
-
-    const glm::mat3 normalTransform = glm::mat3(
-        glm::transpose(glm::inverse(modelViewTransform))
-    );
-
-    const glm::dmat4 projectionTransform = data.camera.projectionMatrix();
-
     // @TODO (2023-03-17, emmbr): Once the light source for the globe can be configured,
     // this code should use the same light source as the globe
-    int nLightSources = 0;
-    _lightIntensitiesBuffer.resize(_lightSources.size());
-    _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
-    for (const std::unique_ptr<LightSource>& lightSource : _lightSources) {
-        if (!lightSource->isEnabled()) {
-            continue;
-        }
-        _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
-        _lightDirectionsViewSpaceBuffer[nLightSources] =
-            lightSource->directionViewSpace(data);
-
-        ++nLightSources;
-    }
-
-    _program->activate();
-    _program->setUniform("modelViewTransform", modelViewTransform);
-    _program->setUniform("projectionTransform", projectionTransform);
-    _program->setUniform("normalTransform", normalTransform);
-
-    _program->setUniform("nLightSources", nLightSources);
-    _program->setUniform("lightIntensities", _lightIntensitiesBuffer);
-    _program->setUniform("lightDirectionsViewSpace", _lightDirectionsViewSpaceBuffer);
+    _lightsourceRenderData.updateBasedOnLightSources(data, _lightSources);
 
     // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -373,7 +354,7 @@ void GeoJsonComponent::render(const RenderData& data) {
     // Do two render passes, to properly render opacoty of overlaying objects
     for (int renderPass = 0; renderPass < 2; ++renderPass) {
         for (GlobeGeometryFeature& g : _geometryFeatures) {
-            g.render(renderPass, _opacity);
+            g.render(data, renderPass, _opacity, _lightsourceRenderData);
         }
     }
 
@@ -382,7 +363,7 @@ void GeoJsonComponent::render(const RenderData& data) {
     }
 
     glBindVertexArray(0);
-    _program->deactivate();
+    _linesAndPolygonsProgram->deactivate();
 
     // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
@@ -393,8 +374,8 @@ void GeoJsonComponent::update() {
     glm::vec3 offsets = glm::vec3(_latLongOffset.value(), _heightOffset);
 
     for (GlobeGeometryFeature& g : _geometryFeatures) {
-        // @TODO: Handle this more nicely. We don't always have to set the offsets if 
-        // the other data related values have been updated. 
+        // @TODO: Handle this more nicely. We don't always have to set the offsets if
+        // the other data related values have been updated.
         if (_dataIsDirty) {
             g.setOffsets(offsets);
         }
@@ -463,7 +444,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
                 geom->getGeometryN(i),
                 static_cast<int>(_geometryFeatures.size())
             );
-            g.initializeGL(_program.get());
+            g.initializeGL(_linesAndPolygonsProgram.get());
             _geometryFeatures.push_back(std::move(g));
         }
         catch (const ghoul::MissingCaseException&) {
