@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/src/geojson/globegeometryfeature.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
+#include <modules/globebrowsing/src/geojson/globegeometryhelper.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
@@ -57,33 +58,6 @@ namespace {
 } // namespace
 
 namespace openspace::globebrowsing {
-
-Geodetic3 toGeodetic(const geos::geom::Coordinate& c) {
-    Geodetic3 gd;
-    gd.geodetic2.lon = glm::radians(c.x);
-    gd.geodetic2.lat = glm::radians(c.y);
-    gd.height = std::isnan(c.z) ? 0.0 : c.z;
-    return gd;
-}
-
-geos::geom::Coordinate toGeosCoord(const Geodetic3& gd) {
-    geos::geom::Coordinate c;
-    c.x = glm::degrees(gd.geodetic2.lon);
-    c.y = glm::degrees(gd.geodetic2.lat);
-    c.z = gd.height;
-    return c;
-}
-
-std::vector<Geodetic3>
-    coordsToGeodetic(const std::vector<geos::geom::Coordinate>& coords)
-{
-    std::vector<Geodetic3> res;
-    res.reserve(coords.size());
-    for (const geos::geom::Coordinate& c : coords) {
-        res.push_back(toGeodetic(c));
-    }
-    return res;
-}
 
 GlobeGeometryFeature::GlobeGeometryFeature(RenderableGlobe& globe,
                                            GeoJsonProperties& defaultProperties,
@@ -146,6 +120,11 @@ bool GlobeGeometryFeature::isPoints() const {
     return _type == GeometryType::Point;
 }
 
+bool GlobeGeometryFeature::useHeightMap() const {
+    return _properties.altitudeMode() ==
+        GeoJsonProperties::AltitudeMode::RelativeToGround;
+}
+
 void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geometry* geo,
                                                         int index)
 {
@@ -156,14 +135,14 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
         case geos::geom::GEOS_MULTIPOINT: {
             std::vector<geos::geom::Coordinate> coords;
             geo->getCoordinates()->toVector(coords);
-            _geoCoordinates.push_back(coordsToGeodetic(coords));
+            _geoCoordinates.push_back(geometryhelper::coordsToGeodetic(coords));
             _type = GeometryType::Point;
             break;
         }
         case geos::geom::GEOS_LINESTRING: {
             std::vector<geos::geom::Coordinate> coords;
             geo->getCoordinates()->toVector(coords);
-            _geoCoordinates.push_back(coordsToGeodetic(coords));
+            _geoCoordinates.push_back(geometryhelper::coordsToGeodetic(coords));
             _type = GeometryType::LineString;
             break;
         }
@@ -187,7 +166,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
                     triCoords.push_back(t->getCoordinate(2));
                     triCoords.push_back(t->getCoordinate(1));
                 }
-                _triangleCoordinates = coordsToGeodetic(triCoords);
+                _triangleCoordinates = geometryhelper::coordsToGeodetic(triCoords);
 
                 // Boundaries / Lines
 
@@ -203,13 +182,13 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
                     _geoCoordinates.reserve(nHoles + 1);
 
                     // Outer bounds
-                    _geoCoordinates.push_back(coordsToGeodetic(outerBounds));
+                    _geoCoordinates.push_back(geometryhelper::coordsToGeodetic(outerBounds));
 
                     // Inner bounds (holes)
                     for (int i = 0; i < nHoles; ++i) {
                         std::vector<geos::geom::Coordinate> ringCoords;
                         pNormalized->getInteriorRingN(i)->getCoordinates()->toVector(ringCoords);
-                        _geoCoordinates.push_back(coordsToGeodetic(ringCoords));
+                        _geoCoordinates.push_back(geometryhelper::coordsToGeodetic(ringCoords));
                     }
                 }
 
@@ -231,14 +210,14 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
     // Compute reference positions to use for checking if height map changes
     geos::geom::Coordinate centroid;
     geo->getCentroid(centroid);
-    Geodetic3 geoCentroid = coordsToGeodetic({ centroid }).front();
+    Geodetic3 geoCentroid = geometryhelper::coordsToGeodetic({ centroid }).front();
     _heightUpdateReferencePoints.push_back(std::move(geoCentroid));
 
     auto envelope = geo->getEnvelope();
     std::vector<geos::geom::Coordinate> coords;
     envelope->getCoordinates()->toVector(coords);
 
-    std::vector<Geodetic3> envelopeGeoCoords = coordsToGeodetic({ coords });
+    std::vector<Geodetic3> envelopeGeoCoords = geometryhelper::coordsToGeodetic({ coords });
     _heightUpdateReferencePoints.insert(
         _heightUpdateReferencePoints.end(),
         envelopeGeoCoords.begin(),
@@ -470,9 +449,11 @@ GlobeGeometryFeature::subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
         double newHeight = glm::mix(h0, h1, t);
 
         // Get position with adjusted height value
-        newV = static_cast<glm::vec3>(adjustHeightOfModelCoordinate(
+        newV = static_cast<glm::vec3>(geometryhelper::adjustHeightOfModelCoordinate(
             newV,
-            newHeight + hOffset
+            newHeight + hOffset,
+            _globe,
+            useHeightMap()
         ));
 
         positions.push_back(newV);
@@ -480,7 +461,12 @@ GlobeGeometryFeature::subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
 
     // Add final position
     positions.push_back(static_cast<glm::vec3>(
-        adjustHeightOfModelCoordinate(v1, h1 + hOffset)
+        geometryhelper::adjustHeightOfModelCoordinate(
+            v1,
+            h1 + hOffset,
+            _globe,
+            useHeightMap()
+        )
     ));
 
     return positions;
@@ -502,7 +488,12 @@ GlobeGeometryFeature::createPointAndLineGeometry()
 
         bool isFirst = true;
         for (const Geodetic3& geodetic : _geoCoordinates[i]) {
-            glm::dvec3 v = computeOffsetedModelCoordinate(geodetic);
+            glm::dvec3 v = geometryhelper::computeOffsetedModelCoordinate(
+                geodetic,
+                _globe,
+                _offsets,
+                useHeightMap()
+            );
 
             // If we are drawing points, just add and continue
             if (_type == GeometryType::Point) {
@@ -567,40 +558,8 @@ GlobeGeometryFeature::createPointAndLineGeometry()
 void GlobeGeometryFeature::createExtrudedGeometry(
                                  const std::vector<std::vector<glm::vec3>>& edgeVertices)
 {
-    std::vector<Vertex> vertices;
-    vertices.reserve(_triangleCoordinates.size());
-
-    // Extrude polygon
-    for (int nBound = 0; nBound < edgeVertices.size(); ++nBound) {
-        const std::vector<glm::vec3>& boundary = edgeVertices[nBound];
-        for (int i = 1; i < boundary.size(); ++i) {
-            glm::vec3 v0 = boundary[i - 1];
-            glm::vec3 v1 = boundary[i ];
-
-            // Vertices close to globe (Based on origin which is the zero point here)
-            // TEST: use center of globe (TODO: allow setting the height)
-            glm::vec3 vOrigin = glm::vec3(0.f);
-
-            // Outer boundary is the first one
-            if (nBound == 0) {
-                glm::vec3 n = glm::vec3(glm::normalize(glm::cross(v1 - vOrigin, v0 - vOrigin)));
-                vertices.push_back({ vOrigin.x, vOrigin.y, vOrigin.z, n.x, n.y, n.z });
-                vertices.push_back({ v1.x, v1.y, v1.z, n.x, n.y, n.z });
-                vertices.push_back({ v0.x, v0.y, v0.z, n.x, n.y, n.z });
-            }
-            // Inner boundary
-            else {
-                // Flipped winding order and normal for inner rings
-                glm::vec3 n = glm::normalize(glm::cross(v0 - vOrigin, v1 - vOrigin));
-                vertices.push_back({ vOrigin.x, vOrigin.y, vOrigin.z, n.x, n.y, n.z });
-                vertices.push_back({ v0.x, v0.y, v0.z, n.x, n.y, n.z });
-                vertices.push_back({ v1.x, v1.y, v1.z, n.x, n.y, n.z });
-            }
-
-            // TODO: Fix faulty triangle directions and draw triangles with correct shading on
-            // both sides of the mesh
-        }
-    }
+    std::vector<Vertex> vertices =
+        geometryhelper::createExtrudedGeometryVertices(edgeVertices);
 
     RenderFeature feature;
     feature.type = RenderType::Polygon;
@@ -616,8 +575,6 @@ void GlobeGeometryFeature::createExtrudedGeometry(
 
     bufferVertexData(feature, vertices);
     _renderFeatures.push_back(std::move(feature));
-
-    // TODO: extrude lines as a box shape
 }
 
 void GlobeGeometryFeature::createPolygonGeometry() {
@@ -633,7 +590,12 @@ void GlobeGeometryFeature::createPolygonGeometry() {
     std::array<glm::vec3, 3> triPositions;
     std::array<double, 3> triHeights;
     for (const Geodetic3& geodetic : _triangleCoordinates) {
-        const glm::vec3 vert = computeOffsetedModelCoordinate(geodetic);
+        const glm::vec3 vert = geometryhelper::computeOffsetedModelCoordinate(
+            geodetic,
+            _globe,
+            _offsets,
+            useHeightMap()
+        );
         triPositions[triIndex] = vert;
         triHeights[triIndex] = geodetic.height;
         triIndex++;
@@ -684,7 +646,7 @@ void GlobeGeometryFeature::createPolygonGeometry() {
                     Geodetic2 geo2 = _globe.ellipsoid().cartesianToGeodetic2(pos);
                     // TODO: include height from pos
                     Geodetic3 geo3 = { geo2, 0.0 };
-                    pointCoords.push_back(toGeosCoord(geo3));
+                    pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
                 }
             }
 
@@ -694,19 +656,19 @@ void GlobeGeometryFeature::createPolygonGeometry() {
                     Geodetic2 geo2 = _globe.ellipsoid().cartesianToGeodetic2(edge01[i]);
                     // TODO: include height from pos
                     Geodetic3 geo3 = { geo2, 0.0 };
-                    pointCoords.push_back(toGeosCoord(geo3));
+                    pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
                 }
                 if (i < edge02.size() - 1) {
                     Geodetic2 geo2 = _globe.ellipsoid().cartesianToGeodetic2(edge02[i]);
                     // TODO: include height from pos
                     Geodetic3 geo3 = { geo2, 0.0 };
-                    pointCoords.push_back(toGeosCoord(geo3));
+                    pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
                 }
                 if (i < edge12.size() - 1) {
                     Geodetic2 geo2 = _globe.ellipsoid().cartesianToGeodetic2(edge12[i]);
                     // TODO: include height from pos
                     Geodetic3 geo3 = { geo2, 0.0 };
-                    pointCoords.push_back(toGeosCoord(geo3));
+                    pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
                 }
             }
 
@@ -714,7 +676,7 @@ void GlobeGeometryFeature::createPolygonGeometry() {
             Geodetic2 geo2 = _globe.ellipsoid().cartesianToGeodetic2(v2);
             // TODO: include height from pos
             Geodetic3 geo3 = { geo2, 0.0 };
-            pointCoords.push_back(toGeosCoord(geo3));
+            pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
 
             pointCoords.shrink_to_fit();
 
@@ -741,8 +703,13 @@ void GlobeGeometryFeature::createPolygonGeometry() {
                     // Skip every 4th coord, as polygons has one extra coord per triangle
                     continue;
                 }
-                Geodetic3 geodetic = toGeodetic(coord);
-                glm::vec3 v = computeOffsetedModelCoordinate(geodetic);
+                Geodetic3 geodetic = geometryhelper::toGeodetic(coord);
+                glm::vec3 v = geometryhelper::computeOffsetedModelCoordinate(
+                    geodetic,
+                    _globe,
+                    _offsets,
+                    useHeightMap()
+                );
                 vertices.push_back({ v.x, v.y, v.z, 0.f, 0.f, 0.f });
                 finalCount++;
 
@@ -788,65 +755,16 @@ void GlobeGeometryFeature::createPolygonGeometry() {
     _renderFeatures.push_back(std::move(triFeature));
 }
 
-double GlobeGeometryFeature::getHeightToReferenceSurface(const Geodetic2& geo) const {
-    // Compute model space coordinate, and potentially account for height map
-    glm::dvec3 posModelSpaceZeroHeight =
-        _globe.ellipsoid().cartesianSurfacePosition(geo);
-
-    double heightToSurface = 0.0;
-
-    // Different height computation depending on the height mode
-    switch (_properties.altitudeMode()) {
-        case GeoJsonProperties::AltitudeMode::RelativeToGround: {
-            const SurfacePositionHandle posHandle =
-                _globe.calculateSurfacePositionHandle(posModelSpaceZeroHeight);
-
-            heightToSurface += posHandle.heightToSurface;
-            break;
-        }
-        case GeoJsonProperties::AltitudeMode::Absolute: {
-            // Do nothing extra
-            break;
-        }
-        default: throw ghoul::MissingCaseException();
-    }
-
-    return heightToSurface;
-}
-
-glm::dvec3 GlobeGeometryFeature::adjustHeightOfModelCoordinate(const glm::dvec3& pos,
-                                                               double targetHeight) const
-{
-    Geodetic2 geo2 = _globe.ellipsoid().cartesianToGeodetic2(pos);
-    double heightToSurface = getHeightToReferenceSurface(geo2);
-    Geodetic3 heightAdjustedGeo = { geo2, heightToSurface + targetHeight };
-    return _globe.ellipsoid().cartesianPosition(heightAdjustedGeo);
-}
-
-glm::dvec3 GlobeGeometryFeature::computeOffsetedModelCoordinate(
-                                                              const Geodetic3& geo) const
-{
-    // Account for lat long offset
-    double offsetLatRadians = glm::radians(_offsets.x);
-    double offsetLonRadians = glm::radians(_offsets.y);
-
-    Geodetic3 adjusted = geo;
-    adjusted.geodetic2.lat += offsetLatRadians;
-    adjusted.geodetic2.lon += offsetLonRadians;
-
-    double heightToSurface = _offsets.z;
-    heightToSurface += getHeightToReferenceSurface(geo.geodetic2);
-
-    Geodetic3 heightAdjustedGeo = geo;
-    heightAdjustedGeo.height += heightToSurface;
-    return _globe.ellipsoid().cartesianPosition(heightAdjustedGeo);
-}
-
 std::vector<double> GlobeGeometryFeature::getCurrentReferencePointsHeights() const {
     std::vector<double> newHeights;
     newHeights.reserve(_heightUpdateReferencePoints.size());
     for (const Geodetic3& geo : _heightUpdateReferencePoints) {
-        const glm::dvec3 p = computeOffsetedModelCoordinate(geo);
+        const glm::dvec3 p = geometryhelper::computeOffsetedModelCoordinate(
+            geo,
+            _globe,
+            _offsets,
+            useHeightMap()
+        );
         const SurfacePositionHandle handle = _globe.calculateSurfacePositionHandle(p);
         newHeights.push_back(handle.heightToSurface);
     }

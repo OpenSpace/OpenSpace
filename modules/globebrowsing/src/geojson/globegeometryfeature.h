@@ -102,6 +102,7 @@ public:
     void deinitializeGL();
     bool isReady() const;
     bool isPoints() const;
+    bool useHeightMap() const;
 
     void createFromSingleGeosGeometry(const geos::geom::Geometry* geo, int index);
 
@@ -152,22 +153,6 @@ private:
      * contained by the shape)
      */
     void createPolygonGeometry();
-
-    /**
-     * Get height contribution from reference surface. What the contribution is depends
-     * on the altitude mode.
-     */
-    double getHeightToReferenceSurface(const Geodetic2& geo) const;
-
-    /// Position in model space. Target height is target height above reference surface
-    glm::dvec3 adjustHeightOfModelCoordinate(const glm::dvec3& pos,
-        double targetHeight) const;
-
-    /**
-     * Compute model space cordinate form geodetic coordinate, and account for lat, long
-     * and height offsets and potentially the height map, depending on the chosen altitude mode
-     */
-    glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo) const;
 
     /// Compute the heights to the surface at the reference points
     std::vector<double> getCurrentReferencePointsHeights() const;

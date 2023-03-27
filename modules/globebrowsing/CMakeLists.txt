@@ -63,6 +63,7 @@ set(HEADER_FILES
   src/geojson/geojsonmanager.h
   src/geojson/geojsonproperties.h
   src/geojson/globegeometryfeature.h
+  src/geojson/globegeometryhelper.h
   src/tileprovider/defaulttileprovider.h
   src/tileprovider/imagesequencetileprovider.h
   src/tileprovider/singleimagetileprovider.h
@@ -108,6 +109,7 @@ set(SOURCE_FILES
   src/geojson/geojsonmanager.cpp
   src/geojson/geojsonproperties.cpp
   src/geojson/globegeometryfeature.cpp
+  src/geojson/globegeometryhelper.cpp
   src/tileprovider/defaulttileprovider.cpp
   src/tileprovider/imagesequencetileprovider.cpp
   src/tileprovider/singleimagetileprovider.cpp
