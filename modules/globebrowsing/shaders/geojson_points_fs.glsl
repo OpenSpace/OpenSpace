@@ -58,7 +58,7 @@ Fragment getFragment() {
     vec3 shadedColor = ambientIntensity  * color;
 
     for (int i = 0; i < nLightSources; ++i) {
-      vec3 l = lightDirectionsViewSpace[i];
+        vec3 l = lightDirectionsViewSpace[i];
 
         // Diffuse
         vec3 diffuseColor = diffuseIntensity * max(dot(n,l), 0.0) * color;

@@ -61,8 +61,7 @@ namespace {
     glm::vec3 hexToRbg(std::string_view hexColor) {
         int r, g, b;
         int ret = std::sscanf(hexColor.data(), "#%02x%02x%02x", &r, &g, &b);
-        // TODO: Hnadle return value to validate color
-        LINFOC("GeoJSON", fmt::format("Return value from hex color read: {}", ret)); // TODO: remove
+        // TODO: Handle return value to validate color
         return (1.f / 255.f) * glm::vec3(r, g, b);
     }
 
@@ -71,7 +70,7 @@ namespace {
         if (value.isArray()) {
             const std::vector<geos::io::GeoJSONValue>& val = value.getArray();
             if (val.size() != 3) {
-                // @TODO: Shouls add some more information on which file the reading failed for
+                // @TODO: Should add some more information on which file the reading failed for
                 LERRORC("GeoJSON", fmt::format(
                     "Failed reading color property. Expected 3 values, got {}", val.size()
                 ));
@@ -86,7 +85,7 @@ namespace {
         }
         else if (value.isString()) {
             const std::string hex = value.getString();
-            // @TODO Verufy color
+            // @TODO Verify color
             color = hexToRbg(hex);
         }
         return color;
@@ -138,7 +137,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AltitudeModeInfo = {
         "AltitudeMode",
         "Altitude Mode",
-        "" // TODO
+        "" // @TODO
     };
 
     struct [[codegen::Dictionary(GeoJsonProperties)]] Parameters {

@@ -344,9 +344,9 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
             rendering::helper::VertexXYZNormal& vert0 = vertices[count - 3];
             rendering::helper::VertexXYZNormal& vert1 = vertices[count - 2];
 
-            const glm::vec3 v0 = glm::vec3(vert0.xyz[0], vert0.xyz[1], vert0.xyz[2]);
-            const glm::vec3 v1 = glm::vec3(vert1.xyz[0], vert1.xyz[1], vert1.xyz[2]);
-            const glm::vec3 n = -glm::normalize(glm::cross(v1 - v0, v - v0));
+            const glm::vec3 v0_pos = glm::vec3(vert0.xyz[0], vert0.xyz[1], vert0.xyz[2]);
+            const glm::vec3 v1_pos = glm::vec3(vert1.xyz[0], vert1.xyz[1], vert1.xyz[2]);
+            const glm::vec3 n = -glm::normalize(glm::cross(v1_pos - v0_pos, v - v0_pos));
 
             vert0.normal[0] = n.x;
             vert0.normal[1] = n.y;
