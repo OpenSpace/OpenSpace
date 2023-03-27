@@ -131,16 +131,12 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
     switch (geo->getGeometryTypeId()) {
         case geos::geom::GEOS_POINT:
         case geos::geom::GEOS_MULTIPOINT: {
-            std::vector<geos::geom::Coordinate> coords;
-            geo->getCoordinates()->toVector(coords);
-            _geoCoordinates.push_back(geometryhelper::coordsToGeodetic(coords));
+            _geoCoordinates.push_back(geometryhelper::geometryCoordsAsGeoVector(geo));
             _type = GeometryType::Point;
             break;
         }
         case geos::geom::GEOS_LINESTRING: {
-            std::vector<geos::geom::Coordinate> coords;
-            geo->getCoordinates()->toVector(coords);
-            _geoCoordinates.push_back(geometryhelper::coordsToGeodetic(coords));
+            _geoCoordinates.push_back(geometryhelper::geometryCoordsAsGeoVector(geo));
             _type = GeometryType::LineString;
             break;
         }
@@ -172,21 +168,24 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
                 std::unique_ptr<Polygon> pNormalized = p->clone();
                 pNormalized->normalize();
 
-                std::vector<geos::geom::Coordinate> outerBounds;
-                pNormalized->getExteriorRing()->getCoordinates()->toVector(outerBounds);
+                const geos::geom::LinearRing* outerRing = pNormalized->getExteriorRing();
+                std::vector<Geodetic3> outerBoundsGeoCoords =
+                    geometryhelper::geometryCoordsAsGeoVector(outerRing);
 
-                if (!outerBounds.empty()) {
+                if (!outerBoundsGeoCoords.empty()) {
                     int nHoles = static_cast<int>(pNormalized->getNumInteriorRing());
                     _geoCoordinates.reserve(nHoles + 1);
 
                     // Outer bounds
-                    _geoCoordinates.push_back(geometryhelper::coordsToGeodetic(outerBounds));
+                    _geoCoordinates.push_back(outerBoundsGeoCoords);
 
                     // Inner bounds (holes)
                     for (int i = 0; i < nHoles; ++i) {
-                        std::vector<geos::geom::Coordinate> ringCoords;
-                        pNormalized->getInteriorRingN(i)->getCoordinates()->toVector(ringCoords);
-                        _geoCoordinates.push_back(geometryhelper::coordsToGeodetic(ringCoords));
+                        const geos::geom::LinearRing* hole = pNormalized->getInteriorRingN(i);
+                        std::vector<Geodetic3> ringGeoCoords =
+                            geometryhelper::geometryCoordsAsGeoVector(hole);
+
+                        _geoCoordinates.push_back(ringGeoCoords);
                     }
                 }
 
@@ -210,12 +209,10 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
     geo->getCentroid(centroid);
     Geodetic3 geoCentroid = geometryhelper::coordsToGeodetic({ centroid }).front();
     _heightUpdateReferencePoints.push_back(std::move(geoCentroid));
+;
+    std::vector<Geodetic3> envelopeGeoCoords =
+        geometryhelper::geometryCoordsAsGeoVector(geo->getEnvelope().get());
 
-    auto envelope = geo->getEnvelope();
-    std::vector<geos::geom::Coordinate> coords;
-    envelope->getCoordinates()->toVector(coords);
-
-    std::vector<Geodetic3> envelopeGeoCoords = geometryhelper::coordsToGeodetic({ coords });
     _heightUpdateReferencePoints.insert(
         _heightUpdateReferencePoints.end(),
         envelopeGeoCoords.begin(),
@@ -287,16 +284,15 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
 
         switch (r.type) {
             case RenderType::Lines:
-                renderLines(r, shader);
+                renderLines(r);
                 break;
             case RenderType::Points:
-                renderPoints(r, shader);
+                renderPoints(r);
                 break;
             case RenderType::Polygon: {
                 shader->setUniform("opacity", fillOpacity);
-
                 bool shouldRenderTwice = (fillOpacity < 1.0);
-                renderPolygons(r, shader, shouldRenderTwice, pass);
+                renderPolygons(r, shouldRenderTwice, pass);
                 break;
             }
             default:
@@ -314,8 +310,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 }
 
-void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
-                                        ghoul::opengl::ProgramObject* shader) const
+void GlobeGeometryFeature::renderPoints(const RenderFeature& feature) const
 {
     ghoul_assert(feature.type == RenderType::Points, "Trying to render faulty geometry");
     _pointsProgram->setUniform("color", _properties.color());
@@ -336,8 +331,7 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
     // TODO: support sprites for the points
 }
 
-void GlobeGeometryFeature::renderLines(const RenderFeature& feature,
-                                       ghoul::opengl::ProgramObject* shader) const
+void GlobeGeometryFeature::renderLines(const RenderFeature& feature) const
 {
     ghoul_assert(feature.type == RenderType::Lines, "Trying to render faulty geometry");
 
@@ -350,7 +344,6 @@ void GlobeGeometryFeature::renderLines(const RenderFeature& feature,
 }
 
 void GlobeGeometryFeature::renderPolygons(const RenderFeature& feature,
-                                          ghoul::opengl::ProgramObject* shader,
                                           bool shouldRenderTwice, int renderPass) const
 {
     ghoul_assert(

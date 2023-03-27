@@ -61,6 +61,12 @@ coordsToGeodetic(const std::vector<geos::geom::Coordinate>& coords)
     return res;
 }
 
+std::vector<Geodetic3> geometryCoordsAsGeoVector(const geos::geom::Geometry* geometry) {
+    std::vector<geos::geom::Coordinate> coords;
+    geometry->getCoordinates()->toVector(coords);
+    return geometryhelper::coordsToGeodetic(coords);
+}
+
 std::vector<rendering::helper::VertexXYZNormal>
 createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVertices)
 {

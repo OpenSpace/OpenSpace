@@ -40,6 +40,7 @@ namespace openspace::rendering::helper {
 
 namespace geos::geom {
     class Coordinate;
+    class Geometry;
 }
 
 namespace openspace::globebrowsing::geometryhelper {
@@ -50,6 +51,8 @@ geos::geom::Coordinate toGeosCoord(const Geodetic3& gd);
 
 std::vector<Geodetic3> coordsToGeodetic(
     const std::vector<geos::geom::Coordinate>& coords);
+
+std::vector<Geodetic3> geometryCoordsAsGeoVector(const geos::geom::Geometry* geometry);
 
 /**
 * Create triangle geometry for the extruded edge, given the provided edge vertices

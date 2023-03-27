@@ -119,15 +119,13 @@ public:
     void updateGeometry();
 
 private:
-    void renderPoints(const RenderFeature& feature,
-        ghoul::opengl::ProgramObject* shader) const;
+    void renderPoints(const RenderFeature& feature) const;
 
-    void renderLines(const RenderFeature& feature,
-        ghoul::opengl::ProgramObject* shader) const;
+    void renderLines(const RenderFeature& feature) const;
 
-    void renderPolygons(const RenderFeature& feature,
-        ghoul::opengl::ProgramObject* shader, bool shouldRenderTwice,
+    void renderPolygons(const RenderFeature& feature, bool shouldRenderTwice,
         int renderPass) const;
+
 
     /**
      * Create the vertex information for the line and point parts of the feature.
