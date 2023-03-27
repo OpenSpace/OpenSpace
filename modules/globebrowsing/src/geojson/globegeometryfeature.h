@@ -130,14 +130,6 @@ private:
         int renderPass) const;
 
     /**
-     * Subdivide line between position v0 and v1 so that it fullfils the MaxDistance
-     * criteria. And interpolate the height value from * h0 to h1, as well as add the
-     * given offset
-     */
-    std::vector<glm::vec3> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
-        double h0, double h1, double hOffset) const;
-
-    /**
      * Create the vertex information for the line and point parts of the feature.
      * Returns the resulting vertex positions, so we can use them for extrusion
      */
