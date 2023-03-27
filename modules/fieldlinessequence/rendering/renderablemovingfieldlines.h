@@ -37,6 +37,7 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/properties/triggerproperty.h>
+#include <curl/curl.h>
 
 #include <openspace/rendering/transferfunction.h>
 
@@ -167,6 +168,7 @@ private:
     double _manualTimeOffset = 0.0;
     std::vector<std::filesystem::path> _sourceFiles;
     std::filesystem::path _seedFilePath;
+    std::string _seedPointsFromProvider = "";
     std::vector<glm::vec3> _seedPoints;
     // Extra variables such as rho, p or t
     std::vector<std::string> _extraVars;

@@ -33,6 +33,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
+#include <curl/curl.h>
+#include <iostream>
 
 #include <ccmc/Kameleon.h>
 #include <ccmc/KameleonInterpolator.h>
@@ -89,6 +91,10 @@ namespace {
     struct [[codegen::Dictionary(RenderableMovingFieldlines)]] Parameters {
         // Path to folder containing the input .cdf files
         std::filesystem::path sourceFolder [[codegen::directory()]];
+        // Bool if seedPointProvider is used or not
+        std::optional<bool> seedPointProvider;
+        // Variable storing seedpoints
+        std::optional<std::string> seedPointsFromProvider;
         // Path to file with seed points
         std::filesystem::path seedPointFile;
         // Extra variables such as rho, p or t
@@ -198,6 +204,7 @@ namespace openspace {
         std::sort(_sourceFiles.begin(), _sourceFiles.end());
 
         _seedFilePath = p.seedPointFile;
+        _seedPointsFromProvider = p.seedPointsFromProvider.value_or(_seedPointsFromProvider);
         _extraVars = p.extraVariables.value_or(_extraVars);
         _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
         _tracingVariable = p.tracingVariable.value_or(_tracingVariable);
@@ -259,6 +266,13 @@ namespace openspace {
         }
     }
 
+    size_t write_data(void* ptr, size_t size, size_t nmemb, FILE* stream)
+    {
+        size_t written;
+        written = fwrite(ptr, size, nmemb, stream);
+        return written;
+    }
+
     void RenderableMovingFieldlines::initialize() {
         // Set a default color table, just in case the (optional) user defined paths are
         // corrupt or not provided
@@ -267,6 +281,23 @@ namespace openspace {
             absPath(_colorTablePaths[0]).string()
             );
 
+        CURL* curl;
+        FILE* fp;
+        CURLcode res;
+        char outfilename[FILENAME_MAX] = "C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/bbb.txt";
+        curl = curl_easy_init();
+        if (curl)
+        {
+            fp = fopen(outfilename, "wb");
+            curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:5000/title");
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+            curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+            res = curl_easy_perform(curl);
+            curl_easy_cleanup(curl);
+            fclose(fp);
+        }
+  
         bool stateSuccuess = getStateFromCdfFiles();
         if (!stateSuccuess) {
             throw ghoul::RuntimeError("Trying to read cdf file failed");
