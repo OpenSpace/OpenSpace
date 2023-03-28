@@ -136,6 +136,11 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     std::stringstream path;
     path << "/" << enclosing << "/" << layerGroup << "/" << identifier << "/";
+    std::string compression = _layerGroupID == layers::Group::ID::HeightLayers ? "LERC" : "JPEG";
+    if (p.cacheSettings.has_value()) {
+        compression = p.cacheSettings->compression.value_or(compression);
+    }
+
     TileTextureInitData initData(
         tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
     );
