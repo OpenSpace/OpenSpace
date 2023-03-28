@@ -121,6 +121,21 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     _performPreProcessing = _layerGroupID == layers::Group::ID::HeightLayers;
     _performPreProcessing = p.performPreProcessing.value_or(_performPreProcessing);
 
+    // Get the name of the layergroup to which this layer belongs
+    auto it = std::find_if(
+        layers::Groups.begin(),
+        layers::Groups.end(),
+        [id = _layerGroupID](const layers::Group& gi) {
+            return gi.id == id;
+        }
+    );
+    auto layerGroup = it != layers::Groups.end() ? it->name : std::to_string(static_cast<int>(_layerGroupID));
+
+    auto identifier = p.identifier.value_or("unspecified");
+    auto enclosing = p.globeName.value_or("unspecified");
+
+    std::stringstream path;
+    path << "/" << enclosing << "/" << layerGroup << "/" << identifier << "/";
     TileTextureInitData initData(
         tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
     );
