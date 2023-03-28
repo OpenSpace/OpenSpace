@@ -95,6 +95,8 @@ public:
      */
     const std::vector<MissionPhase>& phases() const;
 
+    const std::vector<std::string> &actions() const;
+
     using Trace = std::vector<std::reference_wrapper<const MissionPhase>>;
 
     /**
@@ -140,6 +142,8 @@ protected:
     std::vector<MissionPhase> _subphases;
     /// Image that is associated with this phase
     std::string _image;
+    /// Actions associated with the phase
+    std::vector<std::string> _actions;
 };
 
 /**

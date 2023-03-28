@@ -60,6 +60,9 @@ namespace {
             std::optional<std::string> image;
         };
         std::optional<Media> media;
+
+        // Actions associated with this phase
+        std::optional<std::vector<std::string>> actions;
     };
 #include "mission_codegen.cpp"
 } // namespace
@@ -141,6 +144,10 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
             ));
         }
     }
+
+    if (p.actions.has_value()) {
+        _actions = p.actions.value_or(_actions);
+    }
 }
 
 const std::string& MissionPhase::name() const {
@@ -161,6 +168,10 @@ const std::string& MissionPhase::image() const {
 
 const std::vector<MissionPhase>& MissionPhase::phases() const {
     return _subphases;
+}
+
+const std::vector<std::string>& MissionPhase::actions() const {
+    return _actions;
 }
 
 MissionPhase::Trace MissionPhase::phaseTrace(double time, int maxDepth) const {
