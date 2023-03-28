@@ -146,6 +146,9 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
         compression = p.cacheSettings->compression.value_or(compression);
     }
 
+    _cacheProperties.enabled = enabled;
+    _cacheProperties.compression = compression;
+
     TileTextureInitData initData(
         tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
     );

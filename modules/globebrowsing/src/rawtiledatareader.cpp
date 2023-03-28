@@ -521,7 +521,7 @@ void RawTileDataReader::initialize() {
         }
     }
 
-    if (module.isMRFCachingEnabled()) {
+    if (_cacheProperties.enabled) {
         ZoneScopedN("MRF Caching");
 
         std::string datasetIdentifier = std::to_string(std::hash<std::string>{}(_datasetFilePath));;
@@ -567,15 +567,9 @@ void RawTileDataReader::initialize() {
                 createOpts = CSLSetNameValue(createOpts, "CACHEDSOURCE", content.c_str());
                 createOpts = CSLSetNameValue(createOpts, "NOCOPY", "true");
                 createOpts = CSLSetNameValue(createOpts, "uniform_scale", "2");
-                if (root.find("dem") != std::string::npos) {
-                    createOpts = CSLSetNameValue(createOpts, "compress", "LERC");
-                }
-                else {
-                    auto compress = module.mrfCacheCompression();
-                    createOpts = CSLSetNameValue(createOpts, "compress", compress.c_str());
-                    if (compress == "JPEG") {
-                        createOpts = CSLSetNameValue(createOpts, "quality", "75");
-                    }
+                createOpts = CSLSetNameValue(createOpts, "compress", _cacheProperties.compression.c_str());
+                if (_cacheProperties.compression == "JPEG") {
+                    createOpts = CSLSetNameValue(createOpts, "quality", "75");
                 }
 
                 createOpts = CSLSetNameValue(createOpts, "blocksize", "256");
