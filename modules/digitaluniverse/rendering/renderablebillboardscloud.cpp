@@ -624,9 +624,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
     _program->setUniform(
         _uniformCache.cameraViewProjectionMatrix,
-        glm::mat4(
-            glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
-        )
+        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
     );
 
     const float minBillboardSize = _billboardMinMaxSize.value().x; // in pixels
@@ -698,9 +696,9 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 
-    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+    glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
 
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
