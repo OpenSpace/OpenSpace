@@ -532,6 +532,13 @@ void RawTileDataReader::initialize() {
         std::string cache = root + datasetIdentifier + ".mrfcache";
 
         if (!std::filesystem::exists(mrf)) {
+            if (!std::filesystem::create_directories(root)) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Failed to create directories for cache at: {}",
+                    root
+                ));
+            }
+
             auto* driver = GetGDALDriverManager()->GetDriverByName("MRF");
             if (driver != nullptr) {
                 auto src = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
