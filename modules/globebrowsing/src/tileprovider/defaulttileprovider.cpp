@@ -83,6 +83,9 @@ namespace {
         // Specifies the cache settings that should be applied to this layer
         std::optional<CacheSettings> cacheSettings;
 
+        // The name of the enclosing globe
+        std::optional<std::string> globeName;
+
     };
 #include "defaulttileprovider_codegen.cpp"
 } // namespace
