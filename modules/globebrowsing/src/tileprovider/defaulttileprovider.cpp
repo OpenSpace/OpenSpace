@@ -52,6 +52,9 @@ namespace {
         // User-facing name of this tile provider
         std::optional<std::string> name;
 
+        // Identifier of the enclosing layer to which tiles are provided
+        std::optional<std::string> identifier;
+
         // The path to the file that is loaded by GDAL to produce tiles. Since GDAL
         // supports it, this can also be the textual representation of the contents of a
         // loading file
@@ -69,6 +72,16 @@ namespace {
 
         // Determines if the tiles should be preprocessed before uploading to the GPU
         std::optional<bool> performPreProcessing;
+
+        struct CacheSettings {
+            // Specifies whether to use caching or not
+            std::optional<bool> enabled;
+
+            // The compression algorithm to use for cached tiles
+            std::optional<std::string> compression;
+        };
+        // Specifies the cache settings that should be applied to this layer
+        std::optional<CacheSettings> cacheSettings;
 
     };
 #include "defaulttileprovider_codegen.cpp"
