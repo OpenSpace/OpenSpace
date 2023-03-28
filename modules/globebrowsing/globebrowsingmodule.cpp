@@ -131,13 +131,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MRFCacheEnabledInfo = {
         "MRFCacheEnabled",
         "MRF Cache Enabled",
-        "Determines whether MRF something something"
+        "Determines whether automatic caching of globe browsing data is enabled."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MRFCacheLocationInfo = {
         "MRFCacheLocation",
         "MRF Cache Location",
-        "The location of the cache folder for MRF something"
+        "The location of the root folder for the MRF cache of globe browsing data."
     };
 
     openspace::GlobeBrowsingModule::Capabilities
