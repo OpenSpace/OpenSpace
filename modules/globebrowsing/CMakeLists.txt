@@ -100,7 +100,6 @@ set(SOURCE_FILES
   src/tileindex.cpp
   src/tileloadjob.cpp
   src/tiletextureinitdata.cpp
-  src/tilecacheproperties.cpp
   src/timequantizer.cpp
   src/tileprovider/defaulttileprovider.cpp
   src/tileprovider/imagesequencetileprovider.cpp
