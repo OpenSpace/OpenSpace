@@ -26,7 +26,10 @@
 
 flat in float vs_screenSpaceDepth;
 flat in vec3 vs_normal; // TODO: not needed for shading, remove somehow
+in vec2 texCoord;
 
+uniform sampler2D pointTexture;
+uniform bool hasTexture;
 uniform vec3 color;
 uniform float opacity;
 
@@ -35,10 +38,17 @@ const vec3 LightColor = vec3(1.0);
 Fragment getFragment() {
   Fragment frag;
 
-  if (opacity == 0.0) {
+  if (hasTexture) {
+    frag.color = texture(pointTexture, texCoord);
+    frag.color.a *= opacity;
+  }
+  else {
+    frag.color = vec4(color * vs_normal, opacity);
+  }
+
+  if (frag.color.a == 0.0) {
     discard;
   }
-  frag.color = vec4(color * vs_normal, opacity);
 
   frag.depth = vs_screenSpaceDepth;
   frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);

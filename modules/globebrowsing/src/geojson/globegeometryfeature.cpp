@@ -342,17 +342,17 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature) const
     _pointsProgram->setUniform("color", _properties.color());
     _pointsProgram->setUniform("pointSize", _properties.pointSize());
 
-    //if (_pointTexture) {
-    //    ghoul::opengl::TextureUnit unit;
-    //    unit.activate();
-    //    _pointTexture->bind();
-    //    _pointsProgram->setUniform("pointTexture", unit);
-    //    _pointsProgram->setUniform("hasTexture", true);
-    //}
-    //else {
-    //    glBindTexture(GL_TEXTURE_2D, 0);
-    //    _pointsProgram->setUniform("hasTexture", false);
-    //}
+    if (_pointTexture) {
+        ghoul::opengl::TextureUnit unit;
+        unit.activate();
+        _pointTexture->bind();
+        _pointsProgram->setUniform("pointTexture", unit);
+        _pointsProgram->setUniform("hasTexture", true);
+    }
+    else {
+        glBindTexture(GL_TEXTURE_2D, 0);
+        _pointsProgram->setUniform("hasTexture", false);
+    }
     glEnable(GL_PROGRAM_POINT_SIZE);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(feature.nVertices));
     glDisable(GL_PROGRAM_POINT_SIZE);
