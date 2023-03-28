@@ -52,6 +52,7 @@ protected:
 
 private:
     VideoPlayer _videoPlayer;
+    glm::vec2 _textureDimensions = glm::vec2(0.f);
 };
 
 } // namespace openspace
