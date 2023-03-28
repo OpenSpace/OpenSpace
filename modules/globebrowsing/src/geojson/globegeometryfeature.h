@@ -147,7 +147,7 @@ private:
     /// Compute the heights to the surface at the reference points
     std::vector<double> getCurrentReferencePointsHeights() const;
 
-    GeometryType _type;
+    GeometryType _type = GeometryType::Error;
     RenderableGlobe& _globe;
 
     // Coordinates for geometry. For polygons, the first is always the outer ring
