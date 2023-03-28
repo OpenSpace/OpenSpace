@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/rawtile.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <modules/globebrowsing/src/tilecacheproperties.h>
 #include <ghoul/misc/boolean.h>
 #include <string>
 #include <mutex>
@@ -53,7 +54,7 @@ public:
      * \param baseDirectory, the base directory to use in future loading operations
      */
     RawTileDataReader(std::string filePath, TileTextureInitData initData,
-        PerformPreprocessing preprocess = PerformPreprocessing::No);
+        TileCacheProperties cacheProperties, PerformPreprocessing preprocess = PerformPreprocessing::No);
     ~RawTileDataReader();
 
     void reset();
@@ -97,6 +98,7 @@ private:
     int _maxChunkLevel = -1;
 
     const TileTextureInitData _initData;
+    const TileCacheProperties _cacheProperties;
     const PerformPreprocessing _preprocess;
     TileDepthTransform _depthTransform = { .scale = 0.f, .offset = 0.f };
 

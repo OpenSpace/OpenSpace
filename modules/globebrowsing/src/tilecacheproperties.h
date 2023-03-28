@@ -22,44 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__DEFAULTTILEPROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__DEFAULTTILEPROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_CACHE_PROPERTIES___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_CACHE_PROPERTIES___H__
 
-#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/src/tilecacheproperties.h>
-#include <modules/globebrowsing/src/asynctiledataprovider.h>
-#include <memory>
+#include <modules/globebrowsing/src/layergroupid.h>
+#include <ghoul/glm.h>
+#include <ghoul/misc/boolean.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace::globebrowsing {
 
-class DefaultTileProvider : public TileProvider {
-public:
-    DefaultTileProvider(const ghoul::Dictionary& dictionary);
+struct TileCacheProperties {
+    bool enabled;
+    std::string compression;
+    std::string path;
 
-    Tile tile(const TileIndex& tileIndex) override final;
-    Tile::Status tileStatus(const TileIndex& index) override final;
-    TileDepthTransform depthTransform() override final;
-    void update() override final;
-    void reset() override final;
-    int minLevel() override final;
-    int maxLevel() override final;
-    float noDataValueAsFloat() override final;
-
-    static documentation::Documentation Documentation();
-
-private:
-    void initAsyncTileDataReader(TileTextureInitData initData, TileCacheProperties cacheProperties);
-
-    properties::StringProperty _filePath;
-    properties::IntProperty _tilePixelSize;
-
-    std::unique_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    layers::Group::ID _layerGroupID = layers::Group::ID::Unknown;
-    bool _performPreProcessing = false;
-    bool _padTiles = true;
-    TileCacheProperties _cacheProperties{ false };
+    void setDefaultCompression(layers::Group::ID id) {
+        if (id == layers::Group::ID::HeightLayers) {
+            compression = "LERC";
+        }
+        else {
+            compression = "JPEG";
+        }
+    }
 };
 
 } // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__DEFAULTTILEPROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_CACHE_PROPERTIES___H__

@@ -421,9 +421,11 @@ RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile,
 
 RawTileDataReader::RawTileDataReader(std::string filePath,
                                      TileTextureInitData initData,
+                                     TileCacheProperties cacheProperties,
                                      PerformPreprocessing preprocess)
     : _datasetFilePath(std::move(filePath))
     , _initData(std::move(initData))
+    , _cacheProperties(std::move(cacheProperties))
     , _preprocess(preprocess)
 {
     ZoneScoped;

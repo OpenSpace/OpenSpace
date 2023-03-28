@@ -109,13 +109,13 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
         tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
     );
     _tilePixelSize = initData.dimensions.x;
-    initAsyncTileDataReader(initData);
+    initAsyncTileDataReader(initData, _cacheProperties);
 
     addProperty(_filePath);
     addProperty(_tilePixelSize);
 }
 
-void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) {
+void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData, TileCacheProperties cacheProperties) {
     ZoneScoped;
 
     _asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
@@ -123,6 +123,7 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) 
         std::make_unique<RawTileDataReader>(
             _filePath,
             initData,
+            cacheProperties,
             RawTileDataReader::PerformPreprocessing(_performPreProcessing)
         )
     );
@@ -189,7 +190,8 @@ void DefaultTileProvider::update() {
 
     if (_asyncTextureDataProvider->shouldBeDeleted()) {
         initAsyncTileDataReader(
-            tileTextureInitData(_layerGroupID, _padTiles, _tilePixelSize)
+            tileTextureInitData(_layerGroupID, _padTiles, _tilePixelSize),
+            _cacheProperties
         );
     }
 }
