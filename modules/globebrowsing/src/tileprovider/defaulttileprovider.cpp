@@ -136,8 +136,13 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     std::stringstream path;
     path << "/" << enclosing << "/" << layerGroup << "/" << identifier << "/";
+
+    GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
+    auto enabled = module.isMRFCachingEnabled();
+
     std::string compression = _layerGroupID == layers::Group::ID::HeightLayers ? "LERC" : "JPEG";
     if (p.cacheSettings.has_value()) {
+        enabled = p.cacheSettings->enabled.value_or(enabled);
         compression = p.cacheSettings->compression.value_or(compression);
     }
 
