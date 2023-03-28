@@ -370,7 +370,7 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
 
 OrbitalNavigator::LimitZoomOut::LimitZoomOut()
     : properties::PropertyOwner({ "LimitZoomOut" })
-    , isEnabled(EnabledMaximumDistanceInfo, false)
+    , enabled(EnabledMaximumDistanceInfo, false)
     , maximumAllowedDistance(
         MaximumDistanceInfo,
         4E+27,
@@ -378,7 +378,7 @@ OrbitalNavigator::LimitZoomOut::LimitZoomOut()
         4E+27
     )
 {
-    addProperty(isEnabled);
+    addProperty(enabled);
     addProperty(maximumAllowedDistance);
     maximumAllowedDistance.setExponent(20.f);
 }
@@ -967,7 +967,7 @@ void OrbitalNavigator::updatePreviousStateVariables() {
 }
 
 void OrbitalNavigator::setMinimumAllowedDistance(float distance) {
-    if (_limitZoomOut.isEnabled && distance > _limitZoomOut.maximumAllowedDistance) {
+    if (_limitZoomOut.enabled && distance > _limitZoomOut.maximumAllowedDistance) {
         LWARNING("Setting minumum allowed distance larger than maximum allowed distance");
     }
 
@@ -1596,7 +1596,7 @@ glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
     double minHeight = _enableMinimumAllowedDistanceLimit ?
         static_cast<double>(_minimumAllowedDistance) : 0.0;
 
-    double maxHeight = _limitZoomOut.isEnabled ?
+    double maxHeight = _limitZoomOut.enabled ?
         static_cast<double>(_limitZoomOut.maximumAllowedDistance) : -1.0;
 
     if (maxHeight > 0 && minHeight > maxHeight) {
@@ -1621,13 +1621,13 @@ glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
 
     // Adjustment for if the camera is inside the min distance
     double adjustment = 0.0;
-    if (std::abs(minHeight) > std::numeric_limits<double>::epsilon()) {
+    if (std::abs(minHeight) > 0.0) {
         adjustment = glm::max(minHeight - surfaceToCameraSigned, 0.0);
     }
 
     // Adjustment for if the camera is outside the max distance
     // Only apply if the min adjustment not already applied
-    if (maxHeight > 0 && adjustment < std::numeric_limits<double>::epsilon()) {
+    if (maxHeight > 0 && std::abs(adjustment) < std::numeric_limits<double>::epsilon()) {
         adjustment = glm::min(maxHeight - surfaceToCameraSigned, 0.0);
     }
 

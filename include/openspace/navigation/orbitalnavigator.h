@@ -148,8 +148,8 @@ public:
     glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
 
     /**
-    * \return The Lua library that contains all Lua functions available to affect the
-    * orbital navigation
+    * \return the Lua library that contains all Lua functions available to affect the
+    * OrbitalNavigator
     */
     static scripting::LuaLibrary luaLibrary();
 
@@ -203,7 +203,7 @@ private:
     struct LimitZoomOut : public properties::PropertyOwner {
         LimitZoomOut();
 
-        properties::BoolProperty isEnabled;
+        properties::BoolProperty enabled;
         properties::FloatProperty maximumAllowedDistance;
     };
 

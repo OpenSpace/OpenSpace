@@ -302,7 +302,6 @@ TouchInteraction::TouchInteraction()
 {
     addProperty(_disableZoom);
     addProperty(_disableRoll);
-    addProperty(_disableDirect);
     addProperty(_unitTest);
     addProperty(_reset);
     addProperty(_maxTapTime);
