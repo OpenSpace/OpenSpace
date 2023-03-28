@@ -34,7 +34,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
-#include <filesystem>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -54,6 +53,8 @@
 
 #include <algorithm>
 #include <fstream>
+#include <filesystem>
+#include <system_error>
 
 namespace openspace::globebrowsing {
 
@@ -532,11 +533,15 @@ void RawTileDataReader::initialize() {
         std::string cache = root + datasetIdentifier + ".mrfcache";
 
         if (!std::filesystem::exists(mrf)) {
-            if (!std::filesystem::create_directories(root)) {
-                throw ghoul::RuntimeError(fmt::format(
-                    "Failed to create directories for cache at: {}",
-                    root
-                ));
+            std::error_code ec;
+            if (!std::filesystem::create_directories(root, ec)) {
+                // Already existing directories causes a 'failure' but no error
+                if (ec) {
+                    throw ghoul::RuntimeError(fmt::format(
+                        "Failed to create directories for cache at: {}. Error Code: {}, message: {}",
+                        root, std::to_string(ec.value()), ec.message()
+                    ));
+                }
             }
 
             auto* driver = GetGDALDriverManager()->GetDriverByName("MRF");
