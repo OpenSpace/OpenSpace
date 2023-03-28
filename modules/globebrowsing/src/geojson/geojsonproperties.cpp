@@ -181,7 +181,7 @@ documentation::Documentation GeoJsonProperties::Documentation() {
 GeoJsonProperties::GeoJsonProperties()
     : properties::PropertyOwner({ "DefaultProperties" }) // TODO: add a description?
     , opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
+    , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , fillOpacity(FillOpacityInfo, 0.7f, 0.f, 1.f)
     , fillColor(FillColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , pointSize(PointSizeInfo, 1.f, 0.01f, 100.f)

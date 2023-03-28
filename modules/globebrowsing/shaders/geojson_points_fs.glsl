@@ -33,13 +33,17 @@ uniform bool hasTexture;
 uniform vec3 color;
 uniform float opacity;
 
-const vec3 LightColor = vec3(1.0);
+// Can be used to preserve the whites in a point texture
+bool preserveWhite = true;
 
 Fragment getFragment() {
   Fragment frag;
 
   if (hasTexture) {
     frag.color = texture(pointTexture, texCoord);
+    if (!preserveWhite || frag.color.r * frag.color.g * frag.color.b < 0.95) {
+      frag.color.rgb *= color;
+    }
     frag.color.a *= opacity;
   }
   else {
