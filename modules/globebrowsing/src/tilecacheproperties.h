@@ -25,11 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_CACHE_PROPERTIES___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_CACHE_PROPERTIES___H__
 
-#include <modules/globebrowsing/src/layergroupid.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
+#include <string>
 
 namespace openspace::globebrowsing {
 
