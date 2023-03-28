@@ -554,7 +554,6 @@ void RawTileDataReader::initialize() {
                         geoTransform[5] = -180.0 / src->GetRasterYSize(); // Negative for north-up
                         err = src->SetGeoTransform(geoTransform);
                         if (err != CPLErr::CE_None) {
-                            auto msg = CPLGetLastErrorMsg();
                             throw ghoul::RuntimeError(fmt::format(
                                 "Failed to set default Geo Transform of dataset: {}. GDAL Error: {}",
                                 _datasetFilePath, CPLGetLastErrorMsg()
@@ -578,10 +577,9 @@ void RawTileDataReader::initialize() {
 
                 auto dst = static_cast<GDALDataset*>(driver->CreateCopy(mrf.c_str(), src, FALSE, createOpts, NULL, NULL));
                 if (!dst) {
-                    auto msg = CPLGetLastErrorMsg();
                     throw ghoul::RuntimeError(fmt::format(
                         "Failed to create MRF Caching dataset dataset: {}. GDAL Error: {}",
-                        mrf, msg
+                        mrf, CPLGetLastErrorMsg()
                     ));
                 }
                 GDALClose(dst);
