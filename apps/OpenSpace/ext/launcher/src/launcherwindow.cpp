@@ -706,12 +706,12 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
         try {
             sgct::config::GeneratorVersion previewGenVersion =
                 sgct::readConfigGenerator(winCfg);
-            sgct::validateConfigAgainstSchema(
+            sgct::loadFileAndSchemaThenValidate(
                 winCfg,
                 _configPath + "/schema/sgct.schema.json",
                 "This configuration file is unable to generate a proper display"
             );
-            sgct::validateConfigAgainstSchema(
+            sgct::loadFileAndSchemaThenValidate(
                 winCfg,
                 _configPath + "/schema/sgcteditor.schema.json",
                 "This configuration file is valid for generating a display, but "
