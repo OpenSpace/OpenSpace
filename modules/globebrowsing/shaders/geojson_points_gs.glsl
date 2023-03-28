@@ -46,6 +46,9 @@ uniform vec3 right;
 
 uniform float pointSize;
 
+// If false, use the center
+bool useBottomAnchorPoint = true;
+
 const vec2 corners[4] = vec2[4](
   vec2(0.0, 0.0),
   vec2(1.0, 0.0),
@@ -67,28 +70,37 @@ void main() {
   vec4 scaledRightClip = vec4(cameraViewProjectionMatrix * scaledRight);
   vec4 scaledUpClip = vec4(cameraViewProjectionMatrix * scaledUp);
 
-  // TODO: Option to put anchor point at bottom
-  vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
-  vs_screenSpaceDepth = initialPosition.w;
-  vec4 secondPosition = z_normalization(dposClip + scaledRightClip - scaledUpClip);
-  vec4 crossCorner = z_normalization(dposClip + scaledUpClip + scaledRightClip);
-  vec4 thirdPosition = z_normalization(dposClip + scaledUpClip - scaledRightClip);
+  // Place anchor point at the bottom
+  vec4 bottomLeft = z_normalization(dposClip - scaledRightClip);
+  vec4 bottomRight = z_normalization(dposClip + scaledRightClip);
+  vec4 topRight = z_normalization(dposClip + 2 * scaledUpClip + scaledRightClip);
+  vec4 topLeft = z_normalization(dposClip + 2 * scaledUpClip - scaledRightClip);
+
+  if (!useBottomAnchorPoint) {
+    // Place anchor point at the center
+    bottomLeft = z_normalization(dposClip - scaledRightClip - scaledUpClip);
+    bottomRight = z_normalization(dposClip + scaledRightClip - scaledUpClip);
+    topRight = z_normalization(dposClip + scaledUpClip + scaledRightClip);
+    topLeft = z_normalization(dposClip + scaledUpClip - scaledRightClip);
+  }
+
+  vs_screenSpaceDepth = bottomLeft.w;
 
   // Build primitive
   texCoord = corners[0];
-  gl_Position = initialPosition;
+  gl_Position = bottomLeft;
   EmitVertex();
 
   texCoord = corners[1];
-  gl_Position = secondPosition;
+  gl_Position = bottomRight;
   EmitVertex();
 
   texCoord = corners[3];
-  gl_Position = thirdPosition;
+  gl_Position = topLeft;
   EmitVertex();
 
   texCoord = corners[2];
-  gl_Position = crossCorner;
+  gl_Position = topRight;
   EmitVertex();
 
   EndPrimitive();
