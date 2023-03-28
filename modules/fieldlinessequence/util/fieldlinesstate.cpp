@@ -216,6 +216,22 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
     return true;
 }
 
+bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File) {
+
+    // --------------------- ENSURE FILE IS VALID, THEN PARSE IT --------------------- //
+    std::ifstream ifs(pathToHdf5File);
+
+    if (!ifs.is_open()) {
+        LERROR(fmt::format("FAILED TO OPEN FILE: {}", pathToHdf5File));
+        return false;
+    }
+
+   // json jFile;
+   // ifs >> jFile;
+    // -------------------------------------------------------------------------------- //
+    return true;
+}
+
 /**
  * \param absPath must be the path to the file (incl. filename but excl. extension!)
  * Directory must exist! File is created (or overwritten if already existing).

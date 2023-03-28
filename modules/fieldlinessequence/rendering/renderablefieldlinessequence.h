@@ -61,6 +61,7 @@ private:
     bool loadJsonStatesIntoRAM();
     void loadOsflsStatesIntoRAM();
     bool getStatesFromCdfFiles();
+    bool loadHdf5StatesIntoRAM();
     void setModelDependentConstants();
     void setupProperties();
     bool prepareForOsflsStreaming();
@@ -79,7 +80,8 @@ private:
     enum class SourceFileType {
         Cdf = 0,
         Json = 1,
-        Osfls = 2
+        Osfls = 2,
+        Hdf5
     };
 
     // cdf, osfls or json

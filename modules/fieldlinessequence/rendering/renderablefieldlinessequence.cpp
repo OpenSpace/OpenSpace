@@ -168,7 +168,8 @@ namespace {
         enum class SourceFileType {
             Cdf,
             Json,
-            Osfls
+            Osfls,
+            Hdf5
         };
         // Input file type. Should be cdf, json or osfls
         SourceFileType inputFileType;
@@ -348,7 +349,11 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             break;
         case Parameters::SourceFileType::Osfls:
             _inputFileType = SourceFileType::Osfls;
-            fileTypeString = "osfls";
+            fileTypeString = "osfls"; 
+            break;
+        case Parameters::SourceFileType::Hdf5:
+            _inputFileType = SourceFileType::Hdf5;
+            fileTypeString = "Hdf5";
             break;
     }
 
@@ -509,6 +514,11 @@ void RenderableFieldlinesSequence::initializeGL() {
                 loadOsflsStatesIntoRAM();
             }
             break;
+        case SourceFileType::Hdf5:
+            if (!loadHdf5StatesIntoRAM()) {
+                return;
+            }
+            break;
         default:
             return;
     }
@@ -587,7 +597,8 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
 void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM() {
     for (const std::string& filePath : _sourceFiles) {
         FieldlinesState newState;
-        if (newState.loadStateFromOsfls(filePath)) {
+        bool success = newState.loadStateFromOsfls(filePath);
+        if (success) {
             addStateToSequence(newState);
             if (!_outputFolderPath.empty()) {
                 newState.saveStateToJson(
@@ -599,6 +610,20 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM() {
             LWARNING(fmt::format("Failed to load state from: {}", filePath));
         }
     }
+}
+
+bool RenderableFieldlinesSequence::loadHdf5StatesIntoRAM() {
+    for (const std::string& filePath : _sourceFiles) {
+        FieldlinesState newState;
+        bool success = newState.loadStateFromHdf5(filePath); //asset file
+        if (success) {
+            addStateToSequence(newState);
+        }
+        else {
+            LWARNING(fmt::format("Failed to load state from: {}", filePath));
+        }
+    }
+    return true;
 }
 
 void RenderableFieldlinesSequence::setupProperties() {
