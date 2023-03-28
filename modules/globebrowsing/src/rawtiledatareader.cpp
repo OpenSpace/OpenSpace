@@ -524,10 +524,12 @@ void RawTileDataReader::initialize() {
     if (_cacheProperties.enabled) {
         ZoneScopedN("MRF Caching");
 
-        std::string datasetIdentifier = std::to_string(std::hash<std::string>{}(_datasetFilePath));;
-        std::string root = absPath(module.mrfCacheLocation().append("/").append(datasetIdentifier)).string();
-        std::string mrf = root.append(".mrf");
-        std::string cache = root.append(".mrfcache");
+        std::string datasetIdentifier = std::to_string(std::hash<std::string>{}(_datasetFilePath));
+        std::stringstream path;
+        path << module.mrfCacheLocation() << "/" << _cacheProperties.path << "/" << datasetIdentifier << "/";
+        std::string root = absPath(path.str()).string();
+        std::string mrf = root + datasetIdentifier + ".mrf";
+        std::string cache = root + datasetIdentifier + ".mrfcache";
 
         if (!std::filesystem::exists(mrf)) {
             auto* driver = GetGDALDriverManager()->GetDriverByName("MRF");

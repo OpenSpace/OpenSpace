@@ -148,6 +148,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     _cacheProperties.enabled = enabled;
     _cacheProperties.compression = compression;
+    _cacheProperties.path = path.str();
 
     TileTextureInitData initData(
         tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
