@@ -432,21 +432,33 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
     // Read the properties
     GeoJsonOverrideProperties propsFromFile = propsFromGeoJson(feature);
 
-    size_t nGeom = geom->getNumGeometries();
-    for (size_t i = 0; i < nGeom; ++i) {
+    std::vector<const geos::geom::Geometry*> geomsToAdd;
+    if (geom->isPuntal()) {
+        // Handle all point features as one feature, even multi-points
+        geomsToAdd = { geom };
+    }
+    else {
+        size_t nGeom = geom->getNumGeometries();
+        geomsToAdd.reserve(nGeom);
+        for (size_t i = 0; i < nGeom; ++i) {
+            geomsToAdd.push_back(geom->getGeometryN(i));
+        }
+    }
+
+    // Split other collection features into multiple individual components
+
+    for (const geos::geom::Geometry* geometry : geomsToAdd) {
+        const int index = static_cast<int>(_geometryFeatures.size());
         try {
             GlobeGeometryFeature g(_globeNode, _defaultProperties, propsFromFile);
-            g.createFromSingleGeosGeometry(
-                geom->getGeometryN(i),
-                static_cast<int>(_geometryFeatures.size())
-            );
+            g.createFromSingleGeosGeometry(geometry, index);
             g.initializeGL(_pointsProgram.get(), _linesAndPolygonsProgram.get());
             _geometryFeatures.push_back(std::move(g));
         }
         catch (const ghoul::MissingCaseException&) {
             LERROR(fmt::format(
                 "Error creating GeoJSON layer with identifier '{}'. Problem reading "
-                "feature {} in GeoJSON file '{}'.", this->identifier(), i, _geoJsonFile
+                "feature {} in GeoJSON file '{}'.", this->identifier(), index, _geoJsonFile
             ));
             // Do nothing
         }
