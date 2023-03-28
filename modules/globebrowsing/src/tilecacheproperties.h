@@ -37,15 +37,8 @@ struct TileCacheProperties {
     bool enabled;
     std::string compression;
     std::string path;
-
-    void setDefaultCompression(layers::Group::ID id) {
-        if (id == layers::Group::ID::HeightLayers) {
-            compression = "LERC";
-        }
-        else {
-            compression = "JPEG";
-        }
-    }
+    int quality;
+    int blockSize;
 };
 
 } // namespace openspace::globebrowsing

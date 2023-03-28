@@ -581,11 +581,8 @@ void RawTileDataReader::initialize() {
                 createOpts = CSLSetNameValue(createOpts, "NOCOPY", "true");
                 createOpts = CSLSetNameValue(createOpts, "uniform_scale", "2");
                 createOpts = CSLSetNameValue(createOpts, "compress", _cacheProperties.compression.c_str());
-                if (_cacheProperties.compression == "JPEG") {
-                    createOpts = CSLSetNameValue(createOpts, "quality", "75");
-                }
-
-                createOpts = CSLSetNameValue(createOpts, "blocksize", "256");
+                createOpts = CSLSetNameValue(createOpts, "quality", std::to_string(_cacheProperties.quality).c_str());
+                createOpts = CSLSetNameValue(createOpts, "blocksize", std::to_string(_cacheProperties.blockSize).c_str());
                 createOpts = CSLSetNameValue(createOpts, "indexname", cache.c_str());
                 createOpts = CSLSetNameValue(createOpts, "DATANAME", cache.c_str());
 

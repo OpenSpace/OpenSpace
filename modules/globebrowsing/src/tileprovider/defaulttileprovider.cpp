@@ -79,6 +79,12 @@ namespace {
 
             // The compression algorithm to use for cached tiles
             std::optional<std::string> compression;
+
+            // The quality setting of the compression alogrithm, only valid for JPEG
+            std::optional<int> quality;
+
+            // The block-size of the MRF cache
+            std::optional<int> blockSize;
         };
         // Specifies the cache settings that should be applied to this layer
         std::optional<CacheSettings> cacheSettings;
@@ -149,6 +155,8 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     _cacheProperties.enabled = enabled;
     _cacheProperties.compression = compression;
     _cacheProperties.path = path.str();
+    _cacheProperties.quality = p.cacheSettings->quality.value_or(75);
+    _cacheProperties.blockSize = p.cacheSettings->blockSize.value_or(1024);
 
     TileTextureInitData initData(
         tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
