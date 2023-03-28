@@ -140,12 +140,6 @@ namespace {
         "The location of the cache folder for MRF something"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MRFCacheCompressionInfo = {
-        "MRFCacheCompression",
-        "MRF Cache Compression",
-        "The compression algorithm to use for MRF tiles"
-    };
-
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
     {
@@ -224,9 +218,6 @@ namespace {
         // [[codegen::verbatim(WMSCacheLocationInfo.description)]]
         std::optional<std::string> mrfCacheLocation [[codegen::key("MRFCacheLocation")]];
 
-        // [[codegen::verbatim(WMSCacheLocationInfo.description)]]
-        std::optional<std::string> mrfCacheCompression [[codegen::key("MRFCacheCompression")]];
-
         // If you know what you are doing and you have WMS caching *disabled* but offline
         // mode *enabled*, you can set this value to 'true' to silence a warning that you
         // would otherwise get at startup
@@ -246,7 +237,6 @@ GlobeBrowsingModule::GlobeBrowsingModule()
     , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
     , _mrfCacheEnabled(MRFCacheEnabledInfo, false)
     , _mrfCacheLocation(MRFCacheLocationInfo, "${BASE}/cache_mrf")
-    , _mrfCacheCompression(MRFCacheCompressionInfo, "JPEG")
 {
     addProperty(_wmsCacheEnabled);
     addProperty(_offlineMode);
@@ -255,7 +245,6 @@ GlobeBrowsingModule::GlobeBrowsingModule()
     addProperty(_tileCacheSizeMB);
     addProperty(_mrfCacheEnabled);
     addProperty(_mrfCacheLocation);
-    addProperty(_mrfCacheCompression);
 }
 
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
@@ -269,7 +258,6 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     _tileCacheSizeMB = p.tileCacheSize.value_or(_tileCacheSizeMB);
     _mrfCacheEnabled = p.mrfCacheEnabled.value_or(_mrfCacheEnabled);
     _mrfCacheLocation = p.mrfCacheLocation.value_or(_mrfCacheLocation);
-    _mrfCacheCompression = p.mrfCacheCompression.value_or(_mrfCacheCompression);
     const bool noWarning = p.noWarning.value_or(false);
 
     if (!_wmsCacheEnabled && _offlineMode && !noWarning) {
@@ -729,10 +717,6 @@ bool GlobeBrowsingModule::isMRFCachingEnabled() const {
 
 std::string GlobeBrowsingModule::mrfCacheLocation() const {
     return _mrfCacheLocation;
-}
-
-std::string GlobeBrowsingModule::mrfCacheCompression() const {
-    return _mrfCacheCompression;
 }
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
