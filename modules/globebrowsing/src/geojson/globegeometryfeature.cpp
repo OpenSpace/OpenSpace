@@ -90,6 +90,7 @@ void GlobeGeometryFeature::initializeGL(ghoul::opengl::ProgramObject* pointsProg
     if (isPoints()) {
         GlobeBrowsingModule* m = global::moduleEngine->module<GlobeBrowsingModule>();
         if (m->hasDefaultGeoPointTexture()) {
+            _hasTexture = true;
             _pointTexture = std::make_unique<TextureComponent>(2);
             _pointTexture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             _pointTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
@@ -111,7 +112,10 @@ void GlobeGeometryFeature::deinitializeGL() {
 }
 
 bool GlobeGeometryFeature::isReady() const {
-    return (_linesAndPolygonsProgram != nullptr) && (_pointsProgram != nullptr);
+    bool shadersAreReady = (_linesAndPolygonsProgram != nullptr) &&
+        (_pointsProgram != nullptr);
+    bool textureIsReady = _hasTexture ? (_pointTexture != nullptr) : true;
+    return shadersAreReady && textureIsReady;
 }
 
 bool GlobeGeometryFeature::isPoints() const {
@@ -267,18 +271,40 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
             _pointsProgram : _linesAndPolygonsProgram;
 
         shader->activate();
-        shader->setUniform("modelViewTransform", modelViewTransform);
-        shader->setUniform("projectionTransform", projectionTransform);
-        shader->setUniform("normalTransform", normalTransform);
-
-        shader->setUniform("nLightSources", lightSourceData.nLightSources);
-        shader->setUniform("lightIntensities", lightSourceData.intensitiesBuffer);
-        shader->setUniform(
-            "lightDirectionsViewSpace",
-            lightSourceData.directionsViewSpaceBuffer
-        );
-
         shader->setUniform("opacity", opacity);
+        shader->setUniform("modelTransform", globeModelTransform);
+        shader->setUniform("viewTransform", renderData.camera.combinedViewMatrix());
+        shader->setUniform("projectionTransform", projectionTransform);
+
+        if (shader == _linesAndPolygonsProgram) {
+            shader->setUniform("normalTransform", normalTransform);
+            shader->setUniform("nLightSources", lightSourceData.nLightSources);
+            shader->setUniform("lightIntensities", lightSourceData.intensitiesBuffer);
+            shader->setUniform(
+                "lightDirectionsViewSpace",
+                lightSourceData.directionsViewSpaceBuffer
+            );
+        }
+        else {
+            // Points => render as billboard
+            glm::dvec3 cameraViewDirectionWorld = -renderData.camera.viewDirectionWorldSpace();
+            glm::dvec3 cameraUpDirectionWorld = renderData.camera.lookUpVectorWorldSpace();
+            glm::dvec3 orthoRight = glm::normalize(
+                glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
+            );
+            if (orthoRight == glm::dvec3(0.0)) {
+                glm::dvec3 otherVector = glm::vec3(
+                    cameraUpDirectionWorld.y,
+                    cameraUpDirectionWorld.x,
+                    cameraUpDirectionWorld.z
+                );
+                orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
+            }
+            glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
+
+            shader->setUniform("up", glm::vec3(orthoUp));
+            shader->setUniform("right", glm::vec3(orthoRight));
+        }
 
         glBindVertexArray(r.vaoId);
 
@@ -320,10 +346,12 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature) const
     //    ghoul::opengl::TextureUnit unit;
     //    unit.activate();
     //    _pointTexture->bind();
-    //    shader->setUniform("texture", unit);
+    //    _pointsProgram->setUniform("pointTexture", unit);
+    //    _pointsProgram->setUniform("hasTexture", true);
     //}
     //else {
     //    glBindTexture(GL_TEXTURE_2D, 0);
+    //    _pointsProgram->setUniform("hasTexture", false);
     //}
     glEnable(GL_PROGRAM_POINT_SIZE);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(feature.nVertices));
@@ -446,10 +474,12 @@ GlobeGeometryFeature::createPointAndLineGeometry()
                 useHeightMap()
             );
 
-            // If we are drawing points, just add and continue
+            // If we are drawing points, just add and continue.
+            // Note that we set the normal
+            // TODO: make normal the out direction of the globe
             if (_type == GeometryType::Point) {
                 glm::vec3 vf = static_cast<glm::vec3>(v);
-                vertices.push_back({ vf.x, vf.y, vf.z, 0.f, 0.f, 0.f });
+                vertices.push_back({ vf.x, vf.y, vf.z, 1.f, 1.f, 1.f });
                 positions.push_back(vf);
                 continue;
             }

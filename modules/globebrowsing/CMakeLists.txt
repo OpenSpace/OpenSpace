@@ -130,6 +130,7 @@ set(SHADER_FILES
   shaders/blending.glsl
   shaders/geojson_fs.glsl
   shaders/geojson_points_fs.glsl
+  shaders/geojson_points_gs.glsl
   shaders/geojson_points_vs.glsl
   shaders/geojson_vs.glsl
   shaders/globalrenderer_vs.glsl

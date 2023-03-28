@@ -168,6 +168,7 @@ private:
     std::vector<Geodetic3> _heightUpdateReferencePoints;
     std::vector<double> _lastControlHeights;
 
+    bool _hasTexture = false;
     std::unique_ptr<TextureComponent> _pointTexture;
 
     ghoul::opengl::ProgramObject* _linesAndPolygonsProgram = nullptr;

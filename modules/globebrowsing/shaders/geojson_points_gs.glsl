@@ -24,25 +24,72 @@
 
 #version __CONTEXT__
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_normal;
+#include "PowerScaling/powerScalingMath.hglsl"
 
-out float vs_depth;
-out vec3 vs_normal;
-out vec4 vs_positionViewSpace;
+layout(points) in;
+flat in vec3 normal[]; // This could be the globe normal instead, and be used as up-direction
 
+layout(triangle_strip, max_vertices = 4) out;
+out vec2 texCoord;
+flat out float vs_screenSpaceDepth;
+flat out vec3 vs_normal;
+
+// General settings
 uniform dmat4 modelTransform;
 uniform dmat4 viewTransform;
 uniform dmat4 projectionTransform;
-uniform mat3 normalTransform;
+
+// Camera information
+// @TODO: Option to use camera position? (to work better in dome)
+uniform vec3 up;
+uniform vec3 right;
+
+uniform float pointSize;
+
+const vec2 corners[4] = vec2[4](
+  vec2(0.0, 0.0),
+  vec2(1.0, 0.0),
+  vec2(1.0, 1.0),
+  vec2(0.0, 1.0)
+);
 
 void main() {
-    vs_positionViewSpace = vec4(viewTransform * modelTransform * dvec4(in_position, 1.0));
-    vec4 positionScreenSpace = vec4(projectionTransform * vs_positionViewSpace);
-    vs_depth = positionScreenSpace.w;
-    vs_normal = normalize(normalTransform * in_normal);
-    gl_Position = positionScreenSpace;
+  vec4 pos = gl_in[0].gl_Position;
+  vs_normal = normal[0];
+  dvec4 dpos = modelTransform * dvec4(dvec3(pos.xyz), 1.0);
 
-    // Set z to 0 to disable near and far plane, unique handling for perspective in space
-    gl_Position.z = 0.f;
+  dvec4 scaledRight = pointSize * dvec4(right, 0.0) * 0.5;
+  dvec4 scaledUp = pointSize * dvec4(up, 0.0) * 0.5;
+
+  dmat4 cameraViewProjectionMatrix = projectionTransform * viewTransform;
+
+  vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
+  vec4 scaledRightClip = vec4(cameraViewProjectionMatrix * scaledRight);
+  vec4 scaledUpClip = vec4(cameraViewProjectionMatrix * scaledUp);
+
+  // TODO: Option to put anchor point at bottom
+  vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
+  vs_screenSpaceDepth = initialPosition.w;
+  vec4 secondPosition = z_normalization(dposClip + scaledRightClip - scaledUpClip);
+  vec4 crossCorner = z_normalization(dposClip + scaledUpClip + scaledRightClip);
+  vec4 thirdPosition = z_normalization(dposClip + scaledUpClip - scaledRightClip);
+
+  // Build primitive
+  texCoord = corners[0];
+  gl_Position = initialPosition;
+  EmitVertex();
+
+  texCoord = corners[1];
+  gl_Position = secondPosition;
+  EmitVertex();
+
+  texCoord = corners[3];
+  gl_Position = thirdPosition;
+  EmitVertex();
+
+  texCoord = corners[2];
+  gl_Position = crossCorner;
+  EmitVertex();
+
+  EndPrimitive();
 }

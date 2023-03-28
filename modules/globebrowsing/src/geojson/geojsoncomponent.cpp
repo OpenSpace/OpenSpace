@@ -304,7 +304,8 @@ void GeoJsonComponent::initializeGL() {
     _pointsProgram = global::renderEngine->buildRenderProgram(
         "GeoPointsProgram",
         absPath("${MODULE_GLOBEBROWSING}/shaders/geojson_points_vs.glsl"),
-        absPath("${MODULE_GLOBEBROWSING}/shaders/geojson_points_fs.glsl")
+        absPath("${MODULE_GLOBEBROWSING}/shaders/geojson_points_fs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/geojson_points_gs.glsl")
     );
 
     for (GlobeGeometryFeature& g : _geometryFeatures) {
