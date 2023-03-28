@@ -264,18 +264,34 @@ double SonificationBase::calculateElevationAngleTo(const Camera* camera,
         );
     }
     else if (mode == SonificationModule::SurroundMode::CircularWithElevation) {
-        // TODO: Improve!
+        glm::dvec3 cameraToNode = nodePosition - camera->positionVec3();
 
-        // Calculate angle from camera to the node in the camera view plane
+        // Project the node onto the view-right plane
         // Pvplane(v) is v projected onto the camera view plane,
         // Pview(v) is v projected on the camera view vectos, which is the normal
         // of the camera view plane ->
         // Pvplane(v) = v - Pview(v)
-        glm::dvec3 cameraToNode = nodePosition - camera->positionVec3();
         glm::dvec3 cameraToProjectedNode =
             cameraToNode - glm::proj(cameraToNode, cameraViewVector);
 
-        return glm::length(cameraToProjectedNode);
+        double polarAngle = glm::orientedAngle(
+            glm::normalize(cameraUpVector),
+            glm::normalize(cameraToProjectedNode),
+            glm::normalize(-cameraViewVector)
+        );
+
+        // First we counter-rotate the circular angle to make the cameraToNode vector be
+        // inside the view-up plane
+        glm::dvec3 rotatedVector =
+            glm::rotate(cameraToNode, polarAngle, glm::normalize(cameraViewVector));
+
+        // Then we calculate the elavation angle in the same way as the horizontal
+        // surround mode
+        return std::abs(glm::orientedAngle(
+            glm::normalize(cameraViewVector),
+            glm::normalize(rotatedVector),
+            glm::normalize(cameraRightVector)
+        ));
     }
     // None, i.e. Mono sound
     else {
@@ -324,15 +340,34 @@ double SonificationBase::calculateElevationAngleFromAToB(const Camera* camera,
         );
     }
     else if (mode == SonificationModule::SurroundMode::CircularWithElevation) {
-        // Calculate angle from node A to the node B in the camera view plane
+        glm::dvec3 AToB = nodeBPos - nodeAPos;
+
+        // Project the node onto the view-right plane
         // Pvplane(v) is v projected onto the camera view plane,
         // Pview(v) is v projected on the camera view vectos, which is the normal
         // of the camera view plane ->
         // Pvplane(v) = v - Pview(v)
-        glm::dvec3 AToB = nodeBPos - nodeAPos;
-        glm::dvec3 AToProjectedB = AToB - glm::proj(AToB, cameraViewVector);
+        glm::dvec3 AToProjectedB =
+            AToB - glm::proj(AToB, cameraViewVector);
 
-        return glm::length(AToProjectedB);
+        double polarAngle = glm::orientedAngle(
+            glm::normalize(cameraUpVector),
+            glm::normalize(AToProjectedB),
+            glm::normalize(-cameraViewVector)
+        );
+
+        // First we counter-rotate the circular angle to make the cameraToNode vector be
+        // inside the view-up plane
+        glm::dvec3 rotatedVector =
+            glm::rotate(AToB, polarAngle, glm::normalize(cameraViewVector));
+
+        // Then we calculate the elavation angle in the same way as the horizontal
+        // surround mode
+        return std::abs(glm::orientedAngle(
+            glm::normalize(cameraViewVector),
+            glm::normalize(rotatedVector),
+            glm::normalize(cameraRightVector)
+        ));
     }
     // None, i.e. Mono sound
     else {
