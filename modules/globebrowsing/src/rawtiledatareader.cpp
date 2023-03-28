@@ -595,12 +595,12 @@ void RawTileDataReader::initialize() {
                 }
                 GDALClose(dst);
                 GDALClose(src);
-
-                content = mrf.c_str();
             } else {
                 throw ghoul::RuntimeError("Failed to create MRF driver");
             }
         }
+
+        content = mrf.c_str();
     }
 
     {
