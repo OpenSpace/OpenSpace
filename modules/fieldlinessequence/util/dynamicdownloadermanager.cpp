@@ -90,7 +90,6 @@ DynamicDownloaderManager::DynamicDownloaderManager(int dataID, const std::string
         _dataMinTime, _dataMaxTime, _dataID, _dataURL
     );
     requestAvailableFiles(httpDataRequest, _syncDir);
-
 }
 
 void DynamicDownloaderManager::requestDataInfo(std::string httpInfoRequest) {
@@ -220,47 +219,16 @@ double DynamicDownloaderManager::calculateCadence() {
     return averageTime;
 }
 
-//void DynamicDownloaderManager::prioritizeQueue(const double& time) {
-//    //using Unq = std::unique_ptr<HttpFileDownload>;
-//    //using Q = std::priority_queue<Unq>;
-//    //using Vec = std::vector<Unq>;
-//    //using VecIt = Vec::iterator;
-//    // Delta time changed direction and priory of queue is not correct anymore
-//    // Emptying queue
-//    _queuedFilesToDownload.clear();
-//
-//    //const File& closestFileToNow = DynamicDownloaderManager::closestFileToNow(time);
-//    std::vector<File>::iterator now = DynamicDownloaderManager::closestFileToNow(time);
-//    // priority 0 is highest. Higher number is lower priority.
-//
-//    //std::vector<File>::iterator now =
-//    //    _availableData.begin() + closestFileToNow.availableIndex;
-//
-//    std::vector<File>::iterator end;
-//    if (_forward) {
-//        end = _availableData.end();
-//    }
-//    else {
-//        end = _availableData.begin();
-//    }
-//
-//    // if forward iterate from now to end. else reverse from now to begin
-//    int notToMany = 0;
-//    for (std::vector<File>::iterator it = now; it != end; _forward ? ++it : --it) {
-//        if (it->state == File::State::Available) {
-//            _queuedFilesToDownload.push_back(&*it);
-//            it->state = File::State::OnQueue;
-//        }
-//        ++notToMany;
-//        // exit out early if enough files are queued / already downloaded
-//        if (notToMany == _nOfFilesToQueue) break;
-//    }
-//}
-
 void DynamicDownloaderManager::downloadFile() {
     ZoneScoped
     if (_filesCurrentlyDownloading.size() < 4 && _queuedFilesToDownload.size() > 0) {
         File* dl = _queuedFilesToDownload.front();
+        if (dl->state != File::State::OnQueue) {
+            throw ghoul::RuntimeError(
+                "Trying to download file from list of queued files,"
+                "but its status is not OnQueue"
+            );
+        }
         _queuedFilesToDownload.erase(_queuedFilesToDownload.begin());
         dl->download->start();
         _filesCurrentlyDownloading.push_back(dl);
@@ -380,8 +348,7 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
 
     if (_forward && _thisFile != _availableData.end()) {
         // if files are there and time is between next file (+1) and +2 file
-        // (meaning the this file is active from now till next file,
-        // kind of like forward finite difference in math)
+        // (meaning the this file is active from now till next file)
         // change this to be next
         if (_thisFile + 1 != _availableData.end() &&
             _thisFile + 2 != _availableData.end() &&
@@ -404,7 +371,7 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
     else if (!_forward && _thisFile != _availableData.begin()) {
         // if file is there and time is between prev and this file
         // then change this to be prev. Same goes here as if time is moving forward
-        // we will use forward usage. File is active from now till next
+        // we will use forward 'usage', meaning file is active from now till next
         if (_thisFile - 1 != _availableData.begin() &&
             (_thisFile)->time < time &&
             (_thisFile - 1)->time > time)
@@ -447,7 +414,7 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
 //
 // 3. Rename folder for where files are being downloaded to
 //
-// 4. Move class into a different module
+// 4. Move class into a different module + rename class
 //
 // 5. recall data info every now and then to get new files
 //

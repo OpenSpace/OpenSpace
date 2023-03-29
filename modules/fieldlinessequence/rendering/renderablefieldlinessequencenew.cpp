@@ -210,6 +210,9 @@ namespace {
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
+        // [[codegen::verbatim(ColorUseABlendingInfo.description)]]
+        std::optional<bool> alphaBlendingEnabled;
+
         // Set if first/last file should render forever
         bool showAtAllTimes;
 
@@ -423,6 +426,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     _maskingQuantityTemp = p.maskingQuantity.value_or(_maskingQuantityTemp);
     _domainEnabled = p.domainEnabled.value_or(_domainEnabled);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
+    _colorABlendEnabled = p.alphaBlendingEnabled.value_or(_colorABlendEnabled);
     _renderForever = p.showAtAllTimes;
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
 

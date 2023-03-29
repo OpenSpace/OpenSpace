@@ -103,28 +103,6 @@ struct FieldlineOption {
     }
 };
 
-//struct BigWindow {
-//    //This is the big window. pair.first is timestep, pair.second is url to be downloaded
-//    std::vector<std::pair<std::string, std::string>> listOfFiles;
-//    double cadence;
-//    std::pair<std::string, std::string>* whereInList;
-//    std::string absoluteMin;
-//    std::string absoluteMax;
-//};
-
-//struct Info {
-//    HttpFileDownload* download;
-//    enum class State {
-//        Available,
-//        OnQueue,
-//        Downloading,
-//        Downloaded
-//    };
-//    State state;
-//    std::string timestep;
-//    //double timestep;
-//};
-
 struct File {
     std::unique_ptr<HttpFileDownload> download;
     std::string timestep;
@@ -162,7 +140,6 @@ private:
 
     void downloadFile();
     double calculateCadence();
-    //void prioritizeQueue(const double& time);
     void putOnQueue();
     bool _forward = true;
     bool _firstFrame = true;
@@ -184,15 +161,7 @@ private:
     std::vector<File>::iterator _thisFile;
 
     std::vector<File> _availableData;
-
-    //std::vector<std::unique_ptr<HttpFileDownload>> _availableFiles;
-    //std::priority_queue<std::unique_ptr<HttpFileDownload>> _queuedFilesToDownload;
-    //std::vector<std::unique_ptr<HttpFileDownload>> _filesCurrentlyDownloading;
-    ////std::vector<std::unique_ptr<HttpFileDownload>> _downloadedFiles;
-    //std::vector<std::filesystem::path> _downloadedFiles;
-
     std::vector<File*> _queuedFilesToDownload;
-    bool _queueIsPrioritized = false;
     std::vector<File*> _filesCurrentlyDownloading;
     std::vector<std::filesystem::path> _downloadedFiles;
 
