@@ -94,6 +94,9 @@ public:
 
 
 private:
+    static size_t write_data(void* ptr, size_t size, size_t nmemb, FILE* stream);
+    std::filesystem::path initializeSyncDirectory(std::string folderName, std::string nameOfTextFile);
+    void getSeedPointsFromAPI(std::string URL, std::string folderNameInSyncFolder, std::string nameOfGeneratedTextFile);
     bool getStateFromCdfFiles();
     void updateVertexPositionBuffer();
     void updateVertexColorBuffer();
@@ -153,6 +156,8 @@ private:
     std::unique_ptr<TransferFunction> _transferFunction;
     // True when new state is loaded or user change which quantity to color the lines by
     bool _shouldUpdateColorBuffer = false;
+    // If true make call to seed point provider
+    bool _seedPointProvider = false;
     // OpenGL Vertex Array Object
     GLuint _vertexArrayObject = 0;
     // OpenGL Vertex Buffer Object containing the vertex positions

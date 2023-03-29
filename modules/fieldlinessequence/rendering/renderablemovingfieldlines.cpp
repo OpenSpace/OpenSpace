@@ -204,6 +204,7 @@ namespace openspace {
         std::sort(_sourceFiles.begin(), _sourceFiles.end());
 
         _seedFilePath = p.seedPointFile;
+        _seedPointProvider = p.seedPointProvider.value_or(_seedPointProvider);
         _seedPointsFromProvider = p.seedPointsFromProvider.value_or(_seedPointsFromProvider);
         _extraVars = p.extraVariables.value_or(_extraVars);
         _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
@@ -280,23 +281,16 @@ namespace openspace {
         _transferFunction = std::make_unique<TransferFunction>(
             absPath(_colorTablePaths[0]).string()
             );
-
-        CURL* curl;
-        FILE* fp;
-        CURLcode res;
-        char outfilename[FILENAME_MAX] = "C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/bbb.txt";
-        curl = curl_easy_init();
-        if (curl)
-        {
-            fp = fopen(outfilename, "wb");
-            curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:5000/title");
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-            curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-            res = curl_easy_perform(curl);
-            curl_easy_cleanup(curl);
-            fclose(fp);
+        
+        if (_seedPointProvider) {
+            getSeedPointsFromAPI("http://localhost:5000/get_text_file", "seed_points", "seed_points.txt");
         }
+        else if (!_seedPointProvider && _seedFilePath.empty()) {
+            throw ghoul::RuntimeError(
+                "File path to seed points was not provided"
+            );
+        }
+        
   
         bool stateSuccuess = getStateFromCdfFiles();
         if (!stateSuccuess) {
@@ -534,6 +528,40 @@ namespace openspace {
         if (_shaderProgram) {
             global::renderEngine->removeRenderProgram(_shaderProgram.get());
             _shaderProgram = nullptr;
+        }
+    }
+
+    // Write function used by CURLOPT_WRITEFUNCTION
+    size_t RenderableMovingFieldlines::write_data(void* ptr, size_t size, size_t nmemb, FILE* stream) {
+        size_t written;
+        written = fwrite(ptr, size, nmemb, stream);
+        return written;
+    }
+
+    //Function that creates a new path depending on user inputs
+    std::filesystem::path RenderableMovingFieldlines::initializeSyncDirectory(std::string folderName, std::string nameOfTextFile)
+    {
+        std::filesystem::path pathToDownloadTo =
+            absPath("${SYNC}/http/" + folderName + "/" + nameOfTextFile);
+
+        return pathToDownloadTo;
+    }
+    
+    // Initializes curl, creates a text file in sync folder, writes response (api request to URL), to textfile
+    void RenderableMovingFieldlines::getSeedPointsFromAPI(std::string URL, std::string folderNameInSyncFolder, std::string nameOfGeneratedTextFile ) {
+        CURL* curl = curl_easy_init();
+
+        if (curl)
+        {
+            std::filesystem::path pathToDownloadTo = initializeSyncDirectory(folderNameInSyncFolder, nameOfGeneratedTextFile);
+            FILE* fp = fopen(pathToDownloadTo.string().c_str(), "wb");
+            curl_easy_setopt(curl, CURLOPT_URL, URL.c_str());
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+            curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+            CURLcode res = curl_easy_perform(curl);
+            curl_easy_cleanup(curl);
+            fclose(fp);
         }
     }
 
