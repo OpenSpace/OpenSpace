@@ -30,6 +30,8 @@
 #include <openspace/mission/missionmanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
+#include <modules/spacecraftinstruments/util/imagesequencer.h>
+#include <openspace/util/spicemanager.h>
 
 using nlohmann::json;
 
@@ -50,9 +52,21 @@ nlohmann::json MissionTopic::missionJson() const {
     const std::map<std::string, Mission>& missions =
         global::missionManager->missionMap();
 
+    ImageSequencer& sequencer = ImageSequencer::ref();
+    const std::vector<double>& captureTimes = sequencer.captureProgression();
+    std::vector<std::string> captureTimesString(captureTimes.size());
+
+    for (int i = 0; i < captureTimes.size(); i++) {
+        const std::string& str = SpiceManager::ref().dateFromEphemerisTime(
+            sequencer.nextCaptureTime(captureTimes[i]),
+            "YYYY-MM-DDTHR:MN:SC"
+        );
+        captureTimesString[i] = str;
+    }
     json json;
     for (auto const& [name, mission] : missions) {
         nlohmann::json missionJson = createPhaseJson(mission);
+        missionJson["capturetimes"] = captureTimesString;
         json.push_back(missionJson);
     }
 
@@ -73,6 +87,7 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
     nlohmann::json phaseJson = {
         { "name", phase.name() },
         { "description", phase.description() },
+        { "actions" , phase.actions() },
         { "timerange", {
             { "start" ,startTimeString },
             { "end" ,endTimeString }
