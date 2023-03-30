@@ -16,10 +16,11 @@ local syncedDirectory = asset.syncedResource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
 
-local imagesDestination = syncedDirectory .. "images/"
+local imagesDestination = syncedDirectory .. "4096"
 local colorbarDestination = syncedDirectory .. "colorbar/"
 
 local background1layer = {
@@ -65,16 +66,6 @@ local colorbar = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name .. " Images")
-    openspace.unzipFile(syncedDirectory .. "4096.zip", imagesDestination, true)
-  end
-
-  if not openspace.directoryExists(colorbarDestination) then
-    openspace.printInfo("Extracting " .. Name .. " Colorbar")
-    openspace.unzipFile(syncedDirectory .. "colorbar.zip", colorbarDestination, true)
-  end
-
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", background1layer)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", background2layer)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)

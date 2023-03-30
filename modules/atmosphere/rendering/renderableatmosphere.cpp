@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -428,7 +428,7 @@ glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(const TransformData
 }
 
 void RenderableAtmosphere::render(const RenderData& data, RendererTasks& renderTask) {
-    ZoneScoped
+    ZoneScoped;
 
     DeferredcasterTask task{ _deferredcaster.get(), data };
     renderTask.deferredcasterTasks.push_back(task);

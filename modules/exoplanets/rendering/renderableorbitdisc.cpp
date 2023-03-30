@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -77,8 +77,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply Color",
-        "If set, the disc's texture is multiplied with this color. "
-        "Useful for applying a color grayscale images"
+        "If set, the disc's texture is multiplied with this color. Useful for applying a "
+        "color grayscale images"
     };
 
     struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {

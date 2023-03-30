@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,8 +48,8 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
 {}
 
 void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     std::string upperIdentifier = identifier();
     std::transform(
@@ -69,22 +69,22 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
 }
 
 void OpenSpaceModule::initializeGL() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     internalInitializeGL();
 }
 
 void OpenSpaceModule::deinitialize() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     internalDeinitialize();
 }
 
 void OpenSpaceModule::deinitializeGL() {
-    ZoneScoped
-    ZoneName(identifier().c_str(), identifier().size())
+    ZoneScoped;
+    ZoneName(identifier().c_str(), identifier().size());
 
     internalDeinitializeGL();
 }

@@ -33,7 +33,7 @@ local fluxNodes = {
 }
 
 local toggle_fluxnodes = {
-  Identifier = "fluxnodes.toggle_fluxnodes",
+  Identifier = "os.events.bastilleday.fluxnodes.togglefluxnodes",
   Name = "Toggle flux nodes",
   Command = propertyHelper.invert("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled"),
   Documentation = "Toggle flux node rendering of CME",
@@ -56,7 +56,7 @@ asset.export(fluxNodes)
 
 asset.meta = {
   Name = "Predictive Science Inc. Flux nodes Bastille Day",
-  Version = "1.0",
+  Version = "1.1",
   Description = "Flux nodes for the bastille day CME event",
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,8 +40,6 @@ namespace {
     constexpr std::string_view IdentifierKey = "Identifier";
     constexpr std::string_view NameKey = "Name";
     constexpr std::string_view TypeKey = "Type";
-    constexpr std::string_view DescriptionKey = "Description";
-    constexpr std::string_view JsonValueKey = "Value";
     constexpr std::string_view MetaDataKey = "MetaData";
     constexpr std::string_view AdditionalDataKey = "AdditionalData";
 } // namespace
@@ -100,9 +98,7 @@ bool Property::getLuaValue(lua_State*) const {
 
 void Property::set(std::any) {}
 
-bool Property::setLuaValue(lua_State*) {
-    return false;
-}
+void Property::setLuaValue(lua_State*) {}
 
 const std::type_info& Property::type() const {
     return typeid(void);

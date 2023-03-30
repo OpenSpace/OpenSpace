@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -166,7 +166,7 @@ documentation::Documentation ProjectionComponent::Documentation() {
 }
 
 ProjectionComponent::ProjectionComponent()
-    : properties::PropertyOwner({ "ProjectionComponent" })
+    : properties::PropertyOwner({ "ProjectionComponent", "Projection Component" })
     , _performProjection(ProjectionInfo, true)
     , _clearAllProjections(ClearProjectionInfo, false)
     , _projectionFading(FadingInfo, 1.f, 0.f, 1.f)

@@ -70,7 +70,7 @@ local MeridialCutplane = {
 }
 
 local toggle_equatorial = {
-  Identifier = "fluxnodescutplane.toggle_equatorial",
+  Identifier = "os.events.bastilleday.fluxnodescutplane.toggleequatorial",
   Name = "Toggle equatorial cutplane",
   Command = propertyHelper.invert("Scene.EquatorialCutplane-bastille-day-2000.Renderable.Enabled"),
   Documentation = "Toggle equatorial cutplane of CME",
@@ -78,7 +78,7 @@ local toggle_equatorial = {
   IsLocal = false
 }
 local toggle_meridial = {
-  Identifier = "fluxnodescutplane.toggle_meridial",
+  Identifier = "os.events.bastilleday.fluxnodescutplane.togglemeridial",
   Name = "Toggle meridial cutplane",
   Command = propertyHelper.invert("Scene.MeridialCutplane-bastille-day-2000.Renderable.Enabled"),
   Documentation = "Toggle meridial cutplane of CME",
@@ -106,7 +106,7 @@ asset.export(MeridialCutplane)
 
 asset.meta = {
   Name = "Predictive Science Inc. Cutplanes Bastille Days",
-  Version = "1.0",
+  Version = "1.1",
   Description = "Cutplanes for the bastille day CME event",
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,12 +45,6 @@ namespace {
         "The speck label file with the data for the labels"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UnitInfo = {
-        "Unit",
-        "Unit",
-        "Distance unit for the label data"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
@@ -85,9 +79,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
         "FaceCamera",
         "Face Camera",
-        "If enabled, the labels will be rotated to face the camera. "
-        "For non-linear display rendering (for example fisheye) this should be set to "
-        "false."
+        "If enabled, the labels will be rotated to face the camera. For non-linear "
+        "display rendering (for example fisheye) this should be set to false."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
+        "TransformationMatrix",
+        "Transformation Matrix",
+        "Transformation matrix to be applied to the labels"
     };
 
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {
@@ -122,6 +121,9 @@ namespace {
 
         // [[codegen::verbatim(FaceCameraInfo.description)]]
         std::optional<bool> faceCamera;
+
+        // [[codegen::verbatim(TransformationMatrixInfo.description)]]
+        std::optional<glm::dmat4x4> transformationMatrix;
     };
 #include "labelscomponent_codegen.cpp"
 } // namespace
@@ -191,6 +193,8 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
         _faceCamera = !global::windowDelegate->isFisheyeRendering();
     }
     addProperty(_faceCamera);
+
+    _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 }
 
 speck::Labelset& LabelsComponent::labelSet() {
@@ -244,8 +248,15 @@ void LabelsComponent::render(const RenderData& data,
     glm::vec4 textColor = glm::vec4(glm::vec3(_color), _opacity * fadeInVariable);
 
     for (const speck::Labelset::Entry& e : _labelset.entries) {
-        glm::vec3 scaledPos(e.position);
+        if (!e.isEnabled) {
+            continue;
+        }
+
+        // Transform and scale the labels
+        glm::vec3 transformedPos(_transformationMatrix * glm::dvec4(e.position, 1.0));
+        glm::vec3 scaledPos(transformedPos);
         scaledPos *= scale;
+
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,

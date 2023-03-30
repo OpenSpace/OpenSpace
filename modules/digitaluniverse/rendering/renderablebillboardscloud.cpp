@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -135,15 +135,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
         "SizeOption",
         "Size Option Variable",
-        "This value determines which paramenter (datavar) is used for scaling "
-        "of the astronomical objects"
+        "This value determines which paramenter (datavar) is used for scaling of the "
+        "astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Option wether the billboards should face the camera or not. Used for "
-        "non-linear display envierments such as fisheye."
+        "Option wether the billboards should face the camera or not. Used for non-linear "
+        "display envierments such as fisheye."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
@@ -511,7 +511,7 @@ bool RenderableBillboardsCloud::isReady() const {
 }
 
 void RenderableBillboardsCloud::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_hasSpeckFile) {
         _dataset = speck::data::loadFileWithCache(_speckFile);
@@ -536,7 +536,7 @@ void RenderableBillboardsCloud::initialize() {
 }
 
 void RenderableBillboardsCloud::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         "RenderableBillboardsCloud",
@@ -624,9 +624,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
     _program->setUniform(
         _uniformCache.cameraViewProjectionMatrix,
-        glm::mat4(
-            glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
-        )
+        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
     );
 
     const float minBillboardSize = _billboardMinMaxSize.value().x; // in pixels
@@ -698,9 +696,9 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 
-    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+    glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
 
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
@@ -727,11 +725,11 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableBillboardsCloud::update(const UpdateData&) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_dataIsDirty && _hasSpeckFile) {
-        ZoneScopedN("Data dirty")
-        TracyGpuZone("Data dirty")
+        ZoneScopedN("Data dirty");
+        TracyGpuZone("Data dirty");
         LDEBUG("Regenerating data");
 
         std::vector<float> slice = createDataSlice();
@@ -848,8 +846,8 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 
     if (_hasSpriteTexture && _spriteTextureIsDirty && !_spriteTexturePath.value().empty())
     {
-        ZoneScopedN("Sprite texture")
-        TracyGpuZone("Sprite texture")
+        ZoneScopedN("Sprite texture");
+        TracyGpuZone("Sprite texture");
 
         ghoul::opengl::Texture* texture = _spriteTexture;
 
@@ -875,7 +873,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 }
 
 std::vector<float> RenderableBillboardsCloud::createDataSlice() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_dataset.entries.empty()) {
         return std::vector<float>();
@@ -1045,7 +1043,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
 }
 
 void RenderableBillboardsCloud::createPolygonTexture() {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG("Creating Polygon Texture");
 

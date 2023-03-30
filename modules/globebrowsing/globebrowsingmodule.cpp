@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -128,7 +128,6 @@ namespace {
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU"
     };
 
-
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
     {
@@ -147,7 +146,7 @@ namespace {
             std::fill(IdentifierBuffer.begin(), IdentifierBuffer.end(), '\0');
             int ret = sscanf(
                 subDatasets[i],
-                "SUBDATASET_%i_%256[^=]",
+                "SUBDATASET_%i_%255[^=]",
                 &iDataset,
                 IdentifierBuffer.data()
             );
@@ -250,7 +249,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     // Initialize
     global::callback::initializeGL->emplace_back([&]() {
-        ZoneScopedN("GlobeBrowsingModule")
+        ZoneScopedN("GlobeBrowsingModule");
 
         _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
         addPropertySubOwner(_tileCache.get());
@@ -266,21 +265,21 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     });
 
     global::callback::deinitializeGL->emplace_back([]() {
-        ZoneScopedN("GlobeBrowsingModule")
+        ZoneScopedN("GlobeBrowsingModule");
 
         TileProvider::deinitializeDefaultTile();
     });
 
     // Render
     global::callback::render->emplace_back([&]() {
-        ZoneScopedN("GlobeBrowsingModule")
+        ZoneScopedN("GlobeBrowsingModule");
 
         _tileCache->update();
     });
 
     // Deinitialize
     global::callback::deinitialize->emplace_back([&]() {
-        ZoneScopedN("GlobeBrowsingModule")
+        ZoneScopedN("GlobeBrowsingModule");
 
         GdalWrapper::destroy();
     });
@@ -393,7 +392,7 @@ glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
     using namespace globebrowsing;
 
     const Geodetic3 pos = {
-        { glm::radians(latitude), glm::radians(longitude) },
+        { .lat = glm::radians(latitude), .lon = glm::radians(longitude) },
         altitude
     };
 
@@ -452,8 +451,8 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     positionOnPatch.lat *= uv.y;
     positionOnPatch.lon *= uv.x;
     const Geodetic2 pointPosition = {
-        corner.lat + positionOnPatch.lat,
-        corner.lon + positionOnPatch.lon
+        .lat = corner.lat + positionOnPatch.lat,
+        .lon = corner.lon + positionOnPatch.lon
     };
 
     // Compute altitude
@@ -689,29 +688,28 @@ uint64_t GlobeBrowsingModule::wmsCacheSize() const {
 }
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "globebrowsing";
-    res.functions = {
-        codegen::lua::AddLayer,
-        codegen::lua::DeleteLayer,
-        codegen::lua::GetLayers,
-        codegen::lua::MoveLayer,
-        codegen::lua::GoToChunk,
-        codegen::lua::GoToGeo,
-        // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
-        // paths work really well close to surfaces
-        codegen::lua::FlyToGeo,
-        codegen::lua::GetLocalPositionFromGeo,
-        codegen::lua::GetGeoPositionForCamera,
-        codegen::lua::LoadWMSCapabilities,
-        codegen::lua::RemoveWMSServer,
-        codegen::lua::CapabilitiesWMS
+    return {
+        .name = "globebrowsing",
+        .functions = {
+            codegen::lua::AddLayer,
+            codegen::lua::DeleteLayer,
+            codegen::lua::GetLayers,
+            codegen::lua::MoveLayer,
+            codegen::lua::GoToChunk,
+            codegen::lua::GoToGeo,
+            // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
+            // paths work really well close to surfaces
+            codegen::lua::FlyToGeo,
+            codegen::lua::GetLocalPositionFromGeo,
+            codegen::lua::GetGeoPositionForCamera,
+            codegen::lua::LoadWMSCapabilities,
+            codegen::lua::RemoveWMSServer,
+            codegen::lua::CapabilitiesWMS
+        },
+        .scripts = {
+            absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
+        }
     };
-    res.scripts = {
-        absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
-    };
-
-    return res;
 }
 
 } // namespace openspace

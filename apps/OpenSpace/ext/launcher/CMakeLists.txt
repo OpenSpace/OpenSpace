@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake)
 
 set(HEADER_FILES
   include/filesystemaccess.h
@@ -113,8 +113,9 @@ target_include_directories(
   openspace-ui-launcher
   PUBLIC
   include
-  ${OPENSPACE_APPS_DIR}/OpenSpace/ext/sgct/include
-  ${OPENSPACE_APPS_DIR}/OpenSpace/ext/sgct/sgct/ext/glm
+  # @TODO:  This should be handled in a better way
+  ../sgct/include
+  ../sgct/sgct/ext/glm
 )
 target_link_libraries(
   openspace-ui-launcher

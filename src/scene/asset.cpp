@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,7 +59,7 @@ std::filesystem::path Asset::path() const {
 }
 
 void Asset::setState(State state) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_state == state) {
         return;
@@ -109,7 +109,7 @@ void Asset::addSynchronization(ResourceSynchronization* synchronization) {
 }
 
 void Asset::setSynchronizationStateResolved() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!isSynchronized() && isSyncResolveReady()) {
         setState(State::Synchronized);
@@ -117,7 +117,7 @@ void Asset::setSynchronizationStateResolved() {
 }
 
 void Asset::setSynchronizationStateRejected() {
-    ZoneScoped
+    ZoneScoped;
 
     setState(State::SyncRejected);
 }
@@ -270,7 +270,7 @@ void Asset::unload() {
 }
 
 void Asset::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     if (isInitialized()) {
         return;

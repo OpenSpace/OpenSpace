@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,7 +68,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo KopparapuTeffIntervalInfo = {
         "KopparapuTeffInterval",
-        "Kopparapu TEFF" ,
+        "Kopparapu TEFF",
         "The effective temperature interval for which Kopparapu's formula is used for "
         "the habitable zone computation. For stars with temperatures outside the range, "
         "a simpler method by Tom E. Harris is used. This method only uses the star "

@@ -25,7 +25,8 @@
               "pos": { "x": 0.0, "y": 0.0 },
               "size": { "x": 1.0, "y": 1.0 },
               "projection": {
-                "PlanarProjection": {
+                "type": "SpoutFlatProjection",
+                "planarprojection": {
                   "fov": {
                     "hfov": 80.0,
                     "vfov": 50.534015846724
@@ -38,11 +39,10 @@
                   "b": 0.1,
                   "a": 1.0
                 },
-                "drawMain": true,
-                "height": "1080",
+                "drawmain": true,
+                "height": 1080,
                 "mappingspoutname": "OS_FLAT",
-                "type": "SpoutFlatProjection",
-                "width": "1920"
+                "width": 1920
               }
             }
           ]

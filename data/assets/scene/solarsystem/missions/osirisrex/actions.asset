@@ -1,0 +1,113 @@
+local focus_osirisrex = {
+  Identifier = "os.missions.osirisrex.focus",
+  Name = "Focus on OsirisRex",
+  Command = [[
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'OsirisRex'); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+  ]],
+  Documentation = "Sets the focus of the camera on 'OsirisRex'",
+  GuiPath = "/Missions/Osiris Rex",
+  isLocal = false
+}
+
+local focus_bennu = {
+  Identifier = "os.missions.osirisrex.bennu.focus",
+  Name = "Focus on Bennu",
+  Command = [[
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'BennuBarycenter'); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+  ]],
+  Documentation = "Sets the focus of the camera on 'Bennu'",
+  GuiPath = "/Missions/Osiris Rex",
+  isLocal = false
+}
+
+local bennu_approach_time = {
+  Identifier = "os.missions.osirisrex.setup.bennuapproach",
+  Name = "Set Bennu approach time",
+  Command = [[
+    openspace.printInfo('Set time: Approach');
+    openspace.time.setTime('2018-SEP-11 21:31:01.183');
+  ]],
+  Documentation = "Sets the time to the approach at Bennu",
+  GuiPath = "/Missions/Osiris Rex",
+  isLocal = false
+}
+
+local bennu_survey_time = {
+  Identifier = "os.missions.osirisrex.setup.bennusurvey",
+  Name = "Set Bennu survey time",
+  Command = [[
+    openspace.printInfo('Set time: Preliminary Survey'); 
+    openspace.time.setTime('2018-NOV-20 01:13:12.183');
+  ]],
+  Documentation = "Sets the time to the preliminary survey of Bennu",
+  GuiPath = "/Missions/Osiris Rex",
+  isLocal = false
+}
+
+local bennu_event_b = {
+  Identifier = "os.missions.osirisrex.setup.bennueventb",
+  Name = "Set orbital B event time",
+  Command = [[
+    openspace.printInfo('Set time: Orbital B'); 
+    openspace.time.setTime('2019-APR-08 10:35:27.186');
+  ]],
+  Documentation = "Sets the time to the orbital B event",
+  GuiPath = "/Missions/Osiris Rex",
+  isLocal = false
+}
+
+local bennu_recon_event = {
+  Identifier = "os.missions.osirisrex.setup.bennureconevent",
+  Name = "Set recon event time",
+  Command = [[
+    openspace.printInfo('Set time: Recon'); 
+    openspace.time.setTime('2019-MAY-25 03:50:31.195');
+  ]],
+  Documentation = "Sets the time to the recon event",
+  GuiPath = "/Missions/Osiris Rex",
+  isLocal = false
+}
+
+local toggle_sun_marker = {
+  Identifier = "os.missions.osirisrex.togglesunmarker",
+  Name = "Toggle Sun marker",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.SunMarker.Renderable.Enabled', not openspace.getPropertyValue('Scene.SunMarker.Renderable.Enabled'));
+  ]],
+  Documentation = "Toggles the visibility of the text marking the location of the Sun",
+  GuiPath = "/Missions/Osiris Rex",
+  isLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(focus_osirisrex)
+  openspace.action.registerAction(focus_bennu)
+  openspace.action.registerAction(bennu_approach_time)
+  openspace.action.registerAction(bennu_survey_time)
+  openspace.action.registerAction(bennu_event_b)
+  openspace.action.registerAction(bennu_recon_event)
+  openspace.action.registerAction(toggle_sun_marker)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(toggle_sun_marker)
+  openspace.action.removeAction(bennu_recon_event)
+  openspace.action.removeAction(bennu_event_b)
+  openspace.action.removeAction(bennu_survey_time)
+  openspace.action.removeAction(bennu_approach_time)
+  openspace.action.removeAction(focus_bennu)
+  openspace.action.removeAction(focus_osirisrex)
+end)
+
+asset.meta = {
+  Name = "OsirisRex Actions",
+  Version = "1.0",
+  Description = "Actions related to the OsirisRex mission",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

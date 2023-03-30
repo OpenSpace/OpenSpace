@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <openspace/json.h>
 #include <openspace/util/spicemanager.h>
@@ -123,22 +124,22 @@ void testReadingHorizons(HorizonsType type, std::filesystem::path filePath,
     std::vector<HorizonsKeyframe> data = result.data;
     REQUIRE(data.size() == 3);
 
-    CHECK(data[0].time == Approx(t0));
-    CHECK(data[0].position.x == Approx(x0));
-    CHECK(data[0].position.y == Approx(y0));
-    CHECK(data[0].position.z == Approx(z0));
+    CHECK(data[0].time == Catch::Approx(t0));
+    CHECK(data[0].position.x == Catch::Approx(x0));
+    CHECK(data[0].position.y == Catch::Approx(y0));
+    CHECK(data[0].position.z == Catch::Approx(z0));
 
 
-    CHECK(data[1].time == Approx(t1));
-    CHECK(data[1].position.x == Approx(x1));
-    CHECK(data[1].position.y == Approx(y1));
-    CHECK(data[1].position.z == Approx(z1));
+    CHECK(data[1].time == Catch::Approx(t1));
+    CHECK(data[1].position.x == Catch::Approx(x1));
+    CHECK(data[1].position.y == Catch::Approx(y1));
+    CHECK(data[1].position.z == Catch::Approx(z1));
 
 
-    CHECK(data[2].time == Approx(t2));
-    CHECK(data[2].position.x == Approx(x2));
-    CHECK(data[2].position.y == Approx(y2));
-    CHECK(data[2].position.z == Approx(z2));
+    CHECK(data[2].time == Catch::Approx(t2));
+    CHECK(data[2].position.x == Catch::Approx(x2));
+    CHECK(data[2].position.y == Catch::Approx(y2));
+    CHECK(data[2].position.z == Catch::Approx(z2));
 
     // Clean up
     openspace::SpiceManager::ref().unloadKernel(kernel.string());
