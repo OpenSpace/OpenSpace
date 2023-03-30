@@ -58,6 +58,8 @@ target_include_directories(OpenSpaceTest
   PUBLIC
     "${GHOUL_BASE_DIR}/ext/catch2/single_include"
     "${OPENSPACE_BASE_DIR}/apps/OpenSpace/ext/sgct/include"
+    "${OPENSPACE_BASE_DIR}/apps/OpenSpace/ext/sgct/ext/json/include"
+    "${OPENSPACE_BASE_DIR}/apps/OpenSpace/ext/sgct/ext/json-schema-validator/src"
     "${OPENSPACE_BASE_DIR}"
 )
 target_compile_definitions(OpenSpaceTest PUBLIC "GHL_THROW_ON_ASSERT")
