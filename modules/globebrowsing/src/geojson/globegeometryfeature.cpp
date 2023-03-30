@@ -123,7 +123,7 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
 
     if (!isInitializeStep && _properties.hasOverrideTexture()) {
         // Here we don't necessarily have to update, since it should have been
-        // created at initialization
+        // created at initialization. Do nothing
         return;
     }
     else if (!_properties.pointTexture().empty()) {
@@ -134,19 +134,19 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
         texture = m->defaultGeoPointTexture();
     }
     else {
+        // No texture => render without texture
         _hasTexture = false;
+        _pointTexture = nullptr;
         return;
     }
 
-    if (isInitializeStep) {
+    if (isInitializeStep || !_pointTexture) {
         _pointTexture = std::make_unique<TextureComponent>(2);
         _pointTexture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
         _pointTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
     }
 
     std::filesystem::path texturePath = absPath(texture);
-    // TODO: make sure we check for empty textures
-
     if (std::filesystem::is_regular_file(texturePath)) {
         _hasTexture = true;
         _pointTexture->loadFromFile(texture);

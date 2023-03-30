@@ -252,9 +252,12 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     _wmsCacheSizeMB = p.wmsCacheSize.value_or(_wmsCacheSizeMB);
     _tileCacheSizeMB = p.tileCacheSize.value_or(_tileCacheSizeMB);
     const bool noWarning = p.noWarning.value_or(false);
-    _defaultGeoPointTexturePath = absPath(*p.defaultGeoPointTexture).string();
 
-    if (p.defaultGeoPointTexture.has_value()) {
+    _defaultGeoPointTexturePath.onChange([this]() {
+        if (_defaultGeoPointTexturePath.value().empty()) {
+            _hasDefaultGeoPointTexture = false;
+            return;
+        }
         std::filesystem::path path = _defaultGeoPointTexturePath.value();
         if (std::filesystem::exists(path)) {
             _hasDefaultGeoPointTexture = true;
@@ -265,6 +268,10 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
                 "does not exist", path
             ));
         }
+    });
+
+    if (p.defaultGeoPointTexture.has_value()) {
+        _defaultGeoPointTexturePath = absPath(*p.defaultGeoPointTexture).string();
     }
 
     if (!_wmsCacheEnabled && _offlineMode && !noWarning) {
