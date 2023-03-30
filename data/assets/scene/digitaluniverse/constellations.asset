@@ -102,7 +102,9 @@ local show_constellations = {
   Name = "Show all",
   Command = [[
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", {})
+    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 0.0)
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 1.0, 2)
   ]],
   Documentation = "Shows all the constellations lines",
   GuiPath = "/Constellations/Lines",
@@ -113,8 +115,7 @@ local hide_constellations = {
   Identifier = "constellations.hide",
   Name = "Hide all",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", false)
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", {})
+    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 0.0, 2.0, "Linear", "openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', true); openspace.setPropertyValueSingle('Scene.Constellations.Renderable.ConstellationSelection', {})")
   ]],
   Documentation = "Hides all the constellations lines",
   GuiPath = "/Constellations/Lines",
@@ -126,7 +127,9 @@ local show_zodiacs = {
   Name = "Show zodiac",
   Command = [[
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", ]] .. zodiacsString .. [[)
+    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 0.0)
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 1.0, 2)
   ]],
   Documentation = "Shows the zodiac constellations lines",
   GuiPath = "/Constellations/Lines",
