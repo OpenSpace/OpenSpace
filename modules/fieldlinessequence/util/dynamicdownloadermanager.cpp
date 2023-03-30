@@ -70,8 +70,8 @@ std::string formulateDataHttpRequest(double minTime, double maxTime,
 //}
 
 DynamicDownloaderManager::DynamicDownloaderManager(int dataID, const std::string infoURL,
-                                                                const std::string dataURL,
-                                                                          int nOfFilesToQ)
+    const std::string dataURL,
+    int nOfFilesToQ)
     : _infoURL(infoURL)
     , _dataURL(dataURL)
     , _nOfFilesToQueue(nOfFilesToQ)

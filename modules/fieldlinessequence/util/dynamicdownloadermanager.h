@@ -30,6 +30,7 @@
 #include <filesystem>
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <queue>
 
@@ -40,14 +41,20 @@ namespace openspace {
 // 2. if things other than fieldlines are being supported,
 // they could be added in another struct
 struct FieldlineOption {
+
     // Question: What can I use instead of map to guarantee the value is also unique
     // These might only be useful as a dissplay name anyway
-    const std::map<int, std::string> optionMap{
-        // WSA 5.4
+    // Answe: Using two identical unordered map instead, except swaped key and value
+    // This with a constructor with insert function, adds list to the unordered maps.
+    // The vector pairs will later be replaced by a document list supplied from the server
+    // as a TODO.
+    std::unordered_map<int, std::string> _keyToValue;
+    std::unordered_map<std::string, int> _valueToKey;
+    const std::vector<std::pair<int, std::string>> pairs = {
         {2284,"GONG_Z/trace_pfss_intoout"}, //GONG_Z/trace_pfss_intoout
-        {2285,"GONG_Z/trace_pfss_intoout"}, //GONG_Z/trace_pfss_outtoin
-        {2286,"GONG_Z/trace_pfss_intoout"}, //GONG_Z/trace_scs_outtoin
-        {2287,"GONG_Z/trace_pfss_intoout"}, //GONG_Z/trace_sun_earth
+        {2285,"GONG_Z/trace_pfss_outtoin"}, //GONG_Z/trace_pfss_outtoin
+        {2286,"GONG_Z/trace_scs_outtoin"}, //GONG_Z/trace_scs_outtoin
+        {2287,"GONG_Z/trace_sun_earth"}, //GONG_Z/trace_sun_earth
 
         // WSA 5.x GONG
         {1768, "WSA 5.X real"}, // - time output of the field line trace from the solar surface to the source surface using GONGZ as input
@@ -76,30 +83,26 @@ struct FieldlineOption {
         {1179, "trace_pfss_outtoin"},
         //{1180, "WSA_OUT"},              // .fits
     };
-    // Assumes the string is unique as well
-    int id(std::string name) {
-        //std::map<int, std::string>::const_iterator pos = optionMap.find(name);
-        //if (pos == optionMap.end()) {
-        //    LERROR("Did not find key dataID for input name");
-        //    return;
-        //}
-        //else {
-        //    return pos.first;
-        //}
-        for (auto it = optionMap.begin(); it != optionMap.end(); ++it) {
-            if (it->second == name) {
-                return it->first;
-            }
+
+    FieldlineOption() {
+        for (const auto& pair : pairs) {
+            insert(pair.first, pair.second);
         }
     }
-    std::string optionName(int id) {
-        std::string name;
-        try {
-            return optionMap.at(id);
-        }
-        catch (std::out_of_range&) {
-            return "";
-        }
+
+    void insert(int key, std::string value) {
+        _keyToValue[key] = value;
+        _valueToKey[value] = key;
+    }
+
+    int id(std::string value) {
+        auto it = _valueToKey.find(value);
+        return (it != _valueToKey.end()) ? it->second : 0;
+    }
+
+    std::string optionName(int key) {
+        auto it = _keyToValue.find(key);
+        return (it != _keyToValue.end()) ? it->second : "";
     }
 };
 
@@ -120,7 +123,6 @@ struct File {
     };
     State state;
 };
-
 
 class DynamicDownloaderManager {
 public:
