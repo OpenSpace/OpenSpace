@@ -88,17 +88,7 @@ void GlobeGeometryFeature::initializeGL(ghoul::opengl::ProgramObject* pointsProg
     _linesAndPolygonsProgram = linesAndPolygonsProgram;
 
     if (isPoints()) {
-        GlobeBrowsingModule* m = global::moduleEngine->module<GlobeBrowsingModule>();
-        if (m->hasDefaultGeoPointTexture()) {
-            _hasTexture = true;
-            _pointTexture = std::make_unique<TextureComponent>(2);
-            _pointTexture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            _pointTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-
-            // TODO: option to use texture from properties
-            _pointTexture->loadFromFile(m->defaultGeoPointTexture());
-            _pointTexture->uploadToGpu();
-        }
+        updateTexture(true);
     }
 }
 
@@ -127,10 +117,53 @@ bool GlobeGeometryFeature::useHeightMap() const {
         GeoJsonProperties::AltitudeMode::RelativeToGround;
 }
 
+void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
+    std::string texture = "";
+    GlobeBrowsingModule* m = global::moduleEngine->module<GlobeBrowsingModule>();
+
+    if (!isInitializeStep && _properties.hasOverrideTexture()) {
+        // Here we don't necessarily have to update, since it should have been
+        // created at initialization
+        return;
+    }
+    else if (!_properties.pointTexture().empty()) {
+        texture = _properties.pointTexture();
+    }
+    else if (m->hasDefaultGeoPointTexture()) {
+        // TOOD: verify that this is updated correctly
+        texture = m->defaultGeoPointTexture();
+    }
+    else {
+        _hasTexture = false;
+        return;
+    }
+
+    if (isInitializeStep) {
+        _pointTexture = std::make_unique<TextureComponent>(2);
+        _pointTexture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        _pointTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+    }
+
+    std::filesystem::path texturePath = absPath(texture);
+    // TODO: make sure we check for empty textures
+
+    if (std::filesystem::is_regular_file(texturePath)) {
+        _hasTexture = true;
+        _pointTexture->loadFromFile(texture);
+        _pointTexture->uploadToGpu();
+    }
+    else {
+        LERROR(fmt::format("Trying to use texture file that does not exist"));
+    }
+}
+
 void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geometry* geo,
                                                         int index)
 {
-    ghoul_assert(!geo->isCollection(), "Geometry can not be a collection");
+    ghoul_assert(
+        geo->isPuntal() || !geo->isCollection(),
+        "Non-point-geometry can not be a collection"
+    );
 
     switch (geo->getGeometryTypeId()) {
         case geos::geom::GEOS_POINT:
@@ -340,7 +373,10 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature) const
 {
     ghoul_assert(feature.type == RenderType::Points, "Trying to render faulty geometry");
     _pointsProgram->setUniform("color", _properties.color());
-    _pointsProgram->setUniform("pointSize", _properties.pointSize());
+    _pointsProgram->setUniform(
+        "pointSize",
+        0.001f * _properties.pointSize() * static_cast<float>(_globe.boundingSphere())
+    );
 
     if (_pointTexture) {
         ghoul::opengl::TextureUnit unit;

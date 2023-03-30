@@ -25,6 +25,7 @@
 #include "fragment.glsl"
 
 flat in float vs_screenSpaceDepth;
+in vec4 vs_positionViewSpace;
 flat in vec3 vs_normal; // TODO: not needed for shading, remove somehow
 in vec2 texCoord;
 
@@ -50,12 +51,12 @@ Fragment getFragment() {
     frag.color = vec4(color * vs_normal, opacity);
   }
 
-  if (frag.color.a == 0.0) {
+  if (frag.color.a < 0.01) {
     discard;
   }
 
   frag.depth = vs_screenSpaceDepth;
-  frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
+  frag.gPosition = vs_positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   return frag;
 }

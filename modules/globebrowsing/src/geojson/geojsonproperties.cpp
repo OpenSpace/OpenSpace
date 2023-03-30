@@ -33,19 +33,18 @@
 // @TODO: Go through and decide what keys we actually want. (Started out with just using css keys)
 namespace geojson::propertykeys {
     constexpr std::string_view Name = "name";
+    constexpr std::string_view Description = "description";
 
     constexpr std::string_view Opacity = "opacity";
 
-    constexpr std::string_view Color = "color";
-    constexpr std::string_view StrokeColor = "stroke";
-
-    constexpr std::string_view FillColor = "fill"; // TODO: polygon instead of fill?
-    constexpr std::string_view FillColorAlt2 = "fill-color";
-
+    constexpr std::array<std::string_view, 2> Color = { "color", "stroke" };
+    constexpr std::array<std::string_view, 2> FillColor = { "fill", "fill-color" };
     constexpr std::string_view FillOpacity = "fill-opacity";
+    constexpr std::string_view LineWidth = "stroke-width";
 
     constexpr std::string_view PointSize = "point-size"; // TODO: remove?
-    constexpr std::string_view LineWidth = "stroke-width";
+    constexpr std::array<std::string_view, 3> Texture = { "texture", "sprite", "point-texture" };
+
     constexpr std::string_view Extrude = "extrude";
 
     // TODO: Add tesselate?
@@ -57,6 +56,18 @@ namespace geojson::propertykeys {
 }
 
 namespace {
+
+    template<std::size_t SIZE>
+    bool matchesKey(std::string_view key,
+                    const std::array<std::string_view, SIZE>& keyAlternativesArray)
+    {
+        for (auto k : keyAlternativesArray) {
+            if (key == k) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     glm::vec3 hexToRbg(std::string_view hexColor) {
         int r, g, b;
@@ -101,7 +112,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The color of the rendered geometry."
+        "The color of the rendered geometry. For points it will be used as a multiply"
+        "color for any provided texture."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FillOpacityInfo = {
@@ -116,16 +128,25 @@ namespace {
         "The color of the filled portion of a rendered polygon."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
-        "PointSize",
-        "Point Size",
-        "The size of any rendered points."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
         "The width of any rendered lines."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
+        "PointSize",
+        "Point Size",
+        "The size of any rendered points. The size will be scaled based on the "
+        "bounding sphere of the globe"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PointTextureInfo = {
+        "PointTexture",
+        "Point Texture",
+        "A texture to be used for rendering points. No value means to use the default "
+        "texture provided by the globebrowsing module. If no texture is provided there "
+        "either, the point will be rendered as a plane and colored by the color value."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ExtrudeInfo = {
@@ -184,8 +205,9 @@ GeoJsonProperties::GeoJsonProperties()
     , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , fillOpacity(FillOpacityInfo, 0.7f, 0.f, 1.f)
     , fillColor(FillColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , pointSize(PointSizeInfo, 1.f, 0.01f, 100.f)
     , lineWidth(LineWidthInfo, 1.f, 0.01f, 100.f)
+    , pointSize(PointSizeInfo, 1.f, 0.01f, 10.f)
+    , pointTexture(PointTextureInfo)
     , extrude(ExtrudeInfo, false)
     , altitudeModeOption(AltitudeModeInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
@@ -196,8 +218,11 @@ GeoJsonProperties::GeoJsonProperties()
     fillColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(fillColor);
 
-    addProperty(pointSize);
     addProperty(lineWidth);
+
+    addProperty(pointSize);
+    addProperty(pointTexture);
+
     addProperty(extrude);
 
     altitudeModeOption.addOptions({
@@ -238,24 +263,23 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
         else if (key == geojson::propertykeys::Opacity) {
             result.opacity = static_cast<float>(value.getNumber());
         }
-        else if (key == geojson::propertykeys::Color ||
-                 key == geojson::propertykeys::StrokeColor)
-        {
+        else if (matchesKey(key, geojson::propertykeys::Color)) {
             result.color = getColorValue(value);
         }
         else if (key == geojson::propertykeys::FillOpacity) {
             result.fillOpacity = static_cast<float>(value.getNumber());
         }
-        else if (key == geojson::propertykeys::FillColor ||
-                 key == geojson::propertykeys::FillColorAlt2)
-        {
+        else if (matchesKey(key, geojson::propertykeys::FillColor)) {
             result.fillColor = getColorValue(value);
+        }
+        else if (key == geojson::propertykeys::LineWidth) {
+            result.lineWidth = static_cast<float>(value.getNumber());
         }
         else if (key == geojson::propertykeys::PointSize) {
             result.pointSize = static_cast<float>(value.getNumber());
         }
-        else if (key == geojson::propertykeys::LineWidth) {
-            result.lineWidth = static_cast<float>(value.getNumber());
+        else if (matchesKey(key, geojson::propertykeys::Texture)) {
+            result.pointTexture = value.getString();
         }
         else if (key == geojson::propertykeys::Extrude) {
             result.extrude = value.getBoolean();
@@ -285,7 +309,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
         try {
             parseProperty(key, value);
         }
-        catch (const geos::io::GeoJSONValue::GeoJSONTypeError& e) {
+        catch (const geos::io::GeoJSONValue::GeoJSONTypeError&) {
             // @TODO: Shouls add some more information on which file the reading failed for
             LERRORC("GeoJSON", fmt::format(
                 "Error reading GeoJSON property '{}'. Value has wrong type", key
@@ -313,12 +337,16 @@ glm::vec3 PropertySet::fillColor() const {
     return overrideValues.fillColor.value_or(defaultValues.fillColor);
 }
 
+float PropertySet::lineWidth() const {
+    return overrideValues.lineWidth.value_or(defaultValues.lineWidth);
+}
+
 float PropertySet::pointSize() const {
     return overrideValues.pointSize.value_or(defaultValues.pointSize);
 }
 
-float PropertySet::lineWidth() const {
-    return overrideValues.lineWidth.value_or(defaultValues.lineWidth);
+std::string PropertySet::pointTexture() const {
+    return overrideValues.pointTexture.value_or(defaultValues.pointTexture);
 }
 
 bool PropertySet::extrude() const {
@@ -327,6 +355,10 @@ bool PropertySet::extrude() const {
 
 GeoJsonProperties::AltitudeMode PropertySet::altitudeMode() const {
     return overrideValues.altitudeMode.value_or(defaultValues.altitudeMode());
+}
+
+bool PropertySet::hasOverrideTexture() const {
+    return overrideValues.pointTexture.has_value();
 }
 
 } // namespace openspace::globebrowsing

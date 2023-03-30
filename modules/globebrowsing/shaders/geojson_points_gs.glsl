@@ -32,6 +32,7 @@ flat in vec3 normal[]; // This could be the globe normal instead, and be used as
 layout(triangle_strip, max_vertices = 4) out;
 out vec2 texCoord;
 flat out float vs_screenSpaceDepth;
+out vec4 vs_positionViewSpace;
 flat out vec3 vs_normal;
 
 // General settings
@@ -85,6 +86,7 @@ void main() {
   }
 
   vs_screenSpaceDepth = bottomLeft.w;
+  vs_positionViewSpace = vec4(viewTransform * dpos);
 
   // Build primitive
   texCoord = corners[0];

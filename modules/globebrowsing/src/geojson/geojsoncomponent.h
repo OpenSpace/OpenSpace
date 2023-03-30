@@ -102,6 +102,7 @@ private:
 
     bool _dataIsDirty = true;
     bool _dataIsInitialized = false;
+    bool _textureIsDirty = false;
 
     size_t _nVerticesToDraw = 0;
 

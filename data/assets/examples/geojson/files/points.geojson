@@ -36,7 +36,10 @@
     },
     {
       "type": "Feature",
-      "properties": {},
+      "properties": {
+		    "name": "Single point custom icon",
+		    "sprite": "${DATA}/openspace-icon.png"
+	    },
       "geometry": {
         "coordinates": [
           -64.04189076668845,

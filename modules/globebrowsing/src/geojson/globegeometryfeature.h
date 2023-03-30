@@ -104,6 +104,8 @@ public:
     bool isPoints() const;
     bool useHeightMap() const;
 
+    void updateTexture(bool isInitializeStep = false);
+
     void createFromSingleGeosGeometry(const geos::geom::Geometry* geo, int index);
 
     // 2 pass rendering to get correct culling for polygons

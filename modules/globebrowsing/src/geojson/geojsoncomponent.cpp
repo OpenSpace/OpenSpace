@@ -236,6 +236,20 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         _dataIsDirty = true;
     });
 
+    _defaultProperties.pointTexture.onChange([&]() {
+        std::filesystem::path texturePath = _defaultProperties.pointTexture.value();
+        // Not ethat an empty texture is also valid => use default texture from module
+        if (std::filesystem::is_regular_file(texturePath) || texturePath.empty()) {
+            _textureIsDirty = true;
+        }
+        else {
+            LERROR(fmt::format(
+                "Provided texture file does not exist: '{}'",
+                _defaultProperties.pointTexture
+            ));
+        }
+    });
+
     _forceUpdateData.onChange([this]() { _dataIsDirty = true; });
     addProperty(_forceUpdateData);
 
@@ -345,6 +359,7 @@ void GeoJsonComponent::render(const RenderData& data) {
     // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
 
     if (_drawWireframe) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -357,15 +372,12 @@ void GeoJsonComponent::render(const RenderData& data) {
         }
     }
 
-    //if (_drawWireframe) {
-    //    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    //}
-
     glBindVertexArray(0);
 
     // Restore GL State
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
     global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetLineState();
 }
 
@@ -378,9 +390,15 @@ void GeoJsonComponent::update() {
         if (_dataIsDirty) {
             g.setOffsets(offsets);
         }
+
+        if (_textureIsDirty) {
+            g.updateTexture();
+        }
+
         g.update(_dataIsDirty, _preventUpdatesFromHeightMap);
     }
 
+    _textureIsDirty = false;
     _dataIsDirty = false;
 }
 

@@ -30,9 +30,11 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/glm.h>
 #include <optional>
+#include <string_view>
 
 namespace geos::io { class GeoJSONFeature; }
 
@@ -60,13 +62,14 @@ struct GeoJsonProperties : public properties::PropertyOwner {
     properties::Vec3Property color;
     properties::FloatProperty fillOpacity;
     properties::Vec3Property fillColor;
-    properties::FloatProperty pointSize;
     properties::FloatProperty lineWidth;
+    properties::FloatProperty pointSize;
+    properties::StringProperty pointTexture;
     properties::BoolProperty extrude;
     properties::OptionProperty altitudeModeOption;
 };
 
-// Optional versions of all the properties above, that can be read from a geoJson file 
+// Optional versions of all the properties above, that can be read from a geoJson file
 // and used to override any default values
 struct GeoJsonOverrideProperties {
     std::optional<std::string> name = std::nullopt;
@@ -74,8 +77,9 @@ struct GeoJsonOverrideProperties {
     std::optional<glm::vec3> color = std::nullopt;
     std::optional<float> fillOpacity = std::nullopt;
     std::optional<glm::vec3> fillColor = std::nullopt;
-    std::optional<float> pointSize = std::nullopt;
     std::optional<float> lineWidth = std::nullopt;
+    std::optional<float> pointSize = std::nullopt;
+    std::optional<std::string> pointTexture = std::nullopt;
     std::optional<bool> extrude = std::nullopt;
     std::optional<GeoJsonProperties::AltitudeMode> altitudeMode = std::nullopt;
 };
@@ -92,10 +96,13 @@ struct PropertySet {
     glm::vec3 color() const;
     float fillOpacity() const;
     glm::vec3 fillColor() const;
-    float pointSize() const;
     float lineWidth() const;
+    float pointSize() const;
+    std::string pointTexture() const;
     bool extrude() const;
     GeoJsonProperties::AltitudeMode altitudeMode() const;
+
+    bool hasOverrideTexture() const;
 };
 
 } // namespace openspace::globebrowsing
