@@ -60,15 +60,28 @@ namespace geojson::propertykeys {
 namespace {
 
     template<std::size_t SIZE>
-    bool matchesKey(std::string_view key,
-                    const std::array<std::string_view, SIZE>& keyAlternativesArray)
+    bool keyMatches(const std::string_view key,
+                    const std::array<std::string_view, SIZE>& keyAlternativesArray,
+                    std::optional<const openspace::properties::Property::PropertyInfo> propInfo = std::nullopt)
     {
         for (auto k : keyAlternativesArray) {
             if (key == k) {
                 return true;
             }
         }
+
+        if (propInfo.has_value() && key == (*propInfo).identifier) {
+            return true;
+        }
+
         return false;
+    }
+
+    bool keyMatches(const std::string_view key, const std::string_view keyAlternative,
+        std::optional<const openspace::properties::Property::PropertyInfo> propInfo = std::nullopt)
+    {
+        const std::array<std::string_view, 1> array = { keyAlternative };
+        return keyMatches(key, array, propInfo);
     }
 
     glm::vec3 hexToRbg(std::string_view hexColor) {
@@ -270,37 +283,37 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
     const std::map<std::string, geos::io::GeoJSONValue>& props = feature.getProperties();
     GeoJsonOverrideProperties result;
 
-    auto parseProperty = [&result](std::string_view key,
+    auto parseProperty = [&result](const std::string_view key,
                                    const geos::io::GeoJSONValue& value)
     {
-        if (key == geojson::propertykeys::Name) {
+        if (keyMatches(key, geojson::propertykeys::Name)) {
             result.name = value.getString();
         }
-        else if (key == geojson::propertykeys::Opacity) {
+        else if (keyMatches(key, geojson::propertykeys::Opacity, OpacityInfo)) {
             result.opacity = static_cast<float>(value.getNumber());
         }
-        else if (matchesKey(key, geojson::propertykeys::Color)) {
+        else if (keyMatches(key, geojson::propertykeys::Color, ColorInfo)) {
             result.color = getColorValue(value);
         }
-        else if (key == geojson::propertykeys::FillOpacity) {
+        else if (keyMatches(key, geojson::propertykeys::FillOpacity, FillOpacityInfo)) {
             result.fillOpacity = static_cast<float>(value.getNumber());
         }
-        else if (matchesKey(key, geojson::propertykeys::FillColor)) {
+        else if (keyMatches(key, geojson::propertykeys::FillColor, FillColorInfo)) {
             result.fillColor = getColorValue(value);
         }
-        else if (key == geojson::propertykeys::LineWidth) {
+        else if (keyMatches(key, geojson::propertykeys::LineWidth, LineWidthInfo)) {
             result.lineWidth = static_cast<float>(value.getNumber());
         }
-        else if (key == geojson::propertykeys::PointSize) {
+        else if (keyMatches(key, geojson::propertykeys::PointSize, PointSizeInfo)) {
             result.pointSize = static_cast<float>(value.getNumber());
         }
-        else if (matchesKey(key, geojson::propertykeys::Texture)) {
+        else if (keyMatches(key, geojson::propertykeys::Texture, PointTextureInfo)) {
             result.pointTexture = value.getString();
         }
-        else if (key == geojson::propertykeys::Extrude) {
+        else if (keyMatches(key, geojson::propertykeys::Extrude, ExtrudeInfo)) {
             result.extrude = value.getBoolean();
         }
-        else if (key == geojson::propertykeys::AltitudeMode) {
+        else if (keyMatches(key, geojson::propertykeys::AltitudeMode, AltitudeModeInfo)) {
             std::string mode = value.getString();
 
             if (mode == geojson::propertykeys::AltitudeModeAbsolute) {
