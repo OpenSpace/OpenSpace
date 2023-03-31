@@ -384,6 +384,10 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature) const
         _pointTexture->bind();
         _pointsProgram->setUniform("pointTexture", unit);
         _pointsProgram->setUniform("hasTexture", true);
+
+        float widthHeightRatio = static_cast<float>(_pointTexture->texture()->width()) /
+            static_cast<float>(_pointTexture->texture()->height());
+        _pointsProgram->setUniform("textureWidthFactor", widthHeightRatio);
     }
     else {
         glBindTexture(GL_TEXTURE_2D, 0);

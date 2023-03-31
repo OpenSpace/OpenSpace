@@ -46,6 +46,7 @@ uniform vec3 up;
 uniform vec3 right;
 
 uniform float pointSize;
+uniform float textureWidthFactor;
 
 // If false, use the center
 bool useBottomAnchorPoint = true;
@@ -68,7 +69,7 @@ void main() {
   dmat4 cameraViewProjectionMatrix = projectionTransform * viewTransform;
 
   vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
-  vec4 scaledRightClip = vec4(cameraViewProjectionMatrix * scaledRight);
+  vec4 scaledRightClip = textureWidthFactor * vec4(cameraViewProjectionMatrix * scaledRight);
   vec4 scaledUpClip = vec4(cameraViewProjectionMatrix * scaledUp);
 
   // Place anchor point at the bottom
