@@ -375,7 +375,7 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature) const
     _pointsProgram->setUniform("color", _properties.color());
     _pointsProgram->setUniform(
         "pointSize",
-        0.01f * _properties.pointSize() * static_cast<float>(_globe.boundingSphere())
+        0.001f * _properties.pointSize() * static_cast<float>(_globe.boundingSphere())
     );
 
     if (_pointTexture) {
