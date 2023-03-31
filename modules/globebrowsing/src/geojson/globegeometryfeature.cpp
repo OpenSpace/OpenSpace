@@ -416,7 +416,7 @@ void GlobeGeometryFeature::renderPolygons(const RenderFeature& feature,
     );
 
     _linesAndPolygonsProgram->setUniform("color", _properties.fillColor());
-    _linesAndPolygonsProgram->setUniform("performShading", true);
+    _linesAndPolygonsProgram->setUniform("performShading", _properties.performShading());
 
     if (shouldRenderTwice) {
         glEnable(GL_CULL_FACE);

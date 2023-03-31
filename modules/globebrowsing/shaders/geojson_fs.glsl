@@ -60,11 +60,11 @@ Fragment getFragment() {
     for (int i = 0; i < nLightSources; ++i) {
       vec3 l = lightDirectionsViewSpace[i];
 
-        // Diffuse
-        vec3 diffuseColor = diffuseIntensity * max(dot(n,l), 0.0) * color;
+      // Diffuse
+      vec3 diffuseColor = diffuseIntensity * max(dot(n,l), 0.0) * color;
 
-        // Light contribution
-        shadedColor += lightIntensities[i] * (LightColor * diffuseColor);
+      // Light contribution
+      shadedColor += lightIntensities[i] * (LightColor * diffuseColor);
     }
     frag.color.xyz = shadedColor;
   }

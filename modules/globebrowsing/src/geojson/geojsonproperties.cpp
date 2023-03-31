@@ -47,6 +47,8 @@ namespace geojson::propertykeys {
 
     constexpr std::string_view Extrude = "extrude";
 
+    constexpr std::string_view PerformShading = "performShading";
+
     // TODO: Add tesselate?
 
     constexpr std::string_view AltitudeMode = "altitudeMode";
@@ -155,6 +157,15 @@ namespace {
         "If true, extrude the mesh or line to intersect the globe"
     };
 
+
+    constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+        "PerformShading",
+        "Perform Shading",
+        "If true, perform shading on any create meshes, either from polygons or "
+        "extruded lines. The shading will be computed based on any light sources of the "
+        "GeoJson component"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo AltitudeModeInfo = {
         "AltitudeMode",
         "Altitude Mode",
@@ -183,6 +194,9 @@ namespace {
         // [[codegen::verbatim(ExtrudeInfo.description)]]
         std::optional<bool> extrude;
 
+        // [[codegen::verbatim(PerformShadingInfo.description)]]
+        std::optional<bool> performShading;
+
         enum class [[codegen::map(openspace::globebrowsing::GeoJsonProperties::AltitudeMode)]] AltitudeMode {
             Absolute,
             RelativeToGround
@@ -209,6 +223,7 @@ GeoJsonProperties::GeoJsonProperties()
     , pointSize(PointSizeInfo, 10.f, 0.01f, 100.f)
     , pointTexture(PointTextureInfo)
     , extrude(ExtrudeInfo, false)
+    , performShading(PerformShadingInfo, false)
     , altitudeModeOption(AltitudeModeInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     addProperty(opacity);
@@ -224,6 +239,7 @@ GeoJsonProperties::GeoJsonProperties()
     addProperty(pointTexture);
 
     addProperty(extrude);
+    addProperty(performShading);
 
     altitudeModeOption.addOptions({
         { static_cast<int>(AltitudeMode::Absolute), "Absolute"},
@@ -351,6 +367,10 @@ std::string PropertySet::pointTexture() const {
 
 bool PropertySet::extrude() const {
     return overrideValues.extrude.value_or(defaultValues.extrude);
+}
+
+bool PropertySet::performShading() const {
+    return overrideValues.performShading.value_or(defaultValues.performShading);
 }
 
 GeoJsonProperties::AltitudeMode PropertySet::altitudeMode() const {

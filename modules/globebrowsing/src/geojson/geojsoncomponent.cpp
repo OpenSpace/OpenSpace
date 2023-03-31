@@ -270,9 +270,21 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         for (const ghoul::Dictionary& lsDictionary : lightsources) {
             std::unique_ptr<LightSource> lightSource =
                 LightSource::createFromDictionary(lsDictionary);
-            _lightSourcePropertyOwner.addPropertySubOwner(lightSource.get());
             _lightSources.push_back(std::move(lightSource));
+            _lightSourcePropertyOwner.addPropertySubOwner(_lightSources.back().get());
         }
+    }
+    else {
+        // If no light source provided, add a deafult light source from the camera
+        using namespace std::string_literals;
+        ghoul::Dictionary defaultLightSourceDict;
+        defaultLightSourceDict.setValue("Identifier", "Camera"s);
+        defaultLightSourceDict.setValue("Type", "CameraLightSource"s);
+        defaultLightSourceDict.setValue("Intensity", 0.5);
+        _lightSources.push_back(
+            LightSource::createFromDictionary(defaultLightSourceDict)
+        );
+        _lightSourcePropertyOwner.addPropertySubOwner(_lightSources.back().get());
     }
     addPropertySubOwner(_lightSourcePropertyOwner);
 }
@@ -370,6 +382,10 @@ void GeoJsonComponent::render(const RenderData& data) {
         for (GlobeGeometryFeature& g : _geometryFeatures) {
             g.render(data, renderPass, _opacity, _lightsourceRenderData);
         }
+    }
+
+    if (_drawWireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
     glBindVertexArray(0);

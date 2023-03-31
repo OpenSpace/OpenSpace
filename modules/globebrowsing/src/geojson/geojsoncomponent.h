@@ -107,6 +107,7 @@ private:
     size_t _nVerticesToDraw = 0;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
+    std::unique_ptr<LightSource> _defaultLightSource;
 
     rendering::helper::LightSourceRenderData _lightsourceRenderData;
 

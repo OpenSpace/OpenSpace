@@ -66,22 +66,24 @@ struct GeoJsonProperties : public properties::PropertyOwner {
     properties::FloatProperty pointSize;
     properties::StringProperty pointTexture;
     properties::BoolProperty extrude;
+    properties::BoolProperty performShading;
     properties::OptionProperty altitudeModeOption;
 };
 
 // Optional versions of all the properties above, that can be read from a geoJson file
 // and used to override any default values
 struct GeoJsonOverrideProperties {
-    std::optional<std::string> name = std::nullopt;
-    std::optional<float> opacity = std::nullopt;
-    std::optional<glm::vec3> color = std::nullopt;
-    std::optional<float> fillOpacity = std::nullopt;
-    std::optional<glm::vec3> fillColor = std::nullopt;
-    std::optional<float> lineWidth = std::nullopt;
-    std::optional<float> pointSize = std::nullopt;
-    std::optional<std::string> pointTexture = std::nullopt;
-    std::optional<bool> extrude = std::nullopt;
-    std::optional<GeoJsonProperties::AltitudeMode> altitudeMode = std::nullopt;
+    std::optional<std::string> name;
+    std::optional<float> opacity;
+    std::optional<glm::vec3> color;
+    std::optional<float> fillOpacity;
+    std::optional<glm::vec3> fillColor ;
+    std::optional<float> lineWidth;
+    std::optional<float> pointSize;
+    std::optional<std::string> pointTexture;
+    std::optional<bool> extrude;
+    std::optional<bool> performShading;
+    std::optional<GeoJsonProperties::AltitudeMode> altitudeMode;
 };
 
 GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& feature);
@@ -100,6 +102,7 @@ struct PropertySet {
     float pointSize() const;
     std::string pointTexture() const;
     bool extrude() const;
+    bool performShading() const;
     GeoJsonProperties::AltitudeMode altitudeMode() const;
 
     bool hasOverrideTexture() const;
