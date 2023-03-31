@@ -41,6 +41,7 @@
 #include <ghoul/glm.h>
 #include <glm/gtx/string_cast.hpp>
 #include <optional>
+#include <variant>
 
 namespace {
     enum BlendMode {
@@ -91,7 +92,7 @@ namespace {
         std::optional<bool> mirrorBackside;
 
         // [[codegen::verbatim(SizeInfo.description)]]
-        float size;
+        std::variant<float, glm::vec2> size;
 
         enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,
@@ -117,7 +118,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _billboard(BillboardInfo, false)
     , _mirrorBackside(MirrorBacksideInfo, false)
-    , _size(SizeInfo, 10.f, 0.f, 1e25f)
+    , _size(SizeInfo, glm::vec2(10.f), glm::vec2(0.f), glm::vec2(1e25f))
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     Parameters p = codegen::bake<Parameters>(dictionary);
@@ -125,7 +126,13 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _size = p.size;
+    if (std::holds_alternative<float>(p.size)) {
+        _size = glm::vec2(std::get<float>(p.size));
+    }
+    else {
+        _size = std::get<glm::vec2>(p.size);
+    }
+
     _billboard = p.billboard.value_or(_billboard);
     _mirrorBackside = p.mirrorBackside.value_or(_mirrorBackside);
 
@@ -167,7 +174,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 
     addProperty(_multiplyColor);
 
-    setBoundingSphere(_size);
+    setBoundingSphere(glm::compMax(_size.value()));
 }
 
 bool RenderablePlane::isReady() const {
@@ -299,15 +306,16 @@ void RenderablePlane::update(const UpdateData&) {
 }
 
 void RenderablePlane::createPlane() {
-    const GLfloat size = _size;
+    const GLfloat sizeX = _size.value().x;
+    const GLfloat sizeY = _size.value().y;
     const GLfloat vertexData[] = {
-        //      x      y     z     w     s     t
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
-        -size, size, 0.f, 0.f, 0.f, 1.f,
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, -size, 0.f, 0.f, 1.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
+        //   x       y    z    w    s    t
+        -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
+         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f,
+        -sizeX,  sizeY, 0.f, 0.f, 0.f, 1.f,
+        -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
+         sizeX, -sizeY, 0.f, 0.f, 1.f, 0.f,
+         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f,
     };
 
     glBindVertexArray(_quad);
