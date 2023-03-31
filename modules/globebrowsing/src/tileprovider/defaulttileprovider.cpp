@@ -144,19 +144,22 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
     bool enabled = module.isMRFCachingEnabled();
-
     std::string compression =
         _layerGroupID == layers::Group::ID::HeightLayers ? "LERC" : "JPEG";
+    int quality = 75;
+    int blockSize = 1024;
     if (p.cacheSettings.has_value()) {
         enabled = p.cacheSettings->enabled.value_or(enabled);
         compression = p.cacheSettings->compression.value_or(compression);
+        quality = p.cacheSettings->quality.value_or(quality);
+        blockSize = p.cacheSettings->blockSize.value_or(blockSize);
     }
 
     _cacheProperties.enabled = enabled;
     _cacheProperties.compression = compression;
     _cacheProperties.path = path;
-    _cacheProperties.quality = p.cacheSettings->quality.value_or(75);
-    _cacheProperties.blockSize = p.cacheSettings->blockSize.value_or(1024);
+    _cacheProperties.quality = quality;
+    _cacheProperties.blockSize = blockSize;
 
     TileTextureInitData initData(
         tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
