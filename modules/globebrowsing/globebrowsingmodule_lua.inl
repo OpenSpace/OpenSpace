@@ -182,7 +182,7 @@ namespace {
     if (group == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError(fmt::format("Unknown layer group: {}", layerGroup));
     }
-    
+
     LayerGroup& lg = globe->layerManager().layerGroup(group);
     if (std::holds_alternative<int>(source) && std::holds_alternative<int>(destination)) {
         // Short circut here, no need to get the layers
@@ -528,7 +528,8 @@ getGeoPositionForCamera(bool useEyePosition = false)
 }
 
 /**
- * TODO
+ * Add a GeoJson layer specified by the given table to the globe specified by the
+ * 'globeName' argument
  */
 [[codegen::luawrap]] void addGeoJson(std::string globeName, ghoul::Dictionary table)
 {
@@ -552,7 +553,8 @@ getGeoPositionForCamera(bool useEyePosition = false)
 }
 
 /**
- * TODO
+ * Remove the GeoJson layer specified by the given table or string identifier from the
+ * globe specified by the 'globeName' argument
  */
 [[codegen::luawrap]] void deleteGeoJson(std::string globeName,
                           std::variant<std::string, ghoul::Dictionary> tableOrIdentifier)
@@ -587,6 +589,70 @@ getGeoPositionForCamera(bool useEyePosition = false)
     }
 
     globe->geoJsonManager().deleteLayer(identifier);
+}
+
+// TODO: move this (and other createIdentifier/makeIdentifier funcitons) to a separate helper place
+// Conver the input string to a format that is valid as an identifier
+std::string makeIdentifier(std::string s) {
+    std::replace(s.begin(), s.end(), ' ', '_');
+    std::replace(s.begin(), s.end(), '.', '-');
+    // Remove quotes and apostrophe, since they cause problems
+    // when a string is translated to a script call
+    s.erase(remove(s.begin(), s.end(), '\"'), s.end());
+    s.erase(remove(s.begin(), s.end(), '\''), s.end());
+    return s;
+}
+
+/**
+ * Add a GeoJson layer from the given file name and add it to the current anchor node,
+ * if it is a globe. Note that you might have to increase the height offset for the
+ * added feature to be visible on the globe, if using a height map
+ */
+[[codegen::luawrap]] void addGeoJsonFromFile(std::string filename,
+                                             std::optional<std::string> name)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
+
+    std::filesystem::path path = absPath(filename);
+    if (!std::filesystem::is_regular_file(path)) {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Could not find the provided file: '{}'", filename
+        ));
+    }
+
+    if (path.extension() != ".geojson") {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Unexpected file type: '{}'. Expected '.geojson' file", filename
+        ));
+    }
+
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(
+        global::navigationHandler->anchorNode()->identifier()
+    );
+    if (!n) {
+        throw ghoul::lua::LuaError("Invalid anchor node");
+    }
+
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        throw ghoul::lua::LuaError(
+            "Current anchor is not a globe (Expected 'RenderableGlobe')"
+        );
+    }
+
+    // Make a minimal dictionary to represent the geojson component
+    ghoul::Dictionary d;
+
+    std::string identifier = makeIdentifier(name.value_or(path.stem().string()));
+    d.setValue("Identifier", identifier);
+    d.setValue("File", path.string());
+    if (name.has_value()) {
+        d.setValue("Name", *name);
+    }
+
+    // Get the dictionary defining the layer
+    globe->geoJsonManager().addGeoJsonLayer(d);
 }
 
 #include "globebrowsingmodule_lua_codegen.cpp"
