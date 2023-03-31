@@ -551,7 +551,6 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     const QStandardItemModel* model =
         qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
 
-
     model->item(_userConfigCount)->setEnabled(false);
     _userConfigCount++;
     _userConfigStartingIdx++;
@@ -627,7 +626,7 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     else {
         // Add the requested preset at the top
         _windowConfigBox->insertItem(
-                _windowConfigBoxIndexSgctCfgDefault + 1,
+            _windowConfigBoxIndexSgctCfgDefault + 1,
             QString::fromStdString(preset)
         );
         // Increment the user config count because there is an additional option added

@@ -649,7 +649,7 @@ void WindowControl::showWindowLabel(bool show) {
     _windowNumber->setVisible(show);
 }
 
-void WindowControl::setWindowName(std::string windowName) {
+void WindowControl::setWindowName(std::string& windowName) {
     _windowName->setText(QString::fromStdString(windowName));
 }
 
@@ -760,30 +760,34 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
 void WindowControl::setProjectionPlanar(float hfov, float vfov) {
     _planar.fovH->setValue(hfov);
     _planar.fovV->setValue(vfov);
-    _projectionType->setCurrentIndex(0);
+    _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Planar));
 }
 
 void WindowControl::setProjectionFisheye(int quality, bool spoutOutput) {
     setQualityComboBoxFromLinesResolution(quality, _fisheye.quality);
     _fisheye.spoutOutput->setChecked(spoutOutput);
-    _projectionType->setCurrentIndex(1);
+    _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Fisheye));
 }
 
 void WindowControl::setProjectionSphericalMirror(int quality) {
     setQualityComboBoxFromLinesResolution(quality, _sphericalMirror.quality);
-    _projectionType->setCurrentIndex(2);
+    _projectionType->setCurrentIndex(
+        static_cast<int>(ProjectionIndices::SphericalMirror)
+    );
 }
 
 void WindowControl::setProjectionCylindrical(int quality, float heightOffset) {
     setQualityComboBoxFromLinesResolution(quality, _cylindrical.quality);
     _cylindrical.heightOffset->setValue(heightOffset);
-    _projectionType->setCurrentIndex(3);
+    _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Cylindrical));
 }
 
 void WindowControl::setProjectionEquirectangular(int quality, bool spoutOutput) {
     setQualityComboBoxFromLinesResolution(quality, _equirectangular.quality);
     _equirectangular.spoutOutput->setChecked(spoutOutput);
-    _projectionType->setCurrentIndex(4);
+    _projectionType->setCurrentIndex(
+        static_cast<int>(ProjectionIndices::Equirectangular)
+    );
 }
 
 void WindowControl::setQualityComboBoxFromLinesResolution(int lines, QComboBox* combo) {

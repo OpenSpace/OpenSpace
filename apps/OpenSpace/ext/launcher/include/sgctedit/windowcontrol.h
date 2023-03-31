@@ -94,7 +94,7 @@ public:
      *
      * \param windowName The window title to set
      */
-    void setWindowName(std::string windowName);
+    void setWindowName(std::string& windowName);
 
     /**
      * Sets the window's decoration status. If set to true, then the window has a
@@ -111,7 +111,6 @@ public:
      * \param window The sgct::config::Window struct that is passed into the function
      *               and modified with the generated window content
      */
-
     void generateWindowInformation(sgct::config::Window& window) const;
 
     /**

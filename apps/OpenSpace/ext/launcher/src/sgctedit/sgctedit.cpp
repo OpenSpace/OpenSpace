@@ -37,8 +37,6 @@
 #include <QVBoxLayout>
 #include <filesystem>
 
-#include <iostream>
-
 namespace {
     constexpr QRect MonitorWidgetSize = { 0, 0, 500, 500 };
     constexpr int MaxNumberWindows = 4;
@@ -80,7 +78,7 @@ SgctEdit::SgctEdit(QWidget* parent, const std::string& userConfigPath)
 }
 
 SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
-                   std::string configBasePath,
+                   std::string& configBasePath,
                    const std::vector<std::string>& configsReadOnly, QWidget* parent)
     : QDialog(parent)
     , _cluster(cluster)
@@ -90,11 +88,11 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
     , _didImportValues(true)
 {
     setWindowTitle("Window Configuration Editor");
-    unsigned int nWindows = _cluster.nodes.front().windows.size();
-    bool firstWindowGuiIsEnabled = (nWindows > 1) ? true : false;
+    size_t nWindows = _cluster.nodes.front().windows.size();
+    bool firstWindowGuiIsEnabled = (nWindows > 1);
     std::vector<QRect> monitorSizes = createMonitorInfoSet();
     createWidgets(monitorSizes, nWindows, false);
-    unsigned int existingWindowsControlSize = _displayWidget->windowControls().size();
+    size_t existingWindowsControlSize = _displayWidget->windowControls().size();
     for (unsigned int i = 0; i < nWindows; ++i) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
         WindowControl* wCtrl = _displayWidget->windowControls()[i];
@@ -138,12 +136,15 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
         setupProjectionTypeInGui(w.viewports.back(), wCtrl);
     }
     _settingsWidget->setShowUiOnFirstWindow(firstWindowGuiIsEnabled);
-    _settingsWidget->setVsync(_cluster.settings && _cluster.settings.value().display &&
-        _cluster.settings.value().display.value().swapInterval);
+    _settingsWidget->setVsync(
+        _cluster.settings
+        && _cluster.settings.value().display
+        && _cluster.settings.value().display.value().swapInterval
+    );
 }
 
 void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
-                                                                     WindowControl* wCtrl)
+                                        WindowControl* wCtrl)
 {
     std::visit(overloaded{
         [&](sgct::config::CylindricalProjection p) {
@@ -178,7 +179,9 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
         },
         [&](sgct::config::SphericalMirrorProjection p) {
             if (p.quality) {
-                wCtrl->setProjectionSphericalMirror(static_cast<int>(p.quality.value()));
+                wCtrl->setProjectionSphericalMirror(
+                    static_cast<int>(p.quality.value())
+                );
             }
         },
         [&](sgct::config::SpoutOutputProjection p) {
@@ -427,7 +430,7 @@ void SgctEdit::generateConfigAddresses(sgct::config::Node& node) {
 
 void SgctEdit::generateConfigResizeWindowsAccordingToSelected(sgct::config::Node& node) {
     std::vector<WindowControl*> windowControls = _displayWidget->activeWindowControls();
-    for (unsigned int wIdx = 0; wIdx < windowControls.size(); ++wIdx) {
+    for (size_t wIdx = 0; wIdx < windowControls.size(); ++wIdx) {
         if (node.windows.size() <= wIdx) {
             node.windows.push_back(sgct::config::Window());
         }
@@ -443,7 +446,7 @@ void SgctEdit::generateConfigResizeWindowsAccordingToSelected(sgct::config::Node
 }
 
 void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) {
-    for (unsigned int i = 0; i < node.windows.size(); ++i) {
+    for (size_t i = 0; i < node.windows.size(); ++i) {
         // First apply default settings to each window...
         node.windows[i].id = i;
         node.windows[i].draw2D = true;

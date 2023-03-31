@@ -67,7 +67,7 @@ public:
      * \param parent Pointer to parent Qt widget
      */
     SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
-        std::string configBasePath, const std::vector<std::string>& configsReadOnly,
+        std::string& configBasePath, const std::vector<std::string>& configsReadOnly,
         QWidget* parent);
 
     /**
@@ -94,7 +94,6 @@ private:
     void generateConfigAddresses(sgct::config::Node& node);
     void generateConfigResizeWindowsAccordingToSelected(sgct::config::Node& node);
     void generateConfigIndividualWindowSettings(sgct::config::Node& node);
-
     void setupProjectionTypeInGui(sgct::config::Viewport& vPort, WindowControl* wCtrl);
 
     void save();
