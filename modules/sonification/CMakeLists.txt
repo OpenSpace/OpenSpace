@@ -38,6 +38,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/comparesonification.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/focussonification.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification_lua.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/src/solarsonification.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/sonificationbase.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timesonification.cpp

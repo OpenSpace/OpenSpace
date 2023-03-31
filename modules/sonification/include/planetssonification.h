@@ -31,6 +31,8 @@
 
 namespace openspace {
 
+namespace scripting { struct LuaLibrary; }
+
 class PlanetsSonification : public SonificationBase {
 public:
     PlanetsSonification(const std::string& ip, int port);
@@ -47,6 +49,21 @@ public:
      * Function to stop the sonification
      */
     virtual void stop() override;
+
+    /**
+    * Add the given planet to the list of planets and moons
+    *
+    * \param dict the planet that should be added
+    */
+    void addPlanet(ghoul::Dictionary dict);
+
+    /**
+     * Returns the Lua library that contains all Lua functions available to change the
+     * planets sonification.
+     * \return The Lua library that contains all Lua functions available to change the
+     * planets sonification
+     */
+    static scripting::LuaLibrary luaLibrary();
 
 private:
     const int NumDataItems = 3;

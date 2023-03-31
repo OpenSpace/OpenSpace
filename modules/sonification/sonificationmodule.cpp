@@ -192,6 +192,15 @@ const SonificationBase* SonificationModule::sonification(std::string id) const {
     return nullptr;
 }
 
+SonificationBase* SonificationModule::sonification(std::string id) {
+    for (SonificationBase* s : _sonifications) {
+        if (s->identifier() == id) {
+            return s;
+        }
+    }
+    return nullptr;
+}
+
 SonificationModule::SurroundMode SonificationModule::surroundMode() const {
     return _surroundMode;
 }
@@ -238,6 +247,12 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
             sonification->update(camera);
         }
     }
+}
+
+std::vector<scripting::LuaLibrary> SonificationModule::luaLibraries() const {
+    return {
+        PlanetsSonification::luaLibrary()
+    };
 }
 
 } // namespace openspace
