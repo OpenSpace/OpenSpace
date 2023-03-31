@@ -58,7 +58,7 @@ public:
     void play();
     void goToStart();
 
-    void seekToTime(double time, bool pauseAfter = false);
+    void seekToTime(double time, bool pauseAfter = true);
     void toggleMute();
 
     const std::unique_ptr<ghoul::opengl::Texture>& frameTexture() const;

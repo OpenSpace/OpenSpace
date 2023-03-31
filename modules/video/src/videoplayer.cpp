@@ -292,11 +292,6 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         _startJ200Time = Time::convertTime(*p.startTime);
         _endJ200Time = Time::convertTime(*p.endTime);
         ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
-
-        // Change the video time if OpenSpace time changes
-        global::timeManager->addTimeJumpCallback([this]() {
-            seekToTime(correctVideoPlaybackTime());
-        });
     }
 
     global::syncEngine->addSyncable(this);
@@ -493,12 +488,10 @@ void VideoPlayer::update() {
     if (_isDestroying) {
         return;
     }
-    // Initialize mpv here to ensure that the opengl context is the same as in for
-    // the rendering
-    if (!_isInitialized) {
-        initializeMpv();
+    if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+        seekToTime(correctVideoPlaybackTime());
     }
-    else if (_mpvRenderContext && _mpvHandle) {
+    if (_mpvRenderContext && _mpvHandle) {
         renderMpv();
     }
 }
@@ -713,8 +706,6 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
         case MpvKey::IsSeeking: {
             bool* isSeekingBool = reinterpret_cast<bool*>(prop->data);
             _isSeeking = *isSeekingBool;
-            std::string isSeekingString = *isSeekingBool ? "Is Seeking" : "Not Seeking";
-            LINFO(isSeekingString);
             break;
         }
         case MpvKey::Fps: {
@@ -825,51 +816,31 @@ void VideoPlayer::destroy() {
 
 void VideoPlayer::preSync(bool isMaster) {
     if (isMaster) {
-        if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-            _correctPlaybackTime = correctVideoPlaybackTime();
-            double now = global::timeManager->time().j2000Seconds();
-            _deltaTime = now - _timeAtLastRender;
-        }
-        else if (_playbackMode == PlaybackMode::RealTimeLoop) {
-            _correctPlaybackTime = _currentVideoTime;
-        }
+        _correctPlaybackTime = _currentVideoTime;
+    }
+    else {
+        _correctPlaybackTime = -1.0;
     }
 }
 
 void VideoPlayer::encode(SyncBuffer* syncBuffer) {
     syncBuffer->encode(_correctPlaybackTime);
-    syncBuffer->encode(_deltaTime);
 }
 
 void VideoPlayer::decode(SyncBuffer* syncBuffer) {
     syncBuffer->decode(_correctPlaybackTime);
-    syncBuffer->decode(_deltaTime);
 }
 
 void VideoPlayer::postSync(bool isMaster) {
-    if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-        // If we are in valid times, step frames accordingly
-        if (isWithingStartEndTime()) {
-            double now = global::timeManager->time().j2000Seconds();
-            if (_deltaTime > _frameDuration) {
-                // Stepping forwards
-                stepFrameForward();
-                _timeAtLastRender = now; // Only used on master node
-            }
-            else if (_deltaTime < -_frameDuration) {
-                // Stepping backwards
-                stepFrameBackward();
-                _timeAtLastRender = now; // Only used on master node
-            }
-        }
-        else if (!_isPaused) {
-            pause();
-        }
+    if (_correctPlaybackTime < 0.0) {
+        return;
     }
-    // Make sure we are at the correct time
-    bool shouldSeek = abs(_correctPlaybackTime - _currentVideoTime) > _seekThreshold;
-    if (shouldSeek) {
-        seekToTime(_correctPlaybackTime);
+    // Ensure the nodes have the same time as the master node
+    bool isMappingTime = _playbackMode == PlaybackMode::MapToSimulationTime;
+    if (!isMaster) {
+        if ((_correctPlaybackTime - _currentVideoTime) > glm::epsilon<double>()) {
+            seekToTime(_correctPlaybackTime, isMappingTime);
+        }
     }
 }
 
