@@ -30,7 +30,7 @@
 namespace openspace::globebrowsing {
 
 struct TileCacheProperties {
-    bool enabled;
+    bool enabled = false;
     std::string compression;
     std::string path;
     int quality;

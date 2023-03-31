@@ -98,7 +98,7 @@ public:
     uint64_t wmsCacheSize() const; // bytes
 
     bool isMRFCachingEnabled() const;
-    std::string mrfCacheLocation() const;
+    const std::string& mrfCacheLocation() const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;

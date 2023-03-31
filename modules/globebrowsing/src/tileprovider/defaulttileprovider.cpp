@@ -137,16 +137,16 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     );
     auto layerGroup = it != layers::Groups.end() ? it->name : std::to_string(static_cast<int>(_layerGroupID));
 
-    auto identifier = p.identifier.value_or("unspecified");
-    auto enclosing = p.globeName.value_or("unspecified");
+    std::string identifier = p.identifier.value_or("unspecified");
+    std::string enclosing = p.globeName.value_or("unspecified");
 
-    std::stringstream path;
-    path << "/" << enclosing << "/" << layerGroup << "/" << identifier << "/";
+    std::string path = fmt::format("{}/{}/{}/", enclosing, layerGroup, identifier);
 
     GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
-    auto enabled = module.isMRFCachingEnabled();
+    bool enabled = module.isMRFCachingEnabled();
 
-    std::string compression = _layerGroupID == layers::Group::ID::HeightLayers ? "LERC" : "JPEG";
+    std::string compression =
+        _layerGroupID == layers::Group::ID::HeightLayers ? "LERC" : "JPEG";
     if (p.cacheSettings.has_value()) {
         enabled = p.cacheSettings->enabled.value_or(enabled);
         compression = p.cacheSettings->compression.value_or(compression);
@@ -154,7 +154,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     _cacheProperties.enabled = enabled;
     _cacheProperties.compression = compression;
-    _cacheProperties.path = path.str();
+    _cacheProperties.path = path;
     _cacheProperties.quality = p.cacheSettings->quality.value_or(75);
     _cacheProperties.blockSize = p.cacheSettings->blockSize.value_or(1024);
 

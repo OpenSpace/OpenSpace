@@ -525,10 +525,11 @@ void RawTileDataReader::initialize() {
     if (_cacheProperties.enabled) {
         ZoneScopedN("MRF Caching");
 
-        std::string datasetIdentifier = std::to_string(std::hash<std::string>{}(_datasetFilePath));
-        std::stringstream path;
-        path << module.mrfCacheLocation() << "/" << _cacheProperties.path << "/" << datasetIdentifier << "/";
-        std::string root = absPath(path.str()).string();
+        std::string datasetIdentifier =
+            std::to_string(std::hash<std::string>{}(_datasetFilePath));
+        std::string path = fmt::format("{}/{}/{}/",
+                module.mrfCacheLocation(), _cacheProperties.path, datasetIdentifier);
+        std::string root = absPath(path).string();
         std::string mrf = root + datasetIdentifier + ".mrf";
         std::string cache = root + datasetIdentifier + ".mrfcache";
 
@@ -544,7 +545,7 @@ void RawTileDataReader::initialize() {
                 }
             }
 
-            auto* driver = GetGDALDriverManager()->GetDriverByName("MRF");
+            GDALDriver* driver = GetGDALDriverManager()->GetDriverByName("MRF");
             if (driver != nullptr) {
                 auto src = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
                 if (!src) {
@@ -558,7 +559,7 @@ void RawTileDataReader::initialize() {
                     // Check if there is a geotransform present, if not assume its bounds are
                     // [-180, 180] W<->E and [-90, 90] N<->S and North-up
                     double geoTransform[6];
-                    auto err = src->GetGeoTransform(geoTransform);
+                    CPLErr err = src->GetGeoTransform(geoTransform);
                     if (err != CPLErr::CE_None) {
                         geoTransform[0] = -180.0;
                         geoTransform[1] = 360.0 / src->GetRasterXSize();
@@ -576,7 +577,7 @@ void RawTileDataReader::initialize() {
                     }
                 }
 
-                char** createOpts = NULL;
+                char** createOpts = nullptr;
                 createOpts = CSLSetNameValue(createOpts, "CACHEDSOURCE", content.c_str());
                 createOpts = CSLSetNameValue(createOpts, "NOCOPY", "true");
                 createOpts = CSLSetNameValue(createOpts, "uniform_scale", "2");
@@ -595,7 +596,8 @@ void RawTileDataReader::initialize() {
                 }
                 GDALClose(dst);
                 GDALClose(src);
-            } else {
+            }
+            else {
                 throw ghoul::RuntimeError("Failed to create MRF driver");
             }
         }

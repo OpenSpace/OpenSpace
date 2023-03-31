@@ -57,7 +57,7 @@ private:
     layers::Group::ID _layerGroupID = layers::Group::ID::Unknown;
     bool _performPreProcessing = false;
     bool _padTiles = true;
-    TileCacheProperties _cacheProperties{ false };
+    TileCacheProperties _cacheProperties;
 };
 
 } // namespace openspace::globebrowsing

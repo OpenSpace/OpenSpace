@@ -54,7 +54,8 @@ public:
      * \param baseDirectory, the base directory to use in future loading operations
      */
     RawTileDataReader(std::string filePath, TileTextureInitData initData,
-        TileCacheProperties cacheProperties, PerformPreprocessing preprocess = PerformPreprocessing::No);
+        TileCacheProperties cacheProperties,
+        PerformPreprocessing preprocess = PerformPreprocessing::No);
     ~RawTileDataReader();
 
     void reset();
