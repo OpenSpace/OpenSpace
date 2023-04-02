@@ -130,7 +130,7 @@ endif ()
 add_custom_command(TARGET OpenSpace POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
   ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/sgct.schema.json
-  ${OPENSPACE_BASE_DIR}/config/schema
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../config/schema/sgct.schema.json
   COMMAND_EXPAND_LISTS
 )
 

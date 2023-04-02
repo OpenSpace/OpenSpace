@@ -54,6 +54,12 @@ add_executable(
 
 set_openspace_compile_settings(OpenSpaceTest)
 
+target_include_directories(OpenSpaceTest
+  PUBLIC
+    "../apps/OpenSpace/ext/sgct/ext/json/include"
+    "../apps/OpenSpace/ext/sgct/ext/json-schema-validator/src"
+)
+
 target_compile_definitions(OpenSpaceTest PUBLIC "GHL_THROW_ON_ASSERT")
 target_link_libraries(OpenSpaceTest PUBLIC Catch2 openspace-core sgct)
 
