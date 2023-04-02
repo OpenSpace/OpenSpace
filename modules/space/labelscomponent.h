@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -69,6 +69,8 @@ private:
     speck::Labelset _labelset;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
+
+    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
     // Properties
     properties::FloatProperty _opacity;

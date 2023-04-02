@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -125,9 +125,8 @@ public:
         Unavailable,
 
         /**
-         * Can be set by <code>TileProvider</code>s if the requested
-         * <code>TileIndex</code> is undefined for that particular
-         * provider.
+         * Can be set by `TileProvider`s if the requested `TileIndex` is undefined for
+         * that particular provider.
          * texture and metaData are both null
          */
         OutOfRange,

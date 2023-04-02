@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ DashboardItemParallelConnection::DashboardItemParallelConnection(
 {}
 
 void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     const ParallelConnection::Status status = global::parallelPeer->status();
     const size_t nConnections = global::parallelPeer->nConnections();
@@ -106,7 +106,7 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemParallelConnection::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     ParallelConnection::Status status = global::parallelPeer->status();
     size_t nConnections = global::parallelPeer->nConnections();

@@ -61,8 +61,8 @@ local MarsLabel = {
     Type = "RenderableLabel",
     Text = "Mars",
     FontSize = 70.0,
-    Size = 8.66,
-    MinMaxSize = { 1, 100 },
+    Size = 8.50,
+    MinMaxSize = { 1, 50 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     TransformationMatrix = {
@@ -71,6 +71,10 @@ local MarsLabel = {
       0.0, 0.0, 1.0, 1.0E7,
       0.0, 0.0, 0.0, 1.0
     },
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 40.0 },
+    FadeWidths = { 1.0, 50.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {

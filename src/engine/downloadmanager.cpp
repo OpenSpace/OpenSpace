@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -172,9 +172,9 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
             }
 
             ProgressInformation p = {
-                future,
-                std::chrono::system_clock::now(),
-                &progressCb
+                .future = future,
+                .startTime = std::chrono::system_clock::now(),
+                .callback = &progressCb
             };
             #if LIBCURL_VERSION_NUM >= 0x072000
             // xferinfo was introduced in 7.32.0, if a lower curl version is used the

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   ext/levmarq.h
@@ -57,5 +57,6 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-include_external_library(${touch_module} PRIVATE libTUIO11 ${CMAKE_CURRENT_SOURCE_DIR}/ext)
-disable_external_warnings_for_file(${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.cpp)
+add_subdirectory(ext SYSTEM)
+target_link_libraries(${touch_module} PRIVATE libTUIO11)
+set_target_properties(libTUIO11 PROPERTIES FOLDER "External")

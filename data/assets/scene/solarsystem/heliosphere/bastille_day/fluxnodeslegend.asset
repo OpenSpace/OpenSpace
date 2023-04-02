@@ -16,7 +16,7 @@ local legend = {
 }
 
 local show_legend = {
-  Identifier = "fluxnodelegend.show_legend",
+  Identifier = "os.events.bastilleday.fluxnodelegend.showlegend",
   Name = "Show the legend image",
   Command = [[
     openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Opacity", 0.0);
@@ -27,8 +27,9 @@ local show_legend = {
   GuiPath = "/Bastille-Day 2000",
   IsLocal =  false
 }
+
 local hide_legend = {
-  Identifier = "fluxnodelegend.hide_legend",
+  Identifier = "os.events.bastilleday.fluxnodelegend.hidelegend",
   Name = "Hides the legend image",
   Command = [[openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Opacity", 0.0, 2)]],
   Documentation = "Hides the legend image",
@@ -52,7 +53,7 @@ end)
 
 asset.meta = {
   Name = "Predictive Science Inc. Flux nodes legend for Bastille Days",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Screen space renderable image legend of flux nodes for the bastille day
     CME event]],
   Author = "Christian Adamsson, Emilie Ho",

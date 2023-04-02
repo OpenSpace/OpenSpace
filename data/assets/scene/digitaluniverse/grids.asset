@@ -7,19 +7,34 @@ local equatorialRotationMatrix = {
   -0.483835  ,  0.7469823,  0.4559838
 }
 
+local equatorialTransformationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661, 0.0,
+  -0.8734371 , -0.4448296, -0.1980764, 0.0,
+  -0.483835  ,  0.7469823,  0.4559838, 0.0,
+   0.0       ,  0.0      ,  0.0      , 1.0
+}
+
 local eclipticRotationMatrix = {
   -0.05487554,  0.4941095, -0.8676661,
   -0.9938214 , -0.1109906, -0.0003515167,
   -0.09647644,  0.8622859,  0.4971472
 }
 
+local eclipticTransformationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661,    0.0,
+  -0.9938214 , -0.1109906, -0.0003515167, 0.0,
+  -0.09647644,  0.8622859,  0.4971472,    0.0,
+   0.0       ,  0.0      ,  0.0      ,    1.0
+}
+
 local speck = asset.syncedResource({
   Name = "Grids Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_grids_speck",
-  Version = 2
+  Version = 3
 })
 
+local lightHour = 1.0792528488E12
 local lightDay = 2.59020684E13
 local lightMonth = 7.771E14
 local lightYear = 9.4605284E15
@@ -115,18 +130,14 @@ local eclipticLabels = {
       Color = { 0.5, 0.5, 0.5 },
       Size = 14.75,
       MinMaxSize = { 1, 50 },
-      Unit = "pc"
+      Unit = "pc",
+      TransformationMatrix = eclipticTransformationMatrix
     },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "pc",
     DrawLabels = true,
-    TransformationMatrix = {
-      -0.05487554,  0.4941095, -0.8676661,    0.0,
-      -0.9938214 , -0.1109906, -0.0003515167, 0.0,
-      -0.09647644,  0.8622859,  0.4971472,    0.0,
-      0.0,          0.0,        0.0,          1.0
-    }
+    TransformationMatrix = eclipticTransformationMatrix
   },
   GUI = {
     Name = "Ecliptic Sphere Labels",
@@ -171,18 +182,14 @@ local equatorialLabels = {
       Color = { 0.5, 0.5, 0.5 },
       Size = 14.5,
       MinMaxSize = { 2, 70 },
-      Unit = "pc"
+      Unit = "pc",
+      TransformationMatrix = equatorialTransformationMatrix
     },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "pc",
     DrawLabels = true,
-    TransformationMatrix = {
-      -0.05487554,  0.4941095, -0.8676661, 0.0,
-      -0.8734371 , -0.4448296, -0.1980764, 0.0,
-      -0.483835  ,  0.7469823,  0.4559838, 0.0,
-        0.0       ,  0.0      ,  0.0      , 1.0
-    }
+    TransformationMatrix = equatorialTransformationMatrix
   },
   GUI = {
     Name = "Equatorial Sphere Labels",
@@ -232,6 +239,37 @@ local galacticLabels = {
   },
   GUI = {
     Name = "Galactic Sphere Labels",
+    Path = "/Other/Grids"
+  }
+}
+
+local plane1lh = {
+  Identifier = "1lhGrid",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = eclipticRotationMatrix
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Labels = {
+      File = speck .. "1lh.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 9.5,
+      MinMaxSize = { 0, 30 },
+      Unit = "Km"
+    },
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightHour, 2*lightHour }
+  },
+  GUI = {
+    Name = "1lh Grid",
     Path = "/Other/Grids"
   }
 }
@@ -585,7 +623,7 @@ local plane20Gly = {
 
 local nodes = {
   radio, oort, ecliptic, eclipticLabels, equatorial, equatorialLabels,
-  galactic, galacticLabels, plane1ld, plane1lm, plane1ly, plane10ly,
+  galactic, galacticLabels, plane1lh, plane1ld, plane1lm, plane1ly, plane10ly,
   plane100ly, plane1kly, plane10kly, plane100kly, plane1Mly, plane10Mly, plane100Mly,
   plane20Gly
 }

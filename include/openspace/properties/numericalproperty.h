@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -66,7 +66,7 @@ protected:
     static const std::string SteppingValueKey;
     static const std::string ExponentValueKey;
 
-    virtual T fromLuaConversion(lua_State* state, bool& success) const override = 0;
+    T fromLuaConversion(lua_State* state) const override;
     virtual void toLuaConversion(lua_State* state) const override;
     virtual std::string toStringConversion() const override;
 

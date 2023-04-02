@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <ghoul/fmt.h>
 #include <QGridLayout>
 #include <QDialogButtonBox>
+#include <QFileDialog>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
@@ -39,8 +40,10 @@
 #include <QPushButton>
 #include <QTextStream>
 
-ScriptlogDialog::ScriptlogDialog(QWidget* parent)
+ScriptlogDialog::ScriptlogDialog(QWidget* parent, std::string filter)
     : QDialog(parent)
+    , _scriptLogFile(openspace::global::configuration->scriptLog)
+    , _fixedFilter(std::move(filter))
 {
     setWindowTitle("Scriptlog");
     createWidgets();
@@ -63,10 +66,31 @@ void ScriptlogDialog::createWidgets() {
     QGridLayout* layout = new QGridLayout(this);
     {
         QLabel* heading = new QLabel(QString::fromStdString(fmt::format(
-            "Choose commands from \"{}\"", openspace::global::configuration->scriptLog
+            "Choose commands from \"{}\"", _scriptLogFile
         )));
         heading->setObjectName("heading");
         layout->addWidget(heading, 0, 0, 1, 2);
+
+        QPushButton* open = new QPushButton;
+        open->setIcon(open->style()->standardIcon(QStyle::SP_FileIcon));
+        connect(
+            open, &QPushButton::clicked,
+            [this, heading]() {
+                QString file = QFileDialog::getOpenFileName(
+                    this,
+                    "Select log file",
+                    "",
+                    "*.txt"
+                );
+                _scriptLogFile = file.toStdString();
+        
+                heading->setText(QString::fromStdString(fmt::format(
+                    "Choose commands from \"{}\"", _scriptLogFile
+                )));
+                loadScriptFile();
+            }
+        );
+        layout->addWidget(open, 0, 1, Qt::AlignRight);
     }
 
     _filter = new QLineEdit;
@@ -100,7 +124,9 @@ void ScriptlogDialog::createWidgets() {
 }
 
 void ScriptlogDialog::loadScriptFile() {
-    std::string log = absPath(openspace::global::configuration->scriptLog).string();
+    _scripts.clear();
+
+    std::string log = absPath(_scriptLogFile).string();
     QFile file(QString::fromStdString(log));
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
@@ -126,7 +152,10 @@ void ScriptlogDialog::updateScriptList() {
     int index = -1;
     _scriptlogList->clear();
     for (const std::string& script : _scripts) {
-        if (script.find(filter) != std::string::npos) {
+        bool foundDynamic = script.find(filter) != std::string::npos;
+        bool foundStatic =
+            _fixedFilter.empty() ? true : script.find(_fixedFilter) != std::string::npos;
+        if (foundDynamic && foundStatic) {
             if (script == selection && index == -1) {
                 index = _scriptlogList->count();
             }
@@ -136,15 +165,11 @@ void ScriptlogDialog::updateScriptList() {
 }
 
 void ScriptlogDialog::saveChosenScripts() {
-    std::string chosenScripts;
+    std::vector<std::string> chosenScripts;
     QList<QListWidgetItem*> itemList = _scriptlogList->selectedItems();
-    for (int i = 0; i < itemList.size(); ++i) {
-        chosenScripts += itemList.at(i)->text().toStdString();
-        if (i < itemList.size()) {
-            chosenScripts += "\n";
-        }
+    for (QListWidgetItem* item : _scriptlogList->selectedItems()) {
+        chosenScripts.push_back(item->text().toStdString());
     }
     emit scriptsSelected(chosenScripts);
-
     accept();
 }

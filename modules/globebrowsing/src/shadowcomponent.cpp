@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -204,7 +204,7 @@ bool ShadowComponent::isReady() const {
 }
 
 void ShadowComponent::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     createDepthTexture();
     createShadowFBO();
@@ -353,7 +353,7 @@ void ShadowComponent::end() {
 }
 
 void ShadowComponent::update(const UpdateData&) {
-    ZoneScoped
+    ZoneScoped;
 
     SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
     if (sun) {

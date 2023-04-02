@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -172,7 +172,7 @@ bool RenderablePoints::isReady() const {
 }
 
 void RenderablePoints::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     _dataset = speck::data::loadFileWithCache(_speckFile);
 
@@ -182,7 +182,7 @@ void RenderablePoints::initialize() {
 }
 
 void RenderablePoints::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_hasSpriteTexture) {
         _program = DigitalUniverseModule::ProgramObjectManager.request(

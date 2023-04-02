@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@ namespace {
 
     constexpr int LeftRuler = 40;
     constexpr int TopRuler = 80;
-    constexpr int ItemWidth = 240;
+    constexpr int ItemWidth = 260;
     constexpr int ItemHeight = ItemWidth / 4;
     constexpr int SmallItemWidth = 100;
     constexpr int SmallItemHeight = SmallItemWidth / 4;
@@ -61,7 +61,7 @@ namespace {
         constexpr QRect ChooseLabel(LeftRuler, TopRuler + 80, 151, 24);
         constexpr QRect ProfileBox(LeftRuler, TopRuler + 110, ItemWidth, ItemHeight);
         constexpr QRect NewProfileButton(
-            LeftRuler + 140, TopRuler + 180, SmallItemWidth, SmallItemHeight
+            LeftRuler + 160, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect EditProfileButton(
             LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
@@ -69,7 +69,7 @@ namespace {
         constexpr QRect OptionsLabel(LeftRuler, TopRuler + 230, 151, 24);
         constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 260, ItemWidth, ItemHeight);
         constexpr QRect NewWindowButton(
-            LeftRuler + 140, TopRuler + 330, SmallItemWidth, SmallItemHeight
+            LeftRuler + 160, TopRuler + 330, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect EditWindowButton(
             LeftRuler, TopRuler + 330, SmallItemWidth, SmallItemHeight

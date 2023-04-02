@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,6 +65,14 @@ namespace {
     global::renderEngine->takeScreenshot();
     unsigned int screenshotNumber = global::renderEngine->latestScreenshotNumber();
     return static_cast<int>(screenshotNumber);
+}
+
+/**
+* Reset screenshot index to 0.
+*/
+[[codegen::luawrap]] void resetScreenshotNumber() {
+    using namespace openspace;
+    global::renderEngine->resetScreenshotNumber();
 }
 
 // Extracts the DPI scaling for either the GUI window or if there is no dedicated GUI

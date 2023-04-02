@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -69,8 +69,8 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
         ));
     }
     catch (const documentation::SpecificationError& e) {
-        LERROR(ghoul::to_string(e.result));
         LERROR(fmt::format("Error loading state machine: {}", e.what()));
+        logError(e);
     }
 }
 

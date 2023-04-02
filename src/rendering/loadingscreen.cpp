@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -153,8 +153,8 @@ LoadingScreen::~LoadingScreen() {
 }
 
 void LoadingScreen::render() {
-    ZoneScoped
-    FrameMarkStart("Loading")
+    ZoneScoped;
+    FrameMarkStart("Loading");
 
     if (_phase == Phase::PreStart) {
         return;
@@ -174,10 +174,10 @@ void LoadingScreen::render() {
 
     ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(res);
 
-    const glm::vec2 size = {
+    const glm::vec2 size = glm::vec2(
         LogoSize.x,
         LogoSize.y * textureAspectRatio * screenAspectRatio
-    };
+    );
 
     //
     // Clear background
@@ -204,10 +204,10 @@ void LoadingScreen::render() {
     //
     // Render progress bar
     //
-    const glm::vec2 progressbarSize = {
+    const glm::vec2 progressbarSize = glm::vec2(
         ProgressbarSize.x,
         ProgressbarSize.y * screenAspectRatio
-    };
+    );
 
     if (_showProgressbar) {
         const float progress = _nItems != 0 ?
@@ -300,17 +300,17 @@ void LoadingScreen::render() {
 
         std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 
-        const glm::vec2 logoLl = { LogoCenter.x - size.x,  LogoCenter.y - size.y };
-        const glm::vec2 logoUr = { LogoCenter.x + size.x,  LogoCenter.y + size.y };
+        const glm::vec2 logoLl = glm::vec2(LogoCenter.x - size.x,  LogoCenter.y - size.y);
+        const glm::vec2 logoUr = glm::vec2(LogoCenter.x + size.x,  LogoCenter.y + size.y);
 
-        const glm::vec2 progressbarLl = {
+        const glm::vec2 progressbarLl = glm::vec2(
             ProgressbarCenter.x - progressbarSize.x,
             ProgressbarCenter.y - progressbarSize.y
-        };
-        const glm::vec2 progressbarUr = {
+        );
+        const glm::vec2 progressbarUr = glm::vec2(
             ProgressbarCenter.x + progressbarSize.x ,
             ProgressbarCenter.y + progressbarSize.y
-        };
+        );
 
         for (Item& item : _items) {
             if (!item.hasLocation) {
@@ -333,7 +333,7 @@ void LoadingScreen::render() {
                         static_cast<int>(res.y - b.y - 15)
                     );
 
-                    ll = { distX(_randomEngine), distY(_randomEngine) };
+                    ll = glm::vec2(distX(_randomEngine), distY(_randomEngine));
                     ur = ll + b;
 
                     // Test against logo and text
@@ -479,7 +479,7 @@ void LoadingScreen::render() {
 
     std::this_thread::sleep_for(RefreshRate);
     global::windowDelegate->swapBuffer();
-    FrameMarkEnd("Loading")
+    FrameMarkEnd("Loading");
 }
 
 void LoadingScreen::postMessage(std::string message) {
@@ -553,17 +553,12 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
         // We are not computing the location in here since doing it this way might stall
         // the main thread while trying to find a position for the new item
         Item item = {
-            itemIdentifier,
-            itemName,
-            ItemStatus::Started,
-            std::move(progressInfo),
-            false,
-#ifdef LOADINGSCREEN_DEBUGGING
-            false,
-#endif // LOADINGSCREEN_DEBUGGING
-            {},
-            {},
-            std::chrono::system_clock::from_time_t(0)
+            .identifier = itemIdentifier,
+            .name = itemName,
+            .status = ItemStatus::Started,
+            .progress = std::move(progressInfo),
+            .hasLocation = false,
+            .finishedTime = std::chrono::system_clock::from_time_t(0)
         };
 
         if (newStatus == ItemStatus::Finished) {
