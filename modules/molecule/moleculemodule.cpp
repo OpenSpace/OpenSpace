@@ -35,7 +35,8 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 
-#include "mol/viamd/postprocessing.h"
+#include <md_gl.h>
+#include <modules/molecule/mol/viamd/postprocessing.h>
 
 namespace {
 constexpr const char* shader_output_snippet = R"(
