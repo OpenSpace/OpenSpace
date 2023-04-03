@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/pathnavigator.h>
@@ -47,7 +48,6 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include <vector>
-
 #include "pathnavigator_lua.inl"
 
 namespace {
@@ -118,7 +118,7 @@ namespace {
 namespace openspace::interaction {
 
 PathNavigator::PathNavigator()
-    : properties::PropertyOwner({ "PathNavigator" })
+    : properties::PropertyOwner({ "PathNavigator", "Path Navigator" })
     , _defaultPathType(
         DefaultCurveOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -274,12 +274,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
     }
     catch (const documentation::SpecificationError& e) {
         LERROR("Could not create camera path");
-        for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERRORC(o.offender, ghoul::to_string(o.reason));
-        }
-        for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNINGC(w.offender, ghoul::to_string(w.reason));
-        }
+        logError(e);
     }
     catch (const PathCurve::TooShortPathError&) {
         // Do nothing
@@ -305,7 +300,8 @@ void PathNavigator::startPath() {
         return;
     }
 
-    if (!global::openSpaceEngine->setMode(OpenSpaceEngine::Mode::CameraPath)) {
+    bool success = global::openSpaceEngine->setMode(OpenSpaceEngine::Mode::CameraPath);
+    if (!success) {
         LERROR("Could not start camera path");
         return; // couldn't switch to camera path mode
     }
@@ -328,6 +324,11 @@ void PathNavigator::startPath() {
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
     global::navigationHandler->orbitalNavigator().resetVelocities();
+
+    global::eventEngine->publishEvent<events::EventCameraPathStarted>(
+        _currentPath->startPoint().node(),
+        _currentPath->endPoint().node()
+    );
 }
 
 void PathNavigator::abortPath() {
@@ -458,6 +459,11 @@ void PathNavigator::handlePathEnd() {
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
+
+    global::eventEngine->publishEvent<events::EventCameraPathFinished>(
+        _currentPath->startPoint().node(),
+        _currentPath->endPoint().node()
+    );
 }
 
 void PathNavigator::findRelevantNodes() {

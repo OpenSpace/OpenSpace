@@ -7,10 +7,24 @@ local equatorialRotationMatrix = {
   -0.483835  ,  0.7469823,  0.4559838
 }
 
+local equatorialTransformationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661, 0.0,
+  -0.8734371 , -0.4448296, -0.1980764, 0.0,
+  -0.483835  ,  0.7469823,  0.4559838, 0.0,
+   0.0       ,  0.0      ,  0.0      , 1.0
+}
+
 local eclipticRotationMatrix = {
   -0.05487554,  0.4941095, -0.8676661,
   -0.9938214 , -0.1109906, -0.0003515167,
   -0.09647644,  0.8622859,  0.4971472
+}
+
+local eclipticTransformationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661,    0.0,
+  -0.9938214 , -0.1109906, -0.0003515167, 0.0,
+  -0.09647644,  0.8622859,  0.4971472,    0.0,
+   0.0       ,  0.0      ,  0.0      ,    1.0
 }
 
 local speck = asset.syncedResource({
@@ -116,18 +130,14 @@ local eclipticLabels = {
       Color = { 0.5, 0.5, 0.5 },
       Size = 14.75,
       MinMaxSize = { 1, 50 },
-      Unit = "pc"
+      Unit = "pc",
+      TransformationMatrix = eclipticTransformationMatrix
     },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "pc",
     DrawLabels = true,
-    TransformationMatrix = {
-      -0.05487554,  0.4941095, -0.8676661,    0.0,
-      -0.9938214 , -0.1109906, -0.0003515167, 0.0,
-      -0.09647644,  0.8622859,  0.4971472,    0.0,
-      0.0,          0.0,        0.0,          1.0
-    }
+    TransformationMatrix = eclipticTransformationMatrix
   },
   GUI = {
     Name = "Ecliptic Sphere Labels",
@@ -172,18 +182,14 @@ local equatorialLabels = {
       Color = { 0.5, 0.5, 0.5 },
       Size = 14.5,
       MinMaxSize = { 2, 70 },
-      Unit = "pc"
+      Unit = "pc",
+      TransformationMatrix = equatorialTransformationMatrix
     },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "pc",
     DrawLabels = true,
-    TransformationMatrix = {
-      -0.05487554,  0.4941095, -0.8676661, 0.0,
-      -0.8734371 , -0.4448296, -0.1980764, 0.0,
-      -0.483835  ,  0.7469823,  0.4559838, 0.0,
-        0.0       ,  0.0      ,  0.0      , 1.0
-    }
+    TransformationMatrix = equatorialTransformationMatrix
   },
   GUI = {
     Name = "Equatorial Sphere Labels",

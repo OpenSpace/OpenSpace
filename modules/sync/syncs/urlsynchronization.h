@@ -37,7 +37,7 @@ namespace openspace {
 
 /**
  * The UrlSynchronization will download one or more files by directly being provided with
- * the list of URLs to the files that should be downloaded. The \c Override option in the
+ * the list of URLs to the files that should be downloaded. The `Override` option in the
  * Dictionary determines what should happen in a file with the same name and the same
  * identifier has been previously downloaded.
  */

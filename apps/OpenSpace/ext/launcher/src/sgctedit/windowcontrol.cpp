@@ -36,6 +36,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSpinBox>
+#include <numbers>
 
 namespace {
     std::array<std::string, 4> MonitorNames = {
@@ -59,8 +60,8 @@ namespace {
     };
 
     constexpr int LineEditWidthFixedWindowSize = 50;
-    constexpr float DefaultFovH = 80.f;
-    constexpr float DefaultFovV = 50.534f;
+    constexpr float DefaultFovLongEdge = 80.f;
+    constexpr float DefaultFovShortEdge = 50.534f;
     constexpr float DefaultHeightOffset = 0.f;
     constexpr int MaxWindowSizePixels = 10000;
     constexpr double FovEpsilon = 0.00001;
@@ -358,7 +359,7 @@ QWidget* WindowControl::createPlanarWidget() {
     _planar.fovH = new QDoubleSpinBox;
     _planar.fovH->setMinimum(FovEpsilon);
     _planar.fovH->setMaximum(180.0 - FovEpsilon);
-    _planar.fovH->setValue(DefaultFovH);
+    _planar.fovH->setValue(DefaultFovLongEdge);
     _planar.fovH->setEnabled(false);
     _planar.fovH->setToolTip(hfovTip);
     _planar.fovH->setSizePolicy(
@@ -376,7 +377,7 @@ QWidget* WindowControl::createPlanarWidget() {
     _planar.fovV = new QDoubleSpinBox;
     _planar.fovV->setMinimum(FovEpsilon);
     _planar.fovV->setMaximum(180.0 - FovEpsilon);
-    _planar.fovV->setValue(DefaultFovV);
+    _planar.fovV->setValue(DefaultFovShortEdge);
     _planar.fovV->setEnabled(false);
     _planar.fovV->setToolTip(vfovTip);
     _planar.fovV->setSizePolicy(
@@ -614,8 +615,8 @@ void WindowControl::resetToDefaults() {
     _fisheye.spoutOutput->setChecked(false);
     _equirectangular.spoutOutput->setChecked(false);
     _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Planar));
-    _planar.fovV->setValue(DefaultFovH);
-    _planar.fovV->setValue(DefaultFovV);
+    _planar.fovV->setValue(DefaultFovLongEdge);
+    _planar.fovV->setValue(DefaultFovShortEdge);
     _cylindrical.heightOffset->setValue(DefaultHeightOffset);
     _fisheye.quality->setCurrentIndex(2);
     _sphericalMirror.quality->setCurrentIndex(2);
@@ -816,14 +817,21 @@ void WindowControl::onFovLockClicked() {
 }
 
 void WindowControl::updatePlanarLockedFov() {
-    const float aspectRatio = _windowDimensions.width() / _windowDimensions.height();
-    const float ratio = aspectRatio / IdealAspectRatio;
-    if (ratio >= 1.f) {
-        _planar.fovH->setValue(std::min(DefaultFovH * ratio, 180.f));
-        _planar.fovV->setValue(DefaultFovV);
+    bool landscapeOrientation = (_windowDimensions.width() >= _windowDimensions.height());
+    float aspectRatio;
+    if (landscapeOrientation) {
+        aspectRatio = _windowDimensions.width() / _windowDimensions.height();
     }
     else {
-        _planar.fovH->setValue(DefaultFovH);
-        _planar.fovV->setValue(std::min(DefaultFovV / ratio, 180.f));
+        aspectRatio = _windowDimensions.height() / _windowDimensions.width();
     }
+
+    float adjustedFov = 2.f * atan(aspectRatio * tan(DefaultFovShortEdge
+        * std::numbers::pi_v<float> / 180.f / 2.f));
+    // Convert to degrees and limit to 180°
+    adjustedFov *= 180.f / std::numbers::pi_v<float>;
+    adjustedFov = std::min(adjustedFov, 180.f);
+
+    _planar.fovH->setValue(landscapeOrientation ? adjustedFov : DefaultFovShortEdge);
+    _planar.fovV->setValue(landscapeOrientation ? DefaultFovShortEdge : adjustedFov);
 }

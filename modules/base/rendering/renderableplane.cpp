@@ -175,7 +175,7 @@ bool RenderablePlane::isReady() const {
 }
 
 void RenderablePlane::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
@@ -194,7 +194,7 @@ void RenderablePlane::initializeGL() {
 }
 
 void RenderablePlane::deinitializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
@@ -212,7 +212,7 @@ void RenderablePlane::deinitializeGL() {
 }
 
 void RenderablePlane::render(const RenderData& data, RendererTasks&) {
-    ZoneScoped
+    ZoneScoped;
 
     _shader->activate();
     _shader->setUniform("opacity", opacity());
@@ -287,7 +287,7 @@ void RenderablePlane::bindTexture() {}
 void RenderablePlane::unbindTexture() {}
 
 void RenderablePlane::update(const UpdateData&) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();

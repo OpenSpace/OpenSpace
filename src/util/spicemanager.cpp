@@ -1149,7 +1149,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
                                               double ephemerisTime,
                                               double& lightTime) const
 {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(!target.empty(), "Target must not be empty");
     ghoul_assert(!observer.empty(), "Observer must not be empty");

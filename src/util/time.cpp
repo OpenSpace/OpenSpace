@@ -112,7 +112,7 @@ std::string_view Time::UTC() const {
 }
 
 std::string_view Time::ISO8601() const {
-    ZoneScoped
+    ZoneScoped;
 
     constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
     constexpr int S = sizeof(Format);

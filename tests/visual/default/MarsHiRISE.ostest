@@ -14,11 +14,11 @@
     { "type": "script", 
       "value": "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended_01.Enabled', true)"},
     { "type": "wait", 
-      "value": "30"}, 
+      "value": "60"},
     { "type": "navigationstate", 
       "value": "{Anchor='Mars',Pitch=1.347758E0,Position={7.635264E5,-3.287992E6,-3.854482E5},Up={-0.470953E-1,-0.127084E0,0.990773E0},Yaw=0.463204E-1}"},
     { "type": "wait", 
-      "value": "120"},        
+      "value": "180"},
     { "type": "screenshot", 
       "value": "MarsHiRISE"}
 ] 

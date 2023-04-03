@@ -45,9 +45,6 @@ public:
     int typeLua() const override;
 
     using TemplateProperty<glm::mat4x4>::operator=;
-
-protected:
-    glm::mat4x4 fromLuaConversion(lua_State* state, bool& success) const override;
 };
 
 } // namespace openspace::properties

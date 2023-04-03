@@ -61,7 +61,7 @@ class Translation;
  *
  * Trails can be rendered either as lines, as points, or a combination of both with
  * varying colors, line thicknesses, or fading settings. If trails are rendered as points,
- * the RenderInformation's \c stride parameter determines the number of points between
+ * the RenderInformation's `stride` parameter determines the number of points between
  * larger points. A potential use case for this is showing the passage of time along a
  * trail by using a point separation of one hour and a subsampling of 4, you would get a
  * point every 15 minutes with every hourly point being bigger.
@@ -100,8 +100,8 @@ struct Appearance : properties::PropertyOwner {
 
     /**
      * The render method will set up the shader information and then render first the
-     * information contained in the the \c _primaryRenderInformation, then the optional
-     * \c _floatingRenderInformation using the provided \p data
+     * information contained in the the `_primaryRenderInformation`, then the optional
+     * `_floatingRenderInformation` using the provided \p data
      * \param data The data that is necessary to render this Renderable
      */
     void render(const RenderData& data, RendererTasks& rendererTask) override;

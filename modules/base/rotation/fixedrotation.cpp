@@ -390,7 +390,7 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
 }
 
 bool FixedRotation::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     // We have already checked this before, but still
     const Parameters p = codegen::bake<Parameters>(_constructorDictionary);

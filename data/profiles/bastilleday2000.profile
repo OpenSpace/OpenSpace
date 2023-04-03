@@ -1,49 +1,8 @@
 {
-  "actions": [
-    {
-      "documentation": "Reset button to start of CME",
-      "gui_path": "/Bastille-Day 2000",
-      "identifier": "bastille-day.reset_loops",
-      "is_local": false,
-      "name": "Reset button. Start of CME, no loop",
-      "script": "openspace.time.setTime('2000-JUL-14 10:03:00.00');openspace.scriptScheduler.clear();"
-    },
-    {
-      "documentation": "New loop: Restarts time at 10:03 and stops at 10:16, sets delta time to 2 min/ second (120 seconds/ second)",
-      "gui_path": "/Bastille-Day 2000",
-      "identifier": "bastille-day.short_loop",
-      "is_local": false,
-      "name": "Loop 10:03 - 10:16, at 2 min/ second",
-      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(120);openspace.time.setTime('2000-JUL-14 10:03:00.00');EndtimeShortLoop = \"2000 JUL 14 10:16:00\";StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.loadScheduledScript(EndtimeShortLoop, StarttimescriptSlowLoop);"
-    },
-    {
-      "documentation": "New loop: Restarts time at 10:03 and stops at 11:00, delta time to 4 min/ second (240 seconds/ second)",
-      "gui_path": "/Bastille-Day 2000",
-      "identifier": "bastille-day.standard_loop",
-      "is_local": false,
-      "name": "Loop 10:03 - 11:00, at 4 min/ second",
-      "script": "StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.clear();openspace.time.setDeltaTime(240);openspace.time.setTime('2000-JUL-14 10:03:00.00');openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 11:00:00', StarttimescriptSlowLoop);"
-    },
-    {
-      "documentation": "Fast loop: Starts from 10:03 and sets delta time to 15 min/ second (900 seconds/ second)",
-      "gui_path": "/Bastille-Day 2000",
-      "identifier": "bastille-day.fast_loop",
-      "is_local": false,
-      "name": "Loop 10:03 - 11.48, at 15 min/ second",
-      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(900);openspace.time.setTime('2000-JUL-14 10:03:00.00');StarttimescriptFastLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 11:48:00', StarttimescriptFastLoop);"
-    },
-    {
-      "documentation": "Long loop: Restarts time at 09:30 and stops at 11:50, delta time to 4 min/ second (240 seconds/ second)",
-      "gui_path": "/Bastille-Day 2000",
-      "identifier": "bastille-day.long_loop",
-      "is_local": false,
-      "name": "Loop 09:30 - 13:00, at 4 min/ second",
-      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(240);openspace.time.setTime('2000-JUL-14 09:30:00.00');StarttimescriptLongLoop = \"openspace.time.setTime('2000 JUL 14 09:30:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 13:00:00', StarttimescriptLongLoop);"
-    }
-  ],
   "assets": [
     "base",
     "dashboard/default_dashboard",
+    "scene/solarsystem/heliosphere/bastille_day/actions",
     "scene/solarsystem/heliosphere/bastille_day/density_volume",
     "scene/solarsystem/heliosphere/bastille_day/fieldlines",
     "scene/solarsystem/heliosphere/bastille_day/fluxnodes",
@@ -88,59 +47,59 @@
   ],
   "keybindings": [
     {
-      "action": "bastille-day.reset_loops",
+      "action": "os.events.bastilleday.setup.startofcme",
       "key": "R"
     },
     {
-      "action": "bastille-day.short_loop",
+      "action": "os.events.bastilleday.setup.shortloop",
       "key": "CTRL+1"
     },
     {
-      "action": "bastille-day.standard_loop",
+      "action": "os.events.bastilleday.setup.standardloop",
       "key": "CTRL+2"
     },
     {
-      "action": "bastille-day.fast_loop",
+      "action": "os.events.bastilleday.setup.fastloop",
       "key": "CTRL+3"
     },
     {
-      "action": "bastille-day.long_loop",
+      "action": "os.events.bastilleday.setup.longloop",
       "key": "CTRL+4"
     },
     {
-      "action": "density_volume.toggle_volume",
+      "action": "os.events.bastilleday.densityvolume.togglevolume",
       "key": "D"
     },
     {
-      "action": "fluxnodelegend.show_legend",
+      "action": "os.events.bastilleday.fluxnodelegend.showlegend",
       "key": "N"
     },
     {
-      "action": "fluxnodelegend.hide_legend",
+      "action": "os.events.bastilleday.fluxnodelegend.hidelegend",
       "key": "M"
     },
     {
-      "action": "magnetogram_texture.switch_color_layer",
+      "action": "os.events.bastilleday.magnetogramtexture.switchcolorlayer",
       "key": "I"
     },
     {
-      "action": "euv_layer.toggle_EUV",
+      "action": "os.solarsystem.sun.toggleeuv",
       "key": "E"
     },
     {
-      "action": "fluxnodes.toggle_fluxnodes",
+      "action": "os.events.bastilleday.fluxnodes.togglefluxnodes",
       "key": "O"
     },
     {
-      "action": "fieldlines.toggle_fieldlines",
+      "action": "os.events.bastilleday.fieldlines.togglefieldlines",
       "key": "U"
     },
     {
-      "action": "fluxnodescutplane.toggle_equatorial",
+      "action": "os.events.bastilleday.fluxnodescutplane.toggleequatorial",
       "key": "P"
     },
     {
-      "action": "fluxnodescutplane.toggle_meridial",
+      "action": "os.events.bastilleday.fluxnodescutplane.togglemeridial",
       "key": "LEFTBRACKET"
     }
   ],
@@ -158,7 +117,7 @@
     "license": "MIT License",
     "name": "Bastille day 2000",
     "url": "https://www.openspaceproject.com",
-    "version": "1.0"
+    "version": "1.1"
   },
   "properties": [
     {

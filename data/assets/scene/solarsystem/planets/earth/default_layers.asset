@@ -1,6 +1,7 @@
 -- Color layers
 asset.require("./layers/colorlayers/blue_marble", false)
 asset.require("./layers/colorlayers/esri_viirs_combo", true)
+asset.require("./layers/colorlayers/esri_noaa20_combo", false)
 asset.require("./layers/colorlayers/esri_world_imagery", false)
 asset.require("./layers/colorlayers/viirs_snpp_temporal", false)
 asset.require("./layers/colorlayers/aqua_modis_temporal", false)

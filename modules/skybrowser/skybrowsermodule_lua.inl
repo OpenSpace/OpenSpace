@@ -35,10 +35,34 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <scn/scn.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "SkyBrowserModule";
+constexpr std::string_view _loggerCat = "SkyBrowserModule";
 
+bool browserBelongsToCurrentNode(std::string identifier) {
+    size_t found = identifier.find('_');
+    std::string errorMessage = "The Sky Browser encountered a problem when it tried to "
+        "initialize the browser";
+    if (found == std::string::npos) {
+        throw ghoul::RuntimeError(errorMessage);
+    }
+    else {
+        std::string res = identifier.substr(found + 1, identifier.size());
+        if (res.empty()) {
+            throw ghoul::RuntimeError(errorMessage);
+        }
+        // Convert the last char to an int
+        int nodeId = std::stoi(res);
+        return nodeId == openspace::global::windowDelegate->currentNode();
+    }
+}
+
+std::string prunedIdentifier(std::string identifier) {
+    // Removes the node number at the end of the identifier
+    std::string res = identifier.substr(0, identifier.find('_'));
+    return res;
+}
 
 /**
 * Reloads the sky browser display copy for the node index that is sent in.
@@ -116,6 +140,14 @@ namespace {
                 );
                 module->startRotatingCamera(dir);
             }
+
+            if (selected->pointSpaceCraft()) {
+                global::eventEngine->publishEvent<events::EventPointSpacecraft>(
+                    image.equatorialSpherical.x,
+                    image.equatorialSpherical.y,
+                    module->spaceCraftAnimationTime()
+                );
+            }
         }
     }
 }
@@ -178,13 +210,17 @@ namespace {
 [[codegen::luawrap]] void loadImagesToWWT(std::string identifier) {
     using namespace openspace;
 
+    if (!browserBelongsToCurrentNode(identifier)) {
+        return;
+    }
+    std::string prunedId = prunedIdentifier(identifier);
     // Load images from url
-    LINFO("Connection established to WorldWide Telescope application in " + identifier);
-    LINFO("Loading image collections to " + identifier);
+    LINFO("Connection established to WorldWide Telescope application in " + prunedId);
+    LINFO("Loading image collections to " + prunedId);
 
     // Load the collections here because we know that the browser can execute javascript
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
+    TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
         pair->hideChromeInterface();
         pair->browser()->loadImageCollection(module->wwtImageCollectionUrl());
@@ -216,12 +252,11 @@ namespace {
             );
         }
     }
-
     // To ensure each node in a cluster calls its own instance of the wwt application
     // Do not send this script to the other nodes
     global::scriptEngine->queueScript(
         "openspace.skybrowser.sendOutIdsToBrowsers()",
-        scripting::ScriptEngine::RemoteScripting::No
+        scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
 
@@ -250,9 +285,14 @@ namespace {
     using namespace openspace;
 
     // Initialize browser with ID and its corresponding target
-    LINFO("Initializing sky browser " + identifier);
+    if (!browserBelongsToCurrentNode(identifier)) {
+        return;
+    }
+
+    std::string prunedId = prunedIdentifier(identifier);
+    LINFO("Initializing sky browser " + prunedId);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
+    TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
         pair->initialize();
     }
@@ -317,6 +357,7 @@ namespace {
         image.setValue("cartesianDirection", img.equatorialCartesian);
         image.setValue("hasCelestialCoords", img.hasCelestialCoords);
         image.setValue("credits", img.credits);
+        image.setValue("collection", img.collection);
         image.setValue("creditsUrl", img.creditsUrl);
         image.setValue("identifier", img.identifier);
 
@@ -471,7 +512,7 @@ namespace {
     glm::vec3 positionTarget = glm::vec3(0.9f, 0.4f, -2.1f);
     glm::dvec3 galacticTarget = skybrowser::localCameraToGalactic(positionTarget);
     if (glm::any(glm::isnan(galacticTarget))) {
-        galacticTarget = glm::dvec3 (0.0, 0.0, skybrowser::CelestialSphereRadius);
+        galacticTarget = glm::dvec3(0.0, 0.0, skybrowser::CelestialSphereRadius);
     }
     std::string guiPath = "/Sky Browser";
     std::string url = "http://wwt.openspaceproject.com/1/openspace/";
@@ -769,10 +810,15 @@ namespace {
 [[codegen::luawrap]] void loadingImageCollectionComplete(std::string identifier) {
     using namespace openspace;
 
+    if (!browserBelongsToCurrentNode(identifier)) {
+        return;
+    }
+    std::string prunedId = prunedIdentifier(identifier);
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
+    TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
-        LINFO("Image collection is loaded in Screen Space Sky Browser " + identifier);
+        LINFO("Image collection is loaded in Screen Space Sky Browser " + prunedId);
         pair->setImageCollectionIsLoaded(true);
         // Add all selected images to WorldWide Telescope
         const std::vector<std::string>& images = pair->selectedImages();
@@ -798,22 +844,6 @@ namespace {
     for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
         pair->setEnabled(show);
     }
-}
-
-/**
- * Point spacecraft to the equatorial coordinates the target points to. Takes an
- * identifier to a sky browser.
- */
-[[codegen::luawrap]] void pointSpaceCraft(std::string identifier) {
-    using namespace openspace;
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
-    glm::dvec2 equatorial = pair->targetDirectionEquatorial();
-    global::eventEngine->publishEvent<events::EventPointSpacecraft>(
-        equatorial.x,
-        equatorial.y,
-        module->spaceCraftAnimationTime()
-        );
 }
 
 /**

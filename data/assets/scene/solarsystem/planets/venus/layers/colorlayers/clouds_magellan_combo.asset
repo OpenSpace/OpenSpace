@@ -1,0 +1,48 @@
+local globeIdentifier = asset.require("../../venus").Venus.Identifier
+
+
+local texturesPath = asset.syncedResource({
+  Name = "Venus Textures",
+  Type = "HttpSynchronization",
+  Identifier = "venus_textures",
+  Version = 2
+})
+
+local combo = {
+  Identifier = "Clouds_Magellan_Combo",
+  Name = "Clouds Magellan Combo",
+  Enabled = asset.enabled,
+  Type = "ByLevelTileLayer",
+  LevelTileProviders = {
+    {
+      MaxLevel = 4,
+      TileProvider = {
+        Identifier = "Clouds",
+        Name = "Clouds",
+        FilePath = texturesPath .. "venus_clouds.jpg"
+      }
+    },
+    {
+      MaxLevel = 7,
+      TileProvider = {
+        Identifier = "Magellan_Mosaic_Utah",
+        Name = "Magellan Mosaic [Utah]",
+        FilePath = asset.localResource("magellan_mosaic_utah.vrt"),
+        BlendMode = "Color",
+        Settings = {
+          Gamma = 2.0
+        }
+      }
+    },
+  },
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", combo)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", combo)
+end)
+
+asset.export(combo)

@@ -67,10 +67,10 @@ private:
     struct UpdateReport {
         static constexpr int All = 0; ///< The entire array was touched in the update
 
-        /// If \c true the floating point needs to be updated
+        /// If `true` the floating point needs to be updated
         bool floatingPointNeedsUpdate;
 
-        /// If \c true at least one of their permanent point were touched
+        /// If `true` at least one of their permanent point were touched
         bool permanentPointsNeedUpdate;
 
         /// Returns the number of fixed points that were touched in the update method

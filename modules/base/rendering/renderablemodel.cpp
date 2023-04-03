@@ -490,7 +490,7 @@ bool RenderableModel::isReady() const {
 }
 
 void RenderableModel::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     if (_geometry->hasAnimation() && _enableAnimation && _animationStart.empty()) {
         LWARNING("Model with animation not given any start time");
@@ -507,7 +507,7 @@ void RenderableModel::initialize() {
 }
 
 void RenderableModel::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {

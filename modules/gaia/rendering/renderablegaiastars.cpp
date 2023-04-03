@@ -1133,6 +1133,12 @@ void RenderableGaiaStars::renderWithSSBO(const std::map<int, std::vector<float>>
 
     // Update vector with accumulated indices.
     for (const auto& [offset, subData] : updateData) {
+        if (offset >= _accumulatedIndices.size() - 1) {
+            // @TODO(2023-03-08, alebo) We want to redo the whole rendering pipeline
+            // anyway, so right now we just bail out early if we get an invalid index
+            // that would trigger a crash
+            continue;
+        }
         int newValue = static_cast<int>(subData.size() / _nRenderValuesPerStar) +
             _accumulatedIndices[offset];
         int changeInValue = newValue - _accumulatedIndices[offset + 1];

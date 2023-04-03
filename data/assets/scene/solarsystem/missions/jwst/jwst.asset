@@ -1,9 +1,11 @@
+asset.require("spice/base")
+asset.require("./actions")
+asset.require("scene/solarsystem/planets/earth/layers/colorlayers/terra_modis_temporal")
+asset.require("scene/solarsystem/planets/earth/layers/colorlayers/esri_viirs_combo")
+
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
-asset.require("spice/base")
-asset.require("scene/solarsystem/planets/earth/layers/colorlayers/terra_modis_temporal")
-asset.require("scene/solarsystem/planets/earth/layers/colorlayers/esri_viirs_combo")
 
 local models = asset.syncedResource({
   Name = "JWST Model",
@@ -218,7 +220,7 @@ asset.export(JWSTLabel)
 
 asset.meta = {
   Name = "James Webb Space Telescope",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[
     James Webb Space Telescope animated model, safe viewing band, field of view and label.
   ]],

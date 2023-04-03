@@ -14,7 +14,7 @@ local kernels = asset.syncedResource({
   Name = "Juno Kernels",
   Type = "HttpSynchronization",
   Identifier = "juno_kernels",
-  Version = 2
+  Version = 3
 })
 
 local JunoKernels = {
@@ -31,6 +31,7 @@ local JunoKernels = {
   kernels .. "juno_waves_v00.ti",
   kernels .. "juno_mwr_v01.ti",
   kernels .. "spk_merge_110805_171017_130515.bsp",
+  kernels .. "spk_ref_210111_251021_210111.bsp",
   kernels .. "juno_sc_nom_110807_171016_v01.bc",
   kernels .. "juno_sc_prl_110930_111028_jc003c01_v01.bc",
   kernels .. "juno_sc_prl_111028_111125_jc004b00_v01.bc",
@@ -121,7 +122,8 @@ local JunoKernels = {
   kernels .. "juno_sc_prl_170831_170927_jm0081a00_v01.bc",
   kernels .. "juno_sc_prl_170927_171023_jm0082a00_v01.bc",
   kernels .. "juno_sc_prl_171023_171030_jm0091a00_v01.bc",
-  kernels .. "juno_sc_prl_171023_171030_jm0091a00_v01.bc"
+  kernels .. "juno_sc_prl_171023_171030_jm0091a00_v01.bc",
+  kernels .. "juno_sc_prl_230228_230407_jm0490rp_v01.bc"
 }
 
 local RotationMatrix = {
@@ -163,7 +165,7 @@ local Juno = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2011-08-07T17:15:00",
-    End = "2017-10-16T19:29:24"
+    End = "2025-10-16T19:29:24"
   },
   GUI = {
     Path = "/Solar System/Missions/Juno"
@@ -183,7 +185,7 @@ local JunoTrail = {
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "2016 JUL 01",
-    EndTime = "2016 DEC 13",
+    EndTime = "2025 DEC 13",
     SampleInterval = 3600
   },
   GUI = {
@@ -196,11 +198,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Juno)
   openspace.addSceneGraphNode(JunoTrail)
 end)
-
+    
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JunoTrail)
   openspace.removeSceneGraphNode(Juno)
 end)
-
+    
 asset.export(Juno)
 asset.export(JunoTrail)

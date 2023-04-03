@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___CONFIGURATION___H__
 #define __OPENSPACE_CORE___CONFIGURATION___H__
 
+#include <openspace/util/keys.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/dictionary.h>
 #include <filesystem>
@@ -90,6 +91,8 @@ struct Configuration {
     bool isCheckingOpenGLState = false;
     bool isLoggingOpenGLCalls = false;
     bool isPrintingEvents = false;
+
+    Key consoleKey = Key::GraveAccent;
 
     float shutdownCountdown = 0.f;
 

@@ -77,6 +77,8 @@ struct Event {
         PointSpacecraft,
         RenderableEnabled,
         RenderableDisabled,
+        CameraPathStarted,
+        CameraPathFinished,
         Custom
     };
     constexpr explicit Event(Type type_) : type(type_) {}
@@ -118,7 +120,7 @@ struct EventSceneGraphNodeAdded : public Event {
     /**
      * Creates an instance of an EventSceneGraphNodeAdded event.
      *
-     * \param Node The identifier of the node that was added
+     * \param node_ The identifier of the node that was added
      *
      * \pre node_ must not be nullptr
      */
@@ -136,7 +138,7 @@ struct EventSceneGraphNodeRemoved : public Event {
     /**
      * Creates an instance of an EventSceneGraphNodeRemoved event.
      *
-     * \param Node The identifier of the node that was removed
+     * \param node_ The identifier of the node that was removed
      *
      * \pre node_ must not be nullptr
      */
@@ -161,7 +163,7 @@ struct EventParallelConnection : public Event {
     /**
      * Creates an instance of an EventParallelConnection event.
      *
-     * \param State The new state of the parallel connection system;  is one of
+     * \param state_ The new state of the parallel connection system;  is one of
      *        `Established`, `Lost`, `HostshipGained`, or `HostshipLost`
      */
     explicit EventParallelConnection(State state_);
@@ -198,7 +200,7 @@ struct EventApplicationShutdown : public Event {
     /**
      * Creates an instance of an EventApplicationShutdown event.
      *
-     * \param State The next state of the application shutdown sequence;  is one of
+     * \param state_ The next state of the application shutdown sequence;  is one of
      *        `Started`, `Aborted`,  or `Finished`
      */
     explicit EventApplicationShutdown(State state_);
@@ -352,7 +354,7 @@ struct EventInterpolationFinished : public Event {
     /**
      * Creates an instance of an EventInterpolationFinished event.
      *
-     * \param Property The property whose interpolation has finished
+     * \param property_ The property whose interpolation has finished
      *
      * \pre property_ must not be nullptr
      */
@@ -517,7 +519,45 @@ struct EventRenderableDisabled : public Event {
      */
     explicit EventRenderableDisabled(const SceneGraphNode* node_);
 
-  const tstring node;
+    const tstring node;
+};
+
+/**
+ * This event is created when the a camera path is started
+ */
+struct EventCameraPathStarted : public Event {
+    static constexpr Type Type = Event::Type::CameraPathStarted;
+
+    /**
+     * Creates an instance of an EventCameraPathStarted event.
+     *
+     * \param origin_ The scene graph node from which the path started
+     * \param destination_ The scene graph node at which the path ends
+     */
+    EventCameraPathStarted(const SceneGraphNode* origin_,
+        const SceneGraphNode* destination_);
+
+    const tstring origin;
+    const tstring destination;
+};
+
+/**
+ * This event is created when the a camera path is finished
+ */
+struct EventCameraPathFinished : public Event {
+    static constexpr Type Type = Event::Type::CameraPathFinished;
+
+    /**
+     * Creates an instance of an EventCameraPathStarted event.
+     *
+     * \param origin_ The scene graph node from which the path started
+     * \param destination_ The scene graph node where the path ended
+     */
+    EventCameraPathFinished(const SceneGraphNode* origin_,
+        const SceneGraphNode* destination_);
+
+    const tstring origin;
+    const tstring destination;
 };
 
 /**
