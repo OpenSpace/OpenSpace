@@ -591,18 +591,6 @@ getGeoPositionForCamera(bool useEyePosition = false)
     globe->geoJsonManager().deleteLayer(identifier);
 }
 
-// TODO: move this (and other createIdentifier/makeIdentifier funcitons) to a separate helper place
-// Conver the input string to a format that is valid as an identifier
-std::string makeIdentifier(std::string s) {
-    std::replace(s.begin(), s.end(), ' ', '_');
-    std::replace(s.begin(), s.end(), '.', '-');
-    // Remove quotes and apostrophe, since they cause problems
-    // when a string is translated to a script call
-    s.erase(remove(s.begin(), s.end(), '\"'), s.end());
-    s.erase(remove(s.begin(), s.end(), '\''), s.end());
-    return s;
-}
-
 /**
  * Add a GeoJson layer from the given file name and add it to the current anchor node,
  * if it is a globe. Note that you might have to increase the height offset for the
@@ -644,7 +632,9 @@ std::string makeIdentifier(std::string s) {
     // Make a minimal dictionary to represent the geojson component
     ghoul::Dictionary d;
 
-    std::string identifier = makeIdentifier(name.value_or(path.stem().string()));
+    std::string identifier = openspace::makeIdentifier(
+        name.value_or(path.stem().string())
+    );
     d.setValue("Identifier", identifier);
     d.setValue("File", path.string());
     if (name.has_value()) {
