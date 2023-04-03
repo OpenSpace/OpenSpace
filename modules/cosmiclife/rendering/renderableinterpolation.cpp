@@ -167,7 +167,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo InterpolationValueInfo = {
         "InterpolationValue",
         "Interpolation value",
-        "Set data interpolation between 0-1"
+        "Set data interpolation between 0-1 where 0 is the MDS data and 1 is the Umap data"
     };
 
     struct [[codegen::Dictionary(RenderableInterpolation)]] Parameters {
@@ -177,6 +177,8 @@ namespace {
 
         //comment
         std::optional<std::string> file2;
+
+       // std::vector<std::string> files;
 
         // [[codegen::verbatim(ColorInfo.description)]]
         glm::vec3 color [[codegen::color()]];
@@ -280,24 +282,16 @@ namespace openspace {
         , _setRangeFromData(SetRangeFromData)
         , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _interpolationValue(InterpolationValueInfo,0,0.f,1.f)
-
-        //, _MDS_points(MDS_pointsInfo, glm::vec2(1.f), glm::vec2(1.f))
-        //, _Umap_points(Umap_pointsInfo, glm::vec2(1.f), glm::vec2(1.f))
     {
         const Parameters p = codegen::bake<Parameters>(dictionary);
         //const Point v = codegen::bake<Point>(dictionary);
 
-        //if (p.file.has_value()) {
-        //    //Point MDS_point;
-            _speckFile.push_back(absPath(*p.file).string());
-        //    //MDS_points.push_back(MDS_point);
+        //if (p.file.has_value()) {   
+            _speckFile.push_back(absPath(*p.file).string());  
         //}
 
         //if (p.file2.has_value()) {
-        //    //Point Umap_point;
             _speckFile.push_back(absPath(*p.file2).string());
-        //    //Umap_points.push_back(Umap_point);
-        //    
         //}
         _hasSpeckFile = p.file.has_value() && p.file2.has_value();
 
@@ -448,26 +442,49 @@ namespace openspace {
         return (_program && hasAllDataSetData);
     }
 
+    //speck::Dataset RenderableInterpolation::extractComment(const speck::Dataset& d1, const speck::Dataset& d2) {
+
+    //}
+
+    speck::Dataset RenderableInterpolation::sort(const speck::Dataset& d1, const speck::Dataset& d2) {
+        speck::Dataset result{ d2 };
+
+        for (int i = 0; i < d1.entries.size(); i++) {
+            bool found = false;
+            int j = 0;
+
+            while (j < d2.entries.size()) {
+                //replace if statement with a function call that 
+                //finds the id in the comment.
+                if (d1.entries[i].comment == d2.entries[j].comment) {
+                    found = true;
+                    break;
+                }
+                ++j;    
+            }
+
+            if(found) {
+                result.entries[i] = d2.entries[j];
+            }
+            else {
+                //Remove from d1?
+                result.entries[i] = d1.entries[i];
+            }
+        }
+
+        return result;     
+            
+    }
+
     void RenderableInterpolation::initialize() {
         for (const std::string& path : _speckFile) {
             _datasets.push_back(speck::data::loadFileWithCache(path));
         }
+
         
-
-        //for (auto entry : _datasets[0].)
-        //{
-        //    //entry.position
-        //}
-
-        /*if (_hasSpeckFile) {
-            _dataset = speck::data::loadFileWithCache(_speckFile[0]);
-        }*/
-
         if (_hasColorMapFile) {
             _colorMap = speck::color::loadFileWithCache(_colorMapFile);
         }
-
-
 
         if (!_colorOptionString.empty() && (_colorRangeData.size() > 1)) {
             // Following DU behavior here. The last colormap variable
@@ -961,8 +978,6 @@ namespace openspace {
         setBoundingSphere(maxRadius);
         return result;
     }
-
-
 
 } // namespace openspace
 

@@ -84,6 +84,9 @@ namespace openspace {
             const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
         speck::Dataset interpolationFunc(const speck::Dataset& d1, const speck::Dataset& d2, float iv);
         speck::Dataset::Entry interpol(const speck::Dataset::Entry& e1, const speck::Dataset::Entry& e2, float iv);
+        speck::Dataset sort(const speck::Dataset& d1, const speck::Dataset& d2);
+        //speck::Dataset extractComment(const speck::Dataset& d1, const speck::Dataset& d2);
+
         // bool variables
         bool _hasSpeckFile = true;
         bool _dataIsDirty = true;
@@ -93,7 +96,6 @@ namespace openspace {
         bool _hasColorMapFile = false;
         bool _isColorMapExact = false;
         bool _hasDatavarSize = false;
-
 
 
         GLuint _pTexture = 0;
