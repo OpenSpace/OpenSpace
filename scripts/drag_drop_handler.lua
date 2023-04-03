@@ -32,10 +32,9 @@ end
 local ReloadUIScript = [[ if openspace.hasProperty('Modules.CefWebGui.Reload') then openspace.setPropertyValue('Modules.CefWebGui.Reload', nil) end ]]
 
 if is_image_file(extension) then
-  identifier = basename_without_extension:gsub(" ", "_")
-  identifier = identifier:gsub("%p", "_") -- replace all punctuation characters with '_'
-  return [[openspace.addScreenSpaceRenderable({
-    Identifier = "]] .. identifier .. [[",
+  return [[
+  openspace.addScreenSpaceRenderable({
+    Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
     Type = "ScreenSpaceImageLocal",
     TexturePath = "]] .. filename .. [["
   });]] .. ReloadUIScript
