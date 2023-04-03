@@ -25,6 +25,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json-schema.hpp>
@@ -45,8 +46,10 @@ namespace {
     }
 
     void attemptValidation(const std::string cfgString) {
-        std::string schemaString = stringify("../config/schema/sgcteditor.schema.json");
-        std::filesystem::path schemaDir = std::filesystem::u8path("../config/schema");
+        std::filesystem::path schemaDir = absPath("${TESTDIR}/../config/schema");
+        std::string schemaString = stringify(
+            schemaDir.string() + "/sgcteditor.schema.json"
+        );
         sgct::validateConfigAgainstSchema(cfgString, schemaString, schemaDir);
     }
 } // namespace
@@ -448,7 +451,8 @@ R"({
 
 TEST_CASE("SgctEdit: minimumVersion", "[sgctedit]") {
     const sgct::config::GeneratorVersion minVersion { "SgctWindowConfig", 1, 1 };
-    const std::string inputCfg = "../tests/sgctedit/fails_minimum_version.json";
+    std::string inputCfg =
+        absPath("${TESTDIR}/sgctedit/fails_minimum_version.json").string();
     sgct::config::GeneratorVersion ver = sgct::readConfigGenerator(inputCfg);
     CHECK_FALSE(ver.versionCheck(minVersion));
 }
