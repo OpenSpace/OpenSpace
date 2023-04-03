@@ -254,6 +254,10 @@ namespace {
         // the OpenSpaceEngine with the same name
         std::optional<bool> printEvents;
 
+        /// Determines which key opens the in-game console. The value passed in must be a
+        /// valid key (see keys.h for a list)
+        std::optional<std::string> consoleKey;
+
         // This value determines whether the initialization of the scene graph should
         // occur multithreaded, that is, whether multiple scene graph nodes should
         // initialize in parallel. The only use for this value is to disable it for
@@ -352,6 +356,19 @@ void parseLuaState(Configuration& configuration) {
     c.isCheckingOpenGLState = p.checkOpenGLState.value_or(c.isCheckingOpenGLState);
     c.isLoggingOpenGLCalls = p.logEachOpenGLCall.value_or(c.isLoggingOpenGLCalls);
     c.isPrintingEvents = p.printEvents.value_or(c.isPrintingEvents);
+
+    if (p.consoleKey.has_value()) {
+        KeyWithModifier km = stringToKey(*p.consoleKey);
+        if (km.modifier != KeyModifier::None) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Console key '{}' must be a 'bare' key and cannot contain any modifiers",
+                *p.consoleKey
+            ));
+        }
+
+        c.consoleKey = km.key;
+    }
+
     c.shutdownCountdown = p.shutdownCountdown.value_or(c.shutdownCountdown);
     c.shouldUseScreenshotDate = p.screenshotUseDate.value_or(c.shouldUseScreenshotDate);
     c.onScreenTextScaling = p.onScreenTextScaling.value_or(c.onScreenTextScaling);

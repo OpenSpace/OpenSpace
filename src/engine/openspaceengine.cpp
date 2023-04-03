@@ -470,6 +470,7 @@ void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(begin)");
     try {
         global::luaConsole->initialize();
+        global::luaConsole->setCommandInputButton(global::configuration->consoleKey);
     }
     catch (ghoul::RuntimeError& e) {
         LERROR("Error initializing Console with error:");
