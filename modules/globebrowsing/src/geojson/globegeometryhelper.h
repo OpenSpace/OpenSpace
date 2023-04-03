@@ -103,8 +103,6 @@ std::vector<rendering::helper::VertexXYZNormal> subdivideTriangle(
     double h0, double h1, double h2, double maxDistance, const glm::vec3& offsets,
     const RenderableGlobe& globe, bool useHeightMap);
 
-// TODO: subdivide polygons
-
 } // namespace openspace::globebrowsing::geometryhelper
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYHELPER___H__

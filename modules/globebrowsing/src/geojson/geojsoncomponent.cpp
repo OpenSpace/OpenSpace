@@ -250,6 +250,10 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         }
     });
 
+    _defaultProperties.shouldTesselate.onChange([&]() { _dataIsDirty = true; });
+    _defaultProperties.tesselationLevel.onChange([&]() { _dataIsDirty = true; });
+    _defaultProperties.tesselationMaxDistance.onChange([&]() { _dataIsDirty = true; });
+
     _forceUpdateData.onChange([this]() { _dataIsDirty = true; });
     addProperty(_forceUpdateData);
 

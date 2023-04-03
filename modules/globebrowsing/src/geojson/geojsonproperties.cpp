@@ -49,7 +49,9 @@ namespace geojson::propertykeys {
 
     constexpr std::string_view PerformShading = "performShading";
 
-    // TODO: Add tesselate?
+    constexpr std::string_view Tesselate = "tesselate";
+    constexpr std::string_view TesselationLevel = "tesselationLevel";
+    constexpr std::string_view TesselationMaxDistance = "tesselationMaxDistance";
 
     constexpr std::string_view AltitudeMode = "altitudeMode";
     constexpr std::string_view AltitudeModeClamp = "clampToGround";
@@ -185,6 +187,28 @@ namespace {
         "" // @TODO
     };
 
+    constexpr openspace::properties::Property::PropertyInfo TesselateInfo = {
+        "Tesselate",
+        "Should Tesselate",
+        "If false, no tesselation to bend the geometry based on the curvature of the "
+        "planet is performed. This leads to increased performance, but tesselation is "
+        "neccessary for large geometry that spans a big portion of the globe. Otherwise "
+        "it may intersect the surface."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TesselationLevelInfo = {
+        "TesselationLevel",
+        "Tesselation Level",
+        "The higher the value, the higher will the resolution of the rendered geometry "
+        "be." // @TODO: clarify
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TesselationMaxDistanceInfo = {
+        "TesselationMaxDistance",
+        "Tesselation Max Distance",
+        "" // @TODO (and consider using a distance based on angle instead)
+    };
+
     struct [[codegen::Dictionary(GeoJsonProperties)]] Parameters {
         // [[codegen::verbatim(OpacityInfo.description)]]
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
@@ -198,11 +222,14 @@ namespace {
         // [[codegen::verbatim(FillColorInfo.description)]]
         std::optional<glm::vec3> fillColor [[codegen::color()]];
 
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
         // [[codegen::verbatim(PointSizeInfo.description)]]
         std::optional<float> pointSize;
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        // [[codegen::verbatim(PointTextureInfo.description)]]
+        std::optional<std::string> pointTexture;
 
         // [[codegen::verbatim(ExtrudeInfo.description)]]
         std::optional<bool> extrude;
@@ -216,6 +243,15 @@ namespace {
         };
         // [[codegen::verbatim(AltitudeModeInfo.description)]]
         std::optional<AltitudeMode> altitudeMode;
+
+        // [[codegen::verbatim(TesselateInfo.description)]]
+        std::optional<bool> tesselate;
+
+        // [[codegen::verbatim(TesselationLevelInfo.description)]]
+        std::optional<int> tesselationLevel;
+
+        // [[codegen::verbatim(TesselationMaxDistanceInfo.description)]]
+        std::optional<float> tesselationMaxDistance;
     };
 #include "geojsonproperties_codegen.cpp"
 } // namespace
@@ -238,6 +274,9 @@ GeoJsonProperties::GeoJsonProperties()
     , extrude(ExtrudeInfo, false)
     , performShading(PerformShadingInfo, false)
     , altitudeModeOption(AltitudeModeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , shouldTesselate(TesselateInfo, true)
+    , tesselationLevel(TesselationLevelInfo, 10, 0, 100)
+    , tesselationMaxDistance(TesselationMaxDistanceInfo, 100000.f) // TODO: use distance based on angle?
 {
     addProperty(opacity);
     color.setViewOption(properties::Property::ViewOptions::Color);
@@ -260,6 +299,10 @@ GeoJsonProperties::GeoJsonProperties()
         //{ static_cast<int>(AltitudeMode::ClampToGround), "ClampToGround" } / TODO: add ClampToGround
     });
     addProperty(altitudeModeOption);
+
+    addProperty(shouldTesselate);
+    addProperty(tesselationLevel);
+    addProperty(tesselationMaxDistance);
 }
 
 void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary) {
@@ -267,12 +310,18 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
     opacity = p.opacity.value_or(opacity);
     color = p.color.value_or(color);
     pointSize = p.pointSize.value_or(pointSize);
+    pointTexture = p.pointTexture.value_or(pointTexture);
     lineWidth = p.lineWidth.value_or(lineWidth);
     extrude = p.extrude.value_or(extrude);
+    performShading = p.performShading.value_or(performShading);
 
     if (p.altitudeMode.has_value()) {
         altitudeModeOption = static_cast<int>(codegen::map<AltitudeMode>(*p.altitudeMode));
     }
+
+    shouldTesselate = p.tesselate.value_or(shouldTesselate);
+    tesselationLevel = p.tesselationLevel.value_or(tesselationLevel);
+    tesselationMaxDistance = p.tesselationMaxDistance.value_or(tesselationMaxDistance);
 }
 
 GeoJsonProperties::AltitudeMode GeoJsonProperties::altitudeMode() const {
@@ -332,6 +381,16 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
                 ));
             }
         }
+        else if (keyMatches(key, geojson::propertykeys::Tesselate, TesselateInfo)) {
+            result.shouldTesselate = value.getBoolean();
+        }
+        else if (keyMatches(key, geojson::propertykeys::TesselationLevel, TesselationLevelInfo)) {
+            result.tesselationLevel = static_cast<float>(value.getNumber());
+        }
+        else if (keyMatches(key, geojson::propertykeys::TesselationMaxDistance, TesselationMaxDistanceInfo)) {
+            result.tesselationMaxDistance = static_cast<float>(value.getNumber());
+        }
+        // TODO: warn for non-supported keys? General thought is no
     };
 
     for (auto const& [key, value] : props) {
@@ -388,6 +447,20 @@ bool PropertySet::performShading() const {
 
 GeoJsonProperties::AltitudeMode PropertySet::altitudeMode() const {
     return overrideValues.altitudeMode.value_or(defaultValues.altitudeMode());
+}
+
+bool PropertySet::shouldtesselate() const {
+    return overrideValues.shouldTesselate.value_or(defaultValues.shouldTesselate);
+}
+
+int PropertySet::tesselationLevel() const {
+    return overrideValues.tesselationLevel.value_or(defaultValues.tesselationLevel);
+}
+
+float PropertySet::tesselationMaxDistance() const {
+    return overrideValues.tesselationMaxDistance.value_or(
+        defaultValues.tesselationMaxDistance
+    );
 }
 
 bool PropertySet::hasOverrideTexture() const {

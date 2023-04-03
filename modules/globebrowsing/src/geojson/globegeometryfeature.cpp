@@ -51,7 +51,7 @@ namespace {
 
     // Max distance between two coordinates in meter
     // TODO: Make a configurable property. Automatically generated from the size of the object
-    const double MaxDistance = 10000.0;
+    //const double MaxDistance = 10000.0;
 
 } // namespace
 
@@ -369,8 +369,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 }
 
-void GlobeGeometryFeature::renderPoints(const RenderFeature& feature) const
-{
+void GlobeGeometryFeature::renderPoints(const RenderFeature& feature) const {
     ghoul_assert(feature.type == RenderType::Points, "Trying to render faulty geometry");
     _pointsProgram->setUniform("color", _properties.color());
     _pointsProgram->setUniform(
@@ -532,14 +531,17 @@ GlobeGeometryFeature::createPointAndLineGeometry()
                 continue;
             }
 
-            // Add extra vertices to fulfill MaxDistance criteria
+            // Add extra vertices to fulfill MaxDistance criteria.
+            // First determine how much to tesselate
+            float stepSize = determineTesselationDistance(glm::distance(lastPos, v));
+
             std::vector<glm::vec3> subdividedPositions = geometryhelper::subdivideLine(
                 lastPos,
                 v,
                 lastHeightValue,
                 geodetic.height,
                 _offsets.z,
-                MaxDistance,
+                stepSize,
                 _globe,
                 useHeightMap()
             );
@@ -631,15 +633,31 @@ void GlobeGeometryFeature::createPolygonGeometry() {
             double h1 = triHeights[1];
             double h2 = triHeights[2];
 
-            std::vector<Vertex> verts = geometryhelper::subdivideTriangle(
-                v0, v1, v2,
-                h0, h1, h2,
-                MaxDistance,
-                _offsets,
-                _globe,
-                useHeightMap()
-            );
-            polyVertices.insert(polyVertices.end(), verts.begin(), verts.end());
+            if (_properties.shouldtesselate() && _properties.tesselationLevel() > 0.f) {
+                // First determine how much to tesselate
+                float longestSide = std::max(
+                    std::max(glm::distance(v0, v1), glm::distance(v0, v2)),
+                    glm::distance(v1, v2)
+                );
+                float stepSize = determineTesselationDistance(longestSide);
+
+                std::vector<Vertex> verts = geometryhelper::subdivideTriangle(
+                    v0, v1, v2,
+                    h0, h1, h2,
+                    stepSize,
+                    _offsets,
+                    _globe,
+                    useHeightMap()
+                );
+                polyVertices.insert(polyVertices.end(), verts.begin(), verts.end());
+            }
+            else {
+                // Just add a triangle consisting of the three vertices
+                const glm::vec3 n = -glm::normalize(glm::cross(v1 - v0, v2 - v0));
+                polyVertices.push_back({ v0.x, v0.y, v0.z, n.x, n.y, n.z });
+                polyVertices.push_back({ v1.x, v1.y, v1.z, n.x, n.y, n.z });
+                polyVertices.push_back({ v2.x, v2.y, v2.z, n.x, n.y, n.z });
+            }
         }
     }
 
@@ -673,6 +691,20 @@ std::vector<double> GlobeGeometryFeature::getCurrentReferencePointsHeights() con
         newHeights.push_back(handle.heightToSurface);
     }
     return newHeights;
+}
+
+float GlobeGeometryFeature::determineTesselationDistance(float objectSize) const {
+    float tesselationFactor = 1.f / static_cast<float>(_properties.tesselationLevel());
+    float distance = tesselationFactor * _properties.tesselationMaxDistance();
+
+    // If object size is smaller than the allowed max distance, instead split the
+    // distance into the number of steps given by the tesselationlevel property
+    if (objectSize < _properties.tesselationMaxDistance()) {
+        distance = tesselationFactor * objectSize;
+    }
+    // @TODO: verify that this will be ok. Maybe we shoud just simplify it?
+    // Also, make somethign that takes the height into account
+    return distance;
 }
 
 void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,

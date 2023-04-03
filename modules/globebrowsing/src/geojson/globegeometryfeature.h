@@ -128,7 +128,6 @@ private:
     void renderPolygons(const RenderFeature& feature, bool shouldRenderTwice,
         int renderPass) const;
 
-
     /**
      * Create the vertex information for the line and point parts of the feature.
      * Returns the resulting vertex positions, so we can use them for extrusion
@@ -148,6 +147,8 @@ private:
 
     /// Compute the heights to the surface at the reference points
     std::vector<double> getCurrentReferencePointsHeights() const;
+
+    float determineTesselationDistance(float objectSize) const;
 
     GeometryType _type = GeometryType::Error;
     RenderableGlobe& _globe;

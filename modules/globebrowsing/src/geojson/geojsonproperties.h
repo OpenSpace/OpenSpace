@@ -30,6 +30,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/glm.h>
@@ -68,6 +69,11 @@ struct GeoJsonProperties : public properties::PropertyOwner {
     properties::BoolProperty extrude;
     properties::BoolProperty performShading;
     properties::OptionProperty altitudeModeOption;
+
+    // TODO: make separate propertowner, for better distinguishemnt
+    properties::BoolProperty shouldTesselate;
+    properties::IntProperty tesselationLevel;
+    properties::FloatProperty tesselationMaxDistance;
 };
 
 // Optional versions of all the properties above, that can be read from a geoJson file
@@ -84,6 +90,10 @@ struct GeoJsonOverrideProperties {
     std::optional<bool> extrude;
     std::optional<bool> performShading;
     std::optional<GeoJsonProperties::AltitudeMode> altitudeMode;
+
+    std::optional<bool> shouldTesselate;
+    std::optional<int> tesselationLevel;
+    std::optional<float> tesselationMaxDistance;
 };
 
 GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& feature);
@@ -104,6 +114,10 @@ struct PropertySet {
     bool extrude() const;
     bool performShading() const;
     GeoJsonProperties::AltitudeMode altitudeMode() const;
+
+    bool shouldtesselate() const;
+    int tesselationLevel() const;
+    float tesselationMaxDistance() const;
 
     bool hasOverrideTexture() const;
 };
