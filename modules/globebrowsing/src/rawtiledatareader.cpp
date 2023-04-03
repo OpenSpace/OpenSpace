@@ -59,7 +59,7 @@
 namespace openspace::globebrowsing {
 
 namespace {
-
+    constexpr std::string_view _loggerCat = "RawTileDataReader";
 // These are some locations in memory taken from ESRI's No Data Available tile so that we
 // can spotcheck these tiles and not present them
 // The pair is <byte index, expected value>
@@ -538,7 +538,7 @@ void RawTileDataReader::initialize() {
             if (!std::filesystem::create_directories(root, ec)) {
                 // Already existing directories causes a 'failure' but no error
                 if (ec) {
-                    throw ghoul::RuntimeError(fmt::format(
+                    LWARNING(fmt::format(
                         "Failed to create directories for cache at: {}. Error Code: {}, message: {}",
                         root, std::to_string(ec.value()), ec.message()
                     ));
@@ -549,7 +549,7 @@ void RawTileDataReader::initialize() {
             if (driver != nullptr) {
                 auto src = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
                 if (!src) {
-                    throw ghoul::RuntimeError(fmt::format(
+                    LWARNING(fmt::format(
                         "Failed to load dataset: {}. GDAL Error: {}",
                         _datasetFilePath, CPLGetLastErrorMsg()
                     ));
@@ -569,7 +569,7 @@ void RawTileDataReader::initialize() {
                         geoTransform[5] = -180.0 / src->GetRasterYSize(); // Negative for north-up
                         err = src->SetGeoTransform(geoTransform);
                         if (err != CPLErr::CE_None) {
-                            throw ghoul::RuntimeError(fmt::format(
+                            LWARNING(fmt::format(
                                 "Failed to set default Geo Transform of dataset: {}. GDAL Error: {}",
                                 _datasetFilePath, CPLGetLastErrorMsg()
                             ));
@@ -589,7 +589,7 @@ void RawTileDataReader::initialize() {
 
                 auto dst = static_cast<GDALDataset*>(driver->CreateCopy(mrf.c_str(), src, FALSE, createOpts, NULL, NULL));
                 if (!dst) {
-                    throw ghoul::RuntimeError(fmt::format(
+                    LWARNING(fmt::format(
                         "Failed to create MRF Caching dataset dataset: {}. GDAL Error: {}",
                         mrf, CPLGetLastErrorMsg()
                     ));
