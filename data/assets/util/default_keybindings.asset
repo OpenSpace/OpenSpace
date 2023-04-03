@@ -202,10 +202,11 @@ local toggle_planet_labels = {
 
 
 local Actions = {
-  toggle_native_ui,toggle_shutdown,take_screenshot,toggle_pause_interpolated,toggle_pause_immediate,
-  toggle_rotation_friction,toggle_zoom_friction,toggle_roll_friction,fade_to_black,
-  toggle_main_gui,toggle_overlays,toggle_master_rendering,next_delta_step_interpolate,
-  next_delta_step_immediate,previous_delta_step_interpolate,previous_delta_step_immediate
+  toggle_native_ui, toggle_shutdown, take_screenshot, toggle_pause_interpolated,
+  toggle_pause_immediate, toggle_rotation_friction, toggle_zoom_friction,
+  toggle_roll_friction, fade_to_black, toggle_main_gui, toggle_overlays,
+  toggle_master_rendering, next_delta_step_interpolate, next_delta_step_immediate,
+  previous_delta_step_interpolate, previous_delta_step_immediate, toggle_planet_labels
 }
 
 asset.onInitialize(function()
