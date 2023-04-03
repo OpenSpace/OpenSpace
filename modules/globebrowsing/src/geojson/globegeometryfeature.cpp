@@ -722,53 +722,27 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
         GL_STATIC_DRAW
     );
 
-    if (feature.type == RenderType::Points) {
-        GLint positionAttrib = _pointsProgram->attributeLocation("in_position");
-        glEnableVertexAttribArray(positionAttrib);
-        glVertexAttribPointer(
-            positionAttrib,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            6 * sizeof(float),
-            nullptr
-        );
+    GLint positionAttrib = _pointsProgram->attributeLocation("in_position");
+    glEnableVertexAttribArray(positionAttrib);
+    glVertexAttribPointer(
+        positionAttrib,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        6 * sizeof(float),
+        nullptr
+    );
 
-        GLint normalAttrib = _pointsProgram->attributeLocation("in_normal");
-        glEnableVertexAttribArray(normalAttrib);
-        glVertexAttribPointer(
-            normalAttrib,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            6 * sizeof(float),
-            reinterpret_cast<void*>(3 * sizeof(float))
-        );
-    }
-    else {
-        GLint positionAttrib =
-            _linesAndPolygonsProgram->attributeLocation("in_position");
-        glEnableVertexAttribArray(positionAttrib);
-        glVertexAttribPointer(
-            positionAttrib,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            6 * sizeof(float),
-            nullptr
-        );
-
-        GLint normalAttrib = _linesAndPolygonsProgram->attributeLocation("in_normal");
-        glEnableVertexAttribArray(normalAttrib);
-        glVertexAttribPointer(
-            normalAttrib,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            6 * sizeof(float),
-            reinterpret_cast<void*>(3 * sizeof(float))
-        );
-    }
+    GLint normalAttrib = _pointsProgram->attributeLocation("in_normal");
+    glEnableVertexAttribArray(normalAttrib);
+    glVertexAttribPointer(
+        normalAttrib,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        6 * sizeof(float),
+        reinterpret_cast<void*>(3 * sizeof(float))
+    );
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
