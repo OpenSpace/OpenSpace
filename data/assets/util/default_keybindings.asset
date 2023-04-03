@@ -16,6 +16,7 @@ local toggle_shutdown = {
   Name = "Toggle Shutdown",
   Command = "openspace.toggleShutdown()",
   Documentation = "Toggles the shutdown that will stop OpenSpace after a grace period. Press again to cancel the shutdown during this period",
+  GuiPath = "/System",
   IsLocal = true,
 
   Key = "ESC"
