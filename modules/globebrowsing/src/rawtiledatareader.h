@@ -67,6 +67,8 @@ public:
     glm::ivec2 fullPixelSize() const;
 
 private:
+    std::optional<std::string> getMRFCache();
+    
     void initialize();
 
     RawTile::ReadError rasterRead(int rasterBand, const IODescription& io,
