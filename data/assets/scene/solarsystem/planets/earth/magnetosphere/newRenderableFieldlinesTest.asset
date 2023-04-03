@@ -11,7 +11,7 @@ local fieldlinesDirectory = asset.syncedResource({
 })
 
 local fieldlineTest = {
-  Identifier = "fieldlineTest1",
+  Identifier = "NewRenderableMagnetosphereTest1",
   Parent = transforms.GSMReferenceFrame.Identifier,
   InteractionSphere = 6380000,
   Renderable = {

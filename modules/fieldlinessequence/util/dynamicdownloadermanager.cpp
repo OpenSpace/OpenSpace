@@ -180,6 +180,9 @@ void DynamicDownloaderManager::requestAvailableFiles(std::string httpDataRequest
         fileElement.cadence = 0;
         fileElement.availableIndex = index;
         if (std::filesystem::exists(destination)) {
+            if (std::filesystem::file_size(destination) == 0) {
+                //TODO flag as failed, maybe do twice, then warn or something, skipping
+            }
             fileElement.download = nullptr;
             fileElement.state = File::State::Downloaded;
             _downloadedFiles.push_back(destination);
@@ -220,7 +223,8 @@ double DynamicDownloaderManager::calculateCadence() {
 }
 
 void DynamicDownloaderManager::downloadFile() {
-    ZoneScoped
+    ZoneScoped;
+
     if (_filesCurrentlyDownloading.size() < 4 && _queuedFilesToDownload.size() > 0) {
         File* dl = _queuedFilesToDownload.front();
         if (dl->state != File::State::OnQueue) {
@@ -237,6 +241,8 @@ void DynamicDownloaderManager::downloadFile() {
 }
 
 void DynamicDownloaderManager::checkForFinishedDownloads() {
+    ZoneScoped;
+
     std::vector<File*>::iterator currentIt = _filesCurrentlyDownloading.begin();
 
     // since size of filesCurrentlyDownloading can change per iteration, keep size-call
@@ -274,13 +280,14 @@ void DynamicDownloaderManager::checkForFinishedDownloads() {
 // negative part of this is it has to go through the whole list.
 // Maybe a std::map is better to fetch to most relavent file to download.
 std::vector<File>::iterator DynamicDownloaderManager::closestFileToNow(const double time) {
+    ZoneScoped;
+
     File* closest;
     std::vector<File>::iterator it = _availableData.begin();
     double smallest = DBL_MAX;
     for (File& file : _availableData) {
-        const double fileTime = Time::convertTime(file.timestep);
         // smallest differens determains closest file
-        const double differens = abs(time - fileTime);
+        const double differens = abs(time - file.time);
         if (differens < smallest) {
             smallest = differens;
             closest = &file;
@@ -292,6 +299,8 @@ std::vector<File>::iterator DynamicDownloaderManager::closestFileToNow(const dou
 }
 
 void DynamicDownloaderManager::putOnQueue() {
+    ZoneScoped;
+
     std::vector<File>::iterator end;
     if (_forward) {
         end = _availableData.end();
@@ -320,7 +329,7 @@ void DynamicDownloaderManager::putOnQueue() {
 }
 
 void DynamicDownloaderManager::update(const double time, const double deltaTime) {
-    ZoneScoped
+    ZoneScoped;
     // First frame cannot guarantee time and deltatime has been set yet.
     if (_firstFrame) {
         _firstFrame = false;
