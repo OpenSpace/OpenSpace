@@ -631,6 +631,10 @@ void RenderableModel::initializeGL() {
     // Initialize geometry
     _geometry->initialize();
     _geometry->calculateBoundingRadius();
+    setBoundingSphere(_geometry->boundingRadius() * _modelScale);
+
+    // Set Interaction sphere size to be 10% of the bounding sphere
+    setInteractionSphere(_boundingSphere * 0.1);
 }
 
 void RenderableModel::deinitializeGL() {
@@ -915,12 +919,6 @@ void RenderableModel::update(const UpdateData& data) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
-
-    setBoundingSphere(_geometry->boundingRadius() * _modelScale *
-        glm::compMax(data.modelTransform.scale)
-    );
-    // Set Interaction sphere size to be 10% of the bounding sphere
-    setInteractionSphere(_boundingSphere * 0.1);
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime;
