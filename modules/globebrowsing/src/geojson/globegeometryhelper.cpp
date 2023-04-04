@@ -166,18 +166,18 @@ glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,
     return globe.ellipsoid().cartesianPosition(adjusted);
 }
 
-std::vector<glm::vec3> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
-                                     double h0, double h1, double maxDistance)
+std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
+                                         double h0, double h1, double maxDistance)
 {
     double edgeLength = glm::distance(v1, v0);
     int nSegments = static_cast<int>(std::ceil(edgeLength / maxDistance));
 
-    std::vector<glm::vec3> positions;
+    std::vector<PosHeightPair> positions;
     positions.reserve(nSegments + 1);
 
     // If step distance is too big, just add first position
     if (nSegments == 0) {
-        positions.push_back(static_cast<glm::vec3>(v0));
+        positions.push_back({ static_cast<glm::vec3>(v0), h0 });
     }
 
     for (int seg = 0; seg < nSegments; ++seg) {
@@ -192,11 +192,11 @@ std::vector<glm::vec3> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
         glm::vec3 newVf = static_cast<glm::vec3>(
             (glm::length(v0) + heightDiff) * glm::normalize(newV)
         );
-        positions.push_back(newVf);
+        positions.push_back({ newVf, newHeight });
     }
 
     // Add final position
-    positions.push_back(static_cast<glm::vec3>(v1));
+    positions.push_back({ static_cast<glm::vec3>(v1), h1 });
 
     positions.shrink_to_fit();
     return positions;
@@ -210,19 +210,19 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     std::vector<rendering::helper::VertexXYZNormal> vertices;
 
     // Subdivide edges
-    std::vector<glm::vec3> edge01 = geometryhelper::subdivideLine(
+    std::vector<PosHeightPair> edge01 = geometryhelper::subdivideLine(
         v0, v1,
         h0, h1,
         maxDistance
     );
 
-    std::vector<glm::vec3> edge02 = geometryhelper::subdivideLine(
+    std::vector<PosHeightPair> edge02 = geometryhelper::subdivideLine(
         v0, v2,
         h0, h2,
         maxDistance
     );
 
-    std::vector<glm::vec3> edge12 = geometryhelper::subdivideLine(
+    std::vector<PosHeightPair> edge12 = geometryhelper::subdivideLine(
         v1, v2,
         h1, h2,
         maxDistance
@@ -242,8 +242,11 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     const float lengthEdge02 = glm::length(v2 - v0);
     for (size_t i = 1; i < nSteps01; ++i) {
         for (size_t j = 1; j < nSteps02; ++j) {
-            glm::vec3 comp01 = edge01[i] - v0;
-            glm::vec3 comp02 = edge02[j] - v0;
+            glm::vec3 comp01 = edge01[i].position - v0;
+            glm::vec3 comp02 = edge02[j].position - v0;
+
+            double hComp01 = edge01[i].height - h0;
+            double hComp02 = edge02[j].height - h0;
 
             float w1 = glm::length(comp01) / lengthEdge01;
             float w2 = glm::length(comp02) / lengthEdge02;
@@ -253,10 +256,10 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
             }
 
             glm::vec3 pos = v0 + comp01 + comp02;
+            double height = h0 + hComp01 + hComp02;
 
             Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(pos);
-            // TODO: include height from pos
-            Geodetic3 geo3 = { geo2, 0.0 };
+            Geodetic3 geo3 = { geo2, height };
             pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
         }
     }
@@ -264,29 +267,27 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     // Add egde positions
     for (size_t i = 0; i < maxSteps; ++i) {
         if (i < edge01.size() - 1) {
-            Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(edge01[i]);
-            // TODO: include height from pos
-            Geodetic3 geo3 = { geo2, 0.0 };
+            Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(edge01[i].position);
+            Geodetic3 geo3 = { geo2, edge01[i].height };
             pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
         }
         if (i < edge02.size() - 1) {
-            Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(edge02[i]);
-            // TODO: include height from pos
-            Geodetic3 geo3 = { geo2, 0.0 };
+            Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(edge02[i].position);
+            Geodetic3 geo3 = { geo2, edge02[i].height };
             pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
         }
         if (i < edge12.size() - 1) {
-            Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(edge12[i]);
-            // TODO: include height from pos
-            Geodetic3 geo3 = { geo2, 0.0 };
+            Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(edge12[i].position);
+            Geodetic3 geo3 = { geo2, edge12[i].height };
             pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
         }
     }
 
     // Also add the final position (not part of the subdivide step above)
     Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(v2);
-    // TODO: include height from pos
-    Geodetic3 geo3 = { geo2, 0.0 };
+    glm::dvec3 centerToEllipsoidSurface = globe.ellipsoid().geodeticSurfaceProjection(v2);
+    double height = glm::length(glm::dvec3(v2) - centerToEllipsoidSurface);
+    Geodetic3 geo3 = { geo2, height };
     pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
 
     pointCoords.shrink_to_fit();

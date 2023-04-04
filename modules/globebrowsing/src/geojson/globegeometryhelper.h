@@ -79,12 +79,20 @@ double getHeightToReferenceSurface(const Geodetic2& geo, const RenderableGlobe& 
 glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,
     const RenderableGlobe& globe, const glm::vec3& offsets); // TODO: vec2 offset, or lat,long
 
+
+struct PosHeightPair {
+    glm::vec3 position;
+    double height;
+};
+
 /**
  * Subdivide line between position v0 and v1 so that it fullfils the maxDistance
  * criteria. Interpolate the height value from * h0 to h1, as well as add the
- * given offset and account for the height map if that should be done
+ * given offset and account for the height map if that should be done.
+ *
+ * Returns pairs of position and height values
  */
-std::vector<glm::vec3> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
+std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
     double h0, double h1, double maxDistance);
 
 /**

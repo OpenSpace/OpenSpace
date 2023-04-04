@@ -566,15 +566,17 @@ GlobeGeometryFeature::createPointAndLineGeometry()
             // First determine how much to tesselate
             float stepSize = determineTesselationDistance(glm::distance(lastPos, v));
 
-            std::vector<glm::vec3> subdividedPositions = geometryhelper::subdivideLine(
-                lastPos,
-                v,
-                lastHeightValue,
-                geodetic.height,
-                stepSize
-            );
+            std::vector<geometryhelper::PosHeightPair> subdividedPositions =
+                geometryhelper::subdivideLine(
+                    lastPos,
+                    v,
+                    lastHeightValue,
+                    geodetic.height,
+                    stepSize
+                );
 
-            for (const glm::vec3& p : subdividedPositions) {
+            for (const geometryhelper::PosHeightPair& pair : subdividedPositions) {
+                glm::vec3 p = pair.position;
                 vertices.push_back({ p.x, p.y, p.z, 0.f, 0.f, 0.f });
                 positions.push_back(p);
             }
