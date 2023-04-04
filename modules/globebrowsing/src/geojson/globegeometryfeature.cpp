@@ -48,11 +48,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "GlobeGeometryFeature";
-
-    // Max distance between two coordinates in meter
-    // TODO: Make a configurable property. Automatically generated from the size of the object
-    //const double MaxDistance = 10000.0;
-
 } // namespace
 
 namespace openspace::globebrowsing {
@@ -130,7 +125,6 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
         texture = _properties.pointTexture();
     }
     else if (m->hasDefaultGeoPointTexture()) {
-        // TOOD: verify that this is updated correctly
         texture = m->defaultGeoPointTexture();
     }
     else {
@@ -364,7 +358,6 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
 
     glBindVertexArray(0);
 
-    // TODO: move to correct render function
     // Reset after every geometry
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 }
@@ -395,7 +388,6 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature) const {
     glEnable(GL_PROGRAM_POINT_SIZE);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(feature.nVertices));
     glDisable(GL_PROGRAM_POINT_SIZE);
-    // TODO: support sprites for the points
 }
 
 void GlobeGeometryFeature::renderLines(const RenderFeature& feature) const
@@ -703,7 +695,7 @@ float GlobeGeometryFeature::determineTesselationDistance(float objectSize) const
         distance = tesselationFactor * objectSize;
     }
     // @TODO: verify that this will be ok. Maybe we shoud just simplify it?
-    // Also, make somethign that takes the height into account
+    // Also, make something that takes the height into account
     return distance;
 }
 
