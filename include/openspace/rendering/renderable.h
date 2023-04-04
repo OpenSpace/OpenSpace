@@ -56,6 +56,7 @@ class Renderable : public properties::PropertyOwner {
 public:
     struct Settings {
         bool automaticallyUpdateBin = true;
+        bool shouldUpdateIfDisabled = false;
     };
 
     enum class RenderBin : int {
@@ -79,7 +80,7 @@ public:
 
     virtual bool isReady() const = 0;
     bool isEnabled() const;
-    bool shouldUpdateIfDisabled() const;
+    bool shouldUpdateIfDisabled() const noexcept;
 
     double boundingSphere() const;
     double interactionSphere() const;
@@ -132,7 +133,7 @@ protected:
     double _boundingSphere = 0.0;
     double _interactionSphere = 0.0;
     SceneGraphNode* _parent = nullptr;
-    bool _shouldUpdateIfDisabled = false;
+    const bool _shouldUpdateIfDisabled = false;
     RenderBin _renderBin = RenderBin::Opaque;
 
     // An optional renderbin that renderables can use for certain components, in cases

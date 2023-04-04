@@ -160,6 +160,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, Settings settings)
     , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _renderableType(RenderableTypeInfo, "Renderable")
     , _dimInAtmosphere(DimInAtmosphereInfo, false)
+    , _shouldUpdateIfDisabled(settings.shouldUpdateIfDisabled)
 {
     ZoneScoped;
 
@@ -297,7 +298,7 @@ bool Renderable::isEnabled() const {
     return _enabled;
 }
 
-bool Renderable::shouldUpdateIfDisabled() const {
+bool Renderable::shouldUpdateIfDisabled() const noexcept {
     return _shouldUpdateIfDisabled;
 }
 
