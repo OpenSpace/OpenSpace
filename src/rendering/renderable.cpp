@@ -164,7 +164,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, Settings settings)
 {
     ZoneScoped;
 
-    if (settings.automaticallyUpdateBin) {
+    if (settings.automaticallyUpdateRenderBin) {
         registerUpdateRenderBinFromOpacity();
     }
 

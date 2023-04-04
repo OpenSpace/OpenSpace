@@ -55,7 +55,7 @@ class Camera;
 class Renderable : public properties::PropertyOwner {
 public:
     struct Settings {
-        bool automaticallyUpdateBin = true;
+        bool automaticallyUpdateRenderBin = true;
         bool shouldUpdateIfDisabled = false;
     };
 

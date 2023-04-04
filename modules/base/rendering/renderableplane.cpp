@@ -113,7 +113,7 @@ documentation::Documentation RenderablePlane::Documentation() {
 }
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary, { .automaticallyUpdateBin = false })
+    : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _billboard(BillboardInfo, false)
     , _mirrorBackside(MirrorBacksideInfo, false)
