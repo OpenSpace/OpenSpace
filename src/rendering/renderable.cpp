@@ -232,7 +232,7 @@ void Renderable::setBoundingSphere(double boundingSphere) {
     _boundingSphere = boundingSphere;
 }
 
-double Renderable::boundingSphere() const {
+double Renderable::boundingSphere() const noexcept {
     return _boundingSphere;
 }
 
@@ -240,11 +240,11 @@ void Renderable::setInteractionSphere(double interactionSphere) {
     _interactionSphere = interactionSphere;
 }
 
-double Renderable::interactionSphere() const {
+double Renderable::interactionSphere() const noexcept {
     return _interactionSphere;
 }
 
-std::string_view Renderable::typeAsString() const {
+std::string_view Renderable::typeAsString() const noexcept {
     return _renderableType;
 }
 
@@ -327,13 +327,18 @@ void Renderable::registerUpdateRenderBinFromOpacity() {
     _fade.onChange([this]() { setRenderBinFromOpacity(); });
 }
 
-float Renderable::opacity() const {
+float Renderable::opacity() const noexcept {
     // Rendering should depend on if camera is in the atmosphere and if camera is at the
     // dark part of the globe
     const float dimming = _dimInAtmosphere ?
         global::navigationHandler->camera()->atmosphereDimmingFactor() :
         1.f;
     return _opacity * _fade * dimming;
+}
+
+SceneGraphNode* Renderable::parent() const noexcept {
+    ghoul_assert(dynamic_cast<SceneGraphNode*>(owner()), "Owner is not a SceneGraphNode");
+    return static_cast<SceneGraphNode*>(owner());
 }
 
 }  // namespace openspace

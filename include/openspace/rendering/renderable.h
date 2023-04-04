@@ -82,10 +82,10 @@ public:
     bool isEnabled() const;
     bool shouldUpdateIfDisabled() const noexcept;
 
-    double boundingSphere() const;
-    double interactionSphere() const;
+    double boundingSphere() const noexcept;
+    double interactionSphere() const noexcept;
 
-    std::string_view typeAsString() const;
+    std::string_view typeAsString() const noexcept;
 
     virtual void update(const UpdateData& data);
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
@@ -116,24 +116,20 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    properties::BoolProperty _enabled;
-    properties::FloatProperty _opacity;
-    properties::FloatProperty _fade;
-    properties::StringProperty _renderableType;
-    properties::BoolProperty _dimInAtmosphere;
-
     void setBoundingSphere(double boundingSphere);
     void setInteractionSphere(double interactionSphere);
 
     void setRenderBinFromOpacity();
 
     /// Returns the full opacity constructed from the _opacity and _fade property values
-    float opacity() const;
+    float opacity() const noexcept;
 
-    double _boundingSphere = 0.0;
-    double _interactionSphere = 0.0;
-    SceneGraphNode* _parent = nullptr;
-    const bool _shouldUpdateIfDisabled = false;
+    SceneGraphNode* parent() const noexcept;
+
+    properties::BoolProperty _enabled;
+    properties::FloatProperty _opacity;
+    properties::FloatProperty _fade;
+
     RenderBin _renderBin = RenderBin::Opaque;
 
     // An optional renderbin that renderables can use for certain components, in cases
@@ -142,6 +138,14 @@ protected:
 
 private:
     void registerUpdateRenderBinFromOpacity();
+
+    properties::StringProperty _renderableType;
+    properties::BoolProperty _dimInAtmosphere;
+
+    double _boundingSphere = 0.0;
+    double _interactionSphere = 0.0;
+    SceneGraphNode* _parent = nullptr;
+    const bool _shouldUpdateIfDisabled = false;
 
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want
     // to provide a set method for this. Otherwise, anyone might mess around with our

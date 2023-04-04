@@ -433,7 +433,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     );
     const double distance = glm::distance(trailPosWorld, data.camera.eyePositionVec3());
 
-    if (distance > _boundingSphere * DISTANCE_CULLING_RADII) {
+    if (distance > boundingSphere() * DISTANCE_CULLING_RADII) {
         return;
     }
 
