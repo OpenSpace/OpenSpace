@@ -48,8 +48,7 @@ local JWSTBand = {
     Segments = 50,
     DisableFadeInOut = true,
     Orientation = "Inside",
-    Opacity = 0.05,
-    RenderBinMode = "PreDeferredTransparent",
+    Opacity = 0.05
   },
   Tag = { "mission_jwst_fov" },
   GUI = {
