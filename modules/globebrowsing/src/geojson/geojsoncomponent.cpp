@@ -288,7 +288,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         ghoul::Dictionary defaultLightSourceDict;
         defaultLightSourceDict.setValue("Identifier", "Camera"s);
         defaultLightSourceDict.setValue("Type", "CameraLightSource"s);
-        defaultLightSourceDict.setValue("Intensity", 0.5);
+        defaultLightSourceDict.setValue("Intensity", 1.0);
         _lightSources.push_back(
             LightSource::createFromDictionary(defaultLightSourceDict)
         );
