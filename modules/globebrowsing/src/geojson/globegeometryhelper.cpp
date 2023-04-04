@@ -149,7 +149,7 @@ glm::dvec3 adjustHeightOfModelCoordinate(const glm::dvec3& pos,
 
 glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,
                                           const RenderableGlobe& globe,
-                                          const glm::vec3& offsets, bool useHeightMap)
+                                          const glm::vec3& offsets)
 {
     // Account for lat long offset
     double offsetLatRadians = glm::radians(offsets.x);
@@ -159,18 +159,11 @@ glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,
     adjusted.geodetic2.lat += offsetLatRadians;
     adjusted.geodetic2.lon += offsetLonRadians;
 
-    double heightToSurface = offsets.z;
-    heightToSurface += getHeightToReferenceSurface(geo.geodetic2, globe, useHeightMap);
-
-    Geodetic3 heightAdjustedGeo = geo;
-    heightAdjustedGeo.height += heightToSurface;
-    return globe.ellipsoid().cartesianPosition(heightAdjustedGeo);
+    return globe.ellipsoid().cartesianPosition(adjusted);
 }
 
 std::vector<glm::vec3> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
-                                     double h0, double h1, double hOffset,
-                                     double maxDistance, const RenderableGlobe& globe,
-                                     bool useHeightMap)
+                                     double h0, double h1, double maxDistance)
 {
     double edgeLength = glm::distance(v1, v0);
     int nSegments = static_cast<int>(std::ceil(edgeLength / maxDistance));
@@ -182,29 +175,19 @@ std::vector<glm::vec3> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
         double t = static_cast<double>(seg) / static_cast<double>(nSegments);
 
         // Interpolate both position and height value
-        glm::vec3 newV = glm::mix(v0, v1, t);
+        glm::dvec3 newV = glm::mix(v0, v1, t);
         double newHeight = glm::mix(h0, h1, t);
+        double heightDiff = newHeight - h0;
 
-        // Get position with adjusted height value
-        newV = static_cast<glm::vec3>(adjustHeightOfModelCoordinate(
-            newV,
-            newHeight + hOffset,
-            globe,
-            useHeightMap
-        ));
-
-        positions.push_back(newV);
+        // Compute position along arc between v0 and v1, with adjusted height value
+        glm::vec3 newVf = static_cast<glm::vec3>(
+            (glm::length(v0) + heightDiff) * glm::normalize(newV)
+        );
+        positions.push_back(newVf);
     }
 
     // Add final position
-    positions.push_back(static_cast<glm::vec3>(
-        adjustHeightOfModelCoordinate(
-            v1,
-            h1 + hOffset,
-            globe,
-            useHeightMap
-        )
-    ));
+    positions.push_back(static_cast<glm::vec3>(v1));
 
     positions.shrink_to_fit();
     return positions;
@@ -213,8 +196,7 @@ std::vector<glm::vec3> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
 std::vector<rendering::helper::VertexXYZNormal>
 subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
                   double h0, double h1, double h2, double maxDistance,
-                  const glm::vec3& offsets, const RenderableGlobe& globe,
-                  bool useHeightMap)
+                  const glm::vec3& offsets, const RenderableGlobe& globe)
 {
     std::vector<rendering::helper::VertexXYZNormal> vertices;
 
@@ -222,28 +204,19 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     std::vector<glm::vec3> edge01 = geometryhelper::subdivideLine(
         v0, v1,
         h0, h1,
-        offsets.z,
-        maxDistance,
-        globe,
-        useHeightMap
+        maxDistance
     );
 
     std::vector<glm::vec3> edge02 = geometryhelper::subdivideLine(
         v0, v2,
         h0, h2,
-        offsets.z,
-        maxDistance,
-        globe,
-        useHeightMap
+        maxDistance
     );
 
     std::vector<glm::vec3> edge12 = geometryhelper::subdivideLine(
         v1, v2,
         h1, h2,
-        offsets.z,
-        maxDistance,
-        globe,
-        useHeightMap
+        maxDistance
     );
 
     size_t nSteps01 = edge01.size();
@@ -318,7 +291,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     geos::triangulate::DelaunayTriangulationBuilder builder;
     builder.setSites(*points->getCoordinates());
 
-    // Returns a list o triangles, as geos polygons
+    // Returns a list of triangles, as geos polygons
     GeometryCollection* triangleGeoms = builder.getTriangles(*geometryFactory).release();
     std::vector<Coordinate> triCoords;
     triangleGeoms->getCoordinates()->toVector(triCoords);
@@ -338,8 +311,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
         glm::vec3 v = geometryhelper::computeOffsetedModelCoordinate(
             geodetic,
             globe,
-            offsets,
-            useHeightMap
+            offsets
         );
         vertices.push_back({ v.x, v.y, v.z, 0.f, 0.f, 0.f });
 

@@ -40,6 +40,8 @@ uniform dmat4 modelTransform;
 uniform dmat4 viewTransform;
 uniform dmat4 projectionTransform;
 
+uniform float heightOffset;
+
 // Camera information
 // @TODO: Option to use camera position? (to work better in dome)
 uniform vec3 up;
@@ -61,7 +63,15 @@ const vec2 corners[4] = vec2[4](
 void main() {
   vec4 pos = gl_in[0].gl_Position;
   vs_normal = normal[0];
-  dvec4 dpos = modelTransform * dvec4(dvec3(pos.xyz), 1.0);
+  dvec4 dpos = dvec4(dvec3(pos.xyz), 1.0);
+
+  // Offset position based on height information
+  if (length(pos.xyz) > 0) {
+      dvec3 outDirection = normalize(dvec3(dpos));
+      dpos += dvec4(outDirection * double(heightOffset), 0.0);
+  }
+  // World coordinates
+  dpos = modelTransform * dpos;
 
   dvec4 scaledRight = pointSize * dvec4(right, 0.0) * 0.5;
   dvec4 scaledUp = pointSize * dvec4(up, 0.0) * 0.5;

@@ -80,17 +80,15 @@ glm::dvec3 adjustHeightOfModelCoordinate(const glm::dvec3& pos, double targetHei
 */
 // @TODO: documentn or remove use of offsets, globe, useHeightMap
 glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,
-    const RenderableGlobe& globe, const glm::vec3& offsets, bool useHeightMap);
+    const RenderableGlobe& globe, const glm::vec3& offsets);
 
 /**
  * Subdivide line between position v0 and v1 so that it fullfils the maxDistance
  * criteria. Interpolate the height value from * h0 to h1, as well as add the
  * given offset and account for the height map if that should be done
  */
- // @TODO: documentn or remove use of offsets, globe, useHeightMap
 std::vector<glm::vec3> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
-    double h0, double h1, double hOffset, double maxDistance,
-    const RenderableGlobe& globe, bool useHeightMap);
+    double h0, double h1, double maxDistance);
 
 /**
  * Subdivide triangle consisting of vertex positions v0, v1 and v2, with height values
@@ -101,7 +99,7 @@ std::vector<glm::vec3> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
 std::vector<rendering::helper::VertexXYZNormal> subdivideTriangle(
     const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     double h0, double h1, double h2, double maxDistance, const glm::vec3& offsets,
-    const RenderableGlobe& globe, bool useHeightMap);
+    const RenderableGlobe& globe);
 
 } // namespace openspace::globebrowsing::geometryhelper
 

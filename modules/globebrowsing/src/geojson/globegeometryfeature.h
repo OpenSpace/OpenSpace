@@ -112,9 +112,6 @@ public:
     void render(const RenderData& renderData, int pass, float mainOpacity,
         const rendering::helper::LightSourceRenderData& lightSourceData);
 
-    void bufferVertexData(const RenderFeature& feature,
-        const std::vector<Vertex>& vertexData);
-
     bool shouldUpdateDueToHeightMapChange() const;
 
     void update(bool dataIsDirty, bool preventHeightUpdates);
@@ -150,6 +147,9 @@ private:
 
     float determineTesselationDistance(float objectSize) const;
 
+    /// Buffer the static data for the vertices
+    void bufferVertexData(const RenderFeature& feature,
+        const std::vector<Vertex>& vertexData);
     GeometryType _type = GeometryType::Error;
     RenderableGlobe& _globe;
 

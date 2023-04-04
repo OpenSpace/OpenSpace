@@ -303,6 +303,8 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
         shader->setUniform("viewTransform", renderData.camera.combinedViewMatrix());
         shader->setUniform("projectionTransform", projectionTransform);
 
+        shader->setUniform("heightOffset", _offsets.z);
+
         if (shader == _linesAndPolygonsProgram) {
             shader->setUniform("normalTransform", normalTransform);
             shader->setUniform("nLightSources", lightSourceData.nLightSources);
@@ -486,6 +488,7 @@ std::vector<std::vector<glm::vec3>>
 GlobeGeometryFeature::createPointAndLineGeometry()
 {
     std::vector<std::vector<glm::vec3>> resultPositions;
+    resultPositions.reserve(_geoCoordinates.size());
 
     for (int i = 0; i < _geoCoordinates.size(); ++i) {
         std::vector<Vertex> vertices;
@@ -501,16 +504,15 @@ GlobeGeometryFeature::createPointAndLineGeometry()
             glm::dvec3 v = geometryhelper::computeOffsetedModelCoordinate(
                 geodetic,
                 _globe,
-                _offsets,
-                useHeightMap()
+                _offsets
             );
 
             // If we are drawing points, just add and continue.
             // Note that we set the normal
-            // TODO: make normal the out direction of the globe
             if (_type == GeometryType::Point) {
                 glm::vec3 vf = static_cast<glm::vec3>(v);
-                vertices.push_back({ vf.x, vf.y, vf.z, 1.f, 1.f, 1.f });
+                glm::vec3 normal = glm::normalize(vf);
+                vertices.push_back({ vf.x, vf.y, vf.z, normal.x, normal.y, normal.z });
                 positions.push_back(vf);
                 continue;
             }
@@ -532,10 +534,7 @@ GlobeGeometryFeature::createPointAndLineGeometry()
                 v,
                 lastHeightValue,
                 geodetic.height,
-                _offsets.z,
-                stepSize,
-                _globe,
-                useHeightMap()
+                stepSize
             );
 
             for (const glm::vec3& p : subdividedPositions) {
@@ -546,6 +545,8 @@ GlobeGeometryFeature::createPointAndLineGeometry()
             lastPos = v;
             lastHeightValue = geodetic.height;
         }
+
+        vertices.shrink_to_fit();
 
         RenderFeature feature;
         feature.nVertices = vertices.size();
@@ -570,12 +571,17 @@ GlobeGeometryFeature::createPointAndLineGeometry()
         resultPositions.push_back(std::move(positions));
     }
 
+    resultPositions.shrink_to_fit();
     return resultPositions;
 }
 
 void GlobeGeometryFeature::createExtrudedGeometry(
                                  const std::vector<std::vector<glm::vec3>>& edgeVertices)
 {
+    if (edgeVertices.empty()) {
+        return;
+    }
+
     std::vector<Vertex> vertices =
         geometryhelper::createExtrudedGeometryVertices(edgeVertices);
 
@@ -596,6 +602,10 @@ void GlobeGeometryFeature::createExtrudedGeometry(
 }
 
 void GlobeGeometryFeature::createPolygonGeometry() {
+    if (_triangleCoordinates.empty()) {
+        return;
+    }
+
     std::vector<Vertex> polyVertices;
 
     // Create polygon vertices from the triangle coordinates
@@ -606,8 +616,7 @@ void GlobeGeometryFeature::createPolygonGeometry() {
         const glm::vec3 vert = geometryhelper::computeOffsetedModelCoordinate(
             geodetic,
             _globe,
-            _offsets,
-            useHeightMap()
+            _offsets
         );
         triPositions[triIndex] = vert;
         triHeights[triIndex] = geodetic.height;
@@ -638,8 +647,7 @@ void GlobeGeometryFeature::createPolygonGeometry() {
                     h0, h1, h2,
                     stepSize,
                     _offsets,
-                    _globe,
-                    useHeightMap()
+                    _globe
                 );
                 polyVertices.insert(polyVertices.end(), verts.begin(), verts.end());
             }
@@ -676,8 +684,7 @@ std::vector<double> GlobeGeometryFeature::getCurrentReferencePointsHeights() con
         const glm::dvec3 p = geometryhelper::computeOffsetedModelCoordinate(
             geo,
             _globe,
-            _offsets,
-            useHeightMap()
+            _offsets
         );
         const SurfacePositionHandle handle = _globe.calculateSurfacePositionHandle(p);
         newHeights.push_back(handle.heightToSurface);
@@ -705,6 +712,11 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
     ghoul_assert(_pointsProgram != nullptr, "Shader program must be initialized");
     ghoul_assert(_linesAndPolygonsProgram != nullptr, "Shader program must be initialized");
 
+    ghoul::opengl::ProgramObject* program = _linesAndPolygonsProgram;
+    if (feature.type == RenderType::Points) {
+        program = _pointsProgram;
+    }
+
     glBindVertexArray(feature.vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, feature.vboId);
     glBufferData(
@@ -714,7 +726,7 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
         GL_STATIC_DRAW
     );
 
-    GLint positionAttrib = _pointsProgram->attributeLocation("in_position");
+    GLint positionAttrib = program->attributeLocation("in_position");
     glEnableVertexAttribArray(positionAttrib);
     glVertexAttribPointer(
         positionAttrib,
@@ -725,7 +737,7 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
         nullptr
     );
 
-    GLint normalAttrib = _pointsProgram->attributeLocation("in_normal");
+    GLint normalAttrib = program->attributeLocation("in_normal");
     glEnableVertexAttribArray(normalAttrib);
     glVertexAttribPointer(
         normalAttrib,

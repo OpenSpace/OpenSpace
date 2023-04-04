@@ -35,9 +35,18 @@ uniform dmat4 modelTransform;
 uniform dmat4 viewTransform;
 uniform dmat4 projectionTransform;
 uniform mat3 normalTransform;
+uniform float heightOffset;
 
 void main() {
-    vs_positionViewSpace = vec4(viewTransform * modelTransform * dvec4(in_position, 1.0));
+    dvec4 modelPos = dvec4(in_position, 1.0);
+
+    // Offset model pos based on height info
+    if (length(in_position) > 0) {
+        dvec3 outDirection = normalize(dvec3(in_position));
+        modelPos += dvec4(outDirection * double(heightOffset), 0.0);
+    }
+
+    vs_positionViewSpace = vec4(viewTransform * modelTransform * modelPos);
     vec4 positionScreenSpace = vec4(projectionTransform * vs_positionViewSpace);
     vs_depth = positionScreenSpace.w;
     vs_normal = normalize(normalTransform * in_normal);
