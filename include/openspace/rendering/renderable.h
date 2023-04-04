@@ -54,6 +54,10 @@ class Camera;
 
 class Renderable : public properties::PropertyOwner {
 public:
+    struct Settings {
+        bool automaticallyUpdateBin = true;
+    };
+
     enum class RenderBin : int {
         Background = 1,
         Opaque = 2,
@@ -65,7 +69,7 @@ public:
     static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
         ghoul::Dictionary dictionary);
 
-    Renderable(const ghoul::Dictionary& dictionary);
+    Renderable(const ghoul::Dictionary& dictionary, Settings settings = Settings());
     virtual ~Renderable() override = default;
 
     virtual void initialize();
@@ -121,7 +125,6 @@ protected:
     void setInteractionSphere(double interactionSphere);
 
     void setRenderBinFromOpacity();
-    void registerUpdateRenderBinFromOpacity();
 
     /// Returns the full opacity constructed from the _opacity and _fade property values
     float opacity() const;
@@ -137,6 +140,8 @@ protected:
     std::optional<RenderBin> _secondaryRenderBin;
 
 private:
+    void registerUpdateRenderBinFromOpacity();
+
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want
     // to provide a set method for this. Otherwise, anyone might mess around with our
     // parentage and that's no bueno

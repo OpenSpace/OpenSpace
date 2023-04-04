@@ -260,11 +260,10 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     _blendMode.addOptions({
         { BlendMode::Normal, "Normal" },
-        { BlendMode::Additive, "Additive"}
+        { BlendMode::Additive, "Additive" }
     });
     _blendMode.onChange([&]() {
         switch (_blendMode) {

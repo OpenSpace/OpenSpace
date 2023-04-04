@@ -123,7 +123,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     _size = p.size;
     _billboard = p.billboard.value_or(_billboard);

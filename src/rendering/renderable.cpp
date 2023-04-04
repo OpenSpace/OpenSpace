@@ -153,7 +153,7 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
 
 
 
-Renderable::Renderable(const ghoul::Dictionary& dictionary)
+Renderable::Renderable(const ghoul::Dictionary& dictionary, Settings settings)
     : properties::PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
@@ -163,8 +163,9 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 {
     ZoneScoped;
 
-    // I can't come up with a good reason not to do this for all renderables
-    registerUpdateRenderBinFromOpacity();
+    if (settings.automaticallyUpdateBin) {
+        registerUpdateRenderBinFromOpacity();
+    }
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

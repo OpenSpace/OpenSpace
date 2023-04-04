@@ -293,7 +293,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     if (p.forceRenderInvisible.has_value()) {
         _forceRenderInvisible = *p.forceRenderInvisible;
