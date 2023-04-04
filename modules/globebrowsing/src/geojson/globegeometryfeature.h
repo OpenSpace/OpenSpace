@@ -33,6 +33,7 @@
 #include <openspace/rendering/texturecomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
+#include <chrono>
 #include <vector>
 
 namespace openspace::documentation { struct Documentation; }
@@ -84,11 +85,14 @@ public:
         size_t nVertices = 0;
         bool isExtrusionFeature = false;
 
-        // Store the geodetic coordinates of each vertex, so we can quickly recompute then using the height
-        std::vector<glm::vec3> vertices;
+        // Store the geodetic lat long coordinates of each vertex, so we can quickly recompute
+        // the height values for these points
+        std::vector<Geodetic2> vertices;
 
         // Keep the heights around
-        std::vector<double> heights;
+        std::vector<float> heights;
+
+        void initializeBuffers();
     };
 
     std::string key() const;
@@ -116,6 +120,7 @@ public:
 
     void update(bool dataIsDirty, bool preventHeightUpdates);
     void updateGeometry();
+    void updateHeightsFromHeightMap();
 
 private:
     void renderPoints(const RenderFeature& feature) const;
@@ -150,6 +155,10 @@ private:
     /// Buffer the static data for the vertices
     void bufferVertexData(const RenderFeature& feature,
         const std::vector<Vertex>& vertexData);
+
+    /// Buffer the dynamic height data for the vertices, based on the height map
+    void bufferDynamicHeightData(const RenderFeature& feature);
+
     GeometryType _type = GeometryType::Error;
     RenderableGlobe& _globe;
 
@@ -170,6 +179,7 @@ private:
 
     std::vector<Geodetic3> _heightUpdateReferencePoints;
     std::vector<double> _lastControlHeights;
+    std::chrono::system_clock::time_point _lastHeightUpdateTime;
 
     bool _hasTexture = false;
     std::unique_ptr<TextureComponent> _pointTexture;

@@ -96,7 +96,7 @@ private:
     properties::BoolProperty _drawWireframe;
     properties::BoolProperty _preventUpdatesFromHeightMap;
     // Temporary property to get around height map update issues. TODO: remove
-    properties::TriggerProperty _forceUpdateData;
+    properties::TriggerProperty _forceUpdateHeightData;
 
     RenderableGlobe& _globeNode;
 

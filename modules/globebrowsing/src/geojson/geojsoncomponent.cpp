@@ -104,11 +104,11 @@ namespace {
         "heightmap updates. The data can still be force updated."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ForceUpdateDataInfo = {
-        "ForceUpdateData",
-        "Force Update Data",
-        "Triggering this leads to a recomputation of the geometry positions. Can "
-        "be used to for example update the poisition when the height map has loaded."
+    constexpr openspace::properties::Property::PropertyInfo ForceUpdateHeightDataInfo = {
+        "ForceUpdateHeightData",
+        "Force Update Height Data",
+        "Triggering this leads to a recomputation of the heights based on the globe "
+        "hieght map value at the geometry's positions."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
@@ -197,7 +197,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     )
     , _drawWireframe(DrawWireframeInfo, false)
     , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
-    , _forceUpdateData(ForceUpdateDataInfo)
+    , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
     , _featureSelection(SelectionInfo)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
@@ -254,8 +254,12 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     _defaultProperties.tesselationLevel.onChange([&]() { _dataIsDirty = true; });
     _defaultProperties.tesselationMaxDistance.onChange([&]() { _dataIsDirty = true; });
 
-    _forceUpdateData.onChange([this]() { _dataIsDirty = true; });
-    addProperty(_forceUpdateData);
+    _forceUpdateHeightData.onChange([this]() {
+        for (GlobeGeometryFeature& f : _geometryFeatures) {
+            f.updateHeightsFromHeightMap();
+        }
+    });
+    addProperty(_forceUpdateHeightData);
 
     addProperty(_preventUpdatesFromHeightMap);
 

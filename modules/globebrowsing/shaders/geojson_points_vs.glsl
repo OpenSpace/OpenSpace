@@ -26,10 +26,13 @@
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
+layout(location = 2) in float in_height;
 
 out vec3 normal;
+out float dynamicHeight;
 
 void main() {
     gl_Position = vec4(in_position, 1.0);
     normal = in_normal;
+    dynamicHeight = in_height;
 }

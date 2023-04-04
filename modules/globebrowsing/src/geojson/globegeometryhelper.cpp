@@ -67,6 +67,30 @@ std::vector<Geodetic3> geometryCoordsAsGeoVector(const geos::geom::Geometry* geo
     return geometryhelper::coordsToGeodetic(coords);
 }
 
+std::vector<Geodetic2> geodetic2FromVertexList(const RenderableGlobe& globe,
+                            const std::vector<rendering::helper::VertexXYZNormal>& verts)
+{
+    std::vector<Geodetic2> res;
+    res.reserve(verts.size());
+    for (const rendering::helper::VertexXYZNormal& v : verts) {
+        glm::dvec3 cartesian = glm::dvec3(v.xyz[0], v.xyz[1], v.xyz[2]);
+        res.push_back(globe.ellipsoid().cartesianToGeodetic2(cartesian));
+    }
+    return res;
+}
+
+std::vector<float> heightMapHeightsFromGeodetic2List(const RenderableGlobe& globe,
+                                                     const std::vector<Geodetic2>& list)
+{
+    std::vector<float> res;
+    res.reserve(list.size());
+    for (const Geodetic2& geo : list) {
+        float h = static_cast<float>(getHeightToReferenceSurface(geo, globe));
+        res.push_back(h);
+    }
+    return res;
+}
+
 std::vector<rendering::helper::VertexXYZNormal>
 createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVertices)
 {
@@ -116,35 +140,15 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
     // TODO: extrude lines as a box shape
 }
 
-double getHeightToReferenceSurface(const Geodetic2& geo, const RenderableGlobe& globe,
-                                   bool useHeightMap)
-{
+double getHeightToReferenceSurface(const Geodetic2& geo, const RenderableGlobe& globe) {
     // Compute model space coordinate, and potentially account for height map
     glm::dvec3 posModelSpaceZeroHeight =
         globe.ellipsoid().cartesianSurfacePosition(geo);
 
-    double heightToSurface = 0.0;
+    const SurfacePositionHandle posHandle =
+        globe.calculateSurfacePositionHandle(posModelSpaceZeroHeight);
 
-    // Different height computation depending on the height mode
-    if (useHeightMap) {
-        const SurfacePositionHandle posHandle =
-            globe.calculateSurfacePositionHandle(posModelSpaceZeroHeight);
-
-        heightToSurface += posHandle.heightToSurface;
-    }
-
-    return heightToSurface;
-}
-
-glm::dvec3 adjustHeightOfModelCoordinate(const glm::dvec3& pos,
-                                         double targetHeight,
-                                         const RenderableGlobe& globe,
-                                         bool useHeightMap)
-{
-    Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(pos);
-    double heightToSurface = getHeightToReferenceSurface(geo2, globe, useHeightMap);
-    Geodetic3 heightAdjustedGeo = { geo2, heightToSurface + targetHeight };
-    return globe.ellipsoid().cartesianPosition(heightAdjustedGeo);
+    return posHandle.heightToSurface;
 }
 
 glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,

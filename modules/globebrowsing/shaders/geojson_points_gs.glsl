@@ -28,6 +28,7 @@
 
 layout(points) in;
 flat in vec3 normal[]; // This could be the globe normal instead, and be used as up-direction
+flat in float dynamicHeight[];
 
 layout(triangle_strip, max_vertices = 4) out;
 out vec2 texCoord;
@@ -41,6 +42,7 @@ uniform dmat4 viewTransform;
 uniform dmat4 projectionTransform;
 
 uniform float heightOffset;
+uniform bool useHeightMapData;
 
 // Camera information
 // @TODO: Option to use camera position? (to work better in dome)
@@ -68,7 +70,11 @@ void main() {
   // Offset position based on height information
   if (length(pos.xyz) > 0) {
       dvec3 outDirection = normalize(dvec3(dpos));
-      dpos += dvec4(outDirection * double(heightOffset), 0.0);
+      float height = heightOffset;
+      if (useHeightMapData) {
+        height += dynamicHeight[0];
+      }
+      dpos += dvec4(outDirection * double(height), 0.0);
   }
   // World coordinates
   dpos = modelTransform * dpos;

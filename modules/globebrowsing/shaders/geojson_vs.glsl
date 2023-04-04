@@ -26,6 +26,7 @@
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
+layout(location = 2) in float in_height;
 
 out float vs_depth;
 out vec3 vs_normal;
@@ -35,7 +36,9 @@ uniform dmat4 modelTransform;
 uniform dmat4 viewTransform;
 uniform dmat4 projectionTransform;
 uniform mat3 normalTransform;
+
 uniform float heightOffset;
+uniform bool useHeightMapData;
 
 void main() {
     dvec4 modelPos = dvec4(in_position, 1.0);
@@ -43,7 +46,11 @@ void main() {
     // Offset model pos based on height info
     if (length(in_position) > 0) {
         dvec3 outDirection = normalize(dvec3(in_position));
-        modelPos += dvec4(outDirection * double(heightOffset), 0.0);
+        float height = heightOffset;
+        if (useHeightMapData) {
+          height += in_height;
+        }
+        modelPos += dvec4(outDirection * double(heightOffset + height), 0.0);
     }
 
     vs_positionViewSpace = vec4(viewTransform * modelTransform * modelPos);
