@@ -84,8 +84,10 @@ private:
         Hdf5
     };
 
-    // cdf, osfls or json
+    // cdf, osfls, json or hdf5
     SourceFileType _inputFileType;
+    // strings for navigating the hierarchical of h5-files 
+    std::vector<std::string> _hierarchy;
     // Output folder path in case of file conversion
     std::string _outputFolderPath;
     // which tracing vaiable to trace. 'b' for fieldline is default

@@ -30,6 +30,11 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <string>
 #include <vector>
+//#include "modules/kameleon/ext/kameleon/ext/hdf5/hdf5-1.8.12/c++/src/H5Cpp.h"
+//#ifdef HAVE_HDF5 
+//#include "modules/kameleon/ext/kameleon/ext/hdf5/hdf5-1.8.12/c++/src/H5Cpp.h"
+
+
 
 namespace openspace {
 
@@ -72,13 +77,21 @@ private:
     double _triggerTime = -1.0;
     fls::Model _model;
 
+    //H5::H5File* current_file;
+    //H5::Group* rootGroup;
+    //H5::Group* variableGroup;
+
     std::vector<std::vector<float>> _extraQuantities;
     std::vector<std::string> _extraQuantityNames;
     std::vector<GLsizei> _lineCount;
     std::vector<GLint> _lineStart;
     std::vector<glm::vec3> _vertexPositions;
+
+    //H5 variables 
+    //TODO: inizialize variables
 };
 
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
+

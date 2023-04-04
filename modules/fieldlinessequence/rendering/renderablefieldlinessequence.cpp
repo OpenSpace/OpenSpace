@@ -171,7 +171,7 @@ namespace {
             Osfls,
             Hdf5
         };
-        // Input file type. Should be cdf, json or osfls
+        // Input file type. Should be cdf, json, hdf5 or osfls
         SourceFileType inputFileType;
 
         // Path to folder containing the input files
@@ -180,6 +180,9 @@ namespace {
         // Path to a .txt file containing seed points. Mandatory if CDF as input.
         // Files need time stamp in file name like so: yyyymmdd_hhmmss.txt
         std::optional<std::filesystem::path> seedPointDirectory [[codegen::directory()]];
+
+        // Needed for hdf5-files
+        std::optional<std::vector<std::string>> hierarchy;
 
         // Currently supports: batsrus, enlil & pfss
         std::optional<std::string> simulationModel;
