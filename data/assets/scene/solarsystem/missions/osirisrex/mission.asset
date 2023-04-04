@@ -22,18 +22,28 @@ References:
         Date :      2016-08-23
         Comment :   Based on observation of the visualized spice data through OpenSpace.
 
+[5]     Source :    https://www.asteroidmission.org/asteroid-operations/
+        Date :      2023-03-30
+        Comment :   Text about the phases
+
 --]]
 
 local Mission = {
   Name = "OSIRIS-REx",
+  Description = "Launched on Sept. 8, 2016, the Origins, Spectral Interpretation, Resource Identification, Security-Regolith Explorer (OSIRIS-REx) spacecraft traveled to a near-Earth asteroid called Bennu (formerly 1999 RQ36), and collected a sample of the of rocks and material from the surface that it will return to Earth in 2023. The mission will help scientists investigate how planets formed and how life began, as well as improve our understanding of asteroids that could impact Earth.",
+  Media = { Image = "https://www.nasa.gov/sites/default/files/thumbnails/image/9-2020_new_tag_beauty_shot_16x9_150_dpi_png_-_small.png" },
+  Actions = { "aimAtBennu" },
   Phases = {
     -- All 1-level phases based on [1] 
     {
       Name = "Planning and Fabrication",
-      TimeRange = { Start = "2012 JAN 01 00:00:00", End = "2016 SEP 08 23:05:00" }
+      TimeRange = { Start = "2012 JAN 01 00:00:00", End = "2016 SEP 08 23:05:00" },
+      Description = "This is a description of OSIRIS-REx",
+      Media = { Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/28786830184_a9593c204a_o.jpg" }
     },
     { 
       Name = "Outbound Cruise",
+      Media = { Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/28929096574_85a647dc8e_o.jpg" },
       TimeRange = { Start = "2016 SEP 03 00:00:00", End = "2018 SEP 01 01:00:00" },
       Phases = {
         -- Phases from [4]
@@ -41,19 +51,25 @@ local Mission = {
           Name = "Pre Launch", TimeRange = { Start = "2016 SEP 03 01:00:00", End = "2016 SEP 08 23:05:05" }
         },
         { 
-          Name = "Launch", TimeRange = { Start = "2016 SEP 08 23:05:05", End = "2016 SEP 08 23:09:00" }
+          Name = "Launch", 
+          TimeRange = { Start = "2016 SEP 08 23:05:05", End = "2016 SEP 08 23:09:00" }
         },
         { 
-          Name = "Earth Orbit", TimeRange = { Start = "2016 SEP 08 23:09:00", End = "2016 SEP 08 23:45:00" }
+          Name = "Earth Orbit", 
+          Media = { Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/ega_1ms_mapcam_color_corrected_0.png" },
+          TimeRange = { Start = "2016 SEP 08 23:09:00", End = "2016 SEP 08 23:45:00" }
         },
         { 
-          Name = "Solar Orbit", TimeRange = { Start = "2016 SEP 08 23:45:00", End = "2018 SEP 01 00:00:00" }
-        },
-        { 
-          Name = "Upcoming Gravity Assist", TimeRange = { Start = "2017 JAN 22 15:00:00", End = "2017 SEP 22 15:00:00" }
-        },
-        { 
-          Name = "Gravity Assist", TimeRange = { Start = "2017 SEP 22 15:00:00", End = "2017 SEP 22 21:00:00" }
+          Name = "Solar Orbit", 
+          TimeRange = { Start = "2016 SEP 08 23:45:00", End = "2018 SEP 01 00:00:00" },
+          Phases = {
+            { 
+              Name = "Upcoming Gravity Assist", TimeRange = { Start = "2017 JAN 22 15:00:00", End = "2017 SEP 22 15:00:00" }
+            },
+            { 
+              Name = "Gravity Assist", TimeRange = { Start = "2017 SEP 22 15:00:00", End = "2017 SEP 22 21:00:00" }
+            }
+          }
         }
       }
     },
@@ -62,7 +78,10 @@ local Mission = {
       Phases = {
         -- Nested Levels from [3]
         {
-          Name = "Approach", Phases = {
+          Name = "Approach", 
+          Description = "Approach Phase began on August 17, 2018, when the spacecraft was still about 1.2 million miles (two million km) away from Bennu, and it continued until the spacecraft arrived at the asteroid on December 3, 2018. The primary goals of Approach were to visually locate Bennu for the first time, survey the surrounding area for potential hazards, and collect enough imagery of Bennu for scientists to generate a detailed shape model of the asteroid, assign a coordinate system, and understand its spin state.",
+          Media = { Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/lbt-orex-1049-loop-gif.gif" },
+          Phases = {
             { 
               Name = "Dust Search",
               TimeRange = { Start = "2018-SEP-11 21:31:01.183", End = "2018-SEP-12 02:18:41.183" }
@@ -95,6 +114,10 @@ local Mission = {
         },
         {
           Name = "Preliminary Survey",
+          Description = "Preliminary Survey Phase began with the spacecraft’s arrival at Bennu on December 3, 2018, and marked the first time that the OSIRIS-REx spacecraft operated around the asteroid. The spacecraft made a total of five passes over the north pole, equator, and south pole at a range of 4.3 miles (7 km). The primary science goals of Preliminary Survey were to estimate Bennu’s mass, refine the asteroid’s spin state model, and generate a global shape model at a resolution of 75-cm.",
+          Media = {
+            Image = "https://www.asteroidmission.org/wp-content/uploads/2018/05/Prelim-Survey-for-Web.jpg"
+          },
           Phases = {
             {
               Name = "MapCamOLA Phase 1",
@@ -201,6 +224,10 @@ local Mission = {
         },
         {
           Name = "Orbital B",
+          Description = "At the end of Detailed Survey, the spacecraft entered a close orbit – with a radius of 0.6 miles (1 km) – around Bennu to begin Orbital B Phase. This phase broke the record OSIRIS-REx set in Orbital A for the closest that a spacecraft has ever orbited around a small body. The primary science activities for this phase were the global mapping of Bennu, the development of shape modeling based on OLA data, and the execution of a Radio Science experiment. These data were used to evaluate potential sample collection sites for three key elements: safety, sampleability and science value.  Orbital B concluded with the team narrowing in on a primary and a back-up sample site.",
+          Media = {
+            Image = "https://www.asteroidmission.org/wp-content/uploads/2018/05/Orbital-B-for-Web.jpg"
+          },
           Phases = {
             {
               Name = "Candidate Sample Site Phase 1",
