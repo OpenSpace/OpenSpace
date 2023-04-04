@@ -175,6 +175,11 @@ std::vector<glm::vec3> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
     std::vector<glm::vec3> positions;
     positions.reserve(nSegments + 1);
 
+    // If step distance is too big, just add first position
+    if (nSegments == 0) {
+        positions.push_back(static_cast<glm::vec3>(v0));
+    }
+
     for (int seg = 0; seg < nSegments; ++seg) {
         double t = static_cast<double>(seg) / static_cast<double>(nSegments);
 
