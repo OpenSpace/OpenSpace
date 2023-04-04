@@ -238,7 +238,7 @@ documentation::Documentation RenderableLabel::Documentation() {
 }
 
 RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+    : Renderable(dictionary, { .automaticallyUpdateBin = false })
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _fontSize(FontSizeInfo, 50.f, 1.f, 100.f)
