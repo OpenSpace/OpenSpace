@@ -44,17 +44,17 @@ local apollo_moon_disableapollosites= {
   Identifier = "os.missions.apollo.moon.disableapollosites",
   Name = "Disable Apollo sites",
   Command = [[
-    openspace.setPropertyValue('Scene.Moon.Renderable.Layers.ColorLayers.A17_*.Enabled', false); 
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', false); 
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', false); 
-    openspace.setPropertyValueSingle('Scene.Apollo11MoonTrail.Renderable.Enabled', false); 
-    openspace.setPropertyValueSingle('Scene.Apollo11LemTrail.Renderable.Enabled', false); 
+    openspace.setPropertyValue('Scene.Moon.Renderable.Layers.ColorLayers.A17_*.Enabled', false);
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', false);
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', false);
+    openspace.setPropertyValueSingle('Scene.Apollo11MoonTrail.Renderable.Enabled', false);
+    openspace.setPropertyValueSingle('Scene.Apollo11LemTrail.Renderable.Enabled', false);
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled', false);
   ]],
   Documentation = "Disable apollo site on moon when leaving",
   GuiPath = "/Missions/Apollo",
   IsLocal = false
-} 
+}
 
 asset.onInitialize(function ()
   openspace.globebrowsing.addBlendingLayersFromDirectory(heightmaps, moon_transforms.Moon.Identifier)

@@ -46,7 +46,7 @@ namespace {
         return o << key.x << ", " << key.y;
     }
 
-    // custom specialization 
+    // custom specialization
     struct DefaultHasherMyKey {
         unsigned long long operator()(const MyKey& s) const {
             return s.x ^ (s.y << 1);

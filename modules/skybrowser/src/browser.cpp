@@ -124,7 +124,7 @@ void Browser::initializeGL() {
 
     _browserInstance->initialize();
     _browserInstance->loadUrl(_url);
-    // Update the dimensions upon initialization. Do this with flag as it affects 
+    // Update the dimensions upon initialization. Do this with flag as it affects
     // derived classes as well
     _isDimensionsDirty = true;
 }

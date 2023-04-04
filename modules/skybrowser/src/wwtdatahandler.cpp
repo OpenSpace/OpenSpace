@@ -171,7 +171,7 @@ namespace {
         return true;
     }
 
-    std::optional<openspace::ImageData> 
+    std::optional<openspace::ImageData>
     loadImageFromNode(const tinyxml2::XMLElement* node, const std::string& collection)
     {
         using namespace openspace;

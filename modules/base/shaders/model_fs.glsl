@@ -103,7 +103,7 @@ Fragment getFragment() {
     // Some of these values could be passed in as uniforms
     const vec3 lightColorAmbient = vec3(1.0);
     const vec3 lightColor = vec3(1.0);
-        
+
     vec3 n;
     if (has_texture_normal) {
       vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;

@@ -208,23 +208,23 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             _totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
 
             // Cap _numberOfVertices in order to prevent overflow and extreme performance
-            // degredation/RAM usage 
+            // degredation/RAM usage
             _numberOfVertices = std::min(
                 static_cast<unsigned int>(timespan / _totalSampleInterval),
                 maxNumberOfVertices
             );
 
             // We need to recalcuate the _totalSampleInterval if _numberOfVertices eqals
-            // maxNumberOfVertices. If we don't do this the position for each vertex 
+            // maxNumberOfVertices. If we don't do this the position for each vertex
             // will not be correct for the number of vertices we are doing along the trail.
-            _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ? 
+            _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ?
                 (timespan / _numberOfVertices) : _totalSampleInterval;
 
             // Make space for the vertices
             _vertexArray.clear();
             _vertexArray.resize(_numberOfVertices);
         }
-        
+
         // Calculate sweeping range for this iteration
         unsigned int startIndex = _sweepIteration * _sweepChunkSize;
         unsigned int nextIndex = (_sweepIteration + 1) * _sweepChunkSize;
@@ -249,12 +249,12 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             _sweepIteration = 0;
             setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.f);
         }
-        else { 
-            // Early return as we don't need to render if we are still 
+        else {
+            // Early return as we don't need to render if we are still
             // doing full sweep calculations
             return;
         }
-        
+
         // Upload vertices to the GPU
         glBindVertexArray(_primaryRenderInformation._vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);

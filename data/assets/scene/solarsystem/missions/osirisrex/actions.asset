@@ -2,8 +2,8 @@ local focus_osirisrex = {
   Identifier = "os.missions.osirisrex.focus",
   Name = "Focus on OsirisRex",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'OsirisRex'); 
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'OsirisRex');
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');
     openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
   ]],
   Documentation = "Sets the focus of the camera on 'OsirisRex'",
@@ -15,8 +15,8 @@ local focus_bennu = {
   Identifier = "os.missions.osirisrex.bennu.focus",
   Name = "Focus on Bennu",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'BennuBarycenter'); 
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'BennuBarycenter');
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');
     openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
   ]],
   Documentation = "Sets the focus of the camera on 'Bennu'",
@@ -40,7 +40,7 @@ local bennu_survey_time = {
   Identifier = "os.missions.osirisrex.setup.bennusurvey",
   Name = "Set Bennu survey time",
   Command = [[
-    openspace.printInfo('Set time: Preliminary Survey'); 
+    openspace.printInfo('Set time: Preliminary Survey');
     openspace.time.setTime('2018-NOV-20 01:13:12.183');
   ]],
   Documentation = "Sets the time to the preliminary survey of Bennu",
@@ -52,7 +52,7 @@ local bennu_event_b = {
   Identifier = "os.missions.osirisrex.setup.bennueventb",
   Name = "Set orbital B event time",
   Command = [[
-    openspace.printInfo('Set time: Orbital B'); 
+    openspace.printInfo('Set time: Orbital B');
     openspace.time.setTime('2019-APR-08 10:35:27.186');
   ]],
   Documentation = "Sets the time to the orbital B event",
@@ -64,7 +64,7 @@ local bennu_recon_event = {
   Identifier = "os.missions.osirisrex.setup.bennureconevent",
   Name = "Set recon event time",
   Command = [[
-    openspace.printInfo('Set time: Recon'); 
+    openspace.printInfo('Set time: Recon');
     openspace.time.setTime('2019-MAY-25 03:50:31.195');
   ]],
   Documentation = "Sets the time to the recon event",
