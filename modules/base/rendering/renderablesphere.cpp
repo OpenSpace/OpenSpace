@@ -207,7 +207,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_disableFadeInDistance);
 
     setBoundingSphere(_size);
-    setRenderBinFromOpacity();
 }
 
 bool RenderableSphere::isReady() const {

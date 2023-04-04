@@ -207,7 +207,6 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     }
 
     setBoundingSphere(_size);
-    setRenderBinFromOpacity();
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {
