@@ -9,7 +9,7 @@ asset.require("./minor/themisto_group")
 
 local minormoons_on = {
   Identifier = "os.solarsystem.jupiter.minormoonson",
-  Name = "Turn ON minor moons and trails",
+  Name = "Turn on minor moons and trails",
   Command = [[
     local trails = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Enabled');
     local trails_fade = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Fade');
@@ -34,7 +34,7 @@ local minormoons_on = {
 
 local minormoons_off = {
   Identifier = "os.solarsystem.jupiter.minormoonsoff",
-  Name = "Turn OFF minors moon and trails",
+  Name = "Turn off minors moon and trails",
   Command = [[
     local trails = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Enabled');
     local trails_fade = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Fade');

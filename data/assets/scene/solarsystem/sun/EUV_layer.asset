@@ -32,7 +32,7 @@ local EUVLayer = {
 
 local toggle_EUV_layer = {
   Identifier = "os.solarsystem.sun.toggleeuv",
-  Name = "Toggle EUV Layer",
+  Name = "Toggle EUV layer",
   Command = propertyHelper.invert("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled"),
   Documentation = "Toggle EUV layer of sun",
   GuiPath = "/Bastille-Day 2000",

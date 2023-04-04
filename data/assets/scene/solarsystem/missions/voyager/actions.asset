@@ -1,6 +1,6 @@
 local jupiter_approach = {
   Identifier = "os.missions.voyager.setup.jupiterapproach",
-  Name = "Set Jupiter Approach",
+  Name = "Set Jupiter approach",
   Command = [[
     openspace.time.setTime('1979-01-20T01:32:07.914')
   ]],
@@ -11,7 +11,7 @@ local jupiter_approach = {
 
 local saturn_approach = {
   Identifier = "os.missions.voyager.setup.saturnapproach",
-  Name = "Set Saturn Approach",
+  Name = "Set Saturn approach",
   Command = [[
     openspace.time.setTime('1980-10-20T07:43:42.645');
   ]],
@@ -50,7 +50,7 @@ local toggle_minormoon_trails = {
   Identifier = "os.missions.voyager.toggleminormoontrails",
   Name = "Toggle minor trails",
   Command = [[
-    local list = openspace.getProperty('{moonTrail_minor}.Renderable.Enabled');
+    local list = openspace.getProperty('{moonTrail_minor}.Renderable.Enabled')
     for _,v in pairs(list) do
       openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
     end

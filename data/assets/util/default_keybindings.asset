@@ -178,7 +178,7 @@ local previous_delta_step_interpolate = {
 
 local previous_delta_step_immediate = {
   Identifier = "os_default.previous_delta_step_immediate",
-  Name = "Previous Delta Time Step (Immediate)",
+  Name = "Previous delta time step (immediate)",
   Command = "openspace.time.setPreviousDeltaTimeStep()",
   Documentation = "Immediately set the simulation speed to the previous delta time step, if one exists",
   GuiPath = "/Time/Simulation Speed",

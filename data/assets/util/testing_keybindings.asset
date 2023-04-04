@@ -4,7 +4,7 @@ local propertyHelper = asset.require("./property_helper")
 
 local take_screenshot = {
   Identifier = "testing_keyboard.take_screenshot",
-  Name = "Take Screenshot",
+  Name = "Take screenshot",
   Command = "openspace.takeScreenshot()",
   Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory",
   GuiPath = "/Rendering",

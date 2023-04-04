@@ -4,7 +4,7 @@ asset.require("./irregular_retrograde_moons")
 
 local minormoons_on = {
   Identifier = "os.solarsystem.neptune.minormoonson",
-  Name = "Turn ON minor moons and trails",
+  Name = "Turn on minor moons and trails",
   Command = [[
     local trails = openspace.getProperty('{moonTrail_minor_neptune}.Renderable.Enabled');
     local trails_fade = openspace.getProperty('{moonTrail_minor_neptune}.Renderable.Fade');
@@ -29,7 +29,7 @@ local minormoons_on = {
 
 local minormoons_off = {
   Identifier = "os.solarsystem.neptune.minormoonsoff",
-  Name = "Turn OFF minors moon and trails",
+  Name = "Turn off minors moon and trails",
   Command = [[
     local trails = openspace.getProperty('{moonTrail_minor_neptune}.Renderable.Enabled');
     local trails_fade = openspace.getProperty('{moonTrail_minor_neptune}.Renderable.Fade');

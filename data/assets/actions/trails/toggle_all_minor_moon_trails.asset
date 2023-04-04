@@ -1,6 +1,6 @@
 local toggle_minormoon_trails = {
   Identifier = "os_default.toggle_minormoon_trails",
-  Name = "Toggle Minor Moon Trails",
+  Name = "Toggle minor moon trails",
   Command = [[
     local list = openspace.getProperty('{moonTrail_minor}.Renderable.Enabled');
     for _,v in pairs(list) do
