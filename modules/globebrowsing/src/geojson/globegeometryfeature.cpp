@@ -306,6 +306,13 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
             continue;
         }
 
+        bool shouldRenderTwice = r.type == RenderType::Polygon &&
+            fillOpacity < 1.0 && _properties.extrude();
+
+        if (pass > 0 && !shouldRenderTwice) {
+            continue;
+        }
+
         ghoul::opengl::ProgramObject* shader = (r.type == RenderType::Points) ?
             _pointsProgram : _linesAndPolygonsProgram;
 
@@ -359,7 +366,6 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
                 break;
             case RenderType::Polygon: {
                 shader->setUniform("opacity", fillOpacity);
-                bool shouldRenderTwice = (fillOpacity < 1.0);
                 renderPolygons(r, shouldRenderTwice, pass);
                 break;
             }
