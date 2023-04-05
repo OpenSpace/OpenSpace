@@ -53,9 +53,7 @@ namespace openspace {
 
 CosmicSonification::CosmicSonification(const std::string& ip, int port)
     : SonificationBase(CosmicSonificationInfo, ip, port)
-{
-    _enabled = true;
-}
+{}
 
 CosmicSonification::~CosmicSonification() {
 
