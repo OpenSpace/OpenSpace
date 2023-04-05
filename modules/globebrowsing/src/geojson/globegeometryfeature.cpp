@@ -76,14 +76,6 @@ std::string GlobeGeometryFeature::key() const {
     return _key;
 }
 
-bool GlobeGeometryFeature::enabled() const {
-    return _isEnabled;
-}
-
-void GlobeGeometryFeature::setEnabled(bool value) {
-    _isEnabled = value;
-}
-
 void GlobeGeometryFeature::setOffsets(const glm::vec3& value) {
     _offsets = value;
 }
@@ -275,10 +267,6 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
                          const rendering::helper::LightSourceRenderData& lightSourceData)
 {
     ghoul_assert(pass >= 0 && pass < 2, "Render pass variable out of accepted range");
-
-    if (!_isEnabled) {
-        return;
-    }
 
     float opacity = mainOpacity * _properties.opacity();
     float fillOpacity = mainOpacity * _properties.fillOpacity();

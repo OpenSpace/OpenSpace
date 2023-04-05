@@ -182,7 +182,6 @@ private:
 
     glm::vec3 _offsets = glm::vec3(0.f); // lat, long, distance (meters). Passed from parent on property change
 
-    bool _isEnabled = true;
     std::string _key;
     PropertySet _properties;
 

@@ -36,6 +36,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/helper.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
@@ -75,11 +76,22 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void fillSelectionProperty();
-    void selectionPropertyHasChanged();
+    class NavigationFeature : public properties::PropertyOwner {
+    public:
+        NavigationFeature(properties::PropertyOwner::PropertyOwnerInfo info);
+
+        properties::BoolProperty enabled;
+        properties::Vec2Property centroidLatLong;
+        properties::Vec4Property boundingboxLatLong;
+        properties::TriggerProperty flyToFeature;
+        float boundingBoxDiagonal = 0.f;
+        int index = 0;
+    };
 
     void readFile();
     void parseSingleFeature(const geos::io::GeoJSONFeature& feature);
+
+    void flyToFeature(int index) const;
 
     std::vector<GlobeGeometryFeature> _geometryFeatures;
 
@@ -91,11 +103,8 @@ private:
 
     GeoJsonProperties _defaultProperties;
 
-    properties::SelectionProperty _featureSelection;
-
     properties::BoolProperty _drawWireframe;
     properties::BoolProperty _preventUpdatesFromHeightMap;
-    // Temporary property to get around height map update issues. TODO: remove
     properties::TriggerProperty _forceUpdateHeightData;
 
     RenderableGlobe& _globeNode;
@@ -112,6 +121,8 @@ private:
     rendering::helper::LightSourceRenderData _lightsourceRenderData;
 
     properties::PropertyOwner _lightSourcePropertyOwner;
+    properties::PropertyOwner _featuresPropertyOwner;
+    std::vector<std::unique_ptr<NavigationFeature>> _features;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _linesAndPolygonsProgram = nullptr;
     std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram = nullptr;

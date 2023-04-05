@@ -24,13 +24,16 @@
 
 #include <modules/globebrowsing/src/geojson/geojsoncomponent.h>
 
+#include <modules/globebrowsing/src/geojson/globegeometryhelper.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/lightsource.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
@@ -108,15 +111,7 @@ namespace {
         "ForceUpdateHeightData",
         "Force Update Height Data",
         "Triggering this leads to a recomputation of the heights based on the globe "
-        "hieght map value at the geometry's positions."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
-        "Selection",
-        "Selection",
-        "The features selected for rendering. Note that collection features "
-        "(MultiLineString, MultiPolygon, etc.) will be interpreted as individual "
-        "features." // TODO: clarify how this works with naming etc
+        "height map value at the geometry's positions."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
@@ -155,9 +150,6 @@ namespace {
         // [[codegen::verbatim(DrawWireframeInfo.description)]]
         std::optional<bool> drawWireframe;
 
-        // [[codegen::verbatim(SelectionInfo.description)]]
-        std::optional<std::vector<std::string>> selection;
-
         // These properties will be used as default values for the geoJson rendering,
         // meaning that they will be used when there is no value given for the
         // individual geoJson features
@@ -169,12 +161,63 @@ namespace {
             [[codegen::reference("core_light_source")]];
     };
 #include "geojsoncomponent_codegen.cpp"
+
+
+    constexpr openspace::properties::Property::PropertyInfo FlyToFeatureInfo = {
+        "FlyToFeature",
+        "Fly To Feature",
+        "Triggering this leads to the camera flying to a position that show the GeoJSON "
+        "feature. The flight will account for any lat, long or height offset."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CentroidCoordinateInfo = {
+        "CentroidCoordinate",
+        "Centroid Coordinate",
+        "The lat long coordinate of the centroid position of the read geometry. Note "
+        "that this value does not incude the offset"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BoundingBoxInfo = {
+        "BoundingBox",
+        "Bounding Box",
+        "The lat long coordinates of the lower and upper corner of the bounding box of "
+        "the read geometry. Note that this value does not incude the offset"
+    };
+
 } // namespace
 
 namespace openspace::globebrowsing {
 
 documentation::Documentation GeoJsonComponent::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_geojsoncomponent");
+}
+
+GeoJsonComponent::NavigationFeature::NavigationFeature(
+                                       properties::PropertyOwner::PropertyOwnerInfo info)
+    : properties::PropertyOwner(info)
+    , enabled(EnabledInfo, true)
+    , flyToFeature(FlyToFeatureInfo)
+    , centroidLatLong(
+        CentroidCoordinateInfo,
+        glm::vec2(0.f),
+        glm::vec2(-90.f, -180.f),
+        glm::vec2(90.f, 180.f)
+    )
+    , boundingboxLatLong(
+        BoundingBoxInfo,
+        glm::vec4(0.f),
+        glm::vec4(-90.f, -180.f, -90.f, -180.f),
+        glm::vec4(90.f, 180.f, 90.f, 180.f)
+    )
+{
+    addProperty(enabled);
+    addProperty(flyToFeature);
+
+    centroidLatLong.setReadOnly(true);
+    addProperty(centroidLatLong);
+
+    boundingboxLatLong.setReadOnly(true);
+    addProperty(boundingboxLatLong);
 }
 
 GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
@@ -198,8 +241,8 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     , _drawWireframe(DrawWireframeInfo, false)
     , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
     , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
-    , _featureSelection(SelectionInfo)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
+    , _featuresPropertyOwner({ "Features", "Features" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -266,11 +309,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     _drawWireframe = p.drawWireframe.value_or(_drawWireframe);
     addProperty(_drawWireframe);
 
-    _featureSelection.onChange([this]() { selectionPropertyHasChanged(); });
-    addProperty(_featureSelection);
-
     readFile();
-    fillSelectionProperty();
 
     if (p.lightSources.has_value()) {
         std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
@@ -295,27 +334,11 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         _lightSourcePropertyOwner.addPropertySubOwner(_lightSources.back().get());
     }
     addPropertySubOwner(_lightSourcePropertyOwner);
+    addPropertySubOwner(_featuresPropertyOwner);
 }
 
 bool GeoJsonComponent::enabled() const {
     return _enabled;
-}
-
-void GeoJsonComponent::fillSelectionProperty() {
-    _featureSelection.clearOptions();
-    for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
-        const GlobeGeometryFeature& f = _geometryFeatures[i];
-        _featureSelection.addOption(f.key());
-    }
-}
-
-void GeoJsonComponent::selectionPropertyHasChanged() {
-    bool showAll = !_featureSelection.hasSelected();
-    for (GlobeGeometryFeature& f : _geometryFeatures) {
-        // If no values are selected (the default), we want to show all objects.
-        // Else, set enabled to whther it is selected or not
-        f.setEnabled(showAll ? true : _featureSelection.isSelected(f.key()));
-    }
 }
 
 void GeoJsonComponent::initialize() {
@@ -387,8 +410,10 @@ void GeoJsonComponent::render(const RenderData& data) {
 
     // Do two render passes, to properly render opacoty of overlaying objects
     for (int renderPass = 0; renderPass < 2; ++renderPass) {
-        for (GlobeGeometryFeature& g : _geometryFeatures) {
-            g.render(data, renderPass, _opacity, _lightsourceRenderData);
+        for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
+            if (_features[i]->enabled) {
+                _geometryFeatures[i].render(data, renderPass, _opacity, _lightsourceRenderData);
+            }
         }
     }
 
@@ -408,9 +433,12 @@ void GeoJsonComponent::render(const RenderData& data) {
 void GeoJsonComponent::update() {
     glm::vec3 offsets = glm::vec3(_latLongOffset.value(), _heightOffset);
 
-    for (GlobeGeometryFeature& g : _geometryFeatures) {
-        // @TODO: Handle this more nicely. We don't always have to set the offsets if
-        // the other data related values have been updated.
+    for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
+        if (!_features[i]->enabled) {
+            continue;
+        }
+        GlobeGeometryFeature& g = _geometryFeatures[i];
+
         if (_dataIsDirty) {
             g.setOffsets(offsets);
         }
@@ -488,7 +516,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
         }
     }
 
-    // Split other collection features into multiple individual components
+    // Split other collection features into multiple individual rendered components
 
     for (const geos::geom::Geometry* geometry : geomsToAdd) {
         const int index = static_cast<int>(_geometryFeatures.size());
@@ -497,6 +525,70 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
             g.createFromSingleGeosGeometry(geometry, index);
             g.initializeGL(_pointsProgram.get(), _linesAndPolygonsProgram.get());
             _geometryFeatures.push_back(std::move(g));
+
+            using PropertyOwnerInfo = properties::PropertyOwner::PropertyOwnerInfo;
+            _features.push_back(std::make_unique<NavigationFeature>(
+                PropertyOwnerInfo(
+                    makeIdentifier(_geometryFeatures.back().key()),
+                    _geometryFeatures.back().key()
+                ) // TODO: description
+            ));
+
+            // TODO: Make the following a function
+
+            // Add meta information about the feature, to allow things like flying to it etc
+            std::unique_ptr<geos::geom::Point> centroid = geometry->getCentroid();
+            geos::geom::Coordinate centroidCoord = *centroid->getCoordinate();
+            glm::vec2 centroidLatLong = glm::vec2(centroidCoord.y, centroidCoord.x);
+            _features.back()->centroidLatLong = centroidLatLong;
+
+            std::unique_ptr<geos::geom::Geometry> boundingbox = geometry->getEnvelope();
+            // TODO: make sure this works even if a file with an empty collection is used
+            std::unique_ptr<geos::geom::CoordinateSequence> coords = boundingbox->getCoordinates();
+            glm::vec4 boundingboxLatLong;
+            if (boundingbox->isRectangle()) {
+                // A rectangle has 5 coordinates., where the first and third are two corners
+                boundingboxLatLong = glm::vec4(
+                    (*coords)[0].y,
+                    (*coords)[0].x,
+                    (*coords)[2].y,
+                    (*coords)[2].x
+                );
+
+            }
+            else {
+                // Invalid boundingbox. Can happend e.g. for single points.
+                // Just add a degree to every direction from the centroid
+                boundingboxLatLong = glm::vec4(
+                    centroidLatLong.x - 1.f,
+                    centroidLatLong.y - 1.f,
+                    centroidLatLong.x + 1.f,
+                    centroidLatLong.y + 1.f
+                );
+            }
+
+            _features.back()->boundingboxLatLong = boundingboxLatLong;
+
+            // Compute the diagonal distance of the bounding box
+            Geodetic2 pos0 = {
+                glm::radians(boundingboxLatLong.x),
+                glm::radians(boundingboxLatLong.y)
+            };
+
+            Geodetic2 pos1 = {
+                glm::radians(boundingboxLatLong.z),
+                glm::radians(boundingboxLatLong.w)
+            };
+            _features.back()->boundingBoxDiagonal = static_cast<float>(
+                _globeNode.ellipsoid().greatCircleDistance(pos0, pos1)
+                );
+
+            _features.back()->flyToFeature.onChange([this, index]() {
+                flyToFeature(index);
+             });
+
+            _features.back()->index = index;
+            _featuresPropertyOwner.addPropertySubOwner(_features.back().get());
         }
         catch (const ghoul::MissingCaseException&) {
             LERROR(fmt::format(
@@ -507,5 +599,25 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
         }
     }
 }
+
+void GeoJsonComponent::flyToFeature(int index) const {
+    const NavigationFeature* f = _features[index].get();
+
+    // Compute a good distance to travel to based on the feature's size.
+    // Assumes 80 degree FOV
+    float d = f->boundingBoxDiagonal / glm::tan(glm::radians(40.f));
+    d += _heightOffset;
+
+    float lat = f->centroidLatLong.value().x + _latLongOffset.value().x;
+    float lon = f->centroidLatLong.value().y + _latLongOffset.value().y;
+
+    global::scriptEngine->queueScript(
+        fmt::format(
+            "openspace.globebrowsing.flyToGeo({}, {}, {})", lat, lon, d
+        ),
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+}
+
 
 } // namespace openspace::globebrowsing
