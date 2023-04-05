@@ -50,7 +50,7 @@ void main() {
         if (useHeightMapData) {
           height += in_height;
         }
-        modelPos += dvec4(outDirection * double(heightOffset + height), 0.0);
+        modelPos += dvec4(outDirection * double(height), 0.0);
     }
 
     vs_positionViewSpace = vec4(viewTransform * modelTransform * modelPos);

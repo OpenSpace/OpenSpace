@@ -299,8 +299,6 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
     glLineWidth(1.f);
 #endif
 
-    // @TODO: optimise as to not loop through all objects twice (based on
-    // the render pass), but only the ones for which it's actually needed
     for (const RenderFeature& r : _renderFeatures) {
         if (r.isExtrusionFeature && !_properties.extrude()) {
             continue;
@@ -498,11 +496,14 @@ void GlobeGeometryFeature::updateGeometry() {
     // Update vertex data and compute model coordinates based on globe
     _renderFeatures.clear();
 
-    std::vector<std::vector<glm::vec3>> edgeVertices = createPointAndLineGeometry();
-    createExtrudedGeometry(edgeVertices);
-    createPolygonGeometry();
-
-    // TODO: add extrusion for points
+    if (_type == GeometryType::Point) {
+        createPointGeometry();
+    }
+    else {
+        std::vector<std::vector<glm::vec3>> edgeVertices = createLineGeometry();
+        createExtrudedGeometry(edgeVertices);
+        createPolygonGeometry();
+    }
 
     // Compute new heights - to see if height map changed
     _lastControlHeights = getCurrentReferencePointsHeights();
@@ -521,9 +522,7 @@ void GlobeGeometryFeature::updateHeightsFromHeightMap() {
     _lastHeightUpdateTime = std::chrono::system_clock::now();
 }
 
-std::vector<std::vector<glm::vec3>>
-GlobeGeometryFeature::createPointAndLineGeometry()
-{
+std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
     std::vector<std::vector<glm::vec3>> resultPositions;
     resultPositions.reserve(_geoCoordinates.size());
 
@@ -589,10 +588,7 @@ GlobeGeometryFeature::createPointAndLineGeometry()
 
         RenderFeature feature;
         feature.nVertices = vertices.size();
-
-        // Figure out if we're rendering lines or points
-        bool isPoints = _type == GeometryType::Point;
-        feature.type = isPoints ? RenderType::Points : RenderType::Lines;
+        feature.type = RenderType::Lines;
 
         // Get height map heights
         feature.vertices = geometryhelper::geodetic2FromVertexList(_globe, vertices);
@@ -613,6 +609,76 @@ GlobeGeometryFeature::createPointAndLineGeometry()
 
     resultPositions.shrink_to_fit();
     return resultPositions;
+}
+
+void GlobeGeometryFeature::createPointGeometry() {
+    if (_type != GeometryType::Point) {
+        return;
+    }
+
+    for (int i = 0; i < _geoCoordinates.size(); ++i) {
+        std::vector<Vertex> vertices;
+        vertices.reserve(_geoCoordinates[i].size());
+
+        std::vector<Vertex> extrudedLineVertices;
+        extrudedLineVertices.reserve(2 * _geoCoordinates[i].size());
+
+        for (const Geodetic3& geodetic : _geoCoordinates[i]) {
+            glm::dvec3 v = geometryhelper::computeOffsetedModelCoordinate(
+                geodetic,
+                _globe,
+                _offsets
+            );
+
+            glm::vec3 vf = static_cast<glm::vec3>(v);
+            glm::vec3 normal = glm::normalize(vf);
+            vertices.push_back({ vf.x, vf.y, vf.z, normal.x, normal.y, normal.z });
+
+            // Lines from center of the globe out to the point
+            extrudedLineVertices.push_back({ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f });
+            extrudedLineVertices.push_back({ vf.x, vf.y, vf.z, 0.f, 0.f, 0.f });
+        }
+
+        vertices.shrink_to_fit();
+        extrudedLineVertices.shrink_to_fit();
+
+        RenderFeature feature;
+        feature.nVertices = vertices.size();
+        feature.type = RenderType::Points;
+
+        // Get height map heights
+        feature.vertices = geometryhelper::geodetic2FromVertexList(_globe, vertices);
+        feature.heights = geometryhelper::heightMapHeightsFromGeodetic2List(
+            _globe,
+            feature.vertices
+        );
+
+        // Generate buffers and buffer data
+        feature.initializeBuffers();
+        bufferVertexData(feature, vertices);
+
+        _renderFeatures.push_back(std::move(feature));
+
+        // Create extrusion feature
+
+        RenderFeature extrudeFeature;
+        extrudeFeature.nVertices = extrudedLineVertices.size();
+        extrudeFeature.type = RenderType::Lines;
+        extrudeFeature.isExtrusionFeature = true;
+
+        // Get height map heights
+        extrudeFeature.vertices = geometryhelper::geodetic2FromVertexList(_globe, extrudedLineVertices);
+        extrudeFeature.heights = geometryhelper::heightMapHeightsFromGeodetic2List(
+            _globe,
+            extrudeFeature.vertices
+        );
+
+        // Generate buffers and buffer data
+        extrudeFeature.initializeBuffers();
+        bufferVertexData(extrudeFeature, extrudedLineVertices);
+
+        _renderFeatures.push_back(std::move(extrudeFeature));
+    }
 }
 
 void GlobeGeometryFeature::createExtrudedGeometry(

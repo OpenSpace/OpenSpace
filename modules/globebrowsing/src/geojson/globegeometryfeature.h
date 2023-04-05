@@ -131,10 +131,16 @@ private:
         int renderPass) const;
 
     /**
-     * Create the vertex information for the line and point parts of the feature.
+     * Create the vertex information for any line parts of the feature.
      * Returns the resulting vertex positions, so we can use them for extrusion
      */
-    std::vector<std::vector<glm::vec3>> createPointAndLineGeometry();
+    std::vector<std::vector<glm::vec3>> createLineGeometry();
+
+    /**
+     * Create the vertex information for any point parts of the feature. Also creates
+     * the features for extruded lines
+     */
+    void createPointGeometry();
 
     /**
      * Create the triangle geometry for the extruded edges
