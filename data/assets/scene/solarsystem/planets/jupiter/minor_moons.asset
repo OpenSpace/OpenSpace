@@ -17,14 +17,14 @@ local minormoons_on = {
     local moons = openspace.getProperty('{moon_minor_jupiter}.Renderable.Enabled');
     local moons_fade = openspace.getProperty('{moon_minor_jupiter}.Renderable.Fade');
 
-    for i, v in pairs(trails_fade) do 
+    for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(trails[i], true)
-      openspace.setPropertyValueSingle(v, 1, 2, 'Linear') 
+      openspace.setPropertyValueSingle(v, 1, 2, 'Linear')
     end
 
-    for i, v in pairs(moons_fade) do 
+    for i, v in pairs(moons_fade) do
       openspace.setPropertyValueSingle(moons[i], true)
-      openspace.setPropertyValueSingle(v, 1, 2, 'Linear') 
+      openspace.setPropertyValueSingle(v, 1, 2, 'Linear')
     end
   ]],
   Documentation = "Turn ON Jupiter's minor moons and their trails",
@@ -42,12 +42,12 @@ local minormoons_off = {
     local moons = openspace.getProperty('{moon_minor_jupiter}.Renderable.Enabled');
     local moons_fade = openspace.getProperty('{moon_minor_jupiter}.Renderable.Fade');
 
-    for i, v in pairs(trails_fade) do 
-      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)" ) 
+    for i, v in pairs(trails_fade) do
+      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)" )
     end
 
     for i, v in pairs(moons_fade) do
-      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)" ) 
+      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)" )
     end
   ]],
   Documentation = "Turn OFF Jupiter's minor moons and their trails",

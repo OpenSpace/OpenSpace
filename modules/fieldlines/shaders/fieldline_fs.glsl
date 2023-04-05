@@ -45,7 +45,7 @@ Fragment getFragment() {
   }
 
   frag.depth = pscDepth(gs_position);
-      
+
   // G-Buffer
   frag.gPosition  = vec4(0.0);//vs_gPosition;
   // There is no normal here
