@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "scene/solarsystem/missions/voyager/dashboard",
     "scene/solarsystem/missions/voyager/voyager1",
     "scene/solarsystem/missions/voyager/voyager2",

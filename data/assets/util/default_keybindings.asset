@@ -187,27 +187,12 @@ local previous_delta_step_immediate = {
   Key = "Shift+Left"
 }
 
-local toggle_planet_labels = {
-  Identifier = "os_default.toggle_planet_labels",
-  Name = "Toggle planet labels",
-  Command = [[
-    local list = openspace.getProperty("{solarsystem_labels}.Renderable.Enabled");
-    for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
-  ]],
-  Documentation = "Turns on visibility for all solar system labels",
-  GuiPath = "/Solar System",
-  IsLocal = false,
-  Key = "l"
-}
-
-
-
 local Actions = {
   toggle_native_ui, toggle_shutdown, take_screenshot, toggle_pause_interpolated,
   toggle_pause_immediate, toggle_rotation_friction, toggle_zoom_friction,
   toggle_roll_friction, fade_to_black, toggle_main_gui, toggle_overlays,
   toggle_master_rendering, next_delta_step_interpolate, next_delta_step_immediate,
-  previous_delta_step_interpolate, previous_delta_step_immediate, toggle_planet_labels
+  previous_delta_step_interpolate, previous_delta_step_immediate
 }
 
 asset.onInitialize(function()

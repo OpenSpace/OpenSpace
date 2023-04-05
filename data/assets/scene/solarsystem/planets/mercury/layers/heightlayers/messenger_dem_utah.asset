@@ -9,7 +9,7 @@ local layer = {
     Gamma = 1.59,
     Multiplier = 1.38
   },
-  TilePixelSize = 64
+  TilePixelSize = 360
 }
 
 asset.onInitialize(function ()

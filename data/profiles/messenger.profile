@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "scene/solarsystem/missions/messenger/dashboard",
     "scene/solarsystem/missions/messenger/mercurymagnetosphere",
     "scene/solarsystem/missions/messenger/messengerSC"
