@@ -153,6 +153,9 @@ private:
      */
     void createPolygonGeometry();
 
+    void initializeRenderFeature(RenderFeature& feature,
+        const std::vector<Vertex>& vertices);
+
     /// Compute the heights to the surface at the reference points
     std::vector<double> getCurrentReferencePointsHeights() const;
 

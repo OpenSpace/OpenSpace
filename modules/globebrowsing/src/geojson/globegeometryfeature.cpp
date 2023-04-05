@@ -589,18 +589,7 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
         RenderFeature feature;
         feature.nVertices = vertices.size();
         feature.type = RenderType::Lines;
-
-        // Get height map heights
-        feature.vertices = geometryhelper::geodetic2FromVertexList(_globe, vertices);
-        feature.heights = geometryhelper::heightMapHeightsFromGeodetic2List(
-            _globe,
-            feature.vertices
-        );
-
-        // Generate buffers and buffer data
-        feature.initializeBuffers();
-        bufferVertexData(feature, vertices);
-
+        initializeRenderFeature(feature, vertices);
         _renderFeatures.push_back(std::move(feature));
 
         positions.shrink_to_fit();
@@ -645,18 +634,7 @@ void GlobeGeometryFeature::createPointGeometry() {
         RenderFeature feature;
         feature.nVertices = vertices.size();
         feature.type = RenderType::Points;
-
-        // Get height map heights
-        feature.vertices = geometryhelper::geodetic2FromVertexList(_globe, vertices);
-        feature.heights = geometryhelper::heightMapHeightsFromGeodetic2List(
-            _globe,
-            feature.vertices
-        );
-
-        // Generate buffers and buffer data
-        feature.initializeBuffers();
-        bufferVertexData(feature, vertices);
-
+        initializeRenderFeature(feature, vertices);
         _renderFeatures.push_back(std::move(feature));
 
         // Create extrusion feature
@@ -665,18 +643,7 @@ void GlobeGeometryFeature::createPointGeometry() {
         extrudeFeature.nVertices = extrudedLineVertices.size();
         extrudeFeature.type = RenderType::Lines;
         extrudeFeature.isExtrusionFeature = true;
-
-        // Get height map heights
-        extrudeFeature.vertices = geometryhelper::geodetic2FromVertexList(_globe, extrudedLineVertices);
-        extrudeFeature.heights = geometryhelper::heightMapHeightsFromGeodetic2List(
-            _globe,
-            extrudeFeature.vertices
-        );
-
-        // Generate buffers and buffer data
-        extrudeFeature.initializeBuffers();
-        bufferVertexData(extrudeFeature, extrudedLineVertices);
-
+        initializeRenderFeature(extrudeFeature, extrudedLineVertices);
         _renderFeatures.push_back(std::move(extrudeFeature));
     }
 }
@@ -695,7 +662,13 @@ void GlobeGeometryFeature::createExtrudedGeometry(
     feature.type = RenderType::Polygon;
     feature.nVertices = vertices.size();
     feature.isExtrusionFeature = true;
+    initializeRenderFeature(feature, vertices);
+    _renderFeatures.push_back(std::move(feature));
+}
 
+void GlobeGeometryFeature::initializeRenderFeature(RenderFeature& feature,
+                                                   const std::vector<Vertex>& vertices)
+{
     // Get height map heights
     feature.vertices = geometryhelper::geodetic2FromVertexList(_globe, vertices);
     feature.heights = geometryhelper::heightMapHeightsFromGeodetic2List(
@@ -706,8 +679,6 @@ void GlobeGeometryFeature::createExtrudedGeometry(
     // Generate buffers and buffer data
     feature.initializeBuffers();
     bufferVertexData(feature, vertices);
-
-    _renderFeatures.push_back(std::move(feature));
 }
 
 void GlobeGeometryFeature::createPolygonGeometry() {
@@ -770,23 +741,10 @@ void GlobeGeometryFeature::createPolygonGeometry() {
         }
     }
 
-    // TODO: make a function
     RenderFeature triFeature;
     triFeature.type = RenderType::Polygon;
     triFeature.nVertices = polyVertices.size();
-    triFeature.isExtrusionFeature = false;
-
-    // Get height map heights
-    triFeature.vertices = geometryhelper::geodetic2FromVertexList(_globe, polyVertices);
-    triFeature.heights = geometryhelper::heightMapHeightsFromGeodetic2List(
-        _globe,
-        triFeature.vertices
-    );
-
-    // Generate buffers and buffer data
-    triFeature.initializeBuffers();
-    bufferVertexData(triFeature, polyVertices);
-
+    initializeRenderFeature(triFeature, polyVertices);
     _renderFeatures.push_back(std::move(triFeature));
 }
 
