@@ -1,6 +1,6 @@
 local undo_event_fade = {
   Identifier = "os.undo_event_fade",
-  Name = "Undo All Event Fading",
+  Name = "Undo all event fading",
   Command = [[
     openspace.setPropertyValue("Scene.*.Renderable.Fade", 1.0, 0.5);
   ]],
