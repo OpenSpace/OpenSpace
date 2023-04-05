@@ -21,7 +21,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(setup_perseverance)   
+  openspace.action.removeAction(setup_perseverance)
 end)
 
 asset.meta = {

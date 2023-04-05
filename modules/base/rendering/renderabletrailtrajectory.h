@@ -60,7 +60,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    
+
     /// Reset some variables to default state
     void reset();
 
@@ -95,7 +95,7 @@ private:
     /// Tracks sweep iteration, is used to calculate which vertices to work on per frame
     int _sweepIteration = 0;
 
-    /// How many points do we need to compute given the distance between the 
+    /// How many points do we need to compute given the distance between the
     /// start and end date and the desired sample interval
     unsigned int _numberOfVertices = 0;
 

@@ -39,7 +39,7 @@ const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
 
 Fragment getFragment() {
   vec4 color = vec4(0.0);
-  
+
   // GL_POINTS
 
   // Use frustum params to be able to compensate for a skewed frustum (in a dome).
@@ -55,21 +55,21 @@ Fragment getFragment() {
   float planeAspect = yFactor / xFactor; // Equals: (right - left) / (top - bottom)
   float screenAspect = screenSize.x / screenSize.y;
   float fullAspect = planeAspect / screenAspect;
-  
-  // Find screenPos in skewed frustum. uv is [0, 1]
-  vec2 screenPos = uv * vec2(right - left, top - bottom) + vec2(left, bottom); 
 
-  // Find our elliptic scale factors by trigonometric approximation. 
+  // Find screenPos in skewed frustum. uv is [0, 1]
+  vec2 screenPos = uv * vec2(right - left, top - bottom) + vec2(left, bottom);
+
+  // Find our elliptic scale factors by trigonometric approximation.
   float beta = atan(length(screenPos) / near);
-  vec2 sigmaScaleFactor = vec2(1.0 / cos(beta), 1.0 / pow(cos(beta), 2.0)); 
+  vec2 sigmaScaleFactor = vec2(1.0 / cos(beta), 1.0 / pow(cos(beta), 2.0));
 
   float defaultScreen = 1200.0;
   float scaling = screenSize.y / defaultScreen * yFactor;
 
   // Scale filter size depending on screen pos.
   vec2 filterScaleFactor = vec2(
-    pow(screenPos.x / near, 2.0) * fullAspect,  
-    pow(screenPos.y / near, 2.0)  
+    pow(screenPos.x / near, 2.0) * fullAspect,
+    pow(screenPos.y / near, 2.0)
   );
 
   // Use to ignore scaling.
@@ -91,8 +91,8 @@ Fragment getFragment() {
   // Uncomment to compare to original filterSize (assumes origo in center of screen).
   //screenPos = (uv - 0.5) * 2.0; // [-1, 1]
   //filterScaleFactor = vec2(
-  //    pow(screenPos.x, 2.0),  
-  //    pow(screenPos.y, 2.0)  
+  //    pow(screenPos.x, 2.0),
+  //    pow(screenPos.y, 2.0)
   //);
 
   // Make use of the following flag this to toggle betweeen circular and elliptic distribution.
@@ -131,20 +131,20 @@ Fragment getFragment() {
 
       // Calculate the contribution of this pixel (elliptic gaussian distribution).
       float pixelWeight = exp(-(
-          a * pow(x * fullAspect, 2.0) + 2 * b * x * y * fullAspect + c * pow(y, 2.0) 
+          a * pow(x * fullAspect, 2.0) + 2 * b * x * y * fullAspect + c * pow(y, 2.0)
       ));
-      
+
       // Only sample inside FBO texture and if the pixel will contribute to final color.
       if (all(greaterThan(sPoint, vec2(0.0))) && all(lessThan(sPoint, vec2(1.0))) &&
           pixelWeight > pixelWeightThreshold)
       {
         vec4 sIntensity = texture(renderedTexture, sPoint);
 
-        // Use normal distribution function for halo/bloom effect. 
+        // Use normal distribution function for halo/bloom effect.
         if (useCircleDist) {
           float circleDist = sqrt(pow(x / (1 + length(filterScaleFactor)), 2.0) +
             pow(y / (1 + length(filterScaleFactor)), 2.0));
-          intensity += sIntensity.rgb * (1.0 / (sigma * sqrt(2.0 * M_PI))) * 
+          intensity += sIntensity.rgb * (1.0 / (sigma * sqrt(2.0 * M_PI))) *
             exp(-(pow(circleDist, 2.0) / (2.0 * pow(sigma, 2.0)))) / filterSize;
         }
         else {
@@ -169,7 +169,7 @@ Fragment getFragment() {
 
   Fragment frag;
   frag.color = color;
-  // Place stars at back to begin with. 
+  // Place stars at back to begin with.
   frag.depth = DEFAULT_DEPTH;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.blend = BLEND_MODE_NORMAL;

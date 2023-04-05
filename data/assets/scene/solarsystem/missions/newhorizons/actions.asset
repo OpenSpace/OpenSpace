@@ -29,7 +29,7 @@ local focus_pluto = {
   Name = "Focus on Pluto",
   Command = [[
     openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'PlutoProjection');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');
     openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
   ]],
   Documentation = "Sets the focus of the camera on 'Pluto'",
@@ -147,9 +147,9 @@ local toggle_pluto_labels = {
   Identifier = "os.missions.newhorizons.pluto.togglelabels",
   Name = "Toggle Pluto Labels",
   Command = [[
-    local list = {"Scene.PlutoText.Renderable.Enabled", "Scene.CharonText.Renderable.Enabled", "Scene.HydraText.Renderable.Enabled", "Scene.NixText.Renderable.Enabled", "Scene.KerberosText.Renderable.Enabled", "Scene.StyxText.Renderable.Enabled"}; 
-    for _,v in pairs(list) do 
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+    local list = {"Scene.PlutoText.Renderable.Enabled", "Scene.CharonText.Renderable.Enabled", "Scene.HydraText.Renderable.Enabled", "Scene.NixText.Renderable.Enabled", "Scene.KerberosText.Renderable.Enabled", "Scene.StyxText.Renderable.Enabled"};
+    for _,v in pairs(list) do
+      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
     end
   ]],
   Documentation = "Toggles the visibility of the text labels of Pluto, Charon, Hydra, Nix, Kerberos, and Styx",
@@ -161,11 +161,11 @@ local toggle_nh_labels = {
   Identifier = "os.missions.newhorizons.togglelabels",
   Name = "Toggle New Horizons Labels",
   Command = [[
-    local v = openspace.getPropertyValue("Scene.Labels.Renderable.Opacity"); 
-    if v <= 0.5 then 
-      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity",1.0,2.0) 
-    else 
-      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity",0.0,2.0) 
+    local v = openspace.getPropertyValue("Scene.Labels.Renderable.Opacity");
+    if v <= 0.5 then
+      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity",1.0,2.0)
+    else
+      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity",0.0,2.0)
     end
   ]],
   Documentation = "Toggles the visibility of the labels for the New Horizons instruments",

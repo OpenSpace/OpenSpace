@@ -51,7 +51,7 @@ void main() {
   vec4 p = z_normalization(positionClipSpace);
   vs_depth = p.w;
   gl_Position = p;
-  
+
   // The normal transform should be the transposed inverse of the model transform?
   vs_normalViewSpace = normalize(
     mat3(modelViewTransform) * (mat3(meshNormalTransform) * in_normal)

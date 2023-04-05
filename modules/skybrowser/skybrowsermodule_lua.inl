@@ -454,7 +454,7 @@ std::string prunedIdentifier(std::string identifier) {
  * Takes an identifier to a sky browser or sky target, an index to an image and a value
  * for the opacity.
  */
-[[codegen::luawrap]] void setOpacityOfImageLayer(std::string identifier, 
+[[codegen::luawrap]] void setOpacityOfImageLayer(std::string identifier,
                                                  std::string imageUrl, float opacity)
 {
     using namespace openspace;

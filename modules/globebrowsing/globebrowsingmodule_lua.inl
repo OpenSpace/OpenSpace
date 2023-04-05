@@ -182,7 +182,7 @@ namespace {
     if (group == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError(fmt::format("Unknown layer group: {}", layerGroup));
     }
-    
+
     LayerGroup& lg = globe->layerManager().layerGroup(group);
     if (std::holds_alternative<int>(source) && std::holds_alternative<int>(destination)) {
         // Short circut here, no need to get the layers

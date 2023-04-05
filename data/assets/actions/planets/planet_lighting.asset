@@ -28,7 +28,7 @@ local list = openspace.getProperty("Scene." .. node .. ".Renderable.Layers.Night
 if (#list > 0) then
   openspace.setPropertyValue(list[1], true)
 else
-  openspace.setPropertyValueSingle("Scene." .. node .. ".Renderable.PerformShading", true) 
+  openspace.setPropertyValueSingle("Scene." .. node .. ".Renderable.PerformShading", true)
 end
 if openspace.hasSceneGraphNode(node .. "Atmosphere") then
   openspace.setPropertyValueSingle("Scene." .. node .. "Atmosphere.Renderable.SunFollowingCamera", false)

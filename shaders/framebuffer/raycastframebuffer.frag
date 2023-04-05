@@ -98,10 +98,10 @@ void main() {
   vec3 accumulatedAlpha = vec3(0.f);
 
 
-  for (nSteps = 0; 
-      (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || 
-       accumulatedAlpha.b < ALPHA_LIMIT) && nSteps < rayCastSteps; 
-       ++nSteps) 
+  for (nSteps = 0;
+      (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT ||
+       accumulatedAlpha.b < ALPHA_LIMIT) && nSteps < rayCastSteps;
+       ++nSteps)
   {
     if (nextStepSize < raycastDepth / 10000000000.f) {
       break;

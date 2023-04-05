@@ -36,7 +36,7 @@ uniform sampler2D shapeTexture;
 
 void main() {
   float fullColor = 0.0;
-  
+
   float maxConvSize = float(psfTextureSize);
   float convStep = 1.0 / maxConvSize;
   float textureStep = 1.0 / float(convolvedfTextureSize);
