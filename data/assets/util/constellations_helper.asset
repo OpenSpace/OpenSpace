@@ -20,19 +20,19 @@ local findFullName = function(abbreviation)
 
   for line in io.lines(namesFile) do
     -- Try and find the identifier in the file
-    local index, length = string.find(line, abbreviation)
+    local index, length = line:find(abbreviation)
     if index ~= nil and index < 4 then
-      fullName = string.sub(line, length + 2)
+      fullName = line:sub(length + 2)
       break
     end
 
     -- Try and find the identifier in lower case instead
     local fullLine = line
     local lowerLine = string.lower(line)
-    index, length = string.find(lowerLine, string.lower(abbreviation))
+    index, length = lowerLine:find(string.lower(abbreviation))
 
     if index ~= nil and index < 4 then
-      fullName = string.sub(fullLine, length + 2)
+      fullName = fullLine:sub(length + 2)
     end
   end
 

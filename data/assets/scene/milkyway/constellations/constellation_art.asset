@@ -98,7 +98,7 @@ local show_art = {
   Identifier = "constellation_art.show_art",
   Name = "Show all",
   Command = [[
-    openspace.fadeIn("Scene.ImageConstellation*", 2.0)
+    openspace.fadeIn("Scene.ImageConstellation*.Renderable", 2.0)
   ]],
   Documentation = "Enables and fades up constellation art work",
   GuiPath = "/Constellations/Art",
@@ -110,7 +110,7 @@ local hide_art = {
   Identifier = "constellation_art.hide_art",
   Name = "Hide all",
   Command = [[
-    openspace.fadeOut("Scene.ImageConstellation*", 2.0)
+    openspace.fadeOut("Scene.ImageConstellation*.Renderable", 2.0)
   ]],
   Documentation = "Fades out constellation artwork",
   GuiPath = "/Constellations/Art",

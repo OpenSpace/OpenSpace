@@ -176,44 +176,57 @@ openspace.fadeIn = function(identifier, fadeTime, endScript)
         fadeTime = openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
     end
 
-    local enabledProperty = ""
-    local fadeProperty = ""
+    local enabledProperty = identifier .. ".Enabled"
+    local fadeProperty = identifier .. ".Fade"
 
     -- Assume that we need to enable the node(s) as we fade it/them in
     local isEnabled = false
 
-    -- Is the identifier a single node or a regex for several nodes
-    local hasTag, _ = string.find(identifier, "{")
-    local hasWild, _ = string.find(identifier, "*")
+    -- Check if the identifier is a single node or a regex for several nodes
+    local hasTag, _ = identifier:find('{')
+    local hasWild, _ = identifier:find('*')
 
     if hasTag ~= nil or hasWild ~= nil then
         -- Regex, several nodes
-        enabledProperty = identifier .. ".Renderable.Enabled"
-        fadeProperty = identifier .. ".Renderable.Fade"
-    else
-        -- Literal, single node
-        -- Check if node has a Renderable (Renderable always has an Enabled property)
-        local nodeHaveRenderable =
-            openspace.hasProperty(identifier .. ".Renderable.Enabled")
-
-        -- Check if the node has a fade property
-        local nodeHaveFade = openspace.hasProperty(identifier .. ".Fade")
-
-        if nodeHaveRenderable then
-            enabledProperty = identifier .. ".Renderable.Enabled"
-            fadeProperty = identifier .. ".Renderable.Fade"
-        elseif nodeHaveFade then
-            enabledProperty = identifier .. ".Enabled"
-            fadeProperty = identifier .. ".Fade"
-        else
+        local enabledPropertyList = openspace.getProperty(enabledProperty)
+        if next(enabledPropertyList) == nil then
+            -- List is empty, no matches found
             openspace.printError(
                 "Error when calling script 'openspace.fadeIn': " ..
-                "Could not find any match for '" .. identifier .. "'"
+                "Could not find any property matching '" .. enabledProperty .. "'"
             )
             return
         end
 
-        isEnabled = openspace.getPropertyValue(enabledProperty)
+        local fadePropertyList = openspace.getProperty(fadeProperty)
+        if next(fadePropertyList) == nil then
+            -- List is empty, no matches found
+            openspace.printError(
+                "Error when calling script 'openspace.fadeIn': " ..
+                "Could not find any property matching '" .. fadeProperty .. "'"
+            )
+            return
+        end
+    else
+        -- Literal, single node
+        local haveEnabled = openspace.hasProperty(enabledProperty)
+        local haveFade = openspace.hasProperty(fadeProperty)
+
+        if not haveEnabled then
+            openspace.printError(
+                "Error when calling script 'openspace.fadeIn': " ..
+                "Could not find property '" .. enabledProperty .. "'"
+            )
+            return
+        elseif not haveFade then
+            openspace.printError(
+                "Error when calling script 'openspace.fadeIn': " ..
+                "Could not find property '" .. fadeProperty .. "'"
+            )
+            return
+        else
+            isEnabled = openspace.getPropertyValue(enabledProperty)
+        end
     end
 
     -- If node is already enabled we only have to fade it
@@ -235,44 +248,57 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
         fadeTime = openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
     end
 
-    local enabledProperty = ""
-    local fadeProperty = ""
+    local enabledProperty = identifier .. ".Enabled"
+    local fadeProperty = identifier .. ".Fade"
 
     -- Assume that the node(s) are enabled and that we need to fade it/them out
     local isEnabled = true
 
     -- Is the identifier a single node or a regex for several nodes
-    local hasTag, _ = string.find(identifier, "{")
-    local hasWild, _ = string.find(identifier, "*")
+    local hasTag, _ = identifier:find('{')
+    local hasWild, _ = identifier:find('*')
 
     if hasTag ~= nil or hasWild ~= nil then
         -- Regex, several nodes
-        enabledProperty = identifier .. ".Renderable.Enabled"
-        fadeProperty = identifier .. ".Renderable.Fade"
-    else
-         -- Literal, single node
-        -- Check if node has a Renderable (Renderable always has an Enabled property)
-        local nodeHaveRenderable =
-            openspace.hasProperty(identifier .. ".Renderable.Enabled")
-
-        -- Check if the node has a fade property
-        local nodeHaveFade = openspace.hasProperty(identifier .. ".Fade")
-
-        if nodeHaveRenderable then
-            enabledProperty = identifier .. ".Renderable.Enabled"
-            fadeProperty = identifier .. ".Renderable.Fade"
-        elseif nodeHaveFade then
-            enabledProperty = identifier .. ".Enabled"
-            fadeProperty = identifier .. ".Fade"
-        else
+        local enabledPropertyList = openspace.getProperty(enabledProperty)
+        if next(enabledPropertyList) == nil then
+            -- List is empty, no matches found
             openspace.printError(
                 "Error when calling script 'openspace.fadeIn': " ..
-                "Could not find any match for '" .. identifier .. "'"
+                "Could not find any property matching '" .. enabledProperty .. "'"
             )
             return
         end
 
-        isEnabled = openspace.getPropertyValue(enabledProperty)
+        local fadePropertyList = openspace.getProperty(fadeProperty)
+        if next(fadePropertyList) == nil then
+            -- List is empty, no matches found
+            openspace.printError(
+                "Error when calling script 'openspace.fadeIn': " ..
+                "Could not find any property matching '" .. fadeProperty .. "'"
+            )
+            return
+        end
+    else
+        -- Literal, single node
+        local haveEnabled = openspace.hasProperty(enabledProperty)
+        local haveFade = openspace.hasProperty(fadeProperty)
+
+        if not haveEnabled then
+            openspace.printError(
+                "Error when calling script 'openspace.fadeIn': " ..
+                "Could not find property '" .. enabledProperty .. "'"
+            )
+            return
+        elseif not haveFade then
+            openspace.printError(
+                "Error when calling script 'openspace.fadeIn': " ..
+                "Could not find property '" .. fadeProperty .. "'"
+            )
+            return
+        else
+            isEnabled = openspace.getPropertyValue(enabledProperty)
+        end
     end
 
     -- If node is already disabled we don't have to do anything
