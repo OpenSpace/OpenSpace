@@ -529,6 +529,9 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
             return std::nullopt;
         }
     }
+    else {
+        return mrf;
+    }
 }
 
 void RawTileDataReader::initialize() {
