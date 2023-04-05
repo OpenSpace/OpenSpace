@@ -48,6 +48,18 @@ namespace {
         "complete image if a single image is used"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo CompressionInfo = {
+        "Compression",
+        "Compression Algorithm",
+        "The compression algorithm to use for MRF cached tiles"
+    };
+
+    enum Compression {
+        PNG = 0,
+        JPEG,
+        LERC
+    };
+
     struct [[codegen::Dictionary(DefaultTileProvider)]] Parameters {
         // User-facing name of this tile provider
         std::optional<std::string> name;
@@ -77,8 +89,15 @@ namespace {
             // Specifies whether to use caching or not
             std::optional<bool> enabled;
 
+            // [[codegen::verbatim(CompressionInfo.description)]]
+            enum class [[codegen::map(Compression)]] Compression {
+                PNG = 0,
+                JPEG,
+                LERC
+            };
+
             // The compression algorithm to use for cached tiles
-            std::optional<std::string> compression;
+            std::optional<Compression> compression;
 
             // The quality setting of the compression alogrithm, only valid for JPEG
             std::optional<int> quality [[codegen::inrange(0, 100)]];
@@ -144,22 +163,32 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
     bool enabled = module.isMRFCachingEnabled();
-    std::string compression =
-        _layerGroupID == layers::Group::ID::HeightLayers ? "LERC" : "JPEG";
+    Compression compression =
+        _layerGroupID == layers::Group::ID::HeightLayers ? Compression::LERC : Compression::JPEG;
     int quality = 75;
     int blockSize = 1024;
     if (p.cacheSettings.has_value()) {
         enabled = p.cacheSettings->enabled.value_or(enabled);
-        compression = p.cacheSettings->compression.value_or(compression);
+        if (p.cacheSettings->compression.has_value()) {
+            compression = codegen::map<Compression>(*p.cacheSettings->compression);
+        }
         quality = p.cacheSettings->quality.value_or(quality);
         blockSize = p.cacheSettings->blockSize.value_or(blockSize);
     }
 
     _cacheProperties.enabled = enabled;
-    _cacheProperties.compression = compression;
     _cacheProperties.path = path;
     _cacheProperties.quality = quality;
     _cacheProperties.blockSize = blockSize;
+    if (compression == Compression::JPEG) {
+        _cacheProperties.compression = "JPEG";
+    }
+    else if (compression == Compression::PNG){
+        _cacheProperties.compression = "PNG";
+    }
+    else {
+        _cacheProperties.compression = "LERC";
+    }
 
     TileTextureInitData initData(
         tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
