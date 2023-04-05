@@ -4,6 +4,7 @@
   ],
   "assets": [
     "base",
+    "base_keybindings",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/planets/earth/satellites/misc/hubble_trail",

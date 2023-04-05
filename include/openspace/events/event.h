@@ -519,7 +519,7 @@ struct EventRenderableDisabled : public Event {
      */
     explicit EventRenderableDisabled(const SceneGraphNode* node_);
 
-  const tstring node;
+    const tstring node;
 };
 
 /**
@@ -530,8 +530,15 @@ struct EventCameraPathStarted : public Event {
 
     /**
      * Creates an instance of an EventCameraPathStarted event.
+     *
+     * \param origin_ The scene graph node from which the path started
+     * \param destination_ The scene graph node at which the path ends
      */
-    EventCameraPathStarted();
+    EventCameraPathStarted(const SceneGraphNode* origin_,
+        const SceneGraphNode* destination_);
+
+    const tstring origin;
+    const tstring destination;
 };
 
 /**
@@ -542,8 +549,15 @@ struct EventCameraPathFinished : public Event {
 
     /**
      * Creates an instance of an EventCameraPathStarted event.
+     *
+     * \param origin_ The scene graph node from which the path started
+     * \param destination_ The scene graph node where the path ended
      */
-    EventCameraPathFinished();
+    EventCameraPathFinished(const SceneGraphNode* origin_,
+        const SceneGraphNode* destination_);
+
+    const tstring origin;
+    const tstring destination;
 };
 
 /**

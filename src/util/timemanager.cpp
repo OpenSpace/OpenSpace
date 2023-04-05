@@ -509,7 +509,7 @@ void TimeManager::addDeltaTimesKeybindings() {
         );
         action.name = fmt::format("Set Simulation Speed: {}", s);
         action.guiPath = DeltaTimeStepsKeybindsGuiPath;
-        action.synchronization = interaction::Action::IsSynchronized::No;
+        action.isLocal = interaction::Action::IsLocal::Yes;
         global::actionManager->registerAction(std::move(action));
         global::keybindingManager->bindKey(key, mod, std::move(identifier));
         _deltaTimeStepKeybindings.push_back(KeyWithModifier{ key, mod });

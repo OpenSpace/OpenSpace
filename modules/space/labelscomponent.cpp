@@ -83,6 +83,12 @@ namespace {
         "display rendering (for example fisheye) this should be set to false."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
+        "TransformationMatrix",
+        "Transformation Matrix",
+        "Transformation matrix to be applied to the labels"
+    };
+
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
@@ -115,6 +121,9 @@ namespace {
 
         // [[codegen::verbatim(FaceCameraInfo.description)]]
         std::optional<bool> faceCamera;
+
+        // [[codegen::verbatim(TransformationMatrixInfo.description)]]
+        std::optional<glm::dmat4x4> transformationMatrix;
     };
 #include "labelscomponent_codegen.cpp"
 } // namespace
@@ -184,6 +193,8 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
         _faceCamera = !global::windowDelegate->isFisheyeRendering();
     }
     addProperty(_faceCamera);
+
+    _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 }
 
 speck::Labelset& LabelsComponent::labelSet() {
@@ -241,8 +252,11 @@ void LabelsComponent::render(const RenderData& data,
             continue;
         }
 
-        glm::vec3 scaledPos(e.position);
+        // Transform and scale the labels
+        glm::vec3 transformedPos(_transformationMatrix * glm::dvec4(e.position, 1.0));
+        glm::vec3 scaledPos(transformedPos);
         scaledPos *= scale;
+
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,

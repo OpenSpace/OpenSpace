@@ -1,6 +1,6 @@
 <GDAL_WMS>
   <Service name="TMS">
-    <ServerUrl>http://openspace.sci.utah.edu/Moon/Wac3/tile/${z}/${y}/${x}</ServerUrl>
+    <ServerUrl>http://openspace.sci.utah.edu/Moon/Wac/tile/${z}/${y}/${x}</ServerUrl>
   </Service>
   <DataWindow>
     <UpperLeftX>-180.0</UpperLeftX>
@@ -13,8 +13,9 @@
     <YOrigin>top</YOrigin>
   </DataWindow>
   <Projection>GEOGCS["GCS_Moon_2000",DATUM["D_Moon_2000",SPHEROID["Moon_2000_IAU_IAG",1737400.0,0.0]],PRIMEM["Reference_Meridian",0.0],UNIT["Degree",0.0174532925199433]]</Projection>
-  <BlockSizeX>360</BlockSizeX>
-  <BlockSizeY>360</BlockSizeY>
+  <BlockSizeX>256</BlockSizeX>
+  <BlockSizeY>256</BlockSizeY>
   <BandsCount>1</BandsCount>
   <MaxConnections>10</MaxConnections>
+  <Timeout>5</Timeout>
 </GDAL_WMS>
