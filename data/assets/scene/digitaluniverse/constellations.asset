@@ -102,9 +102,7 @@ local show_constellations = {
   Name = "Show all",
   Command = [[
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", {})
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 0.0)
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", true)
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 1.0, 2)
+    openspace.fadeIn("Constellations", 2.0)
   ]],
   Documentation = "Shows all the constellations lines",
   GuiPath = "/Constellations/Lines",
@@ -115,7 +113,7 @@ local hide_constellations = {
   Identifier = "constellations.hide",
   Name = "Hide all",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 0.0, 2.0, "Linear", "openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', true); openspace.setPropertyValueSingle('Scene.Constellations.Renderable.ConstellationSelection', {})")
+    openspace.fadeOut("Constellations", 2.0, "openspace.setPropertyValueSingle('Scene.Constellations.Renderable.ConstellationSelection', {})")
   ]],
   Documentation = "Hides all the constellations lines",
   GuiPath = "/Constellations/Lines",
@@ -127,9 +125,7 @@ local show_zodiacs = {
   Name = "Show zodiac",
   Command = [[
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", ]] .. zodiacsString .. [[)
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 0.0)
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", true)
-    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 1.0, 2)
+    openspace.fadeIn("Constellations", 2.0)
   ]],
   Documentation = "Shows the zodiac constellations lines",
   GuiPath = "/Constellations/Lines",
@@ -161,7 +157,7 @@ asset.export(constellations)
 
 asset.meta = {
   Name = "Constellations",
-  Version = "1.2",
+  Version = "1.3",
   Description = "Digital Universe asset for constellation lines",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

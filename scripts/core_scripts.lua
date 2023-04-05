@@ -59,6 +59,32 @@ openspace.documentation = {
         Arguments = { identifier = "String" },
         Documentation = "Inverts the value of a boolean property with the given "..
         "identifier"
+    },
+    {
+        Name = "fadeIn",
+        Arguments = {
+            identifier = "String",
+            fadeTime = "Number?",
+            endScript = "String?"
+        },
+        Documentation = "Fades in the node with the given identifier over the given " ..
+        "time in seconds. If the fade time is not provided then the " ..
+        "'OpenSpaceEngine.FadeDuration' property will be used instead. If the third " ..
+        "argument (endScript) is provided then that script will be run after the fade " ..
+        "is finished."
+    },
+    {
+        Name = "fadeOut",
+        Arguments = {
+            identifier = "String",
+            fadeTime = "Number?",
+            endScript = "String?"
+        },
+        Documentation = "Fades out the node with the given identifier over the given " ..
+        "time in seconds. If the fade time is not provided then the " ..
+        "'OpenSpaceEngine.FadeDuration' property will be used instead. If the third " ..
+        "argument (endScript) is provided then that script will be run after the fade " ..
+        "is finished."
     }
 }
 
@@ -136,4 +162,87 @@ openspace.invertBooleanProperty = function(propertyIdentifier)
         return;
     end
     openspace.setPropertyValueSingle(propertyIdentifier, not value)
+end
+
+openspace.fadeIn = function(identifier, fadeTime, endScript)
+    if endScript == nil then
+        endScript = ""
+    end
+
+    if fadeTime == nil then
+        fadeTime = openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
+    end
+
+    local exists = openspace.hasSceneGraphNode(identifier)
+    if not exists then
+        openspace.printError(
+            "Error when calling script 'openspace.fadeIn': " ..
+            "Could not find node '" .. identifier .. "'"
+        )
+        return;
+    end
+    local nodeIdentifier = "Scene." .. identifier
+    local enabledProperty = nodeIdentifier .. ".Renderable.Enabled"
+    local fadeProperty = nodeIdentifier .. ".Renderable.Fade"
+
+    exists = openspace.hasProperty(enabledProperty)
+    if not exists then
+        openspace.printError(
+            "Error when calling script 'openspace.fadeIn': " ..
+            "Could not find Renderable for node '" .. identifier .. "'"
+        )
+    end
+
+    local isEnabled = openspace.getPropertyValue(enabledProperty)
+    if not isEnabled then
+        openspace.setPropertyValue(fadeProperty, 0.0)
+        openspace.setPropertyValue(enabledProperty, true)
+    end
+    openspace.setPropertyValue(fadeProperty, 1.0, fadeTime, "Linear", endScript)
+end
+
+openspace.fadeOut = function(identifier, fadeTime, endScript)
+    if endScript == nil then
+        endScript = ""
+    end
+
+    if fadeTime == nil then
+        fadeTime = openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
+    end
+
+    local exists = openspace.hasSceneGraphNode(identifier)
+    if not exists then
+        openspace.printError(
+            "Error when calling script 'openspace.fadeOut': " ..
+            "Could not find node '" .. identifier .. "'"
+        )
+        return;
+    end
+    local nodeIdentifier = "Scene." .. identifier
+    local enabledProperty = nodeIdentifier .. ".Renderable.Enabled"
+    local fadeProperty = nodeIdentifier .. ".Renderable.Fade"
+
+    local exists = openspace.hasProperty(enabledProperty)
+    if not exists then
+        openspace.printError(
+            "Error when calling script 'openspace.fadeOut': " ..
+            "Could not find Renderable for node '" .. identifier .. "'"
+        )
+    end
+
+    local isEnabled = openspace.getPropertyValue(enabledProperty)
+    if isEnabled then
+        local disableScript = [[
+            openspace.setPropertyValue("]] .. enabledProperty .. [[", false)
+            openspace.setPropertyValue("]] .. fadeProperty .. [[", 1.0)
+            ]] .. endScript .. [[
+        ]]
+        openspace.setPropertyValue(
+            nodeIdentifier .. ".Renderable.Fade",
+            0.0,
+            fadeTime,
+            "Linear",
+            disableScript
+        )
+    end
 end
