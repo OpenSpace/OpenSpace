@@ -283,7 +283,7 @@ namespace openspace {
             );
         
         if (_seedPointProvider) {
-            getSeedPointsFromAPI("http://localhost:5000/get_text_file", "seed_points", "seed_points.txt");
+            getSeedPointsFromAPI("http://localhost:5000/get_csv_file", "seed_points", "seedpoints.csv");
         }
         else if (!_seedPointProvider && _seedFilePath.empty()) {
             throw ghoul::RuntimeError(
@@ -548,18 +548,19 @@ namespace openspace {
     }
     
     // Initializes curl, creates a text file in sync folder, writes response (api request to URL), to textfile
-    void RenderableMovingFieldlines::getSeedPointsFromAPI(std::string URL, std::string folderNameInSyncFolder, std::string nameOfGeneratedTextFile ) {
+    void RenderableMovingFieldlines::getSeedPointsFromAPI(std::string URL, std::string folderNameInSyncFolder, std::string nameOfGeneratedFile ) {
         CURL* curl = curl_easy_init();
 
         if (curl)
         {
-            std::filesystem::path pathToDownloadTo = initializeSyncDirectory(folderNameInSyncFolder, nameOfGeneratedTextFile);
+            std::filesystem::path pathToDownloadTo = initializeSyncDirectory(folderNameInSyncFolder, nameOfGeneratedFile);
             FILE* fp = fopen(pathToDownloadTo.string().c_str(), "wb");
             curl_easy_setopt(curl, CURLOPT_URL, URL.c_str());
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
             curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
             CURLcode res = curl_easy_perform(curl);
+
             curl_easy_cleanup(curl);
             fclose(fp);
         }
@@ -589,6 +590,8 @@ namespace openspace {
         if (!seedFileStream.good()) {
             throw ghoul::RuntimeError(fmt::format("Could not read from {}", seedFile));
         }
+
+        //TODO: get certain seedpoints
 
         std::string line;
         while (std::getline(seedFileStream, line)) {

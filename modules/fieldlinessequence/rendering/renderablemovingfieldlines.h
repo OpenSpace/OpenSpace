@@ -96,7 +96,7 @@ public:
 private:
     static size_t write_data(void* ptr, size_t size, size_t nmemb, FILE* stream);
     std::filesystem::path initializeSyncDirectory(std::string folderName, std::string nameOfTextFile);
-    void getSeedPointsFromAPI(std::string URL, std::string folderNameInSyncFolder, std::string nameOfGeneratedTextFile);
+    void getSeedPointsFromAPI(std::string URL, std::string folderNameInSyncFolder, std::string nameOfGeneratedFile);
     bool getStateFromCdfFiles();
     void updateVertexPositionBuffer();
     void updateVertexColorBuffer();
