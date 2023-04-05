@@ -67,7 +67,7 @@ public:
     glm::ivec2 fullPixelSize() const;
 
 private:
-    std::optional<std::string> getMRFCache();
+    std::optional<std::string> mrfCache();
     
     void initialize();
 

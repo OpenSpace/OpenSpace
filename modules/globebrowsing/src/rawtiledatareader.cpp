@@ -442,7 +442,7 @@ RawTileDataReader::~RawTileDataReader() {
     }
 }
 
-std::optional<std::string> RawTileDataReader::getMRFCache() {
+std::optional<std::string> RawTileDataReader::mrfCache() {
     GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
 
     std::string datasetIdentifier =
@@ -468,7 +468,7 @@ std::optional<std::string> RawTileDataReader::getMRFCache() {
 
         GDALDriver* driver = GetGDALDriverManager()->GetDriverByName("MRF");
         if (driver != nullptr) {
-            auto src = static_cast<GDALDataset*>(GDALOpen(_datasetFilePath.c_str(), GA_ReadOnly));
+            GDALDataset* src = static_cast<GDALDataset*>(GDALOpen(_datasetFilePath.c_str(), GA_ReadOnly));
             if (!src) {
                 LWARNING(fmt::format(
                     "Failed to load dataset: {}. GDAL Error: {}",
@@ -476,6 +476,8 @@ std::optional<std::string> RawTileDataReader::getMRFCache() {
                 ));
                 return std::nullopt;
             }
+
+            defer{ GDALClose(src); };
 
             {
                 // Check if there is a geotransform present, if not assume its bounds are
@@ -510,7 +512,7 @@ std::optional<std::string> RawTileDataReader::getMRFCache() {
             createOpts = CSLSetNameValue(createOpts, "indexname", cache.c_str());
             createOpts = CSLSetNameValue(createOpts, "DATANAME", cache.c_str());
 
-            auto dst = static_cast<GDALDataset*>(driver->CreateCopy(mrf.c_str(), src, FALSE, createOpts, NULL, NULL));
+            GDALDataset* dst = static_cast<GDALDataset*>(driver->CreateCopy(mrf.c_str(), src, false, createOpts, nullptr, nullptr));
             if (!dst) {
                 LWARNING(fmt::format(
                     "Failed to create MRF Caching dataset dataset: {}. GDAL Error: {}",
@@ -519,7 +521,6 @@ std::optional<std::string> RawTileDataReader::getMRFCache() {
                 return std::nullopt;
             }
             GDALClose(dst);
-            GDALClose(src);
 
             return mrf;
         }
@@ -613,7 +614,7 @@ void RawTileDataReader::initialize() {
     if (_cacheProperties.enabled) {
         ZoneScopedN("MRF Caching");
 
-        std::optional<std::string> cache = getMRFCache();
+        std::optional<std::string> cache = mrfCache();
         if (cache.has_value()) {
             content = cache.value();
         }

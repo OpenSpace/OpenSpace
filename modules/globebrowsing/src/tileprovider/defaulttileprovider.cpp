@@ -81,10 +81,10 @@ namespace {
             std::optional<std::string> compression;
 
             // The quality setting of the compression alogrithm, only valid for JPEG
-            std::optional<int> quality;
+            std::optional<int> quality [[codegen::inrange(0, 100)]];
 
             // The block-size of the MRF cache
-            std::optional<int> blockSize;
+            std::optional<int> blockSize [[codegen::greater(0)]];
         };
         // Specifies the cache settings that should be applied to this layer
         std::optional<CacheSettings> cacheSettings;
