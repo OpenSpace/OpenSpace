@@ -164,11 +164,15 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, Settings settings)
 {
     ZoneScoped;
 
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.renderBinMode.has_value()) {
+        // If the user specified a RenderBin manually, we disable the automatic bin update
+        settings.automaticallyUpdateRenderBin = false;
+    }
     if (settings.automaticallyUpdateRenderBin) {
         registerUpdateRenderBinFromOpacity();
     }
-
-    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     if (p.tag.has_value()) {
         if (std::holds_alternative<std::string>(*p.tag)) {
