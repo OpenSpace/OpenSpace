@@ -443,6 +443,32 @@ RawTileDataReader::~RawTileDataReader() {
 }
 
 std::optional<std::string> RawTileDataReader::mrfCache() {
+    // We don't support these formats as they will typically lack
+    // crucial imformation such as GeoTags. It also makes little sense to
+    // cache them as they are already local files.
+    // If it is crucial to cache a dataset of this type, convert it to geotiff.
+    constexpr std::array<std::string, 11> unsupported = {
+        "jpeg", "jpg",
+        "png",
+        "bmp",
+        "psd",
+        "tga",
+        "gif",
+        "hdr",
+        "pic",
+        "ppm", "pgm"
+    };
+
+    for (const std::string fmt : unsupported) {
+        if (_datasetFilePath.ends_with(fmt)) {
+            LWARNING(fmt::format(
+                "Unsupported file format for MRF caching: {}, Dataset: {}",
+                fmt, _datasetFilePath
+            ));
+            return std::nullopt;
+        }
+    }
+
     GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
 
     std::string datasetIdentifier =
@@ -478,29 +504,6 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
             }
 
             defer{ GDALClose(src); };
-
-            {
-                // Check if there is a geotransform present, if not assume its bounds are
-                // [-180, 180] W<->E and [-90, 90] N<->S and North-up
-                double geoTransform[6];
-                CPLErr err = src->GetGeoTransform(geoTransform);
-                if (err != CPLErr::CE_None) {
-                    geoTransform[0] = -180.0;
-                    geoTransform[1] = 360.0 / src->GetRasterXSize();
-                    geoTransform[2] = 0.0;
-                    geoTransform[3] = 90.0;
-                    geoTransform[4] = 0.0;
-                    geoTransform[5] = -180.0 / src->GetRasterYSize(); // Negative for north-up
-                    err = src->SetGeoTransform(geoTransform);
-                    if (err != CPLErr::CE_None) {
-                        LWARNING(fmt::format(
-                            "Failed to set default Geo Transform of dataset: {}. GDAL Error: {}",
-                            _datasetFilePath, CPLGetLastErrorMsg()
-                        ));
-                        return std::nullopt;
-                    }
-                }
-            }
 
             char** createOpts = nullptr;
             createOpts = CSLSetNameValue(createOpts, "CACHEDSOURCE", _datasetFilePath.c_str());
@@ -540,79 +543,7 @@ void RawTileDataReader::initialize() {
     if (_datasetFilePath.empty()) {
         throw ghoul::RuntimeError("File path must not be empty");
     }
-
-    GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
-
     std::string content = _datasetFilePath;
-    if (module.isWMSCachingEnabled()) {
-        ZoneScopedN("WMS Caching");
-        std::string c;
-        if (std::filesystem::is_regular_file(_datasetFilePath)) {
-            // Only replace the 'content' if the dataset is an XML file and we want to do
-            // caching
-            std::ifstream t(_datasetFilePath);
-            c.append(
-                (std::istreambuf_iterator<char>(t)),
-                std::istreambuf_iterator<char>()
-            );
-        }
-        else {
-            //GDAL input case for configuration string (e.g. temporal data)
-            c = _datasetFilePath;
-        }
-
-        if (c.size() > 10 && c.substr(0, 10) == "<GDAL_WMS>") {
-            // We know that _datasetFilePath is an XML file, so now we add a Cache line
-            // into it iff there isn't already one in the XML and if the configuration
-            // says we should
-
-            // 1. Parse XML
-            // 2. Inject Cache tag if it isn't already there
-            // 3. Serialize XML to pass into GDAL
-
-            LDEBUGC(_datasetFilePath, "Inserting caching tag");
-
-            bool shouldSerializeXml = false;
-
-            CPLXMLNode* root = CPLParseXMLString(c.c_str());
-            CPLXMLNode* cache = CPLSearchXMLNode(root, "Cache");
-            if (!cache) {
-                // If there already is a cache, we don't want to modify it
-                cache = CPLCreateXMLNode(root, CXT_Element, "Cache");
-
-                CPLCreateXMLElementAndValue(
-                    cache,
-                    "Path",
-                    absPath(module.wmsCacheLocation()).string().c_str()
-                );
-                CPLCreateXMLElementAndValue(cache, "Depth", "4");
-                CPLCreateXMLElementAndValue(cache, "Expires", "315576000"); // 10 years
-                CPLCreateXMLElementAndValue(
-                    cache,
-                    "MaxSize",
-                    std::to_string(module.wmsCacheSize()).c_str()
-                );
-
-                // The serialization only needs to be one if the cache didn't exist
-                // already
-                shouldSerializeXml = true;
-            }
-
-            if (module.isInOfflineMode()) {
-                CPLXMLNode* offlineMode = CPLSearchXMLNode(root, "OfflineMode");
-                if (!offlineMode) {
-                    CPLCreateXMLElementAndValue(root, "OfflineMode", "true");
-                    shouldSerializeXml = true;
-                }
-            }
-
-
-            if (shouldSerializeXml) {
-                content = std::string(CPLSerializeXMLTree(root));
-                //CPLSerializeXMLTreeToFile(root, (_datasetFilePath + ".xml").c_str());
-            }
-        }
-    }
 
     if (_cacheProperties.enabled) {
         ZoneScopedN("MRF Caching");

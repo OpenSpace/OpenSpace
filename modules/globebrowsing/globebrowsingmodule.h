@@ -92,11 +92,6 @@ public:
 
     void removeWMSServer(const std::string& name);
 
-    bool isWMSCachingEnabled() const;
-    bool isInOfflineMode() const;
-    std::string wmsCacheLocation() const;
-    uint64_t wmsCacheSize() const; // bytes
-
     bool isMRFCachingEnabled() const;
     const std::string mrfCacheLocation() const;
 
@@ -116,10 +111,6 @@ private:
     glm::dquat lookDownCameraRotation(const globebrowsing::RenderableGlobe& globe,
         glm::dvec3 cameraPositionModelSpace, globebrowsing::Geodetic2 geo2);
 
-    properties::BoolProperty _wmsCacheEnabled;
-    properties::BoolProperty _offlineMode;
-    properties::StringProperty _wmsCacheLocation;
-    properties::UIntProperty _wmsCacheSizeMB;
     properties::UIntProperty _tileCacheSizeMB;
 
     properties::BoolProperty _mrfCacheEnabled;
