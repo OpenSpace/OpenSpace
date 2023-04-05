@@ -154,13 +154,6 @@ glm::dmat3 computeSystemRotation(glm::dvec3 starPosition) {
     );
 }
 
-std::string createIdentifier(std::string name) {
-    std::replace(name.begin(), name.end(), ' ', '_');
-    std::replace(name.begin(), name.end(), '.', '-');
-    sanitizeNameString(name);
-    return name;
-}
-
 void sanitizeNameString(std::string& s) {
     // We want to avoid quotes and apostrophes in names, since they cause problems
     // when a string is translated to a script call

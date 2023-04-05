@@ -15,7 +15,7 @@ local layer = {
     into sinusoidal, Mercator, and north and south polar stereographic projections
     at a resolution of 5 kilometers per pixel (4641 meters per pixel [m])]],
   FilePath = asset.localResource("magellan_utah.wms"),
-  TilePixelSize = 64,
+  TilePixelSize = 256,
   Settings = {
     Gamma = 1.72,
     Multiplier = 1.1

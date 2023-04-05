@@ -31,7 +31,7 @@
 namespace openspace::interaction {
 
 struct Action {
-    BooleanType(IsSynchronized);
+    BooleanType(IsLocal);
 
     /// Unique identifier that identifies this action. There is no special naming scheme
     /// that we enforce, we are trying to stick to the same . separated structure that
@@ -59,10 +59,11 @@ struct Action {
     /// for the root path
     std::string guiPath = "/";
 
-    /// If this value is set to `Yes`, the execution of this action is synchronized to
-    /// other OpenSpace instances, for example other nodes in a cluster environment, or
-    /// to other OpenSpace instances using a parallel connection
-    IsSynchronized synchronization = IsSynchronized::Yes;
+    /// If this value is set to `Yes`, the execution of this action is restricted to the
+    /// current OpenSpace instance. If it is `No`, it is synchronized to other OpenSpace
+    /// instances, for example other nodes in a cluster environment, or to other OpenSpace
+    /// instances using a parallel connection
+    IsLocal isLocal = IsLocal::Yes;
 };
 
 } // namespace openspace::interaction

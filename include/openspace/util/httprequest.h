@@ -44,7 +44,7 @@ namespace openspace {
  * returned based on this request is returned through three callback functions that can be
  * registered using the #onHeader, #onProgress, and #onData functions. Calling these
  * functions will overwrite any previously registered handler.
- * The ProgressCallback can be used to stop the download if the handler returns \c false.
+ * The ProgressCallback can be used to stop the download if the handler returns `false`.
  *
  * The workflow for this class:
  * 1. Create a new object with the URL that points to the location from which the data
@@ -59,13 +59,13 @@ public:
      * transmits currently downloaded number of bytes (which can be 0 if the download
      * hasn't started yet) and the total number of bytes if that value is known. The
      * return value determines if the download should continue (if the function returns
-     * \c true) or if it should abort (if \c false is returned).
+     * `true`) or if it should abort (if `false` is returned).
      *
      * \param downloadedBytes The number of bytes that have been downloaded thus far or 0
      *        if the download hasn't started yet
      * \param totalBytes The total number of bytes for the download if it is known, or a
      *        std::nullopt of the total size is unknown
-     * \return \c true if the download should continue or \c false if it should be aborted
+     * \return `true` if the download should continue or `false` if it should be aborted
      */
     using ProgressCallback = std::function<
         bool(size_t downloadedBytes, std::optional<size_t> totalBytes)
@@ -76,8 +76,8 @@ public:
      * parameters point to the buffer of this new incoming data and the number of bytes
      * that have arrived. The buffer pointed to will most likely only be valid during the
      * time of the callback and it is the callbacks responsibility to store the contents
-     * of the buffer before the callback returns. If the return value is \c true, the
-     * download continues, if it is \c false, this signals to the library that an error
+     * of the buffer before the callback returns. If the return value is `true`, the
+     * download continues, if it is `false`, this signals to the library that an error
      * has occurred from which recovery is not possible.
      *
      * \param buffer The pointer to the beginning of the buffer where the new incoming
@@ -85,7 +85,7 @@ public:
      *        callback and the contents of the buffer should be copied to a different
      *        location
      * \param size The number of bytes that are contained in the \p buffer
-     * \return \c true if the download should continue or \c false if it should be aborted
+     * \return `true` if the download should continue or `false` if it should be aborted
      */
     using DataCallback = std::function<bool(char* buffer, size_t size)>;
 
@@ -94,17 +94,17 @@ public:
      * successfully. The provided buffer and size contain the contents of the header field
      * for the response. The buffer pointed to will most likely only be valid during the
      * time of the callback and it is the callbacks responsibility to store the contents
-     * of the buffer before the callback returns. If the return value is \c true, the
-     * download continues, if it is \c false, this signals to the library that an error
+     * of the buffer before the callback returns. If the return value is `true`, the
+     * download continues, if it is `false`, this signals to the library that an error
      * has occurred from which recovery is not possible. If this function returns
-     * \c false, it will cause the main download to not start at all.
+     * `false`, it will cause the main download to not start at all.
      *
      * \param buffer The pointer to the beginning of the buffer where the header
      *        information is located. This buffer is only valid during the execution of
      *        this callback and the contents of the buffer should be copied to a different
      *        location
      * \param size The number of bytes that are contained in the \p buffer
-     * \return \c true if the download should continue or \c false if it should be aborted
+     * \return `true` if the download should continue or `false` if it should be aborted
      */
     using HeaderCallback = std::function<bool(char* buffer, size_t size)>;
 
@@ -146,8 +146,8 @@ public:
      * received from the request. It is this callback's responsibility to store that data
      * in a place that is persistent across multiple calls to the callback, usually by
      * storing it in an external buffer and appending to it. The callback can return
-     * whether the download should proceed (by returning \c true) or be aborted (by
-     * returning \c false).
+     * whether the download should proceed (by returning `true`) or be aborted (by
+     * returning `false`).
      *
      * \param cb The callback that should be registered. This will silently replace any
      *        previously registered callback
@@ -165,7 +165,7 @@ public:
      *        server not responding. If this value is 0, there is no timeout on the
      *        request.
      *
-     * \return \c true if the request completed successfully, \c false otherwise
+     * \return `true` if the request completed successfully, `false` otherwise
      */
     bool perform(std::chrono::milliseconds timeout = std::chrono::milliseconds(0));
 
@@ -203,7 +203,7 @@ class HttpDownload {
 public:
     /**
      * Creates a new HttpDownload that will start to download the file pointed to by the
-     * \param url parameter as soon as the download is #start ed.
+     * \p url parameter as soon as the download is #start ed.
      *
      * \param url The URL that should be downloaded by this HttpDownload
      *
@@ -252,12 +252,12 @@ public:
      * This function will wait until the download has completed and will return the
      * success of the download back to the caller.
      *
-     * \return \c true if the downloaded succeeded or \c false if the download failed
+     * \return `true` if the downloaded succeeded or `false` if the download failed
      */
     bool wait();
 
     /**
-     * Returns \c true if the download has completed and it failed, or \c false if either
+     * Returns `true` if the download has completed and it failed, or `false` if either
      * the download is till ongoing or is finished and has succeeded.
      *
      * \return Whether the download has completed and it failed
@@ -265,7 +265,7 @@ public:
     bool hasFailed() const;
 
     /**
-     * Returns \c true if the download has completed successfully , or \c false if either
+     * Returns `true` if the download has completed successfully , or `false` if either
      * the download is till ongoing or is finished and has failed.
      *
      * \return Whether the download has completed successfully
@@ -286,16 +286,16 @@ protected:
      * this new incoming data and the number of bytes that have arrived. The buffer
      * pointed to will most likely only be valid during the time of the callback and it is
      * the callbacks responsibility to store the contents of the buffer before the
-     * callback returns. If the return value is \c true, the download continues, if it is
-     * \c false, this signals to the library that an error has occurred from which
+     * callback returns. If the return value is `true`, the download continues, if it is
+     * `false`, this signals to the library that an error has occurred from which
      * recovery is not possible. This function will be called on a different thread from
      * the one that called the #start method.
      *
      * \param buffer The beginning of the buffer of this chunk of data
      * \param size The number of bytes that the \p buffer contains
      *
-     * \return The implementation should return \c true if the downloading should continue
-     *         and \c false if the handling of the data caused some error that the
+     * \return The implementation should return `true` if the downloading should continue
+     *         and `false` if the handling of the data caused some error that the
      *         subclass is incapable of recovering from
      */
     virtual bool handleData(char* buffer, size_t size) = 0;
@@ -308,7 +308,7 @@ protected:
      * error occurred that will cause the download to be terminated. This function will be
      * called on a different thread from the one that called the #start method.
      *
-     * \return \c true if the setup completed successfully and \c false if the setup
+     * \return `true` if the setup completed successfully and `false` if the setup
      *         failed unrecoverably
      */
     virtual bool setup();
@@ -321,7 +321,7 @@ protected:
      * signals whether the teardown completed successfully. This function will be called
      * on a different thread from the one that called the #start method.
      *
-     * \return \c true if the teardown completed successfully and \c false if it failed
+     * \return `true` if the teardown completed successfully and `false` if it failed
      */
     virtual bool teardown();
 
@@ -427,7 +427,7 @@ private:
  * This concerete HttpDownload subclass downloads the contents of the URL passed into the
  * constructor into a buffer of memory that can be retrieve. Please note that that buffer
  * should only be used accessed once the HttpDownload::hasFinished function returns
- * \c true.
+ * `true`.
  */
 class HttpMemoryDownload : public HttpDownload {
 public:
@@ -448,8 +448,8 @@ public:
     /**
      * Returns a reference to the buffer that is used to store the contents of the URL
      * passed in the constructor. Please observe that while the HttpDownload::hasFinished
-     * method returns \c false, this buffer will be changed by a different thread and
-     * access is not thread-safe. After that function returns \c true, it is safe to
+     * method returns `false`, this buffer will be changed by a different thread and
+     * access is not thread-safe. After that function returns `true`, it is safe to
      * access the buffer.
      *
      * \return A reference to the buffer used to hold the contents of the URL

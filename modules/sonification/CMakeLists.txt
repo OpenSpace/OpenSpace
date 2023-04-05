@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2023                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -27,6 +27,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/include/comparesonification.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/cosmicsonification.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/focussonification.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/planetssonification.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/solarsonification.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/sonificationbase.h
@@ -37,7 +38,9 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/comparesonification.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/cosmicsonification.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/focussonification.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification_lua.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/src/solarsonification.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/sonificationbase.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timesonification.cpp

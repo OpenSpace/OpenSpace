@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "scene/solarsystem/interstellar/c-2019_q4_borisov",
     "scene/solarsystem/interstellar/oumuamua",
     "scene/solarsystem/sssb/amor_asteroid",

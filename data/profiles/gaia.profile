@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "scene/milkyway/gaia/apogee",
     "scene/milkyway/gaia/gaiastars",
     "scene/milkyway/gaia/galah",

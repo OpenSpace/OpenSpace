@@ -31,6 +31,8 @@
 
 namespace openspace {
 
+namespace scripting { struct LuaLibrary; }
+
 class PlanetsSonification : public SonificationBase {
 public:
     PlanetsSonification(const std::string& ip, int port);
@@ -48,7 +50,27 @@ public:
      */
     virtual void stop() override;
 
+    /**
+    * Add the given planet to the list of planets and moons
+    *
+    * \param dict the planet that should be added
+    */
+    void addPlanet(ghoul::Dictionary dict);
+
+    /**
+     * Returns the Lua library that contains all Lua functions available to change the
+     * planets sonification.
+     * \return The Lua library that contains all Lua functions available to change the
+     * planets sonification
+     */
+    static scripting::LuaLibrary luaLibrary();
+
 private:
+    const int NumDataItems = 3;
+    const int DistanceIndex = 0;
+    const int HAngleIndex = 1;
+    const int VAngleIndex = 2;
+
     // Struct to hold data for all the planets
     struct Planet {
         Planet(std::string id = "") {
@@ -56,11 +78,12 @@ private:
         }
 
         std::string identifier;
-        double distance = 0.0;
-        double angle = 0.0;
 
-        // std::vector<std::pair<name of moon, latset calculated angle to it>>
-        std::vector<std::pair<std::string, double>> moons;
+        // Distance, horizontal angle, vertical angle
+        std::vector<double> data = std::vector<double>(3);
+
+        // <name of moon, <distance, horizontal angle, vertical angle>>
+        std::vector<std::pair<std::string, std::vector<double>>> moons;
     };
 
     /**

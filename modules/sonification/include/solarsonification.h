@@ -49,29 +49,6 @@ public:
     virtual void stop() override;
 
 private:
-    // Struct to hold data for all the planets
-    struct Planet {
-        Planet(std::string id = "") {
-            identifier = id;
-        }
-
-        std::string identifier;
-        double distance = 0.0;
-        double angle = 0.0;
-    };
-
-    /**
-     * Update distance and angle data for the given planet
-     *
-     * \param camera pointer to the camera in the scene. Used to calculated the data for
-     *               the planet
-     * \param planet a reference to the internally stored planet data that should be
-     *               updated
-     *
-     * \return true if the data is new compared to before, otherwise false
-     */
-    bool getData(const Camera* camera, Planet& planet);
-
     /**
      * Create a osc::Blob object with current sonification settings.
      * Order of settings: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune
@@ -87,8 +64,6 @@ private:
 
     // Properties onChange
     void onToggleAllChanged();
-
-    std::vector<Planet> _planets;
 
     // Properties
     properties::BoolProperty _toggleAll;

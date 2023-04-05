@@ -43,9 +43,6 @@ public:
     int typeLua() const override;
 
     using TemplateProperty<glm::dvec3>::operator=;
-
-protected:
-    glm::dvec3 fromLuaConversion(lua_State* state, bool& success) const override;
 };
 
 } // namespace openspace::properties

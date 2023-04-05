@@ -65,12 +65,11 @@ protected:
     explicit RenderableConstellationsBase(const ghoul::Dictionary& dictionary);
 
     /**
-     * Callback method that gets triggered when <code>_constellationSelection</code>
-     * changes
+     * Callback method that gets triggered when `_constellationSelection` changes
      */
     virtual void selectionPropertyHasChanged() = 0;
 
-    /// Takes the given constellation <code>identifier</code> and returns the coresponding
+    /// Takes the given constellation `identifier` and returns the corresponding
     /// full name
     std::string constellationFullName(const std::string& identifier) const;
 
@@ -87,6 +86,8 @@ protected:
     // Labels
     bool _hasLabels = false;
     properties::BoolProperty _drawLabels;
+    // Everything related to the labels is handled by LabelsComponent
+    std::unique_ptr<LabelsComponent> _labels;
 
 private:
     // Map over the constellations names and their abbreviations
@@ -94,19 +95,16 @@ private:
     std::map<std::string, std::string> _namesTranslation;
 
     /**
-     * Loads the file specified in <code>_constellationNamesFilename</code> that contains
+     * Loads the file specified in `_constellationNamesFilename` that contains
      * the mapping between abbreviations and full names of constellations
      */
     void loadConstellationFile();
 
-    /// Fills the <code>_constellationSelection</code> property with all constellations
+    /// Fills the `_constellationSelection` property with all constellations
     void fillSelectionProperty();
 
     // The file containing constellation names and abbreviations
     properties::StringProperty _namesFilename;
-
-    // Everything related to the labels is handled by LabelsComponent
-    std::unique_ptr<LabelsComponent> _labels;
 };
 
 } // namespace openspace

@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
+#include <sgct/readconfig.h>
 #include <QComboBox>
 #include <QFile>
 #include <QLabel>
@@ -41,7 +42,10 @@
 #include <fstream>
 #include <iostream>
 #include <random>
-#include <sgct/readconfig.h>
+
+#ifdef WIN32
+#include <Windows.h>
+#endif // WIN32
 
 using namespace openspace;
 
@@ -51,7 +55,7 @@ namespace {
 
     constexpr int LeftRuler = 40;
     constexpr int TopRuler = 80;
-    constexpr int ItemWidth = 240;
+    constexpr int ItemWidth = 260;
     constexpr int ItemHeight = ItemWidth / 4;
     constexpr int SmallItemWidth = 100;
     constexpr int SmallItemHeight = SmallItemWidth / 4;
@@ -62,7 +66,7 @@ namespace {
         constexpr QRect ChooseLabel(LeftRuler, TopRuler + 80, 151, 24);
         constexpr QRect ProfileBox(LeftRuler, TopRuler + 110, ItemWidth, ItemHeight);
         constexpr QRect NewProfileButton(
-            LeftRuler + 140, TopRuler + 180, SmallItemWidth, SmallItemHeight
+            LeftRuler + 160, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect EditProfileButton(
             LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
@@ -70,7 +74,7 @@ namespace {
         constexpr QRect OptionsLabel(LeftRuler, TopRuler + 230, 151, 24);
         constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 260, ItemWidth, ItemHeight);
         constexpr QRect NewWindowButton(
-            LeftRuler + 140, TopRuler + 330, SmallItemWidth, SmallItemHeight
+            LeftRuler + 160, TopRuler + 330, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect EditWindowButton(
             LeftRuler, TopRuler + 330, SmallItemWidth, SmallItemHeight
@@ -137,11 +141,29 @@ namespace {
 
     void saveProfile(QWidget* parent, const std::string& path, const Profile& p) {
         std::ofstream outFile;
+        outFile.exceptions(std::ofstream::badbit | std::ofstream::failbit);
         try {
             outFile.open(path, std::ofstream::out);
             outFile << p.serialize();
         }
         catch (const std::ofstream::failure& e) {
+#ifdef WIN32
+            if (std::filesystem::exists(path)) {
+                // Check if the file is hidden, since that causes ofstream to fail
+                DWORD res = GetFileAttributesA(path.c_str());
+                if (res & FILE_ATTRIBUTE_HIDDEN) {
+                    QMessageBox::critical(
+                        parent,
+                        "Exception",
+                        QString::fromStdString(fmt::format(
+                            "Error writing data to file: '{}' as file is marked hidden",
+                            path
+                        ))
+                    );
+                    return;
+                }
+            }
+#endif // WIN32
             QMessageBox::critical(
                 parent,
                 "Exception",

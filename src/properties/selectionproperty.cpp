@@ -129,44 +129,14 @@ void SelectionProperty::clearOptions() {
     clearSelection();
 }
 
-std::set<std::string> SelectionProperty::fromLuaConversion(lua_State* state,
-                                                           bool& success) const
-{
-    constexpr int KEY = -2;
-    constexpr int VAL = -1;
-
-    if (!lua_istable(state, VAL)) {
-        LERROR("Parameter passed to the property is not a table");
-        success = false;
-        return {};
-    }
-
-    std::set<std::string> result;
-    lua_pushnil(state);
-    while (lua_next(state, KEY) != 0) {
-        if (lua_isstring(state, VAL)) {
-            result.insert(lua_tostring(state, -1));
-        }
-        else {
-            success = false;
-            return {};
-        }
-        lua_pop(state, 1);
-    }
-
-    success = true;
-    return result;
+std::set<std::string> SelectionProperty::fromLuaConversion(lua_State* state) const {
+    std::vector<std::string> val = ghoul::lua::value<std::vector<std::string>>(state, -1);
+    return std::set<std::string>(val.begin(), val.end());
 }
 
 void SelectionProperty::toLuaConversion(lua_State* state) const {
-    lua_newtable(state);
-    int i = 1;
-    for (const std::string& v : _value) {
-        lua_pushinteger(state, i);
-        lua_pushstring(state, v.c_str());
-        lua_settable(state, -3);
-        ++i;
-    }
+    std::vector<std::string> value(_value.begin(), _value.end());
+    ghoul::lua::push(state, value);
 }
 
 std::string SelectionProperty::toStringConversion() const {

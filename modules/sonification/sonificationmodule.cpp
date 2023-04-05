@@ -24,11 +24,13 @@
 
 #include <modules/sonification/sonificationmodule.h>
 
-#include <modules/sonification/include/cosmicsonification.h>
 #include <modules/sonification/include/comparesonification.h>
+#include <modules/sonification/include/cosmicsonification.h>
+#include <modules/sonification/include/focussonification.h>
 #include <modules/sonification/include/planetssonification.h>
 #include <modules/sonification/include/solarsonification.h>
 #include <modules/sonification/include/timesonification.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
@@ -39,14 +41,52 @@ namespace {
     constexpr std::string_view _loggerCat = "SonificationModule";
 
     //Output to SuperCollider
-    constexpr std::string_view SuperColliderIp = "127.0.0.1";
-    constexpr int SuperColliderPort = 57120;
+    constexpr std::string_view DefaultSuperColliderIp = "127.0.0.1";
+    constexpr int DefaultSuperColliderPort = 57120;
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Enable or disable all sonifications"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo IpAddressInfo = {
+        "IpAddress",
+        "Ip address",
+        "The network ip address that the sonification osc messages will be sent to"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PortInfo = {
+        "Port",
+        "Port",
+        "The network port that the sonification osc messages will be sent to"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SurroundModeInfo = {
+        "SurroundMode",
+        "Surround Mode",
+        "The type of surround system that the sonification is played on"
+    };
+
+    struct [[codegen::Dictionary(SonificationModule)]] Parameters {
+        // [[codegen::verbatim(IpAddressInfo.description)]]
+        std::optional<std::string> ipAddress;
+
+        // [[codegen::verbatim(PortInfo.description)]]
+        std::optional<int> port;
+
+        enum class [[codegen::map(openspace::SonificationModule::SurroundMode)]] SurroundMode {
+            Horizontal,
+            HorizontalWithElevation,
+            Circular,
+            CircularWithElevation,
+            None
+        };
+
+        // [[codegen::verbatim(SurroundModeInfo.description)]]
+        std::optional<SurroundMode> surroundMode;
+    };
+#include "sonificationmodule_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -54,8 +94,31 @@ namespace openspace {
 SonificationModule::SonificationModule()
     : OpenSpaceModule("Sonification")
     , _enabled(EnabledInfo, false)
+    , _ipAddress(IpAddressInfo, DefaultSuperColliderIp.data())
+    , _port(PortInfo, DefaultSuperColliderPort, 1025, 65536)
+    , _mode(
+        SurroundModeInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
 {
+    _ipAddress.setReadOnly(true);
+    _port.setReadOnly(true);
+
+    // Add options to the drop down menues
+    _mode.addOptions({
+        { 0, "Horizontal" },
+        { 1, "Horizontal With Elevation" },
+        { 2, "Circular" },
+        { 3, "Circular With Elevation" },
+        { 4, "None" }
+    });
+
+    _mode.onChange([this]() { guiChangeSurroundMode(); });
+
     addProperty(_enabled);
+    addProperty(_ipAddress);
+    addProperty(_port);
+    addProperty(_mode);
 }
 
 SonificationModule::~SonificationModule() {
@@ -65,38 +128,50 @@ SonificationModule::~SonificationModule() {
     }
 }
 
-void SonificationModule::internalInitialize(const ghoul::Dictionary&) {
+void SonificationModule::guiChangeSurroundMode() {
+    _surroundMode = static_cast<SurroundMode>(_mode.value());
+}
+
+void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _ipAddress = p.ipAddress.value_or(_ipAddress);
+    _port = p.port.value_or(_port);
+
+    if (p.surroundMode.has_value()) {
+        Parameters::SurroundMode mode = Parameters::SurroundMode(*p.surroundMode);
+        _surroundMode = codegen::map<SurroundMode>(mode);
+    }
+
     // Fill sonification list
-    _sonifications.push_back(
-        new CosmicSonification(SuperColliderIp.data(), SuperColliderPort)
-    );
-    addPropertySubOwner(_sonifications.back());
+    SonificationBase* sonification = new CompareSonification(_ipAddress, _port);
+    addSonification(sonification);
 
-    _sonifications.push_back(
-        new CompareSonification(SuperColliderIp.data(), SuperColliderPort)
-    );
-    addPropertySubOwner(_sonifications.back());
+    sonification = new CosmicSonification(_ipAddress, _port);
+    addSonification(sonification);
 
-    _sonifications.push_back(
-        new PlanetsSonification(SuperColliderIp.data(), SuperColliderPort)
-    );
-    addPropertySubOwner(_sonifications.back());
+    sonification = new FocusSonification(_ipAddress, _port);
+    addSonification(sonification);
 
-    _sonifications.push_back(
-        new SolarSonification(SuperColliderIp.data(), SuperColliderPort)
-    );
-    addPropertySubOwner(_sonifications.back());
+    sonification = new PlanetsSonification(_ipAddress, _port);
+    addSonification(sonification);
 
-    _sonifications.push_back(
-        new TimeSonification(SuperColliderIp.data(), SuperColliderPort)
-    );
-    addPropertySubOwner(_sonifications.back());
+    sonification = new SolarSonification(_ipAddress, _port);
+    addSonification(sonification);
+
+    sonification = new TimeSonification(_ipAddress, _port);
+    addSonification(sonification);
 
     // Only the master runs the SonificationModule
     if (global::windowDelegate->isMaster()) {
         _isRunning = true;
         _updateThread = std::thread([this]() { update(std::ref(_isRunning)); });
     }
+}
+
+void SonificationModule::addSonification(SonificationBase* sonification) {
+    _sonifications.push_back(sonification);
+    addPropertySubOwner(sonification);
 }
 
 void SonificationModule::internalDeinitialize() {
@@ -106,6 +181,32 @@ void SonificationModule::internalDeinitialize() {
     // Wait before joining the thread
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     _updateThread.join();
+}
+
+const std::vector<SonificationBase*>& SonificationModule::sonifications() const {
+    return _sonifications;
+}
+
+const SonificationBase* SonificationModule::sonification(std::string id) const {
+    for (const SonificationBase* s : _sonifications) {
+        if (s->identifier() == id) {
+            return s;
+        }
+    }
+    return nullptr;
+}
+
+SonificationBase* SonificationModule::sonification(std::string id) {
+    for (SonificationBase* s : _sonifications) {
+        if (s->identifier() == id) {
+            return s;
+        }
+    }
+    return nullptr;
+}
+
+SonificationModule::SurroundMode SonificationModule::surroundMode() const {
+    return _surroundMode;
 }
 
 void SonificationModule::update(std::atomic<bool>& isRunning) {
@@ -150,6 +251,12 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
             sonification->update(camera);
         }
     }
+}
+
+std::vector<scripting::LuaLibrary> SonificationModule::luaLibraries() const {
+    return {
+        PlanetsSonification::luaLibrary()
+    };
 }
 
 } // namespace openspace

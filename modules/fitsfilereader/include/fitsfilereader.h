@@ -74,7 +74,7 @@ public:
 
     /**
      * Read specified table columns from fits file.
-     * If <code>readAll</code> is set to true the entire table will be read before the
+     * If `readAll` is set to true the entire table will be read before the
      * selected columns, which makes the function take a lot longer if it's a big file.
      * If no HDU index is given the current Extension HDU will be read from.
      */
@@ -85,8 +85,8 @@ public:
 
     /**
      * Reads a single FITS file with pre-defined columns (defined for Viennas TGAS-file).
-     * Returns a vector with all read stars with <code>nValuesPerStar</code>.
-     * If additional columns are given by <code>filterColumnNames</code>, they will be
+     * Returns a vector with all read stars with `nValuesPerStar`.
+     * If additional columns are given by `filterColumnNames`, they will be
      * read but it will slow doen the reading tremendously.
      */
     std::vector<float> readFitsFile(std::filesystem::path filePath, int& nValuesPerStar,
@@ -94,7 +94,7 @@ public:
         int multiplier = 1);
 
     /**
-     * Reads a single SPECK file and returns a vector with <code>nRenderValues</code>
+     * Reads a single SPECK file and returns a vector with `nRenderValues`
      * per star. Reads data in pre-defined order based on AMNH's star data files.
      */
     std::vector<float> readSpeckFile(const std::filesystem::path& filePath,

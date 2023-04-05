@@ -33,12 +33,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "CompareSonification";
 
-    // Set the differnet levels of precision
-    constexpr double LowDistancePrecision = 10000.0;
-    constexpr double HighDistancePrecision = 1000.0;
-    constexpr double LowAnglePrecision = 0.1;
-    constexpr double HighAnglePrecision = 0.05;
-
     // Property info
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         CompareSonificationInfo =
@@ -118,53 +112,6 @@ CompareSonification::CompareSonification(const std::string& ip, int port)
     , _moonsEnabled(MoonsInfo, false)
     , _ringsEnabled(RingsInfo, false)
 {
-    _anglePrecision = LowAnglePrecision;
-    _distancePrecision = LowDistancePrecision;
-
-    // Fill the _planets list
-    _planets.reserve(8);
-    _planets.push_back(Planet("Mercury"));
-    _planets.push_back(Planet("Venus"));
-
-    _planets.push_back(Planet("Earth"));
-    _planets.back().moons.reserve(1);
-    _planets.back().moons.push_back({ "Moon", 0.0 });
-
-    _planets.push_back(Planet("Mars"));
-    _planets.back().moons.reserve(2);
-    _planets.back().moons.push_back({ "Phobos", 0.0 });
-    _planets.back().moons.push_back({ "Deimos", 0.0 });
-
-    _planets.push_back(Planet("Jupiter"));
-    _planets.back().moons.reserve(4);
-    _planets.back().moons.push_back({ "Io", 0.0 });
-    _planets.back().moons.push_back({ "Europa", 0.0 });
-    _planets.back().moons.push_back({ "Ganymede", 0.0 });
-    _planets.back().moons.push_back({ "Callisto", 0.0 });
-
-    _planets.push_back(Planet("Saturn"));
-    _planets.back().moons.reserve(8);
-    _planets.back().moons.push_back({ "Dione", 0.0 });
-    _planets.back().moons.push_back({ "Enceladus", 0.0 });
-    _planets.back().moons.push_back({ "Hyperion", 0.0 });
-    _planets.back().moons.push_back({ "Iapetus", 0.0 });
-    _planets.back().moons.push_back({ "Mimas", 0.0 });
-    _planets.back().moons.push_back({ "Rhea", 0.0 });
-    _planets.back().moons.push_back({ "Tethys", 0.0 });
-    _planets.back().moons.push_back({ "Titan", 0.0 });
-
-    _planets.push_back(Planet("Uranus"));
-    _planets.back().moons.reserve(5);
-    _planets.back().moons.push_back({ "Ariel", 0.0 });
-    _planets.back().moons.push_back({ "Miranda", 0.0 });
-    _planets.back().moons.push_back({ "Oberon", 0.0 });
-    _planets.back().moons.push_back({ "Titania", 0.0 });
-    _planets.back().moons.push_back({ "Umbriel", 0.0 });
-
-    _planets.push_back(Planet("Neptune"));
-    _planets.back().moons.reserve(1);
-    _planets.back().moons.push_back({ "Triton", 0.0 });
-
     // Add options to the drop down menues
     _firstPlanet.addOptions({
         { 0, "Choose Planet" },
@@ -232,6 +179,10 @@ osc::Blob CompareSonification::createSettingsBlob() const {
 }
 
 void CompareSonification::sendSettings() {
+    if (!_enabled) {
+        return;
+    }
+
     std::string label = "/Compare";
     std::vector<OscDataType> data(3);
 
@@ -302,79 +253,7 @@ void CompareSonification::onToggleAllChanged() {
     _ringsEnabled.setValue(_toggleAll);
 }
 
-// Extract the data from the given identifier
-bool CompareSonification::getData(const Camera* camera, Planet& planet) {
-    double distance = SonificationBase::calculateDistanceTo(
-        camera,
-        planet.identifier,
-        DistanceUnit::Kilometer
-    );
-    double angle = SonificationBase::calculateAngleTo(camera, planet.identifier);
-
-    if (abs(distance) < std::numeric_limits<double>::epsilon()) {
-        return false;
-    }
-
-    // Also calculate angle to moons
-    bool updateMoons = false;
-    for (std::pair<std::string, double>& moon : planet.moons) {
-        double moonAngle = SonificationBase::calculateAngleFromAToB(
-            camera,
-            planet.identifier,
-            moon.first
-        );
-
-        if (abs(moon.second - moonAngle) > _anglePrecision) {
-            moon.second = moonAngle;
-            updateMoons = true;
-        }
-    }
-
-    // Check if this data is new, otherwise don't send it
-    bool isNewData = false;
-    if (abs(planet.distance - distance) > _distancePrecision ||
-        abs(planet.angle - angle) > _anglePrecision || updateMoons)
-    {
-        // Update the saved data for the planet
-        planet.distance = distance;
-        planet.angle = angle;
-        isNewData = true;
-    }
-    return isNewData;
-}
-
-void CompareSonification::update(const Camera* camera) {
-    if (!_enabled) {
-        return;
-    }
-
-    const SceneGraphNode* focusNode =
-        global::navigationHandler->orbitalNavigator().anchorNode();
-
-    if (!focusNode) {
-        return;
-    }
-
-    // Update data for all planets
-    for (Planet& planet : _planets) {
-        // Increase presision if the planet is in focus
-        if (focusNode->identifier() == planet.identifier) {
-            _anglePrecision = HighAnglePrecision;
-            _distancePrecision = HighDistancePrecision;
-        }
-        else {
-            _anglePrecision = LowAnglePrecision;
-            _distancePrecision = LowDistancePrecision;
-        }
-
-        bool hasDataUpdated = getData(camera, planet);
-
-        // Only send data if something new has happened
-        if (hasDataUpdated) {
-            sendSettings();
-        }
-    }
-}
+void CompareSonification::update(const Camera* camera) {}
 
 void CompareSonification::stop() {
     _toggleAll = false;

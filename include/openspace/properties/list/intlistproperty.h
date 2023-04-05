@@ -41,8 +41,6 @@ public:
     using TemplateProperty<std::vector<int>>::operator=;
 
 protected:
-    std::vector<int> fromLuaConversion(lua_State* state, bool& success) const override;
-    void toLuaConversion(lua_State* state) const override;
     std::string toStringConversion() const override;
 };
 

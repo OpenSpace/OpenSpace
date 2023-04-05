@@ -56,6 +56,16 @@ public:
     virtual void stop() = 0;
 
     /**
+    * \return identifier of the sonification
+    */
+    std::string identifier() const;
+
+    /**
+    * \return if the sonification is enabled or not
+    */
+    bool enabled() const;
+
+    /**
      * Calculate the distance from the camera to the node with the given identifier, in
      * the given distance unit
      *
@@ -103,7 +113,39 @@ public:
         std::variant<std::string, glm::dvec3> nodeIdOrPosA,
         std::variant<std::string, glm::dvec3> nodeIdOrPosB);
 
+    /**
+     * Calculate the elevation angle from the camera to the node with the given
+     * identifier, in radians
+     *
+     * \param camera pointer to the camera in the scene that the elevation angle should be
+     *               calculated from
+     * \param nodeIdOrPos either the identifier or the position of the node, that the
+     *                    elevation angle should be calculate to
+     *
+     * \return elevation angle from the camera to the node with the given identifier in radians
+     */
+    static double calculateElevationAngleTo(const Camera* camera,
+        std::variant<std::string, glm::dvec3> nodeIdOrPos);
+
+    /**
+     * Calculate the elevation angle from the first node with the given identifier to the second
+     * node with the given identifier, in radians
+     *
+     * \param camera pointer to the camera in the scene
+     * \param nodeIdOrPosA either the identifier or the position of the first node that
+     *                     the elevation angle should be calculated from
+     * \param nodeIdOrPosB either the identifier or the position of the second node that
+     *                     the elevation angle should be calculated to
+     *
+     * \return elevation angle from the first node with the given identifier to the second node with
+     *               the given identifier in radians
+     */
+    static double calculateElevationAngleFromAToB(const Camera* camera,
+        std::variant<std::string, glm::dvec3> nodeIdOrPosA,
+        std::variant<std::string, glm::dvec3> nodeIdOrPosB);
+
 protected:
+    std::string _identifier;
     properties::BoolProperty _enabled;
     OscConnection* _connection = nullptr;
 

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #ifndef __OPENSPACE_MODULE_SONIFICATION___TIMESONIFICATION___H__
-#define __OPENSPACE_MODULE_SONIFICATION___TIMERSONIFICATION___H__
+#define __OPENSPACE_MODULE_SONIFICATION___TIMESONIFICATION___H__
 
 #include <modules/sonification/include/sonificationbase.h>
 

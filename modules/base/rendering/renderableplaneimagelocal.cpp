@@ -119,7 +119,7 @@ void RenderablePlaneImageLocal::bindTexture() {
 }
 
 void RenderablePlaneImageLocal::update(const UpdateData& data) {
-    ZoneScoped
+    ZoneScoped;
 
     RenderablePlane::update(data);
 
@@ -130,7 +130,7 @@ void RenderablePlaneImageLocal::update(const UpdateData& data) {
 }
 
 void RenderablePlaneImageLocal::loadTexture() {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_texturePath.value().empty()) {
         ghoul::opengl::Texture* t = _texture;

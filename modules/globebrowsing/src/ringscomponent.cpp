@@ -241,7 +241,7 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
 }
 
 void RingsComponent::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     using ghoul::filesystem::File;
 
@@ -328,7 +328,7 @@ bool RingsComponent::isReady() const {
 }
 
 void RingsComponent::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     loadTexture();
     compileShadowShader();
@@ -582,7 +582,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
 }
 
 void RingsComponent::update(const UpdateData& data) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_shader && _shader->isDirty()) {
         compileShadowShader();

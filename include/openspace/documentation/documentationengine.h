@@ -101,9 +101,9 @@ public:
     * in it: HandlebarJS Templates (from _handlebarTemplates) and json (from
     * \p data) along with the base template and js/css files from the source
     * directory ${WEB}/documentation
-    * \param templates Vector of templates to add. Most of the time this list
-    * will just contain one item, but some modules may wish to provide
-    * multiple templates for subtypes, etc
+    *
+    * \param path The path to add
+    * \param data The JSON data that is written to the documentation
     */
     void writeDocumentationHtml(const std::string& path, std::string data);
 

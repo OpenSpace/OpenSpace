@@ -28,7 +28,10 @@
 #include "openspace/util/openspacemodule.h"
 
 #include <modules/sonification/include/sonificationbase.h>
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <atomic>
 
 namespace openspace {
@@ -37,21 +40,68 @@ class SonificationBase;
 
 class SonificationModule : public OpenSpaceModule {
 public:
-    constexpr static const char* Name = "SonificationModule";
+    constexpr static const char* Name = "Sonification";
+
+    /**
+    * Horizontal: Calculate the angle to the object in the horizontal direction of
+    *             the camera view plane. Where straight forwards in the camera view
+    *             direction is zero degrees. TODO: Where is + and -?. (Norrköping dome)
+    *
+    * HorizontalWithElevation: Same as Horizontal with an additional angle in the vertical
+    *                          direction of the camera view plane. Where the angle goes
+    *                          from -pi/2 to pi/2 and zero is straight forwards in the
+    *                          camera view direction. Positive elevation angles in the up
+    *                          direction of the camera.
+    *
+    * Circular: Calculate the angle to the object in circular space around the center
+    *           point in the camera view plane. Where the angle goes from -pi to pi and
+    *           zero degrees would be straig up in the camera up direction. Negative
+    *           angles in the right direction of the camrea.
+    *
+    * CircularWithElevation: Smae as Circular with an additional angle in the vertical
+    *                        direction of the camera view plane (same as the elevation
+    *                        angle in HorizontalWithElevation). Where the angle goes
+    *                        from -pi/2 to pi/2 and zero is straight forwards in the
+    *                        camera view direction. Positive elevation angles in the up
+    *                        direction of the camera. (Hayden planetarium)
+    *
+    * None: Mono. No directional information at all.
+    */
+    enum class SurroundMode {
+        Horizontal = 0,
+        HorizontalWithElevation,
+        Circular,
+        CircularWithElevation,
+        None
+    };
 
     SonificationModule();
     ~SonificationModule();
 
-    virtual void internalInitialize(const ghoul::Dictionary&) override;
+    std::vector<scripting::LuaLibrary> luaLibraries() const override;
+
+    virtual void internalInitialize(const ghoul::Dictionary& dictionary) override;
     virtual void internalDeinitialize() override;
+
+    const std::vector<SonificationBase*>& sonifications() const;
+    const SonificationBase* sonification(std::string id) const;
+    SonificationBase* sonification(std::string id);
+    SurroundMode surroundMode() const;
 
 private:
     void update(std::atomic<bool>& isRunning);
+    void addSonification(SonificationBase* sonification);
+    void guiChangeSurroundMode();
 
     properties::BoolProperty _enabled;
+    properties::StringProperty _ipAddress;
+    properties::IntProperty _port;
+    properties::OptionProperty _mode;
+
     std::thread _updateThread;
     std::atomic<bool> _isRunning = false;
     std::vector<SonificationBase*> _sonifications;
+    SurroundMode _surroundMode = SurroundMode::Horizontal;
 };
 
 } // namespace openspace

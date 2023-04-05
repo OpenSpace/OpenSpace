@@ -88,7 +88,7 @@ int ServerModule::skyBrowserUpdateTime() const {
 
 void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
     global::callback::preSync->emplace_back([this]() {
-        ZoneScopedN("ServerModule")
+        ZoneScopedN("ServerModule");
 
         preSync();
     });
@@ -173,7 +173,7 @@ void ServerModule::preSync() {
 }
 
 void ServerModule::cleanUpFinishedThreads() {
-    ZoneScoped
+    ZoneScoped;
 
     for (ConnectionData& connectionData : _connections) {
         Connection& connection = *connectionData.connection;
@@ -194,7 +194,7 @@ void ServerModule::cleanUpFinishedThreads() {
 }
 
 void ServerModule::disconnectAll() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
         serverInterface->deinitialize();
@@ -211,7 +211,7 @@ void ServerModule::disconnectAll() {
 }
 
 void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
-    ZoneScoped
+    ZoneScoped;
 
     std::string messageString;
     messageString.reserve(256);
@@ -222,7 +222,7 @@ void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
 }
 
 void ServerModule::consumeMessages() {
-    ZoneScoped
+    ZoneScoped;
 
     std::lock_guard lock(_messageQueueMutex);
     while (!_messageQueue.empty()) {

@@ -58,6 +58,8 @@ public:
     void render();
     float currentHeight() const;
 
+    void setCommandInputButton(Key key);
+
 private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
 
@@ -70,6 +72,8 @@ private:
     properties::Vec4Property _entryTextColor;
     properties::Vec4Property _historyTextColor;
     properties::IntProperty _historyLength;
+
+    Key _commandInputButton = Key::GraveAccent;
 
     size_t _inputPosition = 0;
     std::vector<std::string> _commandsHistory;

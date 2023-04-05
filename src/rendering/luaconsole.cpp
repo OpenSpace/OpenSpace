@@ -54,8 +54,6 @@ namespace {
 
     constexpr uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
 
-    constexpr openspace::Key CommandInputButton = openspace::Key::GraveAccent;
-
     constexpr std::string_view FontName = "Console";
     constexpr float EntryFontSize = 14.0f;
     constexpr float HistoryFontSize = 11.0f;
@@ -169,7 +167,7 @@ LuaConsole::LuaConsole()
 LuaConsole::~LuaConsole() {}
 
 void LuaConsole::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
@@ -234,7 +232,7 @@ void LuaConsole::initialize() {
 }
 
 void LuaConsole::deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
@@ -274,7 +272,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         return false;
     }
 
-    if (key == CommandInputButton) {
+    if (key == _commandInputButton) {
         // Button left of 1 and above TAB
         // How to deal with different keyboard languages? ---abock
         if (_isVisible) {
@@ -580,7 +578,7 @@ void LuaConsole::charCallback(unsigned int codepoint,
         return;
     }
 
-    if (codepoint == static_cast<unsigned int>(CommandInputButton)) {
+    if (codepoint == static_cast<unsigned int>(_commandInputButton)) {
         return;
     }
 
@@ -603,7 +601,7 @@ void LuaConsole::charCallback(unsigned int codepoint,
 }
 
 void LuaConsole::update() {
-    ZoneScoped
+    ZoneScoped;
 
     // Compute the height by simulating _historyFont number of lines and checking
     // what the bounding box for that text would be.
@@ -639,7 +637,7 @@ void LuaConsole::update() {
 }
 
 void LuaConsole::render() {
-    ZoneScoped
+    ZoneScoped;
 
     using namespace ghoul::fontrendering;
 
@@ -830,6 +828,10 @@ void LuaConsole::render() {
 
 float LuaConsole::currentHeight() const {
     return _currentHeight;
+}
+
+void LuaConsole::setCommandInputButton(Key key) {
+    _commandInputButton = key;
 }
 
 void LuaConsole::addToCommand(std::string c) {

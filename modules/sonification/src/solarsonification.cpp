@@ -30,10 +30,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "SolarSonification";
 
-    // Set the differnet levels of precision
-    constexpr double DistancePrecision = 10000.0;
-    constexpr double AnglePrecision = 0.1;
-
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         SolarSonificationInfo =
     {
@@ -112,16 +108,6 @@ SolarSonification::SolarSonification(const std::string& ip, int port)
     , _uranusEnabled(EnableUranusInfo, false)
     , _neptuneEnabled(EnableNeptuneInfo, false)
 {
-    // Fill the _planets list
-    _planets.push_back(Planet("Mercury"));
-    _planets.push_back(Planet("Venus"));
-    _planets.push_back(Planet("Earth"));
-    _planets.push_back(Planet("Mars"));
-    _planets.push_back(Planet("Jupiter"));
-    _planets.push_back(Planet("Saturn"));
-    _planets.push_back(Planet("Uranus"));
-    _planets.push_back(Planet("Neptune"));
-
     // Add onChange functions to the properties
     _toggleAll.onChange([this]() { onToggleAllChanged(); });
     _mercuryEnabled.onChange([this]() { sendSettings(); });
@@ -165,6 +151,10 @@ osc::Blob SolarSonification::createSettingsBlob() const {
 }
 
 void SolarSonification::sendSettings() {
+    if (!_enabled) {
+        return;
+    }
+
     std::string label = "/Sun";
     std::vector<OscDataType> data(1);
 
@@ -184,48 +174,7 @@ void SolarSonification::onToggleAllChanged() {
     _neptuneEnabled.setValue(_toggleAll);
 }
 
-// Extract the data from the given identifier
-bool SolarSonification::getData(const Camera* camera, Planet& planet) {
-    double distance = SonificationBase::calculateDistanceTo(
-        camera,
-        planet.identifier,
-        DistanceUnit::Kilometer
-    );
-    double angle =
-        SonificationBase::calculateAngleFromAToB(camera, "Sun", planet.identifier);
-
-    if (abs(distance) < std::numeric_limits<double>::epsilon()) {
-        return false;
-    }
-
-    // Check if this data is new, otherwise don't send it
-    bool isNewData = false;
-    if (abs(planet.distance - distance) > DistancePrecision ||
-        abs(planet.angle - angle) > AnglePrecision)
-    {
-        // Update the saved data for the planet
-        planet.distance = distance;
-        planet.angle = angle;
-        isNewData = true;
-    }
-    return isNewData;
-}
-
-void SolarSonification::update(const Camera* camera) {
-    if (!_enabled) {
-        return;
-    }
-
-    // Update data for all planets
-    for (Planet& planet : _planets) {
-        bool hasDataUpdated = getData(camera, planet);
-
-        // Only send data if something new has happened
-        if (hasDataUpdated) {
-            sendSettings();
-        }
-    }
-}
+void SolarSonification::update(const Camera* camera) {}
 
 void SolarSonification::stop() {
     _toggleAll = false;
