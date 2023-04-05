@@ -1,0 +1,33 @@
+asset.onInitialize(function ()
+  -- Note that the planets needs to be in this order
+  local nodes = {
+    "Cercopithecoidea_volume_center",
+    "Hominoidea_volume_center",
+    "Platyrrhini_volume_center",
+    "Strepsirrhini_volume_center",
+
+    "birds_anas_platyrhynchos_center",
+    "birds_cardinalis_cardinalis_center",
+    "birds_columba_livia_center",
+    "birds_haliaeetus_leucocephalus_center",
+    "birds_larus_canus_center",
+    "birds_turdus_migratorius_center"
+  }
+
+  local labels = {
+    "birds_lineage_29"
+  }
+
+  openspace.cosmicSonification.addNodes(nodes)
+  openspace.cosmicSonification.addLabels(labels)
+end)
+
+
+asset.meta = {
+  Name = "CosmicSonification nodes",
+  Version = "1.0",
+  Description = "The list of nodes in the CosmicSonification",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -32,6 +32,8 @@
 
 namespace openspace {
 
+namespace scripting { struct LuaLibrary; }
+
 class CosmicSonification : public SonificationBase {
 
 public:
@@ -50,21 +52,48 @@ public:
      */
     virtual void stop() override;
 
+    /**
+    * Add the given node to the list of nodes for the sonification
+    *
+    * \param dict the identifier for the node that should be added
+    */
+    void addNode(const std::string& nodeId);
+
+    /**
+    * Add the labels of the given node to the list of labels for the sonification
+    *
+    * \param dict the identifier for the node that should be added
+    */
+    void addLabelNode(const std::string& labelNodeId);
+
+    /**
+     * Returns the Lua library that contains all Lua functions available to change the
+     * cosmic sonification.
+     * \return The Lua library that contains all Lua functions available to change the
+     * cosmic sonification
+     */
+    static scripting::LuaLibrary luaLibrary();
+
 private:
+    const int DistanceIndex = 0;
+    const int HAngleIndex = 1;
+    const int VAngleIndex = 2;
+    const int NumDataItems = 3;
+
     struct LabelsData {
         speck::Labelset* labels = nullptr;
         DistanceUnit unit;
         bool isInitialized = false;
 
         // std::vector<std::vector<distance, angle>>
-        std::vector<std::vector<double>> prevValues;
+        std::vector<std::vector<double>> data;
     };
 
     // std::map<<Identifier, std::vector<distance, angle>>>
-    std::map<std::string, std::vector<double>> _nodeData;
+    std::map<std::string, std::vector<double>> _nodes;
 
     // std::map<Identifier, Labels data>
-    std::map<std::string, LabelsData> _labelsData;
+    std::map<std::string, LabelsData> _labels;
 };
 
 } // openspace namespace

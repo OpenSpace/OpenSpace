@@ -100,7 +100,7 @@ local birds_lineage_29 = {
         Opacity = 1.0,
         ScaleFactor = scale_factor,
         File = speck_sequences,
-        DrawLabels = false,
+        DrawLabels = true,
         LabelFile = label_lineage_29,
         TextColor = { 1.0, 1.0, 1.0 },
         TextSize = text_size,
@@ -112,7 +112,7 @@ local birds_lineage_29 = {
         BillboardMinMaxSize = { 0.0, 25.0 },
         EnablePixelSizeControl = true,
         EnableLabelFading = false,
-        Enabled = false
+        Enabled = true
     },
     GUI = {
         Name = "Lineage 29",

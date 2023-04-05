@@ -4,7 +4,6 @@
     "cosmic_view/birds_UMAP/branches_anas",
     "cosmic_view/birds_UMAP/clades",
     "cosmic_view/birds_UMAP/consensus_species",
-    "cosmic_view/birds_UMAP/ex/sequence_lineage",
     "cosmic_view/birds_UMAP/sequence_lineage",
     "cosmic_view/birds_UMAP/sequences",
     "cosmic_view/birds_UMAP/taxon",
@@ -17,7 +16,9 @@
     "cosmic_view/mutations",
     "cosmic_view/superfamily",
     "events/toggle_image_trail",
-    "modules/sonification/actions"
+    "modules/sonification/actions",
+    "modules/sonification/cosmic",
+    "modules/sonification/planets"
   ],
   "camera": {
     "aim": "",
