@@ -122,7 +122,7 @@ local treks_ESP_058005_1845_RED_spline_rect = {
   Identifier = "ESP_058005_1845_RED_spline_rect",
   Name = [[MRO HiRISE, Mosaic Insight Landing Site]],
   FilePath = asset.localResource("MRO_HiRISE/Mosaic_Insight_Landing_Site.vrt"),
-  Description = [[This image (ESP_058005_1845) was acquired with the Mars HiRISE Camera aboard NASA’s Mars Reconnaissance Orbiter. It shows the Mars InSight lander (4.5024°, 135.62345°), heat shield (4.50834°, 135.63481°), and backshell with parachute (4.49415°, 135.62778°). The image was acquired on December 11, 2018 at 14:02 local Mars time. The image is centered at 4.495° lat and 135.623° lon. The spacecraft altitude was 271.5 km. Original image scale range is 27.9 cm/pixel (with 1 x 1 binning) so objects about 84 cm across are resolved. The emission angle was 13.7°, phase angle was 51.0°, and solar incidence angle was 39°, with the Sun about 51° above the horizon. Solar longitude was 304.3°, Northern Winter.]]
+  Description = [[This image (ESP_058005_1845) was acquired with the Mars HiRISE Camera aboard NASA's Mars Reconnaissance Orbiter. It shows the Mars InSight lander (4.5024°, 135.62345°), heat shield (4.50834°, 135.63481°), and backshell with parachute (4.49415°, 135.62778°). The image was acquired on December 11, 2018 at 14:02 local Mars time. The image is centered at 4.495° lat and 135.623° lon. The spacecraft altitude was 271.5 km. Original image scale range is 27.9 cm/pixel (with 1 x 1 binning) so objects about 84 cm across are resolved. The emission angle was 13.7°, phase angle was 51.0°, and solar incidence angle was 39°, with the Sun about 51° above the horizon. Solar longitude was 304.3°, Northern Winter.]]
 }
 
 local treks_NES_JEZ_MID_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07102018 = {
