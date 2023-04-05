@@ -98,9 +98,7 @@ local show_art = {
   Identifier = "constellation_art.show_art",
   Name = "Show all",
   Command = [[
-    openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Opacity", 0);
-    openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", true);
-    openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Opacity", 0.2, 2);
+    openspace.fadeIn("Scene.ImageConstellation*", 2.0)
   ]],
   Documentation = "Enables and fades up constellation art work",
   GuiPath = "/Constellations/Art",
@@ -111,7 +109,9 @@ asset.export("ShowArtAction", show_art)
 local hide_art = {
   Identifier = "constellation_art.hide_art",
   Name = "Hide all",
-  Command = [[openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Opacity", 0, 2)]],
+  Command = [[
+    openspace.fadeOut("Scene.ImageConstellation*", 2.0)
+  ]],
   Documentation = "Fades out constellation artwork",
   GuiPath = "/Constellations/Art",
   IsLocal = false
@@ -121,7 +121,9 @@ asset.export("HideArtAction", hide_art)
 local disable_art = {
   Identifier = "constellation_art.disable_art",
   Name = "Disable all",
-  Command = [[openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)]],
+  Command = [[
+    openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)
+  ]],
   Documentation = "Disable constellation artwork",
   GuiPath = "/Constellations/Art",
   IsLocal = false
@@ -132,9 +134,7 @@ local show_zodiac_art = {
   Identifier = "constellation_art.show_zodiac_art",
   Name = "Show zodiac",
   Command = [[
-    openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Opacity", 0);
-    openspace.setPropertyValue("{zodiac}.Renderable.Enabled",true);
-    openspace.setPropertyValue("{zodiac}.Renderable.Opacity", 1, 2);
+    openspace.fadeIn("{zodiac}", 2.0)
   ]],
   Documentation = "Enables and fades up zodiac art work",
   GuiPath = "/Constellations/Art",
@@ -145,7 +145,9 @@ asset.export("ShowZodiacArt", show_zodiac_art)
 local hide_zodiac_art = {
   Identifier = "constellation_art.hide_zodiac_art",
   Name = "Hide zodiac",
-  Command =  [[openspace.setPropertyValue("{zodiac}.Renderable.Opacity", 0, 2)]],
+  Command =  [[
+    openspace.fadeOut("{zodiac}", 2.0)
+  ]],
   Documentation = "fades down zodiac art work",
   GuiPath = "/Constellations/Art",
   IsLocal = false

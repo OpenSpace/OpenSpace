@@ -67,8 +67,9 @@ openspace.documentation = {
             fadeTime = "Number?",
             endScript = "String?"
         },
-        Documentation = "Fades in the node with the given identifier over the given " ..
-        "time in seconds. If the fade time is not provided then the " ..
+        Documentation = "Fades in the node(s) with the given identifier over the given " ..
+        "time in seconds. The identifier can contain a tag and/or a wildcard to target " ..
+        "several nodes. If the fade time is not provided then the " ..
         "'OpenSpaceEngine.FadeDuration' property will be used instead. If the third " ..
         "argument (endScript) is provided then that script will be run after the fade " ..
         "is finished."
@@ -80,8 +81,9 @@ openspace.documentation = {
             fadeTime = "Number?",
             endScript = "String?"
         },
-        Documentation = "Fades out the node with the given identifier over the given " ..
-        "time in seconds. If the fade time is not provided then the " ..
+        Documentation = "Fades out the node(s) with the given identifier over the given " ..
+        "time in seconds. The identifier can contain a tag and/or a wildcard to target " ..
+        "several nodes. If the fade time is not provided then the " ..
         "'OpenSpaceEngine.FadeDuration' property will be used instead. If the third " ..
         "argument (endScript) is provided then that script will be run after the fade " ..
         "is finished."
@@ -165,6 +167,7 @@ openspace.invertBooleanProperty = function(propertyIdentifier)
 end
 
 openspace.fadeIn = function(identifier, fadeTime, endScript)
+    -- Set default values for optional arguments
     if endScript == nil then
         endScript = ""
     end
@@ -173,35 +176,62 @@ openspace.fadeIn = function(identifier, fadeTime, endScript)
         fadeTime = openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
     end
 
-    local exists = openspace.hasSceneGraphNode(identifier)
-    if not exists then
-        openspace.printError(
-            "Error when calling script 'openspace.fadeIn': " ..
-            "Could not find node '" .. identifier .. "'"
-        )
-        return;
-    end
-    local nodeIdentifier = "Scene." .. identifier
-    local enabledProperty = nodeIdentifier .. ".Renderable.Enabled"
-    local fadeProperty = nodeIdentifier .. ".Renderable.Fade"
+    local nodeIdentifier = ""
+    local enabledProperty = ""
+    local fadeProperty = ""
 
-    exists = openspace.hasProperty(enabledProperty)
-    if not exists then
-        openspace.printError(
-            "Error when calling script 'openspace.fadeIn': " ..
-            "Could not find Renderable for node '" .. identifier .. "'"
-        )
+    -- Assume that we need to enable the node(s) as we fade it/them in
+    local isEnabled = false
+
+    -- Is the identifier a single node or a regex for several nodes
+    local hasTag, _ = string.find(identifier, "{")
+    local hasWild, _ = string.find(identifier, "*")
+
+    if hasTag ~= nil or hasWild ~= nil then
+        -- Regex, several nodes
+        nodeIdentifier = identifier
+        enabledProperty = nodeIdentifier .. ".Renderable.Enabled"
+        fadeProperty = nodeIdentifier .. ".Renderable.Fade"
+    else
+        -- Literal, single node
+        -- Check if node exists
+        local exists = openspace.hasSceneGraphNode(identifier)
+        if not exists then
+            openspace.printError(
+                "Error when calling script 'openspace.fadeIn': " ..
+                "Could not find node '" .. identifier .. "'"
+            )
+            return
+        end
+
+        nodeIdentifier = "Scene." .. identifier
+        enabledProperty = nodeIdentifier .. ".Renderable.Enabled"
+        fadeProperty = nodeIdentifier .. ".Renderable.Fade"
+
+        -- Check if node has a Renderable (Renderable always has an Enabled property)
+        exists = openspace.hasProperty(enabledProperty)
+        if not exists then
+            openspace.printError(
+                "Error when calling script 'openspace.fadeIn': " ..
+                "Could not find Renderable for node '" .. identifier .. "'"
+            )
+            return
+        end
+
+        isEnabled = openspace.getPropertyValue(enabledProperty)
     end
 
-    local isEnabled = openspace.getPropertyValue(enabledProperty)
+    -- If node is already enabled we only have to fade it
     if not isEnabled then
         openspace.setPropertyValue(fadeProperty, 0.0)
         openspace.setPropertyValue(enabledProperty, true)
     end
+
     openspace.setPropertyValue(fadeProperty, 1.0, fadeTime, "Linear", endScript)
 end
 
 openspace.fadeOut = function(identifier, fadeTime, endScript)
+    -- Set default values for optional arguments
     if endScript == nil then
         endScript = ""
     end
@@ -210,39 +240,58 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
         fadeTime = openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
     end
 
-    local exists = openspace.hasSceneGraphNode(identifier)
-    if not exists then
-        openspace.printError(
-            "Error when calling script 'openspace.fadeOut': " ..
-            "Could not find node '" .. identifier .. "'"
-        )
-        return;
-    end
-    local nodeIdentifier = "Scene." .. identifier
-    local enabledProperty = nodeIdentifier .. ".Renderable.Enabled"
-    local fadeProperty = nodeIdentifier .. ".Renderable.Fade"
+    local nodeIdentifier = ""
+    local enabledProperty = ""
+    local fadeProperty = ""
 
-    local exists = openspace.hasProperty(enabledProperty)
-    if not exists then
-        openspace.printError(
-            "Error when calling script 'openspace.fadeOut': " ..
-            "Could not find Renderable for node '" .. identifier .. "'"
-        )
+    -- Assume that the node(s) are enabled and that we need to fade it/them out
+    local isEnabled = true
+
+    -- Is the identifier a single node or a regex for several nodes
+    local hasTag, _ = string.find(identifier, "{")
+    local hasWild, _ = string.find(identifier, "*")
+
+    if hasTag ~= nil or hasWild ~= nil then
+        -- Regex, several nodes
+        nodeIdentifier = identifier
+        enabledProperty = nodeIdentifier .. ".Renderable.Enabled"
+        fadeProperty = nodeIdentifier .. ".Renderable.Fade"
+    else
+        -- Literal, single node
+        -- Check if node exists
+        local exists = openspace.hasSceneGraphNode(identifier)
+        if not exists then
+            openspace.printError(
+                "Error when calling script 'openspace.fadeOut': " ..
+                "Could not find node '" .. identifier .. "'"
+            )
+            return;
+        end
+
+        nodeIdentifier = "Scene." .. identifier
+        enabledProperty = nodeIdentifier .. ".Renderable.Enabled"
+        fadeProperty = nodeIdentifier .. ".Renderable.Fade"
+
+        -- Check if node has a Renderable (Renderable always has an Enabled property)
+        exists = openspace.hasProperty(enabledProperty)
+        if not exists then
+            openspace.printError(
+                "Error when calling script 'openspace.fadeOut': " ..
+                "Could not find Renderable for node '" .. identifier .. "'"
+            )
+        end
+
+        isEnabled = openspace.getPropertyValue(enabledProperty)
     end
 
-    local isEnabled = openspace.getPropertyValue(enabledProperty)
+    -- If node is already disabled we don't have to do anything
     if isEnabled then
-        local disableScript = [[
-            openspace.setPropertyValue("]] .. enabledProperty .. [[", false)
-            openspace.setPropertyValue("]] .. fadeProperty .. [[", 1.0)
-            ]] .. endScript .. [[
-        ]]
         openspace.setPropertyValue(
-            nodeIdentifier .. ".Renderable.Fade",
+            fadeProperty,
             0.0,
             fadeTime,
             "Linear",
-            disableScript
+            endScript
         )
     end
 end
