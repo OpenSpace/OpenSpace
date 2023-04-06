@@ -153,11 +153,11 @@ double getHeightToReferenceSurface(const Geodetic2& geo, const RenderableGlobe& 
 
 glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,
                                           const RenderableGlobe& globe,
-                                          const glm::vec3& offsets)
+                                          float latOffset, float lonOffset)
 {
     // Account for lat long offset
-    double offsetLatRadians = glm::radians(offsets.x);
-    double offsetLonRadians = glm::radians(offsets.y);
+    double offsetLatRadians = glm::radians(latOffset);
+    double offsetLonRadians = glm::radians(lonOffset);
 
     Geodetic3 adjusted = geo;
     adjusted.geodetic2.lat += offsetLatRadians;
@@ -205,7 +205,7 @@ std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3&
 std::vector<rendering::helper::VertexXYZNormal>
 subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
                   double h0, double h1, double h2, double maxDistance,
-                  const glm::vec3& offsets, const RenderableGlobe& globe)
+                  float latOffset, float lonOffset, const RenderableGlobe& globe)
 {
     std::vector<rendering::helper::VertexXYZNormal> vertices;
 
@@ -321,7 +321,8 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
         glm::vec3 v = geometryhelper::computeOffsetedModelCoordinate(
             geodetic,
             globe,
-            offsets
+            latOffset,
+            lonOffset
         );
         vertices.push_back({ v.x, v.y, v.z, 0.f, 0.f, 0.f });
 

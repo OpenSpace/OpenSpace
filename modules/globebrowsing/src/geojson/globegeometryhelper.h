@@ -77,7 +77,7 @@ double getHeightToReferenceSurface(const Geodetic2& geo, const RenderableGlobe& 
  * offsets
  */
 glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,
-    const RenderableGlobe& globe, const glm::vec3& offsets); // TODO: vec2 offset, or lat,long
+    const RenderableGlobe& globe, float latOffset, float lonOffset);
 
 
 struct PosHeightPair {
@@ -102,8 +102,8 @@ std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3&
  */
 std::vector<rendering::helper::VertexXYZNormal> subdivideTriangle(
     const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
-    double h0, double h1, double h2, double maxDistance, const glm::vec3& offsets,
-    const RenderableGlobe& globe);
+    double h0, double h1, double h2, double maxDistance,
+    float latOffset, float lonOffset, const RenderableGlobe& globe);
 
 } // namespace openspace::globebrowsing::geometryhelper
 

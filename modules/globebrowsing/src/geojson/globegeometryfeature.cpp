@@ -63,11 +63,10 @@ void GlobeGeometryFeature::RenderFeature::initializeBuffers() {
     }
 }
 
-GlobeGeometryFeature::GlobeGeometryFeature(RenderableGlobe& globe,
+GlobeGeometryFeature::GlobeGeometryFeature(const RenderableGlobe& globe,
                                            GeoJsonProperties& defaultProperties,
                                            GeoJsonOverrideProperties& overrideProperties)
-    : properties::PropertyOwner({ "GlobeGeometryFeature" })
-    , _globe(globe)
+    : _globe(globe)
     , _properties({ defaultProperties, overrideProperties })
     , _lastHeightUpdateTime(std::chrono::system_clock::now())
 {}
@@ -528,7 +527,8 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
             glm::dvec3 v = geometryhelper::computeOffsetedModelCoordinate(
                 geodetic,
                 _globe,
-                _offsets
+                _offsets.x,
+                _offsets.y
             );
 
             // If we are drawing points, just add and continue.
@@ -604,7 +604,8 @@ void GlobeGeometryFeature::createPointGeometry() {
             glm::dvec3 v = geometryhelper::computeOffsetedModelCoordinate(
                 geodetic,
                 _globe,
-                _offsets
+                _offsets.x,
+                _offsets.y
             );
 
             glm::vec3 vf = static_cast<glm::vec3>(v);
@@ -684,7 +685,8 @@ void GlobeGeometryFeature::createPolygonGeometry() {
         const glm::vec3 vert = geometryhelper::computeOffsetedModelCoordinate(
             geodetic,
             _globe,
-            _offsets
+            _offsets.x,
+            _offsets.y
         );
         triPositions[triIndex] = vert;
         triHeights[triIndex] = geodetic.height;
@@ -714,7 +716,8 @@ void GlobeGeometryFeature::createPolygonGeometry() {
                     v0, v1, v2,
                     h0, h1, h2,
                     stepSize,
-                    _offsets,
+                    _offsets.x,
+                    _offsets.y,
                     _globe
                 );
                 polyVertices.insert(polyVertices.end(), verts.begin(), verts.end());
@@ -743,7 +746,8 @@ std::vector<double> GlobeGeometryFeature::getCurrentReferencePointsHeights() con
         const glm::dvec3 p = geometryhelper::computeOffsetedModelCoordinate(
             geo,
             _globe,
-            _offsets
+            _offsets.x,
+            _offsets.y
         );
         const SurfacePositionHandle handle = _globe.calculateSurfacePositionHandle(p);
         newHeights.push_back(handle.heightToSurface);
@@ -776,14 +780,14 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
         program = _pointsProgram;
     }
 
-    // Reserve space for both vertex and dynamic height informatio
-    auto fullFufferSize = vertexData.size() * (sizeof(Vertex) +sizeof(float));
+    // Reserve space for both vertex and dynamic height information
+    auto fullBufferSize = vertexData.size() * (sizeof(Vertex) +sizeof(float));
 
     glBindVertexArray(feature.vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, feature.vboId);
     glBufferData(
         GL_ARRAY_BUFFER,
-        fullFufferSize,
+        fullBufferSize,
         nullptr,
         GL_STATIC_DRAW
     );

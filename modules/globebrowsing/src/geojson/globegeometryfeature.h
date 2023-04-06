@@ -31,15 +31,15 @@
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/texturecomponent.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <chrono>
 #include <vector>
 
 namespace openspace::documentation { struct Documentation; }
 namespace rendering::helper {
-    struct VertexXYZNormal;
     struct LightSourceRenderData;
+    struct VertexXYZNormal;
 }
 namespace geos::geom { class Geometry; }
 
@@ -48,11 +48,12 @@ namespace openspace::globebrowsing {
 class RenderableGlobe;
 
 /**
- * TODO: short documentation
+ * This class is responsible for rendering the geomoetry features of globes,
+ * created e.g. from GeoJson files
  */
-class GlobeGeometryFeature : public properties::PropertyOwner {
+class GlobeGeometryFeature {
 public:
-    GlobeGeometryFeature(RenderableGlobe& globe,
+    GlobeGeometryFeature(const RenderableGlobe& globe,
         GeoJsonProperties& defaultProperties,
         GeoJsonOverrideProperties& overrideProperties);
 
@@ -96,9 +97,7 @@ public:
     };
 
     std::string key() const;
-    bool enabled() const;
 
-    void setEnabled(bool value);
     void setOffsets(const glm::vec3& offsets);
 
     void initializeGL(ghoul::opengl::ProgramObject* pointsProgram,
@@ -138,12 +137,12 @@ private:
 
     /**
      * Create the vertex information for any point parts of the feature. Also creates
-     * the features for extruded lines
+     * the features for extruded lines for the points
      */
     void createPointGeometry();
 
     /**
-     * Create the triangle geometry for the extruded edges
+     * Create the triangle geometry for the extruded edges of lines/polygons
      */
     void createExtrudedGeometry(const std::vector<std::vector<glm::vec3>>& edgeVertices);
 
@@ -169,7 +168,7 @@ private:
     void bufferDynamicHeightData(const RenderFeature& feature);
 
     GeometryType _type = GeometryType::Error;
-    RenderableGlobe& _globe;
+    const RenderableGlobe& _globe;
 
     // Coordinates for geometry. For polygons, the first is always the outer ring
     // and any following are the inner rings (holes)
@@ -183,7 +182,7 @@ private:
     glm::vec3 _offsets = glm::vec3(0.f); // lat, long, distance (meters). Passed from parent on property change
 
     std::string _key;
-    PropertySet _properties;
+    const PropertySet _properties;
 
     std::vector<Geodetic3> _heightUpdateReferencePoints;
     std::vector<double> _lastControlHeights;
