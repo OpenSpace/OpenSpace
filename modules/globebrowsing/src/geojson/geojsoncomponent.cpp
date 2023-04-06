@@ -251,6 +251,13 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _featuresPropertyOwner({ "Features", "Features" })
+    , _centerLatLong(
+        CentroidCoordinateInfo, // TODO: update docs
+        glm::vec2(0.f),
+        glm::vec2(-90.f, -180.f),
+        glm::vec2(90.f, 180.f)
+    )
+    , _flyToFeature(FlyToFeatureInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -317,6 +324,11 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     _drawWireframe = p.drawWireframe.value_or(_drawWireframe);
     addProperty(_drawWireframe);
+
+    addProperty(_centerLatLong);
+
+    _flyToFeature.onChange([this]() { flyToFeature(); });
+    addProperty(_flyToFeature);
 
     readFile();
 
@@ -516,6 +528,8 @@ void GeoJsonComponent::readFile() {
             "GeoJSON file '{}'. Error: '{}'", this->identifier(), _geoJsonFile, e.what()
         ));
     }
+
+    computeMainFeatureMetaPropeties();
 }
 
 void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& feature) {
@@ -614,22 +628,80 @@ void GeoJsonComponent::addMetaPropertiesToFeature(NavigationFeature& feature, in
         glm::radians(boundingboxLatLong.w)
     };
     feature.boundingBoxDiagonal = static_cast<float>(
-        _globeNode.ellipsoid().greatCircleDistance(pos0, pos1)
+        std::abs(_globeNode.ellipsoid().greatCircleDistance(pos0, pos1))
     );
 
     feature.flyToFeature.onChange([this, index]() { flyToFeature(index); });
 }
 
-void GeoJsonComponent::flyToFeature(int index) const {
-    const NavigationFeature* f = _features[index].get();
+void GeoJsonComponent::computeMainFeatureMetaPropeties() {
+    if (_features.size() == 0) {
+        return;
+    }
+
+    glm::vec2 bboxLowerCorner = {
+        _features.front()->boundingboxLatLong.value().x,
+        _features.front()->boundingboxLatLong.value().y
+    };
+    glm::vec2 bboxUpperCorner = {
+        _features.front()->boundingboxLatLong.value().z,
+        _features.front()->boundingboxLatLong.value().w
+    };
+
+    for (const auto& f : _features) {
+        // Update bbox corners
+        if (f->boundingboxLatLong.value().x < bboxLowerCorner.x) {
+            bboxLowerCorner.x = f->boundingboxLatLong.value().x;
+        }
+        if (f->boundingboxLatLong.value().y < bboxLowerCorner.y) {
+            bboxLowerCorner.y = f->boundingboxLatLong.value().y;
+        }
+        if (f->boundingboxLatLong.value().z > bboxUpperCorner.x) {
+            bboxUpperCorner.x = f->boundingboxLatLong.value().z;
+        }
+        if (f->boundingboxLatLong.value().w > bboxUpperCorner.y) {
+            bboxUpperCorner.y = f->boundingboxLatLong.value().w;
+        }
+    }
+
+    // Identify the bounding box midpoints
+    _centerLatLong = 0.5f * (bboxLowerCorner + bboxUpperCorner);
+
+    // Compute the diagonal distance (size) of the bounding box
+    Geodetic2 pos0 = {
+        glm::radians(bboxLowerCorner.x),
+        glm::radians(bboxLowerCorner.y)
+    };
+
+    Geodetic2 pos1 = {
+        glm::radians(bboxUpperCorner.x),
+        glm::radians(bboxUpperCorner.y)
+    };
+    _bboxDiagonalSize = static_cast<float>(
+        std::abs(_globeNode.ellipsoid().greatCircleDistance(pos0, pos1))
+    );
+}
+
+void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
+    // General size properties
+    float diagonal = _bboxDiagonalSize;
+    float centroidLat = _centerLatLong.value().x;
+    float centroidLon = _centerLatLong.value().y;
+
+    if (index.has_value()) {
+        const NavigationFeature* f = _features[*index].get();
+        diagonal = f->boundingBoxDiagonal;
+        centroidLat = f->centroidLatLong.value().x;
+        centroidLon = f->centroidLatLong.value().y;
+    }
 
     // Compute a good distance to travel to based on the feature's size.
     // Assumes 80 degree FOV
-    float d = f->boundingBoxDiagonal / glm::tan(glm::radians(40.f));
+    float d = diagonal / glm::tan(glm::radians(40.f));
     d += _heightOffset;
 
-    float lat = f->centroidLatLong.value().x + _latLongOffset.value().x;
-    float lon = f->centroidLatLong.value().y + _latLongOffset.value().y;
+    float lat = centroidLat + _latLongOffset.value().x;
+    float lon = centroidLon + _latLongOffset.value().y;
 
     global::scriptEngine->queueScript(
         fmt::format(

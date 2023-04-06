@@ -41,6 +41,7 @@
 #include <openspace/rendering/helper.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
+#include <optional>
 #include <vector>
 
 namespace openspace {
@@ -58,7 +59,8 @@ namespace openspace::globebrowsing {
 class RenderableGlobe;
 
 /**
- * TODO: short documentation
+ * A component representing a collection of globe geometry features, whose details
+ * are read from a GeoJson file
  */
 class GeoJsonComponent : public properties::PropertyOwner, public Fadeable {
 public:
@@ -98,7 +100,13 @@ private:
     void addMetaPropertiesToFeature(NavigationFeature& feature, int index,
         const geos::geom::Geometry* geometry);
 
-    void flyToFeature(int index) const;
+    void computeMainFeatureMetaPropeties();
+
+    /**
+     * Trigger a flight to a feature in the collection. No index means to fly to an
+     * overview of all features in the collection.
+     */
+    void flyToFeature(std::optional<int> index = std::nullopt) const;
 
     std::vector<GlobeGeometryFeature> _geometryFeatures;
 
@@ -121,7 +129,9 @@ private:
     bool _dataIsInitialized = false;
     bool _textureIsDirty = false;
 
-    size_t _nVerticesToDraw = 0;
+    properties::Vec2Property _centerLatLong;
+    float _bboxDiagonalSize = 0.f;
+    properties::TriggerProperty _flyToFeature;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
     std::unique_ptr<LightSource> _defaultLightSource;
