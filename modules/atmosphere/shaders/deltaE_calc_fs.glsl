@@ -27,6 +27,6 @@
 out vec4 renderTableColor;
 
 
-void main() {   
+void main() {
   renderTableColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

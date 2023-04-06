@@ -278,13 +278,13 @@ bool WwtCommunicator::isImageCollectionLoaded() const {
 }
 
 SelectedImageDeque::iterator WwtCommunicator::findSelectedImage(
-                                                              const std::string& imageUrl) 
+                                                              const std::string& imageUrl)
 {
     auto it = std::find_if(
         _selectedImages.begin(),
         _selectedImages.end(),
-        [imageUrl](const std::pair<std::string, double>& pair) { 
-            return pair.first == imageUrl; 
+        [imageUrl](const std::pair<std::string, double>& pair) {
+            return pair.first == imageUrl;
         }
     );
     return it;

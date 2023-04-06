@@ -48,7 +48,7 @@ local eiffelTower = {
 
 local updatePositionAction = {
   Identifier = "os.drop_eiffel_tower",
-  Name = "Drop Eiffel Tower under camera",
+  Name = "Drop Eiffel tower under camera",
   Command = [[
     local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
     local camera = openspace.navigation.getNavigationState();
@@ -67,7 +67,7 @@ local updatePositionAction = {
 
 local resetPositionAction = {
   Identifier = "os.reset_eiffel_tower",
-  Name = "Reset Eiffel Tower position",
+  Name = "Reset Eiffel tower position",
   Command = [[
     -- same position as above
     local lat = 48.85824

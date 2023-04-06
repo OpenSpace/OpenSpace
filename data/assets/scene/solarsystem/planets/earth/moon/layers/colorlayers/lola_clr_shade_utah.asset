@@ -30,7 +30,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Lola Color Shade [Utah]",
   Version = "1.1",
-  Description = [[Moon LRO LOLA Color Shaded Relief 388m v4 layer for Moon globe. This 
+  Description = [[Moon LRO LOLA Color Shaded Relief 388m v4 layer for Moon globe. This
     map is hosted on the OpenSpace server in Utah]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Moon/LMMP/LOLA-derived/Lunar_LRO_LOLA_ClrShade_Global_128ppd_v04",

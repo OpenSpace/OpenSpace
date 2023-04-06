@@ -1,6 +1,6 @@
 local fade_up_trails = {
   Identifier = "os.fade_up_trails",
-  Name = "Show All Trails",
+  Name = "Show all trails",
   Command = [[
     local capList = openspace.getProperty("Scene.*Trail.Renderable.Fade");
     for _,v in ipairs(capList) do
@@ -19,7 +19,7 @@ asset.export("fade_up_trails", fade_up_trails.Identifier)
 
 local fade_down_trails = {
   Identifier = "os.fade_down_trails",
-  Name = "Hide All Trails",
+  Name = "Hide all trails",
   Command = [[
     local capList = openspace.getProperty("Scene.*Trail.Renderable.Fade");
     for _,v in ipairs(capList) do
@@ -38,7 +38,7 @@ asset.export("fade_down_trails", fade_down_trails.Identifier)
 
 local toggle_trails = {
   Identifier = "os.toggle_trails",
-  Name = "Toggle All Trails",
+  Name = "Toggle all trails",
   Command = [[
     local capList = openspace.getProperty("*Trail.Renderable.Fade");
     local list = openspace.getProperty("*trail.Renderable.Fade");

@@ -134,6 +134,15 @@ namespace {
         "If checked, hidden scene graph nodes are visible in the UI"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FadeDurationInfo = {
+        "FadeDuration",
+        "Fade Duration (seconds)",
+        "Controls how long time the fading in/out takes when enabling/disabling an "
+        "object through a checkbox in the UI. Holding SHIFT while clicking the "
+        "checkbox will enable/disable the renderable without fading, as will setting "
+        "this value to zero."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
         "Disable All Mouse Inputs",
@@ -151,6 +160,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     , _printEvents(PrintEventsInfo, false)
     , _visibility(VisibilityInfo)
     , _showHiddenSceneGraphNodes(ShowHiddenSceneInfo, false)
+    , _fadeOnEnableDuration(FadeDurationInfo, 1.f, 0.f, 5.f)
     , _disableAllMouseInputs(DisableMouseInputInfo, false)
 {
     FactoryManager::initialize();
@@ -160,6 +170,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     addProperty(_printEvents);
     addProperty(_visibility);
     addProperty(_showHiddenSceneGraphNodes);
+    addProperty(_fadeOnEnableDuration);
     addProperty(_disableAllMouseInputs);
 
     using Visibility = openspace::properties::Property::Visibility;

@@ -34,7 +34,6 @@ local tullyPoints = {
     --ColorOption = { "proximity" },
     ColorOption = { "prox5Mpc" },
     ColorRange = { { 1.0, 30.0 } },
-    DrawLabels = false,
     Unit = "Mpc",
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,
