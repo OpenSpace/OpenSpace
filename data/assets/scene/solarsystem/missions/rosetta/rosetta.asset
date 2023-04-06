@@ -286,8 +286,8 @@ local focus_rosetta = {
   Identifier = "os.missions.rosetta.focus",
   Name = "Focus on Rosetta",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Rosetta'); 
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Rosetta');
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');
     openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
   ]],
   Documentation = "Sets the focus of the camera on Rosetta",

@@ -84,16 +84,16 @@ namespace {
         }
         else {
             double d = std::get<double>(*useUpFromTargetOrDuration);
-            if (d <= 0.0) {
-                throw ghoul::lua::LuaError("Duration must be larger than zero");
+            if (d < 0.0) {
+                throw ghoul::lua::LuaError("Duration must be a positive value");
             }
             insDict.setValue("Duration", d);
         }
     }
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= 0.0) {
-            throw ghoul::lua::LuaError("Duration must be larger than zero");
+        if (d < 0.0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
         }
         insDict.setValue("Duration", d);
     }
@@ -134,16 +134,16 @@ namespace {
         }
         else {
             double d = std::get<double>(*useUpFromTargetOrDuration);
-            if (d <= 0.0) {
-                throw ghoul::lua::LuaError("Duration must be larger than zero");
+            if (d < 0.0) {
+                throw ghoul::lua::LuaError("Duration must be a positive value");
             }
             insDict.setValue("Duration", d);
         }
     }
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= 0.0) {
-            throw ghoul::lua::LuaError("Duration must be larger than zero");
+        if (d < 0.0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
         }
         insDict.setValue("Duration", d);
     }
@@ -182,8 +182,8 @@ namespace {
 
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= 0.0) {
-            throw ghoul::lua::LuaError("Duration must be larger than zero");
+        if (d < 0.0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
         }
         instruction.setValue("Duration", d);
     }
@@ -213,8 +213,8 @@ namespace {
 
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= 0.0) {
-            throw ghoul::lua::LuaError("Duration must be larger than zero");
+        if (d < 0.0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
         }
         insDict.setValue("Duration", d);
     }
@@ -251,8 +251,8 @@ namespace {
 
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= 0.0) {
-            throw ghoul::lua::LuaError("Duration must be larger than zero");
+        if (d < 0.0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
         }
         insDict.setValue("Duration", d);
     }
@@ -294,8 +294,8 @@ namespace {
 
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= 0.0) {
-            throw ghoul::lua::LuaError("Duration must be larger than zero");
+        if (d < 0.0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
         }
         insDict.setValue("Duration", d);
     }

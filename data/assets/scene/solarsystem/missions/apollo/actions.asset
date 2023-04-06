@@ -13,8 +13,8 @@ local focus_moon = {
   Identifier = "os.missions.apollo.moon.focus",
   Name = "Focus on Moon",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', ''); 
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon'); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon');
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
   ]],
   Documentation = "Set camera focus on the Moon",
@@ -26,8 +26,8 @@ local focus_earth = {
   Identifier = "os.missions.apollo.earth.focus",
   Name = "Focus on Earth",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', ''); 
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth'); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
   ]],
   Documentation = "Set camera focus on the Earth",
@@ -38,7 +38,7 @@ local focus_earth = {
 asset.onInitialize(function()
   openspace.action.registerAction(toggle_moon_shading)
   openspace.action.registerAction(focus_moon)
-  openspace.action.registerAction(focus_earth)  
+  openspace.action.registerAction(focus_earth)
 end)
 
 asset.onDeinitialize(function()

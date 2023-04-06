@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "dashboard/default_dashboard",
     "scene/solarsystem/heliosphere/bastille_day/actions",
     "scene/solarsystem/heliosphere/bastille_day/density_volume",

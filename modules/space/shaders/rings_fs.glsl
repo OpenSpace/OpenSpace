@@ -58,7 +58,7 @@ Fragment getFragment() {
   if (texCoord < 0.0 || texCoord > 1.0) {
     discard;
   }
-      
+
   vec4 diffuse = texture(texture1, texCoord);
   // divided by 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
   // to normalize the alpha value to [0,1]

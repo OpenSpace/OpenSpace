@@ -847,9 +847,20 @@ scripting::LuaLibrary Scene::luaLibrary() {
             codegen::lua::WorldRotation,
             codegen::lua::SetParent,
             codegen::lua::BoundingSphere,
-            codegen::lua::InteractionSphere
+            codegen::lua::InteractionSphere,
+            codegen::lua::MakeIdentifier
         }
     };
+}
+
+std::string makeIdentifier(std::string s) {
+    // Note that we want to preserve '-' and '_', but replace any other punctuation
+    // marks. Hence, we first convert '_' to whitespaces to avoid them being replaced
+    // in the puncutation check
+    std::replace(s.begin(), s.end(), '_', ' ');
+    std::replace_if(s.begin(), s.end(), std::ptr_fun<int, int>(&std::ispunct), '-');
+    std::replace(s.begin(), s.end(), ' ', '_');
+    return s;
 }
 
 }  // namespace openspace

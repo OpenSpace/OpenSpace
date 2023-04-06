@@ -263,6 +263,21 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
             res.textures.push_back(texture);
             continue;
         }
+
+        if (startsWith(line, "maxcomment")) {
+            // ignoring this comment as we don't need it
+            continue;
+        }
+
+        // If we get this far, we had an illegal header as it wasn't an empty line and
+        // didn't start with either '#' denoting a comment line, and didn't start with
+        // either the 'datavar', 'texturevar', 'polyorivar', or 'texture' keywords
+        throw ghoul::RuntimeError(fmt::format(
+            "Error in line {} while reading the header information of file {}. Line is "
+            "neither a comment line, nor starts with one of the supported keywords for "
+            "SPECK files",
+            currentLineNumber, path
+        ));
     }
 
     std::sort(

@@ -97,12 +97,6 @@ namespace {
         "The text color of the labels"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
-        "Opacity",
-        "Opacity",
-        "The opacity of the labels"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo FadeDistancesInfo = {
         "FadeDistances",
         "Fade-In Distances",
@@ -165,7 +159,7 @@ namespace {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
-        // [[codegen::verbatim(OpacityInfo.description)]]
+        // The opacity of the labels
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(FadeDistancesInfo.description)]]
@@ -207,7 +201,6 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     , _minMaxSize(MinMaxSizeInfo, glm::ivec2(1, 1000), glm::ivec2(1), glm::ivec2(1000))
     , _heightOffset(HeightOffsetInfo, 100.f, 0.f, 10000.f)
     , _color(ColorInfo, glm::vec3(1.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _fadeDistances(
         FadeDistancesInfo,
         glm::vec2(1e4f, 1e6f),
@@ -224,19 +217,21 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     )
 {
     addProperty(_enabled);
+    addProperty(_color);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_opacity);
+    addProperty(_fade);
+
     addProperty(_fontSize);
     addProperty(_size);
     _minMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(_minMaxSize);
-    addProperty(_color);
-    addProperty(_opacity);
     _fadeDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     _fadeDistances.setExponent(3.f);
     addProperty(_fadeDistances);
     addProperty(_fadeInEnabled);
     addProperty(_fadeOutEnabled);
     addProperty(_heightOffset);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_disableCulling);
     addProperty(_distanceEPS);
 
@@ -533,7 +528,7 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
 ) {
     glm::vec4 textColor = glm::vec4(
         glm::vec3(_color),
-        _opacity * fadeInVariable
+        opacity() * fadeInVariable
     );
 
     glm::dmat4 VP = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *

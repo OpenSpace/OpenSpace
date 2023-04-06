@@ -77,8 +77,8 @@ local focus_earth = {
   Identifier = "os.solarsystem.earth.focus",
   Name = "Focus on Earth",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', ''); 
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth'); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
   ]],
   Documentation = "Set camera focus on the Earth",
@@ -90,9 +90,9 @@ local toggle_earth_satellitetrails = {
   Identifier = "os.solarsystem.earth.togglesatellitetrails",
   Name = "Toggle satellite trails",
   Command = [[
-    local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); 
-    for _,v in pairs(list) do 
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+    local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled');
+    for _,v in pairs(list) do
+      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
     end
   ]],
   Documentation = "Toggle trails on or off for satellites around Earth",

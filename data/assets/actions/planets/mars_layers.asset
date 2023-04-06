@@ -13,7 +13,7 @@ asset.export("ctx_enable_action", ctx_enable_action.Identifier)
 
 local ctx_disable_action = {
   Identifier = "os.mars.ctx.fadedout",
-  Name = "Fade out CTX Layer",
+  Name = "Fade out CTX layer",
   Command = [[openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended_01.Settings.Opacity", 0, 2.0)]],
   Documentation = "Fade out CTX",
   GuiPath = "/Solar System/Mars",
@@ -46,7 +46,7 @@ asset.export("hirise_disable_action", hirise_disable_action.Identifier)
 
 local lshirise_enable_action = {
   Identifier = "os.mars.lshirise.fadein",
-  Name = "Fade in HiRISE Local Set",
+  Name = "Fade in HiRISE local set",
   Command = [[
 openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Enabled", true)
 openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled", true)
@@ -60,7 +60,7 @@ asset.export("lshirise_enable_action", lshirise_enable_action.Identifier)
 
 local lshirise_disable_action = {
   Identifier = "os.mars.lshirise.fadedout",
-  Name = "Fade out HiRISE Local Set",
+  Name = "Fade out HiRISE local set",
   Command = [[openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Settings.Opacity", 0, 2.0)
 openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled", false)]],
   Documentation = "Fade out HiRISE local set layer for Mars",

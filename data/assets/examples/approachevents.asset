@@ -3,7 +3,7 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 local generic_action = {
   Identifier = "os.example.generic",
-  Name = "Generic Example",
+  Name = "Generic example",
   Command = [[
     openspace.printInfo("Node: " .. args.Node)
     openspace.printInfo("Transition: " .. args.Transition)

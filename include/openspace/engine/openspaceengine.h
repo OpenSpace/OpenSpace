@@ -29,8 +29,9 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/property.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -145,6 +146,7 @@ private:
     properties::BoolProperty _printEvents;
     properties::OptionProperty _visibility;
     properties::BoolProperty _showHiddenSceneGraphNodes;
+    properties::FloatProperty _fadeOnEnableDuration;
     properties::BoolProperty _disableAllMouseInputs;
 
     std::unique_ptr<Scene> _scene;

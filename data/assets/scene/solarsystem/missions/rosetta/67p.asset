@@ -135,8 +135,8 @@ local focus_67p = {
   Identifier = "os.missions.rosetta.67p.focus",
   Name = "Focus on 67P",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', '67P'); 
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', '67P');
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');
     openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
   ]],
   Documentation = "Sets the focus of the camera on 67P",
