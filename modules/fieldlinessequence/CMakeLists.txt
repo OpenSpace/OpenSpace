@@ -51,3 +51,88 @@ create_new_module(
   fieldlinessequence_module
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
+
+#########################################################################################
+# General settings
+#########################################################################################
+
+# Set FieldlineSequence paths
+set(FIELDLINESEQUENCE_BASE_DIR "C:/OpenSpace/OpenSpace/modules/fieldlinessequence")
+set(FIELDLINESEQUENCE_SRC_DIR "${FIELDLINESEQUENCE_BASE_DIR}/src")
+set(FIELDLINESEQUENCE_EXT_DIR "${FIELDLINESEQUENCE_BASE_DIR}/ext")
+
+#########################################################################################
+# External Third-party software options
+#########################################################################################
+
+#boost settings
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME ON) 
+
+# If libraries needs to be built, make them shared
+option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+
+# HDF5 options
+option(HDF5_USE_STATIC_LIBRARIES "Use HDF5 static libraries" OFF)
+option(FIELDLINESEQUENCE_USE_HDF5 "Build FieldlineSequence with HDF5 library" OFF)
+
+# Highfive options
+option(HIGHFIVE_USE_STATIC_LIBS "Use HighFive static libraries" OFF)
+option(FIELDLINESEQUENCE_USE_HIGHFIVE "Build HighFive with zlib" OFF)
+
+#########################################################################################
+# External Third-party software
+#########################################################################################
+
+# Boost
+find_package(Boost REQUIRED)
+set(CCMC_DEPENDENT_LIBS ${CCMC_DEPENDENT_LIBS} ${Boost_LIBRARIES})
+
+find_package(HDF5 COMPONENTS C CXX)
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_INCLUDE_DIR}")
+set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_${LIB_TYPE}_LIBRARY})
+
+set (LIB_TYPE STATIC) # or SHARED
+string(TOLOWER ${LIB_TYPE} SEARCH_TYPE)
+if (FIELDLINESEQUENCE_USE_HDF5)
+
+  if (HDF5_FOUND)
+    message(STATUS "HDF5 Found: Building FieldlineSequence with HDF 5")
+    add_definitions(-DHAVE_HDF5)
+  # set(CCMC_DEPENDENT_LIBS ${CCMC_DEPENDENT_LIBS} ${HDF5_LIBRARIES})
+  else ()
+    add_definitions(-DHAVE_HDF5)
+    message(STATUS "Building HDF5 locally")
+   set(HDF5_ROOT ${FIELDLINESEQUENCE_EXT_DIR}/hdf5)
+  set(HDF5_EXTERNALLY_CONFIGURED 1)
+  set(HDF5_BUILD_CPP_LIB ON CACHE BOOL "Build HDF5 C++ Library" FORCE)
+   # Add HDF5 submodule as a subdirectory
+    add_subdirectory(${HDF5_ROOT})
+    set(HDF5_INCLUDE_DIR ${HDF5_ROOT} ${HDF5_ROOT}/src ${HDF5_ROOT}/c++/src)
+    set(HDF5_LIBRARIES hdf5)
+    set(HDF5_LIBRARIES hdf5_cpp)
+
+  endif ()
+ endif ()
+
+#HIGHFIVE
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+
+set(CMAKE_CXX_STANDARD 11)
+add_definitions(-DHIGHFIVE_EXAMPLES=OFF)
+set(HighFive_DIR "${FIELDLINESEQUENCE_EXT_DIR}/HighFive")
+
+if(FIELDLINESEQUENCE_USE_HIGHFIVE)
+    
+   #set(CMAKE_PREFIX_PATH "C:/OpenSpace/OpenSpace/modules/fieldlinessequence/ext/HighFive/CMake" ${CMAKE_PREFIX_PATH})
+    add_subdirectory(${HighFive_DIR})
+    #find_package(HighFive REQUIRED)
+    #add_subdirectory("HighFive")
+    #target_link_libraries(${fieldlinessequence_module} PRIVATE HighFive) 
+    #set_target_properties(HighFive PROPERTIES FOLDER "External")
+    set(CCMC_DEPENDENT_LIBS ${CCMC_DEPENDENT_LIBS} ${HighFive_LIBRARIES})
+endif ()
+if(HighFive_FOUND)
+    message(WARNING "HAVE HIGHFIVE")
+endif()
