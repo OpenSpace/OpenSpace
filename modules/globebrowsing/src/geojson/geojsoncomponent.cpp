@@ -259,7 +259,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     );
 
     _heightOffset = p.heightOffset.value_or(_heightOffset);
-    _heightOffset.onChange([this]() { _dataIsDirty = true; });
+    _heightOffset.onChange([this]() { _heightOffsetIsDirty = true; });
     _heightOffset.setMinValue(-0.9f * minGlobeRadius);
     _heightOffset.setMaxValue(5.f * minGlobeRadius);
     addProperty(_heightOffset);
@@ -272,10 +272,6 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         _defaultProperties.createFromDictionary(*p.defaultProperties);
     }
     addPropertySubOwner(_defaultProperties);
-
-    _defaultProperties.altitudeModeOption.onChange([this]() {
-        _dataIsDirty = true;
-    });
 
     _defaultProperties.pointTexture.onChange([&]() {
         std::filesystem::path texturePath = _defaultProperties.pointTexture.value();
@@ -438,6 +434,10 @@ void GeoJsonComponent::render(const RenderData& data) {
 }
 
 void GeoJsonComponent::update() {
+    if (!_enabled || !isVisible()) {
+        return;
+    }
+
     glm::vec3 offsets = glm::vec3(_latLongOffset.value(), _heightOffset);
 
     for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
@@ -446,7 +446,7 @@ void GeoJsonComponent::update() {
         }
         GlobeGeometryFeature& g = _geometryFeatures[i];
 
-        if (_dataIsDirty) {
+        if (_dataIsDirty || _heightOffsetIsDirty) {
             g.setOffsets(offsets);
         }
 
