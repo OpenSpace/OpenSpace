@@ -54,7 +54,7 @@ namespace {
         "The compression algorithm to use for MRF cached tiles"
     };
 
-    enum Compression {
+    enum class [[codegen::stringify()]] Compression {
         PNG = 0,
         JPEG,
         LERC
@@ -180,15 +180,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     _cacheProperties.path = path;
     _cacheProperties.quality = quality;
     _cacheProperties.blockSize = blockSize;
-    if (compression == Compression::JPEG) {
-        _cacheProperties.compression = "JPEG";
-    }
-    else if (compression == Compression::PNG){
-        _cacheProperties.compression = "PNG";
-    }
-    else {
-        _cacheProperties.compression = "LERC";
-    }
+    _cacheProperties.compression = codegen::toString(compression);
 
     TileTextureInitData initData(
         tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
