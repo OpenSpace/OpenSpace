@@ -109,7 +109,8 @@ public:
 
     void updateTexture(bool isInitializeStep = false);
 
-    void createFromSingleGeosGeometry(const geos::geom::Geometry* geo, int index);
+    void createFromSingleGeosGeometry(const geos::geom::Geometry* geo, int index,
+        bool ignoreHeights);
 
     // 2 pass rendering to get correct culling for polygons
     void render(const RenderData& renderData, int pass, float mainOpacity,

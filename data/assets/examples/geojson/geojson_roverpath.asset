@@ -5,6 +5,7 @@ local Example_RoverPath = {
   Identifier = "Mars-Perseverance-Path",
   File = asset.localResource("./files/path_perseverance.geojson"),
   HeightOffset = 10.0,
+  IgnoreHeights = true, -- Ignores height values from the file itself
   DefaultProperties = {
     LineWidth = 2.0
   },

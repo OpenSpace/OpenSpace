@@ -155,7 +155,7 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
 }
 
 void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geometry* geo,
-                                                        int index)
+                                                        int index, bool ignoreHeights)
 {
     ghoul_assert(
         geo->isPuntal() || !geo->isCollection(),
@@ -238,7 +238,14 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
             throw ghoul::MissingCaseException();
     }
 
-    // TODO: Add option to ignore height values from file
+    // Reset height values if we don't care about them
+    if (ignoreHeights) {
+        for (std::vector<Geodetic3>& vec : _geoCoordinates) {
+            for (Geodetic3& geo : vec) {
+                geo.height = 0.0;
+            }
+        }
+    }
 
     // Compute reference positions to use for checking if height map changes
     geos::geom::Coordinate centroid;

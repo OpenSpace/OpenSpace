@@ -70,6 +70,13 @@ namespace {
         "Path to the GeoJSON file to base the rendering on."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo IgnoreHeightsInfo = {
+        "IgnoreHeights",
+        "Ignore Heights",
+        "If true, ignore any height values that are given in the file. Coordinates with "
+        "three values will then be treated as coordinates with only two values."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo HeightOffsetInfo = {
         "HeightOffset",
         "Height Offset",
@@ -130,6 +137,9 @@ namespace {
         // A human-readable description of the layer to be used in informational texts
         // presented to the user
         std::optional<std::string> description;
+
+        // [[codegen::verbatim(IgnoreHeightsInfo.description)]]
+        std::optional<bool> ignoreHeights;
 
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
@@ -226,6 +236,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         dictionary.hasKey(KeyDesc) ? dictionary.value<std::string>(KeyDesc) : ""
     })
     , _enabled(EnabledInfo, true)
+    , _ignoreHeightsFromFile(IgnoreHeightsInfo, false)
     , _globeNode(globe)
     , _geoJsonFile(FileInfo)
     , _heightOffset(HeightOffsetInfo, 0.f, -1e12f, 1e12f)
@@ -253,6 +264,10 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     _geoJsonFile = p.file.string();
     _geoJsonFile.setReadOnly(true);
     addProperty(_geoJsonFile);
+
+    _ignoreHeightsFromFile = p.ignoreHeights.value_or(_ignoreHeightsFromFile);
+    _ignoreHeightsFromFile.setReadOnly(true);
+    addProperty(_ignoreHeightsFromFile);
 
     const float minGlobeRadius = static_cast<float>(
         _globeNode.ellipsoid().minimumRadius()
@@ -529,7 +544,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
         const int index = static_cast<int>(_geometryFeatures.size());
         try {
             GlobeGeometryFeature g(_globeNode, _defaultProperties, propsFromFile);
-            g.createFromSingleGeosGeometry(geometry, index);
+            g.createFromSingleGeosGeometry(geometry, index, _ignoreHeightsFromFile);
             g.initializeGL(_pointsProgram.get(), _linesAndPolygonsProgram.get());
             _geometryFeatures.push_back(std::move(g));
 

@@ -103,6 +103,7 @@ private:
     std::vector<GlobeGeometryFeature> _geometryFeatures;
 
     properties::BoolProperty _enabled;
+    properties::BoolProperty _ignoreHeightsFromFile;
     properties::StringProperty _geoJsonFile;
     properties::FloatProperty _heightOffset;
     properties::Vec2Property _latLongOffset;
