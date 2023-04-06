@@ -206,7 +206,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TesselationMaxDistanceInfo = {
         "TesselationMaxDistance",
         "Tesselation Max Distance",
-        "" // @TODO (and consider using a distance based on angle instead)
+        "Anything larger than this will be automatically subdivided." // @TODO (and consider using a distance based on angle instead)
     };
 
     struct [[codegen::Dictionary(GeoJsonProperties)]] Parameters {
@@ -274,7 +274,7 @@ GeoJsonProperties::GeoJsonProperties()
     , extrude(ExtrudeInfo, false)
     , performShading(PerformShadingInfo, false)
     , altitudeModeOption(AltitudeModeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , shouldTesselate(TesselateInfo, true)
+    , shouldTesselate(TesselateInfo, false)
     , tesselationLevel(TesselationLevelInfo, 10, 0, 100)
     , tesselationMaxDistance(TesselationMaxDistanceInfo, 100000.f) // TODO: use distance based on angle?
 {

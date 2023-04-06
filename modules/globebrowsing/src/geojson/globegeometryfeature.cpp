@@ -553,16 +553,15 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
                 continue;
             }
 
-            float stepSize = 0.f;
-            if (_properties.shouldtesselate() && _properties.tesselationLevel() > 0) {
-                // TODO: tesselation distance should be consistent between polygons and lines
-                stepSize = determineTesselationDistance(glm::distance(lastPos, v));
-            }
+            float length = glm::distance(lastPos, v);
 
-            // If we get a stepsize, then we want to subdivide
-            if (stepSize > std::numeric_limits<float>::epsilon()) {
+            if (shouldTesselate(length)) {
                 // Add extra vertices to fulfill MaxDistance criteria.
                 // First determine how much to tesselate
+                float stepSize = _properties.tesselationLevel() > 0 ?
+                    length / static_cast<float>(_properties.tesselationLevel()) :
+                    _properties.tesselationMaxDistance();
+
                 std::vector<geometryhelper::PosHeightPair> subdividedPositions =
                     geometryhelper::subdivideLine(
                         lastPos,
@@ -703,13 +702,16 @@ void GlobeGeometryFeature::createPolygonGeometry() {
             double h1 = triHeights[1];
             double h2 = triHeights[2];
 
-            if (_properties.shouldtesselate() && _properties.tesselationLevel() > 0) {
+            float longestSide = std::max(
+                std::max(glm::distance(v0, v1), glm::distance(v0, v2)),
+                glm::distance(v1, v2)
+            );
+
+            if (shouldTesselate(longestSide)) {
                 // First determine how much to tesselate
-                float longestSide = std::max(
-                    std::max(glm::distance(v0, v1), glm::distance(v0, v2)),
-                    glm::distance(v1, v2)
-                );
-                float stepSize = determineTesselationDistance(longestSide);
+                float stepSize = _properties.tesselationLevel() > 0 ?
+                    longestSide / static_cast<float>(_properties.tesselationLevel()) :
+                    _properties.tesselationMaxDistance();
 
                 std::vector<Vertex> verts = geometryhelper::subdivideTriangle(
                     v0, v1, v2,
@@ -767,19 +769,12 @@ std::vector<double> GlobeGeometryFeature::getCurrentReferencePointsHeights() con
     return newHeights;
 }
 
-float GlobeGeometryFeature::determineTesselationDistance(float objectSize) const {
-    ghoul_assert(_properties.tesselationLevel() > 0, "Tesselation level cannot be zero");
-    float tesselationFactor = 1.f / static_cast<float>(_properties.tesselationLevel());
-    float distance = tesselationFactor * _properties.tesselationMaxDistance();
-
-    // If object size is smaller than the allowed max distance, instead split the
-    // distance into the number of steps given by the tesselationlevel property
-    if (objectSize < _properties.tesselationMaxDistance()) {
-        distance = tesselationFactor * objectSize;
+bool GlobeGeometryFeature::shouldTesselate(float objectSize) const {
+    if (objectSize > _properties.tesselationMaxDistance()) {
+        // @TODO Come up with some nice solution for tesselation of smaller objects...
+        return true;
     }
-    // @TODO: verify that this will be ok. Maybe we shoud just simplify it?
-    // Also, make something that takes the height into account
-    return distance;
+    return _properties.shouldtesselate() && _properties.tesselationLevel() > 0;
 }
 
 void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,

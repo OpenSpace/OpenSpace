@@ -159,7 +159,7 @@ private:
     /// Compute the heights to the surface at the reference points
     std::vector<double> getCurrentReferencePointsHeights() const;
 
-    float determineTesselationDistance(float objectSize) const;
+    bool shouldTesselate(float objectSize) const;
 
     /// Buffer the static data for the vertices
     void bufferVertexData(const RenderFeature& feature,
