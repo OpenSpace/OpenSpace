@@ -618,7 +618,8 @@ void GeoJsonComponent::flyToFeature(int index) const {
 
     global::scriptEngine->queueScript(
         fmt::format(
-            "openspace.globebrowsing.flyToGeo({}, {}, {})", lat, lon, d
+            "openspace.globebrowsing.flyToGeo(\"{}\", {}, {}, {})",
+            _globeNode.owner()->identifier(), lat, lon, d
         ),
         scripting::ScriptEngine::RemoteScripting::Yes
     );
