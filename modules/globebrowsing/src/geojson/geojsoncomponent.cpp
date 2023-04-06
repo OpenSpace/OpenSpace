@@ -526,68 +526,16 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
             g.initializeGL(_pointsProgram.get(), _linesAndPolygonsProgram.get());
             _geometryFeatures.push_back(std::move(g));
 
-            using PropertyOwnerInfo = properties::PropertyOwner::PropertyOwnerInfo;
-            _features.push_back(std::make_unique<NavigationFeature>(
-                PropertyOwnerInfo(
-                    makeIdentifier(_geometryFeatures.back().key()),
-                    _geometryFeatures.back().key()
-                ) // TODO: description
-            ));
-
-            // TODO: Make the following a function
-
-            // Add meta information about the feature, to allow things like flying to it etc
-            std::unique_ptr<geos::geom::Point> centroid = geometry->getCentroid();
-            geos::geom::Coordinate centroidCoord = *centroid->getCoordinate();
-            glm::vec2 centroidLatLong = glm::vec2(centroidCoord.y, centroidCoord.x);
-            _features.back()->centroidLatLong = centroidLatLong;
-
-            std::unique_ptr<geos::geom::Geometry> boundingbox = geometry->getEnvelope();
-            // TODO: make sure this works even if a file with an empty collection is used
-            std::unique_ptr<geos::geom::CoordinateSequence> coords = boundingbox->getCoordinates();
-            glm::vec4 boundingboxLatLong;
-            if (boundingbox->isRectangle()) {
-                // A rectangle has 5 coordinates., where the first and third are two corners
-                boundingboxLatLong = glm::vec4(
-                    (*coords)[0].y,
-                    (*coords)[0].x,
-                    (*coords)[2].y,
-                    (*coords)[2].x
-                );
-
-            }
-            else {
-                // Invalid boundingbox. Can happend e.g. for single points.
-                // Just add a degree to every direction from the centroid
-                boundingboxLatLong = glm::vec4(
-                    centroidLatLong.x - 1.f,
-                    centroidLatLong.y - 1.f,
-                    centroidLatLong.x + 1.f,
-                    centroidLatLong.y + 1.f
-                );
-            }
-
-            _features.back()->boundingboxLatLong = boundingboxLatLong;
-
-            // Compute the diagonal distance of the bounding box
-            Geodetic2 pos0 = {
-                glm::radians(boundingboxLatLong.x),
-                glm::radians(boundingboxLatLong.y)
+            std::string name = _geometryFeatures.back().key();
+            properties::PropertyOwner::PropertyOwnerInfo info = {
+                makeIdentifier(name),
+                name
+                // @TODO: Use description from file, if any
             };
+            _features.push_back(std::make_unique<NavigationFeature>(info));
 
-            Geodetic2 pos1 = {
-                glm::radians(boundingboxLatLong.z),
-                glm::radians(boundingboxLatLong.w)
-            };
-            _features.back()->boundingBoxDiagonal = static_cast<float>(
-                _globeNode.ellipsoid().greatCircleDistance(pos0, pos1)
-                );
+            addMetaPropertiesToFeature(*_features.back(), index, geometry);
 
-            _features.back()->flyToFeature.onChange([this, index]() {
-                flyToFeature(index);
-             });
-
-            _features.back()->index = index;
             _featuresPropertyOwner.addPropertySubOwner(_features.back().get());
         }
         catch (const ghoul::MissingCaseException&) {
@@ -598,6 +546,56 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
             // Do nothing
         }
     }
+}
+
+void GeoJsonComponent::addMetaPropertiesToFeature(NavigationFeature& feature, int index,
+                                                  const geos::geom::Geometry* geometry)
+{
+    std::unique_ptr<geos::geom::Point> centroid = geometry->getCentroid();
+    geos::geom::Coordinate centroidCoord = *centroid->getCoordinate();
+    glm::vec2 centroidLatLong = glm::vec2(centroidCoord.y, centroidCoord.x);
+    feature.centroidLatLong = centroidLatLong;
+
+    std::unique_ptr<geos::geom::Geometry> boundingbox = geometry->getEnvelope();
+    std::unique_ptr<geos::geom::CoordinateSequence> coords = boundingbox->getCoordinates();
+    glm::vec4 boundingboxLatLong;
+    if (boundingbox->isRectangle()) {
+        // A rectangle has 5 coordinates, where the first and third are two corners
+        boundingboxLatLong = glm::vec4(
+            (*coords)[0].y,
+            (*coords)[0].x,
+            (*coords)[2].y,
+            (*coords)[2].x
+        );
+    }
+    else {
+        // Invalid boundingbox. Can happen e.g. for single points.
+        // Just add a degree to every direction from the centroid
+        boundingboxLatLong = glm::vec4(
+            centroidLatLong.x - 1.f,
+            centroidLatLong.y - 1.f,
+            centroidLatLong.x + 1.f,
+            centroidLatLong.y + 1.f
+        );
+    }
+
+    feature.boundingboxLatLong = boundingboxLatLong;
+
+    // Compute the diagonal distance of the bounding box
+    Geodetic2 pos0 = {
+        glm::radians(boundingboxLatLong.x),
+        glm::radians(boundingboxLatLong.y)
+    };
+
+    Geodetic2 pos1 = {
+        glm::radians(boundingboxLatLong.z),
+        glm::radians(boundingboxLatLong.w)
+    };
+    feature.boundingBoxDiagonal = static_cast<float>(
+        _globeNode.ellipsoid().greatCircleDistance(pos0, pos1)
+    );
+
+    feature.flyToFeature.onChange([this, index]() { flyToFeature(index); });
 }
 
 void GeoJsonComponent::flyToFeature(int index) const {
@@ -618,6 +616,5 @@ void GeoJsonComponent::flyToFeature(int index) const {
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
-
 
 } // namespace openspace::globebrowsing

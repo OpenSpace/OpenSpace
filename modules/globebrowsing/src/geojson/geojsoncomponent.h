@@ -85,11 +85,17 @@ private:
         properties::Vec4Property boundingboxLatLong;
         properties::TriggerProperty flyToFeature;
         float boundingBoxDiagonal = 0.f;
-        int index = 0;
     };
 
     void readFile();
     void parseSingleFeature(const geos::io::GeoJSONFeature& feature);
+
+    /**
+     * Add meta properties to the feature, to allow things like flying to it,
+     * identifying its location, etc
+     */
+    void addMetaPropertiesToFeature(NavigationFeature& feature, int index,
+        const geos::geom::Geometry* geometry);
 
     void flyToFeature(int index) const;
 
