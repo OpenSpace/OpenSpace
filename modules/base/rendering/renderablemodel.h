@@ -120,6 +120,7 @@ private:
     GLuint _framebuffer = 0;
     GLuint _quadVao = 0;
     GLuint _quadVbo = 0;
+    bool _shouldRenderTwice = false;
 
     // Opacity program
     ghoul::opengl::ProgramObject* _quadProgram = nullptr;

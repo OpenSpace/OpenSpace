@@ -773,18 +773,8 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_DEPTH_TEST);
     }
 
-    // Only render two pass if the model is in any way transparent
-    bool shouldRenderTwice = false;
-    const float o = opacity();
-    if ((o >= 0.f && o < 1.f) || _geometry->isTransparent()) {
-        setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-        shouldRenderTwice = true;
-    }
-    else {
-        setRenderBin(_originalRenderBin);
-    }
 
-    if (!shouldRenderTwice) {
+    if (!_shouldRenderTwice) {
         // Reset manual depth test
         _program->setUniform(
             _uniformCache.performManualDepthTest,
@@ -918,6 +908,17 @@ void RenderableModel::update(const UpdateData& data) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    }
+
+    // Only render two pass if the model is in any way transparent
+    const float o = opacity();
+    if ((o >= 0.f && o < 1.f) || _geometry->isTransparent()) {
+        setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
+        _shouldRenderTwice = true;
+    }
+    else {
+        setRenderBin(_originalRenderBin);
+        _shouldRenderTwice = false;
     }
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
