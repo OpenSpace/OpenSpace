@@ -64,18 +64,11 @@ namespace {
         "This setting determines whether this object will be visible or not"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
-        "Opacity",
-        "Opacity",
-        "This value determines the opacity of this rencomponentderable. A value of 0 means "
-        "completely transparent"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "File",
         "Path to the GeoJSON file to base the rendering on."
-    }; // @TODO: Add documentation about what geometries are supported
+    };
 
     constexpr openspace::properties::Property::PropertyInfo HeightOffsetInfo = {
         "HeightOffset",
@@ -131,7 +124,7 @@ namespace {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
 
-        // [[codegen::verbatim(OpacityInfo.description)]]
+        // The opacity of the component
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
         // A human-readable description of the layer to be used in informational texts
@@ -228,7 +221,6 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         dictionary.hasKey(KeyDesc) ? dictionary.value<std::string>(KeyDesc) : ""
     })
     , _enabled(EnabledInfo, true)
-    , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _globeNode(globe)
     , _geoJsonFile(FileInfo)
     , _heightOffset(HeightOffsetInfo, 0.f, -1e12f, 1e12f)
@@ -251,6 +243,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     _opacity = p.opacity.value_or(_opacity);
     addProperty(_opacity);
+    addProperty(_fade);
 
     _geoJsonFile = p.file.string();
     _geoJsonFile.setReadOnly(true);
@@ -395,6 +388,10 @@ bool GeoJsonComponent::isReady() const {
 }
 
 void GeoJsonComponent::render(const RenderData& data) {
+    if (!_enabled || !isVisible()) {
+        return;
+    }
+
     // @TODO (2023-03-17, emmbr): Once the light source for the globe can be configured,
     // this code should use the same light source as the globe
     _lightsourceRenderData.updateBasedOnLightSources(data, _lightSources);
@@ -412,7 +409,7 @@ void GeoJsonComponent::render(const RenderData& data) {
     for (int renderPass = 0; renderPass < 2; ++renderPass) {
         for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
             if (_features[i]->enabled) {
-                _geometryFeatures[i].render(data, renderPass, _opacity, _lightsourceRenderData);
+                _geometryFeatures[i].render(data, renderPass, opacity(), _lightsourceRenderData);
             }
         }
     }

@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GEOJSONCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
@@ -59,7 +60,7 @@ class RenderableGlobe;
 /**
  * TODO: short documentation
  */
-class GeoJsonComponent : public properties::PropertyOwner {
+class GeoJsonComponent : public properties::PropertyOwner, public Fadeable {
 public:
     GeoJsonComponent(const ghoul::Dictionary& dictionary, RenderableGlobe& globe);
 
@@ -102,7 +103,6 @@ private:
     std::vector<GlobeGeometryFeature> _geometryFeatures;
 
     properties::BoolProperty _enabled;
-    properties::FloatProperty _opacity;
     properties::StringProperty _geoJsonFile;
     properties::FloatProperty _heightOffset;
     properties::Vec2Property _latLongOffset;
