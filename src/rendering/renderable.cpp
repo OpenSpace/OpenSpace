@@ -308,7 +308,6 @@ float Renderable::opacity() const {
     const float dimming = _dimInAtmosphere ?
         global::navigationHandler->camera()->atmosphereDimmingFactor() :
         1.f;
-    // @TODO (2023-03-20, emmbr) Should the dimming set the fade value instead?
     return dimming * Fadeable::opacity();
 }
 
