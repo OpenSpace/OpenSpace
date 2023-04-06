@@ -18,7 +18,6 @@ local tullyPoints = {
     Type = "RenderableBillboardsCloud",
     Enabled = true,
     Labels = {
-      Enabled = false,
       File = speck .. "tully.label",
       Color = { 0.7, 0.7, 0.7 },
       Size = 19.36,
