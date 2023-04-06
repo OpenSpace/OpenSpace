@@ -77,7 +77,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    class NavigationFeature : public properties::PropertyOwner {
+    class NavigationFeature : public properties::PropertyOwner, public Fadeable {
     public:
         NavigationFeature(properties::PropertyOwner::PropertyOwnerInfo info);
 

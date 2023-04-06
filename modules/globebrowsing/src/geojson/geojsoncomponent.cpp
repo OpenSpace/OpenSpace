@@ -203,7 +203,12 @@ GeoJsonComponent::NavigationFeature::NavigationFeature(
         glm::vec4(90.f, 180.f, 90.f, 180.f)
     )
 {
+    // From fadeable
+    addProperty(_opacity);
+    addProperty(_fade);
+
     addProperty(enabled);
+
     addProperty(flyToFeature);
 
     centroidLatLong.setReadOnly(true);
@@ -408,8 +413,13 @@ void GeoJsonComponent::render(const RenderData& data) {
     // Do two render passes, to properly render opacoty of overlaying objects
     for (int renderPass = 0; renderPass < 2; ++renderPass) {
         for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
-            if (_features[i]->enabled) {
-                _geometryFeatures[i].render(data, renderPass, opacity(), _lightsourceRenderData);
+            if (_features[i]->enabled && _features[i]->isVisible()) {
+                _geometryFeatures[i].render(
+                    data,
+                    renderPass,
+                    opacity() * _features[i]->opacity(),
+                    _lightsourceRenderData
+                );
             }
         }
     }
