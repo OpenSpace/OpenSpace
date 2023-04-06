@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "events/toggle_sun",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites"

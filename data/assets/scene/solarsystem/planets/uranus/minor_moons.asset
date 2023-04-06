@@ -4,7 +4,7 @@ asset.require("./irregular_retrograde_moons")
 
 local minormoons_on = {
   Identifier = "os.solarsystem.uranus.minormoonson",
-  Name = "Turn ON minor moons and trails",
+  Name = "Turn on minor moons and trails",
   Command = [[
     local trails = openspace.getProperty('{moonTrail_minor_uranus}.Renderable.Enabled');
     local trails_fade = openspace.getProperty('{moonTrail_minor_uranus}.Renderable.Fade');
@@ -12,14 +12,14 @@ local minormoons_on = {
     local moons = openspace.getProperty('{moon_minor_uranus}.Renderable.Enabled');
     local moons_fade = openspace.getProperty('{moon_minor_uranus}.Renderable.Fade');
 
-    for i, v in pairs(trails_fade) do 
+    for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(trails[i], true)
-      openspace.setPropertyValueSingle(v, 1, 2, 'Linear') 
+      openspace.setPropertyValueSingle(v, 1, 2, 'Linear')
     end
 
-    for i, v in pairs(moons_fade) do 
+    for i, v in pairs(moons_fade) do
       openspace.setPropertyValueSingle(moons[i], true)
-      openspace.setPropertyValueSingle(v, 1, 2, 'Linear') 
+      openspace.setPropertyValueSingle(v, 1, 2, 'Linear')
     end
   ]],
   Documentation = "Turn ON Uranus's minor moons and their trails",
@@ -29,7 +29,7 @@ local minormoons_on = {
 
 local minormoons_off = {
   Identifier = "os.solarsystem.uranus.minormoonsoff",
-  Name = "Turn OFF minors moon and trails",
+  Name = "Turn off minors moon and trails",
   Command = [[
     local trails = openspace.getProperty('{moonTrail_minor_uranus}.Renderable.Enabled');
     local trails_fade = openspace.getProperty('{moonTrail_minor_uranus}.Renderable.Fade');
@@ -37,12 +37,12 @@ local minormoons_off = {
     local moons = openspace.getProperty('{moon_minor_uranus}.Renderable.Enabled');
     local moons_fade = openspace.getProperty('{moon_minor_uranus}.Renderable.Fade');
 
-    for i, v in pairs(trails_fade) do 
-      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)" ) 
+    for i, v in pairs(trails_fade) do
+      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)" )
     end
 
     for i, v in pairs(moons_fade) do
-      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)" ) 
+      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)" )
     end
   ]],
   Documentation = "Turn OFF Uranus's minor moons and their trails",

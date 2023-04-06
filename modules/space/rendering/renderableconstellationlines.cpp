@@ -139,12 +139,28 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
         {
             pair.second.isEnabled = true;
         }
+
+        if (_hasLabels) {
+            for (speck::Labelset::Entry& e : _labels->labelSet().entries) {
+                e.isEnabled = true;
+            }
+        }
     }
     else {
         // Enable all constellations that are selected
         for (ConstellationKeyValuePair& pair : _renderingConstellationsMap)
         {
-            pair.second.isEnabled = _selection.isSelected(pair.second.name);
+            bool isSelected = _selection.isSelected(pair.second.name);
+            pair.second.isEnabled = isSelected;
+
+            if (_hasLabels) {
+                for (speck::Labelset::Entry& e : _labels->labelSet().entries) {
+                    if (constellationFullName(e.identifier) == pair.second.name) {
+                        e.isEnabled = isSelected;
+                        break;
+                    }
+                }
+            }
         }
     }
 }

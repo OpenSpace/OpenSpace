@@ -42,7 +42,7 @@ uniform float viewScaling;
 // Keep in sync with gaiaoptions.h:RenderOption enum
 const int RENDEROPTION_STATIC = 0;
 const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2; 
+const int RENDEROPTION_MOTION = 2;
 const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
 const float LUM_LOWER_CAP = 0.01;
 

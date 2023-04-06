@@ -324,7 +324,11 @@ void PathNavigator::startPath() {
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
     global::navigationHandler->orbitalNavigator().resetVelocities();
-    global::eventEngine->publishEvent<events::EventCameraPathStarted>();
+
+    global::eventEngine->publishEvent<events::EventCameraPathStarted>(
+        _currentPath->startPoint().node(),
+        _currentPath->endPoint().node()
+    );
 }
 
 void PathNavigator::abortPath() {
@@ -456,7 +460,10 @@ void PathNavigator::handlePathEnd() {
         );
     }
 
-    global::eventEngine->publishEvent<events::EventCameraPathFinished>();
+    global::eventEngine->publishEvent<events::EventCameraPathFinished>(
+        _currentPath->startPoint().node(),
+        _currentPath->endPoint().node()
+    );
 }
 
 void PathNavigator::findRelevantNodes() {

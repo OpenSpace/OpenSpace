@@ -54,7 +54,7 @@ Fragment getFragment() {
         v += texture(textures[i], vs_st).r;
       }
       v /= numTextures;
-      
+
       vec4 color = texture(transferFunctions[0], vec2(v, 0.0));
       if ((v < (x + y)) && v > (x - y)) {
         diffuse = Transparent;

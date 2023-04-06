@@ -88,7 +88,7 @@ openspace.globebrowsing.documentation = {
     }
 }
 
-openspace.globebrowsing.addGibsLayer = function(layer, resolution, format, startDate, endDate)
+openspace.globebrowsing.addGibsLayer = function(layerName, resolution, format, startDate, endDate)
     if endDate == 'Present' then
         endDate = ''
     end

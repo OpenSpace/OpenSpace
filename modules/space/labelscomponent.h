@@ -72,6 +72,8 @@ private:
 
     std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
 
+    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+
     // Properties
     properties::BoolProperty _enabled;
     properties::Vec3Property _color;

@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #version __CONTEXT__
 
 #include "PowerScaling/powerScaling_vs.hglsl"
@@ -40,7 +40,7 @@ void main() {
 
     worldPosition = vec4(vertPosition.xyz, 0.0);
     vec4 position = pscTransform(worldPosition, modelTransform);
-    
+
     // project the position to view space
     gl_Position =  z_normalization(viewProjection * position);
 }

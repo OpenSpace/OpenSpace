@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/globals.h>
+#include <openspace/scene/scene.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/matrix/dmat2property.h>
 #include <openspace/properties/matrix/dmat3property.h>
@@ -51,6 +52,8 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <algorithm>
+#include <cctype>
 
 namespace {
 
@@ -1004,7 +1007,7 @@ enum class [[codegen::enum]] CustomPropertyType {
 
 /**
  * Creates a new property that lives in the `UserProperty` group.
- * 
+ *
  * \param identifier The identifier that is going to be used for the new property
  * \param type The type of the property, has to be one of "DMat2Property",
  *        "DMat3Property", "DMat4Property", "Mat2Property", "Mat3Property",
@@ -1159,6 +1162,14 @@ enum class [[codegen::enum]] CustomPropertyType {
             "Could not find user-defined property '{}'", identifier
         ));
     }
+}
+
+/**
+ * Create a valid identifier from the provided input string. Will replace invalid
+ * characters like whitespaces and some punctuation marks with valid alternatives
+ */
+[[codegen::luawrap]] std::string makeIdentifier(std::string input) {
+    return openspace::makeIdentifier(input);
 }
 
 } // namespace

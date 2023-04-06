@@ -481,6 +481,7 @@ void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(begin)");
     try {
         global::luaConsole->initialize();
+        global::luaConsole->setCommandInputButton(global::configuration->consoleKey);
     }
     catch (ghoul::RuntimeError& e) {
         LERROR("Error initializing Console with error:");
@@ -1822,7 +1823,7 @@ void setActionsFromProfile(const Profile& p) {
         action.name = a.name;
         action.documentation = a.documentation;
         action.guiPath = a.guiPath;
-        action.synchronization = interaction::Action::IsSynchronized(a.isLocal);
+        action.isLocal = interaction::Action::IsLocal(a.isLocal);
         global::actionManager->registerAction(std::move(action));
     }
 }

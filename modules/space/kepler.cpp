@@ -205,7 +205,11 @@ namespace {
         // 00-56 correspond to 2000-2056. We'll see each other again in 2057!
 
         // 1,2. Get the full year and days
-        auto [res, year, daysInYear] = scn::scan_tuple<int, double>(epoch, "{:2}{}");
+        std::string e = epoch;
+        if (e.find('.') == std::string::npos) {
+            e += ".0";
+        }
+        auto [res, year, daysInYear] = scn::scan_tuple<int, double>(e, "{:2}{}");
         if (!res) {
             throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
         }
@@ -248,9 +252,14 @@ namespace {
         // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
         // midnight
 
+        std::string e = epoch;
+        if (e.find('.') == std::string::npos) {
+            // No . was found so the epoch was provided as an integer number (see #2551)
+            e += ".0";
+        }
         // 1, 2
         auto [res, year, monthNum, dayOfMonthNum, fractionOfDay] =
-            scn::scan_tuple<int, int, int, double>(epoch, "{:4}{:2}{:2}{}");
+            scn::scan_tuple<int, int, int, double>(e, "{:4}{:2}{:2}{}");
         if (!res) {
             throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
         }
