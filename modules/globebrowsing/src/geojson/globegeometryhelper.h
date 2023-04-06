@@ -102,8 +102,7 @@ std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3&
  */
 std::vector<rendering::helper::VertexXYZNormal> subdivideTriangle(
     const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
-    double h0, double h1, double h2, double maxDistance,
-    float latOffset, float lonOffset, const RenderableGlobe& globe);
+    double h0, double h1, double h2, double maxDistance, const RenderableGlobe& globe);
 
 } // namespace openspace::globebrowsing::geometryhelper
 

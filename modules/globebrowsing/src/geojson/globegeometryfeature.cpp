@@ -716,8 +716,6 @@ void GlobeGeometryFeature::createPolygonGeometry() {
                     v0, v1, v2,
                     h0, h1, h2,
                     stepSize,
-                    _offsets.x,
-                    _offsets.y,
                     _globe
                 );
                 polyVertices.insert(polyVertices.end(), verts.begin(), verts.end());

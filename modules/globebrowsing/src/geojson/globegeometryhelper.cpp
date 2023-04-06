@@ -205,7 +205,7 @@ std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3&
 std::vector<rendering::helper::VertexXYZNormal>
 subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
                   double h0, double h1, double h2, double maxDistance,
-                  float latOffset, float lonOffset, const RenderableGlobe& globe)
+                  const RenderableGlobe& globe)
 {
     std::vector<rendering::helper::VertexXYZNormal> vertices;
 
@@ -318,12 +318,12 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
             continue;
         }
         Geodetic3 geodetic = geometryhelper::toGeodetic(coord);
-        glm::vec3 v = geometryhelper::computeOffsetedModelCoordinate(
-            geodetic,
-            globe,
-            latOffset,
-            lonOffset
-        );
+
+        // Note that offset should already have been applied to the coordinates. Use
+        // zero offset => just get model coordinate
+        glm::vec3 v =
+            geometryhelper::computeOffsetedModelCoordinate(geodetic, globe, 0.f, 0.f);
+
         vertices.push_back({ v.x, v.y, v.z, 0.f, 0.f, 0.f });
 
         // Every third set of coordinates is a triangle => update normal of previous
