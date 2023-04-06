@@ -124,7 +124,7 @@ Fragment getFragment() {
   Fragment frag;
 
   frag.color = diffuse * shadow;
-  frag.color.a = opacity;
+  frag.color.a *= opacity;
   frag.depth = vs_screenSpaceDepth;
   frag.gPosition = vec4(1e30, 1e30, 1e30, 1.0);
   frag.gNormal = vec4(normal, 1.0);
