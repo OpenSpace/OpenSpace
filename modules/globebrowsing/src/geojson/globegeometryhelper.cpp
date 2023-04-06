@@ -110,7 +110,7 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
             glm::vec3 v1 = boundary[i ];
 
             // Vertices close to globe (Based on origin which is the zero point here)
-            // TEST: use center of globe (TODO: allow setting the height)
+            // For now, use center of globe (TODO: allow setting the height)
             glm::vec3 vOrigin = glm::vec3(0.f);
 
             // Outer boundary is the first one
@@ -330,8 +330,10 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
         // triangle vertices
         if (count == 3) {
             // Find previous vertices
-            rendering::helper::VertexXYZNormal& vert0 = vertices[count - 3];
-            rendering::helper::VertexXYZNormal& vert1 = vertices[count - 2];
+            size_t lastIndex = vertices.size() - 1;
+            rendering::helper::VertexXYZNormal& vert0 = vertices[lastIndex - 2];
+            rendering::helper::VertexXYZNormal& vert1 = vertices[lastIndex - 1];
+            rendering::helper::VertexXYZNormal& vert2 = vertices[lastIndex];
 
             const glm::vec3 v0_pos = glm::vec3(vert0.xyz[0], vert0.xyz[1], vert0.xyz[2]);
             const glm::vec3 v1_pos = glm::vec3(vert1.xyz[0], vert1.xyz[1], vert1.xyz[2]);
@@ -345,9 +347,9 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
             vert1.normal[1] = n.y;
             vert1.normal[2] = n.z;
 
-            vertices.back().normal[0] = n.x;
-            vertices.back().normal[1] = n.y;
-            vertices.back().normal[2] = n.y;
+            vert2.normal[0] = n.x;
+            vert2.normal[1] = n.y;
+            vert2.normal[2] = n.z;
         }
     }
 
