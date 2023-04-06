@@ -22,34 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__
-
-#include <openspace/properties/propertyowner.h>
+#ifndef __OPENSPACE_CORE___FADEABLE___H__
+#define __OPENSPACE_CORE___FADEABLE___H__
 
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/triggerproperty.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-struct LayerRenderSettings : public properties::PropertyOwner {
-    LayerRenderSettings();
+/**
+ * This class is an interface for all things fadeable in the software; things that need
+ * a fade and opacity property, which will be combined into a final opacity value
+ * 
+ * A Fadeable can also be dependent on the fade value from a specified parent fadeable,
+ * so that it fades out together with the parent
+ */
+class Fadeable {
+public:
+    Fadeable();
+    virtual ~Fadeable() = default;
 
-    properties::FloatProperty gamma;
-    properties::FloatProperty multiplier;
-    properties::FloatProperty offset;
-    properties::TriggerProperty setDefault;
+    void setFade(float fade);
+    void setParentFadeable(Fadeable* parent);
 
-    void onChange(std::function<void()> callback);
+    float fade() const;
+    virtual bool isVisible() const;
 
-    /// This function matches the function with the same name in the
-    /// shader code
-    float performLayerSettings(float value) const;
-    /// This function matches the function with the same name in the
-    /// shader code
-    glm::vec4 performLayerSettings(const glm::vec4& currentValue) const;
+    /// Returns the full opacity constructed from the _opacity and _fade property values
+    virtual float opacity() const;
+
+protected:
+    properties::FloatProperty _opacity;
+    properties::FloatProperty _fade;
+
+    Fadeable* _parentFadeable = nullptr;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__
+#endif // __OPENSPACE_CORE___FADEABLE___H__

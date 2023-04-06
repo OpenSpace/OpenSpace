@@ -11,6 +11,7 @@ local object = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
     Labels = {
+      Enabled = true,
       File = speck .. "galclust.label",
       Color = { 1.0, 0.44, 0.0 },
       Size = 22,
@@ -20,13 +21,12 @@ local object = {
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "Mpc",
-    DrawLabels = true,
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,
       -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
       0.67314530211,    0.73127116582,  0.11008126223, 0.0,
       0.0,              0.0,            0.0,           1.0
-    },
+    }
   },
   GUI = {
     Name = "Galaxy Cluster Labels",

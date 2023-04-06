@@ -53,18 +53,18 @@
 namespace {
     constexpr std::string_view _loggerCat = "RingsComponent";
 
-    constexpr std::array<const char*, 9> UniformNames = {
+    constexpr std::array<const char*, 10> UniformNames = {
         "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",
         "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture",
-        "zFightingPercentage"
+        "zFightingPercentage", "opacity"
     };
 
-    constexpr std::array<const char*, 15> UniformNamesAdvancedRings = {
+    constexpr std::array<const char*, 16> UniformNamesAdvancedRings = {
         "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",
         "sunPosition", "sunPositionObj", "camPositionObj", "ringTextureFwrd",
         "ringTextureBckwrd", "ringTextureUnlit", "ringTextureColor",
         "ringTextureTransparency", "shadowMatrix", "shadowMapTexture",
-        "zFightingPercentage"
+        "zFightingPercentage", "opacity"
     };
 
     constexpr std::array<const char*, 3> GeomUniformNames = {
@@ -248,6 +248,8 @@ void RingsComponent::initialize() {
     const Parameters p = codegen::bake<Parameters>(_ringsDictionary);
 
     addProperty(_enabled);
+    addProperty(_opacity);
+    addProperty(_fade);
 
     _size.setExponent(15.f);
     _size = p.size.value_or(_size);
@@ -473,6 +475,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
                 _uniformCacheAdvancedRings.ringTextureTransparency,
                 ringTextureTransparencyUnit
             );
+            _shader->setUniform(_uniformCacheAdvancedRings.opacityValue, opacity());
 
             // Adding the model transformation to the final shadow matrix so we have a
             // complete transformation from the model coordinates to the clip space of
@@ -507,7 +510,6 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
             glEnable(GL_DEPTH_TEST);
             glEnablei(GL_BLEND, 0);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
         }
         else {
             _shader->setUniform(
@@ -523,6 +525,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
                 _uniformCache.modelViewProjectionMatrix,
                 modelViewProjectionTransform
             );
+            _shader->setUniform(_uniformCache.opacityValue, opacity());
 
             ringTextureUnit.activate();
             _texture->bind();
