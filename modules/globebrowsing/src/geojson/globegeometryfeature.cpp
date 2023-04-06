@@ -238,6 +238,8 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
             throw ghoul::MissingCaseException();
     }
 
+    // TODO: Add option to ignore height values from file
+
     // Compute reference positions to use for checking if height map changes
     geos::geom::Coordinate centroid;
     geo->getCentroid(centroid);
@@ -531,41 +533,47 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
                 _offsets.y
             );
 
-            // If we are drawing points, just add and continue.
-            // Note that we set the normal
-            if (_type == GeometryType::Point) {
-                glm::vec3 vf = static_cast<glm::vec3>(v);
-                glm::vec3 normal = glm::normalize(vf);
-                vertices.push_back({ vf.x, vf.y, vf.z, normal.x, normal.y, normal.z });
-                positions.push_back(vf);
-                continue;
-            }
-            // Else, we're rendering lines and need to subdivide
+            auto addLinePos = [&](glm::vec3 pos) {
+                vertices.push_back({ pos.x, pos.y, pos.z, 0.f, 0.f, 0.f });
+                positions.push_back(pos);
+            };
 
             if (isFirst) {
                 lastPos = v;
                 lastHeightValue = geodetic.height;
                 isFirst = false;
+                addLinePos(glm::vec3(v));
                 continue;
             }
 
-            // Add extra vertices to fulfill MaxDistance criteria.
-            // First determine how much to tesselate
-            float stepSize = determineTesselationDistance(glm::distance(lastPos, v));
+            float stepSize = 0.f;
+            if (_properties.shouldtesselate() && _properties.tesselationLevel() > 0) {
+                // TODO: tesselation distance should be consistent between polygons and lines
+                stepSize = determineTesselationDistance(glm::distance(lastPos, v));
+            }
 
-            std::vector<geometryhelper::PosHeightPair> subdividedPositions =
-                geometryhelper::subdivideLine(
-                    lastPos,
-                    v,
-                    lastHeightValue,
-                    geodetic.height,
-                    stepSize
-                );
+            // If we get a stepsize, then we want to subdivide
+            if (stepSize > std::numeric_limits<float>::epsilon()) {
+                // Add extra vertices to fulfill MaxDistance criteria.
+                // First determine how much to tesselate
+                std::vector<geometryhelper::PosHeightPair> subdividedPositions =
+                    geometryhelper::subdivideLine(
+                        lastPos,
+                        v,
+                        lastHeightValue,
+                        geodetic.height,
+                        stepSize
+                    );
 
-            for (const geometryhelper::PosHeightPair& pair : subdividedPositions) {
-                glm::vec3 p = pair.position;
-                vertices.push_back({ p.x, p.y, p.z, 0.f, 0.f, 0.f });
-                positions.push_back(p);
+                // Don't add the first position. Has been added as the last in previous step
+                for (int i = 1; i < subdividedPositions.size(); ++i) {
+                    const geometryhelper::PosHeightPair& pair = subdividedPositions[i];
+                    addLinePos(glm::vec3(pair.position));
+                }
+            }
+            else {
+                // Just add the line point
+                addLinePos(glm::vec3(v));
             }
 
             lastPos = v;
@@ -627,7 +635,6 @@ void GlobeGeometryFeature::createPointGeometry() {
         _renderFeatures.push_back(std::move(feature));
 
         // Create extrusion feature
-
         RenderFeature extrudeFeature;
         extrudeFeature.nVertices = extrudedLineVertices.size();
         extrudeFeature.type = RenderType::Lines;
@@ -653,21 +660,6 @@ void GlobeGeometryFeature::createExtrudedGeometry(
     feature.isExtrusionFeature = true;
     initializeRenderFeature(feature, vertices);
     _renderFeatures.push_back(std::move(feature));
-}
-
-void GlobeGeometryFeature::initializeRenderFeature(RenderFeature& feature,
-                                                   const std::vector<Vertex>& vertices)
-{
-    // Get height map heights
-    feature.vertices = geometryhelper::geodetic2FromVertexList(_globe, vertices);
-    feature.heights = geometryhelper::heightMapHeightsFromGeodetic2List(
-        _globe,
-        feature.vertices
-    );
-
-    // Generate buffers and buffer data
-    feature.initializeBuffers();
-    bufferVertexData(feature, vertices);
 }
 
 void GlobeGeometryFeature::createPolygonGeometry() {
@@ -704,7 +696,7 @@ void GlobeGeometryFeature::createPolygonGeometry() {
             double h1 = triHeights[1];
             double h2 = triHeights[2];
 
-            if (_properties.shouldtesselate() && _properties.tesselationLevel() > 0.f) {
+            if (_properties.shouldtesselate() && _properties.tesselationLevel() > 0) {
                 // First determine how much to tesselate
                 float longestSide = std::max(
                     std::max(glm::distance(v0, v1), glm::distance(v0, v2)),
@@ -737,6 +729,21 @@ void GlobeGeometryFeature::createPolygonGeometry() {
     _renderFeatures.push_back(std::move(triFeature));
 }
 
+void GlobeGeometryFeature::initializeRenderFeature(RenderFeature& feature,
+    const std::vector<Vertex>& vertices)
+{
+    // Get height map heights
+    feature.vertices = geometryhelper::geodetic2FromVertexList(_globe, vertices);
+    feature.heights = geometryhelper::heightMapHeightsFromGeodetic2List(
+        _globe,
+        feature.vertices
+    );
+
+    // Generate buffers and buffer data
+    feature.initializeBuffers();
+    bufferVertexData(feature, vertices);
+}
+
 std::vector<double> GlobeGeometryFeature::getCurrentReferencePointsHeights() const {
     std::vector<double> newHeights;
     newHeights.reserve(_heightUpdateReferencePoints.size());
@@ -754,6 +761,7 @@ std::vector<double> GlobeGeometryFeature::getCurrentReferencePointsHeights() con
 }
 
 float GlobeGeometryFeature::determineTesselationDistance(float objectSize) const {
+    ghoul_assert(_properties.tesselationLevel() > 0, "Tesselation level cannot be zero");
     float tesselationFactor = 1.f / static_cast<float>(_properties.tesselationLevel());
     float distance = tesselationFactor * _properties.tesselationMaxDistance();
 
