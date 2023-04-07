@@ -115,8 +115,19 @@ namespace openspace {
         properties::OptionProperty _renderOption;
 
         properties::FloatProperty _interpolationValue;
+        properties::OptionProperty _dataSetOneOption;
+        properties::OptionProperty _dataSetTwoOption;
+
+        
+        //const std::string umap_directory_path = "C:/OpenSpace/OpenSpace/user/data/assets/cosmic_life/morphing/data/umap";
+        //const std::string mds_directory_path = "C:/OpenSpace/OpenSpace/user/data/assets/cosmic_life/morphing/data/mds";
+ //std::map<std::string, std::string> _filePaths; 
 
 
+        const std::map<std::string, std::string> _filePaths{ 
+            {"umap sequences", "C:/OpenSpace/OpenSpace/user/data/assets/cosmic_life/morphing/data/umap/sequences/sequences.speck"},
+            {"mds sequences", "C:/OpenSpace/OpenSpace/user/data/assets/cosmic_life/morphing/data/mds/sequences/sequences.speck"}
+        };
 
         std::vector<Point> _MDS_points;
         std::vector<Point> _Umap_points;
@@ -139,7 +150,7 @@ namespace openspace {
         std::shared_ptr<ghoul::fontrendering::Font> _font;
 
         // String variables
-        std::vector<std::string> _speckFile;//_files
+        std::vector<std::string> _speckFile;//_files //TODO remove
         std::string _colorMapFile;
         std::string _colorOptionString;
         std::string _datavarSizeOptionString;
@@ -149,7 +160,7 @@ namespace openspace {
 
         // speck files
         //speck::Dataset _dataset;
-        std::vector<speck::Dataset> _datasets;
+        std::map<std::string, speck::Dataset> _datasets;
         speck::Dataset _interpolationDataset;
         speck::ColorMap _colorMap;
 

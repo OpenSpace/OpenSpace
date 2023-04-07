@@ -1,0 +1,28 @@
+local five_seconds = {
+  Identifier = "os.five_seconds",
+  Name = "Morph over five seconds",
+  Command = [[
+    if (openspace.getPropertyValue("Scene.morph_sequences.Renderable.InterpolationValue") < 0.01 ) then
+      openspace.setPropertyValueSingle("Scene.morph_sequences.Renderable.InterpolationValue", 1, 5);
+    else
+      openspace.setPropertyValueSingle("Scene.morph_sequences.Renderable.InterpolationValue", 0, 5);
+    end
+  ]],
+  Documentation = [[Morph over five seconds]],
+  GuiPath = "/morph/time",
+  IsLocal = true
+}
+asset.export("five_seconds", five_seconds.Identifier)
+
+asset.onInitialize(function()
+    openspace.action.registerAction(five_seconds)
+  end)
+
+  asset.meta = {
+    Name = "Actions - Toggle current Trails",
+    Version = "1.0",
+    Description = "Asset providing actions to toggle trails",
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+  }

@@ -72,6 +72,7 @@ namespace {
         PositionNormal
     };
 
+
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
@@ -170,6 +171,18 @@ namespace {
         "Set data interpolation between 0-1 where 0 is the MDS data and 1 is the Umap data"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DataSetOneOptionInfo = {
+        "DataSetOneOption",
+        "DataSet One Option",
+        "This value determines the first dataset that will be morphed"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DataSetTwoOptionInfo = {
+        "DataSetTwoOption",
+        "DataSet Two Option",
+        "This value determines the second dataset that will be morphed"
+    };
+
     struct [[codegen::Dictionary(RenderableInterpolation)]] Parameters {
         // The path to the SPECK file that contains information about the astronomical
         // object being rendered
@@ -192,6 +205,13 @@ namespace {
         };
         // [[codegen::verbatim(RenderOptionInfo.description)]]
         std::optional<RenderOption> renderOption;
+
+        //enum class [[codegen::map(dataSetOneOption)]] dataSetOneOption {
+        //    ViewDirection [[codegen::key("Camera View Direction")]],
+        //    PositionNormal [[codegen::key("Camera Position Normal")]]
+        //};
+        //// [[codegen::verbatim(dataSetOneOptionInfo.description)]]
+        //std::optional<dataSetOneOption> dataSetOneOption;
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
@@ -282,7 +302,51 @@ namespace openspace {
         , _setRangeFromData(SetRangeFromData)
         , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _interpolationValue(InterpolationValueInfo,0,0.f,1.f)
+        , _dataSetOneOption(DataSetOneOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+        , _dataSetTwoOption(DataSetTwoOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     {
+
+
+        //for (const auto& file : std::filesystem::recursive_directory_iterator(umap_directory_path)) {
+        //    if (file.path().extension() == ".speck") {
+        //        std::string sequence_name = file.path().stem().string();
+        //        std::string sequence_path = file.path().string();
+        //        _filePaths[sequence_name] = sequence_path;
+        //    }
+        //}
+
+        std::vector<std::string> fileOptionNames;
+  
+
+        //for (const auto& [name, path] : _filePaths) {
+        //    std::string modified_name = name;
+        //    if (path.find("umap") != std::string::npos) {
+        //        modified_name = "umap_" + modified_name;
+        //    }
+        //    else if (path.find("mds") != std::string::npos) {
+        //        modified_name = "mds_" + modified_name;
+        //    }
+        //    fileOptionNames.push_back(modified_name);
+        //}
+
+        for (const auto& [name, path] : _filePaths) {
+            fileOptionNames.push_back(name);
+        }
+
+        _dataSetOneOption.addOptions(fileOptionNames);
+        _dataSetTwoOption.addOptions(fileOptionNames);
+
+
+        auto func = [this]() {
+            _dataIsDirty = true;
+        };
+        _dataSetOneOption.onChange(func);
+        _dataSetTwoOption.onChange(func);
+
+        addProperty(_dataSetOneOption);
+        addProperty(_dataSetTwoOption);
+
+
         const Parameters p = codegen::bake<Parameters>(dictionary);
         //const Point v = codegen::bake<Point>(dictionary);
 
@@ -436,15 +500,11 @@ namespace openspace {
     }
 
     bool RenderableInterpolation::isReady() const {
-        bool hasAllDataSetData = std::all_of(_datasets.begin(), _datasets.end(), [](const speck::Dataset& dataset) {
-            return !dataset.entries.empty();
+        bool hasAllDataSetData = std::all_of(_datasets.begin(), _datasets.end(), [](const auto& d) {
+            return !d.second.entries.empty();
             });
         return (_program && hasAllDataSetData);
     }
-
-    //speck::Dataset RenderableInterpolation::extractComment(const speck::Dataset& d1, const speck::Dataset& d2) {
-
-    //}
 
     speck::Dataset RenderableInterpolation::sort(const speck::Dataset& d1, const speck::Dataset& d2) {
         speck::Dataset result{ d2 };
@@ -454,7 +514,7 @@ namespace openspace {
             int j = 0;
 
             while (j < d2.entries.size()) {
-                //replace if statement with a function call that 
+                //TO DO replace if statement with a function call that 
                 //finds the id in the comment.
                 if (d1.entries[i].comment == d2.entries[j].comment) {
                     found = true;
@@ -477,9 +537,12 @@ namespace openspace {
     }
 
     void RenderableInterpolation::initialize() {
-        for (const std::string& path : _speckFile) {
-            _datasets.push_back(speck::data::loadFileWithCache(path));
+        for (const auto& [name, path] : _filePaths) {
+            _datasets[name] = speck::data::loadFileWithCache(path);
         }
+        //for (const std::string& path : _speckFile) {
+        //    _datasets.push_back(speck::data::loadFileWithCache(path));
+        //}
 
         
         if (_hasColorMapFile) {
@@ -669,7 +732,10 @@ namespace openspace {
                 LDEBUG("Regenerating data");
 
             //todo interpolation
-            _interpolationDataset = interpolationFunc(_datasets[0], _datasets[1], _interpolationValue);
+            _interpolationDataset = interpolationFunc(
+                _datasets[_dataSetOneOption.getDescriptionByValue(_dataSetOneOption.value())],
+                _datasets[_dataSetTwoOption.getDescriptionByValue(_dataSetTwoOption.value())],
+                _interpolationValue);
             std::vector<float> slice = createDataSlice(_interpolationDataset);
 
             int size = static_cast<int>(slice.size());

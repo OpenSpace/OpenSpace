@@ -1,0 +1,29 @@
+local elasticEaseInOut = {
+    Identifier = "os.elasticEaseInOut",
+    Name = "ElasticEaseInOut",
+    Command = [[
+      if (openspace.getPropertyValue("Scene.morph_sequences.Renderable.InterpolationValue") < 0.01 ) then
+        openspace.setPropertyValueSingle("Scene.morph_sequences.Renderable.InterpolationValue", 1 , 5, "ElasticEaseInOut");
+      else
+        openspace.setPropertyValueSingle("Scene.morph_sequences.Renderable.InterpolationValue", 0, 5, "ElasticEaseInOut");
+      end
+    ]],
+    Documentation = [[Morph with easing function ElasticEaseInOut]],
+    GuiPath = "/morph/easingFunctions",
+    IsLocal = true
+  }
+  asset.export("elasticEaseInOut", elasticEaseInOut.Identifier)
+  
+  asset.onInitialize(function()
+      openspace.action.registerAction(elasticEaseInOut)
+    end)
+  
+    asset.meta = {
+      Name = "Actions - Morphing",
+      Version = "1.0",
+      Description = "Asset providing actions to morph",
+      Author = "OpenSpace Team",
+      URL = "http://openspaceproject.com",
+      License = "MIT license"
+    }
+  
