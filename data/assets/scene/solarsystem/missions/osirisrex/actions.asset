@@ -83,6 +83,59 @@ local toggle_sun_marker = {
   isLocal = false
 }
 
+local aimAtBennu = {
+  Identifier = "os.missions.osirisrex.aimAtBennu",
+  Name = "Look at Bennu from OSIRIS-REx",
+  Command = [[
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil);
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", 'OsirisRex');
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", 'Earth');
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAim", nil);
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", 'OsirisRex');
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", 'BennuBarycenter');
+  ]],
+  Documentation = "Look at Bennu from OSIRIS-REx",
+  GuiPath = "/Mission",
+  IsLocal = false
+}
+
+local setTimeToLaunch = {
+  Identifier = "os.missions.osirisrex.launchTime",
+  Name = "Look at launch",
+  Command = [[
+    openspace.printInfo('Set time: Launch'); 
+    openspace.time.setTime('2016-SEP-08 23:05:05.000');
+    openspace.pathnavigation.flyToNavigationState({ 
+      Yaw = -0.0001539482222527231, 
+      Anchor = "Earth", 
+      Position = { 10453686.309525654, -10108287.946681349, 5873485.232088189 }, 
+      Up = { -0.020038533874401465, 0.48672729903974776, 0.8733241056616019 }, 
+      Pitch = 5.201245180910735e-05 
+    })
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", 'OsirisRex')
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", '')
+    openspace.time.setDeltaTime(2 * 60)
+  ]],
+  Documentation = "Look at the launch of OSIRIS-REx",
+  GuiPath = "/Missions/Osiris Rex",
+  isLocal = false
+}
+
+local lookAtImageCapture = {
+  Identifier = "os.missions.osirisrex.imageCapture",
+  Name = "Go to image capture",
+  Command = [[
+    openspace.printInfo('Set time: Image Capture'); 
+    openspace.time.setTime('2018-11-02T04:14:44');
+    openspace.pathnavigation.flyTo('BennuBarycenter')
+    openspace.time.setDeltaTime(60)
+  ]],
+  Documentation = "Look at the image capture of OSIRIS-REx",
+  GuiPath = "/Missions/Osiris Rex",
+  isLocal = false
+}
+
 asset.onInitialize(function()
   openspace.action.registerAction(focus_osirisrex)
   openspace.action.registerAction(focus_bennu)
@@ -91,6 +144,9 @@ asset.onInitialize(function()
   openspace.action.registerAction(bennu_event_b)
   openspace.action.registerAction(bennu_recon_event)
   openspace.action.registerAction(toggle_sun_marker)
+  openspace.action.registerAction(aimAtBennu)
+  openspace.action.registerAction(setTimeToLaunch)
+  openspace.action.registerAction(lookAtImageCapture)
 end)
 
 asset.onDeinitialize(function()
@@ -101,6 +157,9 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(bennu_approach_time)
   openspace.action.removeAction(focus_bennu)
   openspace.action.removeAction(focus_osirisrex)
+  openspace.action.removeAction(aimAtBennu)
+  openspace.action.removeAction(setTimeToLaunch)
+  openspace.action.removeAction(lookAtImageCapture)
 end)
 
 asset.meta = {
