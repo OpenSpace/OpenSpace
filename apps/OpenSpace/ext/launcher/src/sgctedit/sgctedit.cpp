@@ -300,7 +300,8 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
         connect(_cancelButton, &QPushButton::released, this, &SgctEdit::reject);
         layoutButtonBox->addWidget(_cancelButton);
 
-        _saveButton = new QPushButton("Save As");
+        _saveButton = _didImportValues ?
+            new QPushButton("Save") : new QPushButton("Save As");
         _saveButton->setToolTip("Save configuration changes");
         _saveButton->setFocusPolicy(Qt::NoFocus);
         connect(_saveButton, &QPushButton::released, this, &SgctEdit::save);
@@ -338,20 +339,26 @@ void SgctEdit::save() {
         }
     }
 
-    QString fileName = QFileDialog::getSaveFileName(
-        this,
-        "Save Window Configuration File",
-        QString::fromStdString(_userConfigPath),
-        "Window Configuration (*.json)",
-        nullptr
-#ifdef __linux__
-        // Linux in Qt5 and Qt6 crashes when trying to access the native dialog here
-        , QFileDialog::DontUseNativeDialog
-#endif
-    );
-    if (!fileName.isEmpty()) {
-        _saveTarget = fileName.toStdString();
+    if (_didImportValues) {
+        _saveTarget = _configurationFilename;
         accept();
+    }
+    else {
+        QString fileName = QFileDialog::getSaveFileName(
+            this,
+            "Save Window Configuration File",
+            QString::fromStdString(_userConfigPath),
+            "Window Configuration (*.json)",
+            nullptr
+#ifdef __linux__
+            // Linux in Qt5 and Qt6 crashes when trying to access the native dialog here
+            , QFileDialog::DontUseNativeDialog
+#endif
+        );
+        if (!fileName.isEmpty()) {
+            _saveTarget = fileName.toStdString();
+            accept();
+        }
     }
 }
 
