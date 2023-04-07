@@ -98,6 +98,9 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
         WindowControl* wCtrl = _displayWidget->windowControls()[i];
         if (i < existingWindowsControlSize && wCtrl) {
             unsigned int monitorNum = w.monitor.value();
+            if (monitorNum > (monitorSizes.size() - 1)) {
+                monitorNum = 0;
+            }
             unsigned int posX = 0;
             unsigned int posY = 0;
             wCtrl->setMonitorSelection(monitorNum);
