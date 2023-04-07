@@ -202,7 +202,7 @@
                 "title": "Viewports"
               }
             },
-	    "required": [ "pos", "size", "monitor", "viewports" ]
+	    "required": [ "pos", "size", "viewports" ]
   	},
           "title": "Windows",
           "description": "Specifies a single window that is used to render content into. There can be an arbitrary(-ish) number of windows for each node and they all will be created and initialized at start time. Each window has at least one Viewport that specifies exactly where in the window the rendering occurs with which parameters"

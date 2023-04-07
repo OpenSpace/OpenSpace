@@ -97,9 +97,12 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
         WindowControl* wCtrl = _displayWidget->windowControls()[i];
         if (i < existingWindowsControlSize && wCtrl) {
-            unsigned int monitorNum = w.monitor.value();
-            if (monitorNum > (monitorSizes.size() - 1)) {
-                monitorNum = 0;
+            unsigned int monitorNum = 0;
+            if (w.monitor) {
+                monitorNum = static_cast<unsigned int>(w.monitor.value());
+                if (monitorNum > (monitorSizes.size() - 1)) {
+                    monitorNum = 0;
+                }
             }
             unsigned int posX = 0;
             unsigned int posY = 0;
