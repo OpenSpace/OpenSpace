@@ -806,5 +806,5 @@ std::string LauncherWindow::selectedWindowConfig() const {
 
 bool LauncherWindow::isUserConfigSelected() const {
     int selectedIndex = _windowConfigBox->currentIndex();
-    return (selectedIndex < _userConfigCount);
+    return (selectedIndex <= _userConfigCount);
 }
