@@ -94,7 +94,7 @@ public:
      *
      * \param windowName The window title to set
      */
-    void setWindowName(std::string& windowName);
+    void setWindowName(const std::string& windowName);
 
     /**
      * Sets the window's decoration status. If set to true, then the window has a

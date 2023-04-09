@@ -69,7 +69,7 @@ namespace {
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 } // namespace
 
-SgctEdit::SgctEdit(QWidget* parent, const std::string& userConfigPath)
+SgctEdit::SgctEdit(QWidget* parent, const std::string userConfigPath)
     : QDialog(parent)
     , _userConfigPath(userConfigPath)
 {
@@ -93,7 +93,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
     std::vector<QRect> monitorSizes = createMonitorInfoSet();
     createWidgets(monitorSizes, nWindows, false);
     size_t existingWindowsControlSize = _displayWidget->windowControls().size();
-    for (unsigned int i = 0; i < nWindows; ++i) {
+    for (size_t i = 0; i < nWindows; ++i) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
         WindowControl* wCtrl = _displayWidget->windowControls()[i];
         if (i < existingWindowsControlSize && wCtrl) {
@@ -143,9 +143,9 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
     }
     _settingsWidget->setShowUiOnFirstWindow(firstWindowGuiIsEnabled);
     _settingsWidget->setVsync(
-        _cluster.settings
-        && _cluster.settings.value().display
-        && _cluster.settings.value().display.value().swapInterval
+        _cluster.settings &&
+        _cluster.settings.value().display &&
+        _cluster.settings.value().display.value().swapInterval
     );
 }
 
@@ -156,15 +156,15 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
         [&](sgct::config::CylindricalProjection p) {
             if (p.quality && p.heightOffset) {
                 wCtrl->setProjectionCylindrical(
-                    static_cast<int>(p.quality.value()),
-                    p.heightOffset.value()
+                    *p.quality,
+                    *p.heightOffset
                 );
             }
         },
         [&](sgct::config::EquirectangularProjection p) {
             if (p.quality) {
                 wCtrl->setProjectionEquirectangular(
-                    static_cast<int>(p.quality.value()),
+                    *p.quality,
                     false
                 );
             }
@@ -172,7 +172,7 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
         [&](sgct::config::FisheyeProjection p) {
             if (p.quality) {
                 wCtrl->setProjectionFisheye(
-                    static_cast<int>(p.quality.value()),
+                    *p.quality,
                     false
                 );
             }
@@ -186,7 +186,7 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
         [&](sgct::config::SphericalMirrorProjection p) {
             if (p.quality) {
                 wCtrl->setProjectionSphericalMirror(
-                    static_cast<int>(p.quality.value())
+                    *p.quality
                 );
             }
         },
@@ -196,7 +196,7 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
                     sgct::config::SpoutOutputProjection::Mapping::Equirectangular)
                 {
                     wCtrl->setProjectionEquirectangular(
-                        static_cast<int>(p.quality.value()),
+                        *p.quality,
                         true
                     );
                 }
@@ -204,15 +204,15 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
                          sgct::config::SpoutOutputProjection::Mapping::Fisheye)
                 {
                     wCtrl->setProjectionFisheye(
-                        static_cast<int>(p.quality.value()),
+                        *p.quality,
                         true
                     );
                 }
             }
         },
-        [&](sgct::config::NoProjection p) { (void)p; },
-        [&](sgct::config::ProjectionPlane p) { (void)p; },
-        [&](sgct::config::SpoutFlatProjection p) { (void)p; }
+        [&](sgct::config::NoProjection) {},
+        [&](sgct::config::ProjectionPlane) {},
+        [&](sgct::config::SpoutFlatProjection) {}
     }, vPort.projection);
 }
 
@@ -395,7 +395,7 @@ void SgctEdit::apply() {
 void SgctEdit::generateConfiguration() {
     _cluster.scene = sgct::config::Scene();
     _cluster.scene->orientation = _settingsWidget->orientation();
-    if (_cluster.nodes.size() == 0) {
+    if (_cluster.nodes.empty()) {
         _cluster.nodes.push_back(sgct::config::Node());
     }
     sgct::config::Node& node = _cluster.nodes.back();
@@ -409,8 +409,8 @@ void SgctEdit::generateConfiguration() {
 
 void SgctEdit::generateConfigSetupVsync() {
     if (_settingsWidget->vsync()) {
-        if (!_cluster.settings || !_cluster.settings.value().display ||
-            !_cluster.settings.value().display.value().swapInterval)
+        if (!_cluster.settings || !_cluster.settings->display ||
+            !_cluster.settings->display->swapInterval)
         {
             sgct::config::Settings::Display display;
             display.swapInterval = 1;
@@ -466,10 +466,10 @@ void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) 
         node.windows[i].draw3D = true;
         node.windows[i].viewports.back().isTracked = true;
         node.windows[i].tags.erase(
-            std::remove_if(
+            std::remove(
                 node.windows[i].tags.begin(),
                 node.windows[i].tags.end(),
-                [](const std::string& s) { return s == "GUI"; }
+                "GUI"
             ),
             node.windows[i].tags.end()
         );

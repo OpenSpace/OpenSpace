@@ -61,7 +61,7 @@ public:
      *
      * \return vector of pointers of WindowControl objects
      */
-    std::vector<WindowControl*> activeWindowControls();
+    std::vector<WindowControl*> activeWindowControls() const;
 
     /**
      * Returns a vector of pointers to the WindowControl objects for all windows, whether
@@ -89,7 +89,7 @@ public:
      *
      * \return the number of displayed windows in the current configuration
      */
-    unsigned int numWindowsDisplayed();
+    unsigned int numWindowsDisplayed() const;
 
 signals:
     /**

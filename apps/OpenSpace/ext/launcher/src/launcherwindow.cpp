@@ -335,13 +335,14 @@ QWidget* LauncherWindow::createCentralWidget() {
             if (_windowConfigBox->currentIndex() == _windowConfigBoxIndexSgctCfgDefault) {
                 editRefusalDialog(
                     "Editor Option Not Available",
-                    "Cannot edit the 'Default' SGCT configuration string (isn't a file)"
+                    "Cannot edit the 'Default' configuration since it is not a file"
                 );
             }
             else if (_windowConfigBox->currentIndex() >= _preDefinedConfigStartingIdx) {
                 editRefusalDialog(
                     "Editor Option Not Available",
-                    fmt::format("Cannot edit '{}' since it is one of the configuration "
+                    fmt::format(
+                        "Cannot edit '{}' since it is one of the configuration "
                         "files provided in the OpenSpace installation", fileSelected)
                 );
             }
@@ -680,16 +681,18 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
 
 void LauncherWindow::editRefusalDialog(const std::string title, const std::string msg) {
     QMessageBox msgBox;
-    msgBox.setText(QString::fromUtf8(msg.c_str()));
-    msgBox.setWindowTitle(QString::fromUtf8(title.c_str()));
+    msgBox.setText(QString::fromStdString(msg));
+    msgBox.setWindowTitle(QString::fromStdString(title));
     msgBox.setIcon(QMessageBox::Warning);
     msgBox.exec();
 }
 
 void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinCfg) {
+    using namespace sgct;
+
     std::string saveWindowCfgPath = isUserWinCfg ? _userConfigPath : _configPath;
     int ret = QDialog::DialogCode::Rejected;
-    sgct::config::Cluster preview;
+    config::Cluster preview;
     if (winCfg.empty()) {
         SgctEdit editor(this, _userConfigPath);
         ret = editor.exec();
@@ -703,14 +706,13 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
     }
     else {
         try {
-            sgct::config::GeneratorVersion previewGenVersion =
-                sgct::readConfigGenerator(winCfg);
-            sgct::loadFileAndSchemaThenValidate(
+            config::GeneratorVersion previewGenVersion = readConfigGenerator(winCfg);
+            loadFileAndSchemaThenValidate(
                 winCfg,
                 _configPath + "/schema/sgct.schema.json",
                 "This configuration file is unable to generate a proper display"
             );
-            sgct::loadFileAndSchemaThenValidate(
+            loadFileAndSchemaThenValidate(
                 winCfg,
                 _configPath + "/schema/sgcteditor.schema.json",
                 "This configuration file is valid for generating a display, but "
@@ -719,21 +721,18 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
             );
             if (previewGenVersion.versionCheck(minimumVersion)) {
                 try {
-                    preview = sgct::readConfig(
+                    preview = readConfig(
                         winCfg,
                         "This configuration file is unable to generate a proper display "
                         "due to a problem detected in the readConfig function"
                     );
                 }
-                catch (std::runtime_error& e) {
+                catch (const std::runtime_error& e) {
                     //Re-throw an SGCT error exception with the runtime exception message
-                    throw sgct::Error(
-                        sgct::Error::Component::ReadConfig,
-                        6082,
+                    throw std::runtime_error(
                         fmt::format(
                             "Importing of this configuration file failed because of a "
-                            "problem detected in the readConfig function:\n\n{}",
-                            e.what()
+                            "problem detected in the readConfig function:\n\n{}", e.what()
                         )
                     );
                 }
@@ -758,19 +757,12 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                     "File Format Version Error",
                     fmt::format(
                         "File '{}' does not meet the minimum required version of {}.",
-                        winCfg,
-                        minimumVersion.versionString()
+                        winCfg, minimumVersion.versionString()
                     )
                 );
             }
         }
-        catch (sgct::Error& e) {
-            editRefusalDialog(
-                "Format Validation Error",
-                fmt::format("Error in file '{}':\n\n{}", winCfg, e.message)
-            );
-        }
-        catch (std::runtime_error& e) {
+        catch (const std::runtime_error& e) {
             editRefusalDialog(
                 "Format Validation Error",
                 fmt::format("Error in file '{}':\n\n{}", winCfg, e.what())
@@ -780,12 +772,13 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
 }
 
 void LauncherWindow::handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
-                                                  const std::filesystem::path savePath,
-                                                  const std::string saveWindowCfgPath)
+                                                  std::filesystem::path savePath,
+                                                  const std::string& saveWindowCfgPath)
 {
+    savePath.replace_extension(".json");
     saveWindowConfig(this, savePath, cluster);
     // Truncate path to convert this back to path relative to _userConfigPath
-    std::string p = savePath.string().substr(saveWindowCfgPath.size());
+    std::string p = std::filesystem::proximate(savePath, saveWindowCfgPath).string();
     populateWindowConfigsList(p);
 }
 

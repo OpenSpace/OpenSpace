@@ -43,7 +43,7 @@ namespace {
         "Primary", "Secondary", "Tertiary", "Quaternary"
     };
 
-    const int nQualityTypes = 10;
+    constexpr int nQualityTypes = 10;
 
     const QList<QString> QualityTypes = {
         "Low (256)", "Medium (512)", "High (1K)", "1.5K (1536)", "2K (2048)", "4K (4096)",
@@ -306,7 +306,7 @@ void WindowControl::createWidgets(const QColor& windowColor) {
             ProjectionTypes[1],
             ProjectionTypes[2],
             ProjectionTypes[3],
-            ProjectionTypes[4],
+            ProjectionTypes[4]
         });
         _projectionType->setToolTip("Select from the supported window projection types");
         _projectionType->setCurrentIndex(0);
@@ -650,7 +650,7 @@ void WindowControl::showWindowLabel(bool show) {
     _windowNumber->setVisible(show);
 }
 
-void WindowControl::setWindowName(std::string& windowName) {
+void WindowControl::setWindowName(const std::string& windowName) {
     _windowName->setText(QString::fromStdString(windowName));
 }
 
@@ -792,6 +792,7 @@ void WindowControl::setProjectionEquirectangular(int quality, bool spoutOutput) 
 }
 
 void WindowControl::setQualityComboBoxFromLinesResolution(int lines, QComboBox* combo) {
+    ghoul_assert(combo, "Invalid pointer");
     for (unsigned int v = 0; v < nQualityTypes; ++v) {
         if (lines == QualityValues[v]) {
             combo->setCurrentIndex(v);

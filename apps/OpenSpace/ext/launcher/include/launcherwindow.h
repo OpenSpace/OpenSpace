@@ -100,7 +100,7 @@ private:
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);
     void handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
-        const std::filesystem::path savePath, const std::string saveWindowCfgPath);
+        std::filesystem::path savePath, const std::string& saveWindowCfgPath);
 
     const std::string _assetPath;
     const std::string _userAssetPath;

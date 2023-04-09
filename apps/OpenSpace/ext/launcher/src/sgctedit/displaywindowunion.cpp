@@ -127,7 +127,7 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
     layout->addStretch();
 }
 
-std::vector<WindowControl*> DisplayWindowUnion::activeWindowControls() {
+std::vector<WindowControl*> DisplayWindowUnion::activeWindowControls() const {
     std::vector<WindowControl*> res;
     res.reserve(_nWindowsDisplayed);
     for (unsigned int i = 0; i < _nWindowsDisplayed; ++i) {
@@ -155,7 +155,7 @@ void DisplayWindowUnion::removeWindow() {
     }
 }
 
-unsigned int DisplayWindowUnion::numWindowsDisplayed() {
+unsigned int DisplayWindowUnion::numWindowsDisplayed() const {
     return _nWindowsDisplayed;
 }
 
