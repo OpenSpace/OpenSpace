@@ -81,6 +81,15 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
         phases.push_back(subphaseJson);
     }
 
+    json importandDates = json::array();
+    for (const std::pair<std::string, Time> date : phase.importantDates()) {
+        json jsonDate = {
+            { "date", std::string(date.second.ISO8601())},
+            { "name", date.first }
+        };
+        importandDates.push_back(jsonDate);
+    }
+
     std::string startTimeString = std::string(Time(phase.timeRange().start).ISO8601());
     std::string endTimeString = std::string(Time(phase.timeRange().end).ISO8601());
 
@@ -95,7 +104,8 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
         { "phases", phases },
         { "media",{
             { "image", phase.image() }
-        }}
+        }},
+        { "importantDates" , importandDates }
     };
 
     return phaseJson;

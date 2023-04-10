@@ -63,6 +63,15 @@ namespace {
 
         // Actions associated with this phase
         std::optional<std::vector<std::string>> actions;
+
+        // Important dates
+        struct ImportantDates {
+            // An image that can be presented to the user during this phase of a mission
+            std::optional<std::string> date 
+                [[codegen::annotation("A string representing a valid date")]];
+            std::optional<std::string> name;
+        };
+        std::optional<std::vector<ImportantDates>> importantDates;
     };
 #include "mission_codegen.cpp"
 } // namespace
@@ -148,6 +157,15 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     if (p.actions.has_value()) {
         _actions = p.actions.value_or(_actions);
     }
+
+    if (p.importantDates.has_value()) {
+        _importantDates.reserve(p.importantDates->size());
+        for (const auto& date : *p.importantDates) {
+            std::string name = date.name.value();
+            Time time = Time(date.date.value());
+            _importantDates.emplace_back(std::pair<std::string, Time>( name , time ));
+        }
+    }
 }
 
 const std::string& MissionPhase::name() const {
@@ -164,6 +182,10 @@ const std::string& MissionPhase::description() const {
 
 const std::string& MissionPhase::image() const {
     return _image;
+}
+
+const std::vector<std::pair<std::string, Time>>& MissionPhase::importantDates() const {
+    return _importantDates;
 }
 
 const std::vector<MissionPhase>& MissionPhase::phases() const {

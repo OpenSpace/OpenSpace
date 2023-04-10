@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___MISSION___H__
 
 #include <openspace/util/timerange.h>
+#include <openspace/util/time.h>
 
 #include <string>
 #include <vector>
@@ -95,6 +96,20 @@ public:
      */
     const std::vector<MissionPhase>& phases() const;
 
+
+    /**
+     * Returns all important dates.
+     *
+     * \return All important dates
+     */
+    const std::vector<std::pair<std::string, Time>>& importantDates() const;
+
+
+    /**
+     * Returns all actions.
+     *
+     * \return All actions
+     */
     const std::vector<std::string> &actions() const;
 
     using Trace = std::vector<std::reference_wrapper<const MissionPhase>>;
@@ -144,6 +159,8 @@ protected:
     std::string _image;
     /// Actions associated with the phase
     std::vector<std::string> _actions;
+    /// Important dates 
+    std::vector<std::pair<std::string, Time>> _importantDates;
 };
 
 /**
