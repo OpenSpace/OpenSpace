@@ -126,6 +126,8 @@ protected:
 
     SceneGraphNode* parent() const noexcept;
 
+    bool automaticallyUpdatesRenderBin() const noexcept;
+
     properties::BoolProperty _enabled;
     properties::FloatProperty _opacity;
     properties::FloatProperty _fade;
@@ -146,6 +148,7 @@ private:
     double _interactionSphere = 0.0;
     SceneGraphNode* _parent = nullptr;
     const bool _shouldUpdateIfDisabled = false;
+    bool _automaticallyUpdateRenderBin = true;
 
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want
     // to provide a set method for this. Otherwise, anyone might mess around with our

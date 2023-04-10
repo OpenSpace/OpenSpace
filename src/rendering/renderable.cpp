@@ -161,16 +161,19 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, Settings settings)
     , _renderableType(RenderableTypeInfo, "Renderable")
     , _dimInAtmosphere(DimInAtmosphereInfo, false)
     , _shouldUpdateIfDisabled(settings.shouldUpdateIfDisabled)
+    , _automaticallyUpdateRenderBin(settings.automaticallyUpdateRenderBin)
 {
     ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     if (p.renderBinMode.has_value()) {
-        // If the user specified a RenderBin manually, we disable the automatic bin update
-        settings.automaticallyUpdateRenderBin = false;
+        _automaticallyUpdateRenderBin = false;
+        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
     }
-    if (settings.automaticallyUpdateRenderBin) {
+
+    if (_automaticallyUpdateRenderBin) {
+        ghoul_assert(!p.renderBinMode.has_value(), "Something misfired in constructor");
         registerUpdateRenderBinFromOpacity();
     }
 
@@ -208,11 +211,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, Settings settings)
     // set type for UI
     _renderableType = p.type.value_or(_renderableType);
     addProperty(_renderableType);
-
-    // only used by a few classes such as RenderableTrail and RenderableSphere
-    if (p.renderBinMode.has_value()) {
-        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
-    }
 
     _dimInAtmosphere = p.dimInAtmosphere.value_or(_dimInAtmosphere);
     addProperty(_dimInAtmosphere);
@@ -329,6 +327,8 @@ void Renderable::setRenderBinFromOpacity() {
 void Renderable::registerUpdateRenderBinFromOpacity() {
     _opacity.onChange([this]() { setRenderBinFromOpacity(); });
     _fade.onChange([this]() { setRenderBinFromOpacity(); });
+
+    _automaticallyUpdateRenderBin = true;
 }
 
 float Renderable::opacity() const noexcept {
@@ -343,6 +343,10 @@ float Renderable::opacity() const noexcept {
 SceneGraphNode* Renderable::parent() const noexcept {
     ghoul_assert(dynamic_cast<SceneGraphNode*>(owner()), "Owner is not a SceneGraphNode");
     return static_cast<SceneGraphNode*>(owner());
+}
+
+bool Renderable::automaticallyUpdatesRenderBin() const noexcept {
+    return _automaticallyUpdateRenderBin;
 }
 
 }  // namespace openspace
