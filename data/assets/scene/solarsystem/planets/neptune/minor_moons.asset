@@ -1,6 +1,5 @@
 asset.require("./inner_moons")
-asset.require("./irregular_prograde_moons")
-asset.require("./irregular_retrograde_moons")
+asset.require("./irregular_moons")
 
 local minormoons_on = {
   Identifier = "os.solarsystem.neptune.minormoonson",
@@ -63,8 +62,8 @@ end)
 asset.meta = {
   Name = "Neptune Minor Moons",
   Version = "1.1",
-  Description = [[Meta asset containing 3 moon groups: inner_moons,
-    irregular_prograde_moons, and irregular_retrograde_moons]],
+  Description = [[Meta asset containing two moon groups: inner_moons and 
+    irregular_moons]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
