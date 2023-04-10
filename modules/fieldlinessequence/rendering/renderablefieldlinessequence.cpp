@@ -356,7 +356,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             break;
         case Parameters::SourceFileType::Hdf5:
             _inputFileType = SourceFileType::Hdf5;
-            fileTypeString = "Hdf5";
+            fileTypeString = "h5";
             break;
     }
 

@@ -89,6 +89,7 @@ option(FIELDLINESEQUENCE_USE_HIGHFIVE "Build HighFive with zlib" OFF)
 find_package(Boost REQUIRED)
 set(CCMC_DEPENDENT_LIBS ${CCMC_DEPENDENT_LIBS} ${Boost_LIBRARIES})
 
+# HDF5
 find_package(HDF5 COMPONENTS C CXX)
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_INCLUDE_DIR}")
 set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_${LIB_TYPE}_LIBRARY})
@@ -99,10 +100,10 @@ if (FIELDLINESEQUENCE_USE_HDF5)
 
   if (HDF5_FOUND)
     message(STATUS "HDF5 Found: Building FieldlineSequence with HDF 5")
-    add_definitions(-DHAVE_HDF5)
+    add_definitions(-DFLS_HAVE_HDF5)
   # set(CCMC_DEPENDENT_LIBS ${CCMC_DEPENDENT_LIBS} ${HDF5_LIBRARIES})
   else ()
-    add_definitions(-DHAVE_HDF5)
+    add_definitions(-DFLS_HAVE_HDF5)
     message(STATUS "Building HDF5 locally")
    set(HDF5_ROOT ${FIELDLINESEQUENCE_EXT_DIR}/hdf5)
   set(HDF5_EXTERNALLY_CONFIGURED 1)
@@ -116,7 +117,7 @@ if (FIELDLINESEQUENCE_USE_HDF5)
   endif ()
  endif ()
 
-#HIGHFIVE
+# HIGHFIVE
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -124,15 +125,9 @@ add_definitions(-DHIGHFIVE_EXAMPLES=OFF)
 set(HighFive_DIR "${FIELDLINESEQUENCE_EXT_DIR}/HighFive")
 
 if(FIELDLINESEQUENCE_USE_HIGHFIVE)
-    
-   #set(CMAKE_PREFIX_PATH "C:/OpenSpace/OpenSpace/modules/fieldlinessequence/ext/HighFive/CMake" ${CMAKE_PREFIX_PATH})
-    add_subdirectory(${HighFive_DIR})
-    #find_package(HighFive REQUIRED)
-    #add_subdirectory("HighFive")
-    #target_link_libraries(${fieldlinessequence_module} PRIVATE HighFive) 
+   add_subdirectory("${HighFive_DIR}")
+    target_link_libraries(${fieldlinessequence_module} PRIVATE HighFive) 
     #set_target_properties(HighFive PROPERTIES FOLDER "External")
     set(CCMC_DEPENDENT_LIBS ${CCMC_DEPENDENT_LIBS} ${HighFive_LIBRARIES})
 endif ()
-if(HighFive_FOUND)
-    message(WARNING "HAVE HIGHFIVE")
-endif()
+

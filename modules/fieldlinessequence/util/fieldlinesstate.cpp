@@ -31,6 +31,10 @@
 #include <fstream>
 #include <iomanip>
 
+#include <../modules/fieldlinessequence/ext/HighFive/include/highfive/H5File.hpp>
+using namespace HighFive;
+using namespace std;
+ 
 namespace {
     constexpr std::string_view _loggerCat = "FieldlinesState";
     constexpr int CurrentVersion = 0;
@@ -216,6 +220,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
     return true;
 }
 
+#ifdef FLS_HAVE_HDF5
 bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File) {
 
     // --------------------- ENSURE FILE IS VALID, THEN PARSE IT --------------------- //
@@ -226,11 +231,79 @@ bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File) {
         return false;
     }
 
-   // json jFile;
-   // ifs >> jFile;
-    // -------------------------------------------------------------------------------- //
+    // Test HighFive function
+    HighFive::File file(pathToHdf5File, File::ReadOnly);
+    size_t number = file.getNumberObjects();
+    cout << "Number of objects:";
+    printf("%zu", number);
+    cout << "\n";
+
+ // else {
+
+//        try
+  //      {
+         
+   //         current_file = new H5::h5file(pathToHdf5File, H5F_ACC_RDONLY);
+   //         this->rootgroup = new h5::group(current_file->opengroup("/"));
+   //         this->variablegroup = new h5::group(current_file->opengroup("variables"));
+   //         int numvariables = variablegroup->getnumobjs();
+   //         std::cerr << "num variables: " << numvariables << std::endl;
+   //         for (int i = 0; i < numvariables; i++)
+   //         {
+   //             //std::cerr << "variable: " << variablegroup->getobjnamebyidx(i) << std::endl;
+
+   //         }
+   //         status = ok;
+   //     }
+   //     catch (h5::exception const& ex)
+   //     {
+   //         status = open_error;
+   //         if (current_file != null)
+   //         {
+   //             delete current_file;
+   //             current_file = null;
+   //         }
+   //         if (rootgroup != null)
+   //         {
+   //             delete rootgroup;
+   //             rootgroup = null;
+   //         }
+   //         if (variablegroup != null)
+   //         {
+   //             delete variablegroup;
+   //             variablegroup = null;
+   //         }
+   //     }
+
+   //     //file(filename, h5::h5f_acc_rdonly);
+   //     //status = cdfopencdf((char *)filename.c_str(), &current_file_id);
+
+
+   //     if (status == ok)
+   //     {
+   //         current_filename = filename;
+   //         filereader::initializeglobalattributes();
+   //         filereader::initializevariableattributes();
+   //         initializevariableids();
+   //         initializevariablenames();
+   //         //status = ok;
+   //     }
+   //     else
+   //     {
+   //         status = open_error;
+   //         std::cerr << "error opening hdf \"" << filename << "\". not an hdf file?" << std::endl;
+    //    }
+
+   // }
+   // cout << "current_file_id: " << current_file_id << endl;
+   // cout << "testing open in filereader class" << endl;
+
+   //// json jfile;
+   //// ifs >> jfile;
+   // // -------------------------------------------------------------------------------- //
     return true;
 }
+#endif
 
 /**
  * \param absPath must be the path to the file (incl. filename but excl. extension!)
