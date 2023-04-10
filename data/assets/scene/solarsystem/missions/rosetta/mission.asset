@@ -12,19 +12,26 @@ local Mission = {
     },
     {
       Name = "First Earth gravity assist",
-      Date = 	"2005 MAR 04 00:00:00"
+      Date = 	"2005 MAR 04 00:00:00",
+      Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2005/03/moonrise_above_the_pacific_22_06_utc_4_march_2005/9520996-4-eng-GB/Moonrise_above_the_Pacific_22_06_UTC_4_March_2005_pillars.jpg",
+      Description = "The Moon rising above the Pacific at 22:06 UTC, 4 March 2005, just three minutes before the point of closest approach during Rosetta's first Earth fly-by."
     },
     {
       Name = "Mars gravity assist",
-      Date = 	"2007 FEB 25 00:00:00"
+      Date = 	"2007 FEB 25 00:00:00",
+      Description = "The Rosetta swing-by of Mars is the second of four gravity assist manoeuvres that are required to place Rosetta on course for its final destination: comet 67P/Churyumov-Gerasimenko. The closest approach of the swing-by will take place at 01:54 UT, 25 February 2007, when the spacecraft will pass 250 km above the surface of Mars.",
+      Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2007/02/image_of_mars_seen_by_osiris/10287257-2-eng-GB/Image_of_Mars_seen_by_OSIRIS_pillars.jpg"
     },
     {
       Name = "Second Earth gravity assist",
-      Date = 	"2007 NOV 13 00:00:00"
+      Date = 	"2007 NOV 13 00:00:00",
+      Description = "In the evening of 13 November, at 20:57 UTC, the Rosetta spacecraft returns to Earth for a second time after its launch in March 2004. The spacecraft will perform its second Earth swing-by which is part of a series of gravity assists required to put the spacecraft on an intercept course with comet 67P/Churyumov-Gerasimenko."
     },
     {
       Name = "Asteroid Steins flyby",
-      Date = 	"2008 SEP 05 00:00:00"
+      Date = 	"2008 SEP 05 00:00:00",
+      Image = "https://cdn.sci.esa.int/documents/34878/35534/1567217294466-Steins-FlyBy-Mosaic_625.jpg",
+      Description = "Images of asteroid (2867) Steins taken by the OSIRIS Wide Angle Camera on  Rosetta during the fly-by of 5 September 2008. The effective diameter of the asteroid is 5 km, approximately as predicted. At the top of the asteroid (as shown in these images), a large crater, approximately 2  km in size, can be seen."
     },
     {
       Name = "Third Earth gravity assist",
@@ -32,7 +39,9 @@ local Mission = {
     },
     {
       Name = "Asteroid Lutetia flyby",
-      Date = 	"2010 NOV 10 00:00:00"
+      Date = 	"2010 NOV 10 00:00:00",
+      Image = "https://cdn.sci.esa.int/documents/34878/35534/1567216468815-4_closest_approach-0_625.jpg",
+      Description = "Together with 2867-Steins, 21-Lutetia is one of the two target asteroids that Rosetta will study during its long trek to comet 67P-Churyumov-Gersimenko."
     },
     {
       Name = "Rendezvous manoeuvres begin",
@@ -40,21 +49,30 @@ local Mission = {
     },
     {
       Name = "Arrive at comet",
-      Date = 	"2014 AUG 06 00:00:00"
+      Date = 	"2014 AUG 06 00:00:00",
+      Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2014/08/navcam_animation_6_august/14705553-1-eng-GB/NavCam_animation_6_August_pillars.gif",
+      Description = "Comet 67P/Churyumov-Gerasimenko by Rosetta’s OSIRIS narrow-angle camera on 3 August from a distance of 285 km. The image resolution is 5.3 metres/pixel."
     },
     {
       Name = "Start global mapping",
-      Date = 	"2014 SEP 10 00:00:00"
+      Date = 	"2014 SEP 10 00:00:00",
+      Description = "After rendezvous, Rosetta will start with two months of extensive mapping of the comet’s surface, and will also make important measurements of the comet’s gravity, mass and shape, and assess its gaseous, dust-laden atmosphere, or coma. The orbiter will also probe the plasma environment and analyse how it interacts with the Sun’s outer atmosphere, the solar wind."
     },
     {
-      Name = "Lander delivery",
-      Date = 	"2014 NOV 12 00:00:00"
+      Name = "Philae lander delivery",
+      Date = 	"2014 NOV 12 00:00:00",
+      Image = "https://cdn.sci.esa.int/documents/34878/35534/1567216603810-ESA_Rosetta_OSIRIS_NAC_Farewell_Philae_625.jpg",
+      Description = "Rosetta’s OSIRIS narrow-angle camera captured this parting shot of the Philae lander after separation. The lander separated from the orbiter at 09:03 GMT/10:03 CET and is expected to touch down on Comet 67P/Churyumov–Gerasimenko seven hours later. Confirmation of a successful touchdown is expected in a one-hour window centred on 16:02 GMT / 17:02 CET. Rosetta and Philae had been riding through space together for more than 10 years. While Philae is set to become the first probe to land on a comet, Rosetta is the first to rendezvous with a comet and follow it around the Sun. The information collected by Philae at one location on the surface will complement that collected by the Rosetta orbiter for the entire comet."
     },
     {
-      Name = "Perihelion passage	",
+      Name = "Closest approach to Sun (Perihelion)",
       Date = 	"2015 AUG 13 00:00:00",
-      Description = "At 10:00 CET the spacecraft woke up and started post-hibernation procedures. Rosetta restored communications with ESA's Operations Centre through NASA’s Goldstone ground station at 18:17 CET. Greets the Earth with a 'Hello World' message. The message was received on a very low bit level. Over the next months ESA's job will be to raise communication speed through a software update.",
-      Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif"
+      Description = "Perihelion is the closest point a Solar System object gets to the Sun along its orbit (aphelion is the term given to the most distant point). The term derives from ancient Greek, where ‘peri’ means near and ‘helios’ means Sun. “Perihelion is an important milestone in any comet’s calendar, and even more so for the Rosetta mission because this will be the first time a spacecraft has been following a comet from close quarters as it moves through this phase of its journey around the Solar System,” notes Matt Taylor, ESA’s Rosetta project scientist.",
+      Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/03/comet_s_orbit/15317969-1-eng-GB/Comet_s_orbit_pillars.jpg"
+    }, 
+    {
+      Name = "Mission end",
+      Date = 	"2016 SEP 30 00:00:00"
     }
   },
   Phases = {
@@ -66,12 +84,14 @@ local Mission = {
           TimeRange = { Start = "2004 MAR 02 07:17:00", End = "2004 MAR 02 09:14:00" }
         },
         {
-          Name = "Commisioning of Instruments",
-          TimeRange = { Start = "2004 MAR 02 09:14:00", End = "2004 JUN 07 00:00:00" }
+          Name = "Commissioning of Instruments",
+          TimeRange = { Start = "2004 MAR 02 09:14:00", End = "2004 JUN 07 00:00:00" },
+          Description = "The spacecraft is now configured for its long ‘cruise’, with instruments switched off and the Standard Radiation Environment Monitor (SREM) activated for background radiation monitoring."
         },
         {
           Name = "Deep Space Hibernation",
-          TimeRange = { Start = "2011 JUN 08 00:00:00", End = "2014 JAN 20 10:00:00" }
+          TimeRange = { Start = "2011 JUN 08 00:00:00", End = "2014 JAN 20 10:00:00" },
+          Description = "Operating on solar energy alone, Rosetta was placed into a deep space slumber in June 2011 as it cruised out to a distance of nearly 800 million km from the warmth of the Sun, beyond the orbit of Jupiter."
         }
       }
     },
