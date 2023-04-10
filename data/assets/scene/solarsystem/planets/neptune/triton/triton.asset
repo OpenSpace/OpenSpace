@@ -1,6 +1,6 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
-local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels").nep081
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").nep081
 
 
 

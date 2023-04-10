@@ -1,4 +1,5 @@
-asset.require("./triton")
+asset.require("./triton/triton")
+asset.require("./triton/default_layers")
 
 
 asset.meta = {
