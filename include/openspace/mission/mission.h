@@ -37,6 +37,13 @@ namespace openspace {
 
 namespace documentation {  struct Documentation; }
 
+struct ImportantDate {
+    std::string name;
+    Time date;
+    std::optional<std::string> description;
+    std::optional<std::string> image;
+};
+
 /**
  * Used to represent a named period of time within a mission. Allows nested phases, i.e.
  * phases within phases. Designed for WORM usage (Write Once, Read Multiple), and,
@@ -102,7 +109,7 @@ public:
      *
      * \return All important dates
      */
-    const std::vector<std::pair<std::string, Time>>& importantDates() const;
+    const std::vector<ImportantDate>& importantDates() const;
 
 
     /**
@@ -160,7 +167,7 @@ protected:
     /// Actions associated with the phase
     std::vector<std::string> _actions;
     /// Important dates 
-    std::vector<std::pair<std::string, Time>> _importantDates;
+    std::vector<ImportantDate> _importantDates;
 };
 
 /**

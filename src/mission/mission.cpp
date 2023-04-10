@@ -58,6 +58,7 @@ namespace {
         struct Media {
             // An image that can be presented to the user during this phase of a mission
             std::optional<std::string> image;
+            std::optional<std::string> link;
         };
         std::optional<Media> media;
 
@@ -67,9 +68,10 @@ namespace {
         // Important dates
         struct ImportantDates {
             // An image that can be presented to the user during this phase of a mission
-            std::optional<std::string> date 
-                [[codegen::annotation("A string representing a valid date")]];
+            std::optional<std::string> date;
             std::optional<std::string> name;
+            std::optional<std::string> description;
+            std::optional<std::string> image;
         };
         std::optional<std::vector<ImportantDates>> importantDates;
     };
@@ -160,10 +162,17 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
 
     if (p.importantDates.has_value()) {
         _importantDates.reserve(p.importantDates->size());
-        for (const auto& date : *p.importantDates) {
-            std::string name = date.name.value();
-            Time time = Time(date.date.value());
-            _importantDates.emplace_back(std::pair<std::string, Time>( name , time ));
+        for (int i = 0; i < p.importantDates->size(); i++) {
+            std::string name = p.importantDates.value()[i].name.value();
+            Time newTime = Time(p.importantDates.value()[i].date.value());
+            ImportantDate newDate = { name, newTime };
+            if (p.importantDates.value()[i].description.has_value()) {
+                newDate.description = p.importantDates.value()[i].description.value();
+            }
+            if (p.importantDates.value()[i].image.has_value()) {
+                newDate.image = p.importantDates.value()[i].image.value();
+            }
+            _importantDates.emplace_back(newDate);
         }
     }
 }
@@ -184,7 +193,7 @@ const std::string& MissionPhase::image() const {
     return _image;
 }
 
-const std::vector<std::pair<std::string, Time>>& MissionPhase::importantDates() const {
+const std::vector<ImportantDate>& MissionPhase::importantDates() const {
     return _importantDates;
 }
 
