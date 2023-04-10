@@ -19,7 +19,6 @@ local object = {
     Segments = 40,
     Opacity = 0.4,
     Texture = textures .. "eso0932a_blend.png",
-    RenderBinMode = "PreDeferredTransparent",
     Orientation = "Inside",
     MirrorTexture = true,
     FadeOutThreshold = 0.01,

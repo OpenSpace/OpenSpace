@@ -46,7 +46,7 @@ public:
     void render() override;
     void update() override;
 
-    float opacity() const;
+    float opacity() const noexcept;
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     bool isInitialized() const;
     bool isPointingSpacecraft() const;

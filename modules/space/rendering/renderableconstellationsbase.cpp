@@ -96,7 +96,6 @@ RenderableConstellationsBase::RenderableConstellationsBase(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     // Avoid reading files here, instead do it in multithreaded initialize()
     if (p.namesFile.has_value()) {

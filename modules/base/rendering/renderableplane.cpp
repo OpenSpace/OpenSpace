@@ -113,7 +113,7 @@ documentation::Documentation RenderablePlane::Documentation() {
 }
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+    : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _billboard(BillboardInfo, false)
     , _mirrorBackside(MirrorBacksideInfo, false)
@@ -123,7 +123,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     _size = p.size;
     _billboard = p.billboard.value_or(_billboard);

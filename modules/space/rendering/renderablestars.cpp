@@ -541,7 +541,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     _dataMapping.bvColor = p.dataMapping.bv.value_or("");
     _dataMapping.bvColor.onChange([this]() { _dataIsDirty = true; });
