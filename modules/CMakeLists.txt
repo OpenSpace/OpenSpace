@@ -91,7 +91,7 @@ function (get_module_attribute_supported path result)
 endfunction()
 
 
-# Returns the path for the 'module_name'. If the module has not been seen before by 
+# Returns the path for the 'module_name'. If the module has not been seen before by
 # get_individual_modules, an empty string is returned
 function (find_path_for_module module_name module_names module_paths result)
   list(FIND module_names ${module_name} i)
@@ -121,7 +121,7 @@ function (get_recursive_dependencies module_name module_path module_names module
           "${module_names}" "${module_paths}"
           res
         )
-        # 1. We add "base" to the list of dependencies as we always want it 
+        # 1. We add "base" to the list of dependencies as we always want it
         # 2. We add dependencies in this order such that when we later traverse
         #    this list, we automatically get them in the correct order (meaning
         #    that we include a dependency first)
@@ -241,7 +241,7 @@ foreach (val RANGE ${enabled_module_count})
   set(dependencies ${dependencies} ${deps})
 endforeach()
 
-# We can remove the duplicates here.  We constructed the list such that nested 
+# We can remove the duplicates here.  We constructed the list such that nested
 # dependencies are order left to right.  REMOVE_DUPLICATES will keep the left most
 # value in the case of duplicates, so that will still work
 list(REMOVE_DUPLICATES dependencies)

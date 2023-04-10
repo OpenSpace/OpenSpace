@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___RENDERABLE___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -52,7 +53,7 @@ namespace documentation { struct Documentation; }
 
 class Camera;
 
-class Renderable : public properties::PropertyOwner {
+class Renderable : public properties::PropertyOwner, public Fadeable {
 public:
     struct Settings {
         bool automaticallyUpdateRenderBin = true;
@@ -107,30 +108,28 @@ public:
 
     bool matchesSecondaryRenderBin(int binMask) const noexcept;
 
-    void setFade(float fade);
-
-    bool isVisible() const;
+    bool isVisible() const override;
 
     void onEnabledChange(std::function<void(bool)> callback);
 
     static documentation::Documentation Documentation();
 
 protected:
+    properties::BoolProperty _enabled;
+    properties::StringProperty _renderableType;
+    properties::BoolProperty _dimInAtmosphere;
+
     void setBoundingSphere(double boundingSphere);
     void setInteractionSphere(double interactionSphere);
 
     void setRenderBinFromOpacity();
 
     /// Returns the full opacity constructed from the _opacity and _fade property values
-    float opacity() const noexcept;
+    float opacity() const noexcept override;
 
     SceneGraphNode* parent() const noexcept;
 
     bool automaticallyUpdatesRenderBin() const noexcept;
-
-    properties::BoolProperty _enabled;
-    properties::FloatProperty _opacity;
-    properties::FloatProperty _fade;
 
     RenderBin _renderBin = RenderBin::Opaque;
 
@@ -140,9 +139,6 @@ protected:
 
 private:
     void registerUpdateRenderBinFromOpacity();
-
-    properties::StringProperty _renderableType;
-    properties::BoolProperty _dimInAtmosphere;
 
     double _boundingSphere = 0.0;
     double _interactionSphere = 0.0;

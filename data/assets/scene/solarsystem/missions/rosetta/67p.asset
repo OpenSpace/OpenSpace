@@ -21,10 +21,11 @@ local images = asset.syncedResource({
   Type = "HttpSynchronization",
   Identifier = "rosettaimages",
   Version = 2,
-  UnzipFiles = true
+  UnzipFiles = true,
+  UnzipFilesDestination = "images"
 })
 
-local imagesDestination = images .. "images_v1_v2"
+local imagesDestination = images .. "images"
 
 local Barycenter = {
   Identifier = "67PBarycenter",
@@ -136,8 +137,8 @@ local focus_67p = {
   Identifier = "os.missions.rosetta.67p.focus",
   Name = "Focus on 67P",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', '67P'); 
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', '67P');
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');
     openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
   ]],
   Documentation = "Sets the focus of the camera on 67P",

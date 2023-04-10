@@ -31,7 +31,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Clem Uvvis [Utah]",
   Version = "1.1",
-  Description = [[Moon Clementine UVVIS Global Mosaic 118m v2 map of the Moon. This map 
+  Description = [[Moon Clementine UVVIS Global Mosaic 118m v2 map of the Moon. This map
     is hosted on the OpenSpace server in Utah]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Moon/Clementine/UVVIS/Lunar_Clementine_UVVIS_750nm_Global_Mosaic_118m_v2",

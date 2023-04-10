@@ -40,13 +40,13 @@ vec4 psc_to_meter(vec4 v1, vec2 v2) {
 // vertexPosition is returned as the transformed vertex in OS Camera Rig Space in PSC
 vec4 pscTransform(inout vec4 vertexPosition, mat4 modelTransform) {
   vec3 local_vertex_pos = mat3(modelTransform) * vertexPosition.xyz;
-    
+
   // PSC addition; local vertex position and the object power scaled world position
   vertexPosition = psc_addition(vec4(local_vertex_pos,vertexPosition.w),objpos);
-    
+
   // PSC addition; rotated and viewscaled vertex and the cameras negative position
   vertexPosition = psc_addition(vertexPosition,vec4(-campos.xyz,campos.w));
-    
+
   // rotate the camera
   vertexPosition.xyz =  mat3(camrot) * vertexPosition.xyz;
   vec4 tmp = vertexPosition;
@@ -58,10 +58,10 @@ vec4 pscTransform(inout vec4 vertexPosition, mat4 modelTransform) {
   else {
     vertexPosition = vec4(vertexPosition.xyz * scaling.x * pow(k, scaling.y), vertexPosition.w);
   }
-    
+
   // project using the rescaled coordinates,
   tmp = psc_to_meter(tmp, scaling);
-    
+
   // Return the vertex tranformed to OS Camera Rig Space in meters
   return tmp;
 }
