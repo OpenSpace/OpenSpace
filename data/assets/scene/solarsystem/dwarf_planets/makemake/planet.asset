@@ -1,0 +1,42 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+local modelFolder = asset.syncedResource({
+  Name = "Dwarf Planet Models",
+  Type = "HttpSynchronization",
+  Identifier = "dwarf_planet_models",
+  Version = 1
+})
+
+local Planet = {
+  Identifier = "MakemakeGlobe",
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = {0, 0, 1},
+      RotationRate = 1/(10.273*60*60)
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. 'Makemake_1_1430.glb',
+    LightSources = {
+      sun.LightSource
+    },
+  },
+  GUI = {
+    Name = "Makemake",
+    Path = "/Solar System/Dwarf Planets/Makemake",
+    Description = "Globe of Makemake"
+  } 
+}
+
+asset.export("Planet", Planet)
+
+asset.meta = {
+  Name = "Makemake Globe",
+  Version = "1.0",
+  Description = [[Globe of Makemake]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

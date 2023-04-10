@@ -1,0 +1,42 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+local modelFolder = asset.syncedResource({
+  Name = "Dwarf Planet Models",
+  Type = "HttpSynchronization",
+  Identifier = "dwarf_planet_models",
+  Version = 1
+})
+
+local Planet = {
+  Identifier = "ErisGlobe",
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = {0, 0, 1},
+      RotationRate = 1/(25.9*60*60)
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. 'Eris_1_2326.glb',
+    LightSources = {
+      sun.LightSource
+    },
+  },
+  GUI = {
+    Name = "Eris",
+    Path = "/Solar System/Dwarf Planets/Eris",
+    Description = "Globe of Eris"
+  } 
+}
+
+asset.export("Planet", Planet)
+
+asset.meta = {
+  Name = "Eris Globe",
+  Version = "1.0",
+  Description = [[Globe of Eris]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

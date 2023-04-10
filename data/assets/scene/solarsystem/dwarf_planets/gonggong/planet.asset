@@ -1,0 +1,34 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+local Planet = {
+  Identifier = "GonggongGlobe",
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = {0, 0, 1},
+      RotationRate = 1/(22.4*60*60)
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 615.0E3, 615.0E3, 615.0E3 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  GUI = {
+    Name = "Gonggong",
+    Path = "/Solar System/Dwarf Planets/Gonggong",
+    Description = "Globe of Gonggong"
+  } 
+}
+
+asset.export("Planet", Planet)
+
+asset.meta = {
+  Name = "Gonggong Globe",
+  Version = "1.0",
+  Description = [[Globe of Gonggong]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

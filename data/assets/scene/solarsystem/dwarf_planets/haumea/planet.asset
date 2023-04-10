@@ -1,0 +1,42 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+local modelFolder = asset.syncedResource({
+  Name = "Dwarf Planet Models",
+  Type = "HttpSynchronization",
+  Identifier = "dwarf_planet_models",
+  Version = 1
+})
+
+local Planet = {
+  Identifier = "HamueaModel",
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = {0, 0, 1},
+      RotationRate = 1/(3.9154*60*60)
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. 'Haumea_1_1000.glb',
+    LightSources = {
+      sun.LightSource
+    },
+  },
+  GUI = {
+    Name = "Haumea",
+    Path = "/Solar System/Dwarf Planets/Haumea",
+    Description = "Model of Haumea"
+  } 
+}
+
+asset.export("Planet", Planet)
+
+asset.meta = {
+  Name = "Haumea Model",
+  Version = "1.0",
+  Description = [[Model of Haumea]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

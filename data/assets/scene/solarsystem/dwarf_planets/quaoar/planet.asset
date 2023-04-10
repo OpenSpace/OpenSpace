@@ -1,0 +1,34 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+local Planet = {
+  Identifier = "QuaoarGlobe",
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = {0, 0, 1},
+      RotationRate = 1/(8.84*60*60)
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1138.0E3, 1138.0E3, 1036.0E3 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  GUI = {
+    Name = "Quaoar",
+    Path = "/Solar System/Dwarf Planets/Quaoar",
+    Description = "Globe of Quaoar"
+  } 
+}
+
+asset.export("Planet", Planet)
+
+asset.meta = {
+  Name = "Quaoar Globe",
+  Version = "1.0",
+  Description = [[Globe of Quaoar]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

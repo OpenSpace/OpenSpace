@@ -1,0 +1,28 @@
+local Trail = {
+  Identifier = "HaumeaTrail",
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Color = { 0.2, 0.8, 0.3 },
+    Period = 90487.27692706819,
+    Resolution = 10000,
+    Enabled = asset.Enabled,
+    Fade = 1.24
+  },
+  Tag = { "planetTrail_dwarf" },
+  GUI = {
+    Name = "Haumea Trail",
+    Path = "/Solar System/Dwarf Planets/Haumea",
+    Description = "Trail of Haumea"
+  }
+}
+
+asset.export("Trail", Trail)
+
+asset.meta = {
+  Name = "Haumea Trail",
+  Version = "1.0",
+  Description = [[Trail of Haumea]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

@@ -1,0 +1,28 @@
+local Trail = {
+  Identifier = "GonggongTrail",
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Color = { 0.2, 0.8, 0.3 },
+    Period = 201582.9642396014,
+    Resolution = 10000,
+    Enabled = asset.Enabled,
+    Fade = 1.24
+  },
+  Tag = { "planetTrail_dwarf" },
+  GUI = {
+    Name = "Gonggong Trail",
+    Path = "/Solar System/Dwarf Planets/Gonggong",
+    Description = "Trail of Gonggong"
+  }
+}
+
+asset.export("Trail", Trail)
+
+asset.meta = {
+  Name = "Gonggong Trail",
+  Version = "1.0",
+  Description = [[Trail of Gonggong]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

@@ -1,0 +1,34 @@
+local Label = {
+  Identifier = "VestaLabel",
+  Renderable = {
+    Enabled = asset.Enabled,
+    Type = "RenderableLabel",
+    Text = "Vesta",
+    FontSize = 50.0,
+    Size = 8.5,
+    MinMaxSize = { 1, 100 },
+    BlendMode = "Additive",
+    OrientationOption = "Camera View Direction",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.0, 120.0 },
+    FadeWidths = { 1.0, 150.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Vesta Label",
+    Path = "/Solar System/Dwarf Planets/Vesta",
+    Description = "Label for Vesta, visible at the solarsystem overview zoom level"
+  }
+}
+
+asset.export("Label", Label)
+
+asset.meta = {
+  Name = "Vesta Label",
+  Version = "1.0",
+  Description = [[Label of Vesta]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}
