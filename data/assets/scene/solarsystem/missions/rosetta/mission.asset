@@ -1,0 +1,94 @@
+-- Source:  https://solarsystem.nasa.gov/missions/rosetta-philae/in-depth/
+
+local Mission = {
+  Name = "Rosetta",
+  TimeRange = { Start = "2004 MAR 02 00:00:00", End = "2016 SEP 30 00:00:00" },
+  Description = "ESA's Rosetta mission was the first to rendezvous with a comet, the first to follow a comet on its orbit around the Sun, and the first to deploy a lander to a comet's surface. Comets are time capsules containing primitive material left over from the epoch when the Sun and its planets formed. By studying the gas, dust and structure of the nucleus and organic materials associated with the comet, via both remote and in situ observations, the Rosetta mission is unlocking the history and evolution of our Solar System.",
+  Media = { Image = "https://www.cosmos.esa.int/documents/522118/522182/Rosetta_logo.png/cd85878d-2fac-e086-e32a-df0eaee5e505?t=1614026031720" },
+  ImportantDates = {
+    {
+      Name = "Launch",
+      Date = 	"2004 MAR 02 09:00:00"
+    },
+    {
+      Name = "First Earth gravity assist",
+      Date = 	"2005 MAR 04 00:00:00"
+    },
+    {
+      Name = "Mars gravity assist",
+      Date = 	"2007 FEB 25 00:00:00"
+    },
+    {
+      Name = "Second Earth gravity assist",
+      Date = 	"2007 NOV 13 00:00:00"
+    },
+    {
+      Name = "Asteroid Steins flyby",
+      Date = 	"2008 SEP 05 00:00:00"
+    },
+    {
+      Name = "Third Earth gravity assist",
+      Date = 	"2009 NOV 13 00:00:00"
+    },
+    {
+      Name = "Asteroid Lutetia flyby",
+      Date = 	"2010 NOV 10 00:00:00"
+    },
+    {
+      Name = "Rendezvous manoeuvres begin",
+      Date = 	"2014 MAY 07 00:00:00"
+    },
+    {
+      Name = "Arrive at comet",
+      Date = 	"2014 AUG 06 00:00:00"
+    },
+    {
+      Name = "Start global mapping",
+      Date = 	"2014 SEP 10 00:00:00"
+    },
+    {
+      Name = "Lander delivery",
+      Date = 	"2014 NOV 12 00:00:00"
+    },
+    {
+      Name = "Perihelion passage	",
+      Date = 	"2015 AUG 13 00:00:00",
+      Description = "At 10:00 CET the spacecraft woke up and started post-hibernation procedures. Rosetta restored communications with ESA's Operations Centre through NASA’s Goldstone ground station at 18:17 CET. Greets the Earth with a 'Hello World' message. The message was received on a very low bit level. Over the next months ESA's job will be to raise communication speed through a software update.",
+      Media = { Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif" }
+    }
+  },
+  Phases = {
+    {
+      Name = "Launch and Cruise",
+      Phases = {
+        {
+          Name = "Launch",
+          TimeRange = { Start = "2004 MAR 02 07:17:00", End = "2004 MAR 02 09:14:00" }
+        },
+        {
+          Name = "Commisioning of Instruments",
+          TimeRange = { Start = "2004 MAR 02 09:14:00", End = "2004 JUN 07 00:00:00" }
+        },
+        {
+          Name = "Deep Space Hibernation",
+          TimeRange = { Start = "2011 JUN 08 00:00:00", End = "2014 JAN 20 10:00:00" }
+        }
+      }
+    },
+    {
+      Name = "Mission",
+      Description = "At 10:00 CET the spacecraft woke up and started post-hibernation procedures. Rosetta restored communications with ESA's Operations Centre through NASA’s Goldstone ground station at 18:17 CET. Greets the Earth with a 'Hello World' message. The message was received on a very low bit level. Over the next months ESA's job will be to raise communication speed through a software update.",
+      Media = { Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif" },
+      TimeRange = { Start = "2014 JAN 20 10:00:00", End = "2016 SEP 30 00:00:00" }
+    }
+  }
+}
+
+asset.onInitialize(function()
+  openspace.loadMission(Mission)
+ end)
+ 
+ asset.onDeinitialize(function()
+  openspace.unloadMission(Mission.Name)
+ end)
+ 

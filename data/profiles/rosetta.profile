@@ -4,7 +4,8 @@
     "scene/solarsystem/missions/rosetta/67p",
     "scene/solarsystem/missions/rosetta/dashboard",
     "scene/solarsystem/missions/rosetta/rosetta",
-    "scene/solarsystem/missions/rosetta/actions"
+    "scene/solarsystem/missions/rosetta/actions",
+    "scene/solarsystem/missions/rosetta/mission"
   ],
   "camera": {
     "aim": "",
