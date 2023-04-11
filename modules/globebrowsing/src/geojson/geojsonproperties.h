@@ -57,15 +57,26 @@ struct GeoJsonProperties : public properties::PropertyOwner {
         //ClampToGround
     };
 
+    enum class PointRenderMode {
+        AlignToCameraDir = 0, // TODO: investigate if we need "face camera pos" option
+        AlignToCameraPos,
+        AlignToGlobeNormal,
+        AlignToGlobeSurface
+    };
+
     AltitudeMode altitudeMode() const;
+    PointRenderMode pointRenderMode() const;
 
     properties::FloatProperty opacity;
     properties::Vec3Property color;
     properties::FloatProperty fillOpacity;
     properties::Vec3Property fillColor;
     properties::FloatProperty lineWidth;
+
     properties::FloatProperty pointSize;
     properties::StringProperty pointTexture;
+    properties::OptionProperty pointRenderModeOption;
+
     properties::BoolProperty extrude;
     properties::BoolProperty performShading;
     properties::OptionProperty altitudeModeOption;
@@ -80,13 +91,17 @@ struct GeoJsonProperties : public properties::PropertyOwner {
 // and used to override any default values
 struct GeoJsonOverrideProperties {
     std::optional<std::string> name;
+
     std::optional<float> opacity;
     std::optional<glm::vec3> color;
     std::optional<float> fillOpacity;
-    std::optional<glm::vec3> fillColor ;
+    std::optional<glm::vec3> fillColor;
     std::optional<float> lineWidth;
+
     std::optional<float> pointSize;
     std::optional<std::string> pointTexture;
+    std::optional<GeoJsonProperties::PointRenderMode> pointRenderMode;
+
     std::optional<bool> extrude;
     std::optional<bool> performShading;
     std::optional<GeoJsonProperties::AltitudeMode> altitudeMode;
@@ -109,8 +124,11 @@ struct PropertySet {
     float fillOpacity() const;
     glm::vec3 fillColor() const;
     float lineWidth() const;
+
     float pointSize() const;
     std::string pointTexture() const;
+    GeoJsonProperties::PointRenderMode pointRenderMode() const;
+
     bool extrude() const;
     bool performShading() const;
     GeoJsonProperties::AltitudeMode altitudeMode() const;

@@ -27,7 +27,7 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 
 layout(points) in;
-flat in vec3 normal[]; // This could be the globe normal instead, and be used as up-direction
+flat in vec3 normal[]; // Point normals correspond to globe out direction, model space
 flat in float dynamicHeight[];
 
 layout(triangle_strip, max_vertices = 4) out;
@@ -45,14 +45,24 @@ uniform float heightOffset;
 uniform bool useHeightMapData;
 
 // Camera information
-// @TODO: Option to use camera position? (to work better in dome)
-uniform vec3 up;
-uniform vec3 right;
+uniform vec3 cameraUp;
+uniform vec3 cameraRight;
+uniform dvec3 cameraPosition; // world coordinates
+uniform vec3 cameraLookUp;
+
+// Render mode
+uniform int renderMode;
+// OBS! Keep in sync with option property options
+const int RenderOptionCameraDir = 0;
+const int RenderOptionCameraPos = 1;
+const int RenderOptionGlobeNormal = 2;
+const int RenderOptionGlobeSurface = 3;
 
 uniform float pointSize;
 uniform float textureWidthFactor;
 
 // If false, use the center
+// TODO: make an option in C++
 bool useBottomAnchorPoint = true;
 
 const vec2 corners[4] = vec2[4](
@@ -78,6 +88,29 @@ void main() {
   }
   // World coordinates
   dpos = modelTransform * dpos;
+  vec3 worldNormal = normalize(mat3(modelTransform) * vs_normal);
+
+  // Set up and right directions based on render mode.
+  // renderMode 0 is default
+  vec3 right = cameraRight;
+  vec3 up = cameraUp;
+  vec3 cameraToPosDir = vec3(normalize(cameraPosition - dpos.xyz));
+
+  // Update right and up based on render mode
+  if (renderMode == RenderOptionCameraPos) {
+    right = normalize(cross(cameraLookUp, cameraToPosDir));
+    up = normalize(cross(cameraToPosDir, right));
+  }
+  else if (renderMode == RenderOptionGlobeNormal) {
+    up = worldNormal;
+    right = normalize(cross(up, cameraToPosDir));
+  }
+  else if (renderMode == RenderOptionGlobeSurface) {
+    // Compute up to be orthogonal to globe normal and camera right direction
+    up = normalize(cross(worldNormal, right));
+    // Recompute right to be orthognal to globe normal
+    right = cross(up, worldNormal);
+  }
 
   dvec4 scaledRight = pointSize * dvec4(right, 0.0) * 0.5;
   dvec4 scaledUp = pointSize * dvec4(up, 0.0) * 0.5;

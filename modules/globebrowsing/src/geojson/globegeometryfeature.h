@@ -123,7 +123,7 @@ public:
     void updateHeightsFromHeightMap();
 
 private:
-    void renderPoints(const RenderFeature& feature) const;
+    void renderPoints(const RenderFeature& feature, const RenderData& renderData) const;
 
     void renderLines(const RenderFeature& feature) const;
 

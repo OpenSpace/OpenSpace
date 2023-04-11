@@ -252,7 +252,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _featuresPropertyOwner({ "Features", "Features" })
     , _centerLatLong(
-        CentroidCoordinateInfo, // TODO: update docs
+        CentroidCoordinateInfo,
         glm::vec2(0.f),
         glm::vec2(-90.f, -180.f),
         glm::vec2(90.f, 180.f)

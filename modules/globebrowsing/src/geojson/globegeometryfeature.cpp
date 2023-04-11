@@ -328,26 +328,6 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
                 lightSourceData.directionsViewSpaceBuffer
             );
         }
-        else {
-            // Points => render as billboard
-            glm::dvec3 cameraViewDirectionWorld = -renderData.camera.viewDirectionWorldSpace();
-            glm::dvec3 cameraUpDirectionWorld = renderData.camera.lookUpVectorWorldSpace();
-            glm::dvec3 orthoRight = glm::normalize(
-                glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
-            );
-            if (orthoRight == glm::dvec3(0.0)) {
-                glm::dvec3 otherVector = glm::vec3(
-                    cameraUpDirectionWorld.y,
-                    cameraUpDirectionWorld.x,
-                    cameraUpDirectionWorld.z
-                );
-                orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
-            }
-            glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
-
-            shader->setUniform("up", glm::vec3(orthoUp));
-            shader->setUniform("right", glm::vec3(orthoRight));
-        }
 
         glBindVertexArray(r.vaoId);
 
@@ -356,7 +336,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
                 renderLines(r);
                 break;
             case RenderType::Points:
-                renderPoints(r);
+                renderPoints(r, renderData);
                 break;
             case RenderType::Polygon: {
                 shader->setUniform("opacity", fillOpacity);
@@ -377,13 +357,44 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 }
 
-void GlobeGeometryFeature::renderPoints(const RenderFeature& feature) const {
+void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
+                                        const RenderData& renderData) const
+{
     ghoul_assert(feature.type == RenderType::Points, "Trying to render faulty geometry");
     _pointsProgram->setUniform("color", _properties.color());
     _pointsProgram->setUniform(
         "pointSize",
         0.001f * _properties.pointSize() * static_cast<float>(_globe.boundingSphere())
     );
+
+    // TODO: Handle render mode
+    _pointsProgram->setUniform(
+        "renderMode",
+        static_cast<int>(_properties.pointRenderMode())
+    );
+
+    // Points are rendered as billboards
+    glm::dvec3 cameraViewDirectionWorld = -renderData.camera.viewDirectionWorldSpace();
+    glm::dvec3 cameraUpDirectionWorld = renderData.camera.lookUpVectorWorldSpace();
+    glm::dvec3 orthoRight = glm::normalize(
+        glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
+    );
+    if (orthoRight == glm::dvec3(0.0)) {
+        glm::dvec3 otherVector = glm::vec3(
+            cameraUpDirectionWorld.y,
+            cameraUpDirectionWorld.x,
+            cameraUpDirectionWorld.z
+        );
+        orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
+    }
+    glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
+
+    _pointsProgram->setUniform("cameraUp", glm::vec3(orthoUp));
+    _pointsProgram->setUniform("cameraRight", glm::vec3(orthoRight));
+
+    glm::dvec3 cameraPositionWorld = renderData.camera.positionVec3();
+    _pointsProgram->setUniform("cameraPosition", cameraPositionWorld);
+    _pointsProgram->setUniform("cameraLookUp", glm::vec3(cameraUpDirectionWorld));
 
     if (_pointTexture) {
         ghoul::opengl::TextureUnit unit;
@@ -400,6 +411,7 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature) const {
         glBindTexture(GL_TEXTURE_2D, 0);
         _pointsProgram->setUniform("hasTexture", false);
     }
+
     glEnable(GL_PROGRAM_POINT_SIZE);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(feature.nVertices));
     glDisable(GL_PROGRAM_POINT_SIZE);
@@ -623,7 +635,9 @@ void GlobeGeometryFeature::createPointGeometry() {
             );
 
             glm::vec3 vf = static_cast<glm::vec3>(v);
+            // Normal is the out direction
             glm::vec3 normal = glm::normalize(vf);
+
             vertices.push_back({ vf.x, vf.y, vf.z, normal.x, normal.y, normal.z });
 
             // Lines from center of the globe out to the point
