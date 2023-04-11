@@ -31,11 +31,13 @@ layout(triangle_strip, max_vertices = 4) out;
 
 flat in vec4 colorMap[];
 flat in float dvarScaling[];
+flat in float opacity[];
 
 flat out vec4 gs_colorMap;
 out vec2 texCoord;
 flat out float vs_screenSpaceDepth;
 out float ta;
+out float gs_opacity;
 
 // General settings
 uniform float scaleFactor;
@@ -96,6 +98,8 @@ void main() {
     if (hasDvarScaling) {
         scaleMultiply *= dvarScaling[0];
     }
+
+    gs_opacity = opacity[0];
     
     vec3 scaledRight = vec3(0.0);
     vec3 scaledUp = vec3(0.0);

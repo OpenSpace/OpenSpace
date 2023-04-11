@@ -29,12 +29,15 @@
 in vec4 in_position;
 in vec4 in_colormap;
 in float in_dvarScaling;
+in float in_opacity;
 
 flat out vec4 colorMap;
 flat out float dvarScaling;
+flat out float opacity;
 
 void main() {
   colorMap = in_colormap;
   dvarScaling = in_dvarScaling;
+  opacity = in_opacity;
   gl_Position = in_position;
 }

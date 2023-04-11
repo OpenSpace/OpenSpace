@@ -28,22 +28,18 @@ flat in vec4 gs_colorMap;
 flat in float vs_screenSpaceDepth;
 in vec2 texCoord;
 in float ta;
+in float gs_opacity;
 
 uniform float alphaValue;
 uniform vec3 color;
 uniform sampler2D spriteTexture;
 uniform bool hasColorMap;
-uniform float fadeInValue;
 
 Fragment getFragment() {
-  if (gs_colorMap.a == 0.0 || ta == 0.0 || fadeInValue == 0.0 || alphaValue == 0.0) {
-    discard;
-  }
-
+  
+  
   vec4 textureColor = texture(spriteTexture, texCoord);
-  if (textureColor.a < 0.1) {
-    discard;
-  }
+  
 
   vec4 fullColor = textureColor;
     
@@ -54,12 +50,16 @@ Fragment getFragment() {
     fullColor.rgb *= color;
   }
 
-  float textureOpacity = dot(fullColor.rgb, vec3(1.0));
-  if (textureOpacity == 0.0) {
-    discard;
-  }
+  fullColor.a *= alphaValue * gs_opacity * ta;
+  
+  fullColor.a = max(fullColor.a, 0.0f);
+  fullColor.a = min(fullColor.a, 1.0f);
 
-  fullColor.a *= alphaValue * fadeInValue * ta;
+  if(fullColor.a < 1e-4)
+    discard;
+
+
+  float textureOpacity = dot(fullColor.rgb, vec3(fullColor.a));
 
   Fragment frag;
   frag.color = fullColor;

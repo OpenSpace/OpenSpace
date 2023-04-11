@@ -1,6 +1,6 @@
 -- Your personal path
 -- Modify this variable to set the local folder which the data is loaded from
 -- in all the other assets
-local path = "C:/MasterThesis_cosmicView"
+local path = "C:\\MasterThesis_cosmicView"
 
 asset.export("Path", path)

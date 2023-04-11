@@ -27,6 +27,9 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/engine/globals.h>
+#include <openspace/camera/camera.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <modules/space/speckloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -69,24 +72,19 @@ public:
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
-
+    
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<float> createDataSlice();
-    void createPolygonTexture();
+    std::vector<float> createDataSlice(const RenderData& data);
     void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
         GLuint textureHeight);
-    void loadPolygonGeometryForRendering();
-    void renderPolygonGeometry(GLuint vao);
     void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
-        const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
-    void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-        const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
-    float computeFadeFactor(float distanceNodeToCamera) const;
+        const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
+    void updateRenderData(const RenderData& data);
+    float fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e, float thresholdDistance);
 
-
-  //  void readColorMapFile();
+    glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
 
     // bool variables
     bool _hasSpeckFile = false;
@@ -98,47 +96,34 @@ private:
     bool _isColorMapExact = false;
     bool _hasDatavarSize = false;
     bool _hasPolygon = false;
-    bool _hasLabel = false;
-
-    int _polygonSides = 0;
 
     GLuint _pTexture = 0;
 
     properties::FloatProperty _scaleFactor;
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;
-    properties::Vec3Property _textColor;
-    properties::FloatProperty _textOpacity;
-    properties::FloatProperty _textSize;
-    properties::IVec2Property _textMinMaxSize;
+    properties::BoolProperty _useFade;
+    properties::FloatProperty _fadeThreshold;
     properties::BoolProperty _drawElements;
-    properties::BoolProperty _drawLabels;
     properties::BoolProperty _pixelSizeControl;
     properties::OptionProperty _colorOption;
     properties::Vec2Property _optionColorRangeData;
     properties::OptionProperty _datavarSizeOption;
-    properties::Vec2Property _fadeInDistances;
-    properties::BoolProperty _disableFadeInDistance;
     properties::Vec2Property _billboardMinMaxSize;
     properties::FloatProperty _correctionSizeEndDistance;
     properties::FloatProperty _correctionSizeFactor;
     properties::BoolProperty _useLinearFiltering;
     properties::TriggerProperty _setRangeFromData;
     properties::OptionProperty _renderOption;
-    properties::BoolProperty _enableLabelFadingEffect;
-    properties::Vec2Property _fadeLabelDistances;
-    properties::Vec2Property _fadeLabelWidths;
 
-    ghoul::opengl::Texture* _polygonTexture = nullptr;
     ghoul::opengl::Texture* _spriteTexture = nullptr;
     ghoul::opengl::ProgramObject* _program = nullptr;
-    ghoul::opengl::ProgramObject* _renderToPolygonProgram = nullptr;
 
     // variables that are sent to the shaders
     UniformCache(
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
         minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
-        correctionSizeFactor, color, alphaValue, scaleFactor, up, right, fadeInValue,
+        correctionSizeFactor, color, alphaValue, scaleFactor, up, right,
         screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling
     ) _uniformCache;
 
@@ -148,7 +133,6 @@ private:
     // String variables
     std::string _speckFile;
     std::string _colorMapFile;
-    std::string _labelFile;
     std::string _colorOptionString;
     std::string _datavarSizeOptionString;
 
@@ -169,9 +153,6 @@ private:
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
-    // For polygons -- needed?
-    GLuint _polygonVao = 0;
-    GLuint _polygonVbo = 0;
 };
 
 } // namespace openspace
