@@ -679,7 +679,7 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     }
 }
 
-void LauncherWindow::editRefusalDialog(const std::string title, const std::string msg) {
+void LauncherWindow::editRefusalDialog(const std::string& title, const std::string& msg) {
     QMessageBox msgBox;
     msgBox.setText(QString::fromStdString(msg));
     msgBox.setWindowTitle(QString::fromStdString(title));
