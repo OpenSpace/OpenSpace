@@ -52,7 +52,7 @@ public:
      * \param userConfigPath A string containing the file path of the user config
      *                       directory where all window configs are stored
      */
-    SgctEdit(QWidget* parent, const std::string userConfigPath);
+    SgctEdit(QWidget* parent, std::string userConfigPath);
 
     /**
      * Constructor for SgctEdit class, the underlying class for the full window

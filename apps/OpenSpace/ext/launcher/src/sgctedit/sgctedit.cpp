@@ -69,9 +69,9 @@ namespace {
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 } // namespace
 
-SgctEdit::SgctEdit(QWidget* parent, const std::string userConfigPath)
+SgctEdit::SgctEdit(QWidget* parent, std::string userConfigPath)
     : QDialog(parent)
-    , _userConfigPath(userConfigPath)
+    , _userConfigPath(std::move(userConfigPath))
 {
     setWindowTitle("Window Configuration Editor");
     createWidgets(createMonitorInfoSet(), 1, true);
@@ -179,8 +179,8 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
         },
         [&](sgct::config::PlanarProjection p) {
             wCtrl->setProjectionPlanar(
-                (std::fabs(p.fov.left) + std::fabs(p.fov.right)),
-                (std::fabs(p.fov.up) + std::fabs(p.fov.down))
+                (std::abs(p.fov.left) + std::abs(p.fov.right)),
+                (std::abs(p.fov.up) + std::abs(p.fov.down))
             );
         },
         [&](sgct::config::SphericalMirrorProjection p) {
