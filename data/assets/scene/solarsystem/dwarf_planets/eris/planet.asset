@@ -30,7 +30,8 @@ local Planet = {
   GUI = {
     Name = "Eris",
     Path = "/Solar System/Dwarf Planets/Eris",
-    Description = "Globe of Eris"
+    Description = [[A 3D model of Eris, Credit: NASA Visualization Technology
+      Applications and Development (VTAD)."]]
   } 
 }
 
@@ -49,6 +50,6 @@ asset.meta = {
   Version = "1.0",
   Description = [[Globe of Eris]],
   Author = "OpenSpace Team",
-  URL = "https://www.openspaceproject.com",
-  License = "MIT"
+  URL = "https://solarsystem.nasa.gov/planets/dwarf-planets/haumea/in-depth/",
+  License = "JPL/NASA"
 }
