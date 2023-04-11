@@ -95,7 +95,8 @@ private:
 
     void openProfileEditor(const std::string& profile, bool isUserProfile);
     void openWindowEditor(const std::string& winCfg, bool isUserWinCfg);
-    void editRefusalDialog(const std::string& title, const std::string& msg);
+    void editRefusalDialog(const std::string& title, const std::string& msg,
+        const std::string& detailedText);
 
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);

@@ -335,7 +335,8 @@ QWidget* LauncherWindow::createCentralWidget() {
             if (_windowConfigBox->currentIndex() == _windowConfigBoxIndexSgctCfgDefault) {
                 editRefusalDialog(
                     "Editor Option Not Available",
-                    "Cannot edit the 'Default' configuration since it is not a file"
+                    "Cannot edit the 'Default' configuration since it is not a file",
+                    ""
                 );
             }
             else if (_windowConfigBox->currentIndex() >= _preDefinedConfigStartingIdx) {
@@ -343,7 +344,8 @@ QWidget* LauncherWindow::createCentralWidget() {
                     "Editor Option Not Available",
                     fmt::format(
                         "Cannot edit '{}' since it is one of the configuration "
-                        "files provided in the OpenSpace installation", fileSelected)
+                        "files provided in the OpenSpace installation", fileSelected),
+                    ""
                 );
             }
             else if (std::filesystem::is_regular_file(pathSelected)) {
@@ -679,10 +681,13 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     }
 }
 
-void LauncherWindow::editRefusalDialog(const std::string& title, const std::string& msg) {
-    QMessageBox msgBox;
+void LauncherWindow::editRefusalDialog(const std::string& title, const std::string& msg,
+                                       const std::string& detailedText)
+{
+    QMessageBox msgBox(this);
     msgBox.setText(QString::fromStdString(msg));
     msgBox.setWindowTitle(QString::fromStdString(title));
+    msgBox.setDetailedText(QString::fromStdString(detailedText));
     msgBox.setIcon(QMessageBox::Warning);
     msgBox.exec();
 }
@@ -758,14 +763,16 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                     fmt::format(
                         "File '{}' does not meet the minimum required version of {}.",
                         winCfg, minimumVersion.versionString()
-                    )
+                    ),
+                    ""
                 );
             }
         }
         catch (const std::runtime_error& e) {
             editRefusalDialog(
                 "Format Validation Error",
-                fmt::format("Error in file '{}':\n\n{}", winCfg, e.what())
+                fmt::format("Parsing error found in file '{}'", winCfg),
+                e.what()
             );
         }
     }
