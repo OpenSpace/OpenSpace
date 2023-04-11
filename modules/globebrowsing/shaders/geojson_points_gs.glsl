@@ -62,8 +62,7 @@ uniform float pointSize;
 uniform float textureWidthFactor;
 
 // If false, use the center
-// TODO: make an option in C++
-bool useBottomAnchorPoint = true;
+uniform bool useBottomAnchorPoint = true;
 
 const vec2 corners[4] = vec2[4](
   vec2(0.0, 0.0),

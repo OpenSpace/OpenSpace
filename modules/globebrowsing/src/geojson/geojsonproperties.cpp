@@ -44,6 +44,10 @@ namespace geojson::propertykeys {
     constexpr std::string_view PointSize = "point-size";
     constexpr std::array<std::string_view, 3> Texture = { "texture", "sprite", "point-texture" };
 
+    constexpr std::array<std::string_view, 2> PointTextureAnchor = { "point-anchor", "anchor" };
+    constexpr std::string_view PointTextureAnchorBottom = "bottom";
+    constexpr std::string_view PointTextureAnchorCenter = "center";
+
     constexpr std::string_view Extrude = "extrude";
 
     constexpr std::string_view PerformShading = "performShading";
@@ -191,6 +195,13 @@ namespace {
         "the height is considered to be equal to zero"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo PointAnchorOptionInfo = {
+        "PointTextureAnchor",
+        "Point Texture Anchor",
+        "Decides the placement of the point texture in relation to the position. "
+        "Default is a the bottom of the texture, but it can also be put at the center"
+    };
+
     // TODO: Update tesselation documentation as well as parameters..
     constexpr openspace::properties::Property::PropertyInfo TesselateInfo = {
         "Tesselate",
@@ -249,6 +260,13 @@ namespace {
         // [[codegen::verbatim(AltitudeModeInfo.description)]]
         std::optional<AltitudeMode> altitudeMode;
 
+        enum class [[codegen::map(openspace::globebrowsing::GeoJsonProperties::PointTextureAnchor)]] PointTextureAnchor {
+            Bottom,
+            Center
+        };
+        // [[codegen::verbatim(PointAnchorOptionInfo.description)]]
+        std::optional<PointTextureAnchor> pointTextureAnchor;
+
         // [[codegen::verbatim(TesselateInfo.description)]]
         std::optional<bool> tesselate;
 
@@ -282,6 +300,10 @@ GeoJsonProperties::GeoJsonProperties()
         AltitudeModeInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , pointAnchorOption(
+        PointAnchorOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , shouldTesselate(TesselateInfo, false)
     , tesselationLevel(TesselationLevelInfo, 10, 0, 100)
     , tesselationMaxDistance(TesselationMaxDistanceInfo, 100000.f) // TODO: use distance based on angle?
@@ -308,6 +330,12 @@ GeoJsonProperties::GeoJsonProperties()
     });
     addProperty(altitudeModeOption);
 
+    pointAnchorOption.addOptions({
+        { static_cast<int>(PointTextureAnchor::Bottom), "Bottom"},
+        { static_cast<int>(PointTextureAnchor::Center), "Center" }
+    });
+    addProperty(pointAnchorOption);
+
     addProperty(shouldTesselate);
     addProperty(tesselationLevel);
     addProperty(tesselationMaxDistance);
@@ -317,9 +345,16 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
     const Parameters p = codegen::bake<Parameters>(dictionary);
     opacity = p.opacity.value_or(opacity);
     color = p.color.value_or(color);
+    lineWidth = p.lineWidth.value_or(lineWidth);
+
     pointSize = p.pointSize.value_or(pointSize);
     pointTexture = p.pointTexture.value_or(pointTexture);
-    lineWidth = p.lineWidth.value_or(lineWidth);
+    if (p.pointTextureAnchor.has_value()) {
+        pointAnchorOption = static_cast<int>(codegen::map<PointTextureAnchor>(
+            *p.pointTextureAnchor
+        ));
+    }
+
     extrude = p.extrude.value_or(extrude);
     performShading = p.performShading.value_or(performShading);
 
@@ -336,6 +371,10 @@ GeoJsonProperties::AltitudeMode GeoJsonProperties::altitudeMode() const {
     return static_cast<GeoJsonProperties::AltitudeMode>(altitudeModeOption.value());
 }
 
+GeoJsonProperties::PointTextureAnchor GeoJsonProperties::pointTextureAnchor() const {
+    return static_cast<GeoJsonProperties::PointTextureAnchor>(pointAnchorOption.value());
+}
+
 GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& feature) {
     const std::map<std::string, geos::io::GeoJSONValue>& props = feature.getProperties();
     GeoJsonOverrideProperties result;
@@ -343,44 +382,62 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
     auto parseProperty = [&result](const std::string_view key,
                                    const geos::io::GeoJSONValue& value)
     {
-        if (keyMatches(key, geojson::propertykeys::Name)) {
+        using namespace geojson;
+
+        if (keyMatches(key, propertykeys::Name)) {
             result.name = value.getString();
         }
-        else if (keyMatches(key, geojson::propertykeys::Opacity, OpacityInfo)) {
+        else if (keyMatches(key, propertykeys::Opacity, OpacityInfo)) {
             result.opacity = static_cast<float>(value.getNumber());
         }
-        else if (keyMatches(key, geojson::propertykeys::Color, ColorInfo)) {
+        else if (keyMatches(key, propertykeys::Color, ColorInfo)) {
             result.color = getColorValue(value);
         }
-        else if (keyMatches(key, geojson::propertykeys::FillOpacity, FillOpacityInfo)) {
+        else if (keyMatches(key, propertykeys::FillOpacity, FillOpacityInfo)) {
             result.fillOpacity = static_cast<float>(value.getNumber());
         }
-        else if (keyMatches(key, geojson::propertykeys::FillColor, FillColorInfo)) {
+        else if (keyMatches(key, propertykeys::FillColor, FillColorInfo)) {
             result.fillColor = getColorValue(value);
         }
-        else if (keyMatches(key, geojson::propertykeys::LineWidth, LineWidthInfo)) {
+        else if (keyMatches(key, propertykeys::LineWidth, LineWidthInfo)) {
             result.lineWidth = static_cast<float>(value.getNumber());
         }
-        else if (keyMatches(key, geojson::propertykeys::PointSize, PointSizeInfo)) {
+        else if (keyMatches(key, propertykeys::PointSize, PointSizeInfo)) {
             result.pointSize = static_cast<float>(value.getNumber());
         }
-        else if (keyMatches(key, geojson::propertykeys::Texture, PointTextureInfo)) {
+        else if (keyMatches(key, propertykeys::Texture, PointTextureInfo)) {
             result.pointTexture = value.getString();
         }
-        else if (keyMatches(key, geojson::propertykeys::Extrude, ExtrudeInfo)) {
-            result.extrude = value.getBoolean();
-        }
-        else if (keyMatches(key, geojson::propertykeys::AltitudeMode, AltitudeModeInfo)) {
+        else if (keyMatches(key, propertykeys::PointTextureAnchor, PointAnchorOptionInfo))
+        {
             std::string mode = value.getString();
 
-            if (mode == geojson::propertykeys::AltitudeModeAbsolute) {
+            if (mode == propertykeys::PointTextureAnchorBottom) {
+                result.pointTextureAnchor = GeoJsonProperties::PointTextureAnchor::Bottom;
+            }
+            else if (mode == propertykeys::PointTextureAnchorCenter) {
+                result.pointTextureAnchor = GeoJsonProperties::PointTextureAnchor::Center;
+            }
+            else {
+                LERRORC("GeoJSON", fmt::format(
+                    "Point texture anchor mode '{}' not supported", mode
+                ));
+            }
+        }
+        else if (keyMatches(key, propertykeys::Extrude, ExtrudeInfo)) {
+            result.extrude = value.getBoolean();
+        }
+        else if (keyMatches(key, propertykeys::AltitudeMode, AltitudeModeInfo)) {
+            std::string mode = value.getString();
+
+            if (mode == propertykeys::AltitudeModeAbsolute) {
                 result.altitudeMode = GeoJsonProperties::AltitudeMode::Absolute;
             }
-            else if (mode == geojson::propertykeys::AltitudeModeRelative) {
+            else if (mode == propertykeys::AltitudeModeRelative) {
                 result.altitudeMode = GeoJsonProperties::AltitudeMode::RelativeToGround;
             }
-            // TODO Include when support is implemented
-            //else if (mode == geojson::propertykeys::AltitudeModeClamp) {
+            // @TODO Include when support is implemented
+            //else if (mode == propertykeys::AltitudeModeClamp) {
             //    result.altitudeMode = GeoJsonProperties::AltitudeMode::ClampToGround;
             //}
             else {
@@ -389,16 +446,15 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
                 ));
             }
         }
-        else if (keyMatches(key, geojson::propertykeys::Tesselate, TesselateInfo)) {
+        else if (keyMatches(key, propertykeys::Tesselate, TesselateInfo)) {
             result.shouldTesselate = value.getBoolean();
         }
-        else if (keyMatches(key, geojson::propertykeys::TesselationLevel, TesselationLevelInfo)) {
+        else if (keyMatches(key, propertykeys::TesselationLevel, TesselationLevelInfo)) {
             result.tesselationLevel = static_cast<float>(value.getNumber());
         }
-        else if (keyMatches(key, geojson::propertykeys::TesselationMaxDistance, TesselationMaxDistanceInfo)) {
+        else if (keyMatches(key, propertykeys::TesselationMaxDistance, TesselationMaxDistanceInfo)) {
             result.tesselationMaxDistance = static_cast<float>(value.getNumber());
         }
-        // TODO: warn for non-supported keys? General thought is no
     };
 
     for (auto const& [key, value] : props) {
@@ -443,6 +499,10 @@ float PropertySet::pointSize() const {
 
 std::string PropertySet::pointTexture() const {
     return overrideValues.pointTexture.value_or(defaultValues.pointTexture);
+}
+
+GeoJsonProperties::PointTextureAnchor PropertySet::pointTextureAnchor() const {
+    return overrideValues.pointTextureAnchor.value_or(defaultValues.pointTextureAnchor());
 }
 
 bool PropertySet::extrude() const {

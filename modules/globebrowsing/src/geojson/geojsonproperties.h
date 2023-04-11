@@ -57,7 +57,13 @@ struct GeoJsonProperties : public properties::PropertyOwner {
         //ClampToGround
     };
 
+    enum class PointTextureAnchor {
+        Bottom = 0,
+        Center
+    };
+
     AltitudeMode altitudeMode() const;
+    PointTextureAnchor pointTextureAnchor() const;
 
     properties::FloatProperty opacity;
     properties::Vec3Property color;
@@ -67,6 +73,7 @@ struct GeoJsonProperties : public properties::PropertyOwner {
 
     properties::FloatProperty pointSize;
     properties::StringProperty pointTexture;
+    properties::OptionProperty pointAnchorOption;
 
     properties::BoolProperty extrude;
     properties::BoolProperty performShading;
@@ -91,6 +98,7 @@ struct GeoJsonOverrideProperties {
 
     std::optional<float> pointSize;
     std::optional<std::string> pointTexture;
+    std::optional<GeoJsonProperties::PointTextureAnchor> pointTextureAnchor;
 
     std::optional<bool> extrude;
     std::optional<bool> performShading;
@@ -117,6 +125,7 @@ struct PropertySet {
 
     float pointSize() const;
     std::string pointTexture() const;
+    GeoJsonProperties::PointTextureAnchor pointTextureAnchor() const;
 
     bool extrude() const;
     bool performShading() const;

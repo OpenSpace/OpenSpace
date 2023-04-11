@@ -373,9 +373,12 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
         0.001f * _properties.pointSize() * static_cast<float>(_globe.boundingSphere())
     );
 
+    _pointsProgram->setUniform("renderMode", static_cast<int>(renderMode));
+
+    using TextureAnchor = GeoJsonProperties::PointTextureAnchor;
     _pointsProgram->setUniform(
-        "renderMode",
-        static_cast<int>(renderMode)
+        "useBottomAnchorPoint",
+        _properties.pointTextureAnchor() != TextureAnchor::Center
     );
 
     // Points are rendered as billboards
