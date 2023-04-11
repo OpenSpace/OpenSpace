@@ -259,7 +259,7 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     }
 
     _targetPosition = _targetNode->worldPosition();
-    SceneGraphNode* mySGNPointer = _parent;
+    SceneGraphNode* mySGNPointer = parent();
     ghoul_assert(mySGNPointer, "Renderable have to be owned by scene graph node");
     _sourcePosition = mySGNPointer->worldPosition();
 

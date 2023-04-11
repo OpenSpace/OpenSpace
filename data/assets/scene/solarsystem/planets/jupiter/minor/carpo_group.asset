@@ -1,6 +1,7 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup341
+local kernel = asset.require("../kernels").jup344
+local kernel346 = asset.require("../kernels").jup346
 
 
 
@@ -33,6 +34,24 @@ local carpoGroup = {
     TrailColor = trailColor,
     OrbitPeriod = 458.62,
     Kernels = kernel
+  },
+  {
+    Identifier = "S2018J4",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55520",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2018 J 4",
+      Path = "/Solar System/Planets/Jupiter/Moons/Carpo Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 427.631,
+    Kernels = kernel346
   }
 }
 

@@ -162,7 +162,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     _size = p.size;
     _segments = p.segments;
@@ -208,7 +207,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_disableFadeInDistance);
 
     setBoundingSphere(_size);
-    setRenderBinFromOpacity();
 }
 
 bool RenderableSphere::isReady() const {
