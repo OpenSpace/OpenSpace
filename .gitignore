@@ -25,6 +25,7 @@ Thumbs.db
 /cache/
 /cache-*/
 /cache_gdal/
+/mrf_cache/
 /documentation/
 /logs/
 /screenshots/

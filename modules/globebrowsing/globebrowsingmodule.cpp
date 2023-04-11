@@ -91,41 +91,22 @@
 namespace {
     constexpr std::string_view _loggerCat = "GlobeBrowsingModule";
 
-    constexpr openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
-        "WMSCacheEnabled",
-        "WMS Cache Enabled",
-        "Determines whether automatic caching of WMS servers is enabled. Changing the "
-        "value of this property will not affect already created WMS datasets"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo OfflineModeInfo = {
-        "OfflineMode",
-        "Offline Mode",
-        "Determines whether loaded WMS servers should be used in offline mode, that is "
-        "not even try to retrieve images through an internet connection. Please note "
-        "that this setting is only reasonable, if the caching is enabled and there is "
-        "available cached data. Changing the value of this property will not affect "
-        "already created WMS datasets"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo WMSCacheLocationInfo = {
-        "WMSCacheLocation",
-        "WMS Cache Location",
-        "The location of the cache folder for WMS servers. Changing the value of this "
-        "property will not affect already created WMS datasets"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo WMSCacheSizeInfo = {
-        "WMSCacheSize",
-        "WMS Cache Size",
-        "The maximum size of the cache for each WMS server. Changing the value of this "
-        "property will not affect already created WMS datasets"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile Cache Size",
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MRFCacheEnabledInfo = {
+        "MRFCacheEnabled",
+        "MRF Cache Enabled",
+        "Determines whether automatic caching of globe browsing data is enabled."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MRFCacheLocationInfo = {
+        "MRFCacheLocation",
+        "MRF Cache Location",
+        "The location of the root folder for the MRF cache of globe browsing data."
     };
 
     openspace::GlobeBrowsingModule::Capabilities
@@ -185,25 +166,15 @@ namespace {
     }
 
     struct [[codegen::Dictionary(GlobeBrowsingModule)]] Parameters {
-        // [[codegen::verbatim(WMSCacheEnabledInfo.description)]]
-        std::optional<bool> cacheEnabled [[codegen::key("WMSCacheEnabled")]];
-
-        // [[codegen::verbatim(OfflineModeInfo.description)]]
-        std::optional<bool> offlineMode;
-
-        // [[codegen::verbatim(WMSCacheLocationInfo.description)]]
-        std::optional<std::string> cacheLocation [[codegen::key("WMSCacheLocation")]];
-
-        // [[codegen::verbatim(WMSCacheSizeInfo.description)]]
-        std::optional<int> wmsCacheSize [[codegen::key("WMSCacheSize")]];
 
         // [[codegen::verbatim(TileCacheSizeInfo.description)]]
         std::optional<int> tileCacheSize;
 
-        // If you know what you are doing and you have WMS caching *disabled* but offline
-        // mode *enabled*, you can set this value to 'true' to silence a warning that you
-        // would otherwise get at startup
-        std::optional<bool> noWarning;
+        // [[codegen::verbatim(MRFCacheEnabledInfo.description)]]
+        std::optional<bool> mrfCacheEnabled [[codegen::key("MRFCacheEnabled")]];
+
+        // [[codegen::verbatim(MRFCacheLocationInfo.description)]]
+        std::optional<std::string> mrfCacheLocation [[codegen::key("MRFCacheLocation")]];
     };
 #include "globebrowsingmodule_codegen.cpp"
 } // namespace
@@ -212,40 +183,22 @@ namespace openspace {
 
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule(Name)
-    , _wmsCacheEnabled(WMSCacheEnabledInfo, false)
-    , _offlineMode(OfflineModeInfo, false)
-    , _wmsCacheLocation(WMSCacheLocationInfo, "${BASE}/cache_gdal")
-    , _wmsCacheSizeMB(WMSCacheSizeInfo, 1024)
     , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
+    , _mrfCacheEnabled(MRFCacheEnabledInfo, false)
+    , _mrfCacheLocation(MRFCacheLocationInfo, "${BASE}/cache_mrf")
 {
-    addProperty(_wmsCacheEnabled);
-    addProperty(_offlineMode);
-    addProperty(_wmsCacheLocation);
-    addProperty(_wmsCacheSizeMB);
     addProperty(_tileCacheSizeMB);
+    addProperty(_mrfCacheEnabled);
+    addProperty(_mrfCacheLocation);
 }
 
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     using namespace globebrowsing;
 
     const Parameters p = codegen::bake<Parameters>(dict);
-    _wmsCacheEnabled = p.cacheEnabled.value_or(_wmsCacheEnabled);
-    _offlineMode = p.offlineMode.value_or(_offlineMode);
-    _wmsCacheLocation = p.cacheLocation.value_or(_wmsCacheLocation);
-    _wmsCacheSizeMB = p.wmsCacheSize.value_or(_wmsCacheSizeMB);
     _tileCacheSizeMB = p.tileCacheSize.value_or(_tileCacheSizeMB);
-    const bool noWarning = p.noWarning.value_or(false);
-
-    if (!_wmsCacheEnabled && _offlineMode && !noWarning) {
-        LWARNINGC(
-            "GlobeBrowsingModule",
-            "WMS caching is disabled, but offline mode is enabled. Unless you know "
-            "what you are doing, this will probably cause many servers to stop working. "
-            "If you want to silence this warning, set the 'NoWarning' parameter to "
-            "'true'"
-        );
-    }
-
+    _mrfCacheEnabled = p.mrfCacheEnabled.value_or(_mrfCacheEnabled);
+    _mrfCacheLocation = p.mrfCacheLocation.value_or(_mrfCacheLocation);
 
     // Initialize
     global::callback::initializeGL->emplace_back([&]() {
@@ -670,21 +623,12 @@ bool GlobeBrowsingModule::hasUrlInfo(const std::string& globe) const {
     return _urlList.find(globe) != _urlList.end();
 }
 
-bool GlobeBrowsingModule::isWMSCachingEnabled() const {
-    return _wmsCacheEnabled;
+bool GlobeBrowsingModule::isMRFCachingEnabled() const {
+    return _mrfCacheEnabled;
 }
 
-bool GlobeBrowsingModule::isInOfflineMode() const {
-    return _offlineMode;
-}
-
-std::string GlobeBrowsingModule::wmsCacheLocation() const {
-    return _wmsCacheLocation;
-}
-
-uint64_t GlobeBrowsingModule::wmsCacheSize() const {
-    uint64_t size = _wmsCacheSizeMB;
-    return size * 1024 * 1024;
+const std::string GlobeBrowsingModule::mrfCacheLocation() const {
+    return _mrfCacheLocation;
 }
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
