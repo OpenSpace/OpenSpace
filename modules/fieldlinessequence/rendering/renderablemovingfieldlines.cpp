@@ -141,12 +141,13 @@ namespace openspace {
         double startTime
     );
 
-    std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromCSVFile(
+    void modifySeedPoints(
         std::filesystem::path filePath,
         std::vector<glm::vec3>& seedPoints,
         std::vector<double>& birthTimes,
         double startTime
     );
+    std::vector<RenderableMovingFieldlines::SetOfSeedPoints> extractSeedPointsFromCSVFile(std::ifstream file);
     std::ifstream readTxtOrCSVFile(std::filesystem::path filePath);
     std::vector<std::string> extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
 
@@ -484,7 +485,7 @@ namespace openspace {
 
                 // Get seed points from CSV or txt file
                 if(_seedPointProvider){
-                    extractSeedPointsFromCSVFile(_seedCSVFilePath, seedPoints ,birthTimes, startTime);
+                    modifySeedPoints(_seedCSVFilePath, seedPoints ,birthTimes, startTime);
                 }else{
                     extractSeedPointsFromFile(_seedFilePath, seedPoints, birthTimes, startTime);
                 }
@@ -582,53 +583,16 @@ namespace openspace {
         }
     }
 
-    // Extracts seed points from csv file and return tuple
-    std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromCSVFile(
-        std::filesystem::path filePath,
-        std::vector<glm::vec3>& seedPoints,
-        std::vector<double>& birthTimes,
-        double startTime
-    ) { 
-        if (!std::filesystem::is_regular_file(filePath) ||
-            filePath.extension() != ".csv")
-        {
-            // TODO: add support for whatever actual seepoint files are being used
-            throw ghoul::RuntimeError(fmt::format("SeedPointFile needs to be a .csv file"));
-        }
-        
-        std::ifstream file = readTxtOrCSVFile(filePath); // "C:/Dev/OpenSpace/sync/http/seed_points/dayside_seedpoints.csv"
+    std::vector<RenderableMovingFieldlines::SetOfSeedPoints> extractSeedPointsFromCSVFile(std::filesystem::path filePath) {
+
+        std::ifstream file = readTxtOrCSVFile(filePath);
+
+        RenderableMovingFieldlines::SetOfSeedPoints setOfSeedPoints;
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data;
 
         // Read each line of the CSV file
         std::string lineTemp;
         int lineCounter = 0;
-
-        // Struct containing information about ONE seedpoint
-        struct SeedPointInformation {
-            float x;
-            float y;
-            float z;    
-            std::string earthSide;
-            std::string fieldLineStatus;
-        };
-
-        // Struct containing FOUR seedpoints, a set of seedpoints
-        struct SetOfSeedPoints {
-            SeedPointInformation IMF;
-            SeedPointInformation Closed;
-            SeedPointInformation OpenNorth;
-            SeedPointInformation OpenSouth;
-        };
-
-        // Vector containing all set of seedpoints
-        std::vector<SetOfSeedPoints> data;
-
-        // FUNCTION 1 returns data 
-
-        // FUNCTION 2 createst tuple from data
-
-        // END = return tuple 
-
-        SetOfSeedPoints setOfSeedPoints;
 
         int topologyCounter = 0;
 
@@ -637,12 +601,10 @@ namespace openspace {
         while (std::getline(file, lineTemp)) {
             std::stringstream lineStream(lineTemp);
             std::string field;
-            std::vector<std::string> row;
-
             int elementCounter = 0;
             std::cout << "" << std::endl;
 
-            SeedPointInformation seedPoint;
+            RenderableMovingFieldlines::SeedPointInformation seedPoint;
 
             // Get seedPoint 
             while (std::getline(lineStream, field, ',') && elementCounter < 5)
@@ -700,7 +662,7 @@ namespace openspace {
 
                 std::cout << "Push back set of seedpoints to vector " << std::endl;
                 data.push_back(setOfSeedPoints);
-                SetOfSeedPoints setOfSeedPoints;
+                RenderableMovingFieldlines::SetOfSeedPoints setOfSeedPoints;
                 topologyReset = true;
             }
 
@@ -708,6 +670,29 @@ namespace openspace {
             topologyCounter++;
         }
 
+        // Close the file
+        file.close();
+
+        return data;
+    }
+
+    // Extracts seed points from csv file and return tuple
+    void modifySeedPoints(
+        std::filesystem::path filePath,
+        std::vector<glm::vec3>& seedPoints,
+        std::vector<double>& birthTimes,
+        double startTime
+    ) { 
+        if (!std::filesystem::is_regular_file(filePath) ||
+            filePath.extension() != ".csv")
+        {
+            throw ghoul::RuntimeError(fmt::format("SeedPointFile needs to be a .csv file"));
+        }
+        
+        // Vector containing all set of seedpoints
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data = extractSeedPointsFromCSVFile(filePath);
+
+        // Check if vector is correct
         for (size_t i = 0; i < data.size(); i++)
         {
             std::cout << "Row " << i << std::endl;
@@ -717,10 +702,7 @@ namespace openspace {
             std::cout << "IMF: " << data[i].IMF.fieldLineStatus << " y value: " << data[i].IMF.y << std::endl;
         }
 
-        // Close the file
-        file.close();
-
-        return std::make_tuple(seedPoints, birthTimes);
+        // TODO: FUNCTION 2 modifies seedPoints and birthTimes
     }
 
 

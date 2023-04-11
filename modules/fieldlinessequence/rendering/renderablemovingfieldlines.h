@@ -78,6 +78,23 @@ public:
 
     };
 
+    // Struct containing information about ONE seedpoint
+    struct SeedPointInformation {
+        float x = 0.0;
+        float y = 0.0;
+        float z = 0.0;
+        std::string earthSide = "";
+        std::string fieldLineStatus = "";
+    };
+
+    // Struct containing FOUR seedpoints, a set of seedpoints
+    struct SetOfSeedPoints {
+        SeedPointInformation IMF;
+        SeedPointInformation Closed;
+        SeedPointInformation OpenNorth;
+        SeedPointInformation OpenSouth;
+    };
+
 
     RenderableMovingFieldlines(const ghoul::Dictionary& dictionary);
     void initialize() override;
