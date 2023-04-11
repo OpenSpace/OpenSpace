@@ -311,7 +311,6 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
             _pointsProgram : _linesAndPolygonsProgram;
 
         shader->activate();
-        shader->setUniform("opacity", opacity);
         shader->setUniform("modelTransform", globeModelTransform);
         shader->setUniform("viewTransform", renderData.camera.combinedViewMatrix());
         shader->setUniform("projectionTransform", projectionTransform);
@@ -333,9 +332,14 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
 
         switch (r.type) {
             case RenderType::Lines:
+                shader->setUniform(
+                    "opacity",
+                    r.isExtrusionFeature ? fillOpacity : opacity
+                );
                 renderLines(r);
                 break;
             case RenderType::Points:
+                shader->setUniform("opacity", opacity);
                 renderPoints(r, renderData);
                 break;
             case RenderType::Polygon: {
@@ -367,7 +371,6 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
         0.001f * _properties.pointSize() * static_cast<float>(_globe.boundingSphere())
     );
 
-    // TODO: Handle render mode
     _pointsProgram->setUniform(
         "renderMode",
         static_cast<int>(_properties.pointRenderMode())
@@ -421,7 +424,10 @@ void GlobeGeometryFeature::renderLines(const RenderFeature& feature) const
 {
     ghoul_assert(feature.type == RenderType::Lines, "Trying to render faulty geometry");
 
-    _linesAndPolygonsProgram->setUniform("color", _properties.color());
+    const glm::vec3 color = feature.isExtrusionFeature ?
+        _properties.fillColor() : _properties.color();
+
+    _linesAndPolygonsProgram->setUniform("color", color);
     _linesAndPolygonsProgram->setUniform("performShading", false);
 
     glEnable(GL_LINE_SMOOTH);
