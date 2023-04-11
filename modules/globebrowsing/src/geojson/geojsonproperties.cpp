@@ -30,7 +30,6 @@
 #include <cstdio>
 
 // Keys used to read properties from GeoJson files
-// @TODO: Go through and decide what keys we actually want. (Started out with just using css keys)
 namespace geojson::propertykeys {
     constexpr std::string_view Name = "name";
     constexpr std::string_view Description = "description";
@@ -42,7 +41,7 @@ namespace geojson::propertykeys {
     constexpr std::string_view FillOpacity = "fill-opacity";
     constexpr std::string_view LineWidth = "stroke-width";
 
-    constexpr std::string_view PointSize = "point-size"; // TODO: remove?
+    constexpr std::string_view PointSize = "point-size";
     constexpr std::array<std::string_view, 3> Texture = { "texture", "sprite", "point-texture" };
 
     // @TODO: point render mode
@@ -132,25 +131,27 @@ namespace {
         "Color",
         "Color",
         "The color of the rendered geometry. For points it will be used as a multiply"
-        "color for any provided texture."
+        "color for any provided texture"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FillOpacityInfo = {
         "FillOpacity",
         "Fill Opacity",
-        "This value determines the opacity of the filled portion of a polygon."
+        "This value determines the opacity of the filled portion of a polygon. Will "
+        "also be used for extruded features"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FillColorInfo = {
         "FillColor",
         "Fill Color",
-        "The color of the filled portion of a rendered polygon."
+        "The color of the filled portion of a rendered polygon. Will also be used for "
+        "extruded features"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The width of any rendered lines."
+        "The width of any rendered lines"
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
@@ -171,7 +172,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PointRenderModeInfo = {
         "PointRenderMode",
         "Point Render Mode",
-        "" // @TODO
+        "Decides how the billboards for the points should be rendered in terms of up "
+        "direction and whether the plane should face the camera. See details on the"
+        "different options in wiki"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ExtrudeInfo = {
@@ -191,30 +194,34 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AltitudeModeInfo = {
         "AltitudeMode",
         "Altitude Mode",
-        "" // @TODO
+        "The altitude mode decides how any height values of the geo coordinates should "
+        "be interpreted. Absolute means that the height is interpreted as the height "
+        "above the reference ellipsoid, whiel RelativeToGround takes the height map "
+        "into account. For coordinates with only two values (latitude and longitude), "
+        "the height is considered to be equal to zero"
     };
 
-    // TODO: Update tesselation documentation
+    // TODO: Update tesselation documentation as well as parameters..
     constexpr openspace::properties::Property::PropertyInfo TesselateInfo = {
         "Tesselate",
         "Should Tesselate",
         "If false, no tesselation to bend the geometry based on the curvature of the "
         "planet is performed. This leads to increased performance, but tesselation is "
         "neccessary for large geometry that spans a big portion of the globe. Otherwise "
-        "it may intersect the surface."
+        "it may intersect the surface"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TesselationLevelInfo = {
         "TesselationLevel",
         "Tesselation Level",
         "The higher the value, the higher will the resolution of the rendered geometry "
-        "be." // @TODO: clarify
+        "be" // @TODO: clarify
     };
 
     constexpr openspace::properties::Property::PropertyInfo TesselationMaxDistanceInfo = {
         "TesselationMaxDistance",
         "Tesselation Max Distance",
-        "Anything larger than this will be automatically subdivided." // @TODO (and consider using a distance based on angle instead)
+        "Anything larger than this will be automatically subdivided" // @TODO (and consider using a distance based on angle instead)
     };
 
     struct [[codegen::Dictionary(GeoJsonProperties)]] Parameters {

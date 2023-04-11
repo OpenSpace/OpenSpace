@@ -67,21 +67,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "File",
-        "Path to the GeoJSON file to base the rendering on."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo IgnoreHeightsInfo = {
-        "IgnoreHeights",
-        "Ignore Heights",
-        "If true, ignore any height values that are given in the file. Coordinates with "
-        "three values will then be treated as coordinates with only two values."
+        "Path to the GeoJSON file to base the rendering on"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HeightOffsetInfo = {
         "HeightOffset",
         "Height Offset",
         "A height offset value, in meters. Useful for moving a feature closer to or "
-        "farther away from the surface."
+        "farther away from the surface"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CoordinateOffsetInfo = {
@@ -89,14 +82,15 @@ namespace {
         "Geographic Coordinate Offset",
         "A latitude and longitude offset value, in decimal degrees. Can be used to "
         "move the object on the surface and correct potential mismatches with other "
-        "renderings."
+        "renderings. Note that changing it during runtime leads to all positions being "
+        "recomputed"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawWireframeInfo = {
         "DrawWireframe",
         "Wireframe",
-        "If true, draw the wire frame of the polygons. Used for testing"
-        // @TODO make debug/developer property
+        "If true, draw the wire frame of the polygons. Used for testing",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo PreventHeightUpdateInfo = {
@@ -104,14 +98,14 @@ namespace {
         "Prevent Update From Heightmap",
         "If true, the polygon mesh will not be automatically updated based on the "
         "heightmap, even if the 'RelativeToGround' altitude option is set and the "
-        "heightmap updates. The data can still be force updated."
+        "heightmap updates. The data can still be force updated"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ForceUpdateHeightDataInfo = {
         "ForceUpdateHeightData",
         "Force Update Height Data",
         "Triggering this leads to a recomputation of the heights based on the globe "
-        "height map value at the geometry's positions."
+        "height map value at the geometry's positions"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
@@ -138,7 +132,8 @@ namespace {
         // presented to the user
         std::optional<std::string> description;
 
-        // [[codegen::verbatim(IgnoreHeightsInfo.description)]]
+        // If true, ignore any height values that are given in the file. Coordinates with
+        // three values will then be treated as coordinates with only two values
         std::optional<bool> ignoreHeights;
 
         // [[codegen::verbatim(FileInfo.description)]]
@@ -170,7 +165,7 @@ namespace {
         "FlyToFeature",
         "Fly To Feature",
         "Triggering this leads to the camera flying to a position that show the GeoJSON "
-        "feature. The flight will account for any lat, long or height offset."
+        "feature. The flight will account for any lat, long or height offset"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CentroidCoordinateInfo = {
@@ -195,7 +190,7 @@ documentation::Documentation GeoJsonComponent::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_geojsoncomponent");
 }
 
-GeoJsonComponent::NavigationFeature::NavigationFeature(
+GeoJsonComponent::SubFeatureProps::SubFeatureProps(
                                        properties::PropertyOwner::PropertyOwnerInfo info)
     : properties::PropertyOwner(info)
     , enabled(EnabledInfo, true)
@@ -236,7 +231,6 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         dictionary.hasKey(KeyDesc) ? dictionary.value<std::string>(KeyDesc) : ""
     })
     , _enabled(EnabledInfo, true)
-    , _ignoreHeightsFromFile(IgnoreHeightsInfo, false)
     , _globeNode(globe)
     , _geoJsonFile(FileInfo)
     , _heightOffset(HeightOffsetInfo, 0.f, -1e12f, 1e12f)
@@ -273,8 +267,6 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     addProperty(_geoJsonFile);
 
     _ignoreHeightsFromFile = p.ignoreHeights.value_or(_ignoreHeightsFromFile);
-    _ignoreHeightsFromFile.setReadOnly(true);
-    addProperty(_ignoreHeightsFromFile);
 
     const float minGlobeRadius = static_cast<float>(
         _globeNode.ellipsoid().minimumRadius()
@@ -569,7 +561,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
                 name
                 // @TODO: Use description from file, if any
             };
-            _features.push_back(std::make_unique<NavigationFeature>(info));
+            _features.push_back(std::make_unique<SubFeatureProps>(info));
 
             addMetaPropertiesToFeature(*_features.back(), index, geometry);
 
@@ -585,7 +577,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
     }
 }
 
-void GeoJsonComponent::addMetaPropertiesToFeature(NavigationFeature& feature, int index,
+void GeoJsonComponent::addMetaPropertiesToFeature(SubFeatureProps& feature, int index,
                                                   const geos::geom::Geometry* geometry)
 {
     std::unique_ptr<geos::geom::Point> centroid = geometry->getCentroid();
@@ -690,7 +682,7 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
     float centroidLon = _centerLatLong.value().y;
 
     if (index.has_value()) {
-        const NavigationFeature* f = _features[*index].get();
+        const SubFeatureProps* f = _features[*index].get();
         diagonal = f->boundingBoxDiagonal;
         centroidLat = f->centroidLatLong.value().x;
         centroidLon = f->centroidLatLong.value().y;

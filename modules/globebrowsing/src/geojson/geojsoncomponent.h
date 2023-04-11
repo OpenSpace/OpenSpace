@@ -79,9 +79,14 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    class NavigationFeature : public properties::PropertyOwner, public Fadeable {
+    /**
+     * Small helper class whose purpose is to encapsulate properties related to a
+     * specific geomoetry feature, and allow things like flying to or fadin out
+     * individual subfeatures
+     */
+    class SubFeatureProps : public properties::PropertyOwner, public Fadeable {
     public:
-        NavigationFeature(properties::PropertyOwner::PropertyOwnerInfo info);
+        SubFeatureProps(properties::PropertyOwner::PropertyOwnerInfo info);
 
         properties::BoolProperty enabled;
         properties::Vec2Property centroidLatLong;
@@ -97,7 +102,7 @@ private:
      * Add meta properties to the feature, to allow things like flying to it,
      * identifying its location, etc
      */
-    void addMetaPropertiesToFeature(NavigationFeature& feature, int index,
+    void addMetaPropertiesToFeature(SubFeatureProps& feature, int index,
         const geos::geom::Geometry* geometry);
 
     void computeMainFeatureMetaPropeties();
@@ -111,7 +116,6 @@ private:
     std::vector<GlobeGeometryFeature> _geometryFeatures;
 
     properties::BoolProperty _enabled;
-    properties::BoolProperty _ignoreHeightsFromFile;
     properties::StringProperty _geoJsonFile;
     properties::FloatProperty _heightOffset;
     properties::Vec2Property _latLongOffset;
@@ -123,6 +127,8 @@ private:
     properties::TriggerProperty _forceUpdateHeightData;
 
     RenderableGlobe& _globeNode;
+
+    bool _ignoreHeightsFromFile = false;
 
     bool _dataIsDirty = true;
     bool _heightOffsetIsDirty = false;
@@ -140,7 +146,7 @@ private:
 
     properties::PropertyOwner _lightSourcePropertyOwner;
     properties::PropertyOwner _featuresPropertyOwner;
-    std::vector<std::unique_ptr<NavigationFeature>> _features;
+    std::vector<std::unique_ptr<SubFeatureProps>> _features;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _linesAndPolygonsProgram = nullptr;
     std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram = nullptr;
