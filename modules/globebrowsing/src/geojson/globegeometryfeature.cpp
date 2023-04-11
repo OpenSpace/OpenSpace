@@ -272,6 +272,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
 
 void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
                                  float mainOpacity,
+                                 const PointRenderMode& pointRenderMode,
                          const rendering::helper::LightSourceRenderData& lightSourceData)
 {
     ghoul_assert(pass >= 0 && pass < 2, "Render pass variable out of accepted range");
@@ -340,7 +341,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
                 break;
             case RenderType::Points:
                 shader->setUniform("opacity", opacity);
-                renderPoints(r, renderData);
+                renderPoints(r, renderData, pointRenderMode);
                 break;
             case RenderType::Polygon: {
                 shader->setUniform("opacity", fillOpacity);
@@ -362,7 +363,8 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
 }
 
 void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
-                                        const RenderData& renderData) const
+                                        const RenderData& renderData,
+                                        const PointRenderMode& renderMode) const
 {
     ghoul_assert(feature.type == RenderType::Points, "Trying to render faulty geometry");
     _pointsProgram->setUniform("color", _properties.color());
@@ -373,7 +375,7 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
 
     _pointsProgram->setUniform(
         "renderMode",
-        static_cast<int>(_properties.pointRenderMode())
+        static_cast<int>(renderMode)
     );
 
     // Points are rendered as billboards

@@ -65,6 +65,13 @@ public:
     //    GeometryAndShading
     //};
 
+    enum class PointRenderMode {
+        AlignToCameraDir = 0,
+        AlignToCameraPos,
+        AlignToGlobeNormal,
+        AlignToGlobeSurface
+    };
+
     enum class GeometryType {
         LineString = 0,
         Point,
@@ -114,6 +121,7 @@ public:
 
     // 2 pass rendering to get correct culling for polygons
     void render(const RenderData& renderData, int pass, float mainOpacity,
+        const PointRenderMode& pointRenderMode,
         const rendering::helper::LightSourceRenderData& lightSourceData);
 
     bool shouldUpdateDueToHeightMapChange() const;
@@ -123,7 +131,8 @@ public:
     void updateHeightsFromHeightMap();
 
 private:
-    void renderPoints(const RenderFeature& feature, const RenderData& renderData) const;
+    void renderPoints(const RenderFeature& feature, const RenderData& renderData,
+        const PointRenderMode& renderMode) const;
 
     void renderLines(const RenderFeature& feature) const;
 

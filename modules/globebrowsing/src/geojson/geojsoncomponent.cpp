@@ -114,6 +114,14 @@ namespace {
         "A list of light sources that this object should accept light from"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo PointRenderModeInfo = {
+        "PointRenderMode",
+        "Point Render Mode",
+        "Decides how the billboards for the points should be rendered in terms of up "
+        "direction and whether the plane should face the camera. See details on the "
+        "different options in the wiki"
+    };
+
     struct [[codegen::Dictionary(GeoJsonComponent)]] Parameters {
         // The unique identifier for this layer. May not contain '.' or spaces
         std::string identifier;
@@ -144,6 +152,15 @@ namespace {
 
         // [[codegen::verbatim(CoordinateOffsetInfo.description)]]
         std::optional<glm::vec2> coordinateOffset;
+
+        enum class [[codegen::map(openspace::globebrowsing::GlobeGeometryFeature::PointRenderMode)]] PointRenderMode {
+            AlignToCameraDir,
+            AlignToCameraPos,
+            AlignToGlobeNormal,
+            AlignToGlobeSurface
+        };
+        // [[codegen::verbatim(PointRenderModeInfo.description)]]
+        std::optional<PointRenderMode> pointRenderMode;
 
         // [[codegen::verbatim(DrawWireframeInfo.description)]]
         std::optional<bool> drawWireframe;
@@ -245,6 +262,10 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _featuresPropertyOwner({ "Features", "Features" })
+    , _pointRenderModeOption(
+        PointRenderModeInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _centerLatLong(
         CentroidCoordinateInfo,
         glm::vec2(0.f),
@@ -316,6 +337,15 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     _drawWireframe = p.drawWireframe.value_or(_drawWireframe);
     addProperty(_drawWireframe);
+
+    using PointRenderMode = GlobeGeometryFeature::PointRenderMode;
+    _pointRenderModeOption.addOptions({
+        { static_cast<int>(PointRenderMode::AlignToCameraDir), "AlignToCameraDir"},
+        { static_cast<int>(PointRenderMode::AlignToCameraPos), "AlignToCameraPos"},
+        { static_cast<int>(PointRenderMode::AlignToGlobeNormal), "AlignToGlobeNormal"},
+        { static_cast<int>(PointRenderMode::AlignToGlobeSurface), "AlignToGlobeSurface"}
+    });
+    addProperty(_pointRenderModeOption);
 
     _centerLatLong.setReadOnly(true);
     addProperty(_centerLatLong);
@@ -426,6 +456,10 @@ void GeoJsonComponent::render(const RenderData& data) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
+    using PointRenderMode = GlobeGeometryFeature::PointRenderMode;
+    PointRenderMode pointRenderMode =
+        static_cast<PointRenderMode>(_pointRenderModeOption.value());
+
     // Do two render passes, to properly render opacoty of overlaying objects
     for (int renderPass = 0; renderPass < 2; ++renderPass) {
         for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
@@ -434,6 +468,7 @@ void GeoJsonComponent::render(const RenderData& data) {
                     data,
                     renderPass,
                     opacity() * _features[i]->opacity(),
+                    pointRenderMode,
                     _lightsourceRenderData
                 );
             }
@@ -485,7 +520,7 @@ void GeoJsonComponent::readFile() {
     std::ifstream file(_geoJsonFile);
 
     if (!file.good()) {
-        LERROR(fmt::format("Failed to open geoJson file: {}", _geoJsonFile));
+        LERROR(fmt::format("Failed to open GeoJSON file: {}", _geoJsonFile));
         return;
     }
 

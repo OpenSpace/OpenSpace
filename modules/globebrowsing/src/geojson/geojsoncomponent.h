@@ -31,6 +31,7 @@
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <modules/globebrowsing/src/geojson/globegeometryfeature.h>
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/selectionproperty.h>
@@ -121,6 +122,8 @@ private:
     properties::Vec2Property _latLongOffset;
 
     GeoJsonProperties _defaultProperties;
+
+    properties::OptionProperty _pointRenderModeOption;
 
     properties::BoolProperty _drawWireframe;
     properties::BoolProperty _preventUpdatesFromHeightMap;

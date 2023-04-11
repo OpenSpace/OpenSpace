@@ -44,8 +44,6 @@ namespace geojson::propertykeys {
     constexpr std::string_view PointSize = "point-size";
     constexpr std::array<std::string_view, 3> Texture = { "texture", "sprite", "point-texture" };
 
-    // @TODO: point render mode
-
     constexpr std::string_view Extrude = "extrude";
 
     constexpr std::string_view PerformShading = "performShading";
@@ -169,14 +167,6 @@ namespace {
         "either, the point will be rendered as a plane and colored by the color value."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointRenderModeInfo = {
-        "PointRenderMode",
-        "Point Render Mode",
-        "Decides how the billboards for the points should be rendered in terms of up "
-        "direction and whether the plane should face the camera. See details on the"
-        "different options in wiki"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ExtrudeInfo = {
         "Extrude",
         "Extrude",
@@ -246,15 +236,6 @@ namespace {
         // [[codegen::verbatim(PointTextureInfo.description)]]
         std::optional<std::string> pointTexture;
 
-        enum class [[codegen::map(openspace::globebrowsing::GeoJsonProperties::PointRenderMode)]] PointRenderMode {
-            AlignToCameraDir,
-            AlignToCameraPos,
-            AlignToGlobeNormal,
-            AlignToGlobeSurface
-        };
-        // [[codegen::verbatim(PointRenderModeInfo.description)]]
-        std::optional<PointRenderMode> pointRenderMode;
-
         // [[codegen::verbatim(ExtrudeInfo.description)]]
         std::optional<bool> extrude;
 
@@ -295,10 +276,6 @@ GeoJsonProperties::GeoJsonProperties()
     , lineWidth(LineWidthInfo, 2.f, 0.01f, 100.f)
     , pointSize(PointSizeInfo, 10.f, 0.01f, 100.f)
     , pointTexture(PointTextureInfo)
-    , pointRenderModeOption(
-        PointRenderModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
     , extrude(ExtrudeInfo, false)
     , performShading(PerformShadingInfo, false)
     , altitudeModeOption(
@@ -320,13 +297,6 @@ GeoJsonProperties::GeoJsonProperties()
 
     addProperty(pointSize);
     addProperty(pointTexture);
-    pointRenderModeOption.addOptions({
-        { static_cast<int>(PointRenderMode::AlignToCameraDir), "AlignToCameraDir"},
-        { static_cast<int>(PointRenderMode::AlignToCameraPos), "AlignToCameraPos"},
-        { static_cast<int>(PointRenderMode::AlignToGlobeNormal), "AlignToGlobeNormal"},
-        { static_cast<int>(PointRenderMode::AlignToGlobeSurface), "AlignToGlobeSurface"}
-    });
-    addProperty(pointRenderModeOption);
 
     addProperty(extrude);
     addProperty(performShading);
@@ -366,12 +336,6 @@ GeoJsonProperties::AltitudeMode GeoJsonProperties::altitudeMode() const {
     return static_cast<GeoJsonProperties::AltitudeMode>(altitudeModeOption.value());
 }
 
-GeoJsonProperties::PointRenderMode GeoJsonProperties::pointRenderMode() const {
-    return static_cast<GeoJsonProperties::PointRenderMode>(
-        pointRenderModeOption.value()
-    );
-}
-
 GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& feature) {
     const std::map<std::string, geos::io::GeoJSONValue>& props = feature.getProperties();
     GeoJsonOverrideProperties result;
@@ -403,7 +367,6 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
         else if (keyMatches(key, geojson::propertykeys::Texture, PointTextureInfo)) {
             result.pointTexture = value.getString();
         }
-        // @TODO: point render mode
         else if (keyMatches(key, geojson::propertykeys::Extrude, ExtrudeInfo)) {
             result.extrude = value.getBoolean();
         }
@@ -480,10 +443,6 @@ float PropertySet::pointSize() const {
 
 std::string PropertySet::pointTexture() const {
     return overrideValues.pointTexture.value_or(defaultValues.pointTexture);
-}
-
-GeoJsonProperties::PointRenderMode PropertySet::pointRenderMode() const {
-    return overrideValues.pointRenderMode.value_or(defaultValues.pointRenderMode());
 }
 
 bool PropertySet::extrude() const {
