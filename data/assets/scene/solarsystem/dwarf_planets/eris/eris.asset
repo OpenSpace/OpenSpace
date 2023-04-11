@@ -1,61 +1,12 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
-local OneAU = 1.496e+8
-
-local trail = asset.require("./trail").Trail
-local label = asset.require("./label").Label
-local planet = asset.require("./planet").Planet
-
-local translation = {
-  Type = "KeplerTranslation",
-  Eccentricity = 0.4319581224809352,
-  SemiMajorAxis = 68.14536545526268	 * OneAU,
-  Inclination = 43.76049565740999,
-  AscendingNode = 36.07068767579804,
-  ArgumentOfPeriapsis = 150.9970340507818,
-  MeanAnomaly = 208.7617474668772,
-  Epoch = "2023 02 08 21:38:05",
-  Period = 205472.1258735657*60*60*24
-}
-
-local position = {
-  Identifier = "ErisPosition",
-  Parent = transforms.SunECLIPJ2000.Identifier,
-  Transform = {
-    Translation = translation
-  },
-  GUI = {
-    Name = "Eris Position",
-    Path = "/Solar System/Dwarf Planets/Eris",
-    Hidden = true
-  }
-}
-
-planet.Parent = position.Identifier
-trail.Parent = transforms.SunECLIPJ2000.Identifier
-label.Parent = position.Identifier
-trail.Renderable.Translation = translation
-
-asset.onInitialize(function()
-  openspace.addSceneGraphNode(position)
-  openspace.addSceneGraphNode(trail)
-  openspace.addSceneGraphNode(planet)
-  openspace.addSceneGraphNode(label)
-end)
-
-asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(trail)
-  openspace.removeSceneGraphNode(planet)
-  openspace.removeSceneGraphNode(label)
-  openspace.removeSceneGraphNode(position)
-end)
-
+asset.require("./planet")
+asset.require("./trail")
+asset.require("./label")
 
 asset.meta = {
-  Name = "Makemake (Keplerian)",
+  Name = "Eris meta asset",
   Version = "1.0",
-  Description = [[Trail and Model of Makemake. KeplerTranslation Version Data from
-    JPL Horizons]],
+  Description = [[Trail, Model and Label of Eris.]],
   Author = "OpenSpace Team",
-  URL = "https://ssd.jpl.nasa.gov/sbdb.cgi?sstr=Makemake",
-  License = "JPL/NASA"
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
 }

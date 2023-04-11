@@ -1,4 +1,5 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
+local transforms = asset.require("./transforms")
 
 local models = asset.syncedResource({
   Name = "Vesta Models",
@@ -9,11 +10,12 @@ local models = asset.syncedResource({
 
 local Planet = {
   Identifier = "VestaModel",
+  Parent = transforms.Position.Identifier,
   Transform = {
     Rotation = {
       Type = "ConstantRotation",
-      RotationAxis = {0, 0, 1},
-      RotationRate = 1/(5.34212766*60*60)
+      RotationAxis = {0.0, 0.0, 1.0},
+      RotationRate = 1.0/(5.34212766*60.0*60.0)
     }
   },
   Renderable = {
@@ -31,6 +33,14 @@ local Planet = {
     Description = "Model of Vesta"
   } 
 }
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Planet)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Planet)
+end)
 
 asset.export("Planet", Planet)
 

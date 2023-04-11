@@ -1,12 +1,15 @@
+local transforms = asset.require("./transforms")
+
 local Label = {
   Identifier = "VestaLabel",
+  Parent = transforms.Position.Identifier,
   Renderable = {
-    Enabled = asset.Enabled,
+    Enabled = asset.enabled,
     Type = "RenderableLabel",
     Text = "Vesta",
     FontSize = 50.0,
     Size = 8.5,
-    MinMaxSize = { 1, 100 },
+    MinMaxSize = { 1.0, 100.0 },
     BlendMode = "Additive",
     OrientationOption = "Camera View Direction",
     EnableFading = true,
@@ -21,6 +24,14 @@ local Label = {
     Description = "Label for Vesta, visible at the solarsystem overview zoom level"
   }
 }
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Label)
+end)
 
 asset.export("Label", Label)
 

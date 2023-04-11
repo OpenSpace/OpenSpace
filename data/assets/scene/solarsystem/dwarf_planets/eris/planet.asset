@@ -1,24 +1,28 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
+local transforms = asset.require("./transforms")
 
 local modelFolder = asset.syncedResource({
-  Name = "Dwarf Planet Models",
+  Name = "Eris Model",
   Type = "HttpSynchronization",
-  Identifier = "dwarf_planet_models",
+  Identifier = "eris_model",
   Version = 1
 })
 
 local Planet = {
   Identifier = "ErisGlobe",
+  Parent = transforms.Position.Identifier,
   Transform = {
     Rotation = {
       Type = "ConstantRotation",
-      RotationAxis = {0, 0, 1},
-      RotationRate = 1/(25.9*60*60)
+      RotationAxis = {0.0, 0.0, 1.0},
+      RotationRate = 1.0/(25.9*60.0*60.0)
     }
   },
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = modelFolder .. 'Eris_1_2326.glb',
+    SpecularIntensity = 0.0,
+    AmbientIntensity = 0.0,
     LightSources = {
       sun.LightSource
     },
@@ -29,6 +33,14 @@ local Planet = {
     Description = "Globe of Eris"
   } 
 }
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Planet)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Planet)
+end)
 
 asset.export("Planet", Planet)
 

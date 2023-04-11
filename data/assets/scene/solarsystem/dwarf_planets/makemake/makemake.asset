@@ -1,61 +1,12 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
-local OneAU = 1.496e+8
-
-local trail = asset.require("./trail").Trail
-local label = asset.require("./label").Label
-local planet = asset.require("./planet").Planet
-
-local translation = {
-  Type = "KeplerTranslation",
-  Eccentricity = 0.1661360684291203,
-  SemiMajorAxis = 45.26449818092681 * OneAU,
-  Inclination = 29.01842946746389,
-  AscendingNode = 79.36123402529158,
-  ArgumentOfPeriapsis = 295.8223003368652,
-  MeanAnomaly = 167.5755900333624,
-  Epoch = "2023 02 08 21:38:43",
-  Period = 111233.3435553189*60*60*24
-}
-
-local position = {
-  Identifier = "MakemakePosition",
-  Parent = transforms.SunECLIPJ2000.Identifier,
-  Transform = {
-    Translation = translation
-  },
-  GUI = {
-    Name = "Makemake Position",
-    Path = "/Solar System/Dwarf Planets/Makemake",
-    Hidden = true
-  }
-}
-
-planet.Parent = position.Identifier
-trail.Parent = transforms.SunECLIPJ2000.Identifier
-label.Parent = position.Identifier
-trail.Renderable.Translation = translation
-
-asset.onInitialize(function()
-  openspace.addSceneGraphNode(position)
-  openspace.addSceneGraphNode(trail)
-  openspace.addSceneGraphNode(planet)
-  openspace.addSceneGraphNode(label)
-end)
-
-asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(trail)
-  openspace.removeSceneGraphNode(planet)
-  openspace.removeSceneGraphNode(label)
-  openspace.removeSceneGraphNode(position)
-end)
-
+asset.require("./planet")
+asset.require("./trail")
+asset.require("./label")
 
 asset.meta = {
-  Name = "Makemake (Keplerian)",
+  Name = "Makemake meta asset",
   Version = "1.0",
-  Description = [[Trail and Model of Makemake. KeplerTranslation Version Data from
-    JPL Horizons]],
+  Description = [[Trail, Model and Label of Makemake.]],
   Author = "OpenSpace Team",
-  URL = "https://ssd.jpl.nasa.gov/sbdb.cgi?sstr=Makemake",
-  License = "JPL/NASA"
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
 }

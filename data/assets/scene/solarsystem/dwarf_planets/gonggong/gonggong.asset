@@ -1,61 +1,12 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
-local OneAU = 1.496e+8
-
-local trail = asset.require("./trail").Trail
-local label = asset.require("./label").Label
-local planet = asset.require("./planet").Planet
-
-local translation = {
-  Type = "KeplerTranslation",
-  Eccentricity = 0.4979719595192342,
-  SemiMajorAxis = 67.28272930394145 * OneAU,
-  Inclination = 30.6429146610929,
-  AscendingNode = 336.8562311756138,
-  ArgumentOfPeriapsis = 207.244325413599,
-  MeanAnomaly = 108.9504644269052,
-  Epoch = "2022 11 25 17:18:20",
-  Period = 201582.9642396014*60*60*24
-}
-
-local position = {
-  Identifier = "GonggongPosition",
-  Parent = transforms.SunECLIPJ2000.Identifier,
-  Transform = {
-    Translation = translation
-  },
-  GUI = {
-    Name = "Gonggong Position",
-    Path = "/Solar System/Dwarf Planets/Gonggong",
-    Hidden = true
-  }
-}
-
-planet.Parent = position.Identifier
-trail.Parent = transforms.SunECLIPJ2000.Identifier
-label.Parent = position.Identifier
-trail.Renderable.Translation = translation
-
-asset.onInitialize(function()
-  openspace.addSceneGraphNode(position)
-  openspace.addSceneGraphNode(trail)
-  openspace.addSceneGraphNode(planet)
-  openspace.addSceneGraphNode(label)
-end)
-
-asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(trail)
-  openspace.removeSceneGraphNode(planet)
-  openspace.removeSceneGraphNode(label)
-  openspace.removeSceneGraphNode(position)
-end)
-
+asset.require("./planet")
+asset.require("./trail")
+asset.require("./label")
 
 asset.meta = {
-  Name = "Gonggong (Keplerian)",
+  Name = "Gonggong meta asset",
   Version = "1.0",
-  Description = [[Trail and Model of Gonggong. KeplerTranslation Version Data from
-    JPL Horizons]],
+  Description = [[Trail, Model and Label of Gonggong.]],
   Author = "OpenSpace Team",
-  URL = "https://ssd.jpl.nasa.gov/sbdb.cgi?sstr=Gonggong",
-  License = "JPL/NASA"
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
 }
