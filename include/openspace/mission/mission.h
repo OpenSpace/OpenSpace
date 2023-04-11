@@ -37,7 +37,7 @@ namespace openspace {
 
 namespace documentation {  struct Documentation; }
 
-struct ImportantDate {
+struct Milestone {
     std::string name;
     Time date;
     std::optional<std::string> description;
@@ -117,7 +117,7 @@ public:
      *
      * \return All important dates
      */
-    const std::vector<ImportantDate>& importantDates() const;
+    const std::vector<Milestone>& milestones() const;
 
 
     /**
@@ -177,7 +177,7 @@ protected:
     /// Actions associated with the phase
     std::vector<std::string> _actions;
     /// Important dates 
-    std::vector<ImportantDate> _importantDates;
+    std::vector<Milestone> _milestones;
 };
 
 /**

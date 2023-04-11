@@ -66,7 +66,7 @@ namespace {
         std::optional<std::vector<std::string>> actions;
 
         // Important dates
-        struct ImportantDates {
+        struct Milestone {
             // An image that can be presented to the user during this phase of a mission
             std::string date;
             std::string name;
@@ -74,7 +74,7 @@ namespace {
             std::optional<std::string> image;
             std::optional<std::string> link;
         };
-        std::optional<std::vector<ImportantDates>> importantDates;
+        std::optional<std::vector<Milestone>> milestones;
     };
 #include "mission_codegen.cpp"
 } // namespace
@@ -162,22 +162,22 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         _actions = p.actions.value_or(_actions);
     }
 
-    if (p.importantDates.has_value()) {
-        _importantDates.reserve(p.importantDates->size());
-        for (int i = 0; i < p.importantDates->size(); i++) {
-            std::string name = p.importantDates.value()[i].name;
-            Time newTime = Time(p.importantDates.value()[i].date);
-            ImportantDate newDate = { name, newTime };
-            if (p.importantDates.value()[i].description.has_value()) {
-                newDate.description = p.importantDates.value()[i].description.value();
+    if (p.milestones.has_value()) {
+        _milestones.reserve(p.milestones->size());
+        for (int i = 0; i < p.milestones->size(); i++) {
+            std::string name = p.milestones.value()[i].name;
+            Time newTime = Time(p.milestones.value()[i].date);
+            Milestone newDate = { name, newTime };
+            if (p.milestones.value()[i].description.has_value()) {
+                newDate.description = p.milestones.value()[i].description.value();
             }
-            if (p.importantDates.value()[i].image.has_value()) {
-                newDate.image = p.importantDates.value()[i].image.value();
+            if (p.milestones.value()[i].image.has_value()) {
+                newDate.image = p.milestones.value()[i].image.value();
             }
-            if (p.importantDates.value()[i].link.has_value()) {
-                newDate.link = p.importantDates.value()[i].link.value();
+            if (p.milestones.value()[i].link.has_value()) {
+                newDate.link = p.milestones.value()[i].link.value();
             }
-            _importantDates.emplace_back(newDate);
+            _milestones.emplace_back(newDate);
         }
     }
 }
@@ -202,8 +202,8 @@ const std::string& MissionPhase::link() const {
     return _link;
 }
 
-const std::vector<ImportantDate>& MissionPhase::importantDates() const {
-    return _importantDates;
+const std::vector<Milestone>& MissionPhase::milestones() const {
+    return _milestones;
 }
 
 const std::vector<MissionPhase>& MissionPhase::phases() const {

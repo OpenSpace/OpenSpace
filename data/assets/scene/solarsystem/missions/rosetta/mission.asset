@@ -5,7 +5,7 @@ local Mission = {
   TimeRange = { Start = "2004 MAR 02 00:00:00", End = "2016 SEP 30 00:00:00" },
   Description = "ESA's Rosetta mission was the first to rendezvous with a comet, the first to follow a comet on its orbit around the Sun, and the first to deploy a lander to a comet's surface. Comets are time capsules containing primitive material left over from the epoch when the Sun and its planets formed. By studying the gas, dust and structure of the nucleus and organic materials associated with the comet, via both remote and in situ observations, the Rosetta mission is unlocking the history and evolution of our Solar System.",
   Media = { Image = "https://www.cosmos.esa.int/documents/522118/522182/Rosetta_logo.png/cd85878d-2fac-e086-e32a-df0eaee5e505?t=1614026031720" },
-  ImportantDates = {
+  Milestones = {
     {
       Name = "Launch",
       Date = 	"2004 MAR 02 09:00:00"
@@ -22,7 +22,8 @@ local Mission = {
       Name = "Mars gravity assist",
       Date = 	"2007 FEB 25 00:00:00",
       Description = "The Rosetta swing-by of Mars is the second of four gravity assist manoeuvres that are required to place Rosetta on course for its final destination: comet 67P/Churyumov-Gerasimenko. The closest approach of the swing-by will take place at 01:54 UT, 25 February 2007, when the spacecraft will pass 250 km above the surface of Mars.",
-      Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2007/02/image_of_mars_seen_by_osiris/10287257-2-eng-GB/Image_of_Mars_seen_by_OSIRIS_pillars.jpg"
+      Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2007/02/image_of_mars_seen_by_osiris/10287257-2-eng-GB/Image_of_Mars_seen_by_OSIRIS_pillars.jpg",
+      Link = "https://sci.esa.int/web/rosetta/-/40697-rosetta-mars-swing-by"
     },
     {
       Name = "Second Earth gravity assist",

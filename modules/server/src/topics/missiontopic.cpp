@@ -35,12 +35,6 @@
 
 using nlohmann::json;
 
-namespace {
-    constexpr const char* EventKey = "event";
-    constexpr const char* StartSubscription = "start_subscription";
-    constexpr const char* StopSubscription = "stop_subscription";
-} // namespace
-
 namespace openspace {
 
 bool MissionTopic::isDone() const {
@@ -48,7 +42,6 @@ bool MissionTopic::isDone() const {
 }
 
 nlohmann::json MissionTopic::missionJson() const {
-    
     const std::map<std::string, Mission>& missions =
         global::missionManager->missionMap();
 
@@ -81,9 +74,9 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
         phases.push_back(subphaseJson);
     }
     
-    json importantDates = json::array();
-    const std::vector<ImportantDate>& dates = phase.importantDates();
-    for (const ImportantDate& date : dates) {
+    json milestones = json::array();
+    const std::vector<Milestone>& dates = phase.milestones();
+    for (const Milestone& date : dates) {
         json jsonDate = {
             { "date", std::string(date.date.ISO8601())},
             { "name", date.name }
@@ -98,7 +91,7 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
         if (date.link.has_value()) {
             jsonDate["link"] = date.link.value();
         }
-        importantDates.push_back(jsonDate);
+        milestones.push_back(jsonDate);
     }
 
     std::string startTimeString = std::string(Time(phase.timeRange().start).ISO8601());
@@ -117,23 +110,13 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
             { "image", phase.image() },
             { "link", phase.link() }
         }},
-        { "importantDates" , importantDates }
+        { "milestones" , milestones }
     };
 
     return phaseJson;
 }
 
 void MissionTopic::handleJson(const nlohmann::json& input) {
-    //const std::string& event = input.at(EventKey).get<std::string>();
-    //if (event == StartSubscription) {
-    //    // TODO: subsribe to misisons to emit events
-    //    // missionManager.subscribe(); ...
-    //}
-    //else if (event == StopSubscription) {
-    //    // TODO: Unsubsribe to misisons
-    //    // missionManager.subscribe(); ...
-    //    return;
-    //}
     nlohmann::json data = { {"missions", missionJson()} };
     _connection->sendJson(wrappedPayload(data));
 }
