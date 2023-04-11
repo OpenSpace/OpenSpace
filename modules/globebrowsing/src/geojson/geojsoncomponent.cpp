@@ -325,6 +325,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     _drawWireframe = p.drawWireframe.value_or(_drawWireframe);
     addProperty(_drawWireframe);
 
+    _centerLatLong.setReadOnly(true);
     addProperty(_centerLatLong);
 
     _flyToFeature.onChange([this]() { flyToFeature(); });
