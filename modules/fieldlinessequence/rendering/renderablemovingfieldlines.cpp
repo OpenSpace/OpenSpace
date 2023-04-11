@@ -97,6 +97,8 @@ namespace {
         std::optional<std::string> seedPointsFromProvider;
         // Path to file with seed points
         std::filesystem::path seedPointFile;
+        // Path to csv file with seed points
+        std::filesystem::path seedPointCSVFile;
         // Extra variables such as rho, p or t
         std::optional<std::vector<std::string>> extraVariables;
         // Which variable in CDF file to trace. 'u_perp_b' is default. 
@@ -139,6 +141,13 @@ namespace openspace {
         double startTime
     );
 
+    std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromCSVFile(
+        std::filesystem::path filePath,
+        std::vector<glm::vec3>& seedPoints,
+        std::vector<double>& birthTimes,
+        double startTime
+    );
+    std::ifstream readTxtOrCSVFile(std::filesystem::path filePath);
     std::vector<std::string> extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
 
     documentation::Documentation RenderableMovingFieldlines::Documentation() {
@@ -204,6 +213,7 @@ namespace openspace {
         std::sort(_sourceFiles.begin(), _sourceFiles.end());
 
         _seedFilePath = p.seedPointFile;
+        _seedCSVFilePath = p.seedPointCSVFile;
         _seedPointProvider = p.seedPointProvider.value_or(_seedPointProvider);
         _seedPointsFromProvider = p.seedPointsFromProvider.value_or(_seedPointsFromProvider);
         _extraVars = p.extraVariables.value_or(_extraVars);
@@ -282,15 +292,15 @@ namespace openspace {
             absPath(_colorTablePaths[0]).string()
             );
         
+        // Get CSV file from API
         if (_seedPointProvider) {
-            getSeedPointsFromAPI("http://localhost:5000/get_csv_file", "seed_points", "seedpoints.csv");
+            getSeedPointsFromAPI("http://localhost:5000/get_csv_file", "seed_points", "dayside_seedpoints.csv");
         }
         else if (!_seedPointProvider && _seedFilePath.empty()) {
             throw ghoul::RuntimeError(
                 "File path to seed points was not provided"
             );
         }
-        
   
         bool stateSuccuess = getStateFromCdfFiles();
         if (!stateSuccuess) {
@@ -472,7 +482,13 @@ namespace openspace {
                     ));
                 }
 
-                extractSeedPointsFromFile(_seedFilePath, seedPoints, birthTimes, startTime);
+                // Get seed points from CSV or txt file
+                if(_seedPointProvider){
+                    extractSeedPointsFromCSVFile(_seedCSVFilePath, seedPoints ,birthTimes, startTime);
+                }else{
+                    extractSeedPointsFromFile(_seedFilePath, seedPoints, birthTimes, startTime);
+                }
+
                 shouldExtractSeedPoints = false;
             }
 
@@ -554,7 +570,7 @@ namespace openspace {
         if (curl)
         {
             std::filesystem::path pathToDownloadTo = initializeSyncDirectory(folderNameInSyncFolder, nameOfGeneratedFile);
-            FILE* fp = fopen(pathToDownloadTo.string().c_str(), "wb");
+            FILE* fp = fopen(pathToDownloadTo.string().c_str(), "w");
             curl_easy_setopt(curl, CURLOPT_URL, URL.c_str());
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
@@ -565,6 +581,148 @@ namespace openspace {
             fclose(fp);
         }
     }
+
+    // Extracts seed points from csv file and return tuple
+    std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromCSVFile(
+        std::filesystem::path filePath,
+        std::vector<glm::vec3>& seedPoints,
+        std::vector<double>& birthTimes,
+        double startTime
+    ) { 
+        if (!std::filesystem::is_regular_file(filePath) ||
+            filePath.extension() != ".csv")
+        {
+            // TODO: add support for whatever actual seepoint files are being used
+            throw ghoul::RuntimeError(fmt::format("SeedPointFile needs to be a .csv file"));
+        }
+        
+        std::ifstream file = readTxtOrCSVFile(filePath); // "C:/Dev/OpenSpace/sync/http/seed_points/dayside_seedpoints.csv"
+
+        // Read each line of the CSV file
+        std::string lineTemp;
+        int lineCounter = 0;
+
+        // Struct containing information about ONE seedpoint
+        struct SeedPointInformation {
+            float x;
+            float y;
+            float z;    
+            std::string earthSide;
+            std::string fieldLineStatus;
+        };
+
+        // Struct containing FOUR seedpoints, a set of seedpoints
+        struct SetOfSeedPoints {
+            SeedPointInformation IMF;
+            SeedPointInformation Closed;
+            SeedPointInformation OpenNorth;
+            SeedPointInformation OpenSouth;
+        };
+
+        // Vector containing all set of seedpoints
+        std::vector<SetOfSeedPoints> data;
+
+        // FUNCTION 1 returns data 
+
+        // FUNCTION 2 createst tuple from data
+
+        // END = return tuple 
+
+        SetOfSeedPoints setOfSeedPoints;
+
+        int topologyCounter = 0;
+
+        bool topologyReset = false;
+
+        while (std::getline(file, lineTemp)) {
+            std::stringstream lineStream(lineTemp);
+            std::string field;
+            std::vector<std::string> row;
+
+            int elementCounter = 0;
+            std::cout << "" << std::endl;
+
+            SeedPointInformation seedPoint;
+
+            // Get seedPoint 
+            while (std::getline(lineStream, field, ',') && elementCounter < 5)
+            {
+                switch (elementCounter)
+                {
+                case 0:
+                    seedPoint.x = std::stof(field);
+                    break;
+                case 1:
+                    seedPoint.y = std::stof(field);
+                    break;
+                case 2:
+                    seedPoint.z = std::stof(field);
+                    break;
+                case 3:
+                    seedPoint.fieldLineStatus = field;
+                    break;
+                case 4:
+                    seedPoint.earthSide = field;
+                    break;
+                }
+
+                // Add to element
+                elementCounter++;
+            }
+
+            // Check if we added a new seedPointSet last iteration
+            // If we did reset the topology counter
+            if (topologyReset) {
+                topologyCounter = 0;
+                topologyReset = false;
+            }
+
+            // Add seedPoint to setOfSeedPoints
+            switch (topologyCounter)
+            {
+            case 0:
+                setOfSeedPoints.IMF = seedPoint;
+                break;
+            case 1:
+                setOfSeedPoints.Closed = seedPoint;
+            case 2:
+                setOfSeedPoints.OpenNorth = seedPoint;
+                break;
+            case 3:
+                setOfSeedPoints.OpenSouth = seedPoint;
+                break;
+            }
+
+            // Add to line
+            lineCounter++;
+
+            if (lineCounter % 4 == 0 && lineCounter != 0) {
+
+                std::cout << "Push back set of seedpoints to vector " << std::endl;
+                data.push_back(setOfSeedPoints);
+                SetOfSeedPoints setOfSeedPoints;
+                topologyReset = true;
+            }
+
+            // Keep track of which topology we are at
+            topologyCounter++;
+        }
+
+        for (size_t i = 0; i < data.size(); i++)
+        {
+            std::cout << "Row " << i << std::endl;
+            std::cout << "Closed: " << data[i].Closed.fieldLineStatus << " y value: " << data[i].Closed.y << std::endl;
+            std::cout << "Open North: " << data[i].OpenNorth.fieldLineStatus << " y value: " << data[i].OpenNorth.y << std::endl;
+            std::cout << "OPEN SOUTH: " << data[i].OpenSouth.fieldLineStatus << " y value: " << data[i].OpenSouth.y << std::endl;
+            std::cout << "IMF: " << data[i].IMF.fieldLineStatus << " y value: " << data[i].IMF.y << std::endl;
+        }
+
+        // Close the file
+        file.close();
+
+        return std::make_tuple(seedPoints, birthTimes);
+    }
+
 
     /**
     * Extracts seed points from .txt file. Each matching fieldline pair is created
@@ -591,7 +749,6 @@ namespace openspace {
             throw ghoul::RuntimeError(fmt::format("Could not read from {}", seedFile));
         }
 
-        //TODO: get certain seedpoints
 
         std::string line;
         while (std::getline(seedFileStream, line)) {
@@ -1598,4 +1755,18 @@ namespace openspace {
 
         return totalTime;
     }
+
+    /**
+    * File for reading txt or csv file
+    */
+    std::ifstream readTxtOrCSVFile(std::filesystem::path filePath) {
+        std::ifstream file(filePath);\
+
+        if (!file.is_open()) {
+            LERROR("Couldnt read file");
+        }
+
+        return file;
+    }
+
 } // namespace openspace

@@ -6,6 +6,7 @@ local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/
 
 local fieldlinesDirectory = 'C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans' --old: 'C:/Users/HEM/Documents/Liu/Data_Fieldlines'
 local seedPointFile = 'C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/seedpoint_dayside_nightside2.txt' --old: 'C:/Users/HEM/Documents/Liu/Data_Fieldlines/seedpoint_dayside_nightside2.txt'
+local seedPointCSVFile = 'C:/Dev/OpenSpace/sync/http/seed_points/dayside_seedpoints.csv' --old: 'C:/Users/HEM/Documents/Liu/Data_Fieldlines/seedpoint_dayside_nightside2.txt'
 
 local movingLines = {
   Identifier = "MovingFieldlines", -- important: needs to be unique
@@ -16,6 +17,7 @@ local movingLines = {
     SeedPointProvider = true,
     SeedPointsFromProvider = "",
     SeedPointFile = seedPointFile,
+    SeedPointCSVFile = seedPointCSVFile,
     TracingVariable = "u_perp_b", -- u = velocity or similar, perp = perpendicular, b = magnetic field, ultimately our flowline = where our line is moving through time
     NumberOfPointsOnPathLine = 200, -- flow line, our number of keyframes 
     NumberOfPointsOnFieldlines = 500, -- on each keyframe, there's 500 points on our flowline

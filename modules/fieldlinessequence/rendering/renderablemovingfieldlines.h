@@ -173,6 +173,7 @@ private:
     double _manualTimeOffset = 0.0;
     std::vector<std::filesystem::path> _sourceFiles;
     std::filesystem::path _seedFilePath;
+    std::filesystem::path _seedCSVFilePath;
     std::string _seedPointsFromProvider = "";
     std::vector<glm::vec3> _seedPoints;
     // Extra variables such as rho, p or t
