@@ -42,6 +42,7 @@ struct ImportantDate {
     Time date;
     std::optional<std::string> description;
     std::optional<std::string> image;
+    std::optional<std::string> link;
 };
 
 /**
@@ -95,6 +96,13 @@ public:
      * \return The associated image of the MissionPhase or the empty string
      */
     const std::string& image() const;
+
+    /**
+     * Returns the associated link of this MissionPhase. If no link is associated, this
+     * string will be empty.
+     * \return The associated link of the MissionPhase or the empty string
+     */
+    const std::string& link() const;
 
     /**
      * Returns all subphases sorted by start time.
@@ -164,6 +172,8 @@ protected:
     std::vector<MissionPhase> _subphases;
     /// Image that is associated with this phase
     std::string _image;
+    /// Link that is associated with this phase
+    std::string _link;
     /// Actions associated with the phase
     std::vector<std::string> _actions;
     /// Important dates 

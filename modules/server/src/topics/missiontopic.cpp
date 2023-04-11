@@ -95,6 +95,9 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
         if (date.image.has_value()) {
             jsonDate["image"] = date.image.value();
         }
+        if (date.link.has_value()) {
+            jsonDate["link"] = date.link.value();
+        }
         importantDates.push_back(jsonDate);
     }
 
@@ -111,7 +114,8 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
         }},
         { "phases", phases },
         { "media",{
-            { "image", phase.image() }
+            { "image", phase.image() },
+            { "link", phase.link() }
         }},
         { "importantDates" , importantDates }
     };

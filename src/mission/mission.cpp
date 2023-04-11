@@ -68,10 +68,11 @@ namespace {
         // Important dates
         struct ImportantDates {
             // An image that can be presented to the user during this phase of a mission
-            std::optional<std::string> date;
-            std::optional<std::string> name;
+            std::string date;
+            std::string name;
             std::optional<std::string> description;
             std::optional<std::string> image;
+            std::optional<std::string> link;
         };
         std::optional<std::vector<ImportantDates>> importantDates;
     };
@@ -91,6 +92,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     _description = p.description.value_or(_description);
     if (p.media.has_value()) {
         _image = p.media->image.value_or(_image);
+        _link = p.media->link.value_or(_link);
     }
 
     if (p.phases.has_value()) {
@@ -163,14 +165,17 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     if (p.importantDates.has_value()) {
         _importantDates.reserve(p.importantDates->size());
         for (int i = 0; i < p.importantDates->size(); i++) {
-            std::string name = p.importantDates.value()[i].name.value();
-            Time newTime = Time(p.importantDates.value()[i].date.value());
+            std::string name = p.importantDates.value()[i].name;
+            Time newTime = Time(p.importantDates.value()[i].date);
             ImportantDate newDate = { name, newTime };
             if (p.importantDates.value()[i].description.has_value()) {
                 newDate.description = p.importantDates.value()[i].description.value();
             }
             if (p.importantDates.value()[i].image.has_value()) {
                 newDate.image = p.importantDates.value()[i].image.value();
+            }
+            if (p.importantDates.value()[i].link.has_value()) {
+                newDate.link = p.importantDates.value()[i].link.value();
             }
             _importantDates.emplace_back(newDate);
         }
@@ -191,6 +196,10 @@ const std::string& MissionPhase::description() const {
 
 const std::string& MissionPhase::image() const {
     return _image;
+}
+
+const std::string& MissionPhase::link() const {
+    return _link;
 }
 
 const std::vector<ImportantDate>& MissionPhase::importantDates() const {
