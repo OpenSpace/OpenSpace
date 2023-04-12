@@ -5,7 +5,7 @@
     <NoDataValue>0.00000000000000E+00</NoDataValue>
     <ColorInterp>Gray</ColorInterp>
     <ComplexSource>
-      <SourceFilename relativeToVRT="1">ctx_blended_01.wms</SourceFilename>
+      <SourceFilename relativeToVRT="1">ctx_blended.wms</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="4194304" RasterYSize="2097152" DataType="Byte" BlockXSize="512" BlockYSize="512" />
       <SrcRect xOff="0" yOff="0" xSize="4194304" ySize="2097152" />
@@ -17,7 +17,7 @@
     <NoDataValue>0</NoDataValue>
     <ColorInterp>Alpha</ColorInterp>
     <ComplexSource>
-      <SourceFilename relativeToVRT="1">ctx_blended_01.wms</SourceFilename>
+      <SourceFilename relativeToVRT="1">ctx_blended.wms</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="4194304" RasterYSize="2097152" DataType="Byte" BlockXSize="512" BlockYSize="512" />
       <SrcRect xOff="0" yOff="0" xSize="4194304" ySize="2097152" />

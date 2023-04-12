@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -49,7 +50,7 @@ namespace documentation { struct Documentation; }
  * the planes from Spherical to Cartesian coordinates and back. It also specifies the
  * interface that its children need to implement.
  */
-class ScreenSpaceRenderable : public properties::PropertyOwner {
+class ScreenSpaceRenderable : public properties::PropertyOwner, public Fadeable {
 public:
     static std::unique_ptr<ScreenSpaceRenderable> createFromDictionary(
         const ghoul::Dictionary& dictionary);
@@ -111,7 +112,6 @@ protected:
     glm::vec3 cartesianToSpherical(const glm::vec3& cartesian) const;
     glm::vec3 sphericalToCartesian(glm::vec3 spherical) const;
     glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;
-    float opacity() const;
 
     properties::BoolProperty _enabled;
     properties::BoolProperty _usePerspectiveProjection;
@@ -133,8 +133,6 @@ protected:
     properties::FloatProperty _gamma;
     properties::Vec3Property _multiplyColor;
     properties::Vec4Property _backgroundColor;
-    properties::FloatProperty _opacity;
-    properties::FloatProperty _fade;
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);

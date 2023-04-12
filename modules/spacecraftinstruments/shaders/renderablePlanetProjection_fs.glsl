@@ -28,7 +28,7 @@
 
 in vec2 vs_position;
 
-layout (location = 0) out vec4 color; 
+layout (location = 0) out vec4 color;
 layout (location = 1) out vec4 stencil;
 
 uniform sampler2D projectionTexture;
@@ -51,13 +51,13 @@ vec4 uvToModel(vec2 uv, vec3 radius, float segments) {
   float x = radius.x * sin(theta) * cos(phi);
   float y = radius.y * sin(theta) * sin(phi);
   float z = radius.z * cos(theta);
-  
+
   return vec4(x, y, z, 0.0);
 }
 
 bool inRange(float x, float a, float b) {
   return (x >= a && x <= b);
-} 
+}
 
 
 void main() {
@@ -81,7 +81,7 @@ void main() {
       dot(v_b, normal) < 0.0)
   {
     color = texture(projectionTexture, vec2(projected.x, projected.y));
-    stencil = vec4(1.0); 
+    stencil = vec4(1.0);
   }
   else {
     color = vec4(0.0);

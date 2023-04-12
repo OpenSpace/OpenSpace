@@ -85,7 +85,7 @@ local TerraLabel = {
 
 asset.onInitialize(function()
   local t = openspace.space.readKeplerFile(omm .. "Terra.txt", "OMM")
-  TerraTrail.Renderable.Period = t[0].Period / (60 * 60 * 24)
+  TerraTrail.Renderable.Period = t[1].Period / (60 * 60 * 24)
 
   openspace.addSceneGraphNode(Terra)
   openspace.addSceneGraphNode(TerraTrail)

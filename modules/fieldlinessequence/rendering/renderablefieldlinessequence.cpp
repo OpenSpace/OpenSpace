@@ -577,7 +577,7 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
     _states.push_back(newState);
     _nStates = _startTimes.size();
     if (_nStates == 1) {
-        // loading dynamicaly is not nessesary if only having one set in the sequence 
+        // loading dynamicaly is not nessesary if only having one set in the sequence
         _loadingStatesDynamically = false;
     }
     _activeStateIndex = 0;
@@ -1046,7 +1046,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);
-    
+
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;

@@ -1,4 +1,4 @@
--- Contains the required functions to create a simple Lua state machine, that can step 
+-- Contains the required functions to create a simple Lua state machine, that can step
 -- forwards and backwards through a list of states.
 --
 -- A state is given as a table with a Title string, and two functions: Play and Rewind

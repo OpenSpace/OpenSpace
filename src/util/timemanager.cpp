@@ -74,7 +74,7 @@ namespace {
         "when interpolating"
     };
 
-    constexpr std::string_view DeltaTimeStepsKeybindsGuiPath = "/Time/Delta Time Steps";
+    constexpr std::string_view DeltaTimeStepsKeybindsGuiPath = "/Time/Simulation Speed/Steps";
 }
 
 namespace openspace {
@@ -507,9 +507,9 @@ void TimeManager::addDeltaTimesKeybindings() {
         action.documentation = fmt::format(
             "Setting the simulation speed to {} seconds per realtime second", s
         );
-        action.name = fmt::format("Set Simulation Speed: {}", s);
+        action.name = fmt::format("Set: {}", s);
         action.guiPath = DeltaTimeStepsKeybindsGuiPath;
-        action.synchronization = interaction::Action::IsSynchronized::No;
+        action.isLocal = interaction::Action::IsLocal::Yes;
         global::actionManager->registerAction(std::move(action));
         global::keybindingManager->bindKey(key, mod, std::move(identifier));
         _deltaTimeStepKeybindings.push_back(KeyWithModifier{ key, mod });

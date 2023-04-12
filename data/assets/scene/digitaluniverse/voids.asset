@@ -11,6 +11,7 @@ local object = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
     Labels = {
+      Enabled = true,
       File = speck .. "voids.label",
       Color = { 0.296, 0.629, 1.0 },
       Size = 20.9,
@@ -18,7 +19,6 @@ local object = {
       Unit = "Mpc"
     },
     DrawElements = false,
-    DrawLabels = true,
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "Mpc"

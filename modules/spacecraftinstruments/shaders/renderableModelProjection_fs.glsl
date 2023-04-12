@@ -40,7 +40,7 @@ uniform vec3 boresight;
 
 bool inRange(float x, float a, float b) {
   return (x >= a && x <= b);
-} 
+}
 
 
 void main() {

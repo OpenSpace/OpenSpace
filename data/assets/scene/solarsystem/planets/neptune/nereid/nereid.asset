@@ -1,24 +1,23 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
-local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels").nep081
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").nep101xl_802
 
 
-
-local Triton = {
-  Identifier = "Triton",
+local Nereid = {
+  Identifier = "Nereid",
   Parent = {
     Identifier = transforms.NeptuneBarycenter.Identifier,
     Spice = "NEPTUNE BARYCENTER"
   },
-  Spice = "TRITON",
-  Radii = { 2709000, 2706000, 2705000 },
+  Spice = "NEREID",
+  Radii = { 357000, 340000, 340000 },
   Tags = { "moon_solarSystem", "moon_giants", "moon_neptune" },
   TrailTags = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_neptune" },
   GUI = {
-    Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+    Path = "/Solar System/Planets/Neptune/Moons"
   },
   TrailColor = { 0.2, 0.5, 0.75 },
-  OrbitPeriod = 5.877,
+  OrbitPeriod = 360.13,
   Kernels = kernel
 }
 
@@ -26,7 +25,7 @@ local Triton = {
 -- Generate labels for each moon
 local moon_labels = {}
 
-for i, moon in ipairs({ Triton }) do
+for i, moon in ipairs({ Nereid }) do
   local moonName = moon.GUI.Name or moon.Identifier
   moon_labels[i] = {
     Identifier = moon.Identifier .. "Label",
@@ -55,7 +54,7 @@ for i, moon in ipairs({ Triton }) do
 end
 
 
-local nodes = proceduralGlobes.createGlobes({ Triton })
+local nodes = proceduralGlobes.createGlobes({ Nereid })
 
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
@@ -84,9 +83,9 @@ end
 
 
 asset.meta = {
-  Name = "Triton",
+  Name = "Nereid",
   Version = "1.1",
-  Description = [[Procedural Globe asset containing Neptune's moon: Triton. A blank globe
+  Description = [[Procedural Globe asset containing Neptune's moon: Nereid. A blank globe
     and SPICE trail are generated for the moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

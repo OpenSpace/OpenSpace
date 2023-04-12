@@ -85,7 +85,7 @@ end
 
 local show_apollo_labels = {
   Identifier = "apollo_insignias.show_insignias",
-  Name = "Show Apollo Landing Labels",
+  Name = "Show Apollo landing labels",
   Command = [[openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1, 0.5)]],
   Documentation = "Show patches of the Apollo missions on their respective landing sites",
   GuiPath = "/Missions/Apollo",
@@ -94,7 +94,7 @@ local show_apollo_labels = {
 
 local hide_apollo_labels = {
   Identifier = "apollo_insignias.hide_insignias",
-  Name = "Hide Apollo Landing Labels",
+  Name = "Hide Apollo landing labels",
   Command = [[openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, 0.5)]],
   Documentation = "Hide patches of the Apollo missions on their respective landing sites",
   GuiPath = "/Missions/Apollo",

@@ -5,7 +5,7 @@ local layer = {
   Name = "Lola DEM [Utah]",
   Enabled = asset.enabled,
   FilePath = asset.localResource("loladem_utah.wms"),
-  TilePixelSize = 64,
+  TilePixelSize = 360,
   Settings = { Multiplier = 0.5 },
   Description = [[This digital elevation model (DEM) is based on data from the Lunar
     Orbiter Laser Altimeter (LOLA; Smith et al., 2010), an instrument on the National

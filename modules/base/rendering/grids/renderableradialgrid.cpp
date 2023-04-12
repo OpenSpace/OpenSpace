@@ -71,14 +71,7 @@ namespace {
         "ring"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
-        "DrawLabels",
-        "Draw Labels",
-        "Determines whether labels should be drawn or hidden"
-    };
-
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
-    {
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the grid"
@@ -100,9 +93,6 @@ namespace {
         // [[codegen::verbatim(RadiiInfo.description)]]
         std::optional<glm::vec2> radii;
 
-        // [[codegen::verbatim(DrawLabelInfo.description)]]
-        std::optional<bool> drawLabels;
-
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("space_labelscomponent")]];
@@ -123,12 +113,10 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     , _circleSegments(CircleSegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
     , _radii(RadiiInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(20.f))
-    , _drawLabels(DrawLabelInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
@@ -157,12 +145,11 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     addProperty(_radii);
 
     if (p.labels.has_value()) {
-        _drawLabels = p.drawLabels.value_or(_drawLabels);
-        addProperty(_drawLabels);
-
         _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
     }
 }
 
@@ -244,7 +231,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     global::renderEngine->openglStateCache().resetDepthState();
 
     // Draw labels
-    if (_drawLabels && _hasLabels) {
+    if (_hasLabels && _labels->enabled()) {
         const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
         const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
         glm::vec3 right = glm::cross(viewDirection, lookup);

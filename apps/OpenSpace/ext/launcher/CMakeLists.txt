@@ -113,9 +113,6 @@ target_include_directories(
   openspace-ui-launcher
   PUBLIC
   include
-  # @TODO:  This should be handled in a better way
-  ../sgct/include
-  ../sgct/sgct/ext/glm
 )
 target_link_libraries(
   openspace-ui-launcher
@@ -126,6 +123,8 @@ target_link_libraries(
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
+  PRIVATE
+    sgct
 )
 
 target_precompile_headers(openspace-ui-launcher PRIVATE

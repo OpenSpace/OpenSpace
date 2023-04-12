@@ -49,7 +49,7 @@ local fieldlines = {
 
 local toggle_fieldlines = {
   Identifier = "os.events.bastilleday.fieldlines.togglefieldlines",
-  Name = "Toggle Fieldlines",
+  Name = "Toggle fieldlines",
   Command = propertyHelper.invert("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled"),
   Documentation = "Toggle fieldline rendering of CME",
   GuiPath = "/Bastille-Day 2000",

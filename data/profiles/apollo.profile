@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "scene/solarsystem/missions/apollo/8/apollo8",
     "scene/solarsystem/missions/apollo/11/apollo11",
     "scene/solarsystem/missions/apollo/11/lem_flipbook",
