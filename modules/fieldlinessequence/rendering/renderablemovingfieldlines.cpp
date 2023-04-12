@@ -159,7 +159,9 @@ namespace openspace {
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data
     );
 
-    std::vector<RenderableMovingFieldlines::SetOfSeedPoints> extractSeedPointsFromCSVFile(std::ifstream file);
+    std::vector<RenderableMovingFieldlines::SetOfSeedPoints> extractSeedPointsFromCSVFile(
+        std::filesystem::path filePath
+    );
     std::ifstream readTxtOrCSVFile(std::filesystem::path filePath);
     std::vector<std::string> extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
 
