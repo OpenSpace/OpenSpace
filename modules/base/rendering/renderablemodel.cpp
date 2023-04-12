@@ -292,7 +292,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     if (p.forceRenderInvisible.has_value()) {
         _forceRenderInvisible = *p.forceRenderInvisible;
@@ -517,7 +517,7 @@ void RenderableModel::initializeGL() {
     }
     _program = BaseModule::ProgramObjectManager.request(
         program,
-        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [this, program]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             std::filesystem::path vs =
                 _vertexShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_vs.glsl") :

@@ -182,7 +182,7 @@ SkyBrowserModule::SkyBrowserModule()
     // Set callback functions
     global::callback::mouseButton->emplace(
         global::callback::mouseButton->begin(),
-        [&](MouseButton, MouseAction action, KeyModifier, IsGuiWindow) -> bool {
+        [this](MouseButton, MouseAction action, KeyModifier, IsGuiWindow) -> bool {
             if (action == MouseAction::Press) {
                 _cameraRotation.stop();
             }
@@ -295,7 +295,7 @@ void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
     auto it = std::remove_if(
         _targetsBrowsers.begin(),
         _targetsBrowsers.end(),
-        [&](const std::unique_ptr<TargetBrowserPair>& pair) {
+        [&found](const std::unique_ptr<TargetBrowserPair>& pair) {
             return found == pair.get();
         }
     );
@@ -410,7 +410,7 @@ TargetBrowserPair* SkyBrowserModule::pair(std::string_view id) const {
     auto it = std::find_if(
         _targetsBrowsers.begin(),
         _targetsBrowsers.end(),
-        [&](const std::unique_ptr<TargetBrowserPair>& pair) {
+        [&id](const std::unique_ptr<TargetBrowserPair>& pair) {
             const bool foundBrowser = pair->browserId() == id;
             const bool foundTarget = pair->targetRenderableId() == id;
             const bool foundTargetNode = pair->targetNodeId() == id;

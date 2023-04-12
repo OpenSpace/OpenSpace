@@ -188,11 +188,11 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _speckFile = absPath(p.file).string();
     _hasSpeckFile = true;
-    _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
+    _drawElements.onChange([this]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
 
     _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
@@ -228,7 +228,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         _hasLabel = p.textColor.has_value();
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_textColor);
-        _textColor.onChange([&]() { _textColorIsDirty = true; });
+        _textColor.onChange([this]() { _textColorIsDirty = true; });
 
         _textOpacity = p.textOpacity.value_or(_textOpacity);
         addProperty(_textOpacity);

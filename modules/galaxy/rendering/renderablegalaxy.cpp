@@ -297,7 +297,7 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         _pointSpreadFunctionTexturePath
     );
 
-    auto onChange = [&](bool enabled) {
+    auto onChange = [this](bool enabled) {
         if (enabled) {
             global::raycasterManager->attachRaycaster(*_raycaster);
         }

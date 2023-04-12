@@ -328,7 +328,9 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
     _xAxis.type.setGroupIdentifier("xAxis");
-    _xAxis.type.onChange([&]() { setPropertyVisibility(_xAxis); });
+    _xAxis.type.onChange(
+        [this, setPropertyVisibility]() { setPropertyVisibility(_xAxis); }
+    );
     addProperty(_xAxis.type);
 
     _xAxis.object.setGroupIdentifier("xAxis");
@@ -351,7 +353,9 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
     _yAxis.type.setGroupIdentifier("yAxis");
-    _yAxis.type.onChange([&]() { setPropertyVisibility(_yAxis); });
+    _yAxis.type.onChange(
+        [this, setPropertyVisibility]() { setPropertyVisibility(_yAxis); }
+    );
     addProperty(_yAxis.type);
 
     _yAxis.object.setGroupIdentifier("yAxis");
@@ -371,7 +375,9 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
     _zAxis.type.setGroupIdentifier("zAxis");
-    _zAxis.type.onChange([&]() { setPropertyVisibility(_zAxis); });
+    _zAxis.type.onChange(
+        [this, setPropertyVisibility]() { setPropertyVisibility(_zAxis); }
+    );
     addProperty(_zAxis.type);
 
     _zAxis.object.setGroupIdentifier("zAxis");

@@ -824,10 +824,11 @@ std::string prunedIdentifier(std::string identifier) {
         const std::vector<std::string>& images = pair->selectedImages();
         std::for_each(
             images.rbegin(), images.rend(),
-            [&](std::string imageUrl) {
-                const ImageData& image = module->wwtDataHandler().image(imageUrl).value();
+            [module, pair](std::string imageUrl) {
+                std::optional<ImageData> img = module->wwtDataHandler().image(imageUrl);
+                ghoul_assert(img.has_value(), "No image found");
                 // Index of image is used as layer ID as it's unique in the image data set
-                pair->browser()->addImageLayerToWwt(image.imageUrl);
+                pair->browser()->addImageLayerToWwt(img->imageUrl);
             }
         );
     }

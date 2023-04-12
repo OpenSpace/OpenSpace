@@ -211,12 +211,12 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     if (p.file.has_value()) {
         _speckFile = absPath(*p.file);
         _hasSpeckFile = true;
-        _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
+        _drawElements.onChange([this]() { _hasSpeckFile = !_hasSpeckFile; });
         addProperty(_drawElements);
     }
 
@@ -236,7 +236,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
 
     _scaleFactor = p.scaleFactor.value_or(_scaleFactor);
     addProperty(_scaleFactor);
-    _scaleFactor.onChange([&]() { _dataIsDirty = true; });
+    _scaleFactor.onChange([this]() { _dataIsDirty = true; });
 
     if (p.labels.has_value()) {
         _labels = std::make_unique<LabelsComponent>(*p.labels);
@@ -252,7 +252,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         { BlendModeNormal, "Normal" },
         { BlendModeAdditive, "Additive" }
     });
-    _blendMode.onChange([&]() {
+    _blendMode.onChange([this]() {
         switch (_blendMode) {
             case BlendModeNormal:
                 setRenderBin(Renderable::RenderBin::Opaque);

@@ -91,7 +91,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
@@ -101,7 +101,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     addProperty(_lineWidth);
 
     _size = p.size.value_or(_size);
-    _size.onChange([&]() { _gridIsDirty = true; });
+    _size.onChange([this]() { _gridIsDirty = true; });
     addProperty(_size);
 
     if (p.labels.has_value()) {

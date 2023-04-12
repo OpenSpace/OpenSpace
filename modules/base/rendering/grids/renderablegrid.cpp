@@ -134,7 +134,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
@@ -146,11 +146,11 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     addProperty(_highlightColor);
 
     _segments = p.segments.value_or(_segments);
-    _segments.onChange([&]() { _gridIsDirty = true; });
+    _segments.onChange([this]() { _gridIsDirty = true; });
     addProperty(_segments);
 
     _highlightRate = p.highlightRate.value_or(_highlightRate);
-    _highlightRate.onChange([&]() { _gridIsDirty = true; });
+    _highlightRate.onChange([this]() { _gridIsDirty = true; });
     addProperty(_highlightRate);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
@@ -162,7 +162,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
 
     _size.setExponent(10.f);
     _size = p.size.value_or(_size);
-    _size.onChange([&]() { _gridIsDirty = true; });
+    _size.onChange([this]() { _gridIsDirty = true; });
     addProperty(_size);
 
     if (p.labels.has_value()) {

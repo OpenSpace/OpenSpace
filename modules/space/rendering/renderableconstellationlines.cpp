@@ -110,7 +110,7 @@ RenderableConstellationLines::RenderableConstellationLines(
 
     // Avoid reading files here, instead do it in multithreaded initialize()
     _speckFile = absPath(p.file.string()).string();
-    _speckFile.onChange([&]() { loadData(); });
+    _speckFile.onChange([this]() { loadData(); });
     addProperty(_speckFile);
 
     addProperty(_drawElements);

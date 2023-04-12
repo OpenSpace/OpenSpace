@@ -321,9 +321,7 @@ TouchInteraction::TouchInteraction()
         std::chrono::high_resolution_clock::now().time_since_epoch()
     );
 
-    _reset.onChange([&]() {
-        resetPropertiesToDefault();
-    });
+    _reset.onChange([this]() { resetPropertiesToDefault(); });
 }
 
 void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>& list,
@@ -574,7 +572,7 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
         list.begin(),
         list.end(),
         0.0,
-        [&](double diff, const TouchInputHolder& inputHolder) {
+        [this, &lastProcessed](double diff, const TouchInputHolder& inputHolder) {
             const TouchInput& lastPoint = *std::find_if(
                 lastProcessed.begin(),
                 lastProcessed.end(),
@@ -745,7 +743,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
                 list.begin(),
                 list.end(),
                 0.0,
-                [&](double diff, const TouchInputHolder& inputHolder) {
+                [this, &lastProcessed](double diff, const TouchInputHolder& inputHolder) {
                     TouchInput point = *std::find_if(
                         lastProcessed.begin(),
                         lastProcessed.end(),

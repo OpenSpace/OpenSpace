@@ -191,7 +191,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     setRenderBin(RenderBin::Overlay);
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>("Translation")

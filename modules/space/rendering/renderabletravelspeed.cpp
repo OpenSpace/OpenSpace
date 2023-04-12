@@ -118,7 +118,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
     setRenderBin(RenderBin::Overlay);

@@ -579,7 +579,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     ghoul::Dictionary layersDictionary = dictionary.value<ghoul::Dictionary>("Layers");
     _layerManager.initialize(layersDictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.renderAtDistance);
@@ -603,7 +603,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _shadowMappingPropertyOwner.addProperty(_generalProperties.shadowMapping);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.zFightingPercentage);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.nShadowSamples);
-    _generalProperties.nShadowSamples.onChange([&]() {
+    _generalProperties.nShadowSamples.onChange([this]() {
         _shadersNeedRecompilation = true;
     });
     addPropertySubOwner(_shadowMappingPropertyOwner);
@@ -626,7 +626,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
     _debugPropertyOwner.addProperty(_debugProperties.dynamicLodIterationCount);
 
-    auto notifyShaderRecompilation = [&]() {
+    auto notifyShaderRecompilation = [this]() {
         _shadersNeedRecompilation = true;
     };
     _generalProperties.useAccurateNormals.onChange(notifyShaderRecompilation);
@@ -635,7 +635,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _generalProperties.performShading.onChange(notifyShaderRecompilation);
     _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
 
-    _layerManager.onChange([&](Layer* l) {
+    _layerManager.onChange([this](Layer* l) {
         _shadersNeedRecompilation = true;
         _chunkCornersDirty = true;
         _nLayersIsDirty = true;

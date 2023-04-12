@@ -451,34 +451,34 @@ OrbitalNavigator::OrbitalNavigator()
     );
 
     // Define callback functions for changed properties
-    _friction.roll.onChange([&]() {
+    _friction.roll.onChange([this]() {
         _mouseStates.setRotationalFriction(_friction.roll);
         _joystickStates.setRotationalFriction(_friction.roll);
         _websocketStates.setRotationalFriction(_friction.roll);
     });
-    _friction.rotational.onChange([&]() {
+    _friction.rotational.onChange([this]() {
         _mouseStates.setHorizontalFriction(_friction.rotational);
         _joystickStates.setHorizontalFriction(_friction.rotational);
         _websocketStates.setHorizontalFriction(_friction.rotational);
     });
-    _friction.zoom.onChange([&]() {
+    _friction.zoom.onChange([this]() {
         _mouseStates.setVerticalFriction(_friction.zoom);
         _joystickStates.setVerticalFriction(_friction.zoom);
         _websocketStates.setVerticalFriction(_friction.zoom);
     });
-    _friction.friction.onChange([&]() {
+    _friction.friction.onChange([this]() {
         _mouseStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
         _joystickStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
         _websocketStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
     });
 
-    _mouseSensitivity.onChange([&]() {
+    _mouseSensitivity.onChange([this]() {
         _mouseStates.setSensitivity(_mouseSensitivity * pow(10.0, -4));
     });
-    _joystickSensitivity.onChange([&]() {
+    _joystickSensitivity.onChange([this]() {
         _joystickStates.setSensitivity(_joystickSensitivity * 0.1);
     });
-    _websocketSensitivity.onChange([&]() {
+    _websocketSensitivity.onChange([this]() {
         _websocketStates.setSensitivity(_websocketSensitivity);
     });
 
@@ -488,12 +488,12 @@ OrbitalNavigator::OrbitalNavigator()
     _idleBehaviorDampenInterpolator.setTransferFunction(
         ghoul::quadraticEaseInOut<double>
     );
-    _idleBehavior.dampenInterpolationTime.onChange([&]() {
+    _idleBehavior.dampenInterpolationTime.onChange([this]() {
         _idleBehaviorDampenInterpolator.setInterpolationTime(
             _idleBehavior.dampenInterpolationTime
         );
      });
-    _idleBehavior.apply.onChange([&]() {
+    _idleBehavior.apply.onChange([this]() {
         if (_idleBehavior.apply) {
             // Reset velocities to ensure that abort on interaction works correctly
             resetVelocities();
@@ -507,10 +507,10 @@ OrbitalNavigator::OrbitalNavigator()
             _idleBehavior.dampenInterpolationTime
         );
     });
-    _idleBehavior.shouldTriggerWhenIdle.onChange([&]() {
+    _idleBehavior.shouldTriggerWhenIdle.onChange([this]() {
         _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
     });
-    _idleBehavior.idleWaitTime.onChange([&]() {
+    _idleBehavior.idleWaitTime.onChange([this]() {
         _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
     });
 
@@ -531,7 +531,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_retargetInterpolationTime);
     addProperty(_stereoInterpolationTime);
 
-    _followRotationInterpolationTime.onChange([&]() {
+    _followRotationInterpolationTime.onChange([this]() {
         _followRotationInterpolator.setInterpolationTime(
             _followRotationInterpolationTime
         );

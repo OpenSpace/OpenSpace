@@ -116,18 +116,18 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
     _gridSegments = p.gridSegments.value_or(_gridSegments);
-    _gridSegments.onChange([&]() { _gridIsDirty = true; });
+    _gridSegments.onChange([this]() { _gridIsDirty = true; });
     addProperty(_gridSegments);
 
     _circleSegments = p.circleSegments.value_or(_circleSegments);
-    _circleSegments.onChange([&]() {
+    _circleSegments.onChange([this]() {
         if (_circleSegments.value() % 2 == 1) {
             _circleSegments = _circleSegments - 1;
         }
@@ -140,7 +140,7 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
 
     _radii = p.radii.value_or(_radii);
     _radii.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-    _radii.onChange([&]() { _gridIsDirty = true; });
+    _radii.onChange([this]() { _gridIsDirty = true; });
 
     addProperty(_radii);
 

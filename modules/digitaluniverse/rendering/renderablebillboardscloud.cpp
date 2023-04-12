@@ -334,7 +334,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _useColorMap = p.useColorMap.value_or(_useColorMap);
 
     _drawElements = p.drawElements.value_or(_drawElements);
-    _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
+    _drawElements.onChange([this]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
 
     _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
@@ -357,7 +357,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
     if (p.texture.has_value()) {
         _spriteTexturePath = absPath(*p.texture).string();
-        _spriteTexturePath.onChange([&]() { _spriteTextureIsDirty = true; });
+        _spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
 
         // @TODO (abock, 2021-01-31) I don't know why we only add this property if the
         // texture is given, but I think it's a bug
@@ -378,7 +378,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
                 _colorOptionString = opts[i];
             }
         }
-        _colorOption.onChange([&]() {
+        _colorOption.onChange([this]() {
             _dataIsDirty = true;
             const glm::vec2 colorRange = _colorRangeData[_colorOption.value()];
             _optionColorRangeData = colorRange;
@@ -390,7 +390,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         if (!_colorRangeData.empty()) {
             _optionColorRangeData = _colorRangeData[_colorRangeData.size() - 1];
         }
-        _optionColorRangeData.onChange([&]() {
+        _optionColorRangeData.onChange([this]() {
             const glm::vec2 colorRange = _optionColorRangeData;
             _colorRangeData[_colorOption.value()] = colorRange;
             _dataIsDirty = true;
@@ -404,7 +404,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _pointColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_pointColor);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _scaleFactor = p.scaleFactor.value_or(_scaleFactor);
     addProperty(_scaleFactor);
@@ -417,7 +417,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             _datavarSizeOptionString = opts[i];
         }
 
-        _datavarSizeOption.onChange([&]() {
+        _datavarSizeOption.onChange([this]() {
             _dataIsDirty = true;
             _datavarSizeOptionString = _optionConversionSizeMap[_datavarSizeOption];
         });
@@ -484,7 +484,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     addProperty(_useColorMap);
 
     _useLinearFiltering = p.useLinearFiltering.value_or(_useLinearFiltering);
-    _useLinearFiltering.onChange([&]() { _dataIsDirty = true; });
+    _useLinearFiltering.onChange([this]() { _dataIsDirty = true; });
     addProperty(_useLinearFiltering);
 }
 

@@ -308,8 +308,8 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(_scale);
     addProperty(_multiplyColor);
     addProperty(_backgroundColor);
-    addProperty(_opacity);
-    addProperty(_fade);
+    addProperty(Fadeable::_opacity);
+    addProperty(Fadeable::_fade);
     addProperty(_localRotation);
 
 

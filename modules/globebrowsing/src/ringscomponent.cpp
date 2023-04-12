@@ -248,12 +248,12 @@ void RingsComponent::initialize() {
     const Parameters p = codegen::bake<Parameters>(_ringsDictionary);
 
     addProperty(_enabled);
-    addProperty(_opacity);
-    addProperty(_fade);
+    addProperty(Fadeable::_opacity);
+    addProperty(Fadeable::_fade);
 
     _size.setExponent(15.f);
     _size = p.size.value_or(_size);
-    _size.onChange([&]() { _planeIsDirty = true; });
+    _size.onChange([this]() { _planeIsDirty = true; });
     addProperty(_size);
 
     if (p.texture.has_value()) {

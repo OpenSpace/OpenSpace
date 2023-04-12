@@ -219,8 +219,8 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     addProperty(_enabled);
     addProperty(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_opacity);
-    addProperty(_fade);
+    addProperty(Fadeable::_opacity);
+    addProperty(Fadeable::_fade);
 
     addProperty(_fontSize);
     addProperty(_size);

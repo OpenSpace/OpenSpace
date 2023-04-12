@@ -153,7 +153,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _lineColor = p.color.value_or(_lineColor);
     _lineColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -205,7 +205,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
      });
 
     addProperty(_useRelativeOffsets);
-    _useRelativeOffsets.onChange([&]() {
+    _useRelativeOffsets.onChange([this]() {
         SceneGraphNode* startNode = global::renderEngine->scene()->sceneGraphNode(_start);
         SceneGraphNode* endNode = global::renderEngine->scene()->sceneGraphNode(_end);
 

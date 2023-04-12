@@ -95,13 +95,13 @@ RenderableConstellationsBase::RenderableConstellationsBase(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     // Avoid reading files here, instead do it in multithreaded initialize()
     if (p.namesFile.has_value()) {
         _namesFilename = absPath(p.namesFile.value().string()).string();
     }
-    _namesFilename.onChange([&]() { loadConstellationFile(); });
+    _namesFilename.onChange([this]() { loadConstellationFile(); });
     addProperty(_namesFilename);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);

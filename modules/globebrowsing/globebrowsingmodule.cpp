@@ -201,7 +201,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     _mrfCacheLocation = p.mrfCacheLocation.value_or(_mrfCacheLocation);
 
     // Initialize
-    global::callback::initializeGL->emplace_back([&]() {
+    global::callback::initializeGL->emplace_back([this]() {
         ZoneScopedN("GlobeBrowsingModule");
 
         _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
@@ -224,14 +224,14 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     });
 
     // Render
-    global::callback::render->emplace_back([&]() {
+    global::callback::render->emplace_back([this]() {
         ZoneScopedN("GlobeBrowsingModule");
 
         _tileCache->update();
     });
 
     // Deinitialize
-    global::callback::deinitialize->emplace_back([&]() {
+    global::callback::deinitialize->emplace_back([]() {
         ZoneScopedN("GlobeBrowsingModule");
 
         GdalWrapper::destroy();

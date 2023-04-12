@@ -280,11 +280,11 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         _radius = std::get<glm::vec3>(p.radius);
     }
     setBoundingSphere(glm::compMax(_radius.value()));
-    _radius.onChange([&]() { createSphere(); });
+    _radius.onChange([this]() { createSphere(); });
     addProperty(_radius);
 
     _segments = p.segments;
-    _segments.onChange([&]() { createSphere(); });
+    _segments.onChange([this]() { createSphere(); });
     addProperty(_segments);
 }
 

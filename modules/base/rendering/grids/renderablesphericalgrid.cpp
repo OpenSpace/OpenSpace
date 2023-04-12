@@ -93,14 +93,14 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
     _segments = p.segments.value_or(_segments);
-    _segments.onChange([&]() {
+    _segments.onChange([this]() {
         if (_segments.value() % 2 == 1) {
             _segments = _segments - 1;
         }

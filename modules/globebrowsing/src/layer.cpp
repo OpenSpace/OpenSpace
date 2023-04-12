@@ -229,8 +229,8 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
     _padTilePixelSizeDifference = initData.tilePixelSizeDifference;
 
     _opacity = p.opacity.value_or(_opacity);
-    addProperty(_opacity);
-    addProperty(_fade);
+    addProperty(Fadeable::_opacity);
+    addProperty(Fadeable::_fade);
 
     if (p.settings.has_value()) {
         _renderSettings.gamma = p.settings->gamma.value_or(_renderSettings.gamma);
@@ -280,26 +280,26 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
     }
 
     // On change callbacks definitions
-    _enabled.onChange([&]() {
+    _enabled.onChange([this]() {
         if (_onChangeCallback) {
             _onChangeCallback(this);
         }
     });
 
-    _reset.onChange([&]() {
+    _reset.onChange([this]() {
         if (_tileProvider) {
             _tileProvider->reset();
         }
     });
 
-    _remove.onChange([&]() {
+    _remove.onChange([this]() {
         if (_tileProvider) {
             _tileProvider->reset();
             _parent.deleteLayer(identifier());
         }
     });
 
-    _renderSettings.onChange([&]() {
+    _renderSettings.onChange([this]() {
         // Only if we are a height layer will anyone care about these settings changing as
         // that will change the overall bounding box of the layer and thus require culling
         if (_parent.isHeightLayer() && _onChangeCallback) {
@@ -307,7 +307,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
         }
     });
 
-    _typeOption.onChange([&]() {
+    _typeOption.onChange([this]() {
         switch (type()) {
             // Intentional fall through. Same for all tile layers
             case layers::Layer::ID::DefaultTileLayer:
@@ -338,13 +338,13 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
         }
     });
 
-    _blendModeOption.onChange([&]() {
+    _blendModeOption.onChange([this]() {
         if (_onChangeCallback) {
             _onChangeCallback(this);
         }
     });
 
-    _layerAdjustment.onChange([&]() {
+    _layerAdjustment.onChange([this]() {
         if (_onChangeCallback) {
             _onChangeCallback(this);
         }

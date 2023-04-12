@@ -187,7 +187,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings s
     // We don't add the property here as subclasses should decide on their own whether
     // they to expose the opacity or not
 
-    addProperty(_fade);
+    addProperty(Fadeable::_fade);
 
     // set type for UI
     _renderableType = p.type.value_or(_renderableType);
