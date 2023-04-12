@@ -635,9 +635,7 @@ getGeoPositionForCamera(bool useEyePosition = false)
     // Make a minimal dictionary to represent the geojson component
     ghoul::Dictionary d;
 
-    std::string identifier = openspace::makeIdentifier(
-        name.value_or(path.stem().string())
-    );
+    std::string identifier = makeIdentifier(name.value_or(path.stem().string()));
     d.setValue("Identifier", identifier);
     d.setValue("File", path.string());
     if (name.has_value()) {

@@ -80,9 +80,9 @@ struct GeoJsonProperties : public properties::PropertyOwner {
     properties::OptionProperty altitudeModeOption;
 
     // TODO: make separate propertowner, for better distinguishemnt
-    properties::BoolProperty shouldTesselate;
-    properties::IntProperty tesselationLevel;
-    properties::FloatProperty tesselationMaxDistance;
+    properties::BoolProperty shouldTessellate;
+    properties::IntProperty tessellationLevel;
+    properties::FloatProperty tessellationMaxDistance;
 };
 
 // Optional versions of all the properties above, that can be read from a geoJson file
@@ -104,9 +104,9 @@ struct GeoJsonOverrideProperties {
     std::optional<bool> performShading;
     std::optional<GeoJsonProperties::AltitudeMode> altitudeMode;
 
-    std::optional<bool> shouldTesselate;
-    std::optional<int> tesselationLevel;
-    std::optional<float> tesselationMaxDistance;
+    std::optional<bool> shouldTessellate;
+    std::optional<int> tessellationLevel;
+    std::optional<float> tessellationMaxDistance;
 };
 
 GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& feature);
@@ -131,9 +131,9 @@ struct PropertySet {
     bool performShading() const;
     GeoJsonProperties::AltitudeMode altitudeMode() const;
 
-    bool shouldtesselate() const;
-    int tesselationLevel() const;
-    float tesselationMaxDistance() const;
+    bool shouldTessellate() const;
+    int tessellationLevel() const;
+    float tessellationMaxDistance() const;
 
     bool hasOverrideTexture() const;
 };

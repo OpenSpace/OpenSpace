@@ -48,10 +48,10 @@
 namespace openspace {
     struct RenderData;
     class LightSource;
+    namespace documentation { struct Documentation; }
+    namespace rendering::helper { struct VertexXYZNormal; }
 } // namespace::openspace
 
-namespace openspace::documentation { struct Documentation; }
-namespace openspace::rendering::helper { struct VertexXYZNormal; }
 namespace ghoul::opengl { class ProgramObject; }
 namespace geos::io { class GeoJSONFeature; }
 

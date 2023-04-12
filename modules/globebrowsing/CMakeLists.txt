@@ -179,6 +179,6 @@ else (WIN32)
 endif () # WIN32
 
 begin_dependency("GEOS")
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/geos)
+add_subdirectory(ext/geos SYSTEM)
 target_link_libraries(openspace-module-globebrowsing PRIVATE geos)
 end_dependency("GEOS")

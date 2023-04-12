@@ -35,7 +35,7 @@ namespace ghoul::opengl {
 namespace openspace {
     class LightSource;
     struct RenderData;
-}
+} // namespace openspace
 
 namespace openspace::rendering::helper {
 

@@ -97,13 +97,13 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
     std::vector<rendering::helper::VertexXYZNormal> vertices;
 
     size_t nVerts = 0;
-    for (const auto& edge : edgeVertices) {
+    for (const std::vector<glm::vec3>& edge : edgeVertices) {
         nVerts += edge.size();
     }
     vertices.reserve(nVerts * 3);
 
     // Extrude polygon
-    for (int nBound = 0; nBound < edgeVertices.size(); ++nBound) {
+    for (size_t nBound = 0; nBound < edgeVertices.size(); ++nBound) {
         const std::vector<glm::vec3>& boundary = edgeVertices[nBound];
         for (int i = 1; i < boundary.size(); ++i) {
             glm::vec3 v0 = boundary[i - 1];
@@ -177,7 +177,7 @@ std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3&
 
     // If step distance is too big, just add first position
     if (nSegments == 0) {
-        positions.push_back({ static_cast<glm::vec3>(v0), h0 });
+        positions.push_back({ glm::vec3(v0), h0 });
     }
 
     for (int seg = 0; seg < nSegments; ++seg) {

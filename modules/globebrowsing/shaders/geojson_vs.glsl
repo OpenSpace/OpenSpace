@@ -60,5 +60,5 @@ void main() {
     gl_Position = positionScreenSpace;
 
     // Set z to 0 to disable near and far plane, unique handling for perspective in space
-    gl_Position.z = 0.f;
+    gl_Position.z = 0.0;
 }

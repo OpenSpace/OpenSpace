@@ -116,6 +116,7 @@ private:
 
     properties::UIntProperty _tileCacheSizeMB;
 
+    properties::StringProperty _defaultGeoPointTexturePath;
     properties::BoolProperty _mrfCacheEnabled;
     properties::StringProperty _mrfCacheLocation;
 
@@ -129,7 +130,6 @@ private:
     std::multimap<std::string, UrlInfo> _urlList;
 
     bool _hasDefaultGeoPointTexture = false;
-    properties::StringProperty _defaultGeoPointTexturePath;
 };
 
 } // namespace openspace

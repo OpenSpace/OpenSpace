@@ -32,16 +32,16 @@ namespace openspace::globebrowsing {
     struct Geodetic2;
     struct Geodetic3;
     class RenderableGlobe;
-}
+} // namespace openspace::globebrowsing
 
 namespace openspace::rendering::helper {
     struct VertexXYZNormal;
-}
+} // namespace openspace::rendering::helper
 
 namespace geos::geom {
     class Coordinate;
     class Geometry;
-}
+} // namespace geos::geom
 
 namespace openspace::globebrowsing::geometryhelper {
 

@@ -100,8 +100,7 @@ void GlobeGeometryFeature::deinitializeGL() {
 }
 
 bool GlobeGeometryFeature::isReady() const {
-    bool shadersAreReady = (_linesAndPolygonsProgram != nullptr) &&
-        (_pointsProgram != nullptr);
+    bool shadersAreReady = _linesAndPolygonsProgram && _pointsProgram;
     bool textureIsReady = _hasTexture ? (_pointTexture != nullptr) : true;
     return shadersAreReady && textureIsReady;
 }
@@ -116,7 +115,7 @@ bool GlobeGeometryFeature::useHeightMap() const {
 }
 
 void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
-    std::string texture = "";
+    std::string texture;
     GlobeBrowsingModule* m = global::moduleEngine->module<GlobeBrowsingModule>();
 
     if (!isInitializeStep && _properties.hasOverrideTexture()) {
@@ -157,9 +156,10 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
 void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geometry* geo,
                                                         int index, bool ignoreHeights)
 {
+    ghoul_assert(geo, "No geometry provided");
     ghoul_assert(
         geo->isPuntal() || !geo->isCollection(),
-        "Non-point-geometry can not be a collection"
+        "Non-point geometry can not be a collection"
     );
 
     switch (geo->getGeometryTypeId()) {
@@ -302,7 +302,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
         }
 
         bool shouldRenderTwice = r.type == RenderType::Polygon &&
-            fillOpacity < 1.0 && _properties.extrude();
+            fillOpacity < 1.f && _properties.extrude();
 
         if (pass > 0 && !shouldRenderTwice) {
             continue;
@@ -425,8 +425,7 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
     glDisable(GL_PROGRAM_POINT_SIZE);
 }
 
-void GlobeGeometryFeature::renderLines(const RenderFeature& feature) const
-{
+void GlobeGeometryFeature::renderLines(const RenderFeature& feature) const {
     ghoul_assert(feature.type == RenderType::Lines, "Trying to render faulty geometry");
 
     const glm::vec3 color = feature.isExtrusionFeature ?
@@ -443,6 +442,7 @@ void GlobeGeometryFeature::renderLines(const RenderFeature& feature) const
 void GlobeGeometryFeature::renderPolygons(const RenderFeature& feature,
                                           bool shouldRenderTwice, int renderPass) const
 {
+    ghoul_assert(renderPass == 0 || renderPass == 1, "Invalid render pass");
     ghoul_assert(
         feature.type == RenderType::Polygon,
         "Trying to render faulty geometry"
@@ -453,14 +453,8 @@ void GlobeGeometryFeature::renderPolygons(const RenderFeature& feature,
 
     if (shouldRenderTwice) {
         glEnable(GL_CULL_FACE);
-        if (renderPass == 0) {
-            // First draw back faces
-            glCullFace(GL_FRONT);
-        }
-        else {
-            // Then front faces
-            glCullFace(GL_BACK);
-        }
+        // First draw back faces, then front faces
+        glCullFace(renderPass == 0 ? GL_FRONT : GL_BACK);
     }
     else {
         glDisable(GL_CULL_FACE);
@@ -563,7 +557,7 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
                 _offsets.y
             );
 
-            auto addLinePos = [&](glm::vec3 pos) {
+            auto addLinePos = [&vertices, &positions](glm::vec3 pos) {
                 vertices.push_back({ pos.x, pos.y, pos.z, 0.f, 0.f, 0.f });
                 positions.push_back(pos);
             };
@@ -578,12 +572,12 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
 
             float length = glm::distance(lastPos, v);
 
-            if (shouldTesselate(length)) {
+            if (shouldTessellate(length)) {
                 // Add extra vertices to fulfill MaxDistance criteria.
-                // First determine how much to tesselate
-                float stepSize = _properties.tesselationLevel() > 0 ?
-                    length / static_cast<float>(_properties.tesselationLevel()) :
-                    _properties.tesselationMaxDistance();
+                // First determine how much to tessellate
+                float stepSize = _properties.tessellationLevel() > 0 ?
+                    length / static_cast<float>(_properties.tessellationLevel()) :
+                    _properties.tessellationMaxDistance();
 
                 std::vector<geometryhelper::PosHeightPair> subdividedPositions =
                     geometryhelper::subdivideLine(
@@ -630,7 +624,7 @@ void GlobeGeometryFeature::createPointGeometry() {
         return;
     }
 
-    for (int i = 0; i < _geoCoordinates.size(); ++i) {
+    for (size_t i = 0; i < _geoCoordinates.size(); ++i) {
         std::vector<Vertex> vertices;
         vertices.reserve(_geoCoordinates[i].size());
 
@@ -732,11 +726,11 @@ void GlobeGeometryFeature::createPolygonGeometry() {
                 glm::distance(v1, v2)
             );
 
-            if (shouldTesselate(longestSide)) {
-                // First determine how much to tesselate
-                float stepSize = _properties.tesselationLevel() > 0 ?
-                    longestSide / static_cast<float>(_properties.tesselationLevel()) :
-                    _properties.tesselationMaxDistance();
+            if (shouldTessellate(longestSide)) {
+                // First determine how much to tessellate
+                float stepSize = _properties.tessellationLevel() > 0 ?
+                    longestSide / static_cast<float>(_properties.tessellationLevel()) :
+                    _properties.tessellationMaxDistance();
 
                 std::vector<Vertex> verts = geometryhelper::subdivideTriangle(
                     v0, v1, v2,
@@ -794,19 +788,19 @@ std::vector<double> GlobeGeometryFeature::getCurrentReferencePointsHeights() con
     return newHeights;
 }
 
-bool GlobeGeometryFeature::shouldTesselate(float objectSize) const {
-    if (objectSize > _properties.tesselationMaxDistance()) {
-        // @TODO Come up with some nice solution for tesselation of smaller objects...
+bool GlobeGeometryFeature::shouldTessellate(float objectSize) const {
+    if (objectSize > _properties.tessellationMaxDistance()) {
+        // @TODO Come up with some nice solution for tessellation of smaller objects...
         return true;
     }
-    return _properties.shouldtesselate() && _properties.tesselationLevel() > 0;
+    return _properties.shouldTessellate() && _properties.tessellationLevel() > 0;
 }
 
 void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
                                             const std::vector<Vertex>& vertexData)
 {
-    ghoul_assert(_pointsProgram != nullptr, "Shader program must be initialized");
-    ghoul_assert(_linesAndPolygonsProgram != nullptr, "Shader program must be initialized");
+    ghoul_assert(_pointsProgram, "Shader program must be initialized");
+    ghoul_assert(_linesAndPolygonsProgram, "Shader program must be initialized");
 
     ghoul::opengl::ProgramObject* program = _linesAndPolygonsProgram;
     if (feature.type == RenderType::Points) {
@@ -814,7 +808,7 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
     }
 
     // Reserve space for both vertex and dynamic height information
-    auto fullBufferSize = vertexData.size() * (sizeof(Vertex) +sizeof(float));
+    auto fullBufferSize = vertexData.size() * (sizeof(Vertex) + sizeof(float));
 
     glBindVertexArray(feature.vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, feature.vboId);
@@ -881,8 +875,8 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
 };
 
 void GlobeGeometryFeature::bufferDynamicHeightData(const RenderFeature& feature) {
-    ghoul_assert(_pointsProgram != nullptr, "Shader program must be initialized");
-    ghoul_assert(_linesAndPolygonsProgram != nullptr, "Shader program must be initialized");
+    ghoul_assert(_pointsProgram, "Shader program must be initialized");
+    ghoul_assert(_linesAndPolygonsProgram, "Shader program must be initialized");
 
     ghoul::opengl::ProgramObject* program = _linesAndPolygonsProgram;
     if (feature.type == RenderType::Points) {

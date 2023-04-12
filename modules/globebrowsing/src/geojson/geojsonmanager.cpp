@@ -49,6 +49,7 @@ documentation::Documentation GeoJsonManager::Documentation() {
 GeoJsonManager::GeoJsonManager() : properties::PropertyOwner({ "GeoJson" }) {}
 
 void GeoJsonManager::initialize(RenderableGlobe* globe) {
+    ghoul_assert(globe, "No globe provided");
     _parentGlobe = globe;
 }
 
@@ -82,7 +83,7 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
 
         std::string identifier = layerDict.value<std::string>("Identifier");
         if (hasPropertySubOwner(identifier)) {
-            LERROR("Layer with identifier '" + identifier + "' already exists");
+            LERROR("GeoJson layer with identifier '" + identifier + "' already exists");
             return;
         }
 
@@ -97,13 +98,7 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
         addPropertySubOwner(ptr);
     }
     catch (const documentation::SpecificationError& e) {
-        LERRORC(e.component, e.message);
-        for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERRORC(o.offender, ghoul::to_string(o.reason));
-        }
-        for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNINGC(w.offender, ghoul::to_string(w.reason));
-        }
+        logError(e);
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
@@ -121,21 +116,20 @@ void GeoJsonManager::deleteLayer(const std::string& layerIdentifier) {
             removePropertySubOwner(it->get());
             (*it)->deinitializeGL();
             _geoJsonObjects.erase(it);
-            LINFO("Deleted geoJSON layer " + id);
+            LINFO("Deleted GeoJson layer " + id);
             return;
         }
     }
-    LERROR("Could not find geoJSON layer " + layerIdentifier);
+    LERROR("Could not find GeoJson layer " + layerIdentifier);
 }
 
 void GeoJsonManager::update() {
     ZoneScoped
 
     for (std::unique_ptr<GeoJsonComponent>& obj : _geoJsonObjects) {
-        if (!obj->enabled()) {
-            continue;
+        if (obj->enabled()) {
+            obj->update();
         }
-        obj->update();
     }
 }
 
@@ -143,10 +137,9 @@ void GeoJsonManager::render(const RenderData& data) {
     ZoneScoped
 
     for (std::unique_ptr<GeoJsonComponent>& obj : _geoJsonObjects) {
-        if (!obj->enabled()) {
-            continue;
+        if (obj->enabled()) {
+            obj->render(data);
         }
-        obj->render(data);
     }
 }
 

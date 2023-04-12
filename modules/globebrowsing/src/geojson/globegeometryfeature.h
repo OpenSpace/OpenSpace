@@ -40,7 +40,8 @@ namespace openspace::documentation { struct Documentation; }
 namespace rendering::helper {
     struct LightSourceRenderData;
     struct VertexXYZNormal;
-}
+} // namespace rendering::helper
+
 namespace geos::geom { class Geometry; }
 
 namespace openspace::globebrowsing {
@@ -87,6 +88,8 @@ public:
 
     // Each geometry feature might translate into several render features
     struct RenderFeature {
+        void initializeBuffers();
+
         RenderType type;
         GLuint vaoId = 0;
         GLuint vboId = 0;
@@ -99,8 +102,6 @@ public:
 
         // Keep the heights around
         std::vector<float> heights;
-
-        void initializeBuffers();
     };
 
     std::string key() const;
@@ -168,7 +169,7 @@ private:
     /// Compute the heights to the surface at the reference points
     std::vector<double> getCurrentReferencePointsHeights() const;
 
-    bool shouldTesselate(float objectSize) const;
+    bool shouldTessellate(float objectSize) const;
 
     /// Buffer the static data for the vertices
     void bufferVertexData(const RenderFeature& feature,

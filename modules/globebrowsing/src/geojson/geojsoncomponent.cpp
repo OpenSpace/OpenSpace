@@ -45,6 +45,7 @@
 #include <geos/io/GeoJSONReader.h>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <optional>
 
 // This has to be included after the geos files, since they have their own version
@@ -122,6 +123,27 @@ namespace {
         "different options in the wiki"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FlyToFeatureInfo = {
+        "FlyToFeature",
+        "Fly To Feature",
+        "Triggering this leads to the camera flying to a position that show the GeoJSON "
+        "feature. The flight will account for any lat, long or height offset"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CentroidCoordinateInfo = {
+        "CentroidCoordinate",
+        "Centroid Coordinate",
+        "The lat long coordinate of the centroid position of the read geometry. Note "
+        "that this value does not incude the offset"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BoundingBoxInfo = {
+        "BoundingBox",
+        "Bounding Box",
+        "The lat long coordinates of the lower and upper corner of the bounding box of "
+        "the read geometry. Note that this value does not incude the offset"
+    };
+
     struct [[codegen::Dictionary(GeoJsonComponent)]] Parameters {
         // The unique identifier for this layer. May not contain '.' or spaces
         std::string identifier;
@@ -176,29 +198,6 @@ namespace {
             [[codegen::reference("core_light_source")]];
     };
 #include "geojsoncomponent_codegen.cpp"
-
-
-    constexpr openspace::properties::Property::PropertyInfo FlyToFeatureInfo = {
-        "FlyToFeature",
-        "Fly To Feature",
-        "Triggering this leads to the camera flying to a position that show the GeoJSON "
-        "feature. The flight will account for any lat, long or height offset"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo CentroidCoordinateInfo = {
-        "CentroidCoordinate",
-        "Centroid Coordinate",
-        "The lat long coordinate of the centroid position of the read geometry. Note "
-        "that this value does not incude the offset"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo BoundingBoxInfo = {
-        "BoundingBox",
-        "Bounding Box",
-        "The lat long coordinates of the lower and upper corner of the bounding box of "
-        "the read geometry. Note that this value does not incude the offset"
-    };
-
 } // namespace
 
 namespace openspace::globebrowsing {
@@ -225,9 +224,8 @@ GeoJsonComponent::SubFeatureProps::SubFeatureProps(
         glm::vec4(90.f, 180.f, 90.f, 180.f)
     )
 {
-    // From fadeable
-    addProperty(_opacity);
-    addProperty(_fade);
+    addProperty(Fadeable::_opacity);
+    addProperty(Fadeable::_fade);
 
     addProperty(enabled);
 
@@ -295,8 +293,10 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     _heightOffset = p.heightOffset.value_or(_heightOffset);
     _heightOffset.onChange([this]() { _heightOffsetIsDirty = true; });
-    _heightOffset.setMinValue(-0.9f * minGlobeRadius);
-    _heightOffset.setMaxValue(5.f * minGlobeRadius);
+    constexpr float MinRadiusFactor = -0.9f;
+    constexpr float MaxRadiusFactor = 5.f;
+    _heightOffset.setMinValue(MinRadiusFactor * minGlobeRadius);
+    _heightOffset.setMaxValue(MaxRadiusFactor * minGlobeRadius);
     addProperty(_heightOffset);
 
     _latLongOffset = p.coordinateOffset.value_or(_latLongOffset);
@@ -308,7 +308,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     }
     addPropertySubOwner(_defaultProperties);
 
-    _defaultProperties.pointTexture.onChange([&]() {
+    _defaultProperties.pointTexture.onChange([this]() {
         std::filesystem::path texturePath = _defaultProperties.pointTexture.value();
         // Not ethat an empty texture is also valid => use default texture from module
         if (std::filesystem::is_regular_file(texturePath) || texturePath.empty()) {
@@ -322,9 +322,9 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         }
     });
 
-    _defaultProperties.shouldTesselate.onChange([&]() { _dataIsDirty = true; });
-    _defaultProperties.tesselationLevel.onChange([&]() { _dataIsDirty = true; });
-    _defaultProperties.tesselationMaxDistance.onChange([&]() { _dataIsDirty = true; });
+    _defaultProperties.shouldTessellate.onChange([this]() { _dataIsDirty = true; });
+    _defaultProperties.tessellationLevel.onChange([this]() { _dataIsDirty = true; });
+    _defaultProperties.tessellationMaxDistance.onChange([this]() { _dataIsDirty = true; });
 
     _forceUpdateHeightData.onChange([this]() {
         for (GlobeGeometryFeature& f : _geometryFeatures) {
@@ -340,10 +340,10 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     using PointRenderMode = GlobeGeometryFeature::PointRenderMode;
     _pointRenderModeOption.addOptions({
-        { static_cast<int>(PointRenderMode::AlignToCameraDir), "AlignToCameraDir"},
-        { static_cast<int>(PointRenderMode::AlignToCameraPos), "AlignToCameraPos"},
-        { static_cast<int>(PointRenderMode::AlignToGlobeNormal), "AlignToGlobeNormal"},
-        { static_cast<int>(PointRenderMode::AlignToGlobeSurface), "AlignToGlobeSurface"}
+        { static_cast<int>(PointRenderMode::AlignToCameraDir), "Align to Camera Direction"},
+        { static_cast<int>(PointRenderMode::AlignToCameraPos), "Align to Camera Position"},
+        { static_cast<int>(PointRenderMode::AlignToGlobeNormal), "Align to Globe Normal"},
+        { static_cast<int>(PointRenderMode::AlignToGlobeSurface), "Align to Globe Surface"}
     });
     addProperty(_pointRenderModeOption);
 
@@ -361,8 +361,8 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         for (const ghoul::Dictionary& lsDictionary : lightsources) {
             std::unique_ptr<LightSource> lightSource =
                 LightSource::createFromDictionary(lsDictionary);
+            _lightSourcePropertyOwner.addPropertySubOwner(lightSource.get());
             _lightSources.push_back(std::move(lightSource));
-            _lightSourcePropertyOwner.addPropertySubOwner(_lightSources.back().get());
         }
     }
     else {
@@ -434,8 +434,7 @@ bool GeoJsonComponent::isReady() const {
             return g.isReady();
         }
     );
-    return isReady &&
-        (_linesAndPolygonsProgram != nullptr) && (_pointsProgram != nullptr);
+    return isReady && _linesAndPolygonsProgram && _pointsProgram;
 }
 
 void GeoJsonComponent::render(const RenderData& data) {
@@ -460,7 +459,7 @@ void GeoJsonComponent::render(const RenderData& data) {
     PointRenderMode pointRenderMode =
         static_cast<PointRenderMode>(_pointRenderModeOption.value());
 
-    // Do two render passes, to properly render opacoty of overlaying objects
+    // Do two render passes, to properly render opacity of overlaying objects
     for (int renderPass = 0; renderPass < 2; ++renderPass) {
         for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
             if (_features[i]->enabled && _features[i]->isVisible()) {
@@ -545,7 +544,7 @@ void GeoJsonComponent::readFile() {
         if (_geometryFeatures.empty()) {
             LWARNING(fmt::format(
                 "No GeoJSON features could be successfully created for GeoJSON layer "
-                "with identifier '{}'. Disabling layer.", this->identifier()
+                "with identifier '{}'. Disabling layer.", identifier()
             ));
             _enabled = false;
         }
@@ -553,7 +552,7 @@ void GeoJsonComponent::readFile() {
     catch (const geos::util::GEOSException& e) {
         LERROR(fmt::format(
             "Error creating GeoJSON layer with identifier '{}'. Problem reading "
-            "GeoJSON file '{}'. Error: '{}'", this->identifier(), _geoJsonFile, e.what()
+            "GeoJSON file '{}'. Error: '{}'", identifier(), _geoJsonFile, e.what()
         ));
     }
 
@@ -563,6 +562,7 @@ void GeoJsonComponent::readFile() {
 void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& feature) {
     // Read the geometry
     const geos::geom::Geometry* geom = feature.getGeometry();
+    ghoul_assert(geom, "No geometry found");
 
     // Read the properties
     GeoJsonOverrideProperties propsFromFile = propsFromGeoJson(feature);
@@ -605,7 +605,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
         catch (const ghoul::MissingCaseException&) {
             LERROR(fmt::format(
                 "Error creating GeoJSON layer with identifier '{}'. Problem reading "
-                "feature {} in GeoJSON file '{}'.", this->identifier(), index, _geoJsonFile
+                "feature {} in GeoJSON file '{}'.", identifier(), index, _geoJsonFile
             ));
             // Do nothing
         }
@@ -663,7 +663,7 @@ void GeoJsonComponent::addMetaPropertiesToFeature(SubFeatureProps& feature, int 
 }
 
 void GeoJsonComponent::computeMainFeatureMetaPropeties() {
-    if (_features.size() == 0) {
+    if (_features.empty()) {
         return;
     }
 
@@ -676,7 +676,7 @@ void GeoJsonComponent::computeMainFeatureMetaPropeties() {
         _features.front()->boundingboxLatLong.value().w
     };
 
-    for (const auto& f : _features) {
+    for (const std::unique_ptr<SubFeatureProps>& f : _features) {
         // Update bbox corners
         if (f->boundingboxLatLong.value().x < bboxLowerCorner.x) {
             bboxLowerCorner.x = f->boundingboxLatLong.value().x;
@@ -725,7 +725,8 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
 
     // Compute a good distance to travel to based on the feature's size.
     // Assumes 80 degree FOV
-    float d = diagonal / glm::tan(glm::radians(40.f));
+    constexpr float Angle = glm::radians(40.f);
+    float d = diagonal / glm::tan(Angle);
     d += _heightOffset;
 
     float lat = centroidLat + _latLongOffset.value().x;
