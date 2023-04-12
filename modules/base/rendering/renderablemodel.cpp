@@ -683,7 +683,8 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     // Formula from RenderableGlobe
     constexpr double tfov = 0.5773502691896257;
     constexpr int res = 2880;
-    const double maxDistance = res * boundingSphere() / tfov;
+    const double maxDistance =
+        res * boundingSphere() * glm::compMax(data.modelTransform.scale) / tfov;
 
     // Don't render if model is too far away
     if (distanceToCamera >= maxDistance) {
