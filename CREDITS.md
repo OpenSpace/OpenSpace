@@ -12,7 +12,7 @@ Jonas Strandstedt
 Michal Marcinkowski
 Joakim Kilby
 Lovisa Hassler
-Mikael Petterson 
+Mikael Petterson
 Erik Sundén
 Stefan Lindblad
 Corrie Roe

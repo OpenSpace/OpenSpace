@@ -179,11 +179,6 @@ void log(int i, const EventPointSpacecraft& e) {
     ));
 }
 
-void log(int i, const CustomEvent& e) {
-    ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
-    LINFO(fmt::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
-}
-
 void log(int i, const EventRenderableEnabled& e) {
     ghoul_assert(e.type == EventRenderableEnabled::Type, "Wrong type");
     LINFO(fmt::format("[{}] EventRenderableEnabled: {}", i, e.node));
@@ -194,6 +189,26 @@ void log(int i, const EventRenderableDisabled& e) {
     LINFO(fmt::format("[{}] EventRenderableDisabled: {}", i, e.node));
 }
 
+void log(int i, const EventCameraPathStarted& e) {
+    ghoul_assert(e.type == EventCameraPathStarted::Type, "Wrong type");
+    LINFO(fmt::format(
+        "[{}] EventCameraPathStarted:  Origin: '{}'  Destination: '{}'",
+        i, e.origin, e.destination
+    ));
+}
+
+void log(int i, const EventCameraPathFinished& e) {
+    ghoul_assert(e.type == EventCameraPathFinished::Type, "Wrong type");
+    LINFO(fmt::format(
+        "[{}] EventCameraPathFinished:  Origin: '{}'  Destination: '{}'",
+        i, e.origin, e.destination
+    ));
+}
+
+void log(int i, const CustomEvent& e) {
+    ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
+    LINFO(fmt::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
+}
 
 std::string_view toString(Event::Type type) {
     switch (type) {
@@ -217,6 +232,8 @@ std::string_view toString(Event::Type type) {
         case Event::Type::PointSpacecraft: return "PointSpacecraft";
         case Event::Type::RenderableEnabled: return "RenderableEnabled";
         case Event::Type::RenderableDisabled: return "RenderableDisabled";
+        case Event::Type::CameraPathStarted: return "CameraPathStarted";
+        case Event::Type::CameraPathFinished: return "CameraPathFinished";
         case Event::Type::Custom: return "Custom";
         default:
             throw ghoul::MissingCaseException();
@@ -280,6 +297,12 @@ Event::Type fromString(std::string_view str) {
     }
     else if (str == "RenderableDisabled") {
         return Event::Type::RenderableDisabled;
+    }
+    else if (str == "CameraPathStarted") {
+        return Event::Type::CameraPathStarted;
+    }
+    else if (str == "CameraPathFinished") {
+        return Event::Type::CameraPathFinished;
     }
     else if (str == "Custom") {
         return Event::Type::Custom;
@@ -459,6 +482,26 @@ ghoul::Dictionary toParameter(const Event& e) {
                 std::string(static_cast<const EventRenderableDisabled&>(e).node)
             );
             break;
+        case Event::Type::CameraPathStarted:
+            d.setValue(
+                "Origin",
+                std::string(static_cast<const EventCameraPathStarted&>(e).origin)
+            );
+            d.setValue(
+                "Destination",
+                std::string(static_cast<const EventCameraPathStarted&>(e).destination)
+            );
+            break;
+        case Event::Type::CameraPathFinished:
+            d.setValue(
+                "Origin",
+                std::string(static_cast<const EventCameraPathFinished&>(e).origin)
+            );
+            d.setValue(
+                "Destination",
+                std::string(static_cast<const EventCameraPathFinished&>(e).destination)
+            );
+            break;
         case Event::Type::Custom:
             d.setValue(
                 "Subtype", std::string(static_cast<const CustomEvent&>(e).subtype)
@@ -533,6 +576,12 @@ void logAllEvents(const Event* e) {
                 break;
             case Event::Type::RenderableDisabled:
                 log(i, *static_cast<const EventRenderableDisabled*>(e));
+                break;
+            case Event::Type::CameraPathStarted:
+                log(i, *static_cast<const EventCameraPathStarted*>(e));
+                break;
+            case Event::Type::CameraPathFinished:
+                log(i, *static_cast<const EventCameraPathFinished*>(e));
                 break;
             case Event::Type::Custom:
                 log(i, *static_cast<const CustomEvent*>(e));
@@ -662,6 +711,19 @@ EventRenderableDisabled::EventRenderableDisabled(const SceneGraphNode* node_)
     , node(temporaryString(node_->identifier()))
 {}
 
+EventCameraPathStarted::EventCameraPathStarted(const SceneGraphNode* origin_,
+                                               const SceneGraphNode* destination_)
+    : Event(Type)
+    , origin(temporaryString(origin_->identifier()))
+    , destination(temporaryString(destination_->identifier()))
+{}
+
+EventCameraPathFinished::EventCameraPathFinished(const SceneGraphNode* origin_,
+                                                 const SceneGraphNode* destination_)
+    : Event(Type)
+    , origin(temporaryString(origin_->identifier()))
+    , destination(temporaryString(destination_->identifier()))
+{}
 
 CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)
     : Event(Type)

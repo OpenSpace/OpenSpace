@@ -1,6 +1,7 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup341
+local kernel = asset.require("../kernels").jup344
+local kernel346 = asset.require("../kernels").jup346
 
 
 
@@ -91,8 +92,7 @@ local himaliaGroup = {
       Identifier = parentIdentifier,
       Spice = parentSpice
     },
-    -- Spice = "DIA", -- The Identifier is not correctly registered in the Spice kernel
-    Spice = "553",
+    Spice = "DIA",
     Radii = { 4000, 4000, 4000 },
     Tags = tags,
     TrailTags = trailTags,
@@ -101,6 +101,76 @@ local himaliaGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 287.93,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2011J3",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55509",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2011 J 3",
+      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 261.77,
+    Kernels = kernel346
+  },
+  {
+    Identifier = "S2018J2",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55510",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2018 J 2",
+      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 250.88,
+    Kernels = kernel346
+  },
+  {
+    Identifier = "Pandia",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "565",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 251.911,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Ersa",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "571",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 249.229,
     Kernels = kernel
   }
 }

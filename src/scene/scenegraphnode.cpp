@@ -179,16 +179,13 @@ namespace {
         // The identifier of this scene graph node. This name must be unique among all
         // scene graph nodes that are loaded in a specific scene. If a duplicate is
         // detected the loading of the node will fail, as will all childing that depend on
-        // the node. The identifier must not contain any whitespaces or '.'
-        std::string identifier;
+        // the node.
+        std::string identifier [[codegen::identifier()]];
 
         // This names the parent of the currently specified scene graph node. The parent
         // must already exist in the scene graph. If not specified, the node will be
         // attached to the root of the scene graph
-        std::optional<std::string> parent
-            [[codegen::annotation(
-                "If specified, this must be a name for another scene graph node"
-            )]];
+        std::optional<std::string> parent [[codegen::identifier()]];
 
         // The renderable that is to be created for this scene graph node. A renderable is
         // a component of a scene graph node that will lead to some visual result on the
@@ -738,7 +735,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     }
 
     const bool visible = _renderable && _renderable->isVisible() &&
-        _renderable->isReady() && _renderable->matchesRenderBinMask(data.renderBinMask);
+        _renderable->isReady();
 
     if (!visible) {
         return;
@@ -748,21 +745,31 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         return;
     }
 
+    RenderData newData = {
+        .camera = data.camera,
+        .time = data.time,
+        .renderBinMask = data.renderBinMask,
+        .modelTransform = {
+            .translation = _worldPositionCached,
+            .rotation = _worldRotationCached,
+            .scale = _worldScaleCached
+        }
+    };
+
+    if (_renderable->matchesSecondaryRenderBin(data.renderBinMask)) {
+        TracyGpuZone("Render Secondary Bin")
+        _renderable->renderSecondary(newData, tasks);
+    }
+
+    if (!_renderable->matchesRenderBinMask(data.renderBinMask)) {
+        return;
+    }
+
     {
         TracyGpuZone("Render")
 
-        RenderData newData = {
-            .camera = data.camera,
-            .time = data.time,
-            .renderBinMask = data.renderBinMask,
-            .modelTransform = {
-                .translation = _worldPositionCached,
-                .rotation = _worldRotationCached,
-                .scale = _worldScaleCached
-            }
-        };
-
         _renderable->render(newData, tasks);
+
         if (_computeScreenSpaceValues) {
             computeScreenSpaceData(newData);
         }

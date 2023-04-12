@@ -88,21 +88,24 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
         "FadeOutThreshold",
         "Fade-Out Threshold",
-        "This value determines percentage of the sphere is visible before starting "
-        "fading-out it"
+        "This value determines percentage of the sphere that is visible before starting "
+        "to fade it out. A negative or zero value means no fading out will happen. This "
+        "is also the default"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInThresholdInfo = {
         "FadeInThreshold",
         "Fade-In Threshold",
-        "Distance from center of MilkyWay from where the astronomical object starts to "
-        "fade in"
+        "This value determines the distance from center of MilkyWay from where the "
+        "astronomical object starts to fade in, given as a percentage of the size of "
+        "the object. A negative or zero value means no fading in will happen. This is "
+        "also the default"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
         "DisableFadeInOut",
         "Disable Fade-In/Fade-Out effects",
-        "Enables/Disables the Fade-In/Out effects"
+        "Enables/Disables the fade in and out effects"
     };
 
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
@@ -152,14 +155,13 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 1e25f)
     , _segments(SegmentsInfo, 8, 4, 1000)
     , _mirrorTexture(MirrorTextureInfo, false)
-    , _disableFadeInDistance(DisableFadeInOutInfo, true)
-    , _fadeInThreshold(FadeInThresholdInfo, -1.f, 0.f, 1.f)
-    , _fadeOutThreshold(FadeOutThresholdInfo, -1.f, 0.f, 1.f)
+    , _disableFadeInDistance(DisableFadeInOutInfo, false)
+    , _fadeInThreshold(FadeInThresholdInfo, -1.f, -0.1f, 1.f, 0.001f)
+    , _fadeOutThreshold(FadeOutThresholdInfo, -1.f, -0.1f, 1.f, 0.001f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     _size = p.size;
     _segments = p.segments;
@@ -192,29 +194,19 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_texturePath);
     _texturePath.onChange([this]() { loadTexture(); });
 
+    _mirrorTexture = p.mirrorTexture.value_or(_mirrorTexture);
     addProperty(_mirrorTexture);
 
-    _mirrorTexture = p.mirrorTexture.value_or(_mirrorTexture);
+    _fadeOutThreshold = p.fadeOutThreshold.value_or(_fadeOutThreshold);
+    addProperty(_fadeOutThreshold);
 
-    bool hasGivenFadeOut = p.fadeOutThreshold.has_value();
-    if (hasGivenFadeOut) {
-        _fadeOutThreshold = *p.fadeOutThreshold;
-        addProperty(_fadeOutThreshold);
-    }
+    _fadeInThreshold = p.fadeInThreshold.value_or(_fadeInThreshold);
+    addProperty(_fadeInThreshold);
 
-    bool hasGivenFadeIn = p.fadeInThreshold.has_value();
-    if (hasGivenFadeIn) {
-        _fadeInThreshold = *p.fadeInThreshold;
-        addProperty(_fadeInThreshold);
-    }
-
-    if (hasGivenFadeIn || hasGivenFadeOut) {
-        _disableFadeInDistance = false;
-        addProperty(_disableFadeInDistance);
-    }
+    _disableFadeInDistance = p.disableFadeInOut.value_or(_disableFadeInDistance);
+    addProperty(_disableFadeInDistance);
 
     setBoundingSphere(_size);
-    setRenderBinFromOpacity();
 }
 
 bool RenderableSphere::isReady() const {
@@ -281,7 +273,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     float adjustedOpacity = opacity();
 
     if (!_disableFadeInDistance) {
-        if (_fadeInThreshold > -1.0) {
+        if (_fadeInThreshold > 0.f) {
             const double d = glm::distance(
                 data.camera.positionVec3(),
                 data.modelTransform.translation
@@ -308,7 +300,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
             }
         }
 
-        if (_fadeOutThreshold > -1.0) {
+        if (_fadeOutThreshold > 0.f) {
             const double d = glm::distance(
                 data.camera.positionVec3(),
                 data.modelTransform.translation

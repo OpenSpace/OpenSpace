@@ -19,7 +19,7 @@ local toggle_sun = {
       openspace.setPropertyValueSingle("Scene.Sun.Renderable.Fade", 0.0, 1.0)
     end
   ]],
-  Documentation = [[Toggles the visibility of the Sun glare and the Sun globe when the 
+  Documentation = [[Toggles the visibility of the Sun glare and the Sun globe when the
     camera is approaching either so that from far away the Sun Glare is rendered and when
     close up, the globe is rendered instead]],
   GuiPath = "/Solar System/Sun",

@@ -112,10 +112,10 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableNodeLine)]] Parameters {
         // [[codegen::verbatim(StartNodeInfo.description)]]
-        std::optional<std::string> startNode;
+        std::optional<std::string> startNode [[codegen::identifier()]];
 
         // [[codegen::verbatim(EndNodeInfo.description)]]
-        std::optional<std::string> endNode;
+        std::optional<std::string> endNode [[codegen::identifier()]];
 
         // [[codegen::verbatim(LineColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -181,7 +181,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
                 "Trying to use relative offsets for start node '{}' that has no "
                 "bounding sphere. This will result in no offset. Use direct "
                 "values by setting UseRelativeOffsets to false",
-                _parent->identifier(), _start
+                parent()->identifier(), _start
             ));
         }
     });
@@ -199,7 +199,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
                 "Trying to use relative offsets for end node '{}' that has no "
                 "bounding sphere. This will result in no offset. Use direct "
                 "values by setting UseRelativeOffsets to false",
-                _parent->identifier(), _end
+                parent()->identifier(), _end
             ));
         }
      });
@@ -212,7 +212,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         if (!startNode) {
             LERROR(fmt::format(
                 "Error when recomputing node line offsets for scene graph node '{}'. "
-                "Could not find start node '{}'", _parent->identifier(), _start.value()
+                "Could not find start node '{}'", parent()->identifier(), _start.value()
             ));
             return;
         }
@@ -220,7 +220,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         if (!endNode) {
             LERROR(fmt::format(
                 "Error when recomputing node line offsets for scene graph node '{}'. "
-                "Could not find end node '{}'", _parent->identifier(), _end.value()
+                "Could not find end node '{}'", parent()->identifier(), _end.value()
             ));
             return;
         }
@@ -229,8 +229,10 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
             // Recompute previous offsets to relative values
             double startBs = startNode->boundingSphere();
             double endBs = endNode->boundingSphere();
-            _startOffset = startBs > 0.0 ? _startOffset / startBs : 0.0;
-            _endOffset = endBs > 0.0 ? _endOffset / startBs : 0.0;
+            _startOffset =
+                static_cast<float>(startBs > 0.0 ? _startOffset / startBs : 0.0);
+            _endOffset =
+                static_cast<float>(endBs > 0.0 ? _endOffset / startBs : 0.0);
         }
         else {
             // Recompute relative values to meters

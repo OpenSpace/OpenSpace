@@ -67,7 +67,7 @@ public:
      * Load a local file.
      *
      * \param path The path to load
-     * \return \c true if the path exists, \c false otherwise
+     * \return `true` if the path exists, `false` otherwise
      */
     bool loadLocalPath(std::string path);
     void initialize();

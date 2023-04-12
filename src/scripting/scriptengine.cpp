@@ -106,9 +106,9 @@ namespace {
             argument["Name"] = arg.name;
             argument["Type"] = arg.type;
             argument["Default Value"] = arg.defaultValue.value_or("");
-
             function["Arguments"].push_back(argument);
         }
+
         function["Return Type"] = f.returnType;
         function["Help"] = f.helpText;
 

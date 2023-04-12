@@ -33,16 +33,15 @@ namespace openspace::properties {
 
 /**
  * The OptionProperty is a property that provides a number of predefined (using the
- * addOption method) options consisting of a <code>description</code> and a
- * <code>value</code>. The available options can be queried using the options method.
- * Only values representing valid options can be used to set this property, or an error
- * will be logged
+ * addOption method) options consisting of a `description` and a `value`. The available
+ * options can be queried using the options method. Only values representing valid options
+ * can be used to set this property, or an error will be logged
  */
 class OptionProperty : public IntProperty {
 public:
     /**
-     * The struct storing a single option consisting of an integer \c value and a
-     * \c string description.
+     * The struct storing a single option consisting of an integer `value` and a
+     * `string` description.
      */
     struct Option {
         int value;
@@ -55,7 +54,7 @@ public:
     };
 
     /**
-     * The constructor delegating the \c identifier and the \c guiName to its super class.
+     * The constructor delegating the `identifier` and the `guiName` to its super class.
      *
      * \param info The PropertyInfo structure that contains all the required static
      *        information for initializing this Property.
@@ -65,8 +64,7 @@ public:
     OptionProperty(Property::PropertyInfo info);
 
     /**
-    * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
-    * to its super class.
+    * The constructor delegating the `identifier` and the `guiName` to its super class.
     *
     * \param info The PropertyInfo structure that contains all the required static
     *        information for initializing this Property.
@@ -93,8 +91,8 @@ public:
     DisplayType displayType() const;
 
     /**
-     * Adds the passed option to the list of available options. The \c value of the
-     * \c option must not have been registered previously, or a warning will be logged.
+     * Adds the passed option to the list of available options. The `value` of the
+     * `option` must not have been registered previously, or a warning will be logged.
      *
      * \param value The option that will be added to the list of available options
      * \param desc The description of the value that will be added
@@ -138,10 +136,10 @@ public:
     void setValue(int value) override;
 
     /**
-     * This method returns \c true if currently a valid option is selected. This might
+     * This method returns `true` if currently a valid option is selected. This might
      * change as options are added or removed.
      *
-     * \return \c true if a call to #option would return a valid Option
+     * \return `true` if a call to #option would return a valid Option
      */
     bool hasOption() const;
 
@@ -153,7 +151,7 @@ public:
     const Option& option() const;
 
     /**
-    * Get the description of the option that matches \c value .
+    * Get the description of the option that matches `value`.
     *
     * \param value The value of the option
     */

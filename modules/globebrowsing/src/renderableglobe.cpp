@@ -64,6 +64,8 @@ namespace std {
 #endif
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderableGlobe";
+
     // Global flags to modify the RenderableGlobe
     constexpr bool LimitLevelByAvailableData = true;
     constexpr bool PerformFrustumCulling = true;
@@ -653,6 +655,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     // Components
     _hasRings = p.rings.has_value();
     if (_hasRings) {
+        _ringsComponent.setParentFadeable(this);
         _ringsComponent.initialize();
         addPropertySubOwner(_ringsComponent);
     }
@@ -664,12 +667,19 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _generalProperties.shadowMapping = true;
     }
     _generalProperties.shadowMapping.onChange(notifyShaderRecompilation);
+
+    // Use a secondary renderbin for labels, and other things that we want to be able to
+    // render with transparency, on top of the globe, after the atmosphere step
+    _secondaryRenderBin = RenderBin::PostDeferredTransparent;
 }
 
 void RenderableGlobe::initializeGL() {
     if (!_labelsDictionary.isEmpty()) {
         _globeLabelsComponent.initialize(_labelsDictionary, this);
         addPropertySubOwner(_globeLabelsComponent);
+
+        // Fading of the labels should also depend on the fading of the globe
+        _globeLabelsComponent.setParentFadeable(this);
     }
 
     _layerManager.update();
@@ -735,9 +745,6 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
     if ((distanceToCamera < distance) || (_generalProperties.renderAtDistance)) {
         try {
-            // Before Shadows
-            _globeLabelsComponent.draw(data);
-
             if (_hasShadows && _shadowComponent.isEnabled()) {
                 // Set matrices and other GL states
                 RenderData lightRenderData(_shadowComponent.begin(data));
@@ -746,7 +753,9 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
                 // Render from light source point of view
                 renderChunks(lightRenderData, rendererTask, {}, true);
-                if (_hasRings && _ringsComponent.isEnabled()) {
+                if (_hasRings && _ringsComponent.isEnabled() &&
+                    _ringsComponent.isVisible())
+                {
                     _ringsComponent.draw(
                         lightRenderData,
                         RingsComponent::RenderPass::GeometryOnly
@@ -759,7 +768,9 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
                 // Render again from original point of view
                 renderChunks(data, rendererTask, _shadowComponent.shadowMapData());
-                if (_hasRings && _ringsComponent.isEnabled()) {
+                if (_hasRings && _ringsComponent.isEnabled() &&
+                    _ringsComponent.isVisible())
+                {
                     _ringsComponent.draw(
                         data,
                         RingsComponent::RenderPass::GeometryAndShading,
@@ -769,7 +780,9 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
             }
             else {
                 renderChunks(data, rendererTask);
-                if (_hasRings && _ringsComponent.isEnabled()) {
+                if (_hasRings && _ringsComponent.isEnabled() &&
+                    _ringsComponent.isVisible())
+                {
                     _ringsComponent.draw(
                         data,
                         RingsComponent::RenderPass::GeometryAndShading
@@ -804,6 +817,15 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     }
 
     _lastChangedLayer = nullptr;
+}
+
+void RenderableGlobe::renderSecondary(const RenderData& data, RendererTasks&) {
+    try {
+        _globeLabelsComponent.draw(data);
+    }
+    catch (const ghoul::opengl::TextureUnit::TextureUnitError& e) {
+        LERROR(fmt::format("Error on drawing globe labels: '{}'", e.message));
+    }
 }
 
 void RenderableGlobe::update(const UpdateData& data) {

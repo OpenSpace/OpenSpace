@@ -60,6 +60,13 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+
+    /// Reset some variables to default state
+    void reset();
+
+    /// The number of vertices that we calculate during each frame of the full sweep pass
+    unsigned int _sweepChunkSize = 200;
+
     /// The start time of the trail
     properties::StringProperty _startTime;
     /// The end time of the trail
@@ -84,6 +91,19 @@ private:
     double _start = 0.0;
     /// The conversion of the _endTime into the internal time format
     double _end = 0.0;
+
+    /// Tracks sweep iteration, is used to calculate which vertices to work on per frame
+    int _sweepIteration = 0;
+
+    /// How many points do we need to compute given the distance between the
+    /// start and end date and the desired sample interval
+    unsigned int _numberOfVertices = 0;
+
+    double _totalSampleInterval = 0.0;
+
+    /// Max and min vertex used to calculate the bounding sphere
+    glm::vec3 _maxVertex;
+    glm::vec3 _minVertex;
 };
 
 } // namespace openspace

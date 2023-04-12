@@ -106,14 +106,7 @@ namespace {
         "Enables/Disables the drawing of the astronomical objects"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
-        "DrawLabels",
-        "Draw Labels",
-        "Determines whether labels should be drawn or hidden"
-    };
-
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
-    {
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the astronomical objects"
@@ -251,9 +244,6 @@ namespace {
         // The number of sides for the polygon used to represent the astronomical object
         std::optional<int> polygonSides;
 
-        // [[codegen::verbatim(DrawLabelInfo.description)]]
-        std::optional<bool> drawLabels;
-
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("space_labelscomponent")]];
@@ -308,7 +298,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _spriteTexturePath(SpriteTextureInfo)
     , _drawElements(DrawElementsInfo, true)
-    , _drawLabels(DrawLabelInfo, false)
     , _pixelSizeControl(PixelSizeControlInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _optionColorRangeData(OptionColorRangeInfo, glm::vec2(0.f))
@@ -441,12 +430,11 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _hasPolygon = p.polygonSides.has_value();
 
     if (p.labels.has_value()) {
-        _drawLabels = p.drawLabels.value_or(_drawLabels);
-        addProperty(_drawLabels);
-
         _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
     }
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
@@ -624,9 +612,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
     _program->setUniform(
         _uniformCache.cameraViewProjectionMatrix,
-        glm::mat4(
-            glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
-        )
+        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
     );
 
     const float minBillboardSize = _billboardMinMaxSize.value().x; // in pixels
@@ -698,9 +684,9 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 
-    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+    glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
 
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
@@ -721,7 +707,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         renderBillboards(data, modelMatrix, orthoRight, orthoUp, fadeInVar);
     }
 
-    if (_drawLabels && _hasLabels) {
+    if (_hasLabels) {
         _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVar);
     }
 }

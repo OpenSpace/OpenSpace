@@ -46,10 +46,9 @@ public:
     struct FactoryNotFoundError : public ghoul::RuntimeError {
         /**
          * Constructor for FactoryNotFoundError, the \p type is a human-readable (-ish)
-         * type descriptor for the type <code>T</code> for the TemplateFactory that could
+         * type descriptor for the type `T` for the TemplateFactory that could
          * not be found.
-         * \param t The type <code>T</code> for the <code>TemplateFactory<T></code>
-         * that could not be found
+         * \param t The type `T` for the `TemplateFactory<T>` that could not be found
          * \pre \p t must not be empty
          */
         explicit FactoryNotFoundError(std::string t);
@@ -74,8 +73,8 @@ public:
     static void deinitialize();
 
     /**
-     * Returns <code>true</code> if the static FactoryManager has already been
-     * initiailzed, <code>false</code> otherwise.
+     * Returns `true` if the static FactoryManager has already been
+     * initiailzed, `false` otherwise.
      * \return The initialization status of the static FactoryManager
      */
     static bool isInitialized();
@@ -103,7 +102,7 @@ public:
      * their type. The method will always return a proper ghoul::TemplateFactory or throw
      * an error if the appropriate ghoul::TemplateFactory was not registered.
      * \tparam T The type that the requested ghoul::TemplateFactory should create
-     * \return The ghoul::TemplateFactory that will create the pass type <code>T</code>
+     * \return The ghoul::TemplateFactory that will create the pass type `T`
      * \throw FactoryNotFoundError If the requested ghoul::TemplateFactory could not be
      * found
      */

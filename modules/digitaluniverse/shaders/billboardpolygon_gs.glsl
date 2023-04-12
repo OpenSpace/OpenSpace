@@ -34,7 +34,7 @@ const float PI = 3.1415926;
 
 void main() {
   vec4 v0 = gl_in[0].gl_Position;
-    
+
   for (int i = sides; i > 0; --i) {
     // Angle between each side in radians
     float ang = 2.0 * PI / float(sides) * i;

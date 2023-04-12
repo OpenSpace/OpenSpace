@@ -117,26 +117,6 @@ namespace {
         "with the background color to produce the final result"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
-        "Opacity",
-        "Opacity",
-        "This value determines the opacity of the screen space plane. If this value "
-        "is 1, the plane is completely opaque, if this value is 0, the plane is "
-        "completely transparent"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
-        "Fade",
-        "Fade",
-        "This value is used by the system to be able to fade out renderables "
-        "independently from the Opacity value selected by the user. This value should "
-        "not be directly manipulated through a user interface, but instead used by other "
-        "components of the system programmatically",
-        // The Developer mode should be used once the properties in the UI listen to this
-        // openspace::properties::Property::Visibility::Developer
-        openspace::properties::Property::Visibility::Hidden
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
@@ -175,9 +155,8 @@ namespace {
 
         // This is the unique identifier for this screenspace renderable. It has to be
         // unique amongst all existing screenspace nodes that already have been added to
-        // the scene. The identifier is not allowed to have any whitespace or '.' and must
-        // not be empty
-        std::optional<std::string> identifier;
+        // the scene.
+        std::optional<std::string> identifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -209,7 +188,9 @@ namespace {
         // [[codegen::verbatim(BackgroundColorInfo.description)]]
         std::optional<glm::vec4> backgroundColor [[codegen::color()]];
 
-        // [codegen::verbatim(OpacityInfo.description)]]
+        // This value determines the opacity of the screen space plane. If this value
+        // is 1, the plane is completely opaque, if this value is 0, the plane is
+        // completely transparent
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
         // Defines either a single or multiple tags that apply to this
@@ -295,8 +276,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -707,8 +686,4 @@ glm::vec3 ScreenSpaceRenderable::sphericalToRae(glm::vec3 spherical) const {
     );
 }
 
-
-float ScreenSpaceRenderable::opacity() const {
-    return _opacity * _fade;
-}
 } // namespace openspace

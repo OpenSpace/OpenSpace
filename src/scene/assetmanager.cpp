@@ -100,7 +100,7 @@ namespace {
 
         // A list of all identifiers that are exposed by this asset. This list is needed
         // to populate the descriptions in the main user interface
-        std::optional<std::vector<std::string>> identifiers;
+        std::optional<std::vector<std::string>> identifiers [[codegen::identifier()]];
     };
 
 #include "assetmanager_codegen.cpp"
@@ -300,24 +300,15 @@ void AssetManager::update() {
 void AssetManager::add(const std::string& path) {
     ghoul_precondition(!path.empty(), "Path must not be empty");
     // First check if the path is already in the remove queue. If so, remove it from there
-    const auto it = _assetRemoveQueue.find(path);
-    if (it != _assetRemoveQueue.end()) {
-        _assetRemoveQueue.erase(it);
-    }
-
-    _assetAddQueue.insert(path);
+    _assetRemoveQueue.remove(path);
+    _assetAddQueue.push_back(path);
 }
 
 void AssetManager::remove(const std::string& path) {
     ghoul_precondition(!path.empty(), "Path must not be empty");
-
     // First check if the path is already in the add queue. If so, remove it from there
-    const auto it = _assetAddQueue.find(path);
-    if (it != _assetAddQueue.end()) {
-        _assetAddQueue.erase(it);
-    }
-
-    _assetRemoveQueue.insert(path);
+    _assetAddQueue.remove(path);
+    _assetRemoveQueue.push_back(path);
 }
 
 std::vector<const Asset*> AssetManager::allAssets() const {

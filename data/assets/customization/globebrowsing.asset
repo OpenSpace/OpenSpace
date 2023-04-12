@@ -23,7 +23,7 @@ local vrt_folders = {
     -- if areas overlap (for example CTX and HiRISE) and CTX is specified *after* HiRISE,
     -- CTX will stomp over the HiRISE.
 
-    -- tl;dr:  Specify CTX folders first, then HiRISE 
+    -- tl;dr:  Specify CTX folders first, then HiRISE
     -- example:   "C:/OpenSpace/GlobeBrowsingData/Mars/CTX"
 
     -- We recommend using this folder for CTX

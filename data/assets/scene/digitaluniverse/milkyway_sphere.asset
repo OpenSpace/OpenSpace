@@ -21,7 +21,6 @@ local sphere = {
     Opacity = 0.35,
     Texture = sphereTextures .. "DarkUniverse_mellinger_4k.jpg",
     Orientation = "Inside",
-    RenderBinMode = "PreDeferredTransparent",
     MirrorTexture = true,
     FadeOutThreshold = 0.0015,
     Background = true,

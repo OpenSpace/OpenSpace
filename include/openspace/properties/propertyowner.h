@@ -38,17 +38,16 @@ class Property;
 
 /**
  * A PropertyOwner can own Propertys or other PropertyOwner and provide access to both in
- * a unified way. The <code>identifier</code>s and <code>name</code>s of Propertys and
- * sub-owners must be unique to this PropertyOwner. A Property cannot have the same name
- * as a PropertyOwner owned by this PropertyOwner.
- * Propertys can be added using the Property::addProperty methods and be removed by the
- * Property::removeProperty method. The same holds true for sub-owners
+ * a unified way. The `identifier`s and `name`s of Propertys and sub-owners must be unique
+ * to this PropertyOwner. A Property cannot have the same name as a PropertyOwner owned by
+ * this PropertyOwner. Propertys can be added using the Property::addProperty methods and
+ * be removed by the Property::removeProperty method. The same holds true for sub-owners
  * (Property::addPropertySubOwner, Property::removePropertySubOwner). These methods will
- * inform the passed object about the new ownership automatically.
- * Stored properties can be accessed using the Property::properties method or the
- * Property::property method, providing an URI for the location of the property. If the
- * URI contains separators (<code>.</code>), the first name before the separator will be
- * used as a subOwner's name and the search will proceed recursively.
+ * inform the passed object about the new ownership automatically. Stored properties can
+ * be accessed using the Property::properties method or the Property::property method,
+ * providing an URI for the location of the property. If the URI contains separators
+ * (`.`), the first name before the separator will be used as a subOwner's name and the
+ * search will proceed recursively.
  */
 class PropertyOwner : public DocumentationGenerator {
 public:
@@ -69,8 +68,7 @@ public:
      *             #PropertyOwnerInfo::description of this PropertyOwner.
      *
      * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any whitespaces
-     * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any
-     *      <code>.</code>
+     * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any `.`
      */
     PropertyOwner(PropertyOwnerInfo info);
 
@@ -88,10 +86,10 @@ public:
      * PropertyOwner::addProperty and PropertyOwner::addPropertySubOwner methods).
      *
      * \param identifier The identifier of this PropertyOwner. It must not contain any
-     *        <code>.</code>s or whitespaces
+     *        `.`s or whitespaces
      *
      * \pre \p identifier must not contain any whitespaces
-     * \pre \p identifier must not contain any <code>.</code>
+     * \pre \p identifier must not contain any `.`
      */
     void setIdentifier(std::string identifier);
 
@@ -145,14 +143,14 @@ public:
 
     /**
      * Retrieves a Property identified by \p uri from this PropertyOwner. If \p uri does
-     * not contain a <code>.</code> the identifier must refer to a Property directly owned
-     * by this PropertyOwner. If the identifier contains one or more <code>.</code>, the
+     * not contain a `.` the identifier must refer to a Property directly owned
+     * by this PropertyOwner. If the identifier contains one or more `.`, the
      * first part of the name will be recursively extracted and used as a name for a
      * sub-owner and only the last part of the identifier is referring to a Property owned
      * by PropertyOwner named by the second-but-last name.
      *
      * \param uri The identifier of the Property that should be extracted
-     * \return If the Property cannot be found, \c nullptr is returned, otherwise the
+     * \return If the Property cannot be found, `nullptr` is returned, otherwise the
      *         pointer to the Property is returned
      */
     Property* property(const std::string& uri) const;
@@ -160,17 +158,17 @@ public:
     /**
      * This method checks if a Property with the provided \p uri exists in this
      * PropertyOwner (or any sub-owner). If the identifier contains one or more
-     * <code>.</code>, the first part of the name will be recursively extracted and is
+     * `.`, the first part of the name will be recursively extracted and is
      * used as a name for a sub-owner and only the last part of the identifier is
      * referring to a Property owned by PropertyOwner named by the second-but-last name.
      *
-     * \return \c true if the \p uri refers to a Property; \c false otherwise.
+     * \return `true` if the \p uri refers to a Property; `false` otherwise.
      */
     bool hasProperty(const std::string& uri) const;
 
     /**
     * This method checks if a Property exists in this PropertyOwner.
-    * \return <code>true</code> if the Property existed, <code>false</code> otherwise.
+    * \return `true` if the Property existed, `false` otherwise.
     */
     bool hasProperty(const Property* prop) const;
 
@@ -188,23 +186,22 @@ public:
 
     /**
      * This method returns the direct sub-owner of this PropertyOwner with the provided
-     * \p identifier. This means that <code>identifier</code> cannot contain any
-     * <code>.</code> as this character is not allowed in PropertyOwner names. If the
-     * \p name does not name a valid sub-owner of this PropertyOwner, a \c nullptr will be
-     * returned.
+     * \p identifier. This means that `identifier` cannot contain any `.` as this
+     * character is not allowed in PropertyOwner names. If the \p name does not name a
+     * valid sub-owner of this PropertyOwner, a `nullptr` will be returned.
      *
      * \param identifier The identifier of the sub-owner that should be returned
-     * \return The PropertyOwner with the given \p name, or \c nullptr
+     * \return The PropertyOwner with the given \p name, or `nullptr`
      */
     PropertyOwner* propertySubOwner(const std::string& identifier) const;
 
     /**
-     * Returns \c true if this PropertyOwner owns a sub-owner with the provided
-     * \p identifier; returns \c false otherwise.
+     * Returns `true` if this PropertyOwner owns a sub-owner with the provided
+     * \p identifier; returns `false` otherwise.
      *
      * \param identifier The identifier of the sub-owner that should be looked up
-     * \return \c true if this PropertyOwner owns a sub-owner with the provided
-     *         \p identifier; returns \c false otherwise
+     * \return `true` if this PropertyOwner owns a sub-owner with the provided
+     *         \p identifier; returns `false` otherwise
      */
     bool hasPropertySubOwner(const std::string& identifier) const;
 
@@ -254,7 +251,7 @@ public:
 
     /**
      * Removes the Property from this PropertyOwner. Notifies the Property about this
-     * change by calling the Property::setPropertyOwner method with a \c nullptr as
+     * change by calling the Property::setPropertyOwner method with a `nullptr` as
      * parameter.
      *
      * \param prop The Property that should be removed from this PropertyOwner

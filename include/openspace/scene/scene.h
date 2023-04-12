@@ -121,7 +121,7 @@ public:
     const SceneGraphNode* root() const;
 
     /**
-     * Return the scenegraph node with the specified name or <code>nullptr</code> if that
+     * Return the scenegraph node with the specified name or `nullptr` if that
      * name does not exist.
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
@@ -181,7 +181,7 @@ public:
      *        finishes
      * \param easingFunction A function that determines who the interpolation occurs
      *
-     * \pre \p prop must not be \c nullptr
+     * \pre \p prop must not be `nullptr`
      * \pre \p durationSeconds must be positive and not 0
      * \post A new interpolation record exists for \p that is not expired
      */
@@ -202,11 +202,11 @@ public:
 
     /**
      * Informs all Property%s with active interpolations about applying a new update tick
-     * using the Property::interpolateValue method, passing a parameter \c t which is \c 0
-     * if no time has passed between the #addInterpolation method and \c 1 if an amount of
-     * time equal to the requested interpolation time has passed. The parameter \c t is
+     * using the Property::interpolateValue method, passing a parameter `t` which is `0`
+     * if no time has passed between the #addInterpolation method and `1` if an amount of
+     * time equal to the requested interpolation time has passed. The parameter `t` is
      * updated with a resolution of 1 microsecond, which means that if this function is
-     * called twice within 1 microsecond, the passed parameter \c t might be the same for
+     * called twice within 1 microsecond, the passed parameter `t` might be the same for
      * both calls
      */
     void updateInterpolations();
@@ -215,7 +215,7 @@ public:
      * Adds the provided \p time as an interesting time to this scene. The same time can
      * be added multiple times.
      *
-     * \param The time that should be added
+     * \param time The time that should be added
      *
      * \pre \p time.time must not be empty
      * \pre \p time.name must not be empty
@@ -346,7 +346,7 @@ private:
         std::chrono::time_point<std::chrono::steady_clock> beginTime;
         float durationSeconds;
         std::string postScript;
-        
+
         ghoul::EasingFunc<float> easingFunction;
         bool isExpired = false;
     };
@@ -354,6 +354,9 @@ private:
 
     ghoul::MemoryPool<4096> _memoryPool;
 };
+
+// Convert the input string to a format that is valid as an identifier
+std::string makeIdentifier(std::string str);
 
 } // namespace openspace
 

@@ -377,7 +377,7 @@ void ScreenSpaceSkyBrowser::setOpacity(float opacity) {
     _opacity = opacity;
 }
 
-float ScreenSpaceSkyBrowser::opacity() const {
+float ScreenSpaceSkyBrowser::opacity() const noexcept {
     return _opacity;
 }
 

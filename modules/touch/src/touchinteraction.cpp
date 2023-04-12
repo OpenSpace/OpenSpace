@@ -668,15 +668,15 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
     const InteractionType action = interpretInteraction(list, lastProcessed);
 
 #ifdef TOUCH_DEBUG_PROPERTIES
-    const std::map<int, std::string> interactionNames = {
-        { ROTATION, "Rotation" },
-        { PINCH, "Pinch" },
-        { PAN, "Pan" },
-        { ROLL, "Roll" }
+    const std::map<InteractionType, std::string> interactionNames = {
+        { InteractionType::ROTATION, "Rotation" },
+        { InteractionType::PINCH, "Pinch" },
+        { InteractionType::PAN, "Pan" },
+        { InteractionType::ROLL, "Roll" }
     };
     _debugProperties.interpretedInteraction = interactionNames.at(action);
 
-    if (pinchConsecCt > 0 && action != PINCH) {
+    if (pinchConsecCt > 0 && action != InteractionType::PINCH) {
         if (pinchConsecCt > 3) {
             LDEBUG(fmt::format(
                 "PINCH gesture ended with {} drag distance and {} counts",
@@ -828,10 +828,25 @@ double TouchInteraction::computeTapZoomDistance(double zoomGain) {
     return newVelocity;
 }
 
+bool TouchInteraction::hasNonZeroVelocities() const {
+    glm::dvec2 sum = _vel.orbit;
+    sum += glm::dvec2(_vel.zoom, 0.0);
+    sum += glm::dvec2(_vel.roll, 0.0);
+    sum += _vel.pan;
+    // Epsilon size based on that even if no interaction is happening,
+    // there might still be some residual velocity in the
+    return glm::length(sum) > 0.001;
+}
+
 // Main update call, calculates the new orientation and position for the camera depending
 // on _vel and dt. Called every frame
 void TouchInteraction::step(double dt, bool directTouch) {
     using namespace glm;
+
+    if (!(directTouch || hasNonZeroVelocities())) {
+        // No motion => don't update the camera
+        return;
+    }
 
     const SceneGraphNode* anchor =
         global::navigationHandler->orbitalNavigator().anchorNode();
@@ -1011,8 +1026,8 @@ void TouchInteraction::step(double dt, bool directTouch) {
         // should make the touch interaction tap into the orbitalnavigator and let that
         // do the updating of the camera, instead of handling them separately. Then we
         // would keep them in sync and avoid duplicated camera updating code.
-        camPos =
-            global::navigationHandler->orbitalNavigator().pushToSurfaceOfAnchor(camPos);
+        auto orbitalNavigator = global::navigationHandler->orbitalNavigator();
+        camPos = orbitalNavigator.pushToSurfaceOfAnchor(camPos);
 
         // @TODO (emmbr, 2023-02-08) with the line above, the ZoomInLimit might not be
         // needed anymore. We should make it so that just the limit properties in the

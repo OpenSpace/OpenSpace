@@ -33,14 +33,14 @@
 namespace openspace::globebrowsing {
 
 /**
- * Provide <code>Tile</code>s from web map services that have temporal resolution.
+ * Provide `Tile`s from web map services that have temporal resolution.
  *
  * TemporalTileProviders are instantiated using a ghoul::Dictionary, and must define a
  * filepath to a Openspace Temporal dataset description file. This is an xml-file that
  * defines the same meta data as the GDAL wms description
  * (http://www.gdal.org/frmt_wms.html), but augmented with some extra tags describing the
  * temporal properties of the dataset. See
- * <code>TemporalTileProvider::TemporalXMLTags</code>
+ * `TemporalTileProvider::TemporalXMLTags`
  */
 class TemporalTileProvider : public TileProvider {
 public:

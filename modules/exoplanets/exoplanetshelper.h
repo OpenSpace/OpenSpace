@@ -108,9 +108,6 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom = 180.f,
 // so that x is pointing from star to the sun.
 glm::dmat3 computeSystemRotation(glm::dvec3 starPosition);
 
-// Create an identifier without whitespaces
-std::string createIdentifier(std::string name);
-
 void sanitizeNameString(std::string& s);
 
 } // namespace openspace::exoplanets

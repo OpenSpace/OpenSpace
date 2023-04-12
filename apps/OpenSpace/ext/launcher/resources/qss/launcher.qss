@@ -36,7 +36,7 @@ LauncherWindow  QComboBox#config {
   border-radius: 3px;
   border-color: rgb(225, 225, 225);
   padding: 1px 18px 1px 3px;
-  min-width: 6em;
+  min-width: 14em;
   font-size: 10pt;
   font-family: Segoe UI;
   font-weight: bold;
