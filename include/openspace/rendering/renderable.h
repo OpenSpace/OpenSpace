@@ -56,6 +56,8 @@ class Camera;
 class Renderable : public properties::PropertyOwner, public Fadeable {
 public:
     struct Settings {
+        Settings() = default;
+
         bool automaticallyUpdateRenderBin = true;
         bool shouldUpdateIfDisabled = false;
     };
