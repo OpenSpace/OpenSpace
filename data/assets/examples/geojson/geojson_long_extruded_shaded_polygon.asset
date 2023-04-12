@@ -1,0 +1,30 @@
+local earth = asset.require('scene/solarsystem/planets/earth/earth')
+local earthIdentifier = earth.Earth.Identifier
+
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+local Example_Polygon = {
+  Identifier = "Earth-Polygon-withLights",
+  File = asset.localResource("./files/polygon_long_africa.geojson"),
+  HeightOffset = 20000.0,
+  DefaultProperties = {
+    Color = { 0.0, 1.0, 0.0 },
+    LineWidth = 2.0,
+    PerformShading = true,
+    Extrude = true
+  },
+  LightSources = {
+    sun.LightSource
+  },
+  Name = "Long Polygon (shaded and lit by Sun)"
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Polygon)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Polygon)
+end)
+
+asset.export(Example_Polygon)
