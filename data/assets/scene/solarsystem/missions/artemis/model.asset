@@ -4,7 +4,7 @@ local transforms = asset.require("./transforms")
 local models = asset.syncedResource({
   Name = "Artemis Models",
   Type = "HttpSynchronization",
-  Identifier = "artemis_models",
+  Identifier = "artemis_1_models",
   Version = 1
 })
 

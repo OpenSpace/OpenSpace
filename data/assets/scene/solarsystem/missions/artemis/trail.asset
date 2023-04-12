@@ -5,7 +5,7 @@ asset.require("spice/base")
 local kernels = asset.syncedResource({
   Name = "Artemis Kernels",
   Type = "HttpSynchronization",
-  Identifier = "artemis_kernels",
+  Identifier = "artemis_1_kernels",
   Version = 1
 })
 
