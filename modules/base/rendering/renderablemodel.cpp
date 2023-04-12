@@ -297,7 +297,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     if (p.forceRenderInvisible.has_value()) {
         _forceRenderInvisible = *p.forceRenderInvisible;
@@ -634,7 +633,7 @@ void RenderableModel::initializeGL() {
     setBoundingSphere(_geometry->boundingRadius() * _modelScale);
 
     // Set Interaction sphere size to be 10% of the bounding sphere
-    setInteractionSphere(_boundingSphere * 0.1);
+    setInteractionSphere(boundingSphere() * 0.1);
 }
 
 void RenderableModel::deinitializeGL() {

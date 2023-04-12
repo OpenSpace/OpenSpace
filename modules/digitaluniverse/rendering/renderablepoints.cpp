@@ -130,7 +130,6 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     _speckFile = absPath(p.file);
 

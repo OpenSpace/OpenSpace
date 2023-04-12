@@ -48,7 +48,7 @@ public:
     virtual bool isVisible() const;
 
     /// Returns the full opacity constructed from the _opacity and _fade property values
-    virtual float opacity() const;
+    virtual float opacity() const noexcept;
 
 protected:
     properties::FloatProperty _opacity;

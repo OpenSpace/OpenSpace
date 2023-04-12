@@ -22,44 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__DEFAULTTILEPROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__DEFAULTTILEPROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_CACHE_PROPERTIES___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_CACHE_PROPERTIES___H__
 
-#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/src/tilecacheproperties.h>
-#include <modules/globebrowsing/src/asynctiledataprovider.h>
-#include <memory>
+#include <string>
 
 namespace openspace::globebrowsing {
 
-class DefaultTileProvider : public TileProvider {
-public:
-    DefaultTileProvider(const ghoul::Dictionary& dictionary);
-
-    Tile tile(const TileIndex& tileIndex) override final;
-    Tile::Status tileStatus(const TileIndex& index) override final;
-    TileDepthTransform depthTransform() override final;
-    void update() override final;
-    void reset() override final;
-    int minLevel() override final;
-    int maxLevel() override final;
-    float noDataValueAsFloat() override final;
-
-    static documentation::Documentation Documentation();
-
-private:
-    void initAsyncTileDataReader(TileTextureInitData initData, TileCacheProperties cacheProperties);
-
-    properties::StringProperty _filePath;
-    properties::IntProperty _tilePixelSize;
-
-    std::unique_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    layers::Group::ID _layerGroupID = layers::Group::ID::Unknown;
-    bool _performPreProcessing = false;
-    bool _padTiles = true;
-    TileCacheProperties _cacheProperties;
+struct TileCacheProperties {
+    bool enabled = false;
+    std::string compression;
+    std::string path;
+    int quality;
+    int blockSize;
 };
 
 } // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__DEFAULTTILEPROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_CACHE_PROPERTIES___H__

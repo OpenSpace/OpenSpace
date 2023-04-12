@@ -1,6 +1,6 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat368
+local kernel = asset.require("../kernels").sat452
 
 
 
@@ -100,6 +100,60 @@ local inuitGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 894.86,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2004S29",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "660",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2004 S 29",
+      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 858.77,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2004S31",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "65067",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2004 S 31",
+      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 853.80,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2019S01",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "65093",
+    Radii = { 5000, 5000, 5000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2019 S 01",
+      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 443.78,
     Kernels = kernel
   }
 }

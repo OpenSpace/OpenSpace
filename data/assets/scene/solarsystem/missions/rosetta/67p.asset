@@ -21,10 +21,11 @@ local images = asset.syncedResource({
   Type = "HttpSynchronization",
   Identifier = "rosettaimages",
   Version = 2,
-  UnzipFiles = true
+  UnzipFiles = true,
+  UnzipFilesDestination = "images"
 })
 
-local imagesDestination = images .. "images_v1_v2"
+local imagesDestination = images .. "images"
 
 local Barycenter = {
   Identifier = "67PBarycenter",

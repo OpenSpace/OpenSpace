@@ -204,7 +204,7 @@ void RenderableModelProjection::initializeGL() {
     setBoundingSphere(_geometry->boundingRadius() * _modelScale);
 
     // Set Interaction sphere size to be 10% of the bounding sphere
-    setInteractionSphere(_boundingSphere * 0.1);
+    setInteractionSphere(boundingSphere() * 0.1);
 }
 
 void RenderableModelProjection::deinitializeGL() {
