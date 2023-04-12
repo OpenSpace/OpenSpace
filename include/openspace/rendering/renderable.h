@@ -53,13 +53,15 @@ namespace documentation { struct Documentation; }
 
 class Camera;
 
+// Unfortunately we can't move this struct into the Renderable until
+// https://bugs.llvm.org/show_bug.cgi?id=36684 is fixed
+struct RenderableSettings {
+    bool automaticallyUpdateRenderBin = true;
+    bool shouldUpdateIfDisabled = false;
+};
+
 class Renderable : public properties::PropertyOwner, public Fadeable {
 public:
-    struct Settings {
-        bool automaticallyUpdateRenderBin = true;
-        bool shouldUpdateIfDisabled = false;
-    };
-
     enum class RenderBin : int {
         Background = 1,
         Opaque = 2,
@@ -71,7 +73,8 @@ public:
     static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
         ghoul::Dictionary dictionary);
 
-    Renderable(const ghoul::Dictionary& dictionary, Settings settings = Settings());
+    Renderable(const ghoul::Dictionary& dictionary,
+        RenderableSettings settings = RenderableSettings());
     virtual ~Renderable() override = default;
 
     virtual void initialize();

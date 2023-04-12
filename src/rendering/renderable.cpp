@@ -135,7 +135,7 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
 
 
 
-Renderable::Renderable(const ghoul::Dictionary& dictionary, Settings settings)
+Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings settings)
     : properties::PropertyOwner({ "Renderable" })
     , Fadeable()
     , _enabled(EnabledInfo, true)
