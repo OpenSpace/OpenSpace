@@ -1070,16 +1070,15 @@ void OpenSpaceEngine::writeDocumentation() {
     sceneGraph["Name"] = "Scene";
     sceneGraph["Data"] = scene.get();
 
-    nlohmann::json documentation;
-    documentation["documentation"].push_back(sceneGraph);
-    documentation["documentation"].push_back(sceneProperties);
-    documentation["documentation"].push_back(keybindings);
-    documentation["documentation"].push_back(license);
-    documentation["documentation"].push_back(scripting);
-    documentation["documentation"].push_back(factory);
+    nlohmann::json documentation = { 
+        sceneGraph, sceneProperties, keybindings, license, scripting, factory 
+    };
+
+    nlohmann::json result;
+    result["documentation"] = documentation;
 
     std::ofstream out(absPath("${DOCUMENTATION}/documentationData.js"));
-    out << "var data = " << documentation.dump();
+    out << "var data = " << result.dump();
     out.close();
 }
 

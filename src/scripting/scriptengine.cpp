@@ -99,16 +99,17 @@ namespace {
         using namespace openspace::scripting;
         nlohmann::json function;
         function["Name"] = f.name;
-        function["Arguments"] = nlohmann::json::array();
+        nlohmann::json arguments = nlohmann::json::array();
 
         for (const LuaLibrary::Function::Argument& arg : f.arguments) {
             nlohmann::json argument;
             argument["Name"] = arg.name;
             argument["Type"] = arg.type;
             argument["Default Value"] = arg.defaultValue.value_or("");
-            function["Arguments"].push_back(argument);
+            arguments.push_back(argument);
         }
 
+        function["Arguments"] = arguments;
         function["Return Type"] = f.returnType;
         function["Help"] = f.helpText;
 
