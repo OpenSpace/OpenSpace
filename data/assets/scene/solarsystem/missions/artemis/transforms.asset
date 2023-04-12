@@ -13,19 +13,19 @@ local ArtemisPosition = {
   Parent = earthTransforms.EarthCenter.Identifier,
   Transform = {
     Translation = {
-      Type = 'SpiceTranslation',
-      Target = -1023, -- Artemis
+      Type = "SpiceTranslation",
+      Target = "-1023", -- Artemis-1
       Observer = "EARTH",
-      Frame = 'GALACTIC',
-      Kernels = { kernels .. "artemisJPLH-fetchDec15.bsp" }
+      Frame = "GALACTIC",
+      Kernels = { kernels .. "artemis.bsp" }
     },
   },
   GUI = {
-    Name = "Artemis Position",
+    Name = "Artemis-1 Position",
     Path = "/Solar System/Missions/Artemis",
     Hidden = true,
     Description = [[
-      Artemis Position relative to Earth.
+      Artemis-1 position relative to Earth.
     ]],
   }
 }
@@ -41,10 +41,10 @@ end)
 asset.export(ArtemisPosition)
 
 asset.meta = {
-  Name = "Artemis Transforms",
+  Name = "Artemis-1 Transforms",
   Version = "1.0",
   Description = [[
-    Artemis transforms: Artemis position relative to Earth.
+    Artemis-1 transforms, position relative to Earth.
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

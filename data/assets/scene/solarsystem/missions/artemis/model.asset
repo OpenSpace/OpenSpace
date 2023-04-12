@@ -8,9 +8,19 @@ local models = asset.syncedResource({
   Version = 1
 })
 
-local OrionModel = {
-  Identifier = "OrionModel",
+local ArtemisModel = {
+  Identifier = "ArtemisModel",
   Parent = transforms.ArtemisPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "ArtemisModel",
+      XAxis = { 1.0, 0.0, 0.0 },
+      XAxisOrthogonal = true,
+      YAxis = "Sun",
+      YAxisInvert = true
+    },
+  },
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "artemis.glb",
@@ -21,32 +31,32 @@ local OrionModel = {
     LightSources = {
       sun.LightSource
     },
-    AmbientIntensity = 0.03
+    AmbientIntensity = 0.05
   },
   GUI = {
-    Name = "Orion Model",
+    Name = "Orion (Artemis-1) Model",
     Path = "/Solar System/Missions/Artemis",
     Description = [[
-      Model of the Orion capsule.
+      Model of the Orion capsule for the Artemis-1 mission
     ]],
   }
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(OrionModel)
+  openspace.addSceneGraphNode(ArtemisModel)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(OrionModel)
+  openspace.removeSceneGraphNode(ArtemisModel)
 end)
 
-asset.export(OrionModel)
+asset.export(ArtemisModel)
 
 asset.meta = {
-  Name = "Artemis",
+  Name = "Artemis-1 Model",
   Version = "1.0",
   Description = [[
-    Orion capsule model.
+    Orion capsule model for the Artemis-1 mission
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

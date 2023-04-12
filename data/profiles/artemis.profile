@@ -76,15 +76,14 @@
     }
   ],
   "mark_nodes": [
-    "OrionModel",
-    "ArtemisTrailCoRevOrbit",
+    "ArtemisModel",
     "Earth",
     "Moon",
     "Sun"
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Artemis Profile. Adds the Orion capsule model with an estimated trajectery",
+    "description": "Artemis Profile. Adds the Orion capsule (Artemis-1) model with an estimated trajectery",
     "license": "MIT License",
     "name": "Artemis",
     "url": "https://www.openspaceproject.com",
@@ -113,6 +112,16 @@
     },
     {
       "name": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.ISSModel.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.ISS_trail.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
     }
