@@ -24,10 +24,6 @@ local ArtemisModel = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "artemis.glb",
-    ModelScale = "Meter",
-    InvertModelScale = false,
-    PerformShading = true,
-    DisableFaceCulling = true,
     LightSources = {
       sun.LightSource
     },

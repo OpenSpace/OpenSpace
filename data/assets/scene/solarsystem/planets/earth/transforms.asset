@@ -70,38 +70,14 @@ local EarthIAU = {
   }
 }
 
-local EarthECLIPJ2000 = {
-  Identifier = "EarthECLIPJ2000",
-  Parent = transforms.SolarSystemBarycenter.Identifier,
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "EARTH",
-      Observer = "SSB"
-    },
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "ECLIPJ2000",
-      DestinationFrame = "GALACTIC",
-    }
-  },
-  GUI = {
-    Name = "Earth Ecliptic",
-    Path = "/Solar System/Planets/Earth",
-    Hidden = true
-  }
-}
-
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthBarycenter)
   openspace.addSceneGraphNode(EarthCenter)
   openspace.addSceneGraphNode(EarthInertial)
   openspace.addSceneGraphNode(EarthIAU)
-  openspace.addSceneGraphNode(EarthECLIPJ2000)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(EarthECLIPJ2000)
   openspace.removeSceneGraphNode(EarthIAU)
   openspace.removeSceneGraphNode(EarthInertial)
   openspace.removeSceneGraphNode(EarthCenter)
@@ -112,7 +88,6 @@ asset.export(EarthBarycenter)
 asset.export(EarthCenter)
 asset.export(EarthInertial)
 asset.export(EarthIAU)
-asset.export(EarthECLIPJ2000)
 
 asset.meta = {
   Name = "Earth Transforms",
