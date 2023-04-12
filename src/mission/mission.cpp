@@ -55,12 +55,9 @@ namespace {
         std::optional<std::vector<ghoul::Dictionary>> phases
             [[codegen::reference("core_mission_mission")]];
 
-        struct Media {
-            // An image that can be presented to the user during this phase of a mission
-            std::optional<std::string> image;
-            std::optional<std::string> link;
-        };
-        std::optional<Media> media;
+        // An image that can be presented to the user during this phase of a mission
+        std::optional<std::string> image;
+        std::optional<std::string> link;
 
         // Actions associated with this phase
         std::optional<std::vector<std::string>> actions;
@@ -90,10 +87,8 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
 
     _name = p.name;
     _description = p.description.value_or(_description);
-    if (p.media.has_value()) {
-        _image = p.media->image.value_or(_image);
-        _link = p.media->link.value_or(_link);
-    }
+    _image = p.image.value_or(_image);
+    _link = p.link.value_or(_link);
 
     if (p.phases.has_value()) {
         _subphases.reserve(p.phases->size());

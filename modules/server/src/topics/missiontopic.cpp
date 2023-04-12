@@ -106,10 +106,8 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
             { "end" ,endTimeString }
         }},
         { "phases", phases },
-        { "media",{
-            { "image", phase.image() },
-            { "link", phase.link() }
-        }},
+        { "image", phase.image() },
+        { "link", phase.link() },
         { "milestones" , milestones }
     };
 

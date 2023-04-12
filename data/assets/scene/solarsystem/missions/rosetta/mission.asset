@@ -101,10 +101,8 @@ local Mission = {
     {
       Name = "Mission",
       Description = "At 10:00 CET the spacecraft woke up and started post-hibernation procedures. Rosetta restored communications with ESA's Operations Centre through NASA’s Goldstone ground station at 18:17 CET. Greets the Earth with a 'Hello World' message. The message was received on a very low bit level. Over the next months ESA's job will be to raise communication speed through a software update.",
-      Media = { 
-        Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif",
-        Link = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif" 
-        },
+      Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif",
+      Link = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif",
       TimeRange = { Start = "2014 JAN 20 10:00:00", End = "2016 SEP 30 00:00:00" }
     }
   }
