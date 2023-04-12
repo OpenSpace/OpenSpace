@@ -92,16 +92,16 @@ namespace {
         // Path to folder containing the input .cdf files
         std::filesystem::path sourceFolder [[codegen::directory()]];
         // Bool if seedPointProvider is used or not
-        std::optional<bool> seedPointProvider;
+        std::optional<bool> useSeedPointProvider;
         // Variable storing seedpoints
         std::optional<std::string> seedPointsFromProvider;
         // Path to file with seed points
-        std::filesystem::path seedPointFile;
+        std::filesystem::path providedSeedPointFilePath;
         // Path to csv file with seed points
-        std::filesystem::path seedPointCSVFile;
+        std::filesystem::path providedSeedPointCSVFilePath;
         // Extra variables such as rho, p or t
         std::optional<std::vector<std::string>> extraVariables;
-        // Which variable in CDF file to trace. 'u_perp_b' is default. 
+        // Which variable in CDF file to trace. 'u_perp_b' is default.
         // u is for flow, b is for magnetic field. perp meaning perpendicular
         std::optional<std::string> tracingVariable;
         // The number of points on the 'path line' which fieldlines will be moving
@@ -115,7 +115,7 @@ namespace {
         std::optional<bool> renderFlowLine;
         // [[codegen::verbatim(ColorMethodInfo.description)]]
         std::optional<std::string> colorMethod;
-        // List of ranges for which their corresponding parameters values will be 
+        // List of ranges for which their corresponding parameters values will be
         // colorized by. Should be entered as {min value, max value} per range
         std::optional<std::vector<glm::vec2>> colorTableRanges;
         // [[codegen::verbatim(ColorQuantityInfo.description)]]
@@ -126,7 +126,7 @@ namespace {
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
         // ManuelTimeOffset will be added to trigger time.
-        // TODO should not be any need for manual time offset because 
+        // TODO should not be any need for manual time offset because
         // we only want one state
         std::optional<double> manualTimeOffset;
     };
@@ -141,12 +141,24 @@ namespace openspace {
         double startTime
     );
 
-    void modifySeedPoints(
+    void selectAndModifySeedpoints(
         std::filesystem::path filePath,
         std::vector<glm::vec3>& seedPoints,
         std::vector<double>& birthTimes,
         double startTime
     );
+
+    void addCoordinatesToSeedPoints(
+        RenderableMovingFieldlines::SeedPointInformation temp,
+        std::vector<glm::vec3>& seedPoints
+    );
+
+    void addCoordinatesOfTopologies(
+        std::vector<glm::vec3>& seedPoints,
+        std::vector<double>& birthTimes,
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data
+    );
+
     std::vector<RenderableMovingFieldlines::SetOfSeedPoints> extractSeedPointsFromCSVFile(std::ifstream file);
     std::ifstream readTxtOrCSVFile(std::filesystem::path filePath);
     std::vector<std::string> extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
@@ -213,9 +225,9 @@ namespace openspace {
         }
         std::sort(_sourceFiles.begin(), _sourceFiles.end());
 
-        _seedFilePath = p.seedPointFile;
-        _seedCSVFilePath = p.seedPointCSVFile;
-        _seedPointProvider = p.seedPointProvider.value_or(_seedPointProvider);
+        _providedSeedFilePath = p.providedSeedPointFilePath;
+        _providedSeedCSVFilePath = p.providedSeedPointCSVFilePath;
+        _useSeedPointProvider = p.useSeedPointProvider.value_or(_useSeedPointProvider);
         _seedPointsFromProvider = p.seedPointsFromProvider.value_or(_seedPointsFromProvider);
         _extraVars = p.extraVariables.value_or(_extraVars);
         _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
@@ -292,18 +304,28 @@ namespace openspace {
         _transferFunction = std::make_unique<TransferFunction>(
             absPath(_colorTablePaths[0]).string()
             );
-        
+
+        std::filesystem::path pathToDownloadTo = initializeSyncDirectory
+        (
+            "seed_points",
+            "dayside_seedpoints.csv"
+        );
         // Get CSV file from API
-        if (_seedPointProvider) {
-            getSeedPointsFromAPI("http://localhost:5000/get_csv_file", "seed_points", "dayside_seedpoints.csv");
+        if (_useSeedPointProvider) {
+            getSeedPointsFromAPI("http://localhost:5000/get_csv_file", pathToDownloadTo);
         }
-        else if (!_seedPointProvider && _seedFilePath.empty()) {
+        else if (
+            !_useSeedPointProvider &&
+            _providedSeedFilePath.empty() &&
+            _providedSeedCSVFilePath.empty()
+        )
+        {
             throw ghoul::RuntimeError(
                 "File path to seed points was not provided"
             );
         }
-  
-        bool stateSuccuess = getStateFromCdfFiles();
+
+        bool stateSuccuess = getStateFromCdfFiles(pathToDownloadTo);
         if (!stateSuccuess) {
             throw ghoul::RuntimeError("Trying to read cdf file failed");
         }
@@ -341,21 +363,21 @@ namespace openspace {
             //        mf.pathLines.second.daysideReconnectionStart);
             //}
 
-            // hard coding for the sake of the smurfsaft 
+            // hard coding for the sake of the smurfsaft
             if (traverserIndex < _fieldlineState.getAllMatchingFieldlines().size()) {
 
             //    // ---------This part works for dayside separate---------
             //    // find out which traverser has the longest traveling time to point of
-            //    // reconnection and adjust the startpoint according to the shorter 
+            //    // reconnection and adjust the startpoint according to the shorter
             //    // traverser traveltime
                 if (timeToReconTrav1 > timeToReconTrav2) {
                     _traversers[traverserIndex].setStartPoint(
-                        timeToReconTrav2, 
+                        timeToReconTrav2,
                         mf.pathLines.first.daysideReconnectionStart);
                 }
                 else {
                     _traversers[traverserIndex + 1].setStartPoint(
-                        timeToReconTrav1, 
+                        timeToReconTrav1,
                         mf.pathLines.second.daysideReconnectionStart);
                 }
             }
@@ -370,7 +392,7 @@ namespace openspace {
             }
 
             // initialize the temporary key frame for each traverser
-            _traversers[traverserIndex].temporaryInterpolationKeyFrame.vertices = 
+            _traversers[traverserIndex].temporaryInterpolationKeyFrame.vertices =
                 std::vector(_nPointsOnFieldlines, glm::vec3{});
 
             _traversers[traverserIndex + 1].temporaryInterpolationKeyFrame.vertices =
@@ -445,7 +467,7 @@ namespace openspace {
         setRenderBin(Renderable::RenderBin::Overlay);
     }
 
-    bool RenderableMovingFieldlines::getStateFromCdfFiles() {
+    bool RenderableMovingFieldlines::getStateFromCdfFiles(std::filesystem::path pathToDownloadTo) {
 
         std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
 
@@ -464,17 +486,21 @@ namespace openspace {
 
             _fieldlineState.setModel(fls::stringToModel(kameleon->getModelName()));
 
-            // We only need to extract seed points once, but we need the start time of the first
+            // We only need to extract seed points once,
+            // but we need the start time of the first
             // CDF-file to create correct birth times for the points.
             if (shouldExtractSeedPoints) {
 
-                // Get start_time from cdf and convert it to double; needed to give seed points
+                // Get start_time from cdf and convert it to double;
+                // needed to give seed points
                 // give in date-format their proper birthTime.
                 bool hasStartTime = kameleon->doesAttributeExist("start_time");
                 if (hasStartTime) {
                     std::string startTimeStr =
                         kameleon->getGlobalAttribute("start_time").getAttributeString();
-                    startTime = Time::convertTime(startTimeStr.substr(0, startTimeStr.length() - 2));
+                    startTime = Time::convertTime(
+                        startTimeStr.substr(0, startTimeStr.length() - 2)
+                    );
                 }
                 else {
                     LWARNING(fmt::format(
@@ -483,11 +509,33 @@ namespace openspace {
                     ));
                 }
 
-                // Get seed points from CSV or txt file
-                if(_seedPointProvider){
-                    modifySeedPoints(_seedCSVFilePath, seedPoints ,birthTimes, startTime);
-                }else{
-                    extractSeedPointsFromFile(_seedFilePath, seedPoints, birthTimes, startTime);
+                // Run seedpoint-provider (API-call),
+                // download and use .csv file with seedpoints
+                if (_useSeedPointProvider) {
+                    selectAndModifySeedpoints(
+                        pathToDownloadTo,
+                        seedPoints,
+                        birthTimes,
+                        startTime
+                    );
+                }
+                // Use provided .csv file with seedpoints
+                else if (!_useSeedPointProvider && !_providedSeedCSVFilePath.empty()) {
+                    selectAndModifySeedpoints(
+                        _providedSeedCSVFilePath,
+                        seedPoints,
+                        birthTimes,
+                        startTime
+                    );
+                }
+                // Use provided .txt file with seedpoints
+                else {
+                    extractSeedPointsFromFile(
+                        _providedSeedFilePath,
+                        seedPoints,
+                        birthTimes,
+                        startTime
+                    );
                 }
 
                 shouldExtractSeedPoints = false;
@@ -549,28 +597,41 @@ namespace openspace {
     }
 
     // Write function used by CURLOPT_WRITEFUNCTION
-    size_t RenderableMovingFieldlines::write_data(void* ptr, size_t size, size_t nmemb, FILE* stream) {
+    size_t RenderableMovingFieldlines::write_data(
+        void* ptr, size_t size, size_t nmemb, FILE* stream) {
         size_t written;
         written = fwrite(ptr, size, nmemb, stream);
         return written;
     }
 
-    //Function that creates a new path depending on user inputs
-    std::filesystem::path RenderableMovingFieldlines::initializeSyncDirectory(std::string folderName, std::string nameOfTextFile)
+    // Function that creates a new path depending on user inputs
+    std::filesystem::path RenderableMovingFieldlines::initializeSyncDirectory(
+        std::string folderName,
+        std::string nameOfTextFile
+    )
     {
         std::filesystem::path pathToDownloadTo =
             absPath("${SYNC}/http/" + folderName + "/" + nameOfTextFile);
 
         return pathToDownloadTo;
     }
-    
-    // Initializes curl, creates a text file in sync folder, writes response (api request to URL), to textfile
-    void RenderableMovingFieldlines::getSeedPointsFromAPI(std::string URL, std::string folderNameInSyncFolder, std::string nameOfGeneratedFile ) {
-        CURL* curl = curl_easy_init();
 
+    /**
+    * Initializes curl, creates a text file in sync folder,
+    * writes response (api request to URL), to textfile
+    */
+    void RenderableMovingFieldlines::getSeedPointsFromAPI
+    (
+        std::string URL,
+        std::filesystem::path pathToDownloadTo
+    )
+    {
+        CURL* curl = curl_easy_init();
         if (curl)
         {
-            std::filesystem::path pathToDownloadTo = initializeSyncDirectory(folderNameInSyncFolder, nameOfGeneratedFile);
+            /*std::filesystem::path pathToDownloadTo = initializeSyncDirectory(
+                folderNameInSyncFolder,
+                nameOfGeneratedFile);*/
             FILE* fp = fopen(pathToDownloadTo.string().c_str(), "w");
             curl_easy_setopt(curl, CURLOPT_URL, URL.c_str());
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
@@ -583,8 +644,10 @@ namespace openspace {
         }
     }
 
-    std::vector<RenderableMovingFieldlines::SetOfSeedPoints> extractSeedPointsFromCSVFile(std::filesystem::path filePath) {
-
+    std::vector<RenderableMovingFieldlines::SetOfSeedPoints> extractSeedPointsFromCSVFile(
+        std::filesystem::path filePath
+    )
+    {
         std::ifstream file = readTxtOrCSVFile(filePath);
 
         RenderableMovingFieldlines::SetOfSeedPoints setOfSeedPoints;
@@ -606,7 +669,7 @@ namespace openspace {
 
             RenderableMovingFieldlines::SeedPointInformation seedPoint;
 
-            // Get seedPoint 
+            // Get seedPoint
             while (std::getline(lineStream, field, ',') && elementCounter < 5)
             {
                 switch (elementCounter)
@@ -676,33 +739,80 @@ namespace openspace {
         return data;
     }
 
-    // Extracts seed points from csv file and return tuple
-    void modifySeedPoints(
+    /**
+    * Add coordinates of seedpoints by topology (vector data)
+    * to seedpoint vector for rendering
+    */
+    void addCoordinatesToSeedPoints(
+        RenderableMovingFieldlines::SeedPointInformation temp,
+        std::vector<glm::vec3>& seedPoints
+    )
+    {
+        glm::vec3 seedPointVector;
+        seedPointVector.x = temp.x;
+        seedPointVector.y = temp.y;
+        seedPointVector.z = temp.z;
+        seedPoints.push_back(seedPointVector);
+    }
+
+    /**
+    * Iterate through vector with seedpoint information and pushback seedpoints to
+    * seedPoints and create birthTimes for rendering
+    * (push back seedpoints we want to render)
+    */
+    void addCoordinatesOfTopologies(
+        std::vector<glm::vec3>& seedPoints,
+        std::vector<double>& birthTimes,
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data
+    )
+    {
+        // Iterate through data vector
+        for (size_t i = 0; i < data.size(); i++)
+        {
+            addCoordinatesToSeedPoints(data[i].IMF, seedPoints);
+            addCoordinatesToSeedPoints(data[i].Closed, seedPoints);
+            addCoordinatesToSeedPoints(data[i].OpenNorth, seedPoints);
+            addCoordinatesToSeedPoints(data[i].OpenSouth, seedPoints);
+
+            // TODO make understandable - make function - temp code until better solution
+            double t = -28695.816082351092;
+            birthTimes.push_back(t);
+        }
+    }
+
+    /**
+    * Extracts seed points from csv file and return tuple
+    */
+    void selectAndModifySeedpoints(
         std::filesystem::path filePath,
         std::vector<glm::vec3>& seedPoints,
         std::vector<double>& birthTimes,
         double startTime
-    ) { 
+    )
+    {
+        // Check if provided file has extension csv
         if (!std::filesystem::is_regular_file(filePath) ||
             filePath.extension() != ".csv")
         {
-            throw ghoul::RuntimeError(fmt::format("SeedPointFile needs to be a .csv file"));
+            throw ghoul::RuntimeError(
+                fmt::format("SeedPointFile needs to be a .csv file"));
         }
-        
-        // Vector containing all set of seedpoints
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data = extractSeedPointsFromCSVFile(filePath);
 
-        // Check if vector is correct
-        for (size_t i = 0; i < data.size(); i++)
+        // Create vector data containing all set of seedpoints from csv file
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data =
+            extractSeedPointsFromCSVFile(filePath);
+
+        // TODO function that removes seedpoints from created vector data
+        // TODO modify
+
+        // Iterate through vector data and pushback seedpoints of intrest
+        // to seedPoints and birthTimes for rendering
+        addCoordinatesOfTopologies(seedPoints, birthTimes, data);
+
+        for (int i = 0; i < seedPoints.size(); i++)
         {
-            std::cout << "Row " << i << std::endl;
-            std::cout << "Closed: " << data[i].Closed.fieldLineStatus << " y value: " << data[i].Closed.y << std::endl;
-            std::cout << "Open North: " << data[i].OpenNorth.fieldLineStatus << " y value: " << data[i].OpenNorth.y << std::endl;
-            std::cout << "OPEN SOUTH: " << data[i].OpenSouth.fieldLineStatus << " y value: " << data[i].OpenSouth.y << std::endl;
-            std::cout << "IMF: " << data[i].IMF.fieldLineStatus << " y value: " << data[i].IMF.y << std::endl;
+            std::cout << "seedpoint " << i << ": " << seedPoints[i] << std::endl;
         }
-
-        // TODO: FUNCTION 2 modifies seedPoints and birthTimes
     }
 
 
@@ -838,12 +948,12 @@ namespace openspace {
             double timeToReconTrav2 = _traversers[travindex + 1].
                 getTimeToReconnectionPoint(_nPointsOnPathLine);
 
-            // hard coding for the sake of the smurfsaft 
+            // hard coding for the sake of the smurfsaft
             if (travindex < _fieldlineState.getAllMatchingFieldlines().size()) {
 
                 //    // ---------This part works for dayside separate---------
                 //    // find out which traverser has the longest traveling time to point of
-                //    // reconnection and adjust the startpoint according to the shorter 
+                //    // reconnection and adjust the startpoint according to the shorter
                 //    // traverser traveltime
                 if (timeToReconTrav1 > timeToReconTrav2) {
                     _traversers[travindex].setStartPoint(
@@ -953,7 +1063,7 @@ namespace openspace {
     void RenderableMovingFieldlines::moveLine(const double dt,
         const FieldlinesState::PathLine& pathLine,
         PathLineTraverser& traverser, GLint lineStart,
-        GLsizei nVertices) 
+        GLsizei nVertices)
     {
         bool forward = std::signbit(dt) ? false : true;
 
@@ -1048,7 +1158,7 @@ namespace openspace {
             // Tracking change of direction is needed for temporary
             // key frames
             bool isNewTimeDirection = _traversers[lineIndex].forward != isMovingForward;
-            if (isNewTimeDirection) 
+            if (isNewTimeDirection)
             {
                 _traversers[lineIndex].isNewTimeDirection = true;
                 _traversers[lineIndex + 1].isNewTimeDirection = true;
@@ -1096,7 +1206,7 @@ namespace openspace {
                 std::vector<glm::vec3>::iterator lineEnd2 = lineBegin2 + _nPointsOnFieldlines;
 
                 glm::vec3 criticalPoint = _fieldlineState.criticalPoint(i);
-                
+
                 int reconnectionIndex1 = closestVertexToReconnection(lineBegin1, lineEnd1, criticalPoint);
                 int reconnectionIndex2 = closestVertexToReconnection(lineBegin2, lineEnd2, criticalPoint);
 
@@ -1169,7 +1279,7 @@ namespace openspace {
                             _traversers[lineIndex + 1].temporaryInterpolationKeyFrame.timeToNextKeyFrame +
                             _traversers[lineIndex + 1].timeSinceInterpolation;
 
-                        //_traversers[lineIndex].timeSinceInterpolation = 
+                        //_traversers[lineIndex].timeSinceInterpolation =
                         //    _traversers[lineIndex].backKeyFrame->timeToNextKeyFrame -
                         //    _traversers[lineIndex].temporaryInterpolationKeyFrame.timeToNextKeyFrame;
 
@@ -1201,14 +1311,14 @@ namespace openspace {
                     _traversers[lineIndex + 1].timeSinceInterpolation;
 
             }
-            
+
             // Individual delta time for each traverser
             // since it might be modified depending on birth and death
             double dt1 = dt;
 
             bool hasShortenedDt = false;
             // Checks if line would move after birth time with current dt
-            // and changes dt accordingly       
+            // and changes dt accordingly
             bool isAfterBirth1 = previousTime >= allMatchingFieldlines[i].pathLines.first.birthTime;
             bool movesBeforeBirth1 = currentTime < allMatchingFieldlines[i].pathLines.first.birthTime;
             if ((isAfterBirth1 && movesBeforeBirth1) || (!isAfterBirth1 && !movesBeforeBirth1)) {
@@ -1217,7 +1327,7 @@ namespace openspace {
             }
 
             // Checks if line would move after death time with current dt
-            // and changes dt accordingly 
+            // and changes dt accordingly
             bool isBeforeDeath1 = previousTime <= allMatchingFieldlines[i].pathLines.first.deathTime;
             bool movesAfterDeath1 = currentTime > allMatchingFieldlines[i].pathLines.first.deathTime;
             if ((isBeforeDeath1 && movesAfterDeath1) || (!isBeforeDeath1 && !movesAfterDeath1)) {
@@ -1238,7 +1348,7 @@ namespace openspace {
 
             hasShortenedDt = false;
             // checks if line would move after birth time with current dt
-            // and changes dt accordingly 
+            // and changes dt accordingly
             bool isAfterBirth2 = previousTime >= allMatchingFieldlines[i].pathLines.second.birthTime;
             bool movesBeforeBirth2 = currentTime < allMatchingFieldlines[i].pathLines.second.birthTime;
             if ((isAfterBirth2 && movesBeforeBirth2) || (!isAfterBirth2 && !movesBeforeBirth2)) {
@@ -1247,7 +1357,7 @@ namespace openspace {
             }
 
             // checks if line would move after death time with current dt
-            // and changes dt accordingly 
+            // and changes dt accordingly
             bool isBeforeDeath2 = previousTime <= allMatchingFieldlines[i].pathLines.second.deathTime;
             bool movesAfterDeath2 = currentTime > allMatchingFieldlines[i].pathLines.second.deathTime;
             if ((isBeforeDeath2 && movesAfterDeath2) || (!isBeforeDeath2 && !movesAfterDeath2)) {
@@ -1573,8 +1683,8 @@ namespace openspace {
         // sets one new temporary key frame position per iteration
         while (it != secondLineEndIt && temporaryKeyFrameIndex < _nPointsOnFieldlines - 1) {
 
-            bool itAtSecondLineBegiIt = it == secondLineBeginIt; 
-            std::vector<glm::vec3>::iterator backIt = itAtSecondLineBegiIt ? 
+            bool itAtSecondLineBegiIt = it == secondLineBeginIt;
+            std::vector<glm::vec3>::iterator backIt = itAtSecondLineBegiIt ?
                 (firstLineEndIt - 1) : (it - 1); // needed for the gap
 
             float distanceSinceLastLineVertex =
@@ -1666,7 +1776,7 @@ namespace openspace {
 
     double RenderableMovingFieldlines::PathLineTraverser::getTimeToReconnectionPoint(size_t indexOfReconnection) {
         double totalTime = 0.0;
-        // iterates over vertices on pathline to indexOfReconnection 
+        // iterates over vertices on pathline to indexOfReconnection
         // and sums up the time to get there
         for (size_t i = 0; i < indexOfReconnection; ++i) {
             totalTime += keyFrames[i].timeToNextKeyFrame;

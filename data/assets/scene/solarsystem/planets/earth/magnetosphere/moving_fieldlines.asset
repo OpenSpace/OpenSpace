@@ -14,10 +14,10 @@ local movingLines = {
   Renderable = {
     Type = "RenderableMovingFieldlines",
     SourceFolder = fieldlinesDirectory,
-    SeedPointProvider = true,
+    UseSeedPointProvider = true,
     SeedPointsFromProvider = "",
-    SeedPointFile = seedPointFile,
-    SeedPointCSVFile = seedPointCSVFile,
+    ProvidedSeedPointFilePath = providedSeedPointFilePath,
+    ProvidedSeedPointCSVFilePath = providedSeedPointCSVFilePath,
     TracingVariable = "u_perp_b", -- u = velocity or similar, perp = perpendicular, b = magnetic field, ultimately our flowline = where our line is moving through time
     NumberOfPointsOnPathLine = 200, -- flow line, our number of keyframes 
     NumberOfPointsOnFieldlines = 500, -- on each keyframe, there's 500 points on our flowline

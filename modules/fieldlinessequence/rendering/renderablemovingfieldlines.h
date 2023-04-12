@@ -59,7 +59,7 @@ public:
         bool isAtStart() const;
         double getTimeToReconnectionPoint(size_t indexOfReconnection);
         double getTimeToEndKeyFrame();
-        void setStartPoint(double timeToRecon, size_t indexOfReconnection); 
+        void setStartPoint(double timeToRecon, size_t indexOfReconnection);
         bool isFalseTopologyChange() const;
 
         std::vector<FieldlinesState::Fieldline>& keyFrames;
@@ -113,8 +113,8 @@ public:
 private:
     static size_t write_data(void* ptr, size_t size, size_t nmemb, FILE* stream);
     std::filesystem::path initializeSyncDirectory(std::string folderName, std::string nameOfTextFile);
-    void getSeedPointsFromAPI(std::string URL, std::string folderNameInSyncFolder, std::string nameOfGeneratedFile);
-    bool getStateFromCdfFiles();
+    void getSeedPointsFromAPI(std::string URL, std::filesystem::path pathToDownloadTo);
+    bool getStateFromCdfFiles(std::filesystem::path pathToDownloadTo);
     void updateVertexPositionBuffer();
     void updateVertexColorBuffer();
     void updateVertexAlphaBuffer(const double currentTime);
@@ -130,12 +130,12 @@ private:
         std::vector<glm::vec3>::iterator secondLineEndIt,
         FieldlinesState::Fieldline& temporaryInterpolationKeyFrame);
     float calculateFieldlineLength(
-        std::vector<glm::vec3>::iterator beginIt, 
+        std::vector<glm::vec3>::iterator beginIt,
         std::vector<glm::vec3>::iterator endIt);
     FieldlinesState::Fieldline::Topology matchingTopology(FieldlinesState::Fieldline::Topology topology);
     int closestVertexToReconnection(
-        std::vector<glm::vec3>::iterator beginIt, 
-        std::vector<glm::vec3>::iterator endIt, 
+        std::vector<glm::vec3>::iterator beginIt,
+        std::vector<glm::vec3>::iterator endIt,
         glm::vec3 criticalPoint);
 
     enum class ColorMethod {
@@ -174,7 +174,7 @@ private:
     // True when new state is loaded or user change which quantity to color the lines by
     bool _shouldUpdateColorBuffer = false;
     // If true make call to seed point provider
-    bool _seedPointProvider = false;
+    bool _useSeedPointProvider = false;
     // OpenGL Vertex Array Object
     GLuint _vertexArrayObject = 0;
     // OpenGL Vertex Buffer Object containing the vertex positions
@@ -189,8 +189,8 @@ private:
     FieldlinesState _fieldlineState;
     double _manualTimeOffset = 0.0;
     std::vector<std::filesystem::path> _sourceFiles;
-    std::filesystem::path _seedFilePath;
-    std::filesystem::path _seedCSVFilePath;
+    std::filesystem::path _providedSeedFilePath;
+    std::filesystem::path _providedSeedCSVFilePath;
     std::string _seedPointsFromProvider = "";
     std::vector<glm::vec3> _seedPoints;
     // Extra variables such as rho, p or t
