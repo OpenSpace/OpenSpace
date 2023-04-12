@@ -157,7 +157,7 @@ namespace {
         std::ofstream outFile;
         try {
             outFile.open(path, std::ofstream::out);
-            sgct::config::GeneratorVersion genEntry = minimumVersion;
+            sgct::config::GeneratorVersion genEntry = versionMin;
             outFile << sgct::serializeConfig(
                 cluster,
                 genEntry
@@ -220,9 +220,10 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
     populateProfilesList(globalConfig.profile);
     _profileBox->setEnabled(profileEnabled);
 
-    populateWindowConfigsList(_sgctConfigName);
     _windowConfigBox->setEnabled(sgctConfigEnabled);
-
+    populateWindowConfigsList(_sgctConfigName);
+    // Trigger currentIndexChanged so the preview file read is performed
+    _windowConfigBox->currentIndexChanged(_windowConfigBox->currentIndex());
 
     std::filesystem::path p = absPath(
         globalConfig.pathTokens.at("SYNC") + "/http/launcher_images"
@@ -332,23 +333,7 @@ QWidget* LauncherWindow::createCentralWidget() {
             std::filesystem::path pathSelected = absPath(selectedWindowConfig());
             bool isUserConfig = isUserConfigSelected();
             std::string fileSelected = pathSelected.generic_string();
-            if (_windowConfigBox->currentIndex() == _windowConfigBoxIndexSgctCfgDefault) {
-                editRefusalDialog(
-                    "Editor Option Not Available",
-                    "Cannot edit the 'Default' configuration since it is not a file",
-                    ""
-                );
-            }
-            else if (_windowConfigBox->currentIndex() >= _preDefinedConfigStartingIdx) {
-                editRefusalDialog(
-                    "Editor Option Not Available",
-                    fmt::format(
-                        "Cannot edit '{}' since it is one of the configuration "
-                        "files provided in the OpenSpace installation", fileSelected),
-                    ""
-                );
-            }
-            else if (std::filesystem::is_regular_file(pathSelected)) {
+            if (std::filesystem::is_regular_file(pathSelected)) {
                 openWindowEditor(fileSelected, isUserConfig);
             }
         }
@@ -545,6 +530,13 @@ bool handleConfigurationFile(QComboBox& box, const std::filesystem::directory_en
 void LauncherWindow::populateWindowConfigsList(std::string preset) {
     namespace fs = std::filesystem;
 
+    // Disconnect the signal for new window config selection during population process
+    disconnect(
+        _windowConfigBox,
+        QOverload<int>::of(&QComboBox::currentIndexChanged),
+        nullptr,
+        nullptr
+    );
     _windowConfigBox->clear();
 
     _userConfigCount = 0;
@@ -639,6 +631,52 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
         _preDefinedConfigStartingIdx++;
         _windowConfigBox->setCurrentIndex(_windowConfigBoxIndexSgctCfgDefault + 1);
     }
+    connect(
+        _windowConfigBox,
+        QOverload<int>::of(&QComboBox::currentIndexChanged),
+        [this](int newIndex) {
+            std::filesystem::path pathSelected = absPath(selectedWindowConfig());
+            std::string fileSelected = pathSelected.generic_string();
+            if (newIndex == _windowConfigBoxIndexSgctCfgDefault) {
+                _editWindowButton->setEnabled(false);
+                _editWindowButton->setToolTip(
+                    "Cannot edit the 'Default' configuration since it is not a file"
+                );
+            }
+            else if (newIndex >= _preDefinedConfigStartingIdx) {
+                _editWindowButton->setEnabled(false);
+                _editWindowButton->setToolTip(
+                    QString::fromStdString(fmt::format(
+                        "Cannot edit '{}' since it is one of the configuration "
+                        "files provided in the OpenSpace installation", fileSelected))
+                );
+            }
+            else {
+                try {
+                    sgct::config::GeneratorVersion previewGenVersion =
+                        sgct::readConfigGenerator(fileSelected);
+                    if (!versionCheck(previewGenVersion)) {
+                        _editWindowButton->setEnabled(false);
+                        _editWindowButton->setToolTip(QString::fromStdString(fmt::format(
+                            "This file does not meet the minimum required version of {}.",
+                            versionMin.versionString()
+                        )));
+                        return;
+                    } 
+                }
+                catch (const std::runtime_error& e) {
+                    // Ignore an exception here because clicking the edit button will
+                    // bring up an explanatory error message
+                }
+                _editWindowButton->setEnabled(true);
+                _editWindowButton->setToolTip("");
+            }
+        }
+    );
+}
+
+bool LauncherWindow::versionCheck(sgct::config::GeneratorVersion& v) const {
+    return (v.versionCheck(versionMin) || v == versionLegacy18 || v == versionLegacy19);
 }
 
 void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserProfile) {
@@ -724,7 +762,7 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                 "its format does not match the window editor requirements and "
                 "cannot be opened in the editor"
             );
-            if (previewGenVersion.versionCheck(minimumVersion)) {
+            if (versionCheck(previewGenVersion)) {
                 try {
                     preview = readConfig(
                         winCfg,
@@ -762,7 +800,7 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                     "File Format Version Error",
                     fmt::format(
                         "File '{}' does not meet the minimum required version of {}.",
-                        winCfg, minimumVersion.versionString()
+                        winCfg, versionMin.versionString()
                     ),
                     ""
                 );
