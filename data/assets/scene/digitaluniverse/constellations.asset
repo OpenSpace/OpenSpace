@@ -74,7 +74,7 @@ local constellations = {
 
 
 local getZodiacsString = function(zodiacsList)
-  local zodiacsString = [[{]]
+  local zodiacsString = "{"
   local isFirst = true
 
   for k, zodiac in pairs(zodiacsList) do
@@ -83,14 +83,14 @@ local getZodiacsString = function(zodiacsList)
       if isFirst then
         isFirst = false
       else
-        zodiacsString = zodiacsString .. [[, ]]
+        zodiacsString = zodiacsString .. ", "
       end
 
-      zodiacsString = zodiacsString .. [["]] .. fullName .. [["]]
+      zodiacsString = zodiacsString .. '"' .. fullName .. '"'
     end
   end
 
-  zodiacsString = zodiacsString .. [[}]]
+  zodiacsString = zodiacsString .. "}"
   return zodiacsString
 end
 
@@ -102,7 +102,7 @@ local show_constellations = {
   Name = "Show all",
   Command = [[
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", {})
-    openspace.fadeIn("Scene.Constellations.Renderable", 2.0)
+    openspace.fadeIn("Scene.Constellations.Renderable")
   ]],
   Documentation = "Shows all the constellations lines",
   GuiPath = "/Constellations/Lines",
@@ -113,7 +113,7 @@ local hide_constellations = {
   Identifier = "constellations.hide",
   Name = "Hide all",
   Command = [[
-    openspace.fadeOut("Scene.Constellations.Renderable", 2.0, "openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', false); openspace.setPropertyValueSingle('Scene.Constellations.Renderable.ConstellationSelection', {})")
+    openspace.fadeOut("Scene.Constellations.Renderable", nil, "openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', false); openspace.setPropertyValueSingle('Scene.Constellations.Renderable.ConstellationSelection', {})")
   ]],
   Documentation = "Hides all the constellations lines",
   GuiPath = "/Constellations/Lines",
@@ -125,7 +125,7 @@ local show_zodiacs = {
   Name = "Show zodiac",
   Command = [[
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", ]] .. zodiacsString .. [[)
-    openspace.fadeIn("Scene.Constellations.Renderable", 2.0)
+    openspace.fadeIn("Scene.Constellations.Renderable")
   ]],
   Documentation = "Shows the zodiac constellations lines",
   GuiPath = "/Constellations/Lines",

@@ -98,7 +98,7 @@ local show_art = {
   Identifier = "constellation_art.show_art",
   Name = "Show all",
   Command = [[
-    openspace.fadeIn("Scene.ImageConstellation*.Renderable", 2.0)
+    openspace.fadeIn("Scene.ImageConstellation*.Renderable")
   ]],
   Documentation = "Enables and fades up constellation art work",
   GuiPath = "/Constellations/Art",
@@ -110,7 +110,7 @@ local hide_art = {
   Identifier = "constellation_art.hide_art",
   Name = "Hide all",
   Command = [[
-    openspace.fadeOut("Scene.ImageConstellation*.Renderable", 2.0)
+    openspace.fadeOut("Scene.ImageConstellation*.Renderable")
   ]],
   Documentation = "Fades out constellation artwork",
   GuiPath = "/Constellations/Art",
@@ -134,7 +134,7 @@ local show_zodiac_art = {
   Identifier = "constellation_art.show_zodiac_art",
   Name = "Show zodiac",
   Command = [[
-    openspace.fadeIn("{zodiac}", 2.0)
+    openspace.fadeIn("{zodiac}")
   ]],
   Documentation = "Enables and fades up zodiac art work",
   GuiPath = "/Constellations/Art",
@@ -146,7 +146,7 @@ local hide_zodiac_art = {
   Identifier = "constellation_art.hide_zodiac_art",
   Name = "Hide zodiac",
   Command =  [[
-    openspace.fadeOut("{zodiac}", 2.0)
+    openspace.fadeOut("{zodiac}")
   ]],
   Documentation = "fades down zodiac art work",
   GuiPath = "/Constellations/Art",

@@ -14,7 +14,7 @@ local findFullName = function(abbreviation)
   local fullName = ""
 
   if file == nil then
-    io.close(file)
+    file:close()
     return nil
   end
 
@@ -28,15 +28,16 @@ local findFullName = function(abbreviation)
 
     -- Try and find the identifier in lower case instead
     local fullLine = line
-    local lowerLine = string.lower(line)
-    index, length = lowerLine:find(string.lower(abbreviation))
+    local lowerLine = line:lower()
+    index, length = lowerLine:find(abbreviation:lower())
 
     if index ~= nil and index < 4 then
       fullName = fullLine:sub(length + 2)
+      break
     end
   end
 
-  io.close(file)
+  file:close()
   if fullName == "" then
     return nil
   else

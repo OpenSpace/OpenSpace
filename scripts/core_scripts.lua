@@ -168,13 +168,8 @@ end
 
 openspace.fadeIn = function(identifier, fadeTime, endScript)
     -- Set default values for optional arguments
-    if endScript == nil then
-        endScript = ""
-    end
-
-    if fadeTime == nil then
-        fadeTime = openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
-    end
+    endScript = endScript or ""
+    fadeTime = fadeTime or openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
 
     local enabledProperty = identifier .. ".Enabled"
     local fadeProperty = identifier .. ".Fade"
@@ -209,16 +204,16 @@ openspace.fadeIn = function(identifier, fadeTime, endScript)
         end
     else
         -- Literal, single node
-        local haveEnabled = openspace.hasProperty(enabledProperty)
-        local haveFade = openspace.hasProperty(fadeProperty)
+        local hasEnabled = openspace.hasProperty(enabledProperty)
+        local hasFade = openspace.hasProperty(fadeProperty)
 
-        if not haveEnabled then
+        if not hasEnabled then
             openspace.printError(
                 "Error when calling script 'openspace.fadeIn': " ..
                 "Could not find property '" .. enabledProperty .. "'"
             )
             return
-        elseif not haveFade then
+        elseif not hasFade then
             openspace.printError(
                 "Error when calling script 'openspace.fadeIn': " ..
                 "Could not find property '" .. fadeProperty .. "'"
@@ -240,13 +235,8 @@ end
 
 openspace.fadeOut = function(identifier, fadeTime, endScript)
     -- Set default values for optional arguments
-    if endScript == nil then
-        endScript = ""
-    end
-
-    if fadeTime == nil then
-        fadeTime = openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
-    end
+    endScript = endScript or ""
+    fadeTime = fadeTime or openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
 
     local enabledProperty = identifier .. ".Enabled"
     local fadeProperty = identifier .. ".Fade"
@@ -281,16 +271,16 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
         end
     else
         -- Literal, single node
-        local haveEnabled = openspace.hasProperty(enabledProperty)
-        local haveFade = openspace.hasProperty(fadeProperty)
+        local hasEnabled = openspace.hasProperty(enabledProperty)
+        local hasFade = openspace.hasProperty(fadeProperty)
 
-        if not haveEnabled then
+        if not hasEnabled then
             openspace.printError(
                 "Error when calling script 'openspace.fadeIn': " ..
                 "Could not find property '" .. enabledProperty .. "'"
             )
             return
-        elseif not haveFade then
+        elseif not hasFade then
             openspace.printError(
                 "Error when calling script 'openspace.fadeIn': " ..
                 "Could not find property '" .. fadeProperty .. "'"
