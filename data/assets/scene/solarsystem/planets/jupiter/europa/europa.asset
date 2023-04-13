@@ -1,7 +1,7 @@
 local transforms = asset.require("../transforms")
 asset.require("spice/base")
 asset.require("./trail")
-local kernel = asset.require("../kernels").jup310
+local kernel = asset.require("../kernels").jup365
 
 local labelsPath = asset.syncedResource({
   Name = "Jupiter Labels",
@@ -92,7 +92,7 @@ asset.export(Europa)
 
 
 asset.meta = {
-  Name = "Mimas",
+  Name = "Europa",
   Version = "1.1",
   Description = "Europa globe with labels",
   Author = "OpenSpace Team",

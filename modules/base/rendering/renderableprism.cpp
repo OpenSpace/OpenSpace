@@ -141,21 +141,21 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _nShapeSegments.onChange([&]() { _prismIsDirty = true; });
+    _nShapeSegments.onChange([this]() { _prismIsDirty = true; });
     _nShapeSegments = p.segments;
     addProperty(_nShapeSegments);
 
-    _nLines.onChange([&]() { _prismIsDirty = true; });
+    _nLines.onChange([this]() { _prismIsDirty = true; });
     _nLines = p.lines.value_or(_nShapeSegments);
     addProperty(_nLines);
 
     _radius.setExponent(12.f);
-    _radius.onChange([&]() { _prismIsDirty = true; });
+    _radius.onChange([this]() { _prismIsDirty = true; });
     _radius = p.radius.value_or(_radius);
     addProperty(_radius);
 
     _baseRadius.setExponent(12.f);
-    _baseRadius.onChange([&]() { _prismIsDirty = true; });
+    _baseRadius.onChange([this]() { _prismIsDirty = true; });
     // Use the "regular" radius as default if no value was provided
     _baseRadius = p.baseRadius.value_or(_radius);
     addProperty(_baseRadius);
@@ -168,11 +168,11 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     addProperty(_lineColor);
 
     _length.setExponent(12.f);
-    _length.onChange([&]() { _prismIsDirty = true; });
+    _length.onChange([this]() { _prismIsDirty = true; });
     _length = p.length.value_or(_length);
     addProperty(_length);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 }
 
 bool RenderablePrism::isReady() const {

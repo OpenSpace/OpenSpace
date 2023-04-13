@@ -1,6 +1,6 @@
 local toggle_trail = {
   Identifier = "os.toggle_trail",
-  Name = "Toggle Trail",
+  Name = "Toggle trail",
   Command = [[
     local node
     if is_declared("args") then
@@ -48,7 +48,7 @@ asset.export("toggle_trail", toggle_trail.Identifier)
 
 local hide_trail = {
   Identifier = "os.hide_trail",
-  Name = "Hide Trail",
+  Name = "Hide trail",
   Command = [[
     local node
     if is_declared("args") then
@@ -73,7 +73,7 @@ asset.export("hide_trail", hide_trail.Identifier)
 
 local show_trail = {
   Identifier = "os.show_trail",
-  Name = "Show Trail",
+  Name = "Show trail",
   Command = [[
     local node
     if is_declared("args") then

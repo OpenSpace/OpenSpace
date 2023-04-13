@@ -11,6 +11,7 @@ local homeLabel = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
     Labels = {
+      Enabled = true,
       File = homespeck .. "home.label",
       Color = { 0.8, 0.8, 0.8 },
       Size = 20.50,
@@ -20,7 +21,6 @@ local homeLabel = {
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.99,
     ScaleFactor = 500.0,
-    DrawLabels = true,
     Unit = "Mpc",
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,

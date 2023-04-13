@@ -1,6 +1,6 @@
 local transforms = asset.require("../transforms")
 asset.require("spice/base")
-local kernel = asset.require("../kernels").jup310
+local kernel = asset.require("../kernels").jup365
 
 local EuropaTrail = {
   Identifier = "EuropaTrail",

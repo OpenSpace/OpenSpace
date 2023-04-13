@@ -42,7 +42,7 @@ void main() {
   else {
     vs_color = vec3(0.0);
   }
-  
+
   // Transform the damn psc to homogenous coordinate
   vec4 position = vec4(in_point_position.xyz * pow(10, in_point_position.w), 1.0);
   vec4 positionClipSpace = modelViewProjectionTransform * position;

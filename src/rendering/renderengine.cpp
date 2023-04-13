@@ -413,6 +413,10 @@ RenderEngine::RenderEngine()
 
 RenderEngine::~RenderEngine() {}
 
+const FramebufferRenderer& RenderEngine::renderer() const {
+    return _renderer;
+}
+
 void RenderEngine::initialize() {
     ZoneScoped;
 

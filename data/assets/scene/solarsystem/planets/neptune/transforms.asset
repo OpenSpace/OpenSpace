@@ -1,5 +1,6 @@
 local sun_transforms_asset = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local kernel = asset.require("./kernels").nep097
 
 local NeptuneBarycenter = {
   Identifier = "NeptuneBarycenter",
@@ -8,7 +9,8 @@ local NeptuneBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "NEPTUNE BARYCENTER",
-      Observer = "SSB"
+      Observer = "SSB",
+      Kernels = kernel
     }
   },
   GUI = {

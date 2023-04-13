@@ -63,7 +63,6 @@ local quakebar_combined = {
   Name = Name .. " (Combined)",
   Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
-  Enabled = false,
   TexturePath = syncedDirectory .. "quakebar_combined.png",
   FaceCamera = false,
   Scale = 0.6,

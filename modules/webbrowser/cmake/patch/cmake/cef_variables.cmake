@@ -59,7 +59,7 @@ set(CEF_LIBCEF_DLL_WRAPPER_PATH "${_CEF_ROOT}/libcef_dll")
 
 # Shared compiler/linker flags.
 list(APPEND CEF_COMPILER_DEFINES
-  # Allow C++ programs to use stdint.h macros specified in the C99 standard that aren't 
+  # Allow C++ programs to use stdint.h macros specified in the C99 standard that aren't
   # in the C++ standard (e.g. UINT8_MAX, INT64_MIN, etc)
   __STDC_CONSTANT_MACROS __STDC_FORMAT_MACROS
   )

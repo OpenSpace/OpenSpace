@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
+#include <sgct/readconfig.h>
 #include <QComboBox>
 #include <QFile>
 #include <QLabel>
@@ -41,7 +42,10 @@
 #include <fstream>
 #include <iostream>
 #include <random>
-#include <sgct/readconfig.h>
+
+#ifdef WIN32
+#include <Windows.h>
+#endif // WIN32
 
 using namespace openspace;
 
@@ -137,11 +141,29 @@ namespace {
 
     void saveProfile(QWidget* parent, const std::string& path, const Profile& p) {
         std::ofstream outFile;
+        outFile.exceptions(std::ofstream::badbit | std::ofstream::failbit);
         try {
             outFile.open(path, std::ofstream::out);
             outFile << p.serialize();
         }
         catch (const std::ofstream::failure& e) {
+#ifdef WIN32
+            if (std::filesystem::exists(path)) {
+                // Check if the file is hidden, since that causes ofstream to fail
+                DWORD res = GetFileAttributesA(path.c_str());
+                if (res & FILE_ATTRIBUTE_HIDDEN) {
+                    QMessageBox::critical(
+                        parent,
+                        "Exception",
+                        QString::fromStdString(fmt::format(
+                            "Error writing data to file: '{}' as file is marked hidden",
+                            path
+                        ))
+                    );
+                    return;
+                }
+            }
+#endif // WIN32
             QMessageBox::critical(
                 parent,
                 "Exception",

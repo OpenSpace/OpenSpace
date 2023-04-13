@@ -2,7 +2,7 @@ local propertyHelper = asset.require("./property_helper")
 
 local toggle_native_ui = {
   Identifier = "os_default.toggle_native_ui",
-  Name = "Show Native GUI",
+  Name = "Show native GUI",
   Command = propertyHelper.invert("Modules.ImGUI.Enabled"),
   Documentation = "Shows or hides the native UI",
   GuiPath = "/System/GUI",
@@ -13,9 +13,10 @@ local toggle_native_ui = {
 
 local toggle_shutdown = {
   Identifier = "os_default.toggle_shutdown",
-  Name = "Toggle Shutdown",
+  Name = "Toggle shutdown",
   Command = "openspace.toggleShutdown()",
   Documentation = "Toggles the shutdown that will stop OpenSpace after a grace period. Press again to cancel the shutdown during this period",
+  GuiPath = "/System",
   IsLocal = true,
 
   Key = "ESC"
@@ -23,7 +24,7 @@ local toggle_shutdown = {
 
 local take_screenshot = {
   Identifier = "os_default.take_screenshot",
-  Name = "Take Screenshot",
+  Name = "Take screenshot",
   Command = "openspace.takeScreenshot()",
   Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory",
   GuiPath = "/System/Rendering",
@@ -34,7 +35,7 @@ local take_screenshot = {
 
 local toggle_pause_interpolated = {
   Identifier = "os_default.toggle_pause_interpolated",
-  Name = "Toggle Pause (Interpolated)",
+  Name = "Toggle pause (interpolate)",
   Command = "openspace.time.pauseToggleViaKeyboard()",
   Documentation = "Smoothly starts and stops the simulation time",
   GuiPath = "/Time/Simulation Speed",
@@ -45,7 +46,7 @@ local toggle_pause_interpolated = {
 
 local toggle_pause_immediate = {
   Identifier = "os_default.toggle_pause_immediate",
-  Name = "Toggle Pause (Immediate)",
+  Name = "Toggle pause (immediate)",
   Command = "openspace.time.togglePause()",
   Documentation = "Immediately starts and stops the simulation time",
   GuiPath = "/Time/Simulation Speed",
@@ -56,7 +57,7 @@ local toggle_pause_immediate = {
 
 local toggle_rotation_friction = {
   Identifier = "os_default.toggle_rotation_friction",
-  Name = "Toggle Rotation friction",
+  Name = "Toggle rotation friction",
   Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction"),
   Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely",
   GuiPath = "/Navigation",
@@ -67,7 +68,7 @@ local toggle_rotation_friction = {
 
 local toggle_zoom_friction = {
   Identifier = "os_default.toggle_zoom_friction",
-  Name = "Toggle Zoom Friction",
+  Name = "Toggle zoom friction",
   Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction"),
   Documentation = "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely",
   GuiPath = "/Navigation",
@@ -78,7 +79,7 @@ local toggle_zoom_friction = {
 
 local toggle_roll_friction = {
   Identifier = "os_default.toggle_roll_friction",
-  Name = "Toggle Roll Friction",
+  Name = "Toggle roll friction",
   Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RollFriction"),
   Documentation = "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely",
   GuiPath = "/Navigation",
@@ -144,9 +145,9 @@ local toggle_master_rendering = {
 
 local next_delta_step_interpolate = {
   Identifier = "os_default.next_delta_step_interpolate",
-  Name = "Next Delta Time Step (Interpolate)",
+  Name = "Next simulation time step (interpolate)",
   Command = "openspace.time.interpolateNextDeltaTimeStep()",
-  Documentation = "Smoothly interpolates the simulation speed to the next delta time step, if one exists",
+  Documentation = "Smoothly interpolates the simulation speed to the next simulation time step, if one exists",
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true,
 
@@ -155,9 +156,9 @@ local next_delta_step_interpolate = {
 
 local next_delta_step_immediate = {
   Identifier = "os_default.next_delta_step_immediate",
-  Name = "Next Delta Time Step (Immediate)",
+  Name = "Next simulation time step (immediate)",
   Command = "openspace.time.setNextDeltaTimeStep()",
-  Documentation = "Immediately set the simulation speed to the next delta time step, if one exists",
+  Documentation = "Immediately set the simulation speed to the next simulation time step, if one exists",
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true,
 
@@ -166,9 +167,9 @@ local next_delta_step_immediate = {
 
 local previous_delta_step_interpolate = {
   Identifier = "os_default.previous_delta_step_interpolate",
-  Name = "Previous Delta Time Step (Interpolate)",
+  Name = "Previous simulation time step (interpolate)",
   Command = "openspace.time.interpolatePreviousDeltaTimeStep()",
-  Documentation = "Smoothly interpolates the simulation speed to the previous delta time step, if one exists",
+  Documentation = "Smoothly interpolates the simulation speed to the previous simulation time step, if one exists",
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true,
 
@@ -177,35 +178,21 @@ local previous_delta_step_interpolate = {
 
 local previous_delta_step_immediate = {
   Identifier = "os_default.previous_delta_step_immediate",
-  Name = "Previous Delta Time Step (Immediate)",
+  Name = "Previous simulation time step (immediate)",
   Command = "openspace.time.setPreviousDeltaTimeStep()",
-  Documentation = "Immediately set the simulation speed to the previous delta time step, if one exists",
+  Documentation = "Immediately set the simulation speed to the previous simulation time step, if one exists",
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true,
 
   Key = "Shift+Left"
 }
 
-local toggle_planet_labels = {
-  Identifier = "os_default.toggle_planet_labels",
-  Name = "Toggle planet labels",
-  Command = [[
-    local list = openspace.getProperty("{solarsystem_labels}.Renderable.Enabled");
-    for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
-  ]],
-  Documentation = "Turns on visibility for all solar system labels",
-  GuiPath = "/Solar System",
-  IsLocal = false,
-  Key = "l"
-}
-
-
-
 local Actions = {
-  toggle_native_ui,toggle_shutdown,take_screenshot,toggle_pause_interpolated,toggle_pause_immediate,
-  toggle_rotation_friction,toggle_zoom_friction,toggle_roll_friction,fade_to_black,
-  toggle_main_gui,toggle_overlays,toggle_master_rendering,next_delta_step_interpolate,
-  next_delta_step_immediate,previous_delta_step_interpolate,previous_delta_step_immediate
+  toggle_native_ui, toggle_shutdown, take_screenshot, toggle_pause_interpolated,
+  toggle_pause_immediate, toggle_rotation_friction, toggle_zoom_friction,
+  toggle_roll_friction, fade_to_black, toggle_main_gui, toggle_overlays,
+  toggle_master_rendering, next_delta_step_interpolate, next_delta_step_immediate,
+  previous_delta_step_interpolate, previous_delta_step_immediate
 }
 
 asset.onInitialize(function()

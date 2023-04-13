@@ -1,6 +1,7 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup341
+local kernel = asset.require("../kernels").jup344
+local kernel346 = asset.require("../kernels").jup346
 
 
 
@@ -248,7 +249,7 @@ local pasiphaeGroup = {
       Identifier = parentIdentifier,
       Spice = parentSpice
     },
-    Spice = "55062",
+    Spice = "55502",
     Radii = { 2000, 2000, 2000 },
     Tags = tags,
     TrailTags = trailTags,
@@ -360,6 +361,60 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 792.44,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2016J4",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55519",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2016 J 4",
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 743.69,
+    Kernels = kernel346
+  },
+  {
+    Identifier = "S2017J6",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "567",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2017 J 6",
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 683.0,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J23",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55507",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 23",
+      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 792.00,
     Kernels = kernel
   }
 }

@@ -60,7 +60,7 @@ void main() {
   gl_Position = pos;
 
   vec3 color;
-  switch (colorInformation) { 
+  switch (colorInformation) {
     case VertexColorTypeDefaultStart:
       vs_color = vec4(colorStart, 1.0);
       break;

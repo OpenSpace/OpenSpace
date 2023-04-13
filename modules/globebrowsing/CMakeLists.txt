@@ -58,6 +58,7 @@ set(HEADER_FILES
   src/tileindex.h
   src/tileloadjob.h
   src/tiletextureinitdata.h
+  src/tilecacheproperties.h
   src/timequantizer.h
   src/tileprovider/defaulttileprovider.h
   src/tileprovider/imagesequencetileprovider.h

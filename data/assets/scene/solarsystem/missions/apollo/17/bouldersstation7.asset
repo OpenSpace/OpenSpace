@@ -49,7 +49,7 @@ local Station7BoulderModel = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Station 7 Boulder Model",

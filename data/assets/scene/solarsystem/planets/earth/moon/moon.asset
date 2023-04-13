@@ -85,8 +85,8 @@ local focus_moon = {
   Identifier = "os.solarsystem.earth.moon.focus",
   Name = "Focus on Moon",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', ''); 
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon'); 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon');
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
   ]],
   Documentation = "Set camera focus on the Moon",

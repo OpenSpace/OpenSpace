@@ -65,7 +65,7 @@ LuaTranslation::LuaTranslation()
 {
     addProperty(_luaScriptFile);
 
-    _luaScriptFile.onChange([&]() {
+    _luaScriptFile.onChange([this]() {
         requireUpdate();
         _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
         _fileHandle->setCallback([this]() {

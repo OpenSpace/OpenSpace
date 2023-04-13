@@ -14,7 +14,7 @@ asset.require("./layers/colorlayers/themis_ir_night_utah", false)
 asset.require("./layers/colorlayers/themis_ir_night_sweden", false)
 asset.require("./layers/colorlayers/ctx_mosaic_utah", false)
 asset.require("./layers/colorlayers/ctx_mosaic_sweden", false)
-asset.require("./layers/colorlayers/ctx_blended_01", false)
+asset.require("./layers/colorlayers/ctx_blended", false)
 asset.require("./layers/colorlayers/hirise", false)
 asset.require("./layers/colorlayers/hirisels", false)
 
