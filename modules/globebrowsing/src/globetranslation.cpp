@@ -74,6 +74,18 @@ namespace {
         "globe's reference ellipsoid. The default value is 'false'"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseCameraInfo = {
+        "UseCamera",
+        "Use Camera",
+        "If this value is 'true', the lat and lon are updated to match the camera"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseCameraAltitudeInfo = {
+        "UseCameraAltitude",
+        "Use Camera Altitude",
+        "If this value is 'true', the altitude is updated to match the camera"
+    };
+
     struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {
         // [[codegen::verbatim(GlobeInfo.description)]]
         std::string globe
@@ -90,6 +102,12 @@ namespace {
 
         // [[codegen::verbatim(UseHeightmapInfo.description)]]
         std::optional<bool> useHeightmap;
+
+        // [[codegen::verbatim(UseCameraInfo.description)]]
+        std::optional<bool> useCamera;
+
+        // [[codegen::verbatim(UseCameraAltitudeInfo.description)]]
+        std::optional<bool> useCameraAltitude;
     };
 #include "globetranslation_codegen.cpp"
 } // namespace
@@ -106,6 +124,8 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _altitude(AltitudeInfo, 0.0, -1e12, 1e12)
     , _useHeightmap(UseHeightmapInfo, false)
+    , _useCamera(UseCameraInfo, false)
+    , _useCameraAltitude(UseCameraAltitudeInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -133,6 +153,14 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     _useHeightmap = p.useHeightmap.value_or(_useHeightmap);
     _useHeightmap.onChange([this]() { setUpdateVariables(); });
     addProperty(_useHeightmap);
+
+    _useCamera = p.useCamera.value_or(_useCamera);
+    _useCamera.onChange([this]() { setUpdateVariables(); });
+    addProperty(_useCamera);
+
+    _useCameraAltitude = p.useCameraAltitude.value_or(_useCameraAltitude);
+    _useCameraAltitude.onChange([this]() { setUpdateVariables(); });
+    addProperty(_useCameraAltitude);
 }
 
 void GlobeTranslation::fillAttachedNode() {
@@ -158,7 +186,7 @@ void GlobeTranslation::setUpdateVariables() {
 }
 
 void GlobeTranslation::update(const UpdateData& data) {
-    if (_useHeightmap) {
+    if (_useHeightmap || _useCamera) {
         // If we use the heightmap, we have to compute the height every frame
         setUpdateVariables();
     }
@@ -182,11 +210,25 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
 
     GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
 
+    double lat = _latitude;
+    double lon = _longitude;
+    double alt = _altitude;
+
+    if (_useCamera) {
+        glm::dvec3 position = mod->geoPosition();
+        lat = position.x;
+        lon = position.y;
+        if (_useCameraAltitude) {
+            alt = position.z;
+        }
+    }
+
     if (_useHeightmap) {
+
         glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
-            _latitude,
-            _longitude,
+            lat,
+            lon,
             0.0
         );
 
@@ -195,18 +237,18 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
 
         _position = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
-            _latitude,
-            _longitude,
-            h.heightToSurface + _altitude
+            lat,
+            lon,
+            h.heightToSurface + alt
         );
         return _position;
     }
     else {
         _position = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
-            _latitude,
-            _longitude,
-            _altitude
+            lat,
+            lon,
+            alt
         );
         _positionIsDirty = false;
         return _position;

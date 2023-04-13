@@ -18,7 +18,7 @@ local Position = {
       Latitude = 0,
       Longitude = 0,
       Altitude = 0,
-      UseHeightmap = true
+      UseCamera = true
     },
     Rotation = {
       Type = "GlobeRotation",
@@ -58,7 +58,7 @@ local sphere = {
     Texture = textures..'/sphere.png',
     Orientation = "Inside",
     MirrorTexture = true,
-    RenderBinMode = "Overlay"
+    RenderBinMode = "PostDeferredTransparent"
   },
   GUI = {
     Name = "Cardinal Directions",
@@ -105,17 +105,9 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(sphere)
   openspace.action.registerAction(hideAction)
   openspace.action.registerAction(showAction)
-  openspace.event.registerEventAction(
-    "CameraMovedPosition",
-    hideAction.Identifier
-  )
 end)
 
 asset.onDeinitialize(function()
-  openspace.event.unregisterEventAction(
-    "CameraMovedPosition",
-    hideAction.Identifier
-  )
   openspace.action.removeAction(showAction)
   openspace.action.removeAction(hideAction)
   openspace.removeSceneGraphNode(sphere)

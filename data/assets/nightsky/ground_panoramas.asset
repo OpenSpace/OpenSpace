@@ -18,7 +18,8 @@ local Position = {
       Latitude = 34.201639,
       Longitude = -118.171319,
       Altitude = 10,
-      UseHeightmap = false
+      UseCamera = true,
+      UseCameraAltitude = true
     },
     Rotation = {
       Type = "GlobeRotation",
@@ -167,17 +168,9 @@ asset.onInitialize(function()
   openspace.action.registerAction(showCityAction)
   openspace.action.registerAction(show3Action)
   openspace.action.registerAction(show4Action)
-  openspace.event.registerEventAction(
-    "CameraMovedPosition",
-    hideAction.Identifier
-  )  
 end)
 
 asset.onDeinitialize(function()
-  openspace.event.registerEventAction(
-    "CameraMovedPosition",
-    hideAction.Identifier
-  )
   openspace.action.removeAction(showForestAction)
   openspace.action.removeAction(showCityAction)
   openspace.action.removeAction(show3Action)

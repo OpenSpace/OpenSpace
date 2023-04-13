@@ -7,7 +7,6 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-
 local Position = {
   Identifier = "MeridianPosition",
   Parent = earthAsset.Earth.Identifier,
@@ -18,18 +17,18 @@ local Position = {
       Latitude = 0,
       Longitude = 0,
       Altitude = 0,
-      UseHeightmap = true
+      UseCamera = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
       Latitude = 0,
       Longitude = 0,
-      UseHeightmap = false
+      UseCamera = true
     }
   },
   GUI = {
-    Name = "Meridian Position",
+    Name = "Local Meridian Position",
     Path = "/Night Sky/Lines and Grids",
     Hidden = false
   }
@@ -59,14 +58,14 @@ local Plane = {
     RenderBinMode = "PostDeferredTransparent"
   },
   GUI = {
-    Name = "Meridian",
+    Name = "Local Meridian",
     Path = "/Night Sky/Lines and Grids"
   }
 }
 
 local showAction = {
   Identifier = "os.show_meridian",
-  Name = "Show meridian",
+  Name = "Show local meridian",
   Command = [[
     local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
     local camera = openspace.navigation.getNavigationState();
@@ -81,18 +80,18 @@ local showAction = {
     openspace.setPropertyValueSingle('Scene.Meridian.Renderable.Fade', 0);
     openspace.setPropertyValueSingle('Scene.Meridian.Renderable.Fade', 1, 1);
   ]],
-  Documentation = "Shows a line for the meridian",
+  Documentation = "Shows a line for the local meridian",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
 
 local hideAction = {
   Identifier = "os.hide_meridian",
-  Name = "Hide meridian",
+  Name = "Hide local meridian",
   Command = [[
     openspace.setPropertyValueSingle('Scene.Meridian.Renderable.Fade', 0, 1);
   ]],
-  Documentation = "Hides the line for the meridian",
+  Documentation = "Hides the line for the local meridian",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
@@ -103,17 +102,9 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Plane)
   openspace.action.registerAction(hideAction)
   openspace.action.registerAction(showAction)
-  openspace.event.registerEventAction(
-    "CameraMovedPosition",
-    hideAction.Identifier
-  )
 end)
 
 asset.onDeinitialize(function()
-  openspace.event.unregisterEventAction(
-    "CameraMovedPosition",
-    hideAction.Identifier
-  )
   openspace.action.removeAction(showAction)
   openspace.action.removeAction(hideAction)
   openspace.removeSceneGraphNode(Plane)

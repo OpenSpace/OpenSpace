@@ -10,18 +10,20 @@ local gridPosition = {
       Latitude = 0,
       Longitude = 0,
       Altitude = 0,
-      UseHeightmap = true
+      UseHeightmap = false,
+      UseCamera = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
       Latitude = 0,
       Longitude = 0,
-      UseHeightmap = false
+      UseHeightmap = false,
+      UseCamera = true
     }
   },
   GUI = {
-    Name = "Altaz Grid",
+    Name = "Altaz Grid Position",
     Path = "/Night Sky/Lines and Grids",
     Hidden = true
   }
@@ -37,7 +39,7 @@ local grid = {
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {-1.57079, 90.0, 0.0}
+      Rotation = {-1.57079, 0.0, 0.0}
     },
   },
   Renderable = {
@@ -93,17 +95,10 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(grid)
   openspace.action.registerAction(hideAction)
   openspace.action.registerAction(showAction)
-  openspace.event.registerEventAction(
-    "CameraMovedPosition",
-    hideAction.Identifier
-  )
+
 end)
 
 asset.onDeinitialize(function()
-  openspace.event.unregisterEventAction(
-    "CameraMovedPosition",
-    hideAction.Identifier
-  )
   openspace.action.removeAction(showAction)
   openspace.action.removeAction(hideAction)
   openspace.removeSceneGraphNode(grid)

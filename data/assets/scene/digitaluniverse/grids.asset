@@ -115,7 +115,7 @@ local ecliptic = {
   },
   GUI = {
     Name = "Ecliptic Sphere",
-    Path = "/Other/Grids"
+    Path = "/Night Sky/Lines and Grids"
   }
 }
 
@@ -141,7 +141,7 @@ local eclipticLabels = {
   },
   GUI = {
     Name = "Ecliptic Sphere Labels",
-    Path = "/Other/Grids"
+    Path = "/Night Sky/Lines and Grids"
   }
 }
 
@@ -167,7 +167,7 @@ local equatorial = {
   },
   GUI = {
     Name = "Equatorial Sphere",
-    Path = "/Other/Grids"
+    Path = "/Night Sky/Lines and Grids"
   }
 }
 
@@ -193,7 +193,7 @@ local equatorialLabels = {
   },
   GUI = {
     Name = "Equatorial Sphere Labels",
-    Path = "/Other/Grids"
+    Path = "/Night Sky/Lines and Grids"
   }
 }
 
@@ -215,7 +215,7 @@ local galactic = {
   },
   GUI = {
     Name = "Galactic Sphere",
-    Path = "/Other/Grids"
+    Path = "/Night Sky/Lines and Grids"
   }
 }
 
@@ -239,7 +239,7 @@ local galacticLabels = {
   },
   GUI = {
     Name = "Galactic Sphere Labels",
-    Path = "/Other/Grids"
+    Path = "/Night Sky/Lines and Grids"
   }
 }
 

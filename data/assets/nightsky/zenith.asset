@@ -18,14 +18,15 @@ local Position = {
       Latitude = 0,
       Longitude = 0,
       Altitude = 100000000,
-      UseHeightmap = true
+      UseCamera = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
       Latitude = 0,
       Longitude = 0,
-      UseHeightmap = false
+      UseHeightmap = false,
+      UseCamera = true
     }
   },
   GUI = {
@@ -39,10 +40,6 @@ local Plane = {
   Identifier = "ZenithDot",
   Parent = Position.Identifier,
   Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 1
-    },
     Rotation = {
       Type = "StaticRotation",
       Rotation = {-1.57079, 90.0, 0.0}
@@ -102,17 +99,9 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Plane)
   openspace.action.registerAction(hideAction)
   openspace.action.registerAction(showAction)
-  openspace.event.registerEventAction(
-    "CameraMovedPosition",
-    hideAction.Identifier
-  )
 end)
 
 asset.onDeinitialize(function()
-  openspace.event.unregisterEventAction(
-    "CameraMovedPosition",
-    hideAction.Identifier
-  )
   openspace.action.removeAction(showAction)
   openspace.action.removeAction(hideAction)
   openspace.removeSceneGraphNode(Plane)

@@ -131,7 +131,7 @@ local show_art = {
     openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Opacity", 0.2, 2);
   ]],
   Documentation = "Enables and fades up constellation art work",
-  GuiPath = "/Rendering",
+  GuiPath = "/Night Sky/Constellations",
   IsLocal = false
 }
 asset.export("ShowArtAction", show_art)
@@ -141,7 +141,7 @@ local hide_art = {
   Name = "Hide constellation art",
   Command = [[openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Opacity", 0, 2)]],
   Documentation = "Fades out constellation artwork",
-  GuiPath = "/Rendering",
+  GuiPath = "/Night Sky/Constellations",
   IsLocal = false
 }
 asset.export("HideArtAction", hide_art)
@@ -151,7 +151,7 @@ local disable_art = {
   Name = "Disable constellation art",
   Command = [[openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)]],
   Documentation = "Disable constellation artwork",
-  GuiPath = "/Rendering",
+  GuiPath = "/Night Sky/Constellations",
   IsLocal = false
 }
 asset.export("DisableArtAction", disable_art)
@@ -165,7 +165,7 @@ local show_zodiac_art = {
     openspace.setPropertyValue("{zodiac}.Renderable.Opacity", 1, 2);
   ]],
   Documentation = "Enables and fades up zodiac art work",
-  GuiPath = "/Rendering",
+  GuiPath = "/Night Sky/Constellations",
   IsLocal = false
 }
 asset.export("ShowZodiacArt", show_zodiac_art)
@@ -174,8 +174,8 @@ local hide_zodiac_art = {
   Identifier = "constellation_art.hide_zodiac_art",
   Name = "Hide zodiac art",
   Command =  [[openspace.setPropertyValue("{zodiac}.Renderable.Opacity", 0, 2)]],
-  Documentation = "fades down zodiac art work",
-  GuiPath = "/Rendering",
+  Documentation = "Fades down zodiac art work",
+  GuiPath = "/Night Sky/Constellations",
   IsLocal = false
 }
 asset.export("HideZodiacArt", hide_zodiac_art)
