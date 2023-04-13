@@ -391,7 +391,6 @@ OrbitalNavigator::LimitZoom::LimitZoom()
     // Min
     addProperty(enableZoomInLimit);
     addProperty(minimumAllowedDistance);
-    minimumAllowedDistance.setExponent(20.f);
 
     // Max
     addProperty(enableZoomOutLimit);
