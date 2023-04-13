@@ -45,8 +45,8 @@
 namespace {
     constexpr std::string_view _loggerCat = "OrbitalNavigator";
 
-    constexpr double AngleEpsilon = 1E-7;
-    constexpr double DistanceRatioAimThreshold = 1E-4;
+    constexpr double AngleEpsilon = 1e-7;
+    constexpr double DistanceRatioAimThreshold = 1e-4;
 
     constexpr openspace::properties::Property::PropertyInfo AnchorInfo = {
         "Anchor",
@@ -146,35 +146,6 @@ namespace {
         "A factor used to determine the distance at which the camera starts rotating "
         "with the anchor node. The actual distance will be computed by multiplying "
         "this factor with the approximate radius of the node"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo
-        EnabledMinimumAllowedDistanceLimitInfo = {
-        "EnabledMinimumAllowedDistanceLimit",
-        "Enable minimum allowed distance limit",
-        "Enables or disables that the camera cannot go closer to an object than "
-        "the set minimum allowed distance"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
-        "MinimumAllowedDistance",
-        "Minimum Allowed Distance",
-        "Limits how close the camera can get to an object. The distance is given in "
-        "meters above the surface"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo EnabledMaximumDistanceInfo = {
-        "Enabled",
-        "Enable Maximum Allowed Distance",
-        "Enables or disables that the camera cannot go further away from an object than "
-        "the set maximum allowed distance"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MaximumDistanceInfo = {
-        "MaximumAllowedDistance",
-        "Maximum Allowed Distance",
-        "Limits how far away the camera can get from an object. The distance is given in "
-        "meters above the surface"
     };
 
     constexpr openspace::properties::Property::PropertyInfo StereoInterpolationTimeInfo =
@@ -311,6 +282,36 @@ namespace {
         "or canceled, in seconds"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo
+        EnabledMinimumAllowedDistanceInfo =
+    {
+        "EnabledMinimumAllowedDistance",
+        "Enable minimum allowed distance limit",
+        "Enables or disables that the camera cannot go closer to an object than "
+        "the set minimum allowed distance"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
+        "MinimumAllowedDistance",
+        "Minimum Allowed Distance",
+        "The limit of how close the camera can get to an object. The distance is given "
+        "in meters above the surface"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnabledMaximumDistanceInfo = {
+        "EnableMaximumAllowedDistance",
+        "Enable Maximum Allowed Distance limit",
+        "Enables or disables that the camera cannot go further away from an object than "
+        "the set maximum allowed distance"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MaximumDistanceInfo = {
+        "MaximumAllowedDistance",
+        "Maximum Allowed Distance",
+        "The limit of how far away the camera can get from an object. The distance is "
+        "given in meters above the surface"
+    };
+
     constexpr std::string_view IdleKeyOrbit = "Orbit";
     constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
     constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
@@ -368,17 +369,25 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     addProperty(dampenInterpolationTime);
 }
 
-OrbitalNavigator::LimitZoomOut::LimitZoomOut()
-    : properties::PropertyOwner({ "LimitZoomOut" })
-    , enabled(EnabledMaximumDistanceInfo, false)
+OrbitalNavigator::LimitZoom::LimitZoom()
+    : properties::PropertyOwner({ "LimitZoom" })
+    , enableZoomInLimit(EnabledMinimumAllowedDistanceInfo, true)
+    , minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
+    , enableZoomOutLimit(EnabledMaximumDistanceInfo, false)
     , maximumAllowedDistance(
         MaximumDistanceInfo,
-        4E+27,
+        4e+27,
         50.f,
-        4E+27
+        4e+27
     )
 {
-    addProperty(enabled);
+    // Min
+    addProperty(enableZoomInLimit);
+    addProperty(minimumAllowedDistance);
+    minimumAllowedDistance.setExponent(20.f);
+
+    // Max
+    addProperty(enableZoomOutLimit);
     addProperty(maximumAllowedDistance);
     maximumAllowedDistance.setExponent(20.f);
 }
@@ -391,8 +400,6 @@ OrbitalNavigator::OrbitalNavigator()
     , _retargetAim(RetargetAimInfo)
     , _followAnchorNodeRotation(FollowAnchorNodeInfo, true)
     , _followAnchorNodeRotationDistance(FollowAnchorNodeDistanceInfo, 5.f, 0.f, 20.f)
-    , _enableMinimumAllowedDistanceLimit(EnabledMinimumAllowedDistanceLimitInfo, true)
-    , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.0f, 50.f)
@@ -524,7 +531,7 @@ OrbitalNavigator::OrbitalNavigator()
 
     addPropertySubOwner(_friction);
     addPropertySubOwner(_idleBehavior);
-    addPropertySubOwner(_limitZoomOut);
+    addPropertySubOwner(_limitZoom);
 
     _idleBehaviorDampenInterpolator.setTransferFunction(
         ghoul::quadraticEaseInOut<double>
@@ -561,8 +568,6 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_retargetAim);
     addProperty(_followAnchorNodeRotation);
     addProperty(_followAnchorNodeRotationDistance);
-    addProperty(_enableMinimumAllowedDistanceLimit);
-    addProperty(_minimumAllowedDistance);
 
     addProperty(_useAdaptiveStereoscopicDepth);
     addProperty(_staticViewScaleExponent);
@@ -967,26 +972,26 @@ void OrbitalNavigator::updatePreviousStateVariables() {
 }
 
 void OrbitalNavigator::setMinimumAllowedDistance(float distance) {
-    if (_limitZoomOut.enabled && distance > _limitZoomOut.maximumAllowedDistance) {
-        LWARNING("Setting minumum allowed distance larger than maximum allowed distance");
+    if (_limitZoom.enableZoomOutLimit && distance > _limitZoom.maximumAllowedDistance) {
+        LWARNING("Setting minimum allowed distance larger than maximum allowed distance");
     }
 
-    _minimumAllowedDistance = distance;
+    _limitZoom.minimumAllowedDistance = distance;
 }
 
-void OrbitalNavigator::setMaximumAllowedDistance(double distance) {
+void OrbitalNavigator::setMaximumAllowedDistance(float distance) {
     if (distance < 50.f) {
         LWARNING("Setting maximum allowed distance below 50 meters is not allowed");
         return;
     }
 
-    if (_minimumAllowedDistance > distance) {
+    if (_limitZoom.minimumAllowedDistance > distance) {
         LWARNING(
-            "Setting maximum allowed distance smaller than minumum allowed distance"
+            "Setting maximum allowed distance smaller than minimum allowed distance"
         );
     }
 
-    _limitZoomOut.maximumAllowedDistance = distance;
+    _limitZoom.maximumAllowedDistance = distance;
 }
 
 void OrbitalNavigator::startRetargetAnchor() {
@@ -1093,7 +1098,11 @@ bool OrbitalNavigator::hasRollFriction() const {
 }
 
 double OrbitalNavigator::minAllowedDistance() const {
-    return _minimumAllowedDistance;
+    return _limitZoom.minimumAllowedDistance;
+}
+
+double OrbitalNavigator::maxAllowedDistance() const {
+    return _limitZoom.maximumAllowedDistance;
 }
 
 OrbitalNavigator::CameraRotationDecomposition
@@ -1593,13 +1602,13 @@ glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
                                            const glm::dvec3& objectPosition,
                                         const SurfacePositionHandle& positionHandle) const
 {
-    double minHeight = _enableMinimumAllowedDistanceLimit ?
-        static_cast<double>(_minimumAllowedDistance) : 0.0;
+    double minHeight = _limitZoom.enableZoomInLimit ?
+        static_cast<double>(_limitZoom.minimumAllowedDistance) : 0.0;
 
-    double maxHeight = _limitZoomOut.enabled ?
-        static_cast<double>(_limitZoomOut.maximumAllowedDistance) : -1.0;
+    double maxHeight = _limitZoom.enableZoomOutLimit ?
+        static_cast<double>(_limitZoom.maximumAllowedDistance) : -1.0;
 
-    if (maxHeight > 0 && minHeight > maxHeight) {
+    if (maxHeight > 0.0 && minHeight > maxHeight) {
         LWARNING("Minimum allowed distance is larger than maximum allowed distance");
     }
 
@@ -1627,7 +1636,7 @@ glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
 
     // Adjustment for if the camera is outside the max distance
     // Only apply if the min adjustment not already applied
-    if (maxHeight > 0 && std::abs(adjustment) < std::numeric_limits<double>::epsilon()) {
+    if (maxHeight > 0.0 && std::abs(adjustment) < std::numeric_limits<double>::epsilon()) {
         adjustment = glm::min(maxHeight - surfaceToCameraSigned, 0.0);
     }
 

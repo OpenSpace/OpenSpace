@@ -115,7 +115,7 @@ public:
     void updatePreviousStateVariables();
 
     void setMinimumAllowedDistance(float distance);
-    void setMaximumAllowedDistance(double distance);
+    void setMaximumAllowedDistance(float distance);
 
     JoystickCameraStates& joystickStates();
     const JoystickCameraStates& joystickStates() const;
@@ -136,6 +136,7 @@ public:
     bool hasRollFriction() const;
 
     double minAllowedDistance() const;
+    double maxAllowedDistance() const;
 
     glm::dvec3 anchorNodeToCameraVector() const;
     glm::quat anchorNodeToCameraRotation() const;
@@ -197,17 +198,19 @@ private:
 
     properties::BoolProperty _followAnchorNodeRotation;
     properties::FloatProperty _followAnchorNodeRotationDistance;
-    properties::BoolProperty _enableMinimumAllowedDistanceLimit;
-    properties::FloatProperty _minimumAllowedDistance;
 
-    struct LimitZoomOut : public properties::PropertyOwner {
-        LimitZoomOut();
 
-        properties::BoolProperty enabled;
+    struct LimitZoom : public properties::PropertyOwner {
+        LimitZoom();
+
+        properties::BoolProperty enableZoomInLimit;
+        properties::FloatProperty minimumAllowedDistance;
+
+        properties::BoolProperty enableZoomOutLimit;
         properties::FloatProperty maximumAllowedDistance;
     };
 
-    LimitZoomOut _limitZoomOut;
+    LimitZoom _limitZoom;
 
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;

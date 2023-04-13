@@ -139,7 +139,8 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-    ZoomSensitivityDistanceThresholdInfo = {
+        ZoomSensitivityDistanceThresholdInfo =
+    {
         "ZoomSensitivityDistanceThreshold",
         "Threshold of distance to target node for whether or not to use exponential "
         "zooming",
@@ -147,7 +148,8 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-    ZoomInBoundarySphereMultiplierInfo = {
+        ZoomInBoundarySphereMultiplierInfo =
+    {
         "ZoomInBoundarySphereMultiplier",
         "Multiplies a node's boundary sphere by this in order to limit zoom in & prevent "
         "surface collision",
@@ -155,7 +157,8 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-    ZoomOutBoundarySphereMultiplierInfo = {
+        ZoomOutBoundarySphereMultiplierInfo =
+    {
         "ZoomOutBoundarySphereMultiplier",
         "Multiplies a node's boundary sphere by this in order to limit zoom out",
         "" // @TODO Missing documentation
