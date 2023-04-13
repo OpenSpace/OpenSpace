@@ -44,10 +44,10 @@ uniform bool has_color_specular;
 uniform sampler2D texture_diffuse;
 uniform sampler2D texture_normal;
 uniform sampler2D texture_specular;
-uniform float opacity = 1.0;
 
 uniform vec4 color_diffuse;
 uniform vec4 color_specular;
+uniform float opacity = 1.0;
 
 uniform int nLightSources;
 uniform vec3 lightDirectionsViewSpace[8];

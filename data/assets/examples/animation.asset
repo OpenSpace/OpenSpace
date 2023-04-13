@@ -28,8 +28,7 @@ local animationLoop = {
     ModelScale = 3E7,
     LightSources = {
       sun.LightSource
-    },
-    PerformShading = true
+    }
   },
   GUI = {
     Name = "Animated Model example (LoopFromStart)",
@@ -56,8 +55,7 @@ local animationLoopInf = {
     ModelScale = 3E7,
     LightSources = {
       sun.LightSource
-    },
-    PerformShading = true
+    }
   },
   GUI = {
     Name = "Animated Model example (LoopInfinitely)",
@@ -84,8 +82,7 @@ local animationOnce = {
     ModelScale = 3E7,
     LightSources = {
       sun.LightSource
-    },
-    PerformShading = true
+    }
   },
   GUI = {
     Name = "Animated Model example (Once)",
@@ -112,8 +109,7 @@ local animationBounceInf = {
     ModelScale = 3E7,
     LightSources = {
       sun.LightSource
-    },
-    PerformShading = true
+    }
   },
   GUI = {
     Name = "Animated Model example (BounceInfinitely)",
@@ -140,8 +136,7 @@ local animationBounce = {
     ModelScale = 3E7,
     LightSources = {
       sun.LightSource
-    },
-    PerformShading = true
+    }
   },
   GUI = {
     Name = "Animated Model example (BounceFromStart)",

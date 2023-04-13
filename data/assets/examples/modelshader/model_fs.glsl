@@ -47,6 +47,7 @@ uniform sampler2D texture_specular;
 
 uniform vec3 color_diffuse;
 uniform vec3 color_specular;
+uniform float opacity = 1.0;
 
 uniform int nLightSources;
 uniform vec3 lightDirectionsViewSpace[8];
@@ -63,7 +64,7 @@ Fragment getFragment() {
   frag.gPosition = vs_positionCameraSpace;
   frag.gNormal = vec4(vs_normalViewSpace, 0.0);
   frag.disableLDR2HDR = true;
-  frag.color.a = 1.0;
+  frag.color.a = opacity;
 
   if (performManualDepthTest) {
     // gl_FragCoord.x goes from 0 to resolution.x and gl_FragCoord.y goes from 0 to

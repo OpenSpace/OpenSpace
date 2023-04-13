@@ -35,8 +35,7 @@ local obj = {
     ModelScale = 1000,
     LightSources = {
       sun.LightSource
-    },
-    PerformShading = true
+    }
   },
   InteractionSphere = 900,
   ApproachFactor = 50.0,
