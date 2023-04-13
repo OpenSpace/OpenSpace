@@ -248,7 +248,7 @@ namespace {
         std::optional<float> pointSize [[codegen::greater(0.0)]];
 
         // [[codegen::verbatim(PointTextureInfo.description)]]
-        std::optional<std::filesystem::path> pointTexture;
+        std::optional<std::string> pointTexture;
 
         // [[codegen::verbatim(ExtrudeInfo.description)]]
         std::optional<bool> extrude;
@@ -357,7 +357,7 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
     pointSize = p.pointSize.value_or(pointSize);
 
     if (p.pointTexture.has_value()) {
-        pointTexture = (*p.pointTexture).string();
+        pointTexture = *p.pointTexture;
     }
 
     if (p.pointTextureAnchor.has_value()) {

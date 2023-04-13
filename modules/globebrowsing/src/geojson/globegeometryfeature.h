@@ -83,14 +83,15 @@ public:
     enum class RenderType {
         Lines = 0,
         Points,
-        Polygon
+        Polygon,
+        Uninitialized
     };
 
     // Each geometry feature might translate into several render features
     struct RenderFeature {
         void initializeBuffers();
 
-        RenderType type;
+        RenderType type = RenderType::Uninitialized;
         GLuint vaoId = 0;
         GLuint vboId = 0;
         size_t nVertices = 0;

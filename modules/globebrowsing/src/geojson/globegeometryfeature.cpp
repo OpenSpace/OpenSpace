@@ -101,7 +101,7 @@ void GlobeGeometryFeature::deinitializeGL() {
 
 bool GlobeGeometryFeature::isReady() const {
     bool shadersAreReady = _linesAndPolygonsProgram && _pointsProgram;
-    bool textureIsReady = _hasTexture ? (_pointTexture != nullptr) : true;
+    bool textureIsReady = (!_hasTexture) || _pointTexture;
     return shadersAreReady && textureIsReady;
 }
 
@@ -149,7 +149,9 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
         _pointTexture->uploadToGpu();
     }
     else {
-        LERROR(fmt::format("Trying to use texture file that does not exist"));
+        LERROR(fmt::format(
+            "Trying to use texture file that does not exist: {} ", texturePath
+        ));
     }
 }
 
@@ -241,8 +243,8 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
     // Reset height values if we don't care about them
     if (ignoreHeights) {
         for (std::vector<Geodetic3>& vec : _geoCoordinates) {
-            for (Geodetic3& geo : vec) {
-                geo.height = 0.0;
+            for (Geodetic3& coord : vec) {
+                coord.height = 0.0;
             }
         }
     }
@@ -388,6 +390,8 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
         glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
     );
     if (orthoRight == glm::dvec3(0.0)) {
+        // For some reason, the up vector and camera view vecter were the same. Use a
+        // slightly different vector
         glm::dvec3 otherVector = glm::vec3(
             cameraUpDirectionWorld.y,
             cameraUpDirectionWorld.x,
@@ -404,7 +408,7 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
     _pointsProgram->setUniform("cameraPosition", cameraPositionWorld);
     _pointsProgram->setUniform("cameraLookUp", glm::vec3(cameraUpDirectionWorld));
 
-    if (_pointTexture) {
+    if (_pointTexture && _hasTexture) {
         ghoul::opengl::TextureUnit unit;
         unit.activate();
         _pointTexture->bind();
@@ -570,7 +574,7 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
                 continue;
             }
 
-            float length = glm::distance(lastPos, v);
+            float length = static_cast<float>(glm::distance(lastPos, v));
 
             if (shouldTessellate(length)) {
                 // Add extra vertices to fulfill MaxDistance criteria.
@@ -589,8 +593,8 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
                     );
 
                 // Don't add the first position. Has been added as the last in previous step
-                for (int i = 1; i < subdividedPositions.size(); ++i) {
-                    const geometryhelper::PosHeightPair& pair = subdividedPositions[i];
+                for (int subi = 1; subi < subdividedPositions.size(); ++subi) {
+                    const geometryhelper::PosHeightPair& pair = subdividedPositions[subi];
                     addLinePos(glm::vec3(pair.position));
                 }
             }
