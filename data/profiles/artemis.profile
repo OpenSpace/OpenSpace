@@ -1,43 +1,29 @@
 {
-  "actions": [
-    {
-      "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Solar System/Earth",
-      "identifier": "profile.toggle.satellite",
-      "is_local": false,
-      "name": "Toggle satellite trails",
-      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-    },
-    {
-      "documentation": "Refocuses the camera on the ISS",
-      "gui_path": "/Solar System/Earth",
-      "identifier": "profile.focus.iss",
-      "is_local": false,
-      "name": "Focus ISS",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    },
-    {
-      "documentation": "Retargets the camera on Earth",
-      "gui_path": "/Solar System/Earth",
-      "identifier": "profile.focus.earth",
-      "is_local": false,
-      "name": "Focus on Earth",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    }
-  ],
   "assets": [
     "base",
     "events/toggle_sun",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
-    "scene/solarsystem/missions/artemis/artemis"
+    "scene/solarsystem/missions/artemis/artemis",
+    "scene/solarsystem/missions/artemis/toggle_trail"
   ],
   "camera": {
-    "altitude": 17000000.0,
-    "anchor": "Earth",
-    "latitude": 58.5877,
-    "longitude": 16.1924,
-    "type": "goToGeo"
+    "aim": "",
+    "anchor": "ArtemisModel",
+    "frame": "Root",
+    "yaw": -0.003474,
+    "pitch":  0.008681,
+    "type": "setNavigationState",
+    "position": {
+      "x": 364.907409,
+      "y": -65.898746,
+      "z": 361.510673
+    },
+    "up": {
+      "x": -0.128611,
+      "y": 0.944590,
+      "z": 0.302006
+    }
   },
   "delta_times": [
     1.0,
@@ -60,20 +46,6 @@
     157680000.0,
     315360000.0,
     630720000.0
-  ],
-  "keybindings": [
-    {
-      "action": "profile.toggle.satellite",
-      "key": "S"
-    },
-    {
-      "action": "profile.focus.iss",
-      "key": "I"
-    },
-    {
-      "action": "profile.focus.earth",
-      "key": "HOME"
-    }
   ],
   "mark_nodes": [
     "ArtemisModel",
@@ -124,11 +96,21 @@
       "name": "Scene.ISS_trail.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
+    },
+    {
+      "name": "Scene.ArtemisEarthTrail.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.ArtemisMoonTrail.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
     }
   ],
   "time": {
-    "type": "relative",
-    "value": "-1d"
+    "type": "absolute",
+    "value": "2022-11-21T12:00:00"
   },
   "version": {
     "major": 1,
