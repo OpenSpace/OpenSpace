@@ -227,7 +227,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         }
         else {
             LWARNINGC("GlobeBrowsingModule", fmt::format(
-                "The provided texture file '{}' for the default geo point texture "
+                "The provided texture file {} for the default geo point texture "
                 "does not exist", path
             ));
         }

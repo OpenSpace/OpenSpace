@@ -358,7 +358,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
 
     glBindVertexArray(0);
 
-    // Reset after every geometry
+    // Reset when we're done rendering all the polygon features
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 }
 
@@ -758,7 +758,7 @@ void GlobeGeometryFeature::createPolygonGeometry() {
 }
 
 void GlobeGeometryFeature::initializeRenderFeature(RenderFeature& feature,
-    const std::vector<Vertex>& vertices)
+                                                   const std::vector<Vertex>& vertices)
 {
     // Get height map heights
     feature.vertices = geometryhelper::geodetic2FromVertexList(_globe, vertices);

@@ -92,8 +92,9 @@ namespace {
 
     glm::vec3 hexToRbg(std::string_view hexColor) {
         int r, g, b;
+        // @TODO: Consider using scn::scan instead of sscanf
         int ret = std::sscanf(hexColor.data(), "#%02x%02x%02x", &r, &g, &b);
-        // TODO: Handle return value to validate color
+        // @TODO: Handle return value to validate color
         return (1.f / 255.f) * glm::vec3(r, g, b);
     }
 

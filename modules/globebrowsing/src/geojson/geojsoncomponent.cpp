@@ -441,9 +441,7 @@ bool GeoJsonComponent::isReady() const {
     bool isReady = std::all_of(
         std::begin(_geometryFeatures),
         std::end(_geometryFeatures),
-        [](const GlobeGeometryFeature& g) {
-            return g.isReady();
-        }
+        std::mem_fn(&GlobeGeometryFeature::isReady)
     );
     return isReady && _linesAndPolygonsProgram && _pointsProgram;
 }
@@ -580,7 +578,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
 
     std::vector<const geos::geom::Geometry*> geomsToAdd;
     if (geom->isPuntal()) {
-        // Handle all point features as one feature, even multi-points
+        // If points, handle all point features as one feature, even multi-points
         geomsToAdd = { geom };
     }
     else {
