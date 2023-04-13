@@ -682,6 +682,9 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     // Formula from RenderableGlobe
     constexpr double tfov = 0.5773502691896257;
     constexpr int res = 2880;
+
+    // @TODO (malej 13-APR-23): This should only use the boundingSphere function once
+    // that takes the gui scale into account too for all renderables
     const double maxDistance =
         res * boundingSphere() * glm::compMax(data.modelTransform.scale) / tfov;
 
