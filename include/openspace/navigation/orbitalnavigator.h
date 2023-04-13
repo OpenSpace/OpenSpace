@@ -50,6 +50,8 @@ namespace openspace {
     struct SurfacePositionHandle;
 } // namespace
 
+namespace openspace::scripting { struct LuaLibrary; }
+
 namespace openspace::interaction {
 
 class MouseInputState;
@@ -114,6 +116,9 @@ public:
     void setRetargetInterpolationTime(float durationInSeconds);
     void updatePreviousStateVariables();
 
+    void setMinimumAllowedDistance(float distance);
+    void setMaximumAllowedDistance(float distance);
+
     JoystickCameraStates& joystickStates();
     const JoystickCameraStates& joystickStates() const;
 
@@ -133,6 +138,7 @@ public:
     bool hasRollFriction() const;
 
     double minAllowedDistance() const;
+    double maxAllowedDistance() const;
 
     glm::dvec3 anchorNodeToCameraVector() const;
     glm::quat anchorNodeToCameraRotation() const;
@@ -143,6 +149,12 @@ public:
      * minimal allowed distance
      */
     glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
+
+    /**
+    * \return the Lua library that contains all Lua functions available to affect the
+    * OrbitalNavigator
+    */
+    static scripting::LuaLibrary luaLibrary();
 
 private:
     struct CameraRotationDecomposition {
@@ -188,7 +200,19 @@ private:
 
     properties::BoolProperty _followAnchorNodeRotation;
     properties::FloatProperty _followAnchorNodeRotationDistance;
-    properties::FloatProperty _minimumAllowedDistance;
+
+
+    struct LimitZoom : public properties::PropertyOwner {
+        LimitZoom();
+
+        properties::BoolProperty enableZoomInLimit;
+        properties::FloatProperty minimumAllowedDistance;
+
+        properties::BoolProperty enableZoomOutLimit;
+        properties::FloatProperty maximumAllowedDistance;
+    };
+
+    LimitZoom _limitZoom;
 
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;

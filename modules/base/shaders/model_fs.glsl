@@ -28,135 +28,139 @@ in vec2 vs_st;
 in vec3 vs_normalViewSpace;
 in vec4 vs_positionCameraSpace;
 in float vs_screenSpaceDepth;
-in mat3 TBN;
+in mat3 vs_TBN;
 
 uniform float ambientIntensity = 0.2;
 uniform float diffuseIntensity = 1.0;
 uniform float specularIntensity = 1.0;
 uniform bool performShading = true;
+
 uniform bool use_forced_color = false;
 uniform bool has_texture_diffuse;
 uniform bool has_texture_normal;
 uniform bool has_texture_specular;
 uniform bool has_color_specular;
-uniform bool opacityBlending = false;
+
 uniform sampler2D texture_diffuse;
 uniform sampler2D texture_normal;
 uniform sampler2D texture_specular;
-uniform vec3 color_diffuse;
-uniform vec3 color_specular;
+
+uniform vec4 color_diffuse;
+uniform vec4 color_specular;
+uniform float opacity = 1.0;
+
 uniform int nLightSources;
 uniform vec3 lightDirectionsViewSpace[8];
 uniform float lightIntensities[8];
-uniform float opacity = 1.0;
 
+uniform bool performManualDepthTest = false;
+uniform sampler2D gBufferDepthTexture;
+
+uniform vec2 resolution;
 
 Fragment getFragment() {
+  Fragment frag;
+  frag.depth = vs_screenSpaceDepth;
+  frag.gPosition = vs_positionCameraSpace;
+  frag.gNormal = vec4(vs_normalViewSpace, 0.0);
+  frag.disableLDR2HDR = true;
+  frag.color.a = opacity;
+
+  if (performManualDepthTest) {
+    // gl_FragCoord.x goes from 0 to resolution.x and gl_FragCoord.y goes from 0 to
+    // resolution.y, need to normalize it
+    vec2 texCoord = gl_FragCoord.xy;
+    texCoord.x = texCoord.x / resolution.x;
+    texCoord.y = texCoord.y / resolution.y;
+
+    // Manual depth test
+    float gBufferDepth = denormalizeFloat(texture(gBufferDepthTexture, texCoord).x);
+    if (vs_screenSpaceDepth > gBufferDepth) {
+      frag.color = vec4(0.0);
+      frag.depth = gBufferDepth;
+      return frag;
+    }
+  }
+
   // Render invisible mesh with flashy procedural material
   if (use_forced_color) {
-    Fragment frag;
-
-    vec3 adjustedPos = floor(vs_positionCameraSpace.xyz * 3.0);
+    vec3 adjustedPos = floor(vs_positionCameraSpace.xyz / 500.0);
     float chessboard  = adjustedPos.x + adjustedPos.y + adjustedPos.z;
     chessboard = fract(chessboard * 0.5);
     chessboard *= 2;
+
     // Pink and complementary green in a chessboard pattern
     frag.color.rgb = mix(vec3(1.0, 0.0, 0.8), vec3(0.0, 1.0, 0.2), chessboard);
-
-    frag.color.a = opacity;
-    frag.depth = vs_screenSpaceDepth;
-    frag.gPosition = vs_positionCameraSpace;
-    frag.gNormal = vec4(vs_normalViewSpace, 0.0);
-    frag.disableLDR2HDR = true;
-
     return frag;
   }
 
-  vec3 diffuseAlbedo;
+  // Base color
+  vec4 diffuseAlbedo;
   if (has_texture_diffuse) {
-    diffuseAlbedo = texture(texture_diffuse, vs_st).rgb;
+    diffuseAlbedo = texture(texture_diffuse, vs_st);
   }
   else {
     diffuseAlbedo = color_diffuse;
   }
 
-  if (opacity == 0.0) {
-    discard;
-  }
-
-  Fragment frag;
-
   if (performShading) {
+    // Specular color
     vec3 specularAlbedo;
     if (has_texture_specular) {
       specularAlbedo = texture(texture_specular, vs_st).rgb;
     }
     else {
       if (has_color_specular) {
-        specularAlbedo = color_specular;
+        specularAlbedo = color_specular.rgb;
       }
       else {
-        specularAlbedo = vec3(1.0);
+        specularAlbedo = diffuseAlbedo.rgb;
       }
     }
 
-    // Some of these values could be passed in as uniforms
-    const vec3 lightColorAmbient = vec3(1.0);
-    const vec3 lightColor = vec3(1.0);
-
-    vec3 n;
+    // Bumb mapping
+    vec3 normal;
     if (has_texture_normal) {
       vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;
       normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);
-      n = normalize(TBN * normalAlbedo);
+      normal = normalize(vs_TBN * normalAlbedo);
     }
     else {
-      n = normalize(vs_normalViewSpace);
+      normal = normalize(vs_normalViewSpace);
     }
+    frag.gNormal = vec4(normal, 0.0);
 
-    vec3 c = normalize(vs_positionCameraSpace.xyz);
+    // Could be seperated into ambinet, diffuse and specular and passed in as uniforms
+    const vec3 lightColor = vec3(1.0);
+    const float specularPower = 100.0;
 
-    vec3 color = ambientIntensity * lightColorAmbient * diffuseAlbedo;
+    // Ambient light
+    vec3 totalLightColor = ambientIntensity * lightColor * diffuseAlbedo.rgb;
+
+    vec3 viewDirection = normalize(vs_positionCameraSpace.xyz);
 
     for (int i = 0; i < nLightSources; ++i) {
-      vec3 l = lightDirectionsViewSpace[i];
-      vec3 r = reflect(l, n);
-
-      float diffuseCosineFactor = dot(n,l);
-      float specularCosineFactor = dot(c,r);
-      const float specularPower = 100.0;
-
+      // Diffuse light
+      vec3 lightDirection = lightDirectionsViewSpace[i];
+      float diffuseFactor =  max(dot(normal, lightDirection), 0.0);
       vec3 diffuseColor =
-            diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0);
+        diffuseIntensity * lightColor * diffuseFactor * diffuseAlbedo.rgb;
 
+      // Specular light
+      vec3 reflectDirection = reflect(lightDirection, normal);
+      float specularFactor =
+        pow(max(dot(viewDirection, reflectDirection), 0.0), specularPower);
       vec3 specularColor =
-            specularIntensity * lightColor * specularAlbedo *
-              pow(max(specularCosineFactor, 0), specularPower);
+        specularIntensity * lightColor * specularFactor * specularAlbedo;
 
-      color += lightIntensities[i] * (diffuseColor + specularColor);
+      totalLightColor += lightIntensities[i] * (diffuseColor + specularColor);
     }
-    frag.color.rgb = color;
+    frag.color.rgb = totalLightColor;
   }
   else {
-    frag.color.rgb = diffuseAlbedo;
+    frag.color.rgb = diffuseAlbedo.rgb;
   }
 
-  if (opacityBlending) {
-    // frag.color.a = opacity * (frag.color.r + frag.color.g + frag.color.b)/3.0;
-    frag.color.a = opacity * max(max(frag.color.r, frag.color.g), frag.color.b);
-  }
-  else {
-    frag.color.a = opacity;
-  }
-
-  if (frag.color.a < 0.1) {
-    discard;
-  }
-
-  frag.depth = vs_screenSpaceDepth;
-  frag.gPosition = vs_positionCameraSpace;
-  frag.gNormal = vec4(vs_normalViewSpace, 0.0);
-  frag.disableLDR2HDR = true;
-
+  frag.color.a = diffuseAlbedo.a * opacity;
   return frag;
 }

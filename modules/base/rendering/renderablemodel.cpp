@@ -28,7 +28,10 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/distanceconversion.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/updatestructures.h>
@@ -39,8 +42,10 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 #include <optional>
 
@@ -62,11 +67,22 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
-    constexpr std::array<const char*, 12> UniformNames = {
-        "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
+    const GLenum ColorAttachmentArray[3] = {
+       GL_COLOR_ATTACHMENT0,
+       GL_COLOR_ATTACHMENT1,
+       GL_COLOR_ATTACHMENT2,
+    };
+
+    constexpr std::array<const char*, 14> UniformNames = {
+        "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",
-        "specularIntensity", "opacityBlending"
+        "specularIntensity", "performManualDepthTest", "gBufferDepthTexture",
+        "resolution", "opacity"
+    };
+
+    constexpr std::array<const char*, 5> UniformOpacityNames = {
+        "opacity", "colorTexture", "depthTexture", "viewport", "resolution"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
@@ -100,10 +116,10 @@ namespace {
         "of the Sun"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableFaceCullingInfo = {
-        "DisableFaceCulling",
-        "Disable Face Culling",
-        "Disable OpenGL automatic face culling optimization"
+    constexpr openspace::properties::Property::PropertyInfo EnableFaceCullingInfo = {
+        "EnableFaceCulling",
+        "Enable Face Culling",
+        "Enable OpenGL automatic face culling optimization"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
@@ -125,10 +141,10 @@ namespace {
         "A list of light sources that this model should accept light from"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableDepthTestInfo = {
-        "DisableDepthTest",
-        "Disable Depth Test",
-        "Disable Depth Testing for the Model"
+    constexpr openspace::properties::Property::PropertyInfo EnableDepthTestInfo = {
+        "EnableDepthTest",
+        "Enable Depth Test",
+        "Enable Depth Testing for the Model"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
@@ -136,12 +152,6 @@ namespace {
         "Blending Options",
         "Changes the blending function used to calculate the colors of the model with "
         "respect to the opacity"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo EnableOpacityBlendingInfo = {
-        "EnableOpacityBlending",
-        "Enable Opacity Blending",
-        "Enable Opacity Blending"
     };
 
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {
@@ -158,8 +168,6 @@ namespace {
             Decimeter,
             Meter,
             Kilometer,
-
-            // Weird units
             Thou,
             Inch,
             Foot,
@@ -228,8 +236,8 @@ namespace {
         // [[codegen::verbatim(ShadingInfo.description)]]
         std::optional<bool> performShading;
 
-        // [[codegen::verbatim(DisableFaceCullingInfo.description)]]
-        std::optional<bool> disableFaceCulling;
+        // [[codegen::verbatim(EnableFaceCullingInfo.description)]]
+        std::optional<bool> enableFaceCulling;
 
         // [[codegen::verbatim(ModelTransformInfo.description)]]
         std::optional<glm::dmat3x3> modelTransform;
@@ -241,14 +249,11 @@ namespace {
         std::optional<std::vector<ghoul::Dictionary>> lightSources
             [[codegen::reference("core_light_source")]];
 
-        // [[codegen::verbatim(DisableDepthTestInfo.description)]]
-        std::optional<bool> disableDepthTest;
+        // [[codegen::verbatim(EnableDepthTestInfo.description)]]
+        std::optional<bool> enableDepthTest;
 
         // [[codegen::verbatim(BlendingOptionInfo.description)]]
         std::optional<std::string> blendingOption;
-
-        // [[codegen::verbatim(EnableOpacityBlendingInfo.description)]]
-        std::optional<bool> enableOpacityBlending;
 
         // The path to the vertex shader program that is used instead of the default
         // shader.
@@ -268,13 +273,13 @@ documentation::Documentation RenderableModel::Documentation() {
 }
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+    : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , _enableAnimation(EnableAnimationInfo, false)
     , _ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
     , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
     , _performShading(ShadingInfo, true)
-    , _disableFaceCulling(DisableFaceCullingInfo, false)
+    , _enableFaceCulling(EnableFaceCullingInfo, true)
     , _modelTransform(
         ModelTransformInfo,
         glm::dmat3(1.0),
@@ -282,8 +287,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         glm::dmat3(1.0)
     )
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
-    , _disableDepthTest(DisableDepthTestInfo, false)
-    , _enableOpacityBlending(EnableOpacityBlendingInfo, false)
+    , _enableDepthTest(EnableDepthTestInfo, true)
     , _blendingFuncOption(
         BlendingOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -410,8 +414,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _diffuseIntensity = p.diffuseIntensity.value_or(_diffuseIntensity);
     _specularIntensity = p.specularIntensity.value_or(_specularIntensity);
     _performShading = p.performShading.value_or(_performShading);
-    _disableDepthTest = p.disableDepthTest.value_or(_disableDepthTest);
-    _disableFaceCulling = p.disableFaceCulling.value_or(_disableFaceCulling);
+    _enableDepthTest = p.enableDepthTest.value_or(_enableDepthTest);
+    _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
 
     if (p.vertexShader.has_value()) {
         _vertexShaderPath = p.vertexShader->string();
@@ -440,8 +444,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_diffuseIntensity);
     addProperty(_specularIntensity);
     addProperty(_performShading);
-    addProperty(_disableFaceCulling);
-    addProperty(_disableDepthTest);
+    addProperty(_enableFaceCulling);
+    addProperty(_enableDepthTest);
     addProperty(_modelTransform);
     addProperty(_rotationVec);
 
@@ -468,7 +472,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     _blendingFuncOption.addOption(DefaultBlending, "Default");
     _blendingFuncOption.addOption(AdditiveBlending, "Additive");
-    _blendingFuncOption.addOption(PointsAndLinesBlending, "Points and Lines");
     _blendingFuncOption.addOption(PolygonBlending, "Polygon");
     _blendingFuncOption.addOption(ColorAddingBlending, "Color Adding");
 
@@ -479,13 +482,11 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _blendingFuncOption.set(BlendingMapping[blendingOpt]);
     }
 
-    _enableOpacityBlending = p.enableOpacityBlending.value_or(_enableOpacityBlending);
-
-    addProperty(_enableOpacityBlending);
+    _originalRenderBin = renderBin();
 }
 
 bool RenderableModel::isReady() const {
-    return _program;
+    return _program && _quadProgram;
 }
 
 void RenderableModel::initialize() {
@@ -538,13 +539,111 @@ void RenderableModel::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
+    _quadProgram = BaseModule::ProgramObjectManager.request(
+        "ModelOpacityProgram",
+        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            std::filesystem::path vs =
+                absPath("${MODULE_BASE}/shaders/modelOpacity_vs.glsl");
+            std::filesystem::path fs =
+                absPath("${MODULE_BASE}/shaders/modelOpacity_fs.glsl");
+
+            return global::renderEngine->buildRenderProgram("ModelOpacityProgram", vs, fs);
+        }
+    );
+    ghoul::opengl::updateUniformLocations(
+        *_quadProgram,
+        _uniformOpacityCache,
+        UniformOpacityNames
+    );
+
+    // Screen quad VAO
+    const GLfloat quadVertices[] = {
+        // x     y     s     t
+        -1.f, -1.f,  0.f,  0.f,
+         1.f,  1.f,  1.f,  1.f,
+        -1.f,  1.f,  0.f,  1.f,
+        -1.f, -1.f,  0.f,  0.f,
+         1.f, -1.f,  1.f,  0.f,
+         1.f,  1.f,  1.f,  1.f
+    };
+
+    glGenVertexArrays(1, &_quadVao);
+    glBindVertexArray(_quadVao);
+
+    glGenBuffers(1, &_quadVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        4 * sizeof(GLfloat),
+        reinterpret_cast<void*>(2 * sizeof(GLfloat))
+    );
+
+    // Generate textures and the frame buffer
+    glGenFramebuffers(1, &_framebuffer);
+
+    // Bind textures to the framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        global::renderEngine->renderer().additionalColorTexture1(),
+        0
+    );
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT1,
+        global::renderEngine->renderer().additionalColorTexture2(),
+        0
+    );
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT2,
+        global::renderEngine->renderer().additionalColorTexture3(),
+        0
+    );
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        global::renderEngine->renderer().additionalDepthTexture(),
+        0
+    );
+
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Framebuffer");
+    }
+
+    // Check status
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Framebuffer is not complete");
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Initialize geometry
     _geometry->initialize();
     _geometry->calculateBoundingRadius();
+    setBoundingSphere(_geometry->boundingRadius() * _modelScale);
+
+    // Set Interaction sphere size to be 10% of the bounding sphere
+    setInteractionSphere(boundingSphere() * 0.1);
 }
 
 void RenderableModel::deinitializeGL() {
     _geometry->deinitialize();
     _geometry.reset();
+
+    glDeleteFramebuffers(1, &_framebuffer);
+
+    glDeleteBuffers(1, &_quadVbo);
+    glDeleteVertexArrays(1, &_quadVao);
 
     std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
@@ -559,7 +658,17 @@ void RenderableModel::deinitializeGL() {
             global::renderEngine->removeRenderProgram(p);
         }
     );
+
+    BaseModule::ProgramObjectManager.release(
+        "ModelOpacityProgram",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
+
     _program = nullptr;
+    _quadProgram = nullptr;
+    ghoul::opengl::FramebufferObject::deactivate();
 }
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
@@ -573,110 +682,241 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     // Formula from RenderableGlobe
     constexpr double tfov = 0.5773502691896257;
     constexpr int res = 2880;
-    const double maxDistance = res * boundingSphere() / tfov;
 
-    if (distanceToCamera < maxDistance) {
-        _program->activate();
+    // @TODO (malej 13-APR-23): This should only use the boundingSphere function once
+    // that takes the gui scale into account too for all renderables
+    const double maxDistance =
+        res * boundingSphere() * glm::compMax(data.modelTransform.scale) / tfov;
 
-        _program->setUniform(_uniformCache.opacity, opacity());
+    // Don't render if model is too far away
+    if (distanceToCamera >= maxDistance) {
+        return;
+    }
 
-        // Model transform and view transform needs to be in double precision
-        const glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            glm::dmat4(data.modelTransform.rotation) *
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-            glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
-        const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-            modelTransform;
+    _program->activate();
 
-        int nLightSources = 0;
-        _lightIntensitiesBuffer.resize(_lightSources.size());
-        _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
-        for (const std::unique_ptr<LightSource>& lightSource : _lightSources) {
-            if (!lightSource->isEnabled()) {
-                continue;
-            }
-            _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
-            _lightDirectionsViewSpaceBuffer[nLightSources] =
-                lightSource->directionViewSpace(data);
+    // Model transform and view transform needs to be in double precision
+    const glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
+        glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
+    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
+        modelTransform;
 
-            ++nLightSources;
+    int nLightSources = 0;
+    _lightIntensitiesBuffer.resize(_lightSources.size());
+    _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
+    for (const std::unique_ptr<LightSource>& lightSource : _lightSources) {
+        if (!lightSource->isEnabled()) {
+            continue;
         }
+        _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
+        _lightDirectionsViewSpaceBuffer[nLightSources] =
+            lightSource->directionViewSpace(data);
 
+        ++nLightSources;
+    }
+
+    _program->setUniform(
+        _uniformCache.nLightSources,
+        nLightSources
+    );
+    _program->setUniform(
+        _uniformCache.lightIntensities,
+        _lightIntensitiesBuffer
+    );
+    _program->setUniform(
+        _uniformCache.lightDirectionsViewSpace,
+        _lightDirectionsViewSpaceBuffer
+    );
+    _program->setUniform(
+        _uniformCache.modelViewTransform,
+        glm::mat4(modelViewTransform)
+    );
+
+    glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
+
+    _program->setUniform(
+        _uniformCache.normalTransform,
+        glm::mat4(normalTransform)
+    );
+
+    _program->setUniform(
+        _uniformCache.projectionTransform,
+        data.camera.projectionMatrix()
+    );
+    _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
+    _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
+    _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
+    _program->setUniform(_uniformCache.performShading, _performShading);
+
+    if (!_enableFaceCulling) {
+        glDisable(GL_CULL_FACE);
+    }
+
+    // Configure blending
+    glEnablei(GL_BLEND, 0);
+    switch (_blendingFuncOption) {
+        case DefaultBlending:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case AdditiveBlending:
+            glBlendFunc(GL_ONE, GL_ONE);
+            break;
+        case PolygonBlending:
+            glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
+            break;
+        case ColorAddingBlending:
+            glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
+            break;
+    };
+
+    if (!_enableDepthTest) {
+        glDisable(GL_DEPTH_TEST);
+    }
+
+
+    if (!_shouldRenderTwice) {
+        // Reset manual depth test
         _program->setUniform(
-            _uniformCache.nLightSources,
-            nLightSources
-        );
-        _program->setUniform(
-            _uniformCache.lightIntensities,
-            _lightIntensitiesBuffer
-        );
-        _program->setUniform(
-            _uniformCache.lightDirectionsViewSpace,
-            _lightDirectionsViewSpaceBuffer
-        );
-        _program->setUniform(
-            _uniformCache.modelViewTransform,
-            glm::mat4(modelViewTransform)
+            _uniformCache.performManualDepthTest,
+            false
         );
 
-        glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
-
-        _program->setUniform(
-            _uniformCache.normalTransform,
-            glm::mat4(normalTransform)
-        );
-
-        _program->setUniform(
-            _uniformCache.projectionTransform,
-            data.camera.projectionMatrix()
-        );
-        _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
-        _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
-        _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
-        _program->setUniform(_uniformCache.performShading, _performShading);
-        _program->setUniform(_uniformCache.opacityBlending, _enableOpacityBlending);
-
-        if (_disableFaceCulling) {
-            glDisable(GL_CULL_FACE);
+        if (hasOverrideRenderBin()) {
+            // If override render bin is set then use the opacity values as normal
+            _program->setUniform(_uniformCache.opacity, opacity());
         }
-
-        glEnablei(GL_BLEND, 0);
-        switch (_blendingFuncOption) {
-            case DefaultBlending:
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                break;
-            case AdditiveBlending:
-                glBlendFunc(GL_ONE, GL_ONE);
-                break;
-            case PointsAndLinesBlending:
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                break;
-            case PolygonBlending:
-                glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
-                break;
-            case ColorAddingBlending:
-                glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
-                break;
-        };
-
-        if (_disableDepthTest) {
-            glDisable(GL_DEPTH_TEST);
+        else {
+            // Otherwise reset to 1
+            _program->setUniform(_uniformCache.opacity, 1.f);
         }
 
         _geometry->render(*_program);
-        if (_disableFaceCulling) {
-            glEnable(GL_CULL_FACE);
-        }
-
-        global::renderEngine->openglStateCache().resetBlendState();
-
-        if (_disableDepthTest) {
-            glEnable(GL_DEPTH_TEST);
-        }
-
-        _program->deactivate();
     }
+    else {
+        // Prepare framebuffer
+        GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+
+        // Re-bind first texture to use the currently not used Ping-Pong texture in the
+        // FramebufferRenderer
+        glFramebufferTexture(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            global::renderEngine->renderer().additionalColorTexture1(),
+            0
+        );
+        // Check status
+        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
+            LERROR("Framebuffer is not complete");
+        }
+
+        glDrawBuffers(3, ColorAttachmentArray);
+        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(glm::vec4(0.f, 0.f, 0.f, 0.f)));
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Use a manuel depth test to make the models aware of the rest of the scene
+        _program->setUniform(
+            _uniformCache.performManualDepthTest,
+            _enableDepthTest
+        );
+
+        // Bind the G-buffer depth texture for a manual depth test towards the rest
+        // of the scene
+        ghoul::opengl::TextureUnit gBufferDepthTextureUnit;
+        gBufferDepthTextureUnit.activate();
+        glBindTexture(
+            GL_TEXTURE_2D,
+            global::renderEngine->renderer().gBufferDepthTexture()
+        );
+        _program->setUniform(
+            _uniformCache.gBufferDepthTexture,
+            gBufferDepthTextureUnit
+        );
+
+        // Will also need the resolution to get a texture coordinate for the G-buffer
+        // depth texture
+        _program->setUniform(
+            _uniformCache.resolution,
+            glm::vec2(global::windowDelegate->currentDrawBufferResolution())
+        );
+
+        // Make sure opacity in first pass is always 1
+        _program->setUniform(_uniformCache.opacity, 1.f);
+
+        // Render Pass 1
+        // Render all parts of the model into the new framebuffer without opacity
+        _geometry->render(*_program);
+        _program->deactivate();
+
+        // Render pass 2
+        // Render the whole model into the G-buffer with the correct opacity
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+
+        // Screen-space quad should not be discarded due to depth test,
+        // but we still want to be able to write to the depth buffer -> GL_ALWAYS
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_ALWAYS);
+
+        _quadProgram->activate();
+
+        _quadProgram->setUniform(_uniformOpacityCache.opacity, opacity());
+
+        // Bind textures
+        ghoul::opengl::TextureUnit colorTextureUnit;
+        colorTextureUnit.activate();
+        glBindTexture(
+            GL_TEXTURE_2D,
+            global::renderEngine->renderer().additionalColorTexture1()
+        );
+        _quadProgram->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
+
+        ghoul::opengl::TextureUnit depthTextureUnit;
+        depthTextureUnit.activate();
+        glBindTexture(
+            GL_TEXTURE_2D,
+            global::renderEngine->renderer().additionalDepthTexture()
+        );
+        _quadProgram->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
+
+        // Will also need the resolution and viewport to get a texture coordinate
+        _quadProgram->setUniform(
+            _uniformOpacityCache.resolution,
+            glm::vec2(global::windowDelegate->currentDrawBufferResolution())
+        );
+
+        GLint vp[4] = { 0 };
+        global::renderEngine->openglStateCache().viewport(vp);
+        glm::ivec4 viewport = glm::ivec4(vp[0], vp[1], vp[2], vp[3]);
+        _quadProgram->setUniform(
+            _uniformOpacityCache.viewport,
+            viewport[0],
+            viewport[1],
+            viewport[2],
+            viewport[3]
+        );
+
+        // Draw
+        glBindVertexArray(_quadVao);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        _quadProgram->deactivate();
+    }
+
+    // Reset
+    if (!_enableFaceCulling) {
+        glEnable(GL_CULL_FACE);
+    }
+
+    if (!_enableDepthTest) {
+        glEnable(GL_DEPTH_TEST);
+    }
+
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void RenderableModel::update(const UpdateData& data) {
@@ -685,11 +925,19 @@ void RenderableModel::update(const UpdateData& data) {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    setBoundingSphere(_geometry->boundingRadius() * _modelScale *
-        glm::compMax(data.modelTransform.scale)
-    );
-    // Set Interaction sphere size to be 10% of the bounding sphere
-    setInteractionSphere(boundingSphere() * 0.1);
+    if (!hasOverrideRenderBin()) {
+        // Only render two pass if the model is in any way transparent
+        const float o = opacity();
+        if ((o >= 0.f && o < 1.f) || _geometry->isTransparent()) {
+            setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
+            _shouldRenderTwice = true;
+        }
+        else {
+            setRenderBin(_originalRenderBin);
+            _shouldRenderTwice = false;
+        }
+    }
+
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime;

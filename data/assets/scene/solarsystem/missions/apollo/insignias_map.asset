@@ -14,7 +14,6 @@ local landingData = {
   {
     Identifier = "Apollo11",
     Name = "Apollo 11",
-    Name = "Apollo 11",
     Texture = "apollo11.png",
     LunarModule = { 0.67409, 23.47298, 0.0 }
   },

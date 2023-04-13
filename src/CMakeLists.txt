@@ -73,6 +73,7 @@ set(OPENSPACE_SOURCE
   navigation/navigationhandler_lua.inl
   navigation/navigationstate.cpp
   navigation/orbitalnavigator.cpp
+  navigation/orbitalnavigator_lua.inl
   navigation/path.cpp
   navigation/pathcurve.cpp
   navigation/pathnavigator.cpp

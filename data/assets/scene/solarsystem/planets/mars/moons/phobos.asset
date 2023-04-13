@@ -45,8 +45,7 @@ local Phobos = {
     LightSources = {
       sun.LightSource
     },
-    PerformShading = true,
-    DisableFaceCulling = true
+    PerformShading = true
   },
   Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
   GUI = {
