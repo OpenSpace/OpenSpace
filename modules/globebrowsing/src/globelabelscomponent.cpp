@@ -162,9 +162,6 @@ namespace {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
-        // The opacity of the labels
-        std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
-
         // [[codegen::verbatim(FadeDistancesInfo.description)]]
         std::optional<glm::vec2> fadeDistances;
 
