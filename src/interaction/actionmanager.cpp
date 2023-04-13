@@ -96,13 +96,13 @@ void ActionManager::triggerAction(const std::string& identifier,
     if (arguments.isEmpty()) {
         global::scriptEngine->queueScript(
             a.command,
-            scripting::ScriptEngine::RemoteScripting(a.synchronization)
+            scripting::ScriptEngine::RemoteScripting(!a.isLocal)
         );
     }
     else {
         global::scriptEngine->queueScript(
             fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command),
-            scripting::ScriptEngine::RemoteScripting(a.synchronization)
+            scripting::ScriptEngine::RemoteScripting(!a.isLocal)
         );
     }
 }

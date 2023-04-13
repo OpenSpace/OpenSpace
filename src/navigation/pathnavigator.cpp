@@ -477,7 +477,7 @@ void PathNavigator::findRelevantNodes() {
         return;
     }
 
-    auto isRelevant = [&](const SceneGraphNode* node) {
+    auto isRelevant = [&relevantTags](const SceneGraphNode* node) {
         const std::vector<std::string> tags = node->tags();
         auto result = std::find_first_of(
             relevantTags.begin(),

@@ -91,7 +91,7 @@ namespace {
         CHECK(k9 == 9);
     }
 
-    int loadLSKKernel()  { 
+    int loadLSKKernel() {
         int kernelID = openspace::SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
         );
@@ -99,7 +99,7 @@ namespace {
         return kernelID;
     }
 
-    int loadPCKKernel()  {
+    int loadPCKKernel() {
         int kernelID = openspace::SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc").string()
         );
@@ -126,7 +126,7 @@ TEST_CASE("SpiceManager: Load Single Kernel", "[spicemanager]") {
         &spicemanager_constants::handle,
         &found
     );
-    
+
     CHECK(found == SPICETRUE);
 
     openspace::SpiceManager::deinitialize();
@@ -276,7 +276,7 @@ TEST_CASE("SpiceManager: Get Value From ID ND", "[spicemanager]") {
     CHECK_NOTHROW(openspace::SpiceManager::ref().getValue(target, valueND, returnND));
 
     std::vector<double> controlVec{ 189870.0, 256900.0, 9000.0, 9000.0, 0.000003 };
-    
+
     CHECK(controlVec.size() == returnND.size());
 
     for (unsigned int i = 0; i < returnND.size(); ++i){
@@ -392,7 +392,7 @@ TEST_CASE("SpiceManager: Transform matrix", "[spicemanager]") {
      stateMatrix = openspace::SpiceManager::ref().stateTransformMatrix(
         "J2000", "IAU_PHOEBE", et)
     );
-   
+
    // check for matrix consistency
    for (int i = 0; i < 6; i++) {
        for (int j = 0; j < 6; j++) {
@@ -452,7 +452,7 @@ TEST_CASE("SpiceManager: Get Position Transform Matrix", "[spicemanager]") {
 #endif
 
     position = positionMatrix * position;
-    // check transformed values match 
+    // check transformed values match
     for (int i = 0; i < 3; i++) {
         CHECK(position[i] == Catch::Approx(state_t[i]));
     }
@@ -465,7 +465,7 @@ TEST_CASE("SpiceManager: Get Field Of View", "[spicemanager]") {
 
     using openspace::SpiceManager;
     loadMetaKernel();
-    
+
     SpiceInt n;
     SpiceInt cassini_ID;
     double et;

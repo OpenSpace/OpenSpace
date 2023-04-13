@@ -20,5 +20,5 @@
     <BandsCount>1</BandsCount>
     <MaxConnections>10</MaxConnections>
     <DataValues NoData="0" Min="1" Max="255"/>
-    <ZeroBlockHttpCodes>400</ZeroBlockHttpCodes>    
+    <ZeroBlockHttpCodes>400</ZeroBlockHttpCodes>
   </GDAL_WMS>

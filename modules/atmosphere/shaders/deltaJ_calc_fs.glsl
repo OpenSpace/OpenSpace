@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #version __CONTEXT__
 
 #include "atmosphere_common.glsl"
@@ -100,7 +100,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
 
   // Now we get vec(v) and vec(s) from mu, muSun and nu:
   // Assuming:
-  //              z |theta 
+  //              z |theta
   //                |\ vec(v) ||vec(v)|| = 1
   //                | \
   //                |__\_____x
@@ -121,7 +121,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
   // 1 = sqrt(s.x*s.x + s.y*s.y + s.z*s.z)
   // s.y = sqrt(1 - s.x*s.x - s.z*s.z) = sqrt(1 - s.x*s.x - muSun*muSun)
   vec3 s = vec3(sx, sqrt(max(0.0, 1.0 - sx * sx - muSun2)), muSun);
-  
+
   // In order to integrate over 4PI, we scan the sphere using the spherical coordinates
   // previously defined
   vec3 radianceJAcc = vec3(0.0);
@@ -132,7 +132,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
     float distanceToGround = 0.0;
     float groundReflectance = 0.0;
     vec3 groundTransmittance = vec3(0.0);
-    
+
     // If the ray w can see the ground we must compute the transmittance
     // effect from the starting point x to the ground point in direction -vec(v):
     if (cosineTheta < cosHorizon) { // ray hits ground
@@ -146,7 +146,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       //               |\ distGround
       //            r  | \  alpha
       //               |  \/
-      //               |  /  
+      //               |  /
       //               | / Rg
       //               |/
       // So cos(alpha) = ((vec(x)+vec(dg)) dot -vec(distG))/(||(vec(x)+vec(distG))|| * ||vec(distG)||)
@@ -178,7 +178,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       float nuWV = dot(v, w);
       float phaseRayleighWV = rayleighPhaseFunction(nuWV);
       float phaseMieWV = miePhaseFunction(nuWV, mieG);
-      
+
       vec3 groundNormal = (vec3(0.0, 0.0, r) + distanceToGround * w) / Rg;
       vec3 groundIrradiance = irradianceLUT(deltaETexture, dot(groundNormal, s), Rg);
 
@@ -194,7 +194,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       // light. We stored these values in the deltaS textures (Ray and Mie), and in order
       // to avoid problems with the high angle dependency in the phase functions, we don't
       // include the phase functions on those tables (that's why we calculate them now).
-      if (firstIteration == 1) {        
+      if (firstIteration == 1) {
         float phaseRaySW = rayleighPhaseFunction(nuSW);
         float phaseMieSW = miePhaseFunction(nuSW, mieG);
         // We can now access the values for the single InScattering in the textures deltaS textures.
@@ -204,7 +204,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
           Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
 
         // Initial InScattering including the phase functions
-        radianceJ1 += singleRay * phaseRaySW + singleMie * phaseMieSW;        
+        radianceJ1 += singleRay * phaseRaySW + singleMie * phaseMieSW;
       }
       else {
         // On line 9 of the algorithm, the texture table deltaSR is updated, so when we
@@ -219,7 +219,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       // Finally, we add the atmospheric scale height (See: Radiation Transfer on the
       // Atmosphere and Ocean from Thomas and Stamnes, pg 9-10.
       radianceJAcc += radianceJ1 * (betaRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
-        betaMieScattering * exp(-(r - Rg) / HM) * phaseMieWV) * dw;        
+        betaMieScattering * exp(-(r - Rg) / HM) * phaseMieWV) * dw;
     }
   }
 

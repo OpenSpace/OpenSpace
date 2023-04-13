@@ -346,7 +346,7 @@ private:
         std::chrono::time_point<std::chrono::steady_clock> beginTime;
         float durationSeconds;
         std::string postScript;
-        
+
         ghoul::EasingFunc<float> easingFunction;
         bool isExpired = false;
     };
@@ -354,6 +354,9 @@ private:
 
     ghoul::MemoryPool<4096> _memoryPool;
 };
+
+// Convert the input string to a format that is valid as an identifier
+std::string makeIdentifier(std::string str);
 
 } // namespace openspace
 

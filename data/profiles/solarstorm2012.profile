@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "dashboard/default_dashboard",
     "scene/solarsystem/heliosphere/2012/sun_earth_2012_fieldlines",
     "scene/solarsystem/planets/earth/magnetosphere/magnetosphere",

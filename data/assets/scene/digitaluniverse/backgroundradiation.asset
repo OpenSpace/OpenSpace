@@ -29,7 +29,6 @@ local wmap = {
     Texture = textures .. "wmap_ilc_7yr_v4_200uK_RGB_sos.png",
     Orientation = "Both",
     MirrorTexture = true,
-    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {
@@ -55,7 +54,6 @@ local cbe = {
     Texture = textures .. "COBErect.png",
     Orientation = "Both",
     MirrorTexture = true,
-    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {
@@ -81,7 +79,6 @@ local planck = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {
@@ -107,7 +104,6 @@ local Halpha = {
     Opacity = 0.4,
     Texture = textures .. "mwHalpha-f.png",
     Orientation = "Inside",
-    RenderBinMode = "PreDeferredTransparent",
     MirrorTexture = true,
     FadeOutThreshold = 0.025,
     Background = true

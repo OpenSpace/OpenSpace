@@ -178,7 +178,7 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
     _distanceFraction = p.distanceFraction.value_or(_distanceFraction);
     addProperty(_distanceFraction);
 
-    _saveDepthTexture.onChange([&]() { _executeDepthTextureSave = true; });
+    _saveDepthTexture.onChange([this]() { _executeDepthTextureSave = true; });
 
     if (p.depthMapSize.has_value()) {
         _shadowDepthTextureWidth = p.depthMapSize->x;

@@ -67,7 +67,7 @@ void main() {
       id = 1.0 - id;
     }
 
-    fade = clamp(id * lineFade, 0.0, 1.0); 
+    fade = clamp(id * lineFade, 0.0, 1.0);
   }
   else {
     fade = 1.0;
@@ -76,8 +76,8 @@ void main() {
   vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
   vec4 vs_positionClipSpace = projectionTransform * vs_gPosition;
   vs_positionDepth = vs_positionClipSpace.w;
-  
-  gl_PointSize = (stride == 1 || int(modId) % stride == 0) ? 
+
+  gl_PointSize = (stride == 1 || int(modId) % stride == 0) ?
                   float(pointSize) : float(pointSize) / 2;
   gl_Position  = z_normalization(vs_positionClipSpace);
 }

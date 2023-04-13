@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #include "fragment.glsl"
 #include "floatoperations.glsl"
 
@@ -41,7 +41,7 @@ uniform int renderOption;
 // Keep in sync with gaiaoptions.h:RenderOption enum
 const int RENDEROPTION_STATIC = 0;
 const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2; 
+const int RENDEROPTION_MOTION = 2;
 const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
 const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
 const float LUM_LOWER_CAP = 0.01;
@@ -114,7 +114,7 @@ Fragment getFragment() {
 
   Fragment frag;
   frag.color = vec4(color, textureColor.a);;
-  // Place stars at back to begin with. 
+  // Place stars at back to begin with.
   frag.depth = DEFAULT_DEPTH;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.blend = BLEND_MODE_NORMAL;

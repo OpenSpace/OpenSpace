@@ -359,21 +359,29 @@ void KameleonPlane::subscribeToGroup() {
 
     //Add additional Events specific to KameleonPlane
     ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
-    groupEvent.subscribe(identifier(), "resolutionChanged", [&](ghoul::Dictionary dict) {
-        LDEBUG(identifier() + " Event resolutionChanged");
-        if (dict.hasKey("resolution") && dict.hasValue<double>("resolution")) {
-            _resolution = static_cast<float>(dict.value<double>("resolution"));
+    groupEvent.subscribe(
+        identifier(),
+        "resolutionChanged",
+        [this](ghoul::Dictionary dict) {
+            LDEBUG(identifier() + " Event resolutionChanged");
+            if (dict.hasKey("resolution") && dict.hasValue<double>("resolution")) {
+                _resolution = static_cast<float>(dict.value<double>("resolution"));
+            }
         }
-    });
+    );
 
-    groupEvent.subscribe(identifier(), "cdfChanged", [&](ghoul::Dictionary dict) {
-        LDEBUG(identifier() + " Event cdfChanged");
-        if (dict.hasKey("path") && dict.hasValue<std::string>("path")) {
-            const std::string& path = dict.value<std::string>("path");
-            changeKwPath(path);
+    groupEvent.subscribe(
+        identifier(),
+        "cdfChanged",
+        [this](ghoul::Dictionary dict) {
+            LDEBUG(identifier() + " Event cdfChanged");
+            if (dict.hasKey("path") && dict.hasValue<std::string>("path")) {
+                const std::string& path = dict.value<std::string>("path");
+                changeKwPath(path);
+            }
+            updateTexture();
         }
-        updateTexture();
-    });
+    );
 }
 
 void KameleonPlane::setDimensions() {

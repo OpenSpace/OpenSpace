@@ -1,6 +1,6 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup341
+local kernel = asset.require("../kernels").jup365
 
 
 
@@ -137,7 +137,7 @@ asset.onDeinitialize(function()
   for i = #moon_labels, 1, -1 do
     openspace.removeSceneGraphNode(moon_labels[i])
   end
-  
+
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end

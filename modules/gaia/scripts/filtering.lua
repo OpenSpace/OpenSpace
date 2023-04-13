@@ -79,7 +79,7 @@ openspace.gaia.addClippingSphere = function (name, radius)
         Transform = {
             Scale = {
                 Type = "StaticScale",
-                Scale = radius * kilo_parsec_in_meter 
+                Scale = radius * kilo_parsec_in_meter
             }
         },
         Renderable = {

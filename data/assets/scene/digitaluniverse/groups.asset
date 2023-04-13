@@ -11,6 +11,7 @@ local object = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
     Labels = {
+      Enabled = true,
       File = speck .. "groups.label",
       Color = { 0.1, 0.6, 0.2 },
       Size = 21.5,
@@ -21,7 +22,6 @@ local object = {
     Opacity = 0.65,
     --ScaleFactor = 10.0,
     Unit = "Mpc",
-    DrawLabels = true,
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,
       -0.074553778365, -0.080991471307, 0.9939225904,  0.0,

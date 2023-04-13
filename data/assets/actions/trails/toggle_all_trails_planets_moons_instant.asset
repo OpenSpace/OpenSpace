@@ -1,6 +1,6 @@
 local toggle_trails = {
   Identifier = "os_default.toggle_trails",
-  Name = "Toggle Planet and Moon Trails (Instant)",
+  Name = "Toggle planet and moon trails (instant)",
   Command = [[
     local list = openspace.getProperty("{planetTrail_solarSystem}.Renderable.Enabled");
     for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end

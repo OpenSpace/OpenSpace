@@ -579,7 +579,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     ghoul::Dictionary layersDictionary = dictionary.value<ghoul::Dictionary>("Layers");
     _layerManager.initialize(layersDictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.renderAtDistance);
@@ -603,7 +603,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _shadowMappingPropertyOwner.addProperty(_generalProperties.shadowMapping);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.zFightingPercentage);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.nShadowSamples);
-    _generalProperties.nShadowSamples.onChange([&]() {
+    _generalProperties.nShadowSamples.onChange([this]() {
         _shadersNeedRecompilation = true;
     });
     addPropertySubOwner(_shadowMappingPropertyOwner);
@@ -626,7 +626,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
     _debugPropertyOwner.addProperty(_debugProperties.dynamicLodIterationCount);
 
-    auto notifyShaderRecompilation = [&]() {
+    auto notifyShaderRecompilation = [this]() {
         _shadersNeedRecompilation = true;
     };
     _generalProperties.useAccurateNormals.onChange(notifyShaderRecompilation);
@@ -635,7 +635,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _generalProperties.performShading.onChange(notifyShaderRecompilation);
     _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
 
-    _layerManager.onChange([&](Layer* l) {
+    _layerManager.onChange([this](Layer* l) {
         _shadersNeedRecompilation = true;
         _chunkCornersDirty = true;
         _nLayersIsDirty = true;
@@ -655,6 +655,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     // Components
     _hasRings = p.rings.has_value();
     if (_hasRings) {
+        _ringsComponent.setParentFadeable(this);
         _ringsComponent.initialize();
         addPropertySubOwner(_ringsComponent);
     }
@@ -676,6 +677,9 @@ void RenderableGlobe::initializeGL() {
     if (!_labelsDictionary.isEmpty()) {
         _globeLabelsComponent.initialize(_labelsDictionary, this);
         addPropertySubOwner(_globeLabelsComponent);
+
+        // Fading of the labels should also depend on the fading of the globe
+        _globeLabelsComponent.setParentFadeable(this);
     }
 
     _layerManager.update();
@@ -749,7 +753,9 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
                 // Render from light source point of view
                 renderChunks(lightRenderData, rendererTask, {}, true);
-                if (_hasRings && _ringsComponent.isEnabled()) {
+                if (_hasRings && _ringsComponent.isEnabled() &&
+                    _ringsComponent.isVisible())
+                {
                     _ringsComponent.draw(
                         lightRenderData,
                         RingsComponent::RenderPass::GeometryOnly
@@ -762,7 +768,9 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
                 // Render again from original point of view
                 renderChunks(data, rendererTask, _shadowComponent.shadowMapData());
-                if (_hasRings && _ringsComponent.isEnabled()) {
+                if (_hasRings && _ringsComponent.isEnabled() &&
+                    _ringsComponent.isVisible())
+                {
                     _ringsComponent.draw(
                         data,
                         RingsComponent::RenderPass::GeometryAndShading,
@@ -772,7 +780,9 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
             }
             else {
                 renderChunks(data, rendererTask);
-                if (_hasRings && _ringsComponent.isEnabled()) {
+                if (_hasRings && _ringsComponent.isEnabled() &&
+                    _ringsComponent.isVisible())
+                {
                     _ringsComponent.draw(
                         data,
                         RingsComponent::RenderPass::GeometryAndShading

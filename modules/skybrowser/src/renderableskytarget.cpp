@@ -146,7 +146,7 @@ void RenderableSkyTarget::initializeGL() {
 
     _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
-        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [&ProgramName]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_SKYBROWSER}/shaders/target_vs.glsl"),

@@ -58,7 +58,7 @@ local xy_u = {
   GUI = {
     Name = "Ganymede XY Plane U",
     Path = "/Solar System/Missions/Juice/Plane",
-    Description = [[A cut plane in Ganymede's XY plane showing the strength of the 
+    Description = [[A cut plane in Ganymede's XY plane showing the strength of the
       magnetic field]]
   }
 }
@@ -193,7 +193,7 @@ local xz_u = {
   GUI = {
     Name = "Ganymede XZ Plane U",
     Path = "/Solar System/Missions/Juice/Plane",
-    Description = [[A cut plane in Ganymede's XZ plane showing the strength of the 
+    Description = [[A cut plane in Ganymede's XZ plane showing the strength of the
       magnetic field]]
   }
 }

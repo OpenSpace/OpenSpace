@@ -35,7 +35,6 @@ namespace openspace::globebrowsing {
 struct LayerRenderSettings : public properties::PropertyOwner {
     LayerRenderSettings();
 
-    properties::FloatProperty opacity;
     properties::FloatProperty gamma;
     properties::FloatProperty multiplier;
     properties::FloatProperty offset;

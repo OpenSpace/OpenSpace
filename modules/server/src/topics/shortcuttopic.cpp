@@ -59,7 +59,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
             { "identifier", action.identifier },
             { "name", action.name },
             { "script", action.command },
-            { "synchronization", static_cast<bool>(action.synchronization) },
+            { "synchronization", static_cast<bool>(!action.isLocal) },
             { "documentation", action.documentation },
             { "guiPath", action.guiPath },
         };

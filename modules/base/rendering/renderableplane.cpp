@@ -113,7 +113,7 @@ documentation::Documentation RenderablePlane::Documentation() {
 }
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+    : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _billboard(BillboardInfo, false)
     , _mirrorBackside(MirrorBacksideInfo, false)
@@ -122,8 +122,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 {
     Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _size = p.size;
     _billboard = p.billboard.value_or(_billboard);
@@ -133,7 +132,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         { static_cast<int>(BlendMode::Normal), "Normal" },
         { static_cast<int>(BlendMode::Additive), "Additive"}
     });
-    _blendMode.onChange([&]() {
+    _blendMode.onChange([this]() {
         switch (_blendMode) {
             case static_cast<int>(BlendMode::Normal):
                 setRenderBinFromOpacity();
@@ -146,7 +145,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         }
     });
 
-    _opacity.onChange([&]() {
+    _opacity.onChange([this]() {
         if (_blendMode == static_cast<int>(BlendMode::Normal)) {
             setRenderBinFromOpacity();
         }

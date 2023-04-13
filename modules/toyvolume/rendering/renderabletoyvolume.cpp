@@ -147,7 +147,7 @@ void RenderableToyVolume::initializeGL() {
 
     global::raycasterManager->attachRaycaster(*_raycaster.get());
 
-    std::function<void(bool)> onChange = [&](bool enabled) {
+    std::function<void(bool)> onChange = [this](bool enabled) {
         if (enabled) {
             global::raycasterManager->attachRaycaster(*_raycaster.get());
         }
@@ -164,7 +164,7 @@ void RenderableToyVolume::initializeGL() {
     addProperty(_translation);
     addProperty(_rotation);
     addProperty(_color);
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
     addProperty(_downScaleVolumeRendering);
 }
 
