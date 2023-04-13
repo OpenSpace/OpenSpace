@@ -6,7 +6,7 @@ local lat = 38.6248806710205
 local lon = -90.18493947620934
 local altitude = 0
 local scale = 0.5
-local rotationVector = {0.0, 157.0, 0.0}
+local rotationVector = { 0.0, 157.0, 0.0 }
 
 local modelFolder = helper.createModelFolder(name, "scale_model_gateway_arch")
 local model = helper.createModel(identifier, lat, lon, altitude, scale, "Meter",

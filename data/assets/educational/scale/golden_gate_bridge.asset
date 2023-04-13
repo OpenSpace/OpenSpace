@@ -6,11 +6,11 @@ local lat = 37.82011483830592
 local lon = -122.47789030197121
 local altitude = 0
 local scale = 0.5
-local rotationVector = {0.0, 157.0, 0.0}
+local rotationVector = { 0.0, 157.0, 0.0 }
 
 local modelFolder = helper.createModelFolder(name, "scale_model_golden_gate_bridge")
-local model = helper.createModel(identifier, lat, lon, altitude, scale, "Millimeter", 
-  rotationVector, name, modelFolder, "golden_gate.fbx")
+local model = helper.createModel(identifier, lat, lon, altitude, scale, "Millimeter",
+  rotationVector, name, modelFolder, "golden_gate.osmodel")
 
 local updatePositionAction = helper.createDropAction(identifier, name, 'Scale Objects')
 local resetPositionAction = helper.createResetAction(identifier, name, lat, lon, 'Scale Objects')

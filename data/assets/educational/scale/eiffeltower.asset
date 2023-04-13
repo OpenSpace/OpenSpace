@@ -4,7 +4,7 @@ local sunAsset = asset.require('scene/solarsystem/sun/sun')
 local modelFolder = asset.syncedResource({
   Name = "Eiffel Tower Model",
   Type = "HttpSynchronization",
-  Identifier = "eiffel_tower_model",
+  Identifier = "scale_model_eiffel_tower",
   Version = 1
 })
 

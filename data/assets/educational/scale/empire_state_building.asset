@@ -9,7 +9,7 @@ local scale = 0.5
 local rotationVector = { 0.0, 60.0, 0.0 }
 
 local modelFolder = helper.createModelFolder(name, "scale_model_empire_state")
-local model = helper.createModel(identifier, lat, lon, altitude, scale, "Meter"
+local model = helper.createModel(identifier, lat, lon, altitude, scale, "Meter",
   rotationVector, name, modelFolder, "Empire_State_fbx.osmodel")
 
 local updatePositionAction = helper.createDropAction(identifier, name, 'Scale Objects')

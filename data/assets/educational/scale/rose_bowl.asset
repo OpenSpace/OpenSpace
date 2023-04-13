@@ -6,7 +6,7 @@ local lat = 34.161318
 local lon = -118.167623
 local altitude = 0
 local scale = 1
-local rotationVector = {0.0, 98.68, 0.0}
+local rotationVector = { 0.0, 98.68, 0.0 }
 
 local modelFolder = helper.createModelFolder(name, "scale_model_rose_bowl")
 local model = helper.createModel(identifier, lat, lon, altitude, scale, "Meter", 

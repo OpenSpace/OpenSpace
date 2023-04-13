@@ -6,7 +6,7 @@ local lat = 34.201639
 local lon = -118.171319
 local altitude = 0.78
 local scale = 1
-local rotationVector = {0.0, 90.0, 0.0}
+local rotationVector = { 0.0, 90.0, 0.0 }
 
 local modelFolder = helper.createModelFolder(name, "scale_model_scientist")
 local model = helper.createModel(identifier, lat, lon, altitude, scale, "Meter", 
