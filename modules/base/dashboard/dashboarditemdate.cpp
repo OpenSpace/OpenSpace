@@ -40,7 +40,8 @@ namespace {
         "FormatString",
         "Format String",
         "The format text describing how this dashboard item renders its text. This text "
-        "must contain exactly one {} which is a placeholder that will contain the date"
+        "must contain exactly one {} which is a placeholder that will contain the date",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeFormatInfo = {

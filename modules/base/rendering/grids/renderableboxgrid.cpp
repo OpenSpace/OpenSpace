@@ -51,7 +51,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid Size",
-        "This value species the size of each dimensions of the box"
+        "This value species the size of each dimensions of the box",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {

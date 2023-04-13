@@ -92,7 +92,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to the renderable"
+        "This determines the blending mode that is applied to the renderable",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -122,7 +123,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
         "Min and Max Size",
-        "The minimum and maximum size (in pixels) of the label"
+        "The minimum and maximum size (in pixels) of the label",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
@@ -150,20 +152,23 @@ namespace {
         "The first value is the distance before the closest distance and the second "
         "the one after the furthest distance. For example, with the unit Parsec (pc), "
         "a value of {1, 2} will make the label being fully faded out 1 Parsec before "
-        "the closest distance and 2 Parsec away from the furthest distance"
+        "the closest distance and 2 Parsec away from the furthest distance",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeDistancesInfo = {
         "FadeDistances",
         "Fade Distances",
         "The distance range in which the labels should be fully opaque, specified in "
-        "the chosen unit. The distance from the position of the label to the camera"
+        "the chosen unit. The distance from the position of the label to the camera",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeUnitOptionInfo = {
         "FadeUnit",
         "Fade Distance Unit",
-        "Distance unit for fade-in/-out distance calculations. Defaults to \"au\""
+        "Distance unit for fade-in/-out distance calculations. Defaults to \"au\"",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableLabel)]] Parameters {

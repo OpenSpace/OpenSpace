@@ -112,7 +112,8 @@ namespace {
         "Rendering Mode",
         "Determines how the trail should be rendered to the screen. If 'Lines' is "
         "selected, only the line part is visible, if 'Points' is selected, only the "
-        "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts"
+        "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {

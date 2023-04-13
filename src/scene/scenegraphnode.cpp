@@ -532,7 +532,9 @@ SceneGraphNode::SceneGraphNode()
 {
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
+    _screenVisibility.setReadOnly(true);
     addProperty(_screenVisibility);
+    _distFromCamToNode.setReadOnly(true);
     addProperty(_distFromCamToNode);
     addProperty(_screenSizeRadius);
     addProperty(_visibilityDistance);

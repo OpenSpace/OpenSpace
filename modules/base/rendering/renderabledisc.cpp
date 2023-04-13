@@ -61,7 +61,8 @@ namespace {
         "Width",
         "This value is used to set the width of the disc. The actual width is set "
         "based on the given size and this value should be set between 0 and 1. A value "
-        "of 1 results in a full circle and 0.5 a disc with an inner radius of 0.5*size"
+        "of 1 results in a full circle and 0.5 a disc with an inner radius of 0.5*size",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableDisc)]] Parameters {

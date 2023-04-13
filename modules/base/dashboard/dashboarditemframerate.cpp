@@ -55,7 +55,8 @@ namespace {
         "ClearCache",
         "Clear Cache",
         "Clears the cache of this DashboardItemFramerate item. If the selected option "
-        "does not use any caching, this trigger does not do anything"
+        "does not use any caching, this trigger does not do anything",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     [[ nodiscard ]] char* formatDt(std::vector<char>& buffer) {

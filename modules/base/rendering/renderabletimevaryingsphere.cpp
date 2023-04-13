@@ -59,7 +59,8 @@ namespace {
         "Texture Source",
         "This value specifies a directory of images that are loaded from disk and is "
         "used as a texture that is applied to this sphere. The images are expected to "
-        "be an equirectangular projection"
+        "be an equirectangular projection",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
@@ -72,7 +73,8 @@ namespace {
         "Orientation",
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
-        "outside of the sphere, or both"
+        "outside of the sphere, or both",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
@@ -84,21 +86,24 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
-        "This value specifies the radius of the sphere in meters"
+        "This value specifies the radius of the sphere in meters",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
         "FadeOutThreshold",
         "Fade-Out Threshold",
         "This value determines percentage of the sphere is visible before starting "
-        "fading-out it"
+        "fading-out it",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInThresholdInfo = {
         "FadeInThreshold",
         "Fade-In Threshold",
         "Distance from center of MilkyWay from where the astronomical object starts to "
-        "fade in"
+        "fade in",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {

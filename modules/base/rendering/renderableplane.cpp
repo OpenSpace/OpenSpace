@@ -53,7 +53,8 @@ namespace {
         "Billboard mode",
         "This value specifies whether the plane is a billboard, which means that it is "
         "always facing the camera. If this is false, it can be oriented using other "
-        "transformations"
+        "transformations",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorBacksideInfo = {
@@ -67,13 +68,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
-        "This value specifies the size of the plane in meters"
+        "This value specifies the size of the plane in meters",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to this plane"
+        "This determines the blending mode that is applied to this plane",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {

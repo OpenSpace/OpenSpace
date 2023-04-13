@@ -102,7 +102,8 @@ namespace {
         "The number of samples along the orbit. This determines the resolution of the "
         "trail; the tradeoff being that a higher resolution is able to resolve more "
         "detail, but will take more resources while rendering, too. The higher, the "
-        "smoother the trail, but also more memory will be used"
+        "smoother the trail, but also more memory will be used",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {

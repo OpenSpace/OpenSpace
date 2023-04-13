@@ -70,7 +70,8 @@ namespace {
         "Orientation",
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
-        "outside of the sphere, or both"
+        "outside of the sphere, or both",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
@@ -82,7 +83,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
-        "This value specifies the radius of the sphere in meters"
+        "This value specifies the radius of the sphere in meters",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
@@ -90,7 +92,8 @@ namespace {
         "Fade-Out Threshold",
         "This value determines percentage of the sphere that is visible before starting "
         "to fade it out. A negative or zero value means no fading out will happen. This "
-        "is also the default"
+        "is also the default",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInThresholdInfo = {
@@ -99,7 +102,8 @@ namespace {
         "This value determines the distance from center of MilkyWay from where the "
         "astronomical object starts to fade in, given as a percentage of the size of "
         "the object. A negative or zero value means no fading in will happen. This is "
-        "also the default"
+        "also the default",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {

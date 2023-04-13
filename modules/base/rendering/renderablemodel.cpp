@@ -138,20 +138,23 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
         "LightSources",
         "Light Sources",
-        "A list of light sources that this model should accept light from"
+        "A list of light sources that this model should accept light from",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableDepthTestInfo = {
         "EnableDepthTest",
         "Enable Depth Test",
-        "Enable Depth Testing for the Model"
+        "Enable Depth Testing for the Model",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending Options",
         "Changes the blending function used to calculate the colors of the model with "
-        "respect to the opacity"
+        "respect to the opacity",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {

@@ -96,7 +96,8 @@ namespace {
         "Format String",
         "The format string that is used for formatting the distance string.  This format "
         "receives four parameters:  The name of the source, the name of the destination "
-        "the value of the distance and the unit of the distance"
+        "the value of the distance and the unit of the distance",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     std::vector<std::string> unitList() {

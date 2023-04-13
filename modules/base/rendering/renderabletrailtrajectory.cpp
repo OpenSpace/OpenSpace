@@ -48,14 +48,16 @@ namespace {
         "StartTime",
         "Start Time",
         "The start time for the range of this trajectory. The date must be in ISO 8601 "
-        "format: YYYY MM DD HH:mm:ss.xxx"
+        "format: YYYY MM DD HH:mm:ss.xxx",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndTimeInfo = {
         "EndTime",
         "End Time",
         "The end time for the range of this trajectory. The date must be in ISO 8601 "
-        "format: YYYY MM DD HH:mm:ss.xxx"
+        "format: YYYY MM DD HH:mm:ss.xxx",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SampleIntervalInfo = {
@@ -64,7 +66,8 @@ namespace {
         "The interval between samples of the trajectory. This value (together with "
         "'TimeStampSubsampleFactor') determines how far apart (in time) the samples are "
         "spaced along the trajectory. The time interval between 'StartTime' and "
-        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments"
+        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeSubSampleInfo = {
@@ -73,7 +76,8 @@ namespace {
         "The factor that is used to create subsamples along the trajectory. This value "
         "(together with 'SampleInterval') determines how far apart (in time) the samples "
         "are spaced along the trajectory. The time interval between 'StartTime' and "
-        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments"
+        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderFullPathInfo = {

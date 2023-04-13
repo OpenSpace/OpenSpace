@@ -81,14 +81,16 @@ namespace {
         "LabelFile",
         "Label File",
         "The path to the label file that contains information about the astronomical "
-        "objects being rendered"
+        "objects being rendered",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
         "TextMinMaxSize",
         "Text Min/Max Size",
         "The minimum and maximum size (in pixels) of the text for the labels for the "
-        "astronomical objects being rendered"
+        "astronomical objects being rendered",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -118,7 +120,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Debug option for rendering of billboards and texts"
+        "Debug option for rendering of billboards and texts",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {

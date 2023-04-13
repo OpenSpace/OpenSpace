@@ -53,53 +53,61 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Decides if the GUI for this module should be enabled"
+        "Decides if the GUI for this module should be enabled",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataFolderInfo = {
         "DataFolder",
         "Data Folder",
-        "The path to the folder containing the exoplanets data and lookup table"
+        "The path to the folder containing the exoplanets data and lookup table",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BvColorMapInfo = {
         "BvColormap",
         "B-V Colormap",
-        "The path to a cmap file that maps a B-V color index to an RGB color"
+        "The path to a cmap file that maps a B-V color index to an RGB color",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StarTextureInfo = {
         "StarTexture",
         "Star Texture",
-        "The path to a grayscale image that is used for the host star surfaces"
+        "The path to a grayscale image that is used for the host star surfaces",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StarGlareTextureInfo = {
         "StarGlareTexture",
         "Star Glare Texture",
         "The path to a grayscale image that is used for the glare effect of the "
-        "host stars"
+        "host stars",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NoDataTextureInfo = {
         "NoDataTexture",
         "No Data Star Texture",
         "A path to a texture that is used to represent that there is missing data about "
-        "the star. For example no color information"
+        "the star. For example no color information",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrbitDiscTextureInfo = {
         "OrbitDiscTexture",
         "Orbit Disc Texture",
         "A path to a 1-dimensional image used as a transfer function for the "
-        "exoplanets' orbit uncertainty disc"
+        "exoplanets' orbit uncertainty disc",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HabitableZoneTextureInfo = {
         "HabitableZoneTexture",
         "Habitable Zone Texture",
         "A path to a 1-dimensional image used as a transfer function for the "
-        "habitable zone disc"
+        "habitable zone disc",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowComparisonCircleInfo = {

@@ -52,7 +52,8 @@ namespace {
         "Clamp to Positive",
         "If this value is true, the velocity computation will never result in any "
         "negative values. This is useful for instantaneous events that only propagate "
-        "forwards. The default value is 'true'"
+        "forwards. The default value is 'true'",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(TimeDependentScale)]] Parameters {

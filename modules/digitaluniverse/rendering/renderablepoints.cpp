@@ -57,14 +57,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
-        "The path to the texture that should be used as the point sprite"
+        "The path to the texture that should be used as the point sprite",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point"
+        "size of each point",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -76,7 +78,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
-        "The path to the color map file of the astronomical object"
+        "The path to the color map file of the astronomical object",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePoints)]] Parameters {

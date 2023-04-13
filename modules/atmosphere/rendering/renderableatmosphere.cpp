@@ -41,7 +41,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
         "AtmosphereHeight",
         "Atmosphere Height (KM)",
-        "The thickness of the atmosphere in km"
+        "The thickness of the atmosphere in km",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AverageGroundReflectanceInfo =
@@ -49,40 +50,46 @@ namespace {
         "AverageGroundReflectance",
         "Average Ground Reflectance (%)",
         "Average percentage of light reflected by the ground during the pre-calculation "
-        "phase"
+        "phase",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmissionInfo = {
         "GroundRadianceEmission",
         "Percentage of initial radiance emitted from ground",
-        "Multiplier of the ground radiance color during the rendering phase"
+        "Multiplier of the ground radiance color during the rendering phase",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo = {
         "RayleighHeightScale",
         "Rayleigh Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
-        "constant factor"
+        "constant factor",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RayleighScatteringCoeffInfo =
     {
         "RayleighScatteringCoeff",
         "Rayleigh Scattering Coeff",
-        "Rayleigh sea-level scattering coefficients in meters"
+        "Rayleigh sea-level scattering coefficients in meters",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OzoneLayerInfo = {
         "Ozone",
         "Ozone Layer Enabled",
-        "Enables/Disable Ozone Layer during pre-calculation phase"
+        "Enables/Disable Ozone Layer during pre-calculation phase",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OzoneHeightScaleInfo = {
         "OzoneLayerHeightScale",
         "Ozone Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
-        "constant factor"
+        "constant factor",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffInfo = {

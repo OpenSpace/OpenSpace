@@ -87,13 +87,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to this plane"
+        "This determines the blending mode that is applied to this plane",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TexturePathInfo = {
         "TexturePath",
         "Texture Path",
-        "This value specifies the path for the textures in disk"
+        "This value specifies the path for the textures in disk",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LuminosityInfo = {
@@ -111,14 +113,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Debug option for rendering of billboards and texts"
+        "Debug option for rendering of billboards and texts",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
-        "our galaxy from which the astronomical object will start and end fading-in"
+        "our galaxy from which the astronomical object will start and end fading-in",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
@@ -130,7 +134,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PlaneMinSizeInfo = {
         "PlaneMinSize",
         "Plane Min Size in Pixels",
-        "The min size (in pixels) for the plane representing the astronomical object"
+        "The min size (in pixels) for the plane representing the astronomical object",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlanesCloud)]] Parameters {
@@ -196,7 +201,7 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
 
 RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 300000.f)
+    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1000.f)
     , _drawElements(DrawElementsInfo, true)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _fadeInDistances(
