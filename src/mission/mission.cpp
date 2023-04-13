@@ -158,18 +158,18 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     }
 
     _milestones.reserve(p.milestones->size());
-    for (int i = 0; i < p.milestones->size(); i++) {
-        std::string name = p.milestones.value()[i].name;
-        Time newTime = Time(p.milestones.value()[i].date);
+    for (const Parameters::Milestone& milestone : *p.milestones) {
+        std::string name = milestone.name;
+        Time newTime = Time(milestone.date);
         Milestone newDate = { name, newTime };
-        if (p.milestones.value()[i].description.has_value()) {
-            newDate.description = p.milestones.value()[i].description.value();
+        if (milestone.description.has_value()) {
+            newDate.description = milestone.description.value();
         }
-        if (p.milestones.value()[i].image.has_value()) {
-            newDate.image = p.milestones.value()[i].image.value();
+        if (milestone.image.has_value()) {
+            newDate.image = milestone.image.value();
         }
-        if (p.milestones.value()[i].link.has_value()) {
-            newDate.link = p.milestones.value()[i].link.value();
+        if (milestone.link.has_value()) {
+            newDate.link = milestone.link.value();
         }
         _milestones.emplace_back(newDate);
     }
