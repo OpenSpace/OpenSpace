@@ -144,6 +144,21 @@ namespace {
         "the read geometry. Note that this value does not incude the offset"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo PointSizeScaleInfo = {
+        "PointSizeScale",
+        "Point Size Scale",
+        "An extra scale value that can be used to increase or decrease the scale of any "
+        "rendered points in the component, even if a value is set from the GeoJson file"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LineWidthScaleInfo = {
+        "LineWidthScale",
+        "Line Width Scale",
+        "An extra scale value that can be used to increase or decrease the width of any "
+        "rendered lines in the component, even if a value is set from the GeoJson file. "
+        "Note that there is a max limit for how wide lines can be."
+    };
+
     struct [[codegen::Dictionary(GeoJsonComponent)]] Parameters {
         // The unique identifier for this layer. May not contain '.' or spaces
         std::string identifier;
@@ -174,6 +189,12 @@ namespace {
 
         // [[codegen::verbatim(HeightOffsetInfo.description)]]
         std::optional<float> heightOffset;
+
+        // [[codegen::verbatim(PointSizeScaleInfo.description)]]
+        std::optional<float> pointSizeScale;
+
+        // [[codegen::verbatim(LineWidthScaleInfo.description)]]
+        std::optional<float> lineWidthScale;
 
         // [[codegen::verbatim(CoordinateOffsetInfo.description)]]
         std::optional<glm::vec2> coordinateOffset;
@@ -258,6 +279,8 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         glm::vec2(-90.0),
         glm::vec2(90.f)
     )
+    , _pointSizeScale(PointSizeScaleInfo, 1.f, 0.01f, 100.f)
+    , _lineWidthScale(LineWidthScaleInfo, 1.f, 0.01f, 10.f)
     , _drawWireframe(DrawWireframeInfo, false)
     , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
     , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
@@ -305,6 +328,12 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     _latLongOffset = p.coordinateOffset.value_or(_latLongOffset);
     _latLongOffset.onChange([this]() { _dataIsDirty = true; });
     addProperty(_latLongOffset);
+
+    _pointSizeScale = p.pointSizeScale.value_or(_pointSizeScale);
+    addProperty(_pointSizeScale);
+
+    _lineWidthScale = p.lineWidthScale.value_or(_lineWidthScale);
+    addProperty(_lineWidthScale);
 
     if (p.defaultProperties.has_value()) {
         _defaultProperties.createFromDictionary(*p.defaultProperties);
@@ -468,6 +497,14 @@ void GeoJsonComponent::render(const RenderData& data) {
     PointRenderMode pointRenderMode =
         static_cast<PointRenderMode>(_pointRenderModeOption.value());
 
+    // Compose extra data from relevant properties to pass to the individual features
+    const GlobeGeometryFeature::ExtraRenderData extraRenderdata = {
+        _pointSizeScale,
+        _lineWidthScale,
+        pointRenderMode,
+        _lightsourceRenderData
+    };
+
     // Do two render passes, to properly render opacity of overlaying objects
     for (int renderPass = 0; renderPass < 2; ++renderPass) {
         for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
@@ -476,8 +513,7 @@ void GeoJsonComponent::render(const RenderData& data) {
                     data,
                     renderPass,
                     opacity() * _features[i]->opacity(),
-                    pointRenderMode,
-                    _lightsourceRenderData
+                    extraRenderdata
                 );
             }
         }

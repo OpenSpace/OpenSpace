@@ -121,6 +121,9 @@ private:
     properties::FloatProperty _heightOffset;
     properties::Vec2Property _latLongOffset;
 
+    properties::FloatProperty _pointSizeScale;
+    properties::FloatProperty _lineWidthScale;
+
     GeoJsonProperties _defaultProperties;
 
     properties::OptionProperty _pointRenderModeOption;

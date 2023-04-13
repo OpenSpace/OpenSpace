@@ -105,6 +105,14 @@ public:
         std::vector<float> heights;
     };
 
+    // Some extra data that we need for doing the rendering
+    struct ExtraRenderData {
+        float pointSizeScale;
+        float lineWidthScale;
+        PointRenderMode& pointRenderMode;
+        rendering::helper::LightSourceRenderData& lightSourceData;
+    };
+
     std::string key() const;
 
     void setOffsets(const glm::vec3& offsets);
@@ -123,8 +131,7 @@ public:
 
     // 2 pass rendering to get correct culling for polygons
     void render(const RenderData& renderData, int pass, float mainOpacity,
-        const PointRenderMode& pointRenderMode,
-        const rendering::helper::LightSourceRenderData& lightSourceData);
+        const ExtraRenderData& extraRenderData);
 
     bool shouldUpdateDueToHeightMapChange() const;
 
@@ -134,7 +141,7 @@ public:
 
 private:
     void renderPoints(const RenderFeature& feature, const RenderData& renderData,
-        const PointRenderMode& renderMode) const;
+        const PointRenderMode& renderMode, float sizeScale) const;
 
     void renderLines(const RenderFeature& feature) const;
 

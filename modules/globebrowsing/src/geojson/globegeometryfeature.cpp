@@ -273,9 +273,8 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
 }
 
 void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
-                                 float mainOpacity,
-                                 const PointRenderMode& pointRenderMode,
-                         const rendering::helper::LightSourceRenderData& lightSourceData)
+                                  float mainOpacity,
+                                  const ExtraRenderData& extraRenderData)
 {
     ghoul_assert(pass >= 0 && pass < 2, "Render pass variable out of accepted range");
 
@@ -293,7 +292,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
     const glm::dmat4 projectionTransform = renderData.camera.projectionMatrix();
 
 #ifndef __APPLE__
-    glLineWidth(_properties.lineWidth());
+    glLineWidth(_properties.lineWidth() * extraRenderData.lineWidthScale);
 #else
     glLineWidth(1.f);
 #endif
@@ -322,13 +321,12 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
         shader->setUniform("useHeightMapData", useHeightMap());
 
         if (shader == _linesAndPolygonsProgram) {
+            const rendering::helper::LightSourceRenderData& ls =
+                extraRenderData.lightSourceData;
             shader->setUniform("normalTransform", normalTransform);
-            shader->setUniform("nLightSources", lightSourceData.nLightSources);
-            shader->setUniform("lightIntensities", lightSourceData.intensitiesBuffer);
-            shader->setUniform(
-                "lightDirectionsViewSpace",
-                lightSourceData.directionsViewSpaceBuffer
-            );
+            shader->setUniform("nLightSources", ls.nLightSources);
+            shader->setUniform("lightIntensities", ls.intensitiesBuffer);
+            shader->setUniform("lightDirectionsViewSpace", ls.directionsViewSpaceBuffer);
         }
 
         glBindVertexArray(r.vaoId);
@@ -341,10 +339,12 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
                 );
                 renderLines(r);
                 break;
-            case RenderType::Points:
+            case RenderType::Points: {
                 shader->setUniform("opacity", opacity);
-                renderPoints(r, renderData, pointRenderMode);
+                float scale = extraRenderData.pointSizeScale;
+                renderPoints(r, renderData, extraRenderData.pointRenderMode, scale);
                 break;
+            }
             case RenderType::Polygon: {
                 shader->setUniform("opacity", fillOpacity);
                 renderPolygons(r, shouldRenderTwice, pass);
@@ -366,14 +366,15 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
 
 void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
                                         const RenderData& renderData,
-                                        const PointRenderMode& renderMode) const
+                                        const PointRenderMode& renderMode,
+                                        float sizeScale) const
 {
     ghoul_assert(feature.type == RenderType::Points, "Trying to render faulty geometry");
     _pointsProgram->setUniform("color", _properties.color());
-    _pointsProgram->setUniform(
-        "pointSize",
-        0.001f * _properties.pointSize() * static_cast<float>(_globe.boundingSphere())
-    );
+
+    float bs = static_cast<float>(_globe.boundingSphere());
+    float size = 0.001f * sizeScale * _properties.pointSize() * bs;
+    _pointsProgram->setUniform("pointSize", size);
 
     _pointsProgram->setUniform("renderMode", static_cast<int>(renderMode));
 
