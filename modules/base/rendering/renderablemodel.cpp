@@ -786,17 +786,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         if (hasOverrideRenderBin()) {
             // If override render bin is set then use the opacity values as normal
-            _program->setUniform(
-                _uniformCache.opacity,
-                opacity()
-            );
+            _program->setUniform(_uniformCache.opacity, opacity());
         }
         else {
-            // Otherwise reset
-            _program->setUniform(
-                _uniformCache.opacity,
-                1.f
-            );
+            // Otherwise reset to 1
+            _program->setUniform(_uniformCache.opacity, 1.f);
         }
 
         _geometry->render(*_program);
@@ -851,10 +845,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         );
 
         // Make sure opacity in first pass is always 1
-        _program->setUniform(
-            _uniformCache.opacity,
-            1.f
-        );
+        _program->setUniform(_uniformCache.opacity, 1.f);
 
         // Render Pass 1
         // Render all parts of the model into the new framebuffer without opacity
