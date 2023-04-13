@@ -295,7 +295,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     using namespace geos::geom;
 
     GeometryFactory::Ptr geometryFactory = GeometryFactory::create();
-    MultiPoint* points = geometryFactory->createMultiPoint(pointCoords);
+    std::unique_ptr<MultiPoint> points = geometryFactory->createMultiPoint(pointCoords);
 
     // Create triangulation of points
     geos::triangulate::DelaunayTriangulationBuilder builder;

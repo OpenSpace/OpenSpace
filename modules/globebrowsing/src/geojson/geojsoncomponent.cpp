@@ -625,7 +625,7 @@ void GeoJsonComponent::addMetaPropertiesToFeature(SubFeatureProps& feature, int 
                                                   const geos::geom::Geometry* geometry)
 {
     std::unique_ptr<geos::geom::Point> centroid = geometry->getCentroid();
-    geos::geom::Coordinate centroidCoord = *centroid->getCoordinate();
+    geos::geom::CoordinateXY centroidCoord = *centroid->getCoordinate();
     glm::vec2 centroidLatLong = glm::vec2(centroidCoord.y, centroidCoord.x);
     feature.centroidLatLong = centroidLatLong;
 
