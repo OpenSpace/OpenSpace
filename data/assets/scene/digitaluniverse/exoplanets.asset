@@ -26,7 +26,6 @@ local object = {
     },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 1.0,
-    ScaleFactor = 10.0,
     Texture = textures .. "target-blue.png",
     File = speck .. "expl.speck",
     Unit = "pc",
