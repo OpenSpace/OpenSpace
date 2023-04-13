@@ -35,7 +35,9 @@ local TransformGONG = {
     }
   },
   GUI = {
-    Name = "Transform GONG fieldlines (w Rotation Offset)"
+    Name = "Transform GONG fieldlines (w Rotation Offset)",
+    Path = "/Solar System/Sun",
+    Hidden = true
   }
 }
 

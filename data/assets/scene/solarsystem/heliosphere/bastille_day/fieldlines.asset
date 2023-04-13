@@ -28,7 +28,6 @@ local fieldlines = {
   Renderable = {
     Type = "RenderableFieldlinesSequenceNew",
     SourceFolder = fieldlinesDirectory,
-    AlphaBlendingEnabled = false,
     LoadingType = "DynamicLoading",
     InputFileType = "Osfls",
     LineWidth = 1,

@@ -308,7 +308,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     )
     , _colorABlendEnabled(ColorUseABlendingInfo, true)
 
-    , _domainEnabled(DomainEnabledInfo, true)
+    , _domainEnabled(DomainEnabledInfo, false)
     , _domainGroup({ "Domain" })
     , _domainX(DomainXInfo)
     , _domainY(DomainYInfo)
@@ -319,7 +319,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     , _flowGroup({ "Flow" })
     , _flowColor(
         FlowColorInfo,
-        glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
+        glm::vec4(0.96f, 0.88f, 0.8f, 1.0f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
@@ -379,7 +379,6 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     }
     else {
         _model = fls::Model::Invalid;
-        _domainEnabled = false;
     }
     //maybe this should be called even if model is invalid
     setModelDependentConstants();

@@ -414,8 +414,10 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
 
 // The todo list: //
 //
+//     done
 // 1. When initializing add the already cached files to the _availableData list as downloaded
 //
+//     to be desided if we should implement this or not. TBD
 // 2. OnChange functions for if a different dataID is selected - reinitialize things
 //     note: can there be different id for other models other than wsa. If that is the
 //     case, it wouldnt make sense to change id, and therefor dataset, for the same
@@ -429,8 +431,10 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
 //
 // 6. ultimet test: test with different data
 //
+//     done
 // 7. optamize the closestFileToNow function
 //
+//     done
 // 8. tracy
 //
 // 9. maybe make a copy of the once that gets returned with downloadedFiles() so that

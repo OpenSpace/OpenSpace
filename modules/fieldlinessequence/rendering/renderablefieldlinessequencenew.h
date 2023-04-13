@@ -247,11 +247,6 @@ private:
     // Line width for the line rendering part
     properties::FloatProperty _lineWidth;
 
-    ///////////////other.//////////////////////////
-
-    // Paths to color tables. One for each 'extraQuantity'
-    //std::string _colorTablePath;
-
     // At least one file in data set needs to be loaded to read extra variable
     bool _firstLoad = true;
 
