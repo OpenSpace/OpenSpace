@@ -144,6 +144,9 @@ namespace {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
 
+        // This value determines the opacity of the labels
+        std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
+
         // [[codegen::verbatim(FontSizeInfo.description)]]
         std::optional<float> fontSize;
 
@@ -219,6 +222,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     addProperty(_enabled);
     addProperty(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
+
     addProperty(Fadeable::_opacity);
     addProperty(Fadeable::_fade);
 
@@ -256,6 +260,8 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     if (!loadSuccess) {
         return;
     }
+
+    Fadeable::_opacity = p.opacity.value_or(Fadeable::_opacity);
 
     _enabled = p.enabled.value_or(_enabled);
     _fontSize = p.fontSize.value_or(_fontSize);
