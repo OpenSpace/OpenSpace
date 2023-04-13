@@ -221,9 +221,7 @@ local Mission = {
         {
           Name = "Orbital B",
           Description = "At the end of Detailed Survey, the spacecraft entered a close orbit – with a radius of 0.6 miles (1 km) – around Bennu to begin Orbital B Phase. This phase broke the record OSIRIS-REx set in Orbital A for the closest that a spacecraft has ever orbited around a small body. The primary science activities for this phase were the global mapping of Bennu, the development of shape modeling based on OLA data, and the execution of a Radio Science experiment. These data were used to evaluate potential sample collection sites for three key elements: safety, sampleability and science value.  Orbital B concluded with the team narrowing in on a primary and a back-up sample site.",
-          Media = {
-            Image = "https://www.asteroidmission.org/wp-content/uploads/2018/05/Orbital-B-for-Web.jpg"
-          },
+          Image = "https://www.asteroidmission.org/wp-content/uploads/2018/05/Orbital-B-for-Web.jpg",
           Phases = {
             {
               Name = "Candidate Sample Site Phase 1",
@@ -303,7 +301,6 @@ local Mission = {
   -- End of [1]
   }
 }
-
 
 asset.onInitialize(function()
   openspace.loadMission(Mission)

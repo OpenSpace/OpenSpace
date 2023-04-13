@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +26,12 @@
 
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
+#include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/engine/globals.h>
 #include <openspace/mission/missionmanager.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
-#include <modules/spacecraftinstruments/util/imagesequencer.h>
-#include <openspace/util/spicemanager.h>
 
 using nlohmann::json;
 
@@ -49,25 +49,23 @@ nlohmann::json MissionTopic::missionJson() const {
     const std::vector<double>& captureTimes = sequencer.captureProgression();
     std::vector<std::string> captureTimesString(captureTimes.size());
 
-    for (int i = 0; i < captureTimes.size(); i++) {
-        const std::string& str = SpiceManager::ref().dateFromEphemerisTime(
+    for (size_t i = 0; i < captureTimes.size(); i++) {
+        std::string str = SpiceManager::ref().dateFromEphemerisTime(
             sequencer.nextCaptureTime(captureTimes[i]),
             "YYYY-MM-DDTHR:MN:SC"
         );
-        captureTimesString[i] = str;
+        captureTimesString[i] = std::move(str);
     }
     json json;
     for (auto const& [name, mission] : missions) {
         nlohmann::json missionJson = createPhaseJson(mission);
         missionJson["capturetimes"] = captureTimesString;
-        json.push_back(missionJson);
+        json.push_back(std::move(missionJson));
     }
-
     return json;
 }
 
 nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
-
     json phases = json::array();
     for (const MissionPhase& missionPhase : phase.phases()) {
         json subphaseJson = createPhaseJson(missionPhase);
@@ -78,20 +76,20 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
     const std::vector<Milestone>& dates = phase.milestones();
     for (const Milestone& date : dates) {
         json jsonDate = {
-            { "date", std::string(date.date.ISO8601())},
+            { "date", std::string(date.date.ISO8601()) },
             { "name", date.name }
         };
         
         if (date.description.has_value()) {
-            jsonDate["description"] = date.description.value();
+            jsonDate["description"] = *date.description;;
         }
         if (date.image.has_value()) {
-            jsonDate["image"] = date.image.value();
+            jsonDate["image"] = *date.image;
         }
         if (date.link.has_value()) {
-            jsonDate["link"] = date.link.value();
+            jsonDate["link"] = *date.link;
         }
-        milestones.push_back(jsonDate);
+        milestones.push_back(std::move(jsonDate));
     }
 
     std::string startTimeString = std::string(Time(phase.timeRange().start).ISO8601());
@@ -100,15 +98,15 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
     nlohmann::json phaseJson = {
         { "name", phase.name() },
         { "description", phase.description() },
-        { "actions" , phase.actions() },
+        { "actions", phase.actions() },
         { "timerange", {
-            { "start" ,startTimeString },
-            { "end" ,endTimeString }
+            { "start", startTimeString },
+            { "end", endTimeString }
         }},
         { "phases", phases },
         { "image", phase.image() },
         { "link", phase.link() },
-        { "milestones" , milestones }
+        { "milestones", milestones }
     };
 
     return phaseJson;

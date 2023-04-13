@@ -33,7 +33,7 @@ local Mission = {
           Name = "Voyager 2 Jupiter Encounter",
           TimeRange = { Start = "1979 JUL 09 00:00:00", End = "1979 JUL 09 00:00:00" }
         },
-		{
+		    {
           Name = "Voyager 1 Saturn Encounter",
           TimeRange = { Start = "1980 NOV 09 00:00:00", End = "1980 NOV 09 00:00:00" }
         },

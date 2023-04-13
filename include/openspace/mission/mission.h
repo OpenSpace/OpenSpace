@@ -93,6 +93,7 @@ public:
     /**
      * Returns the associated image of this MissionPhase. If no image is associated, this
      * string will be empty.
+     *
      * \return The associated image of the MissionPhase or the empty string
      */
     const std::string& image() const;
@@ -100,6 +101,7 @@ public:
     /**
      * Returns the associated link of this MissionPhase. If no link is associated, this
      * string will be empty.
+     * 
      * \return The associated link of the MissionPhase or the empty string
      */
     const std::string& link() const;
@@ -125,7 +127,7 @@ public:
      *
      * \return All actions
      */
-    const std::vector<std::string> &actions() const;
+    const std::vector<std::string>& actions() const;
 
     using Trace = std::vector<std::reference_wrapper<const MissionPhase>>;
 

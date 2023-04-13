@@ -87,9 +87,6 @@ local aimAtBennu = {
   Identifier = "os.missions.osirisrex.aimAtBennu",
   Name = "Look at Bennu from OSIRIS-REx",
   Command = [[
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil);
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", 'OsirisRex');
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", 'Earth');
       openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAim", nil);
       openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", 'OsirisRex');
       openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", 'BennuBarycenter');
@@ -170,3 +167,4 @@ asset.meta = {
   URL = "http://openspaceproject.com",
   License = "MIT license"
 }
+

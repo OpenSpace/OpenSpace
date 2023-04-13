@@ -157,23 +157,21 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         _actions = p.actions.value_or(_actions);
     }
 
-    if (p.milestones.has_value()) {
-        _milestones.reserve(p.milestones->size());
-        for (int i = 0; i < p.milestones->size(); i++) {
-            std::string name = p.milestones.value()[i].name;
-            Time newTime = Time(p.milestones.value()[i].date);
-            Milestone newDate = { name, newTime };
-            if (p.milestones.value()[i].description.has_value()) {
-                newDate.description = p.milestones.value()[i].description.value();
-            }
-            if (p.milestones.value()[i].image.has_value()) {
-                newDate.image = p.milestones.value()[i].image.value();
-            }
-            if (p.milestones.value()[i].link.has_value()) {
-                newDate.link = p.milestones.value()[i].link.value();
-            }
-            _milestones.emplace_back(newDate);
+    _milestones.reserve(p.milestones->size());
+    for (int i = 0; i < p.milestones->size(); i++) {
+        std::string name = p.milestones.value()[i].name;
+        Time newTime = Time(p.milestones.value()[i].date);
+        Milestone newDate = { name, newTime };
+        if (p.milestones.value()[i].description.has_value()) {
+            newDate.description = p.milestones.value()[i].description.value();
         }
+        if (p.milestones.value()[i].image.has_value()) {
+            newDate.image = p.milestones.value()[i].image.value();
+        }
+        if (p.milestones.value()[i].link.has_value()) {
+            newDate.link = p.milestones.value()[i].link.value();
+        }
+        _milestones.emplace_back(newDate);
     }
 }
 

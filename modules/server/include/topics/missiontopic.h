@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___MISSION_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___MISSION_TOPIC___H__
-
-#include <openspace/mission/mission.h>
+#ifndef __OPENSPACE_MODULE_SERVER___MISSIONTOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___MISSIONTOPIC___H__
 
 #include <modules/server/include/topics/topic.h>
+
+#include <openspace/mission/mission.h>
 
 using nlohmann::json;
 
@@ -48,4 +48,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___MISSION_TOPIC___H__
+#endif // __OPENSPACE_MODULE_SERVER___MISSIONTOPIC___H__

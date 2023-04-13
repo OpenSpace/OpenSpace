@@ -101,7 +101,6 @@ const std::map<std::string, Mission>& MissionManager::missionMap() {
     return _missionMap;
 }
 
-
 scripting::LuaLibrary MissionManager::luaLibrary() {
     return {
         "",
@@ -115,6 +114,4 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
 }
 
 // Singleton
-
-
 }  // namespace openspace
