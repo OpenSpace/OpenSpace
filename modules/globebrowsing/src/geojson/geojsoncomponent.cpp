@@ -117,7 +117,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointRenderModeInfo = {
         "PointRenderMode",
-        "Point Render Mode",
+        "Points Aligned to",
         "Decides how the billboards for the points should be rendered in terms of up "
         "direction and whether the plane should face the camera. See details on the "
         "different options in the wiki"
@@ -166,6 +166,9 @@ namespace {
         // three values will then be treated as coordinates with only two values
         std::optional<bool> ignoreHeights;
 
+        // [[codegen::verbatim(PreventHeightUpdateInfo.description)]]
+        std::optional<bool> preventHeightUpdate;
+
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
 
@@ -176,10 +179,10 @@ namespace {
         std::optional<glm::vec2> coordinateOffset;
 
         enum class [[codegen::map(openspace::globebrowsing::GlobeGeometryFeature::PointRenderMode)]] PointRenderMode {
-            AlignToCameraDir,
-            AlignToCameraPos,
-            AlignToGlobeNormal,
-            AlignToGlobeSurface
+            AlignToCameraDir [[codegen::key("Camera Direction")]],
+            AlignToCameraPos [[codegen::key("Camera Position")]],
+            AlignToGlobeNormal [[codegen::key("Globe Normal")]],
+            AlignToGlobeSurface [[codegen::key("Globe Surface")]]
         };
         // [[codegen::verbatim(PointRenderModeInfo.description)]]
         std::optional<PointRenderMode> pointRenderMode;
@@ -324,7 +327,9 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     _defaultProperties.shouldTessellate.onChange([this]() { _dataIsDirty = true; });
     _defaultProperties.tessellationLevel.onChange([this]() { _dataIsDirty = true; });
-    _defaultProperties.tessellationMaxDistance.onChange([this]() { _dataIsDirty = true; });
+    _defaultProperties.tessellationMaxDistance.onChange([this]() {
+        _dataIsDirty = true;
+    });
 
     _forceUpdateHeightData.onChange([this]() {
         for (GlobeGeometryFeature& f : _geometryFeatures) {
@@ -333,6 +338,8 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     });
     addProperty(_forceUpdateHeightData);
 
+    _preventUpdatesFromHeightMap =
+        p.preventHeightUpdate.value_or(_preventUpdatesFromHeightMap);
     addProperty(_preventUpdatesFromHeightMap);
 
     _drawWireframe = p.drawWireframe.value_or(_drawWireframe);
@@ -340,11 +347,15 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     using PointRenderMode = GlobeGeometryFeature::PointRenderMode;
     _pointRenderModeOption.addOptions({
-        { static_cast<int>(PointRenderMode::AlignToCameraDir), "Align to Camera Direction"},
-        { static_cast<int>(PointRenderMode::AlignToCameraPos), "Align to Camera Position"},
-        { static_cast<int>(PointRenderMode::AlignToGlobeNormal), "Align to Globe Normal"},
-        { static_cast<int>(PointRenderMode::AlignToGlobeSurface), "Align to Globe Surface"}
+        { static_cast<int>(PointRenderMode::AlignToCameraDir), "Camera Direction"},
+        { static_cast<int>(PointRenderMode::AlignToCameraPos), "Camera Position"},
+        { static_cast<int>(PointRenderMode::AlignToGlobeNormal), "Globe Normal"},
+        { static_cast<int>(PointRenderMode::AlignToGlobeSurface), "Globe Surface"}
     });
+    if (p.pointRenderMode.has_value()) {
+        _pointRenderModeOption =
+            static_cast<int>(codegen::map<PointRenderMode>(*p.pointRenderMode));
+    }
     addProperty(_pointRenderModeOption);
 
     _centerLatLong.setReadOnly(true);

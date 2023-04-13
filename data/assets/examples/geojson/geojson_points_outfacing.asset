@@ -2,13 +2,14 @@ local earth = asset.require('scene/solarsystem/planets/earth/earth')
 local earthIdentifier = earth.Earth.Identifier
 
 local Example_Points = {
-  Identifier = "Points-Example",
+  Identifier = "Points-Example-outfacing",
   File = asset.localResource("./files/points.geojson"),
   HeightOffset = 20000.0,
   DefaultProperties = {
     PointSize = 10.0
   },
-  Name = "Example Points"
+  PointRenderMode = "Globe Normal",
+  Name = "Example Points (align to globe normal)"
 }
 
 asset.onInitialize(function()

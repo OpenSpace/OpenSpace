@@ -9,7 +9,7 @@ local Example_RoverPath = {
   DefaultProperties = {
     LineWidth = 2.0
   },
-  Name = "Perseverance Rover Path" -- TODO: show in GUI (like layers)
+  Name = "Perseverance Rover Path"
 }
 
 asset.onInitialize(function()

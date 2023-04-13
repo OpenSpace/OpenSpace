@@ -16,7 +16,7 @@ local Example_Toronto = {
     Color = { 0.0, 1.0, 0.0 },
     LineWidth = 2.0,
   },
-  Name = "Toronto Neighbourhoods" -- TODO: show in GUI (like layers)
+  Name = "Toronto Neighbourhoods"
 }
 
 asset.onInitialize(function()

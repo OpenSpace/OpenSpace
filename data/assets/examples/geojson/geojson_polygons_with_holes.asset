@@ -8,27 +8,15 @@ local Example_Holes = {
   DefaultProperties = {
     Color = { 0.0, 1.0, 1.0 }
   },
-  Name = "Example Polygon (holes)"  -- TODO: show in GUI (like layers)
-}
-
-local Example_Holes_Overlapping = {
-  Identifier = "PolygonWithOverlappingHoles",
-  File = asset.localResource("./files/polygon_with_overlapping_holes.geojson"),
-  HeightOffset = 2000.0,
-  DefaultProperties = {
-    Color = { 0.0, 0.5, 1.0 }
-  },
-  Name = "Example Polygon (overlapping holes)" -- TODO: show in GUI (like layers)
+  Name = "Example Polygon (holes)"
 }
 
 asset.onInitialize(function()
   openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Holes)
-  openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Holes_Overlapping)
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Holes)
-  openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Holes_Overlapping)
 end)
 
 asset.export(Example_Holes)
