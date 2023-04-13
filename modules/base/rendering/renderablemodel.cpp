@@ -73,12 +73,12 @@ namespace {
        GL_COLOR_ATTACHMENT2,
     };
 
-    constexpr std::array<const char*, 13> UniformNames = {
+    constexpr std::array<const char*, 14> UniformNames = {
         "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",
         "specularIntensity", "performManualDepthTest", "gBufferDepthTexture",
-        "resolution"
+        "resolution", "opacity"
     };
 
     constexpr std::array<const char*, 5> UniformOpacityNames = {
@@ -273,7 +273,7 @@ documentation::Documentation RenderableModel::Documentation() {
 }
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+    : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , _enableAnimation(EnableAnimationInfo, false)
     , _ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
@@ -781,6 +781,21 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             false
         );
 
+        if (hasOverrideRenderBin()) {
+            // If override render bin is set then use the opacity values as normal
+            _program->setUniform(
+                _uniformCache.opacity,
+                opacity()
+            );
+        }
+        else {
+            // Otherwise reset
+            _program->setUniform(
+                _uniformCache.opacity,
+                1.f
+            );
+        }
+
         _geometry->render(*_program);
     }
     else {
@@ -830,6 +845,12 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(
             _uniformCache.resolution,
             glm::vec2(global::windowDelegate->currentDrawBufferResolution())
+        );
+
+        // Make sure opacity in first pass is always 1
+        _program->setUniform(
+            _uniformCache.opacity,
+            1.f
         );
 
         // Render Pass 1
@@ -910,16 +931,19 @@ void RenderableModel::update(const UpdateData& data) {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    // Only render two pass if the model is in any way transparent
-    const float o = opacity();
-    if ((o >= 0.f && o < 1.f) || _geometry->isTransparent()) {
-        setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-        _shouldRenderTwice = true;
+    if (!hasOverrideRenderBin()) {
+        // Only render two pass if the model is in any way transparent
+        const float o = opacity();
+        if ((o >= 0.f && o < 1.f) || _geometry->isTransparent()) {
+            setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
+            _shouldRenderTwice = true;
+        }
+        else {
+            setRenderBin(_originalRenderBin);
+            _shouldRenderTwice = false;
+        }
     }
-    else {
-        setRenderBin(_originalRenderBin);
-        _shouldRenderTwice = false;
-    }
+
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime;

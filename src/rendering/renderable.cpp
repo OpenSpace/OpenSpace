@@ -150,6 +150,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, Settings settings)
 
     if (p.renderBinMode.has_value()) {
         _automaticallyUpdateRenderBin = false;
+        _hasOverrideRenderBin = true;
         setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
     }
 
@@ -324,6 +325,10 @@ SceneGraphNode* Renderable::parent() const noexcept {
 
 bool Renderable::automaticallyUpdatesRenderBin() const noexcept {
     return _automaticallyUpdateRenderBin;
+}
+
+bool Renderable::hasOverrideRenderBin() const noexcept {
+    return _hasOverrideRenderBin;
 }
 
 }  // namespace openspace

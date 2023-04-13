@@ -44,6 +44,7 @@ uniform bool has_color_specular;
 uniform sampler2D texture_diffuse;
 uniform sampler2D texture_normal;
 uniform sampler2D texture_specular;
+uniform float opacity = 1.0;
 
 uniform vec4 color_diffuse;
 uniform vec4 color_specular;
@@ -63,7 +64,7 @@ Fragment getFragment() {
   frag.gPosition = vs_positionCameraSpace;
   frag.gNormal = vec4(vs_normalViewSpace, 0.0);
   frag.disableLDR2HDR = true;
-  frag.color.a = 1.0;
+  frag.color.a = opacity;
 
   if (performManualDepthTest) {
     // gl_FragCoord.x goes from 0 to resolution.x and gl_FragCoord.y goes from 0 to
@@ -160,6 +161,6 @@ Fragment getFragment() {
     frag.color.rgb = diffuseAlbedo.rgb;
   }
 
-  frag.color.a = diffuseAlbedo.a;
+  frag.color.a = diffuseAlbedo.a * opacity;
   return frag;
 }

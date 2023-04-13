@@ -131,6 +131,7 @@ protected:
     SceneGraphNode* parent() const noexcept;
 
     bool automaticallyUpdatesRenderBin() const noexcept;
+    bool hasOverrideRenderBin() const noexcept;
 
     RenderBin _renderBin = RenderBin::Opaque;
 
@@ -146,6 +147,7 @@ private:
     SceneGraphNode* _parent = nullptr;
     const bool _shouldUpdateIfDisabled = false;
     bool _automaticallyUpdateRenderBin = true;
+    bool _hasOverrideRenderBin = false;
 
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want
     // to provide a set method for this. Otherwise, anyone might mess around with our
