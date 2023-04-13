@@ -39,6 +39,10 @@ local findFullName = function(abbreviation)
 
   file:close()
   if fullName == "" then
+    openspace.printError(
+      "Error when calling function 'findFullName' in file 'util/constellations_helper': " ..
+      "Identifier '" .. abbreviation .. "' could not be found in list of constellations"
+    )
     return nil
   else
     return fullName

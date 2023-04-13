@@ -135,10 +135,9 @@ std::string RenderableConstellationsBase::constellationFullName(
         return _namesTranslation.at(identifier);
     }
 
-    LERROR(fmt::format(
+    throw ghoul::RuntimeError(fmt::format(
         "Identifier '{}' could not be found in list of constellations", identifier
     ));
-    return "";
 }
 
 void RenderableConstellationsBase::loadConstellationFile() {
