@@ -21,7 +21,7 @@ local MimasTrail = {
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
   GUI = {
     Name = "Mimas Trail",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Mimas",
     Description = "Trail of Saturn's moon Mimas as observed by Saturn",
   }
 }

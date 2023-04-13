@@ -29,7 +29,7 @@ local carmeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Herse"
     },
     TrailColor = trailColor,
     OrbitPeriod = 672.75,
@@ -46,7 +46,7 @@ local carmeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Aitne"
     },
     TrailColor = trailColor,
     OrbitPeriod = 679.64,
@@ -63,7 +63,7 @@ local carmeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kale"
     },
     TrailColor = trailColor,
     OrbitPeriod = 685.32,
@@ -80,7 +80,7 @@ local carmeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Taygete"
     },
     TrailColor = trailColor,
     OrbitPeriod = 686.67,
@@ -97,7 +97,7 @@ local carmeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Chaldene"
     },
     TrailColor = trailColor,
     OrbitPeriod = 699.33,
@@ -114,7 +114,7 @@ local carmeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Erinome"
     },
     TrailColor = trailColor,
     OrbitPeriod = 711.96,
@@ -131,7 +131,7 @@ local carmeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kallichore"
     },
     TrailColor = trailColor,
     OrbitPeriod = 717.81,
@@ -148,7 +148,7 @@ local carmeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kalyke"
     },
     TrailColor = trailColor,
     OrbitPeriod = 721.02,
@@ -165,7 +165,7 @@ local carmeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Pasithee"
     },
     TrailColor = trailColor,
     OrbitPeriod = 726.93,
@@ -183,7 +183,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2010 J 1",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2010J1"
     },
     TrailColor = trailColor,
     OrbitPeriod = 722.83,
@@ -200,7 +200,7 @@ local carmeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Eukelade"
     },
     TrailColor = trailColor,
     OrbitPeriod = 735.20,
@@ -217,7 +217,7 @@ local carmeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Arche"
     },
     TrailColor = trailColor,
     OrbitPeriod = 746.19,
@@ -234,7 +234,7 @@ local carmeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe"
     },
     TrailColor = trailColor,
     OrbitPeriod = 750.13,
@@ -251,7 +251,7 @@ local carmeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Carme"
     },
     TrailColor = trailColor,
     OrbitPeriod = 763.95,
@@ -269,7 +269,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2003 J 5",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J5"
     },
     TrailColor = trailColor,
     OrbitPeriod = 758.34,
@@ -287,7 +287,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2018 J 3",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2018J3"
     },
     TrailColor = trailColor,
     OrbitPeriod = 704.56,
@@ -305,7 +305,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2021 J 4",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J4"
     },
     TrailColor = trailColor,
     OrbitPeriod = 710.13,
@@ -323,7 +323,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2021 J 5",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J5"
     },
     TrailColor = trailColor,
     OrbitPeriod = 704.80,
@@ -341,7 +341,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2021 J 6",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J6"
     },
     TrailColor = trailColor,
     OrbitPeriod = 732.55,
@@ -359,7 +359,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2016 J 3",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2016J3"
     },
     TrailColor = trailColor,
     OrbitPeriod = 676.37,
@@ -377,7 +377,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2022 J 1",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J1"
     },
     TrailColor = trailColor,
     OrbitPeriod = 667.34,
@@ -395,7 +395,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2022 J 2",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J2"
     },
     TrailColor = trailColor,
     OrbitPeriod = 685.51,
@@ -413,7 +413,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2017 J 2",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J2"
     },
     TrailColor = trailColor,
     OrbitPeriod = 723.1,
@@ -431,7 +431,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2017 J 5",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J5"
     },
     TrailColor = trailColor,
     OrbitPeriod = 719.5,
@@ -449,7 +449,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2017 J 8",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J8"
     },
     TrailColor = trailColor,
     OrbitPeriod = 719.6,
@@ -467,7 +467,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2011 J 1",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2011J1"
     },
     TrailColor = trailColor,
     OrbitPeriod = 686.6,
@@ -485,7 +485,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2003 J 9",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J9"
     },
     TrailColor = trailColor,
     OrbitPeriod = 767.6,
@@ -503,7 +503,7 @@ local carmeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2003 J 10",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J10"
     },
     TrailColor = trailColor,
     OrbitPeriod = 705.96,
@@ -537,7 +537,7 @@ for i, moon in ipairs(carmeGroup) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Jupiter/Moons",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/" .. moon.Identifier,
       Description = "Label for Jupiter's moon " .. moonName .. " (Carme group)"
     }
   }

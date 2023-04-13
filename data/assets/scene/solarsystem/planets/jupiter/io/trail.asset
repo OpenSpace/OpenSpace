@@ -22,7 +22,7 @@ local IoTrail = {
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
   GUI = {
     Name = "Io Trail",
-    Path = "/Solar System/Planets/Jupiter/Moons"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Io"
   }
 }
 

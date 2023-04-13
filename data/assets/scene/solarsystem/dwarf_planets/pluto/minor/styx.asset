@@ -20,7 +20,7 @@ local Styx = {
   },
   Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor" },
   GUI = {
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Styx"
   }
 }
 
@@ -46,7 +46,7 @@ local StyxTrail = {
   },
   GUI = {
     Name = "Styx Trail",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Styx"
   }
 }
 
@@ -69,8 +69,8 @@ local StyxLabel = {
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
-    Name = "Cheron Label",
-    Path = "/Solar System/Dwarf Planets/Pluto/Moons",
+    Name = "Styx Label",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Styx",
     Description = "Label for Pluto's moon Styx"
   }
 }

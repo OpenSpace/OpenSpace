@@ -51,7 +51,7 @@ local Phobos = {
   Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
   GUI = {
     Name = "Phobos",
-    Path = "/Solar System/Planets/Mars",
+    Path = "/Solar System/Planets/Mars/Moons/Phobos",
     Description = "One of two moons of Mars"
   }
 }
@@ -74,7 +74,7 @@ local PhobosTrail = {
   Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
   GUI = {
     Name = "Phobos Trail",
-    Path = "/Solar System/Planets/Mars",
+    Path = "/Solar System/Planets/Mars/Moons/Phobos",
     Description = "Trail for Phobos"
   }
 }
@@ -99,7 +99,7 @@ local PhobosLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Phobos Label",
-    Path = "/Solar System/Planets/Mars/Moons",
+    Path = "/Solar System/Planets/Mars/Moons/Phobos",
     Description = "Label for Mars' moon Phobos"
   }
 }

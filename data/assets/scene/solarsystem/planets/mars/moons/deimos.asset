@@ -50,7 +50,7 @@ local Deimos = {
   Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
   GUI = {
     Name = "Deimos",
-    Path = "/Solar System/Planets/Mars",
+    Path = "/Solar System/Planets/Mars/Moons/Deimos",
     Description = "One of two moons of Mars"
   }
 }
@@ -72,7 +72,7 @@ local DeimosTrail = {
   Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
   GUI = {
     Name = "Deimos Trail",
-    Path = "/Solar System/Planets/Mars",
+    Path = "/Solar System/Planets/Mars/Moons/Deimos",
     Description = "Trail for Deimos"
   }
 }
@@ -98,7 +98,7 @@ local DeimosLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Deimos Label",
-    Path = "/Solar System/Planets/Mars/Moons",
+    Path = "/Solar System/Planets/Mars/Moons/Deimos",
     Description = "Label for Mars' moon Deimos"
   }
 }

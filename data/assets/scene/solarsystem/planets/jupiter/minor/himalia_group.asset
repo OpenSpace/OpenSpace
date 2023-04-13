@@ -29,7 +29,7 @@ local himaliaGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Leda"
     },
     TrailColor = trailColor,
     OrbitPeriod = 240.82,
@@ -46,7 +46,7 @@ local himaliaGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Himalia"
     },
     TrailColor = trailColor,
     OrbitPeriod = 250.23,
@@ -63,7 +63,7 @@ local himaliaGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Lysithea"
     },
     TrailColor = trailColor,
     OrbitPeriod = 259.89,
@@ -80,7 +80,7 @@ local himaliaGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Elara"
     },
     TrailColor = trailColor,
     OrbitPeriod = 257.62,
@@ -97,7 +97,7 @@ local himaliaGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Dia"
     },
     TrailColor = trailColor,
     OrbitPeriod = 287.93,
@@ -115,7 +115,7 @@ local himaliaGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2011 J 3",
-      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2011J3"
     },
     TrailColor = trailColor,
     OrbitPeriod = 261.77,
@@ -133,7 +133,7 @@ local himaliaGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2018 J 2",
-      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2018J2"
     },
     TrailColor = trailColor,
     OrbitPeriod = 250.88,
@@ -150,7 +150,7 @@ local himaliaGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Pandia"
     },
     TrailColor = trailColor,
     OrbitPeriod = 251.911,
@@ -167,7 +167,7 @@ local himaliaGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Ersa"
     },
     TrailColor = trailColor,
     OrbitPeriod = 249.229,
@@ -200,7 +200,7 @@ for i, moon in ipairs(himaliaGroup) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Jupiter/Moons",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/" .. moon.Identifier,
       Description = "Label for Jupiter's moon " .. moonName .. " (Himalia group)"
     }
   }
