@@ -8,7 +8,7 @@ local Example_Lines = {
   DefaultProperties = {
     LineWidth = 2.0
   },
-  Name = "Example Lines" -- TODO: show in GUI (like layers)
+  Name = "Example Lines"
 }
 
 asset.onInitialize(function()
@@ -20,3 +20,13 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Example_Lines)
+
+
+asset.meta = {
+  Name = "GeoJson Example - Lines",
+  Version = "1.0",
+  Description = [[GeoJson example asset with lines]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

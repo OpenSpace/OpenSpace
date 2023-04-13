@@ -36,3 +36,13 @@ end)
 
 asset.export(Example_Polygon)
 asset.export(Example_Polygon_Diff_Heights)
+
+
+asset.meta = {
+  Name = "GeoJson Example - Multiple Polygons",
+  Version = "1.0",
+  Description = [[GeoJson example asset with multiple polygons]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

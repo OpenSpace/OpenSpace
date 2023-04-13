@@ -21,3 +21,13 @@ end)
 
 asset.export(Example_Holes)
 asset.export(Example_Holes_Overlapping)
+
+
+asset.meta = {
+  Name = "GeoJson Example - Polygon with holes",
+  Version = "1.0",
+  Description = [[GeoJson example asset with polygon that has holes in it]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -10,7 +10,7 @@ local Example_Polygon = {
   DefaultProperties = {
     Color = { 0.0, 1.0, 0.0 },
     FillColor = { 0.5, 0.6, 0.5 },
-    LineWidth = 2.0,
+    LineWidth = 0.5,
     FillOpacity = 1.0,
     PerformShading = true
   },
@@ -29,3 +29,14 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Example_Polygon)
+
+
+asset.meta = {
+  Name = "GeoJson Example - Extruded and Shaded Polygon",
+  Version = "1.0",
+  Description = [[GeoJson example asset demonstrating how to apply shading from light
+    sources on polygons]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
