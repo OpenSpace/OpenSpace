@@ -44,8 +44,7 @@ local Apollo15 = {
     LightSources = {
       sun.LightSource
     },
-    PerformShading = true,
-    DisableFaceCulling = true
+    PerformShading = true
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
