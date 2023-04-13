@@ -68,6 +68,31 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
     _texturePath.onChange([this]() { _textureIsDirty = true; });
     _texturePath = p.url;
     addProperty(_texturePath);
+
+    _autoScale.onChange([this]() {
+        if (!_autoScale) {
+            return;
+        }
+
+        // Shape the plane based on the aspect ration of the image
+        glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        if (_textureDimensions != textureDim) {
+            float aspectRatio = textureDim.x / textureDim.y;
+            float planeAspectRatio = _size.value().x / _size.value().y;
+
+            if (std::abs(planeAspectRatio - aspectRatio) >
+                std::numeric_limits<float>::epsilon())
+            {
+                glm::vec2 newSize =
+                    aspectRatio > 0.f ?
+                    glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                    glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+                _size = newSize;
+            }
+
+            _textureDimensions = textureDim;
+        }
+    });
 }
 
 void RenderablePlaneImageOnline::deinitializeGL() {
@@ -132,6 +157,29 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
 
                 _texture = std::move(texture);
                 _textureIsDirty = false;
+
+                if (!_autoScale) {
+                    return;
+                }
+
+                // Shape the plane based on the aspect ration of the image
+                glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+                if (_textureDimensions != textureDim) {
+                    float aspectRatio = textureDim.x / textureDim.y;
+                    float planeAspectRatio = _size.value().x / _size.value().y;
+
+                    if (std::abs(planeAspectRatio - aspectRatio) >
+                        std::numeric_limits<float>::epsilon())
+                    {
+                        glm::vec2 newSize =
+                            aspectRatio > 0.f ?
+                            glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                            glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+                        _size = newSize;
+                    }
+
+                    _textureDimensions = textureDim;
+                }
             }
         }
         catch (const ghoul::io::TextureReader::InvalidLoadException& e) {

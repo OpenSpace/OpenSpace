@@ -117,6 +117,8 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     , _applyRoll(ApplyRollInfo, true)
 {
     // Handle target dimension property
+    _autoScale = false;
+    _autoScale.setReadOnly(true);
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _crossHairSize = p.crossHairSize.value_or(_crossHairSize);
@@ -165,12 +167,12 @@ glm::ivec3 RenderableSkyTarget::borderColor() const {
 }
 
 glm::dvec3 RenderableSkyTarget::rightVector() const {
-    double scaling = (_verticalFov / 70)* static_cast<double>(_size.value().x);
+    double scaling = (_verticalFov / 70)* static_cast<double>(glm::compMax(_size.value()));
     return scaling * _rightVector;
 }
 
 glm::dvec3 RenderableSkyTarget::upVector() const {
-    double scaling = (_verticalFov / 70) * static_cast<double>(_size.value().y);
+    double scaling = (_verticalFov / 70) * static_cast<double>(glm::compMax(_size.value()));
     return scaling * _upVector;
 }
 

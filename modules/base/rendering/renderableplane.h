@@ -73,6 +73,7 @@ protected:
     properties::BoolProperty _billboard;
     properties::BoolProperty _mirrorBackside;
     properties::Vec2Property _size;
+    properties::BoolProperty _autoScale;
     properties::Vec3Property _multiplyColor;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;

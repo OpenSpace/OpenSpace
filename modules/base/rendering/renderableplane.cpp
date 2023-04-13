@@ -71,6 +71,13 @@ namespace {
         "This value specifies the size of the plane in meters"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AutoScaleInfo = {
+        "AutoScale",
+        "Auto Scale",
+        "When true, the plane will automatically adjust in size to match the aspect "
+        "ratio of the content. Otherwise it will remain in the given size."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
@@ -119,6 +126,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _billboard(BillboardInfo, false)
     , _mirrorBackside(MirrorBacksideInfo, false)
     , _size(SizeInfo, glm::vec2(10.f), glm::vec2(0.f), glm::vec2(1e25f))
+    , _autoScale(AutoScaleInfo, false)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     Parameters p = codegen::bake<Parameters>(dictionary);
@@ -171,6 +179,8 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     _size.setExponent(15.f);
     addProperty(_size);
     _size.onChange([this](){ _planeIsDirty = true; });
+
+    addProperty(_autoScale);
 
     addProperty(_multiplyColor);
 
