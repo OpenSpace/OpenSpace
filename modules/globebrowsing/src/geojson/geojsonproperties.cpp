@@ -347,6 +347,10 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
     const Parameters p = codegen::bake<Parameters>(dictionary);
     opacity = p.opacity.value_or(opacity);
     color = p.color.value_or(color);
+
+    fillOpacity = p.fillOpacity.value_or(fillOpacity);
+    fillColor = p.fillColor.value_or(fillColor);
+
     lineWidth = p.lineWidth.value_or(lineWidth);
 
     pointSize = p.pointSize.value_or(pointSize);
