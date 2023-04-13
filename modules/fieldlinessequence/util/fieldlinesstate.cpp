@@ -32,8 +32,6 @@
 #include <iomanip>
 
 #include <../modules/fieldlinessequence/ext/HighFive/include/highfive/H5File.hpp>
-using namespace HighFive;
-using namespace std;
  
 namespace {
     constexpr std::string_view _loggerCat = "FieldlinesState";
@@ -224,83 +222,85 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File) {
 
     // --------------------- ENSURE FILE IS VALID, THEN PARSE IT --------------------- //
-    std::ifstream ifs(pathToHdf5File);
+   /* std::ifstream ifs(pathToHdf5File);
 
     if (!ifs.is_open()) {
         LERROR(fmt::format("FAILED TO OPEN FILE: {}", pathToHdf5File));
         return false;
+    }*/
+
+    HighFive::File file(pathToHdf5File, HighFive::File::ReadOnly);
+
+    // ----- EXTRACT THE EXTRA QUANTITY NAMES & TRIGGER TIME (same for all lines) ----- //
+
+    HighFive::Group g = file.getGroup("Step#0"); //Get the group that holds all groups for the lines
+    double sTime = 0.0;
+    _triggerTime = sTime;
+
+    std::string firstLineName = g.getObjectName(1);
+    HighFive::Group firstLine = g.getGroup(firstLineName);
+    const size_t nVariables = firstLine.getNumberObjects(); //Number of datasets
+    const std::vector<std::string> variableNameVec = firstLine.listObjectNames(); //All names of dataset
+
+
+    for (size_t i = 0; i < nVariables; ++i) { //Store all variables data except LCon
+        if (variableNameVec[i] != "LCon" && variableNameVec[i] != "xyz") {
+            _extraQuantityNames.push_back(variableNameVec[i]);
+        }
     }
 
-    // Test HighFive function
-    HighFive::File file(pathToHdf5File, File::ReadOnly);
-    size_t number = file.getNumberObjects();
-    cout << "Number of objects:";
-    printf("%zu", number);
-    cout << "\n";
+    const size_t nExtras = _extraQuantityNames.size();
+    _extraQuantities.resize(nExtras);
 
- // else {
+    size_t lineStartIdx = 0;
 
-//        try
-  //      {
-         
-   //         current_file = new H5::h5file(pathToHdf5File, H5F_ACC_RDONLY);
-   //         this->rootgroup = new h5::group(current_file->opengroup("/"));
-   //         this->variablegroup = new h5::group(current_file->opengroup("variables"));
-   //         int numvariables = variablegroup->getnumobjs();
-   //         std::cerr << "num variables: " << numvariables << std::endl;
-   //         for (int i = 0; i < numvariables; i++)
-   //         {
-   //             //std::cerr << "variable: " << variablegroup->getobjnamebyidx(i) << std::endl;
+    const size_t nLines = g.getNumberObjects() - 1; //Fulkod... Get number of groups(lines) minus one to subtract the attribute object
 
-   //         }
-   //         status = ok;
-   //     }
-   //     catch (h5::exception const& ex)
-   //     {
-   //         status = open_error;
-   //         if (current_file != null)
-   //         {
-   //             delete current_file;
-   //             current_file = null;
-   //         }
-   //         if (rootgroup != null)
-   //         {
-   //             delete rootgroup;
-   //             rootgroup = null;
-   //         }
-   //         if (variablegroup != null)
-   //         {
-   //             delete variablegroup;
-   //             variablegroup = null;
-   //         }
-   //     }
+    // Loop through all fieldlines
+    for (size_t i = 0; i < nLines; i++) {
 
-   //     //file(filename, h5::h5f_acc_rdonly);
-   //     //status = cdfopencdf((char *)filename.c_str(), &current_file_id);
+        std::vector<std::vector<float>> coordData;
+        const std::string lineName = g.getObjectName(i);
+        const HighFive::Group line = g.getGroup(lineName);
+        const HighFive::DataSet ds = line.getDataSet("xyz");
+        ds.read(coordData);
+        const size_t nPoints = coordData.size();
 
+        for (size_t j = 0; j < nPoints; ++j) {
+            const std::vector<float>& points = coordData[j]; //glm::vec3<float>
 
-   //     if (status == ok)
-   //     {
-   //         current_filename = filename;
-   //         filereader::initializeglobalattributes();
-   //         filereader::initializevariableattributes();
-   //         initializevariableids();
-   //         initializevariablenames();
-   //         //status = ok;
-   //     }
-   //     else
-   //     {
-   //         status = open_error;
-   //         std::cerr << "error opening hdf \"" << filename << "\". not an hdf file?" << std::endl;
-    //    }
+            const size_t xIdx = 0;
+            const size_t yIdx = 1;
+            const size_t zIdx = 2;
+            // Expects the x, y and z variables to be stored first!
+            _vertexPositions.push_back(
+                fls::ReToMeter *
+                glm::vec3(
+                    points[xIdx],
+                    points[yIdx],
+                    points[zIdx]
+                )
+            );
+        }
 
-   // }
-   // cout << "current_file_id: " << current_file_id << endl;
-   // cout << "testing open in filereader class" << endl;
+        for (size_t n = 0; n < nExtras; n++) // Collect all extra values except Lcon
+        {
+            std::vector<float> extraData;
+            const std::string extraName = _extraQuantityNames[n];
 
-   //// json jfile;
-   //// ifs >> jfile;
-   // // -------------------------------------------------------------------------------- //
+            const HighFive::DataSet extraDs = line.getDataSet(extraName);
+            extraDs.read(extraData);
+
+            for (size_t m = 0; m < nPoints; m++) {
+                _extraQuantities[n].push_back(
+                    extraData[m]
+                );
+            }
+        }
+        _lineCount.push_back(static_cast<GLsizei>(nPoints));
+        _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
+        lineStartIdx += nPoints;
+    }
     return true;
 }
 #endif

@@ -234,6 +234,9 @@ namespace {
         // [[codegen::verbatim(FlowParticleSpacingInfo.description)]]
         std::optional<int> particleSpacing;
 
+        // enable or disable domain limits
+        std::optional<bool> domainEnabled;
+
         // [[codegen::verbatim(FlowSpeedInfo.description)]]
         std::optional<int> flowSpeed;
 
@@ -413,6 +416,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _flowParticleSize = p.particleSize.value_or(_flowParticleSize);
     _flowParticleSpacing = p.particleSpacing.value_or(_flowParticleSpacing);
     _flowSpeed = p.flowSpeed.value_or(_flowSpeed);
+    _domainEnabled = p.domainEnabled.value_or(_domainEnabled);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _modelStr = p.simulationModel.value_or(_modelStr);
