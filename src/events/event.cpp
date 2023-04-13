@@ -304,6 +304,9 @@ Event::Type fromString(std::string_view str) {
     else if (str == "CameraPathFinished") {
         return Event::Type::CameraPathFinished;
     }
+    else if (str == "CameraMovedPosition") {
+        return Event::Type::CameraMovedPosition;
+    }
     else if (str == "Custom") {
         return Event::Type::Custom;
     }
@@ -723,6 +726,10 @@ EventCameraPathFinished::EventCameraPathFinished(const SceneGraphNode* origin_,
     : Event(Type)
     , origin(temporaryString(origin_->identifier()))
     , destination(temporaryString(destination_->identifier()))
+{}
+
+EventCameraMovedPosition::EventCameraMovedPosition()
+    : Event(Type)
 {}
 
 CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)

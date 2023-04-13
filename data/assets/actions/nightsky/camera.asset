@@ -1,0 +1,58 @@
+local level_horizon_yaw_action = {
+  Identifier = "os.planetarium.level_horizon_yaw",
+  Name = "Level Horizon Yaw",
+  Command = [[
+    local currentNavState = openspace.navigation.getNavigationState();
+    local NewNavState = {};
+    NewNavState["Pitch"] = currentNavState["Pitch"];
+    NewNavState["Anchor"] = tostring(currentNavState["Anchor"]);
+    NewNavState["Yaw"] = 0.0;
+    NewNavState["Position"] = currentNavState["Position"];
+    NewNavState["Up"] = currentNavState["Up"];
+    openspace.navigation.setNavigationState(NewNavState)
+    ]],
+  Documentation = "Levels the horizon horizontally.",
+  GuiPath = "/Night Sky/View",
+  IsLocal = true
+}
+asset.export("level_horizon_yaw_action", level_horizon_yaw_action.Identifier)
+
+local level_horizon_pitch_action = {
+  Identifier = "os.planetarium.level_horizon_pitch",
+  Name = "Level Horizon Pitch",
+  Command = [[
+    local currentNavState = openspace.navigation.getNavigationState();
+    local NewNavState = {};
+    NewNavState["Pitch"] = 1.5707;
+    NewNavState["Anchor"] = tostring(currentNavState["Anchor"]);
+    NewNavState["Yaw"] = currentNavState["Yaw"];
+    NewNavState["Position"] = currentNavState["Position"];
+    NewNavState["Up"] = currentNavState["Up"];
+    openspace.navigation.setNavigationState(NewNavState)
+    ]],
+  Documentation = "Levels the horizon vertically.",
+  GuiPath = "/Night Sky/View",
+  IsLocal = true
+}
+asset.export("level_horizon_pitch_action", level_horizon_pitch_action.Identifier)
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(level_horizon_yaw_action)
+  openspace.action.registerAction(level_horizon_pitch_action)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(level_horizon_yaw_action)
+  openspace.action.removeAction(level_horizon_pitch_action)
+end)
+
+
+-- local currentNavState = openspace.navigation.getNavigationState();
+--     local NewNavState = {};
+--     NewNavState["Pitch"] = currentNavState["Pitch"];
+--     NewNavState["Anchor"] = tostring(currentNavState["Anchor"]);
+--     NewNavState["Yaw"] = currentNavState["Yaw"];
+--     NewNavState["Position"] = currentNavState["Position"];
+--     NewNavState["Up"] = {0,currentNavState["Up"][2],currentNavState["Up"][3]} ;
+--     openspace.navigation.setNavigationState(NewNavState)

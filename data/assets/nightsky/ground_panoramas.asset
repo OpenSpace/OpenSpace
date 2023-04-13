@@ -1,0 +1,194 @@
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+
+local textures = asset.syncedResource({
+  Name = "Ground Panorama Textures",
+  Type = "HttpSynchronization",
+  Identifier = "ground_panorama_textures",
+  Version = 1
+})
+
+
+local Position = {
+  Identifier = "GroundPanoPosition",
+  Parent = earthAsset.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 34.201639,
+      Longitude = -118.171319,
+      Altitude = 10,
+      UseHeightmap = false
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 34.201639,
+      Longitude = -118.171319,
+      UseHeightmap = false,
+      Angle = 270
+    }
+  },
+  GUI = {
+    Name = "Ground Pano Position",
+    Path = "/Night Sky/Panoramas",
+    Hidden = false
+  }
+}
+
+local sphere = {
+  Identifier = "GroundPanoSphere",
+  Parent = Position.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 1
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = {-1.57079, 00.0, 0.0}
+    },
+  },
+  Renderable = {
+    Type = "RenderableSphere",
+    Size = 8.5,
+    Segments = 40,
+    Opacity = 1.0,
+    Enabled = asset.enabled,
+    Texture = textures .. "4.png",
+    Orientation = "Inside",
+    UseAdditiveBlending = false,
+    MirrorTexture = true,
+    FadeOutThreshold = 1.00,
+    Background = true,
+    RenderBinMode = "Overlay"
+  },
+  GUI = {
+    Name = "Ground Panorama",
+    Path = "/Night Sky/Panoramas"
+  }
+}
+
+local showCommand = [[
+  local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
+  local camera = openspace.navigation.getNavigationState();
+  openspace.setParent('GroundPanoPosition', camera.Anchor)
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Translation.Globe', camera.Anchor);
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Translation.Latitude', lat);
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Translation.Longitude', lon);
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Translation.Altitude', alt);
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Rotation.Globe', camera.Anchor);
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Rotation.Latitude', lat);
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Rotation.Longitude', lon);
+  openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Enabled', true);
+  openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 0);
+  openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 1, 1);
+]]
+
+local setTextureCommand = function(scene) 
+  local command = 'openspace.setPropertyValueSingle("Scene.GroundPanoSphere.Renderable.Texture", "'
+  command = command .. textures
+  if (scene == "forest") then 
+    command = command .. "1"
+  elseif (scene == 'city') then
+    command = command .. "2"
+  elseif (scene == '3') then
+    command = command .. "3"
+  elseif (scene == '4') then
+    command = command .. "4"
+  elseif (scene == '5') then
+    command = command .. "5"
+  elseif (scene == '6') then
+    command = command .. "6"
+  elseif (scene == '7') then
+    command = command .. "2"
+  else
+    openspace.printDebug("unknown scene")
+  end
+  command = command .. '.png")'
+  command = command:gsub( "\\", "\\\\")
+  return command
+end
+
+local showForestAction = {
+  Identifier = "os.show_forest_pano",
+  Name = "Show forest panorama",
+  Command = setTextureCommand("forest") .. showCommand,
+  Documentation = "Shows the ground panorama sphere and updates it to your current position",
+  GuiPath = "/Night Sky/Panoramas",
+  IsLocal = false
+}
+
+local showCityAction = {
+  Identifier = "os.show_city_pano",
+  Name = "Show city panorama",
+  Command = setTextureCommand("city") .. showCommand,
+  Documentation = "Shows the ground panorama sphere and updates it to your current position",
+  GuiPath = "/Night Sky/Panoramas",
+  IsLocal = false
+}
+
+local show3Action = {
+  Identifier = "os.show_3_pano",
+  Name = "Show 3 panorama",
+  Command = setTextureCommand("3") .. showCommand,
+  Documentation = "Shows the ground panorama sphere and updates it to your current position",
+  GuiPath = "/Night Sky/Panoramas",
+  IsLocal = false
+}
+
+local show4Action = {
+  Identifier = "os.show_4_pano",
+  Name = "Show 4 panorama",
+  Command = setTextureCommand("4") .. showCommand,
+  Documentation = "Shows the ground panorama sphere and updates it to your current position",
+  GuiPath = "/Night Sky/Panoramas",
+  IsLocal = false
+}
+
+local hideAction = {
+  Identifier = "os.hide_ground_pano",
+  Name = "Hide ground panorama",
+  Command = [[
+    -- same position as above
+    openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 0, 0.5);
+  ]],
+  Documentation = "Hides the ground panorama",
+  GuiPath = "/Night Sky/Panoramas",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Position)
+  openspace.addSceneGraphNode(sphere)
+  openspace.action.registerAction(hideAction)
+  openspace.action.registerAction(showForestAction)
+  openspace.action.registerAction(showCityAction)
+  openspace.action.registerAction(show3Action)
+  openspace.action.registerAction(show4Action)
+  openspace.event.registerEventAction(
+    "CameraMovedPosition",
+    hideAction.Identifier
+  )  
+end)
+
+asset.onDeinitialize(function()
+  openspace.event.registerEventAction(
+    "CameraMovedPosition",
+    hideAction.Identifier
+  )
+  openspace.action.removeAction(showForestAction)
+  openspace.action.removeAction(showCityAction)
+  openspace.action.removeAction(show3Action)
+  openspace.action.removeAction(show4Action)
+  openspace.action.removeAction(hideAction)
+  openspace.removeSceneGraphNode(sphere)
+  openspace.removeSceneGraphNode(Position)
+end)
+
+asset.export(showForestAction)
+asset.export(showCityAction)
+asset.export(hideAction)
+asset.export(sphere)
+asset.export(Position)

@@ -1,0 +1,125 @@
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+
+local textures = asset.syncedResource({
+  Name = "Planetarium Textures",
+  Type = "HttpSynchronization",
+  Identifier = "planetarium_textures",
+  Version = 1
+})
+
+
+local Position = {
+  Identifier = "ZenithPosition",
+  Parent = earthAsset.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 0,
+      Longitude = 0,
+      Altitude = 100000000,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 0,
+      Longitude = 0,
+      UseHeightmap = false
+    }
+  },
+  GUI = {
+    Name = "Zenith Position",
+    Path = "/Night Sky/Lines and Grids",
+    Hidden = false
+  }
+}
+
+local Plane = {
+  Identifier = "ZenithDot",
+  Parent = Position.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 1
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = {-1.57079, 90.0, 0.0}
+    },
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Enabled = asset.enabled,
+    Size = 1000000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = textures .. "point3A.png",
+    BlendMode = "Additive"
+  },
+  GUI = {
+    Name = "Zenith",
+    Path = "/Night Sky/Lines and Grids"
+  }
+}
+
+local showAction = {
+  Identifier = "os.show_zenith",
+  Name = "Show local zenith",
+  Command = [[
+    local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
+    local camera = openspace.navigation.getNavigationState();
+    openspace.setParent('ZenithPosition', camera.Anchor)
+    openspace.setPropertyValueSingle('Scene.ZenithPosition.Translation.Globe', camera.Anchor);
+    openspace.setPropertyValueSingle('Scene.ZenithPosition.Translation.Latitude', lat);
+    openspace.setPropertyValueSingle('Scene.ZenithPosition.Translation.Longitude', lon);
+    openspace.setPropertyValueSingle('Scene.ZenithPosition.Rotation.Globe', camera.Anchor);
+    openspace.setPropertyValueSingle('Scene.ZenithPosition.Rotation.Latitude', lat);
+    openspace.setPropertyValueSingle('Scene.ZenithPosition.Rotation.Longitude', lon);
+    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Enabled', true);
+    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 0);
+    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 1, 1);
+  ]],
+  Documentation = "Shows a dot for the local zenith",
+  GuiPath = "/Night Sky/Lines and Grids",
+  IsLocal = false
+}
+
+local hideAction = {
+  Identifier = "os.hide_zenith",
+  Name = "Hide local zenith",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 0, 1);
+  ]],
+  Documentation = "Hides the dot for the local zenith",
+  GuiPath = "/Night Sky/Lines and Grids",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Position)
+  openspace.addSceneGraphNode(Plane)
+  openspace.action.registerAction(hideAction)
+  openspace.action.registerAction(showAction)
+  openspace.event.registerEventAction(
+    "CameraMovedPosition",
+    hideAction.Identifier
+  )
+end)
+
+asset.onDeinitialize(function()
+  openspace.event.unregisterEventAction(
+    "CameraMovedPosition",
+    hideAction.Identifier
+  )
+  openspace.action.removeAction(showAction)
+  openspace.action.removeAction(hideAction)
+  openspace.removeSceneGraphNode(Plane)
+  openspace.removeSceneGraphNode(Position)
+end)
+
+asset.export(showAction)
+asset.export(hideAction)
+asset.export(Plane)
+asset.export(Position)

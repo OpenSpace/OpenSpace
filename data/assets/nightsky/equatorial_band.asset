@@ -1,0 +1,74 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+local equatorialRotationMatrix = {
+    -0.05487554,  0.4941095, -0.8676661,
+    -0.8734371 , -0.4448296, -0.1980764,
+    -0.483835  ,  0.7469823,  0.4559838
+}
+
+local band = {
+  Identifier = "EquatorialBand",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 4.28601E17;
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = equatorialRotationMatrix
+    }
+  },
+  Renderable = {
+    Type = "RenderableRadialGrid",
+    Opacity = 0.8,
+    Color = { 1.0, 1.0, 1.0 },
+    LineWidth = 3.0,
+    GridSegments = { 1, 1 },
+    Radii = { 0.5, 0.5 },
+    Enabled = asset.enabled
+  },
+  GUI = {
+    Name = "Equatorial Band",
+    Path = "/Night Sky/Lines and Grids"
+  }
+}
+
+local showAction = {
+  Identifier = "os.show_equatorial_band",
+  Name = "Show equatorial band",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.EquatorialBand.Renderable.Fade', 0);
+    openspace.setPropertyValueSingle('Scene.EquatorialBand.Renderable.Enabled', true);
+    openspace.setPropertyValueSingle('Scene.EquatorialBand.Renderable.Fade', 1, 1);
+  ]],
+  Documentation = "Shows the equatorial band",
+  GuiPath = "/Night Sky/Lines and Grids",
+  IsLocal = false
+}
+  
+local hideAction = {
+  Identifier = "os.hide_equatorial_band",
+  Name = "Hide equatorial band",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.EquatorialBand.Renderable.Fade', 0, 1);
+  ]],
+  Documentation = "Hides the equatorial band",
+  GuiPath = "/Night Sky/Lines and Grids",
+  IsLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(band)
+  openspace.action.registerAction(showAction)
+  openspace.action.registerAction(hideAction)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.action.removeAction(hideAction)
+  openspace.action.removeAction(showAction)
+  openspace.removeSceneGraphNode(band)
+end)
+  
+asset.export(band)
+  
