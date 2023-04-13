@@ -282,6 +282,13 @@ namespace {
         "or canceled, in seconds"
     };
 
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LimitZoomInfo = {
+        "LimitZoom",
+        "Limit Zoom",
+        "Settings to limit the camera from going to close to or too far away from the "
+        "current focus"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo
         EnabledMinimumAllowedDistanceInfo =
     {
@@ -370,7 +377,7 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
 }
 
 OrbitalNavigator::LimitZoom::LimitZoom()
-    : properties::PropertyOwner({ "LimitZoom" })
+    : properties::PropertyOwner(LimitZoomInfo)
     , enableZoomInLimit(EnabledMinimumAllowedDistanceInfo, true)
     , minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , enableZoomOutLimit(EnabledMaximumDistanceInfo, false)
