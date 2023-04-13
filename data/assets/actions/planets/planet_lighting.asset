@@ -95,14 +95,15 @@ local saturn_standard = getIlluminationAction("Saturn", "saturn", false)
 asset.export("titan_standard", saturn_standard.Identifier)
 
 
---handling Earth special
---if we have #2258 we can do all globes with night layers instead of just earth
---if we have #1826 we can do the default night layer instead of the first
+-- handling Earth special
+-- if we have #2258 we can do all globes with night layers instead of just earth
+-- if we have #1826 we can do the default night layer instead of the first
 local all_globes_global = {
-  Identifier = "os.all_globes_global_lighting",
+  Identifier = "os.all_globes_global_illumination",
   Name = "All globes global illumination",
   Command = [[
-    openspace.setPropertyValue("Scene.*.Renderable.PerformShading", false)
+    openspace.setPropertyValue("{planet_solarSystem}.Renderable.PerformShading", false)
+    openspace.setPropertyValue("{moon_solarSystem}.Renderable.PerformShading", false)
     openspace.setPropertyValue("Scene.*Atmosphere.Renderable.SunFollowingCamera", true)
     openspace.setPropertyValue("Scene.*.Renderable.ShadowsComponent.DistanceFraction", 3000)
     openspace.setPropertyValue("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled", false)
@@ -111,13 +112,14 @@ local all_globes_global = {
   GuiPath = "/Solar System",
   IsLocal = true
 }
-asset.export("all_globes_global", all_globes_global.Identifier)
+asset.export("all_globes_global_illumination", all_globes_global.Identifier)
 
 local all_globes_standard = {
-  Identifier = "os.all_globes_standard_lighting",
+  Identifier = "os.all_globes_standard_illumination",
   Name = "All globes standard illumination",
   Command = [[
-    openspace.setPropertyValue("Scene.*.Renderable.PerformShading", true)
+    openspace.setPropertyValue("{planet_solarSystem}.Renderable.PerformShading", true)
+    openspace.setPropertyValue("{moon_solarSystem}.Renderable.PerformShading", true)
     openspace.setPropertyValue("Scene.*Atmosphere.Renderable.SunFollowingCamera", false)
     openspace.setPropertyValue("Scene.*.Renderable.ShadowsComponent.DistanceFraction", 40)
     openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled", true)
@@ -127,7 +129,7 @@ local all_globes_standard = {
   GuiPath = "/Solar System",
   IsLocal = true
 }
-asset.export("all_globes_standard", all_globes_standard.Identifier)
+asset.export("all_globes_standard_illumination", all_globes_standard.Identifier)
 
 
 asset.onInitialize(function()
