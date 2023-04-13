@@ -487,7 +487,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     if (p.renderMode.has_value()) {
         _renderMode = codegen::map<gaia::RenderMode>(*p.renderMode);
     }
-    _renderMode.onChange([&]() { _buffersAreDirty = true; });
+    _renderMode.onChange([this]() { _buffersAreDirty = true; });
     addProperty(_renderMode);
 
     _shaderOption.addOptions({
@@ -511,7 +511,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         }
 #endif // __APPLE__
     }
-    _shaderOption.onChange([&]() {
+    _shaderOption.onChange([this]() {
         _buffersAreDirty = true;
         _shadersAreDirty = true;
     });
@@ -547,7 +547,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _lodPixelThreshold = p.lodPixelThreshold.value_or(_lodPixelThreshold);
 
     _maxGpuMemoryPercent = p.maxGpuMemoryPercent.value_or(_maxGpuMemoryPercent);
-    _maxGpuMemoryPercent.onChange([&]() {
+    _maxGpuMemoryPercent.onChange([this]() {
         if (_ssboData != 0) {
             glDeleteBuffers(1, &_ssboData);
             glGenBuffers(1, &_ssboData);
@@ -594,11 +594,11 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     // Only add properties correlated to fits files if we're reading from a fits file.
     if (_fileReaderOption == gaia::FileReaderOption::Fits) {
         _firstRow = p.firstRow.value_or(_firstRow);
-        _firstRow.onChange([&]() { _dataIsDirty = true; });
+        _firstRow.onChange([this]() { _dataIsDirty = true; });
         addProperty(_firstRow);
 
         _lastRow = p.lastRow.value_or(_lastRow);
-        _lastRow.onChange([&]() { _dataIsDirty = true; });
+        _lastRow.onChange([this]() { _dataIsDirty = true; });
         addProperty(_lastRow);
 
         if (p.columnNames.has_value()) {

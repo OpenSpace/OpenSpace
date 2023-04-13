@@ -42,7 +42,7 @@ uniform bool filterOutOfRange;
 
 // keep in sync with renderablestars.h:ColorOption enum
 const int ColorOptionColor = 0;
-const int ColorOptionVelocity = 1; 
+const int ColorOptionVelocity = 1;
 const int ColorOptionSpeed = 2;
 const int ColorOptionOtherData = 3;
 const int ColorOptionFixedColor = 4;
@@ -69,7 +69,7 @@ vec4 otherDataValue() {
 Fragment getFragment() {
   vec4 color = vec4(0.0);
   switch (colorOption) {
-    case ColorOptionColor: 
+    case ColorOptionColor:
       color = bv2rgb(ge_bv);
       break;
     case ColorOptionVelocity:
@@ -94,7 +94,7 @@ Fragment getFragment() {
 
   vec4 textureColor = texture(psfTexture, texCoords);
   vec4 fullColor = vec4(color.rgb, textureColor.a * alphaValue);
-  
+
   if (fullColor.a < 0.001) {
     discard;
   }
@@ -105,6 +105,6 @@ Fragment getFragment() {
   frag.gPosition = vec4(vs_position, 1.0);
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.disableLDR2HDR = true;
-  
+
   return frag;
 }

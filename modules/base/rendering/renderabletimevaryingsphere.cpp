@@ -163,8 +163,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _size = p.size;
     _segments = p.segments;
@@ -208,7 +207,6 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     }
 
     setBoundingSphere(_size);
-    setRenderBinFromOpacity();
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {

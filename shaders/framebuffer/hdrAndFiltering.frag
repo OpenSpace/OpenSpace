@@ -58,10 +58,10 @@ void main() {
 
   vec4 color = texture(hdrFeedingTexture, st);
   color.rgb *= blackoutFactor;
-    
+
   // Applies TMO
   vec3 tColor = toneMappingOperator(color.rgb, hdrExposure);
-    
+
   // Color control
   vec3 hsvColor = rgb2hsv(tColor);
   hsvColor.x = (hsvColor.x + Hue);

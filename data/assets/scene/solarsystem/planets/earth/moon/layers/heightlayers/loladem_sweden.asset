@@ -5,7 +5,7 @@ local layer = {
   Name = "Lola DEM [Sweden]",
   Enabled = asset.enabled,
   FilePath = asset.localResource("loladem_sweden.wms"),
-  TilePixelSize = 64,
+  TilePixelSize = 360,
   Settings = { Multiplier = 0.5 }
 }
 

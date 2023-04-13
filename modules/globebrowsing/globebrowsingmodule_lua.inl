@@ -56,6 +56,9 @@ namespace {
         throw ghoul::lua::LuaError("Unknown layer group: " + layerGroupName);
     }
 
+    // Add the name of the enclosing globe to layer dict, it is used to identify a cache
+    layer.setValue("GlobeName", globeName);
+
     // Get the dictionary defining the layer
     Layer* l = globe->layerManager().addLayer(groupID, layer);
     if (l) {
@@ -182,7 +185,7 @@ namespace {
     if (group == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError(fmt::format("Unknown layer group: {}", layerGroup));
     }
-    
+
     LayerGroup& lg = globe->layerManager().layerGroup(group);
     if (std::holds_alternative<int>(source) && std::holds_alternative<int>(destination)) {
         // Short circut here, no need to get the layers

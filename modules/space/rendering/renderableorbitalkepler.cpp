@@ -157,7 +157,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
 {
     const Parameters p = codegen::bake<Parameters>(dict);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _segmentQuality = static_cast<unsigned int>(p.segmentQuality);
     _segmentQuality.onChange([this]() { updateBuffers(); });

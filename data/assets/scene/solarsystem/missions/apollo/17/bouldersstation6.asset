@@ -39,9 +39,7 @@ local Station6Frag1Model = {
       Latitude = 20.2903,
       Altitude = -2562.6,
       UseHeightmap = false
-    }
-  },
-  Transform = {
+    },
     Scale = {
       Type = "StaticScale",
       Scale = 0.1

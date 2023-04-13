@@ -118,7 +118,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
     setRenderBin(RenderBin::Overlay);
@@ -259,7 +259,7 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     }
 
     _targetPosition = _targetNode->worldPosition();
-    SceneGraphNode* mySGNPointer = _parent;
+    SceneGraphNode* mySGNPointer = parent();
     ghoul_assert(mySGNPointer, "Renderable have to be owned by scene graph node");
     _sourcePosition = mySGNPointer->worldPosition();
 

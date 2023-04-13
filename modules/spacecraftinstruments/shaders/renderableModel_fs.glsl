@@ -62,7 +62,7 @@ Fragment getFragment() {
       projectionFading * projectionColor.a
     );
   }
-  
+
   vec3 diffuseAlbedo = textureColor.rgb;
 
   Fragment frag;
@@ -70,7 +70,7 @@ Fragment getFragment() {
     // Some of these values could be passed in as uniforms
     const vec3 lightColorAmbient = vec3(1.0);
     const vec3 lightColor = vec3(1.0);
-    
+
     vec3 n = normalize(vs_normalViewSpace);
     vec3 l = directionToSunViewSpace;
     vec3 c = normalize(vs_positionCameraSpace.xyz);
@@ -80,7 +80,7 @@ Fragment getFragment() {
     float specularCosineFactor = dot(c,r);
 
     vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
-    vec3 diffuseColor = 
+    vec3 diffuseColor =
         diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0.0);
     vec3 specularColor = specularIntensity * lightColor * specularAlbedo *
         pow(max(specularCosineFactor, 0.0), specularPower);

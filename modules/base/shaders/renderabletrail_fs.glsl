@@ -35,7 +35,7 @@ uniform float opacity = 1.0;
 uniform float lineWidth;
 uniform vec4 viewport;
 
-// Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
+// Fragile! Keep in sync with RenderableTrail::render::RenderPhase
 const int RenderPhaseLines = 0;
 const int RenderPhasePoints = 1;
 
@@ -52,7 +52,7 @@ Fragment getFragment() {
     // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
     // smoothstep to gradually decrease the alpha on the edges of the point
     vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
-    //float circleClipping = 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));        
+    //float circleClipping = 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));
     float circleClipping = smoothstep(1.0, 1.0 - Delta, dot(circCoord, circCoord));
     float transparencyCorrection = frag.color.a * circleClipping;
     if (transparencyCorrection < 0.9) {
@@ -71,7 +71,7 @@ Fragment getFragment() {
   double distanceCenter = length(mathLine - xy);
   double dLW = double(lineWidth);
   const float blendFactor = 20.0;
-  
+
   if (distanceCenter > dLW) {
     frag.color.a = 0.0;
   }
@@ -80,7 +80,7 @@ Fragment getFragment() {
   }
 
   frag.gPosition = vs_gPosition;
-  
+
   // There is no normal here
   frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 

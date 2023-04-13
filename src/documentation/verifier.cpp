@@ -256,7 +256,7 @@ TestResult IdentifierVerifier::operator()(const ghoul::Dictionary& dict,
 
 std::string IdentifierVerifier::documentation() const {
     return "An identifier string. May not contain '.', spaces, newlines, or tabs";
-};
+}
 
 std::string IdentifierVerifier::type() const {
     return "Identifier";

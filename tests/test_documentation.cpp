@@ -276,7 +276,7 @@ TEST_CASE("Documentation: Constructor", "[documentation]") {
 
 TEST_CASE("Documentation: Initializer Constructor", "[documentation]") {
     using namespace openspace::documentation;
-    
+
     Documentation doc {
         {
             // Basic Verifiers
@@ -1037,7 +1037,7 @@ TEST_CASE("Documentation: Optional", "[documentation]") {
     positiveRes = testSpecification(doc, positive);
     CHECK(positiveRes.success);
     CHECK(positiveRes.offenses.empty());
-    
+
     ghoul::Dictionary negative;
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);

@@ -2,9 +2,9 @@ local toggle_outer_planetary_trails = {
   Identifier = "os.missions.rosetta.toggleouterplanetarytrails",
   Name = "Toggle outer planetary trails",
   Command = [[
-    local list = openspace.getProperty('{planetTrail_giants}.Renderable.Enabled'); 
-    for _,v in pairs(list) do 
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+    local list = openspace.getProperty('{planetTrail_giants}.Renderable.Enabled')
+    for _,v in pairs(list) do
+      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
     end
   ]],
   Documentation = "Toggles the visibility of all trails further from the Sun than 67P",

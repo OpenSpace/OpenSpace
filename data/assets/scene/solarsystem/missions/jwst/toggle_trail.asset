@@ -1,6 +1,6 @@
 local toggle_trail = {
   Identifier = "event.jwst.toggle_trail",
-  Name = "Toggle JWST Trail (Auto)",
+  Name = "Toggle JWST trail (auto)",
   Command = [[
     local node
     if is_declared("args") then

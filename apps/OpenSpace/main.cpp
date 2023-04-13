@@ -80,6 +80,7 @@
 
 #include <launcherwindow.h>
 #include <QApplication>
+#include <QMessageBox>
 
 using namespace openspace;
 using namespace sgct;
@@ -1258,6 +1259,19 @@ int main(int argc, char* argv[]) {
         QApplication app(qac, nullptr);
 #endif // __APPLE__
 
+        std::string pwd = std::filesystem::current_path().string();
+        if (size_t it = pwd.find_first_of("'\"[]");  it != std::string::npos) {
+            QMessageBox::warning(
+                nullptr,
+                "OpenSpace",
+                QString::fromStdString(fmt::format(
+                    "The OpenSpace folder is started must not contain any of \"'\", "
+                    "\"\"\", [, or ]. Path is: '{}'. Unexpected errors will occur when "
+                    "proceeding to run the software", pwd
+                ))
+            );
+        }
+
         LauncherWindow win(
             !hasProfile,
             *global::configuration,
@@ -1280,11 +1294,12 @@ int main(int argc, char* argv[]) {
             windowConfiguration,
             labelFromCfgFile
         );
-    } else {
+    }
+    else {
         glfwInit();
     }
     if (global::configuration->profile.empty()) {
-        LFATAL("Cannot launch with an empty profile");
+        LFATAL("Cannot launch without a profile");
         exit(EXIT_FAILURE);
     }
 

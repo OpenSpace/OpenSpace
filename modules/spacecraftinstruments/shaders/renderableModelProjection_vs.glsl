@@ -45,6 +45,6 @@ void main() {
   vs_normal = normalize(ModelTransform * meshNormalTransform * vec4(in_normal, 0.0));
   vs_ndc = position / position.w;
 
-  vec2 texco = (in_st * 2.0) - 1.0; 
+  vec2 texco = (in_st * 2.0) - 1.0;
   gl_Position = vec4(texco, 0.0, 1.0);
 }

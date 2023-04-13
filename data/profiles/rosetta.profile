@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "scene/solarsystem/missions/rosetta/67p",
     "scene/solarsystem/missions/rosetta/dashboard",
     "scene/solarsystem/missions/rosetta/rosetta",

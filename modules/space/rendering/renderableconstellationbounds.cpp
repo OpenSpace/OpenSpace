@@ -81,7 +81,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 
     // Avoid reading files here, instead do it in multithreaded initialize()
     _vertexFilename = absPath(p.file.string()).string();
-    _vertexFilename.onChange([&](){ loadData(); });
+    _vertexFilename.onChange([this](){ loadData(); });
     addProperty(_vertexFilename);
 
     _color.setViewOption(properties::Property::ViewOptions::Color);

@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__DEFAULTTILEPROVIDER___H__
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
-
+#include <modules/globebrowsing/src/tilecacheproperties.h>
 #include <modules/globebrowsing/src/asynctiledataprovider.h>
 #include <memory>
 
@@ -48,7 +48,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void initAsyncTileDataReader(TileTextureInitData initData);
+    void initAsyncTileDataReader(TileTextureInitData initData, TileCacheProperties cacheProperties);
 
     properties::StringProperty _filePath;
     properties::IntProperty _tilePixelSize;
@@ -57,6 +57,7 @@ private:
     layers::Group::ID _layerGroupID = layers::Group::ID::Unknown;
     bool _performPreProcessing = false;
     bool _padTiles = true;
+    TileCacheProperties _cacheProperties;
 };
 
 } // namespace openspace::globebrowsing

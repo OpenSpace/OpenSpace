@@ -43,7 +43,7 @@ void main() {
 
   // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
   // vs_normal = normalize(ModelTransform * vec4(in_normal,0));
-  
+
   vec4 position = pscTransform(tmp, ModelTransform);
   vs_position = tmp;
   position = ViewProjection * position;

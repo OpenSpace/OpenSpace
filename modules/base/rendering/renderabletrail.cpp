@@ -191,7 +191,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     setRenderBin(RenderBin::Overlay);
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>("Translation")
@@ -433,7 +433,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     );
     const double distance = glm::distance(trailPosWorld, data.camera.eyePositionVec3());
 
-    if (distance > _boundingSphere * DISTANCE_CULLING_RADII) {
+    if (distance > boundingSphere() * DISTANCE_CULLING_RADII) {
         return;
     }
 

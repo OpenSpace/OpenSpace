@@ -292,8 +292,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     if (p.forceRenderInvisible.has_value()) {
         _forceRenderInvisible = *p.forceRenderInvisible;
@@ -518,7 +517,7 @@ void RenderableModel::initializeGL() {
     }
     _program = BaseModule::ProgramObjectManager.request(
         program,
-        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [this, program]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             std::filesystem::path vs =
                 _vertexShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_vs.glsl") :
@@ -690,7 +689,7 @@ void RenderableModel::update(const UpdateData& data) {
         glm::compMax(data.modelTransform.scale)
     );
     // Set Interaction sphere size to be 10% of the bounding sphere
-    setInteractionSphere(_boundingSphere * 0.1);
+    setInteractionSphere(boundingSphere() * 0.1);
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime;
