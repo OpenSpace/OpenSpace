@@ -95,6 +95,43 @@ local saturn_standard = getIlluminationAction("Saturn", "saturn", false)
 asset.export("titan_standard", saturn_standard.Identifier)
 
 
+-- handling Earth special
+-- if we have #2258 we can do all globes with night layers instead of just earth
+-- if we have #1826 we can do the default night layer instead of the first
+local all_globes_global_illumination = {
+  Identifier = "os.all_globes_global_illumination",
+  Name = "All globes global illumination",
+  Command = [[
+    openspace.setPropertyValue("{planet_solarSystem}.Renderable.PerformShading", false)
+    openspace.setPropertyValue("{moon_solarSystem}.Renderable.PerformShading", false)
+    openspace.setPropertyValue("Scene.*Atmosphere.Renderable.SunFollowingCamera", true)
+    openspace.setPropertyValue("Scene.*.Renderable.ShadowsComponent.DistanceFraction", 3000)
+    openspace.setPropertyValue("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled", false)
+  ]],
+  Documentation = "Enables global illumination for all globes",
+  GuiPath = "/Solar System",
+  IsLocal = true
+}
+asset.export("all_globes_global_illumination", all_globes_global_illumination.Identifier)
+
+local all_globes_standard_illumination = {
+  Identifier = "os.all_globes_standard_illumination",
+  Name = "All globes standard illumination",
+  Command = [[
+    openspace.setPropertyValue("{planet_solarSystem}.Renderable.PerformShading", true)
+    openspace.setPropertyValue("{moon_solarSystem}.Renderable.PerformShading", true)
+    openspace.setPropertyValue("Scene.*Atmosphere.Renderable.SunFollowingCamera", false)
+    openspace.setPropertyValue("Scene.*.Renderable.ShadowsComponent.DistanceFraction", 40)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.PerformShading", false)
+  ]],
+  Documentation = "Disables global illumination for all globes",
+  GuiPath = "/Solar System",
+  IsLocal = true
+}
+asset.export("all_globes_standard_illumination", all_globes_standard_illumination.Identifier)
+
+
 asset.onInitialize(function()
   openspace.action.registerAction(current_focus_global)
   openspace.action.registerAction(current_focus_standard)
@@ -108,9 +145,13 @@ asset.onInitialize(function()
   openspace.action.registerAction(titan_standard)
   openspace.action.registerAction(saturn_global)
   openspace.action.registerAction(saturn_standard)
+  openspace.action.registerAction(all_globes_global_illumination)
+  openspace.action.registerAction(all_globes_standard_illumination)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(all_globes_global_illumination)
+  openspace.action.removeAction(all_globes_standard_illumination)
   openspace.action.removeAction(saturn_standard)
   openspace.action.removeAction(saturn_global)
   openspace.action.removeAction(titan_standard)
