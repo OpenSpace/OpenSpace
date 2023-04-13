@@ -1636,10 +1636,10 @@ glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
         glm::sign(dot(actualSurfaceToCamera, referenceSurfaceOutDirection));
 
     // Adjustment for if the camera is inside the min distance
-    double adjustment = 0.0;
-    if (std::abs(minHeight) > 0.0) {
-        adjustment = glm::max(minHeight - surfaceToCameraSigned, 0.0);
-    }
+    double adjustment =
+        std::abs(minHeight) > std::numeric_limits<double>::epsilon() ?
+        glm::max(minHeight - surfaceToCameraSigned, 0.0) :
+        0.0;
 
     // Adjustment for if the camera is outside the max distance
     // Only apply if the min adjustment not already applied
