@@ -1,0 +1,32 @@
+local helper = asset.require('util/scale_model_helper')
+
+local name = "School bus"
+local identifier = "ScaleSchoolBus"
+local lat = 40.780671
+local lon = -73.971701
+local altitude = 0
+local scale = 1
+local rotationVector = {0.0, 90.0, 0.0}
+
+local modelFolder = helper.createModelFolder(name, "scale_model_school_bus")
+local model = helper.createModel(identifier, lat, lon, altitude, scale, "Meter", 
+  rotationVector, name, modelFolder, "school_bus.gltf")
+
+local updatePositionAction = helper.createDropAction(identifier, name, 'Scale Objects')
+local resetPositionAction = helper.createResetAction(identifier, name, lat, lon, 'Scale Objects')
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(model)
+  openspace.action.registerAction(updatePositionAction)
+  openspace.action.registerAction(resetPositionAction)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(resetPositionAction)
+  openspace.action.removeAction(updatePositionAction)
+  openspace.removeSceneGraphNode(model)
+end)
+
+asset.export(model)
+asset.export(updatePositionAction)
+asset.export(resetPositionAction)

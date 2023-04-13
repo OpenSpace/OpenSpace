@@ -1,0 +1,32 @@
+local helper = asset.require('util/scale_model_helper')
+
+local name = "Big Ben"
+local identifier = "ScaleBigBen"
+local lat = 51.50079
+local lon = -0.12427930157489303
+local altitude = 0
+local scale = 1
+local rotationVector = { 0.0, 265.0, 0.0 }
+
+local modelFolder = helper.createModelFolder(name, "scale_model_big_ben")
+local model = helper.createModel(identifier, lat, lon, altitude, scale, "Millimeter",
+  rotationVector, name, modelFolder, "bigben.osmodel")
+
+local updatePositionAction = helper.createDropAction(identifier, name, 'Scale Objects')
+local resetPositionAction = helper.createResetAction(identifier, name, lat, lon, 'Scale Objects')
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(model)
+  openspace.action.registerAction(updatePositionAction)
+  openspace.action.registerAction(resetPositionAction)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(resetPositionAction)
+  openspace.action.removeAction(updatePositionAction)
+  openspace.removeSceneGraphNode(model)
+end)
+
+asset.export(model)
+asset.export(updatePositionAction)
+asset.export(resetPositionAction)

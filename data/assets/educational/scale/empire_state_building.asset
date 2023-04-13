@@ -1,0 +1,32 @@
+local helper = asset.require('util/scale_model_helper')
+
+local name = "Empire State Building"
+local identifier = "ScaleEmpireStateBuilding"
+local lat = 40.748441925859615
+local lon = -73.98566439323896
+local altitude = 0
+local scale = 0.5
+local rotationVector = { 0.0, 60.0, 0.0 }
+
+local modelFolder = helper.createModelFolder(name, "scale_model_empire_state")
+local model = helper.createModel(identifier, lat, lon, altitude, scale, "Meter"
+  rotationVector, name, modelFolder, "Empire_State_fbx.osmodel")
+
+local updatePositionAction = helper.createDropAction(identifier, name, 'Scale Objects')
+local resetPositionAction = helper.createResetAction(identifier, name, lat, lon, 'Scale Objects')
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(model)
+  openspace.action.registerAction(updatePositionAction)
+  openspace.action.registerAction(resetPositionAction)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(resetPositionAction)
+  openspace.action.removeAction(updatePositionAction)
+  openspace.removeSceneGraphNode(model)
+end)
+
+asset.export(model)
+asset.export(updatePositionAction)
+asset.export(resetPositionAction)

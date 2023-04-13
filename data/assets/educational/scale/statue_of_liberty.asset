@@ -1,0 +1,32 @@
+local helper = asset.require('util/scale_model_helper')
+
+local name = "Statue of Liberty"
+local identifier = "ScaleStatueOfLiberty"
+local lat = 40.68920695736352
+local lon = -74.0444870716398
+local altitude = -3
+local scale = 1
+local rotationVector = { 0.0, 235.0, 0.0 }
+
+local modelFolder = helper.createModelFolder(name, "scale_model_statue_of_liberty")
+local model = helper.createModel(identifier, lat, lon, altitude, scale, "Meter",
+  rotationVector, name, modelFolder, "STATUE_OF_LIBERTY.osmodel")
+
+local updatePositionAction = helper.createDropAction(identifier, name, 'Scale Objects')
+local resetPositionAction = helper.createResetAction(identifier, name, lat, lon, 'Scale Objects')
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(model)
+  openspace.action.registerAction(updatePositionAction)
+  openspace.action.registerAction(resetPositionAction)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(resetPositionAction)
+  openspace.action.removeAction(updatePositionAction)
+  openspace.removeSceneGraphNode(model)
+end)
+
+asset.export(model)
+asset.export(updatePositionAction)
+asset.export(resetPositionAction)
