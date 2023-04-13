@@ -40,3 +40,5 @@ COMMIT.md
 # SkyBrowser Module downloaded data
 /modules/skybrowser/wwtimagedata
 doc
+modules/fieldlinessequence/ext/hdf5/
+modules/fieldlinessequence/ext/HighFive/
