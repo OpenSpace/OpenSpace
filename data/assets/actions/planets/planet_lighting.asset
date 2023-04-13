@@ -98,7 +98,7 @@ asset.export("titan_standard", saturn_standard.Identifier)
 -- handling Earth special
 -- if we have #2258 we can do all globes with night layers instead of just earth
 -- if we have #1826 we can do the default night layer instead of the first
-local all_globes_global = {
+local all_globes_global_illumination = {
   Identifier = "os.all_globes_global_illumination",
   Name = "All globes global illumination",
   Command = [[
@@ -112,9 +112,9 @@ local all_globes_global = {
   GuiPath = "/Solar System",
   IsLocal = true
 }
-asset.export("all_globes_global_illumination", all_globes_global.Identifier)
+asset.export("all_globes_global_illumination", all_globes_global_illumination.Identifier)
 
-local all_globes_standard = {
+local all_globes_standard_illumination = {
   Identifier = "os.all_globes_standard_illumination",
   Name = "All globes standard illumination",
   Command = [[
@@ -129,7 +129,7 @@ local all_globes_standard = {
   GuiPath = "/Solar System",
   IsLocal = true
 }
-asset.export("all_globes_standard_illumination", all_globes_standard.Identifier)
+asset.export("all_globes_standard_illumination", all_globes_standard_illumination.Identifier)
 
 
 asset.onInitialize(function()
@@ -145,13 +145,13 @@ asset.onInitialize(function()
   openspace.action.registerAction(titan_standard)
   openspace.action.registerAction(saturn_global)
   openspace.action.registerAction(saturn_standard)
-  openspace.action.registerAction(all_globes_global)
-  openspace.action.registerAction(all_globes_standard)
+  openspace.action.registerAction(all_globes_global_illumination)
+  openspace.action.registerAction(all_globes_standard_illumination)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(all_globes_global)
-  openspace.action.removeAction(all_globes_standard)
+  openspace.action.removeAction(all_globes_global_illumination)
+  openspace.action.removeAction(all_globes_standard_illumination)
   openspace.action.removeAction(saturn_standard)
   openspace.action.removeAction(saturn_global)
   openspace.action.removeAction(titan_standard)
