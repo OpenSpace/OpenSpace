@@ -127,6 +127,10 @@ Image ImageSequencer::latestImageForInstrument(const std::string& instrumentID) 
     }
 }
 
+const std::vector<double>& ImageSequencer::captureProgression() const {
+    return _captureProgression;
+}
+
 std::vector<std::pair<std::string, bool>> ImageSequencer::activeInstruments(double time) {
     // first set all instruments to off
     for (std::pair<std::string, bool>& i : _switchingMap) {

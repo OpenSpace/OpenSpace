@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___MISSIONMANAGER___H__
 #define __OPENSPACE_CORE___MISSIONMANAGER___H__
 
+#include <openspace/documentation/documentationgenerator.h>
 #include <openspace/mission/mission.h>
 
 #include <ghoul/misc/assert.h>
@@ -58,7 +59,7 @@ public:
     * \pre \p filename must not contain tokens
     * \pre \p filename must exist
     */
-    std::string loadMission(const std::string& filename);
+    std::string loadMission(Mission mission);
 
     /**
      * Unloads a previously loaded mission identified by the provided \p missionName.
@@ -87,24 +88,28 @@ public:
     void setCurrentMission(const std::string& missionName);
 
     /**
-    * Returns true if a current mission exists
-    */
+     * Returns true if a current mission exists
+     */
     bool hasCurrentMission() const;
 
     /**
-    * Returns the latest mission specified to `setCurrentMission()`. If no mission has
-    * been specified, the first mission loaded will be returned. If no mission has been
-    * loaded, a warning will be printed and a dummy mission will be returned.
-    */
+     * Returns the latest mission specified to `setCurrentMission()`. If no mission has
+     * been specified, the first mission loaded will be returned. If no mission has been
+     * loaded, a warning will be printed and a dummy mission will be returned.
+     */
     const Mission& currentMission();
+
+    /**
+     * Returns the mission map.
+     */
+    const std::map<std::string, Mission>& missionMap();
+
 
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    using MissionMap = std::map<std::string, Mission>;
-    MissionMap _missionMap;
-
-    MissionMap::iterator _currentMission;
+    std::map<std::string, Mission> _missionMap;
+    std::map<std::string, Mission>::iterator _currentMission;
 };
 
 } // namespace openspace

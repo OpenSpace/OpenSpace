@@ -22,45 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
+#ifndef __OPENSPACE_MODULE_SERVER___MISSIONTOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___MISSIONTOPIC___H__
 
-// Load mission phases from file.
-[[codegen::luawrap]] void loadMission(ghoul::Dictionary mission) {
-    // TODO: Check if mission table is valid
-    openspace::global::missionManager->loadMission(mission);
-}
+#include <modules/server/include/topics/topic.h>
 
-// Unloads a previously loaded mission.
-[[codegen::luawrap]] void unloadMission(std::string missionName) {
-    using namespace openspace;
+#include <openspace/mission/mission.h>
 
-    if (missionName.empty()) {
-        throw ghoul::lua::LuaError("Mission name is empty");
-    }
+using nlohmann::json;
 
-    if (!global::missionManager->hasMission(missionName)) {
-        throw ghoul::lua::LuaError("Mission was not previously loaded");
-    }
+namespace openspace {
 
-    global::missionManager->unloadMission(missionName);
-}
+class MissionTopic : public Topic {
+public:
+    MissionTopic() = default;
+    virtual ~MissionTopic() = default;
 
-// Returns whether a mission with the provided name has been loaded.
-[[codegen::luawrap]] bool hasMission(std::string missionName) {
-    if (missionName.empty()) {
-        throw ghoul::lua::LuaError("Missing name is empty");
-    }
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
-    bool hasMission = openspace::global::missionManager->hasMission(missionName);
-    return hasMission;
-}
+private:
+    nlohmann::json missionJson() const;
+    nlohmann::json createPhaseJson(const MissionPhase& phase) const;
+};
 
-// Set the currnet mission.
-[[codegen::luawrap]] void setCurrentMission(std::string missionName) {
-    if (missionName.empty()) {
-        throw ghoul::lua::LuaError("Mission name is empty");
-    }
-    openspace::global::missionManager->setCurrentMission(missionName);
-}
-#include "missionmanager_lua_codegen.cpp"
+} // namespace openspace
 
+#endif // __OPENSPACE_MODULE_SERVER___MISSIONTOPIC___H__
