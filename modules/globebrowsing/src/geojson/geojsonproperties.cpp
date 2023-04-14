@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 
+#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
 #include <geos/io/GeoJSON.h>
@@ -236,7 +237,9 @@ namespace {
         "Tessellation Distance",
         "Defult distance to use for tessellation of line and polygon geometry. Anything "
         "larger than this distance will be automatically subdivided into smaller pieces "
-        "matching this distance, while anything smaller will not be subdivided"
+        "matching this distance, while anything smaller will not be subdivided. Per "
+        "default this will be set to a distance corresponding to about 1 degree "
+        "longitude on the globe"
     };
 
     struct [[codegen::Dictionary(GeoJsonProperties)]] Parameters {
@@ -369,7 +372,9 @@ GeoJsonProperties::GeoJsonProperties()
     addPropertySubOwner(tessellation);
 }
 
-void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary) {
+void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary,
+                                             const RenderableGlobe& globe)
+{
     const Parameters p = codegen::bake<Parameters>(dictionary);
     opacity = p.opacity.value_or(opacity);
     color = p.color.value_or(color);
@@ -397,6 +402,15 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
     if (p.altitudeMode.has_value()) {
         altitudeModeOption = static_cast<int>(codegen::map<AltitudeMode>(*p.altitudeMode));
     }
+
+    // Set up default value and max value for tessellation distance based on globe size.
+    // Distances are computed based on a certain lat/long angle size
+    constexpr float DefaultAngle = glm::radians(1.f);
+    constexpr float MaxAngle = glm::radians(45.f);
+    float defaultDistance = globe.ellipsoid().longitudalDistance(0.f, 0.f, DefaultAngle);
+    float maxDistance = globe.ellipsoid().longitudalDistance(0.f, 0.f, MaxAngle);
+    tessellation.distance = defaultDistance;
+    tessellation.distance.setMaxValue(maxDistance);
 
     if (p.tessellation.has_value()) {
         const Parameters::Tessellation pTess = (*p.tessellation);

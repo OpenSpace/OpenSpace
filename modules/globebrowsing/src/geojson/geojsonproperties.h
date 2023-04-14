@@ -41,9 +41,12 @@ namespace geos::io { class GeoJSONFeature; }
 
 namespace openspace::globebrowsing {
 
+class RenderableGlobe;
+
 struct GeoJsonProperties : public properties::PropertyOwner {
     GeoJsonProperties();
-    void createFromDictionary(const ghoul::Dictionary& dictionary);
+    void createFromDictionary(const ghoul::Dictionary& dictionary,
+        const RenderableGlobe& globe);
 
     static documentation::Documentation Documentation();
 

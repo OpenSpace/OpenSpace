@@ -336,7 +336,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     addProperty(_lineWidthScale);
 
     if (p.defaultProperties.has_value()) {
-        _defaultProperties.createFromDictionary(*p.defaultProperties);
+        _defaultProperties.createFromDictionary(*p.defaultProperties, _globeNode);
     }
     addPropertySubOwner(_defaultProperties);
 
