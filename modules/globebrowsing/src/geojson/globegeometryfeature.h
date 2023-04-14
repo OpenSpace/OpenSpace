@@ -175,7 +175,7 @@ private:
         const std::vector<Vertex>& vertices);
 
     /// Get the distance that shall be used for tesselation, based on the properties
-    float tesselationStepSize() const;
+    float tessellationStepSize() const;
 
     /// Compute the heights to the surface at the reference points
     std::vector<double> getCurrentReferencePointsHeights() const;

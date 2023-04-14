@@ -354,9 +354,10 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         }
     });
 
-    _defaultProperties.shouldTessellate.onChange([this]() { _dataIsDirty = true; });
-    _defaultProperties.tessellationLevel.onChange([this]() { _dataIsDirty = true; });
-    _defaultProperties.tessellationMaxDistance.onChange([this]() {
+    _defaultProperties.tessellation.enabled.onChange([this]() { _dataIsDirty = true; });
+    _defaultProperties.tessellation.useLevel.onChange([this]() { _dataIsDirty = true; });
+    _defaultProperties.tessellation.level.onChange([this]() { _dataIsDirty = true; });
+    _defaultProperties.tessellation.distance.onChange([this]() {
         _dataIsDirty = true;
     });
 

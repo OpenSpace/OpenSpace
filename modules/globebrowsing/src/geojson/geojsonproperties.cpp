@@ -55,7 +55,7 @@ namespace geojson::propertykeys {
 
     constexpr std::string_view Tessellate = "tessellate";
     constexpr std::string_view TessellationLevel = "tessellationLevel";
-    constexpr std::string_view TessellationMaxDistance = "tessellationMaxDistance";
+    constexpr std::string_view TessellationMaxDistance = "tessellationDistance";
 
     constexpr std::string_view AltitudeMode = "altitudeMode";
     constexpr std::string_view AltitudeModeClamp = "clampToGround";
@@ -204,28 +204,39 @@ namespace {
         "Default is a the bottom of the texture, but it can also be put at the center"
     };
 
-    // TODO: Update tessellation documentation as well as parameters..
-    constexpr openspace::properties::Property::PropertyInfo TessellateInfo = {
-        "Tessellate",
-        "Should Tessellate",
+    constexpr openspace::properties::Property::PropertyInfo TessellationEnabledInfo = {
+        "Enabled",
+        "Enabled",
         "If false, no tessellation to bend the geometry based on the curvature of the "
         "planet is performed. This leads to increased performance, but tessellation is "
         "neccessary for large geometry that spans a big portion of the globe. Otherwise "
         "it may intersect the surface"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TessellationLevelInfo = {
-        "TessellationLevel",
-        "Tesselation Level",
-        "The higher the value, the higher will the resolution of the rendered geometry "
-        "be" // @TODO: clarify
+    constexpr openspace::properties::Property::PropertyInfo UseTessellationLevelInfo = {
+        "UseTessellationLevel",
+        "Use Tessellation Level",
+        "If true, use the 'Tesselation Level' to control the level of detail for the "
+        "tessellation. The distance used will be the 'Tesselation Distance' divided by "
+        "the 'Tesselation Level', so the higher the level value, the smaller each "
+        "segment in the geomoetry will be"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TessellationMaxDistanceInfo = {
-        "TessellationMaxDistance",
-        "Tesselation Max Distance",
-        // @TODO (and consider using a distance based on angle instead)
-        "Anything larger than this will be automatically subdivided"
+    constexpr openspace::properties::Property::PropertyInfo TessellationLevelInfo = {
+        "TessellationLevel",
+        "Tessellation Level",
+        "When manual tessellation is enabled, this value will be used to determine how "
+        "much tessellation to apply. The resulting distance used for subdividing the "
+        "geometry will be the 'Tessellation Distance' divided by this value. Zero menas "
+        "to use the "
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TessellationDistanceInfo = {
+        "TessellationDistance",
+        "Tessellation Distance",
+        "Defult distance to use for tessellation of line and polygon geometry. Anything "
+        "larger than this distance will be automatically subdivided into smaller pieces "
+        "matching this distance, while anything smaller will not be subdivided"
     };
 
     struct [[codegen::Dictionary(GeoJsonProperties)]] Parameters {
@@ -270,14 +281,20 @@ namespace {
         // [[codegen::verbatim(PointAnchorOptionInfo.description)]]
         std::optional<PointTextureAnchor> pointTextureAnchor;
 
-        // [[codegen::verbatim(TessellateInfo.description)]]
-        std::optional<bool> tessellate;
+        struct Tessellation {
+            // [[codegen::verbatim(TessellationEnabledInfo.description)]]
+            std::optional<bool> ebabled;
 
-        // [[codegen::verbatim(TessellationLevelInfo.description)]]
-        std::optional<int> tessellationLevel;
+            // [[codegen::verbatim(UseTessellationLevelInfo.description)]]
+            std::optional<bool> useTessellationLevel;
 
-        // [[codegen::verbatim(TessellationMaxDistanceInfo.description)]]
-        std::optional<float> tessellationMaxDistance;
+            // [[codegen::verbatim(TessellationLevelInfo.description)]]
+            std::optional<int> tessellationLevel;
+
+            // [[codegen::verbatim(TessellationDistanceInfo.description)]]
+            std::optional<float> tessellationDistance;
+        };
+        std::optional<Tessellation> tessellation;
     };
 #include "geojsonproperties_codegen.cpp"
 } // namespace
@@ -286,6 +303,19 @@ namespace openspace::globebrowsing {
 
 documentation::Documentation GeoJsonProperties::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_geojsonproperties");
+}
+
+GeoJsonProperties::Tessellation::Tessellation()
+    : properties::PropertyOwner({ "Tessellation" })
+    , enabled(TessellationEnabledInfo, true)
+    , useLevel(UseTessellationLevelInfo, false)
+    , level(TessellationLevelInfo, 10, 0, 100)
+    , distance(TessellationDistanceInfo, 100000.f, 0.f, 1e12f)
+{
+    addProperty(enabled);
+    addProperty(distance);
+    addProperty(level);
+    addProperty(useLevel);
 }
 
 GeoJsonProperties::GeoJsonProperties()
@@ -307,9 +337,6 @@ GeoJsonProperties::GeoJsonProperties()
         PointAnchorOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , shouldTessellate(TessellateInfo, false)
-    , tessellationLevel(TessellationLevelInfo, 10, 0, 100)
-    , tessellationMaxDistance(TessellationMaxDistanceInfo, 100000.f) // TODO: use distance based on angle?
 {
     addProperty(opacity);
     color.setViewOption(properties::Property::ViewOptions::Color);
@@ -330,18 +357,16 @@ GeoJsonProperties::GeoJsonProperties()
         { static_cast<int>(AltitudeMode::Absolute), "Absolute"},
         { static_cast<int>(AltitudeMode::RelativeToGround), "Relative to Ground" }
         //{ static_cast<int>(AltitudeMode::ClampToGround), "Clamp to Ground" } / TODO: add ClampToGround
-    });
+        });
     addProperty(altitudeModeOption);
 
     pointAnchorOption.addOptions({
         { static_cast<int>(PointTextureAnchor::Bottom), "Bottom"},
         { static_cast<int>(PointTextureAnchor::Center), "Center" }
-    });
+        });
     addProperty(pointAnchorOption);
 
-    addProperty(shouldTessellate);
-    addProperty(tessellationLevel);
-    addProperty(tessellationMaxDistance);
+    addPropertySubOwner(tessellation);
 }
 
 void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary) {
@@ -373,9 +398,15 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
         altitudeModeOption = static_cast<int>(codegen::map<AltitudeMode>(*p.altitudeMode));
     }
 
-    shouldTessellate = p.tessellate.value_or(shouldTessellate);
-    tessellationLevel = p.tessellationLevel.value_or(tessellationLevel);
-    tessellationMaxDistance = p.tessellationMaxDistance.value_or(tessellationMaxDistance);
+    if (p.tessellation.has_value()) {
+        const Parameters::Tessellation pTess = (*p.tessellation);
+        tessellation.enabled = pTess.useTessellationLevel.value_or(tessellation.enabled);
+        tessellation.useLevel =
+            pTess.useTessellationLevel.value_or(tessellation.useLevel);
+        tessellation.level = pTess.tessellationLevel.value_or(tessellation.level);
+        tessellation.distance =
+            pTess.tessellationDistance.value_or(tessellation.distance);
+    }
 }
 
 GeoJsonProperties::AltitudeMode GeoJsonProperties::altitudeMode() const {
@@ -457,14 +488,15 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
                 ));
             }
         }
-        else if (keyMatches(key, propertykeys::Tessellate, TessellateInfo)) {
-            result.shouldTessellate = value.getBoolean();
+        else if (keyMatches(key, propertykeys::Tessellate, TessellationEnabledInfo)) {
+            result.tessellationEnabled = value.getBoolean();
         }
         else if (keyMatches(key, propertykeys::TessellationLevel, TessellationLevelInfo)) {
+            result.useTessellationLevel = true;
             result.tessellationLevel = static_cast<float>(value.getNumber());
         }
-        else if (keyMatches(key, propertykeys::TessellationMaxDistance, TessellationMaxDistanceInfo)) {
-            result.tessellationMaxDistance = static_cast<float>(value.getNumber());
+        else if (keyMatches(key, propertykeys::TessellationMaxDistance, TessellationDistanceInfo)) {
+            result.tessellationDistance = static_cast<float>(value.getNumber());
         }
     };
 
@@ -512,7 +544,9 @@ std::string PropertySet::pointTexture() const {
 }
 
 GeoJsonProperties::PointTextureAnchor PropertySet::pointTextureAnchor() const {
-    return overrideValues.pointTextureAnchor.value_or(defaultValues.pointTextureAnchor());
+    return overrideValues.pointTextureAnchor.value_or(
+        defaultValues.pointTextureAnchor()
+    );
 }
 
 bool PropertySet::extrude() const {
@@ -527,17 +561,23 @@ GeoJsonProperties::AltitudeMode PropertySet::altitudeMode() const {
     return overrideValues.altitudeMode.value_or(defaultValues.altitudeMode());
 }
 
-bool PropertySet::shouldTessellate() const {
-    return overrideValues.shouldTessellate.value_or(defaultValues.shouldTessellate);
+bool PropertySet::tessellationEnabled() const {
+    return overrideValues.tessellationEnabled.value_or(defaultValues.tessellation.enabled);
+}
+
+bool PropertySet::useTessellationLevel() const {
+    return overrideValues.useTessellationLevel.value_or(
+        defaultValues.tessellation.useLevel
+    );
 }
 
 int PropertySet::tessellationLevel() const {
-    return overrideValues.tessellationLevel.value_or(defaultValues.tessellationLevel);
+    return overrideValues.tessellationLevel.value_or(defaultValues.tessellation.level);
 }
 
-float PropertySet::tessellationMaxDistance() const {
-    return overrideValues.tessellationMaxDistance.value_or(
-        defaultValues.tessellationMaxDistance
+float PropertySet::tessellationDistance() const {
+    return overrideValues.tessellationDistance.value_or(
+        defaultValues.tessellation.distance
     );
 }
 

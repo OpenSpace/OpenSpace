@@ -577,24 +577,30 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
 
             float length = static_cast<float>(glm::distance(lastPos, v));
 
-            // Tessellate.
-            // But first, determine the step size for the tessellation (larger features will
-            // not be tesselated)
-            float stepSize = tesselationStepSize();
+            if (_properties.tessellationEnabled()) {
+                // Tessellate.
+                // But first, determine the step size for the tessellation (larger
+                // features will not be tesselated)
+                float stepSize = tessellationStepSize();
 
-            std::vector<geometryhelper::PosHeightPair> subdividedPositions =
-                geometryhelper::subdivideLine(
-                    lastPos,
-                    v,
-                    lastHeightValue,
-                    geodetic.height,
-                    stepSize
-                );
+                std::vector<geometryhelper::PosHeightPair> subdividedPositions =
+                    geometryhelper::subdivideLine(
+                        lastPos,
+                        v,
+                        lastHeightValue,
+                        geodetic.height,
+                        stepSize
+                    );
 
-            // Don't add the first position. Has been added as the last in previous step
-            for (int subi = 1; subi < subdividedPositions.size(); ++subi) {
-                const geometryhelper::PosHeightPair& pair = subdividedPositions[subi];
-                addLinePos(glm::vec3(pair.position));
+                // Don't add the first position. Has been added as last in previous step
+                for (int si = 1; si < subdividedPositions.size(); ++si) {
+                    const geometryhelper::PosHeightPair& pair = subdividedPositions[si];
+                    addLinePos(glm::vec3(pair.position));
+                }
+            }
+            else {
+                // Just add the line point
+                addLinePos(glm::vec3(v));
             }
 
             lastPos = v;
@@ -719,22 +725,26 @@ void GlobeGeometryFeature::createPolygonGeometry() {
             double h1 = triHeights[1];
             double h2 = triHeights[2];
 
-            float longestSide = std::max(
-                std::max(glm::distance(v0, v1), glm::distance(v0, v2)),
-                glm::distance(v1, v2)
-            );
+            if (_properties.tessellationEnabled()) {
+                // First determine the step size for the tessellation (larger features
+                // will not be tesselated)
+                float stepSize = tessellationStepSize();
 
-            // First determine the step size for the tessellation (larger features will
-            // not be tesselated)
-            float stepSize = tesselationStepSize();
-
-            std::vector<Vertex> verts = geometryhelper::subdivideTriangle(
-                v0, v1, v2,
-                h0, h1, h2,
-                stepSize,
-                _globe
-            );
-            polyVertices.insert(polyVertices.end(), verts.begin(), verts.end());
+                std::vector<Vertex> verts = geometryhelper::subdivideTriangle(
+                    v0, v1, v2,
+                    h0, h1, h2,
+                    stepSize,
+                    _globe
+                );
+                polyVertices.insert(polyVertices.end(), verts.begin(), verts.end());
+            }
+            else {
+                // Just add a triangle consisting of the three vertices
+                const glm::vec3 n = -glm::normalize(glm::cross(v1 - v0, v2 - v0));
+                polyVertices.push_back({ v0.x, v0.y, v0.z, n.x, n.y, n.z });
+                polyVertices.push_back({ v1.x, v1.y, v1.z, n.x, n.y, n.z });
+                polyVertices.push_back({ v2.x, v2.y, v2.z, n.x, n.y, n.z });
+            }
         }
     }
 
@@ -760,9 +770,9 @@ void GlobeGeometryFeature::initializeRenderFeature(RenderFeature& feature,
     bufferVertexData(feature, vertices);
 }
 
-float GlobeGeometryFeature::tesselationStepSize() const {
-    float distance = _properties.tessellationMaxDistance();
-    bool shouldDivideDistance = _properties.shouldTessellate() &&
+float GlobeGeometryFeature::tessellationStepSize() const {
+    float distance = _properties.tessellationDistance();
+    bool shouldDivideDistance = _properties.useTessellationLevel() &&
         _properties.tessellationLevel() > 0;
 
     if (shouldDivideDistance) {
