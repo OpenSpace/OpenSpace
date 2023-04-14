@@ -46,8 +46,8 @@ local Mission = {
       Description = "Together with 2867-Steins, 21-Lutetia is one of the two target asteroids that Rosetta will study during its long trek to comet 67P-Churyumov-Gersimenko."
     },
     {
-      Date = "2014 MAY 07 00:00:00"
-      Name = "Rendezvous maneuvers begin",
+      Date = "2014 MAY 07 00:00:00",
+      Name = "Rendezvous maneuvers begin"
     },
     {
       Name = "Arrive at comet",
