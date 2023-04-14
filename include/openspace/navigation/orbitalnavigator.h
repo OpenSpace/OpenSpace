@@ -255,7 +255,7 @@ private:
     IdleBehavior _idleBehavior;
     float _idleBehaviorTriggerTimer = 0.f;
 
-    float _movementTimer = 0.0;
+    float _movementTimer = 0.f;
 
     /**
      * Decomposes the camera's rotation in to a global and a local rotation defined by
