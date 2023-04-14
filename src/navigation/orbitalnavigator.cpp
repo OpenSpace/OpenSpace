@@ -863,7 +863,7 @@ void OrbitalNavigator::updateOnCameraInteraction() {
     }
 }
 
-void OrbitalNavigator::tickMovementTimer(double deltaTime) {
+void OrbitalNavigator::tickMovementTimer(float deltaTime) {
     _movementTimer -= deltaTime;
 }
 
