@@ -58,8 +58,6 @@ public:
         const globebrowsing::TileIndex& tileIndex) override final;
     globebrowsing::TileDepthTransform depthTransform() override final;
 
-    static documentation::Documentation Documentation();
-
 private:
     void internalInitialize() override final;
     void internalDeinitialize() override final;

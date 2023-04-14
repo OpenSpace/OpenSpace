@@ -37,7 +37,6 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   videomodule.cpp
-  videomodule_lua.inl
   src/videotileprovider.cpp
   src/videoplayer.cpp
   src/screenspacevideo.cpp

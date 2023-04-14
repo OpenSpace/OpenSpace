@@ -33,8 +33,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
 
-#include "videomodule_lua.inl"
-
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
@@ -83,9 +81,6 @@ void VideoModule::internalInitialize(const ghoul::Dictionary& dict) {
 }
 
 std::vector<documentation::Documentation> VideoModule::documentations() const {
-     return {
-        VideoTileProvider::Documentation(),
-    };
     return std::vector<documentation::Documentation>();
 }
 

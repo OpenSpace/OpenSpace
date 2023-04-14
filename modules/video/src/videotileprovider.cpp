@@ -37,18 +37,15 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "VideoTileProvider";
-
-#include "videotileprovider_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 namespace {
 
-constexpr bool isDifferent(double first, double second) {
+bool isDifferent(double first, double second) {
     return abs(first - second) > glm::epsilon<double>();
 }
-
 }
 
 VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)

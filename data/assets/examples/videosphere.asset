@@ -23,7 +23,7 @@ local sphere = {
     Orientation = "Both",
   },
   GUI = {
-    Name = "Aurora Sphere",
+    Name = "Video Sphere",
     Path = "/Other/Spheres"
   }
 }
