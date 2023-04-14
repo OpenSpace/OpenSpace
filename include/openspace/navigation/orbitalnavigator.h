@@ -253,7 +253,7 @@ private:
     bool _invertIdleBehaviorInterpolation = false;
 
     IdleBehavior _idleBehavior;
-    float _idleBehaviorTriggerTimer = 0.0;
+    float _idleBehaviorTriggerTimer = 0.f;
 
     float _movementTimer = 0.0;
 
