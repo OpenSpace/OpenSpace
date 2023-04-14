@@ -22,7 +22,7 @@ local GanymedeTrail = {
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
   GUI = {
     Name = "Ganymede Trail",
-    Path = "/Solar System/Planets/Jupiter/Moons"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Ganymede"
   }
 }
 

@@ -21,7 +21,7 @@ local TethysTrail = {
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
   GUI = {
     Name = "Tethys Trail",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Tethys",
     Description = "Trail of Saturn's moon Tethys as observed by Saturn",
   }
 }

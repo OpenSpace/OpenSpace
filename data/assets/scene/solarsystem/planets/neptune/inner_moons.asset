@@ -29,7 +29,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Naiad"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.294,
@@ -46,7 +46,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Thalassa"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.311,
@@ -63,7 +63,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Despina"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.335,
@@ -80,7 +80,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Galatea"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.429,
@@ -97,7 +97,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Larissa"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.555,
@@ -115,7 +115,7 @@ local innerMoons = {
     TrailTags = trailTags,
     GUI = {
       Name = "Hippocamp",
-      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Hippocamp"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.936,
@@ -132,7 +132,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Proteus"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.122,
@@ -166,7 +166,7 @@ for i, moon in ipairs(innerMoons) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Neptune/Moons",
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/" .. moon.Identifier,
       Description = "Label for Neptune's moon " .. moonName .. " (inner group)"
     }
   }

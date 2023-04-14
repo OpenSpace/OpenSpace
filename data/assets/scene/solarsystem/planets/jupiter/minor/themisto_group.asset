@@ -27,7 +27,7 @@ local themistoGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Themisto Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto"
     },
     TrailColor = trailColor,
     OrbitPeriod = 129.87,
@@ -60,7 +60,7 @@ for i, moon in ipairs(themistoGroup) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Jupiter/Moons",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto",
       Description = "Label for Jupiter's moon " .. moonName .. " (Themisto group)"
     }
   }
