@@ -17,7 +17,7 @@ local gridPosition = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
       Latitude = 0,
-      Longitude = 0,
+      Longitude = 0.0,
       UseHeightmap = false,
       UseCamera = true
     }
