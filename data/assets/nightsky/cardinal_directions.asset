@@ -66,24 +66,41 @@ local sphere = {
   }
 }
 
-local showAction = {
-  Identifier = "os.show_nesw",
-  Name = "Show cardinal directions",
-  Command = [[
-    local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
-    local camera = openspace.navigation.getNavigationState();
-    openspace.setParent('CardinalDirectionsPosition', camera.Anchor)
-    openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Globe', camera.Anchor);
-    openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Latitude', lat);
-    openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Longitude', lon);
-    openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Globe', camera.Anchor);
-    openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Latitude', lat);
-    openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Longitude', lon);
-    openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0);
-    openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 1, 1);
-  ]],
-  Documentation = "Shows the cardinal direction sphere and updates it to your current position",
+local showCommand = [[
+
+  local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
+  local camera = openspace.navigation.getNavigationState();
+  openspace.setParent('CardinalDirectionsPosition', camera.Anchor)
+  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Globe', camera.Anchor);
+  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Latitude', lat);
+  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Longitude', lon);
+  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Globe', camera.Anchor);
+  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Latitude', lat);
+  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Longitude', lon);
+  openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Enabled', true);
+  openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0);
+  openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 1, 1);
+]]
+
+
+local showBandAction = {
+  Identifier = "os.show_nesw_band",
+  Name = "Show cardinal directions (with ticks)",
+  Command = "openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Texture','"
+  .. textures:gsub("\\","/") .. "sphere5.png')"
+  .. showCommand,
+  Documentation = "Shows the cardinal direction sphere with letters and a band",
+  GuiPath = "/Night Sky/Directions",
+  IsLocal = false
+}
+
+local showLettersAction = {
+  Identifier = "os.show_nesw_letters",
+  Name = "Show cardinal directions (letters only)",
+  Command = "openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Texture','"
+  .. textures:gsub("\\","/") .. "sphere.png')"
+  .. showCommand,
+  Documentation = "Shows the cardinal direction sphere with letters only",
   GuiPath = "/Night Sky/Directions",
   IsLocal = false
 }
@@ -99,22 +116,24 @@ local hideAction = {
   IsLocal = false
 }
 
-
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Position)
   openspace.addSceneGraphNode(sphere)
   openspace.action.registerAction(hideAction)
-  openspace.action.registerAction(showAction)
+  openspace.action.registerAction(showBandAction)
+  openspace.action.registerAction(showLettersAction)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(showAction)
+  openspace.action.removeAction(showLettersAction)
+  openspace.action.removeAction(showBandAction)
   openspace.action.removeAction(hideAction)
   openspace.removeSceneGraphNode(sphere)
   openspace.removeSceneGraphNode(Position)
 end)
 
-asset.export(showAction)
+asset.export(showBandAction)
+asset.export(showLettersAction)
 asset.export(hideAction)
 asset.export(sphere)
 asset.export(Position)
