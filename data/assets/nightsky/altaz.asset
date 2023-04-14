@@ -51,7 +51,7 @@ local grid = {
     RenderBinMode = "PostDeferredTransparent"
   },
   GUI = {
-    Name = "Altaz Grid",
+    Name = "Altitude/Azimuth Grid",
     Path = "/Night Sky/Lines and Grids"
   }
 }
