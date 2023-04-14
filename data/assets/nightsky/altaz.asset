@@ -23,7 +23,7 @@ local gridPosition = {
     }
   },
   GUI = {
-    Name = "Altaz Grid Position",
+    Name = "Altitude/Azimuth Grid Position",
     Path = "/Night Sky/Lines and Grids",
     Hidden = true
   }
