@@ -31,7 +31,7 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.80812,
@@ -48,7 +48,7 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.00957,
@@ -65,7 +65,7 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.05089,
@@ -82,7 +82,7 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.370218,
@@ -99,7 +99,7 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.887802,
@@ -116,7 +116,7 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.887802,
@@ -133,7 +133,7 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene"
     },
     TrailColor = trailColor,
     OrbitPeriod = 2.736915,
@@ -150,7 +150,7 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces"
     },
     TrailColor = trailColor,
     OrbitPeriod = 2.736915,
@@ -168,7 +168,7 @@ local otherGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 24",
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1293.85,
@@ -201,7 +201,7 @@ for i, moon in ipairs(otherGroup) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Saturn/Moons",
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/" .. moon.Identifier,
       Description = "Label for Saturn's moon " .. moonName .. " (other group)"
     }
   }

@@ -24,7 +24,7 @@ local CharonTrailBarycentric = {
   },
   GUI = {
     Name = "Charon Barycentric Trail",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Charon"
   }
 }
 

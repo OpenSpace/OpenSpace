@@ -1,5 +1,5 @@
-return 
-{ Name = "Nominal_Observations_Science", Phases = {
+local Mission = {
+  Name = "Nominal_Observations_Science", Phases = {
   { Name = "03_Approach", Phases = {
     { Name = "DustSearch_v1", Phases = {
       { Name = "Phase03_AP_DustSearch_1.bc", TimeRange = { Start = "2018-SEP-11 21:31:01.183", End = "2018-SEP-12 02:18:41.183" }},
@@ -93,3 +93,12 @@ return
     }},
   }},
 }}
+
+
+asset.onInitialize(function()
+  openspace.loadMission(Mission)
+end)
+
+asset.onDeinitialize(function()
+  openspace.unloadMission(Mission.Name)
+end)

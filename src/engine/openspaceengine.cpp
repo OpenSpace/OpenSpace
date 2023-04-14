@@ -41,6 +41,7 @@
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
+#include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/network/parallelpeer.h>
@@ -1029,13 +1030,13 @@ void OpenSpaceEngine::writeDocumentation() {
     path = absPath(path).string() + '/';
 
     // Start the async requests as soon as possible so they are finished when we need them
-    std::future<std::string> root = std::async(
-        &properties::PropertyOwner::generateJson,
+    std::future<nlohmann::json> settings = std::async(
+        &properties::PropertyOwner::generateJsonJson,
         global::rootPropertyOwner
     );
 
-    std::future<std::string> scene = std::async(
-        &properties::PropertyOwner::generateJson,
+    std::future<nlohmann::json> scene = std::async(
+        &properties::PropertyOwner::generateJsonJson,
         _scene.get()
     );
 
@@ -1044,56 +1045,41 @@ void OpenSpaceEngine::writeDocumentation() {
     DocEng.addHandlebarTemplates(FactoryManager::ref().templatesToRegister());
     DocEng.addHandlebarTemplates(DocEng.templatesToRegister());
 
-    std::string json = "{\"documentation\":[";
+    nlohmann::json scripting;
+    scripting["Name"] = "Scripting API";
+    scripting["Data"] = global::scriptEngine->generateJsonJson();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Scripting",
-        global::scriptEngine->jsonName(),
-        global::scriptEngine->generateJson()
-    );
+    nlohmann::json factory;
+    factory["Name"] = "Asset Types";
+    factory["Data"] = FactoryManager::ref().generateJsonJson();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Top Level", DocEng.jsonName(), DocEng.generateJson()
-    );
-
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Factory", FactoryManager::ref().jsonName(), FactoryManager::ref().generateJson()
-    );
-
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Keybindings",
-        global::keybindingManager->jsonName(),
-        global::keybindingManager->generateJson()
-    );
+    nlohmann::json keybindings;
+    keybindings["Name"] = "Keybindings";
+    keybindings["Keybindings"] = global::keybindingManager->generateJsonJson();
 
     SceneLicenseWriter writer;
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Scene License Information", writer.jsonName(), writer.generateJson()
-    );
+    nlohmann::json license;
+    license["Name"] = "Licenses";
+    license["Data"] = writer.generateJsonJson();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Scene Properties", "propertylist", root.get()
-    );
+    nlohmann::json sceneProperties;
+    sceneProperties["Name"] = "Settings";
+    sceneProperties["Data"] = settings.get();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}})",
-        "Scene Graph Information", "propertylist", scene.get()
-    );
+    nlohmann::json sceneGraph;
+    sceneGraph["Name"] = "Scene";
+    sceneGraph["Data"] = scene.get();
 
-    json += "]}";
+    nlohmann::json documentation = { 
+        sceneGraph, sceneProperties, keybindings, license, scripting, factory 
+    };
 
-    // Add templates for the JSONs we just registered
-    DocEng.addHandlebarTemplates(global::keybindingManager->templatesToRegister());
-    DocEng.addHandlebarTemplates(writer.templatesToRegister());
-    DocEng.addHandlebarTemplates(global::rootPropertyOwner->templatesToRegister());
+    nlohmann::json result;
+    result["documentation"] = documentation;
 
-    DocEng.writeDocumentationHtml(path, json);
+    std::ofstream out(absPath("${DOCUMENTATION}/documentationData.js"));
+    out << "var data = " << result.dump();
+    out.close();
 }
 
 void OpenSpaceEngine::preSynchronization() {

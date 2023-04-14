@@ -5,7 +5,7 @@ local orbit = asset.syncedResource({
   Name = "Itokawa Orbit",
   Type = "HttpSynchronization",
   Identifier = "itokawa_horizons",
-  Version = 1
+  Version = 2
 })
 
 local model = asset.syncedResource({

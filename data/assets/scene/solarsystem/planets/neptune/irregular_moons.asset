@@ -28,7 +28,7 @@ local irregularProgradeMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Halimede"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1879.08,
@@ -45,7 +45,7 @@ local irregularProgradeMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Psamathe"
     },
     TrailColor = trailColor,
     OrbitPeriod = 9074.3,
@@ -62,7 +62,7 @@ local irregularProgradeMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Sao"
     },
     TrailColor = trailColor,
     OrbitPeriod = 2912.72,
@@ -79,7 +79,7 @@ local irregularProgradeMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Laomedeia"
     },
     TrailColor = trailColor,
     OrbitPeriod = 3171.33,
@@ -96,7 +96,7 @@ local irregularProgradeMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Neso"
     },
     TrailColor = trailColor,
     OrbitPeriod = 9740.73,
@@ -130,7 +130,7 @@ for i, moon in ipairs(irregularProgradeMoons) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Neptune/Moons",
+      Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/" .. moon.Identifier,
       Description = "Label for Neptune's moon " .. moonName .. " (Irregular prograde group)"
     }
   }

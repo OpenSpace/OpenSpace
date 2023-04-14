@@ -28,7 +28,7 @@ local irregularMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco"
     },
     TrailColor = trailColor,
     OrbitPeriod = 266.56,
@@ -45,7 +45,7 @@ local irregularMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban"
     },
     TrailColor = trailColor,
     OrbitPeriod = 579.50,
@@ -62,7 +62,7 @@ local irregularMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano"
     },
     TrailColor = trailColor,
     OrbitPeriod = 676.50,
@@ -79,7 +79,7 @@ local irregularMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo"
     },
     TrailColor = trailColor,
     OrbitPeriod = 758.10,
@@ -96,7 +96,7 @@ local irregularMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1283.4,
@@ -113,7 +113,7 @@ local irregularMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1992.8,
@@ -130,7 +130,7 @@ local irregularMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos"
     },
     TrailColor = trailColor,
     OrbitPeriod = 2202.3,
@@ -147,7 +147,7 @@ local irregularMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand"
     },
     TrailColor = trailColor,
     OrbitPeriod = 2823.4,
@@ -180,7 +180,7 @@ for i, moon in ipairs(irregularMoons) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Uranus/Moons",
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/" .. moon.Identifier,
       Description = "Label for Uranus' moon " .. moonName .. " (Irregular retrograde group)"
     }
   }

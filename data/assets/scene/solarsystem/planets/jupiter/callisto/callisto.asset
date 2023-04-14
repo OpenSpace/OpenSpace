@@ -48,7 +48,7 @@ local Callisto = {
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
   GUI = {
-    Path = "/Solar System/Planets/Jupiter/Moons"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Callisto"
   }
 }
 
@@ -72,7 +72,7 @@ local CallistoLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Callisto Label",
-    Path = "/Solar System/Planets/Jupiter/Moons",
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Callisto",
     Description = "Label for Jupiter's moon Callisto"
   }
 }

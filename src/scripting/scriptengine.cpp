@@ -39,7 +39,6 @@
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <filesystem>
 #include <fstream>
-
 #include "scriptengine_lua.inl"
 
 namespace {
@@ -82,85 +81,50 @@ namespace {
         return result;
     }
 
-    void toJson(const openspace::scripting::LuaLibrary& library, std::stringstream& json)
-    {
-        constexpr std::string_view replStr = R"("{}": "{}", )";
-        constexpr std::string_view replStr2 = R"("{}": "{}")";
+    void sortJson(nlohmann::json& json) {
+        std::sort(
+            json.begin(),
+            json.end(),
+            [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
+                std::string lhsString = lhs["Name"];
+                std::string rhsString = rhs["Name"];
+                std::transform(
+                    lhsString.begin(),
+                    lhsString.end(),
+                    lhsString.begin(),
+                    [](unsigned char c) { return std::tolower(c); }
+                );
+                std::transform(
+                    rhsString.begin(),
+                    rhsString.end(),
+                    rhsString.begin(),
+                    [](unsigned char c) { return std::tolower(c); }
+                );
 
+                return rhsString > lhsString;
+            });
+    }
+
+    nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f) {
         using namespace openspace;
         using namespace openspace::scripting;
+        nlohmann::json function;
+        function["Name"] = f.name;
+        nlohmann::json arguments = nlohmann::json::array();
 
-        json << "{";
-        json << fmt::format(replStr, "library", library.name);
-        json << "\"functions\": [";
-
-        for (const LuaLibrary::Function& f : library.functions) {
-            json << "{";
-            json << fmt::format(replStr, "name", f.name);
-            json << "\"arguments\": [";
-            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
-                json << "{";
-                json << fmt::format(replStr, "name", escapedJson(arg.name));
-                json << fmt::format(replStr, "type", escapedJson(arg.type));
-                json << fmt::format(
-                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
-                );
-                json << "}";
-
-                if (&arg != &f.arguments.back()) {
-                    json << ",";
-                }
-            }
-            json << "],";
-            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
-            json << fmt::format(replStr, "help", escapedJson(f.helpText));
-            json << fmt::format(
-                "\"sourceLocation\": {{ \"file\": \"{}\", \"line\": {} }}",
-                escapedJson(f.sourceLocation.file), f.sourceLocation.line
-            );
-            json << "}";
-            if (&f != &library.functions.back() || !library.documentations.empty()) {
-                json << ",";
-            }
+        for (const LuaLibrary::Function::Argument& arg : f.arguments) {
+            nlohmann::json argument;
+            argument["Name"] = arg.name;
+            argument["Type"] = arg.type;
+            argument["Default Value"] = arg.defaultValue.value_or("");
+            arguments.push_back(argument);
         }
 
+        function["Arguments"] = arguments;
+        function["Return Type"] = f.returnType;
+        function["Help"] = f.helpText;
 
-        for (const LuaLibrary::Function& f : library.documentations) {
-            json << "{";
-            json << fmt::format(replStr, "name", f.name);
-            json << "\"arguments\": [";
-            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
-                json << "{";
-                json << fmt::format(replStr, "name", escapedJson(arg.name));
-                json << fmt::format(replStr, "type", escapedJson(arg.type));
-                json << fmt::format(
-                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
-                );
-                json << "}";
-
-                if (&arg != &f.arguments.back()) {
-                    json << ",";
-                }
-            }
-            json << "],";
-            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
-            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
-            json << "}";
-            if (&f != &library.documentations.back()) {
-                json << ",";
-            }
-        }
-
-        json << "],";
-
-        json << "\"subLibraries\": [";
-        for (const LuaLibrary& sl : library.subLibraries) {
-            toJson(sl, json);
-            if (&sl != &library.subLibraries.back()) {
-                json << ",";
-            }
-        }
-        json << "]}";
+        return function;
     }
 
 #include "scriptengine_codegen.cpp"
@@ -510,24 +474,35 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
 }
 
 std::string ScriptEngine::generateJson() const {
-    ZoneScoped;
+    return "";
+}
 
-    // Create JSON
-    std::stringstream json;
-    json << "[";
+nlohmann::json ScriptEngine::generateJsonJson() const {
+    ZoneScoped
 
-    bool first = true;
+    nlohmann::json json;
+
     for (const LuaLibrary& l : _registeredLibraries) {
-        if (!first) {
-            json << ",";
+        using namespace openspace;
+        using namespace openspace::scripting;
+
+        nlohmann::json library;
+        std::string libraryName = l.name.empty() ? "openspace" : "openspace." + l.name;
+        library["Name"] = libraryName;
+
+        for (const LuaLibrary::Function& f : l.functions) {
+            library["Functions"].push_back(toJson(f));
         }
-        first = false;
 
-        toJson(l, json);
+        for (const LuaLibrary::Function& f : l.documentations) {
+            library["Functions"].push_back(toJson(f));
+        }
+        sortJson(library["Functions"]);
+        json.push_back(library);
+
+        sortJson(json);
     }
-    json << "]";
-
-    return json.str();
+    return json;
 }
 
 void ScriptEngine::writeLog(const std::string& script) {

@@ -47,7 +47,7 @@ local Europa = {
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
   GUI = {
-    Path = "/Solar System/Planets/Jupiter/Moons"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Europa"
   }
 }
 
@@ -71,7 +71,7 @@ local EuropaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Europa Label",
-    Path = "/Solar System/Planets/Jupiter/Moons",
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Europa",
     Description = "Label for Jupiter's moon Europa"
   }
 }

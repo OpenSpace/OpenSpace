@@ -1,0 +1,45 @@
+local transforms = asset.require("./transforms")
+
+local Label = {
+  Identifier = "QuaoarLabel",
+  Parent = transforms.Position.Identifier,
+  Renderable = {
+    Enabled = asset.enabled,
+    Type = "RenderableLabel",
+    Text = "Quaoar",
+    FontSize = 70.0,
+    Size = 9.10,
+    MinMaxSize = { 1.0, 100.0 },
+    BlendMode = "Additive",
+    OrientationOption = "Camera View Direction",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.0, 120.0 },
+    FadeWidths = { 1.0, 150.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Quaoar Label",
+    Path = "/Solar System/Dwarf Planets/Quaoar",
+    Description = "Label for Quaoar, visible at the solarsystem overview zoom level"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Label)
+end)
+
+asset.export("Label", Label)
+
+asset.meta = {
+  Name = "Quaoar Label",
+  Version = "1.0",
+  Description = [[Label of Quaoar]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

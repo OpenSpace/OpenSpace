@@ -15,7 +15,7 @@ local Triton = {
   Tags = { "moon_solarSystem", "moon_giants", "moon_neptune" },
   TrailTags = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_neptune" },
   GUI = {
-    Path = "/Solar System/Planets/Neptune/Moons"
+    Path = "/Solar System/Planets/Neptune/Major Moons/Triton"
   },
   TrailColor = { 0.2, 0.5, 0.75 },
   OrbitPeriod = 5.877,
@@ -48,7 +48,7 @@ for i, moon in ipairs({ Triton }) do
     Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Neptune/Moons",
+      Path = "/Solar System/Planets/Neptune/Major Moons/" .. moon.Identifier,
       Description = "Label for Neptune's moon " .. moonName
     }
   }

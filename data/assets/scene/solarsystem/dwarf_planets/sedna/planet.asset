@@ -1,0 +1,44 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
+local transforms = asset.require("./transforms")
+
+local Planet = {
+  Identifier = "SednaGlobe",
+  Parent = transforms.Position.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = {0.0, 0.0, 1.0},
+      RotationRate = 1.0/(10.273*60.0*60.0)
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 995.0E3, 1060.0E3, 1025.0E3 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  GUI = {
+    Name = "Sedna",
+    Path = "/Solar System/Dwarf Planets/Sedna",
+    Description = "Globe of Sedna"
+  } 
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Planet)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Planet)
+end)
+
+asset.export("Planet", Planet)
+
+asset.meta = {
+  Name = "Sedna Globe",
+  Version = "1.0",
+  Description = [[Globe of Sedna]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}
