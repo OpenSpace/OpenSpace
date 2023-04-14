@@ -22,48 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOPLANE___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOPLANE___H__
 
 #include <modules/base/rendering/renderableplane.h>
 
-#include <openspace/engine/downloadmanager.h>
-
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class Texture; }
+#include <modules/video/include/videoplayer.h>
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
-
 namespace documentation { struct Documentation; }
 
-class RenderablePlaneImageOnline : public RenderablePlane {
+class RenderableVideoPlane : public RenderablePlane {
 public:
-    RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary);
+    RenderableVideoPlane(const ghoul::Dictionary& dictionary);
 
+    void initializeGL() override;
     void deinitializeGL() override;
 
-    void update(const UpdateData& data) override;
+    bool isReady() const override;
 
-    static documentation::Documentation Documentation();
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
 
 protected:
     virtual void bindTexture() override;
 
 private:
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
-        const std::string& url);
-
-    properties::StringProperty _texturePath;
-
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    VideoPlayer _videoPlayer;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
-    bool _textureIsDirty = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOPLANE___H__

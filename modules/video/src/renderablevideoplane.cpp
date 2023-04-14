@@ -22,48 +22,71 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#include <modules/video/include/renderablevideoplane.h>
 
-#include <modules/base/rendering/renderableplane.h>
-
-#include <openspace/engine/downloadmanager.h>
-
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class Texture; }
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
+RenderableVideoPlane::RenderableVideoPlane(const ghoul::Dictionary& dictionary)
+    : RenderablePlane(dictionary)
+    , _videoPlayer(dictionary)
+{
+    addPropertySubOwner(_videoPlayer);
+}
 
-namespace documentation { struct Documentation; }
+void RenderableVideoPlane::initializeGL() {
+    RenderablePlane::initializeGL();
+    _videoPlayer.initialize();
+}
 
-class RenderablePlaneImageOnline : public RenderablePlane {
-public:
-    RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary);
+void RenderableVideoPlane::deinitializeGL() {
+    _videoPlayer.destroy();
+    RenderablePlane::deinitializeGL();
+}
 
-    void deinitializeGL() override;
+bool RenderableVideoPlane::isReady() const {
+    return RenderablePlane::isReady() && _videoPlayer.isInitialized();
+}
 
-    void update(const UpdateData& data) override;
+void RenderableVideoPlane::render(const RenderData& data, RendererTasks& rendererTask) {
+    if (_videoPlayer.isInitialized()) {
+        RenderablePlane::render(data, rendererTask);
+    }
+}
 
-    static documentation::Documentation Documentation();
+void RenderableVideoPlane::update(const UpdateData& data) {
+    _videoPlayer.update();
 
-protected:
-    virtual void bindTexture() override;
+    if (!_videoPlayer.isInitialized()) {
+        return;
+    }
 
-private:
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
-        const std::string& url);
+    // Shape the vidoe based on the aspect ration of the film
+    glm::vec2 textureDim = glm::vec2(_videoPlayer.frameTexture()->dimensions());
+    if (_textureDimensions != textureDim) {
+        float aspectRatio = textureDim.x / textureDim.y;
+        float planeAspectRatio = _size.value().x / _size.value().y;
 
-    properties::StringProperty _texturePath;
+        if (std::abs(planeAspectRatio - aspectRatio) >
+            std::numeric_limits<float>::epsilon())
+        {
+            glm::vec2 newSize =
+                aspectRatio > 0.f ?
+                glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+            _size = newSize;
+        }
 
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    glm::vec2 _textureDimensions = glm::vec2(0.f);
-    bool _textureIsDirty = false;
-};
+        _textureDimensions = textureDim;
+    }
+
+    RenderablePlane::update(data);
+}
+
+void RenderableVideoPlane::bindTexture() {
+    _videoPlayer.frameTexture()->bind();
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__

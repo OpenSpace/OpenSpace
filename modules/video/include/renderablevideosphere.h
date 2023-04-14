@@ -22,48 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOSPHERE___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOSPHERE___H__
 
-#include <modules/base/rendering/renderableplane.h>
+#include <openspace/rendering/renderable.h>
 
-#include <openspace/engine/downloadmanager.h>
+#include <modules/video/include/videoplayer.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class Texture; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
+class Sphere;
 struct RenderData;
 struct UpdateData;
 
 namespace documentation { struct Documentation; }
 
-class RenderablePlaneImageOnline : public RenderablePlane {
+class RenderableVideoSphere : public Renderable {
 public:
-    RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary);
+    RenderableVideoSphere(const ghoul::Dictionary& dictionary);
 
+    void initializeGL() override;
     void deinitializeGL() override;
 
-    void update(const UpdateData& data) override;
+    bool isReady() const override;
+
+    virtual void render(const RenderData& data, RendererTasks& rendererTask) override;
+    virtual void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 protected:
-    virtual void bindTexture() override;
+    void bindTexture();
+    void unbindTexture();
 
 private:
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
-        const std::string& url);
+    VideoPlayer _videoPlayer;
 
-    properties::StringProperty _texturePath;
+    properties::OptionProperty _orientation;
 
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    glm::vec2 _textureDimensions = glm::vec2(0.f);
-    bool _textureIsDirty = false;
+    properties::FloatProperty _size;
+    properties::IntProperty _segments;
+
+    properties::BoolProperty _mirrorTexture;
+    properties::BoolProperty _disableFadeInDistance;
+
+    properties::FloatProperty _fadeInThreshold;
+    properties::FloatProperty _fadeOutThreshold;
+
+    ghoul::opengl::ProgramObject* _shader = nullptr;
+
+    std::unique_ptr<Sphere> _sphere;
+
+    UniformCache(opacity, modelViewProjection, modelViewRotation, colorTexture,
+        _mirrorTexture) _uniformCache;
+
+    bool _sphereIsDirty = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOSPHERE___H__

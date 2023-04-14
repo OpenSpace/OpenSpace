@@ -22,48 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#ifndef __OPENSPACE_MODULE_VIDEO___SCREENSPACEVIDEO___H__
+#define __OPENSPACE_MODULE_VIDEO___SCREENSPACEVIDEO___H__
 
-#include <modules/base/rendering/renderableplane.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
-#include <openspace/engine/downloadmanager.h>
+#include <modules/video/include/videoplayer.h>
+#include <openspace/properties/stringproperty.h>
 
-namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
-
 namespace documentation { struct Documentation; }
 
-class RenderablePlaneImageOnline : public RenderablePlane {
+class ScreenSpaceVideo : public ScreenSpaceRenderable {
 public:
-    RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary);
+    ScreenSpaceVideo(const ghoul::Dictionary& dictionary);
 
-    void deinitializeGL() override;
-
-    void update(const UpdateData& data) override;
+    bool initializeGL() override;
+    bool deinitializeGL() override;
+    void update() override;
+    void render() override;
 
     static documentation::Documentation Documentation();
 
-protected:
-    virtual void bindTexture() override;
-
 private:
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
-        const std::string& url);
+    void bindTexture() override;
 
-    properties::StringProperty _texturePath;
-
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    glm::vec2 _textureDimensions = glm::vec2(0.f);
-    bool _textureIsDirty = false;
+    VideoPlayer _videoPlayer;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#endif // __OPENSPACE_MODULE_VIDEO___SCREENSPACEVIDEO___H__

@@ -22,48 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#ifndef __OPENSPACE_MODULE_VIDEO___VIDEOTILEPROVIDER___H__
+#define __OPENSPACE_MODULE_VIDEO___VIDEOTILEPROVIDER___H__
 
-#include <modules/base/rendering/renderableplane.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
-#include <openspace/engine/downloadmanager.h>
+#include <modules/video/include/videoplayer.h>
+#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <ghoul/glm.h>
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class Texture; }
+// libmpv
+#include <client.h>
+#include <render_gl.h>
+
+namespace openspace { struct Documentation; }
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
-class RenderablePlaneImageOnline : public RenderablePlane {
+class VideoTileProvider : public globebrowsing::TileProvider {
 public:
-    RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary);
+    VideoTileProvider(const ghoul::Dictionary& dictionary);
+    ~VideoTileProvider();
 
-    void deinitializeGL() override;
-
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    virtual void bindTexture() override;
+    void update() override final;
+    void reset() override final;
+    int minLevel() override final;
+    int maxLevel() override final;
+    float noDataValueAsFloat() override final;
+    globebrowsing::ChunkTile chunkTile(globebrowsing::TileIndex tileIndex, int parents, 
+        int maxParents = 1337) override;
+    globebrowsing::Tile tile(const globebrowsing::TileIndex& tileIndex) override final;
+    globebrowsing::Tile::Status tileStatus(
+        const globebrowsing::TileIndex& tileIndex) override final;
+    globebrowsing::TileDepthTransform depthTransform() override final;
 
 private:
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
-        const std::string& url);
+    void internalInitialize() override final;
+    void internalDeinitialize() override final;
 
-    properties::StringProperty _texturePath;
+    // Tile handling
+    // Cache for rendering 1 frame
+    std::map<globebrowsing::TileIndex::TileHashKey, globebrowsing::Tile> _tileCache; 
+    bool _tileIsReady = false;
 
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    glm::vec2 _textureDimensions = glm::vec2(0.f);
-    bool _textureIsDirty = false;
+    VideoPlayer _videoPlayer;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#endif // __OPENSPACE_MODULE_VIDEO___VIDEOTILEPROVIDER___H__

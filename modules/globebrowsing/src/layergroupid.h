@@ -88,6 +88,7 @@ struct Layer {
         ByLevelTileLayer,
         SolidColor,
         SpoutImageTileLayer,
+        VideoTileLayer,
         Unknown
     };
 
@@ -95,7 +96,7 @@ struct Layer {
     std::string_view identifier;
 };
 
-constexpr std::array<Layer, 10> Layers = {
+constexpr std::array<Layer, 11> Layers = {
     Layer {
         .id = Layer::ID::DefaultTileLayer,
         .identifier = "DefaultTileLayer"
@@ -135,10 +136,12 @@ constexpr std::array<Layer, 10> Layers = {
     Layer {
         .id = Layer::ID::SpoutImageTileLayer,
         .identifier = "SpoutImageTileLayer"
+    },
+    Layer {
+        .id = Layer::ID::VideoTileLayer,
+        .identifier = "VideoTileLayer"
     }
 };
-
-
 
 struct Adjustment {
     enum class ID {

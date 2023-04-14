@@ -22,48 +22,72 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#include <modules/video/include/screenspacevideo.h>
 
-#include <modules/base/rendering/renderableplane.h>
-
-#include <openspace/engine/downloadmanager.h>
-
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class Texture; }
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureconversion.h>
+#include <filesystem>
+#include <optional>
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
+ScreenSpaceVideo::ScreenSpaceVideo(const ghoul::Dictionary& dictionary)
+    : ScreenSpaceRenderable(dictionary)
+    , _videoPlayer(dictionary)
+{
+    // @TODO (abock, 2021-02-02) Should this be the name variable? The identifier wasn't
+    // declared in the documentation
+    std::string identifier;
+    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
+        identifier = dictionary.value<std::string>(KeyIdentifier);
+    }
+    else {
+        identifier = "ScreenSpaceVideo";
+    }
+    identifier = makeUniqueIdentifier(identifier);
+    setIdentifier(identifier);
 
-namespace documentation { struct Documentation; }
+    addPropertySubOwner(_videoPlayer);
+}
 
-class RenderablePlaneImageOnline : public RenderablePlane {
-public:
-    RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary);
+void ScreenSpaceVideo::update() {
+    _videoPlayer.update();
 
-    void deinitializeGL() override;
+    if (!_videoPlayer.isInitialized()) {
+        return;
+    }
+    glm::uvec3 texDimensions = _videoPlayer.frameTexture()->dimensions();
+    if (_objectSize != glm::ivec2(texDimensions.x, texDimensions.y)) {
+        _objectSize = texDimensions;
+    }
+}
 
-    void update(const UpdateData& data) override;
+void ScreenSpaceVideo::render() {
+    if (_videoPlayer.isInitialized()) {
+        ScreenSpaceRenderable::render();
+    }
+}
 
-    static documentation::Documentation Documentation();
+bool ScreenSpaceVideo::initializeGL() {
+    _videoPlayer.initialize();
 
-protected:
-    virtual void bindTexture() override;
+    return ScreenSpaceRenderable::initializeGL();
+}
 
-private:
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
-        const std::string& url);
+bool ScreenSpaceVideo::deinitializeGL() {
+    _videoPlayer.destroy();
 
-    properties::StringProperty _texturePath;
+    return ScreenSpaceRenderable::deinitializeGL();
+}
 
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    glm::vec2 _textureDimensions = glm::vec2(0.f);
-    bool _textureIsDirty = false;
-};
+void ScreenSpaceVideo::bindTexture() {
+    _videoPlayer.frameTexture()->bind();
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__

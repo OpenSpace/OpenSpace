@@ -22,48 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#ifndef __OPENSPACE_MODULE_VIDEO___VIDEOMODULE___H__
+#define __OPENSPACE_MODULE_VIDEO___VIDEOMODULE___H__
 
-#include <modules/base/rendering/renderableplane.h>
+#include <openspace/util/openspacemodule.h>
 
-#include <openspace/engine/downloadmanager.h>
-
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class Texture; }
+#include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
-class RenderablePlaneImageOnline : public RenderablePlane {
+class VideoModule : public OpenSpaceModule {
 public:
-    RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary);
+    constexpr static const char* Name = "Video";
 
-    void deinitializeGL() override;
+    VideoModule();
 
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
+    std::vector<documentation::Documentation> documentations() const override;
 
 protected:
-    virtual void bindTexture() override;
+    void internalInitialize(const ghoul::Dictionary& dict) override;
 
 private:
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
-        const std::string& url);
-
-    properties::StringProperty _texturePath;
-
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    glm::vec2 _textureDimensions = glm::vec2(0.f);
-    bool _textureIsDirty = false;
+    properties::BoolProperty _enabled;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#endif // __OPENSPACE_MODULE_VIDEO___VIDEOMODULE___H__

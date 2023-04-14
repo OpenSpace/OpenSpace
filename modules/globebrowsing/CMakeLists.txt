@@ -147,6 +147,7 @@ target_precompile_headers(${globebrowsing_module} PRIVATE
   <map>
 )
 
+# Gdal
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 
 if (WIN32)

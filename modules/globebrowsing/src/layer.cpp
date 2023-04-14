@@ -115,7 +115,7 @@ namespace {
         std::optional<std::string> type [[codegen::inlist("DefaultTileLayer",
             "SingleImageTileLayer", "ImageSequenceTileLayer", "SizeReferenceTileLayer",
             "TemporalTileLayer", "TileIndexTileLayer", "ByIndexTileLayer",
-            "ByLevelTileLayer", "SolidColor", "SpoutImageTileLayer")]];
+            "ByLevelTileLayer", "SolidColor", "SpoutImageTileLayer", "VideoTileLayer")]];
 
         // Determine whether the layer is enabled or not. If this value is not specified,
         // the layer is disabled
@@ -319,6 +319,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
             case layers::Layer::ID::TileIndexTileLayer:
             case layers::Layer::ID::ByIndexTileLayer:
             case layers::Layer::ID::ByLevelTileLayer:
+            case layers::Layer::ID::VideoTileLayer:
                 if (_tileProvider) {
                     removePropertySubOwner(*_tileProvider);
                 }
@@ -488,6 +489,7 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
         case layers::Layer::ID::TileIndexTileLayer:
         case layers::Layer::ID::ByIndexTileLayer:
         case layers::Layer::ID::ByLevelTileLayer:
+        case layers::Layer::ID::VideoTileLayer:
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
             initDict.setValue(
@@ -499,6 +501,7 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
             _tileProvider = TileProvider::createFromDictionary(id, std::move(initDict));
+            
             break;
         case layers::Layer::ID::SolidColor:
             if (initDict.hasValue<glm::dvec3>(ColorInfo.identifier)) {
@@ -522,6 +525,7 @@ void Layer::addVisibleProperties() {
         case layers::Layer::ID::TileIndexTileLayer:
         case layers::Layer::ID::ByIndexTileLayer:
         case layers::Layer::ID::ByLevelTileLayer:
+        case layers::Layer::ID::VideoTileLayer:
             if (_tileProvider) {
                 addPropertySubOwner(*_tileProvider);
             }
