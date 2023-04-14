@@ -37,6 +37,8 @@
 #include <optional>
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderableConstellationsBase";
+
     constexpr openspace::properties::Property::PropertyInfo NamesFileInfo = {
         "NamesFile",
         "Constellation Names File Path",
@@ -125,8 +127,7 @@ std::string RenderableConstellationsBase::constellationFullName(
                                                       const std::string& identifier) const
 {
     if (_namesTranslation.empty() || identifier.empty()) {
-        std::string message = "List of constellations or the given identifier was empty";
-        LWARNINGC("RenderableConstellationsBase", message);
+        LWARNING("List of constellations or the given identifier was empty");
         return "";
     }
 
@@ -134,11 +135,9 @@ std::string RenderableConstellationsBase::constellationFullName(
         return _namesTranslation.at(identifier);
     }
 
-    std::string message = fmt::format(
+    throw ghoul::RuntimeError(fmt::format(
         "Identifier '{}' could not be found in list of constellations", identifier
-    );
-    LERRORC("RenderableConstellationsBase", message);
-    return "";
+    ));
 }
 
 void RenderableConstellationsBase::loadConstellationFile() {

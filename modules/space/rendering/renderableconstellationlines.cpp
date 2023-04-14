@@ -135,8 +135,7 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
 
     // If no values are selected (the default), we want to show all constellations
     if (!_selection.hasSelected()) {
-        for (ConstellationKeyValuePair& pair : _renderingConstellationsMap)
-        {
+        for (ConstellationKeyValuePair& pair : _renderingConstellationsMap) {
             pair.second.isEnabled = true;
         }
 
@@ -148,8 +147,7 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
     }
     else {
         // Enable all constellations that are selected
-        for (ConstellationKeyValuePair& pair : _renderingConstellationsMap)
-        {
+        for (ConstellationKeyValuePair& pair : _renderingConstellationsMap) {
             bool isSelected = _selection.isSelected(pair.second.name);
             pair.second.isEnabled = isSelected;
 
@@ -185,13 +183,24 @@ void RenderableConstellationLines::initialize() {
         std::set<std::string> selectedConstellations;
 
         for (const std::string& s : _assetSelection) {
-            const auto it = std::find(options.begin(), options.end(), s);
+            auto it = std::find(options.begin(), options.end(), s);
             if (it == options.end()) {
-                // The user has specified a constellation name that doesn't exist
-                LWARNINGC(
-                    "RenderableConstellationsBase",
-                    fmt::format("Option '{}' not found in list of constellations", s)
+                // Test if the provided name was an identifier instead of the full name
+                it = std::find(
+                    options.begin(),
+                    options.end(),
+                    constellationFullName(s)
                 );
+
+                if (it == options.end()) {
+                    // The user has specified a constellation name that doesn't exist
+                    LWARNING(fmt::format(
+                        "Option '{}' not found in list of constellations", s
+                    ));
+                }
+                else {
+                    selectedConstellations.insert(constellationFullName(s));
+                }
             }
             else {
                 selectedConstellations.insert(s);

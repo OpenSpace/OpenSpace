@@ -71,6 +71,12 @@ namespace {
         "modelViewProjectionMatrix", "textureOffset", "ringTexture"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "Enable/Disable Rings"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
@@ -158,6 +164,12 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RingsComponent)]] Parameters {
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
+
+        // This value determines the overall opacity of the rings
+        std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
+
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<std::filesystem::path> texture;
 
@@ -215,7 +227,7 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
     , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
     , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
     , _colorFilter(ColorFilterInfo, 0.15f, 0.f, 1.f)
-    , _enabled({ "Enabled", "Enabled", "Enable/Disable Rings" }, true)
+    , _enabled(EnabledInfo, true)
     , _zFightingPercentage(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f)
     , _nShadowSamples(NumberShadowSamplesInfo, 2, 1, 7)
     , _ringsDictionary(dictionary)
@@ -247,7 +259,9 @@ void RingsComponent::initialize() {
 
     const Parameters p = codegen::bake<Parameters>(_ringsDictionary);
 
+    _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
+    _opacity = p.opacity.value_or(_opacity);
     addProperty(Fadeable::_opacity);
     addProperty(Fadeable::_fade);
 
