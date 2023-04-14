@@ -142,8 +142,8 @@ protected:
     // where all parts of the renderable should not be rendered in the same bin
     std::optional<RenderBin> _secondaryRenderBin;
 
-private:
     void registerUpdateRenderBinFromOpacity();
+private:
 
     double _boundingSphere = 0.0;
     double _interactionSphere = 0.0;
