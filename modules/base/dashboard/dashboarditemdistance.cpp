@@ -81,7 +81,8 @@ namespace {
         "Simplification",
         "If this value is enabled, the distance is displayed in nuanced units, such as "
         "km, AU, light years, parsecs, etc. If this value is disabled, the unit can be "
-        "explicitly requested"
+        "explicitly requested",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {

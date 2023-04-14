@@ -126,7 +126,8 @@ namespace {
         "PropertyVisibility",
         "Property Visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
-        "are"
+        "are",
+        openspace::properties::Property::Visibility::Always
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHiddenSceneInfo = {

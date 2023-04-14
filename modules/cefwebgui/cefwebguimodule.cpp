@@ -66,7 +66,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GuiScaleInfo = {
         "GuiScale",
         "Gui Scale",
-        "GUI scale multiplier"
+        "GUI scale multiplier",
+        openspace::properties::Property::Visibility::Always
     };
 } // namespace
 
