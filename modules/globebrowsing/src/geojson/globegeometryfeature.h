@@ -174,10 +174,11 @@ private:
     void initializeRenderFeature(RenderFeature& feature,
         const std::vector<Vertex>& vertices);
 
+    /// Get the distance that shall be used for tesselation, based on the properties
+    float tesselationStepSize() const;
+
     /// Compute the heights to the surface at the reference points
     std::vector<double> getCurrentReferencePointsHeights() const;
-
-    bool shouldTessellate(float objectSize) const;
 
     /// Buffer the static data for the vertices
     void bufferVertexData(const RenderFeature& feature,
