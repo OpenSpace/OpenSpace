@@ -127,13 +127,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DisableCullingInfo = {
         "DisableCulling",
         "Culling Disabled",
-        "Labels culling disabled"
+        "Labels culling disabled",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceEPSInfo = {
         "DistanceEPS",
         "Culling Distance",
-        "Labels culling distance from globe's center"
+        "Labels culling distance from globe's center",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo AlignmentOptionInfo = {

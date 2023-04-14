@@ -68,8 +68,7 @@ namespace {
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the astronomical objects",
-        openspace::properties::Property::Visibility::NoviceUser
+        "The labels for the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
@@ -82,7 +81,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
-        "Transformation matrix to be applied to each astronomical object"
+        "Transformation matrix to be applied to each astronomical object",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {

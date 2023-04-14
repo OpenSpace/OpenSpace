@@ -55,26 +55,30 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this object will be visible or not"
+        "This setting determines whether this object will be visible or not",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo CollapsedInfo = {
         "Collapsed",
         "Is Collapsed",
-        "This setting determines whether this window is collapsed or not"
+        "This setting determines whether this window is collapsed or not",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHelpInfo = {
         "ShowHelpText",
         "Show tooltip help",
         "If this value is enabled these kinds of tooltips are shown for most properties "
-        "explaining what impact they have on the visuals"
+        "explaining what impact they have on the visuals",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
         "HelpTextDelay",
         "Tooltip Delay (in s)",
-        "This value determines the delay in seconds after which the tooltip is shown"
+        "This value determines the delay in seconds after which the tooltip is shown",
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 

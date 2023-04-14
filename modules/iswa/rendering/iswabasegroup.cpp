@@ -48,7 +48,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 

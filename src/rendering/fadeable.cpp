@@ -46,7 +46,7 @@ namespace {
         "components of the system programmatically",
         // The Developer mode should be used once the properties in the UI listen to this
         // openspace::properties::Property::Visibility::Developer
-        openspace::properties::Property::Visibility::Hidden
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 

@@ -55,25 +55,29 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AutoFilterInfo = {
         "AutoFilter",
         "Auto Filter",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo NormalizeValues = {
         "NormValues",
         "Normalize Values",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
         "BackgroundValues",
         "Background Values",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "Transferfunctions",
         "Transfer Functions",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {

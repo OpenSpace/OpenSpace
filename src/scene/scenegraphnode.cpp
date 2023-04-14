@@ -47,14 +47,15 @@ namespace {
         "ComputeScreenSpaceData",
         "Compute Screen Space Data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
-        "at regular intervals. If these values are set to 'false', they are not updated"
+        "at regular intervals. If these values are set to 'false', they are not updated",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
         "ScreenSpacePosition",
         "ScreenSpacePosition",
         "The x,y position in screen space. Can be used for placing GUI elements",
-        openspace::properties::Property::Visibility::Hidden
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
@@ -68,7 +69,7 @@ namespace {
         "DistanceFromCamToNode",
         "DistanceFromCamToNode",
         "The distance from the camera to the node surface",
-        openspace::properties::Property::Visibility::Hidden
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {

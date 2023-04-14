@@ -111,7 +111,8 @@ namespace {
         "ShowChunkEdges",
         "Show chunk edges",
         "If this value is set to 'true', the borders between chunks are shown using a "
-        "red highlight"
+        "red highlight",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo LevelProjectedAreaInfo = {
@@ -135,7 +136,8 @@ namespace {
         "This value determines the tile level that is used as the cut off between "
         "rendering tiles using the globe model rendering vs the flat in-game rendering "
         "method. This value is a tradeoff between not having precision errors in the "
-        "rendering and represting a tile as flat or curved"
+        "rendering and represting a tile as flat or curved",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DynamicLodIterationCountInfo =
@@ -144,7 +146,8 @@ namespace {
         "Data availability checks before LOD factor impact",
         "The number of checks that have to fail/succeed in a row before the dynamic "
         "level-of-detail adjusts the actual level-of-detail up or down during a session "
-        "recording"
+        "recording",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
@@ -195,14 +198,16 @@ namespace {
         "ZFightingPercentage",
         "Z-Fighting Percentage",
         "The percentage of the correct distance to the surface being shadowed. Possible "
-        "values: [0.0, 1.0]"
+        "values: [0.0, 1.0]",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberShadowSamplesInfo = {
         "NumberShadowSamples",
         "Number of Shadow Samples",
         "The number of samples used during shadow mapping calculation (Percentage Closer "
-        "Filtering)"
+        "Filtering)",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetLodScaleFactorInfo = {
@@ -225,7 +230,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OrenNayarRoughnessInfo = {
         "OrenNayarRoughness",
         "orenNayarRoughness",
-        "The roughness factor that is used for the Oren-Nayar lighting mode"
+        "The roughness factor that is used for the Oren-Nayar lighting mode",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {

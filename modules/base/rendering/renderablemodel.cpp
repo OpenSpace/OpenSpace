@@ -128,7 +128,8 @@ namespace {
         "ModelTransform",
         "Model Transform",
         "This value specifies the model transform that is applied to the model before "
-        "all other transformations are applied"
+        "all other transformations are applied",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {

@@ -163,14 +163,16 @@ namespace {
         "ZFightingPercentage",
         "Z-Fighting Percentage",
         "The percentage of the correct distance to the surface being shadowed. "
-        "Possible values: [0.0, 1.0]"
+        "Possible values: [0.0, 1.0]",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberShadowSamplesInfo = {
         "NumberShadowSamples",
         "Number of Shadow Samples",
         "The number of samples used during shadow mapping calculation "
-        "(Percentage Closer Filtering)"
+        "(Percentage Closer Filtering)",
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(RingsComponent)]] Parameters {

@@ -41,7 +41,8 @@ namespace {
         "LogGdalErrors",
         "Log GDAL errors",
         "If this value is enabled, any error that is raised by GDAL will be logged using "
-        "the logmanager. If this value is disabled, any error will be ignored"
+        "the logmanager. If this value is disabled, any error will be ignored",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo GdalMaximumCacheInfo = {

@@ -115,13 +115,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StatsToFileInfo = {
         "PrintStats",
         "Print Stats",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo StatsToFileNameInfo = {
         "PrintStatsFileName",
         "Stats Filename",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
@@ -141,13 +143,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 

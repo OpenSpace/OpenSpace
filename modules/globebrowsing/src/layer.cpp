@@ -48,7 +48,8 @@ namespace {
         "Type",
         "Type",
         "The type of this Layer. This value is a read-only property and thus cannot be "
-        "changed"
+        "changed",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
