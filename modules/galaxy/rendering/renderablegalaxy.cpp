@@ -77,14 +77,16 @@ namespace {
         "VolumeRenderingEnabled",
         "Volume Rendering",
         "If this value is enabled, the volume rendering component of the galaxy "
-        "rendering is turned on. Otherwise, the volume rendering is skipped"
+        "rendering is turned on. Otherwise, the volume rendering is skipped",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo StarRenderingEnabledInfo = {
         "StarRenderingEnabled",
         "Star Rendering",
         "If this value is enabled, the point-based star rendering component of the "
-        "galaxy rendering is turned on. Otherwise, the volume rendering is skipped"
+        "galaxy rendering is turned on. Otherwise, the volume rendering is skipped",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {

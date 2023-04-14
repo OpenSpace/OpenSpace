@@ -127,7 +127,8 @@ namespace {
         "Friction Factor",
         "Determines the factor that is applied if the 'Roll Friction', 'Rotational "
         "Friction', and 'Zoom Friction' values are enabled. The lower this value is, the "
-        "faster the camera movements will stop"
+        "faster the camera movements will stop",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FollowAnchorNodeInfo = {
@@ -136,7 +137,8 @@ namespace {
         "If true, the camera will rotate with the current achor node if within a "
         "certain distance from it. When this happens, the object will appear fixed in "
         "relation to the camera. The distance at which the change happens is controlled "
-        "through another property"
+        "through another property",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FollowAnchorNodeDistanceInfo =

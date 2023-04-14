@@ -59,7 +59,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SliceInfo = {
         "Slice",
         "Slice",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 } // namespace
 

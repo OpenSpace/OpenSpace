@@ -66,7 +66,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
         "MirrorTexture",
         "Mirror Texture",
-        "Mirror the texture along the x-axis"
+        "Mirror the texture along the x-axis",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrientationInfo = {

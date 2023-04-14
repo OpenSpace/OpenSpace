@@ -77,7 +77,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DisableJoystickInputInfo = {
         "DisableJoystickInputs",
         "Disable all joystick inputs",
-        "Disables all joystick inputs and prevents them from affecting the camera"
+        "Disables all joystick inputs and prevents them from affecting the camera",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrameInfo = {

@@ -60,7 +60,8 @@ namespace {
         "Highlight Rate",
         "The rate that the columns and rows are highlighted, counted with respect to the "
         "center of the grid. If the number of segments in the grid is odd, the "
-        "highlighting might be offset from the center."
+        "highlighting might be offset from the center.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -72,13 +73,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo HighlightLineWidthInfo = {
         "HighlightLineWidth",
         "Highlight Line Width",
-        "This value specifies the line width of the highlighted lines in the grid"
+        "This value specifies the line width of the highlighted lines in the grid",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid Size",
-        "This value species the size of each dimensions of the grid"
+        "This value species the size of each dimensions of the grid",
+        openspace::properties::Property::Visibility::User
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {

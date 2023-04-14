@@ -51,7 +51,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
-        "Reload the web browser"
+        "Reload the web browser",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(Browser)]] Parameters {

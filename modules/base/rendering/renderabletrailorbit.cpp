@@ -93,7 +93,8 @@ namespace {
         "The objects period, i.e. the length of its orbit around the parent object given "
         "in (Earth) days. In the case of Earth, this would be a sidereal year "
         "(=365.242 days). If this values is specified as multiples of the period, it is "
-        "possible to show the effects of precession"
+        "possible to show the effects of precession",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {

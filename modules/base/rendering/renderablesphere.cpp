@@ -63,7 +63,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
         "MirrorTexture",
         "Mirror Texture",
-        "Mirror the texture along the x-axis"
+        "Mirror the texture along the x-axis",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrientationInfo = {
@@ -109,7 +110,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
         "DisableFadeInOut",
         "Disable Fade-In/Fade-Out effects",
-        "Enables/Disables the fade in and out effects"
+        "Enables/Disables the fade in and out effects",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {

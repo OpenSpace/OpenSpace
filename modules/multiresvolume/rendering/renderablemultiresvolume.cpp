@@ -102,7 +102,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LoopInfo = {
         "Loop",
         "Loop",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectorNameInfo = {

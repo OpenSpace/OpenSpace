@@ -108,7 +108,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AmbientBrightnessInfo = {
         "AmbientBrightness",
         "Ambient Brightness",
-        "This value determines the ambient brightness of the dark side of the planet"
+        "This value determines the ambient brightness of the dark side of the planet",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxProjectionsPerFrameInfo = {

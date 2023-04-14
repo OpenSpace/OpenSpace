@@ -44,23 +44,29 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Size",
         "Marker radius",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Marker opacity",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ThicknessInfo = {
         "Thickness",
         "Marker thickness",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
-        "MarkerColor", "Marker color", "" // @TODO Missing documentation
+        "MarkerColor",
+        "Marker color",
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 } // namespace
 

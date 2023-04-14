@@ -71,7 +71,8 @@ namespace {
         "Colors",
         "Constellation Colors",
         "The defined colors for the constellations to be rendered. There can be several "
-        "groups of constellaitons that can have distinct colors."
+        "groups of constellaitons that can have distinct colors.",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableConstellationLines)]] Parameters {

@@ -65,8 +65,7 @@ namespace {
         "size of each point"
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
-    {
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the astronomical objects"
@@ -128,7 +127,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
         "Disable Fade-in effect",
-        "Enables/Disables the Fade-in effect"
+        "Enables/Disables the Fade-in effect",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PlaneMinSizeInfo = {

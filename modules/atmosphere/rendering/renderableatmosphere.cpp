@@ -137,7 +137,8 @@ namespace {
     {
         "SunFollowingCamera",
         "Enable Sun On Camera Position",
-        "When selected the Sun is artificially positioned behind the observer all times"
+        "When selected the Sun is artificially positioned behind the observer all times",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {

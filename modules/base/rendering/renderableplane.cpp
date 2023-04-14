@@ -83,7 +83,8 @@ namespace {
         "MultiplyColor",
         "Multiply Color",
         "If set, the plane's texture is multiplied with this color. Useful for applying "
-        "a color grayscale images"
+        "a color grayscale images",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {

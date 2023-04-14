@@ -98,13 +98,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
         "TriggerTimeJump",
         "Jump",
-        "Sets the time to be the first time of the volume sequence"
+        "Sets the time to be the first time of the volume sequence",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
         "JumpToTimestep",
         "Jump to timestep",
-        "Lets you scrub through the sequence's time steps"
+        "Lets you scrub through the sequence's time steps",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrightnessInfo = {

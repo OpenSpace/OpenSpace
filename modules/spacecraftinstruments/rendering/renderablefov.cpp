@@ -51,7 +51,8 @@ namespace {
         "LineWidth",
         "Line Width",
         "This value determines width of the lines connecting the instrument to the "
-        "corners of the field of view"
+        "corners of the field of view",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo StandoffDistanceInfo = {

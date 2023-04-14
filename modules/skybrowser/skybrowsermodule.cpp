@@ -64,19 +64,22 @@ namespace {
         "CameraRotationSpeed",
         "Camera Rotation Speed",
         "The speed of the rotation of the camera when the camera rotates to look at a "
-        "coordinate which is outside of the field of view"
+        "coordinate which is outside of the field of view",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetSpeedInfo = {
         "TargetAnimationSpeed",
         "Target Animation Speed",
-        "This determines the speed of the animation of the sky target"
+        "This determines the speed of the animation of the sky target",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrowserSpeedInfo = {
         "BrowserAnimationSpeed",
         "Field of View Animation Speed",
-        "This determines the speed of the animation of the field of view in the browser"
+        "This determines the speed of the animation of the field of view in the browser",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HideWithGuiInfo = {

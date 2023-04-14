@@ -74,7 +74,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text Size",
-        "The text size for the astronomical object labels"
+        "The text size for the astronomical object labels",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {

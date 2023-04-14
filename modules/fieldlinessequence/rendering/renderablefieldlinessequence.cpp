@@ -86,7 +86,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
         "Domain Limits",
-        "Enable/Disable domain limits"
+        "Enable/Disable domain limits",
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo DomainXInfo = {
         "LimitsX",
@@ -126,7 +127,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FlowReversedInfo = {
         "Reversed",
         "Reversed Flow",
-        "Toggle to make the flow move in the opposite direction"
+        "Toggle to make the flow move in the opposite direction",
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
         "ParticleSize",
@@ -141,7 +143,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
         "Speed",
         "Speed",
-        "Speed of the flow"
+        "Speed of the flow",
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
         "MaskingEnabled",

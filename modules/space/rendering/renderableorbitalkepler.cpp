@@ -102,7 +102,8 @@ namespace {
         "If enabled, then the contiguous set of objects starting from StartRenderIdx "
         "of size RenderSize will be rendered. If disabled, then the number of objects "
         "defined by UpperLimit will rendered from an evenly dispersed sample of the "
-        "full length of the data file."
+        "full length of the data file.",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {

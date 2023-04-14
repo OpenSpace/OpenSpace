@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -222,19 +223,22 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo HueInfo = {
         "Hue",
         "Hue",
-        "Hue"
+        "Hue",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaturationInfo = {
         "Saturation",
         "Saturation",
-        "Saturation"
+        "Saturation",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ValueInfo = {
         "Value",
         "Value",
-        "Value"
+        "Value",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FramerateLimitInfo = {
@@ -249,7 +253,8 @@ namespace {
         "Horizontal Field of View",
         "Adjusts the degrees of the horizontal field of view. The vertical field of "
         "view will be automatically adjusted to match, according to the current "
-        "aspect ratio"
+        "aspect ratio",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo GlobalBlackoutFactorInfo = {
@@ -268,13 +273,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledFontColorInfo = {
         "EnabledFontColor",
         "Enabled Font Color",
-        "The font color used for enabled options"
+        "The font color used for enabled options",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisabledFontColorInfo = {
         "DisabledFontColor",
         "Disabled Font Color",
-        "The font color used for disabled options"
+        "The font color used for disabled options",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 

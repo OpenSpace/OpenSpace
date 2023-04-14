@@ -88,7 +88,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
         "Enable Animation",
-        "Enable or disable the animation for the model if it has any"
+        "Enable or disable the animation for the model if it has any",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
@@ -113,7 +114,8 @@ namespace {
         "PerformShading",
         "Perform Shading",
         "This value determines whether this model should be shaded by using the position "
-        "of the Sun"
+        "of the Sun",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableFaceCullingInfo = {

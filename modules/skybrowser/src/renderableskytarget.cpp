@@ -78,7 +78,8 @@ namespace {
        "ApplyRoll",
        "Apply Roll",
        "Always rotate the target to have it's up direction aligned with the up direction "
-       "of the camera"
+       "of the camera",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableSkyTarget)]] Parameters {

@@ -99,14 +99,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LocalRotationInfo = {
         "Rotation",
         "Local Rotation",
-        "An euler rotation (x, y, z) to apply to the plane"
+        "An euler rotation (x, y, z) to apply to the plane",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply Color",
         "If set, the plane's texture is multiplied with this color. Useful for applying "
-        "a color grayscale images"
+        "a color grayscale images",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
@@ -114,7 +116,8 @@ namespace {
         "Background Color",
         "The fixed color that is combined with the screen space renderable to create the "
         "final color. The actual color of the screen space renderable is alpha-blended "
-        "with the background color to produce the final result"
+        "with the background color to produce the final result",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {

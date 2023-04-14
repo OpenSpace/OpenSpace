@@ -75,7 +75,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VariableInfo = {
         "Variable",
         "Variable",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LowerDomainBoundInfo = {
@@ -95,7 +96,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DomainScaleInfo = {
         "DomainScale",
         "Domain scale",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LowerValueBoundInfo = {

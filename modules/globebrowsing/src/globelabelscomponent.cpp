@@ -111,14 +111,16 @@ namespace {
         "FadeInEnabled",
         "Fade In Enabled",
         "Sets whether the labels fade in when approaching the globe from a distance. If "
-        "false, no fading happens and the labels immediately has full opacity"
+        "false, no fading happens and the labels immediately has full opacity",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeOutEnabledInfo = {
         "FadeOutEnabled",
         "Fade Out Enabled",
         "Sets whether the labels fade out when approaching the surface of the globe. If "
-        "false, no fading happens and the labels stays in full opacity"
+        "false, no fading happens and the labels stays in full opacity",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableCullingInfo = {

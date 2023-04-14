@@ -74,14 +74,16 @@ namespace {
         "Speed Scale",
         "Scale factor that the speed will be multiplied with during path traversal. "
         "Can be used to speed up or slow down the camera motion, depending on if the "
-        "value is larger than or smaller than one"
+        "value is larger than or smaller than one",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorOnFinishInfo = {
         "ApplyIdleBehaviorOnFinish",
         "Apply Idle Behavior on Finish",
         "If set to true, the chosen IdleBehavior of the OrbitalNavigator will be "
-        "triggered once the path has reached its target"
+        "triggered once the path has reached its target",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ArrivalDistanceFactorInfo = {

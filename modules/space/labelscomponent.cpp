@@ -68,7 +68,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "Font size for the labels. This is different from the text size"
+        "Font size for the labels. This is different from the text size",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxInfo = {
