@@ -1,0 +1,48 @@
+local data = asset.syncedResource({
+  Name = "Example Globe Video",
+  Type = "UrlSynchronization",
+  Identifier = "example_globe_video",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/test-video.mp4"
+})
+
+local sphere = {
+  Identifier = "ExampleVideoOnSphere",
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0, 0, 0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableVideoSphere",
+    Enabled = true,
+    Size = 100.0,
+    Segments = 80,
+    Opacity = 1,
+    Video = data .. "/test-video.mp4",
+    Orientation = "Both",
+  },
+  GUI = {
+    Name = "Aurora Sphere",
+    Path = "/Other/Spheres"
+  }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(sphere)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(sphere)
+end)
+
+asset.export(sphere)
+
+asset.meta = {
+  Name = "Video Player on Sphere",
+  Version = "1.0",
+  Description = "An example asset that shows how to include a video on a sphere",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT"
+}

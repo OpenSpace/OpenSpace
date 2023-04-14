@@ -445,7 +445,7 @@ void VideoPlayer::initializeMpv() {
     // Load file
     std::string file = _videoFile;
     const char* cmd[] = { "loadfile", file.c_str(), nullptr };
-    int result = mpv_command(_mpvHandle, cmd);
+    result = mpv_command(_mpvHandle, cmd);
     if (!checkMpvError(result)) {
         LERROR("Could not open video file");
         return;

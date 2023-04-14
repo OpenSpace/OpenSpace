@@ -1,0 +1,50 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+
+local data = asset.syncedResource({
+  Name = "Example Globe Video",
+  Type = "UrlSynchronization",
+  Identifier = "example_globe_video",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/test-video.mp4"
+})
+
+
+local plane = {
+  Identifier = "VideoPlaneExample",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0, -11E7, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableVideoPlane",
+    MirrorBackside = true,
+    Size = 3E7,
+    Video = data .. "/test-video.mp4",
+    PlaybackMode = "RealTimeLoop"
+  },
+  GUI = {
+    Name = "Video Plane Example",
+    Path = "/Other/Planes"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(plane)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(plane)
+end)
+
+asset.export(plane)
+
+asset.meta = {
+  Name = "Video Plane Test",
+  Version = "1.0",
+  Description = "An example asset that shows how to include a video on a plane",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT"
+}
