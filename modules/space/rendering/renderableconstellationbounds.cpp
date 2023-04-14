@@ -55,7 +55,8 @@ namespace {
         "Color",
         "Color of constellation lines",
         "Specifies the color of the constellation lines. The lines are always drawn at "
-        "full opacity"
+        "full opacity",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {

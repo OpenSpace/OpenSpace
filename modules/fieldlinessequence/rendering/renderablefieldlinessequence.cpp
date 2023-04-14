@@ -175,7 +175,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
         "TimeJumpToStart",
         "Jump to Start Of Sequence",
-        "Performs a time jump to the start of the sequence"
+        "Performs a time jump to the start of the sequence",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(RenderableFieldlinesSequence)]] Parameters {

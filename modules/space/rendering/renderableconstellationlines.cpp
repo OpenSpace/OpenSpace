@@ -57,7 +57,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the constellations"
+        "Enables/Disables the drawing of the constellations",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UnitInfo = {

@@ -33,7 +33,8 @@ namespace {
         "Opacity",
         "Opacity",
         "This value determines the opacity of this object. A value of 0 means "
-        "completely transparent"
+        "completely transparent",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInfo = {

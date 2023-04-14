@@ -50,7 +50,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this sceen space plane will be visible or not"
+        "This setting determines whether this sceen space plane will be visible or not",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -63,7 +64,8 @@ namespace {
         "using cartesian coordinates. By switching this value, the correct property will "
         "be shown or hidden. The Cartesian coordinate system is useful if a regular "
         "rendering is applied, whereas the radius azimuth elevation are most useful in a "
-        "planetarium environment"
+        "planetarium environment",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UsePerspectiveProjectionInfo =
@@ -77,7 +79,8 @@ namespace {
         "CartesianPosition",
         "Cartesian Coordinates",
         "This value determines the position of this screen space plane in Cartesian "
-        "three-dimensional coordinates (meters)"
+        "three-dimensional coordinates (meters)",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusAzimuthElevationInfo = {
@@ -85,7 +88,8 @@ namespace {
         "Radius Azimuth Elevation",
         "This value determines the position of this screen space plane in a "
         "coordinate system based on radius (meters), azimuth (radians) and elevation "
-        "(radians)"
+        "(radians)",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
@@ -144,7 +148,6 @@ namespace {
     float wrap(float value, float min, float max) {
         return glm::mod(value - min, max - min) + min;
     }
-
 
     struct [[codegen::Dictionary(ScreenSpaceRenderable)]] Parameters {
         // The type of the Screenspace renderable that is to be created. The available

@@ -38,7 +38,8 @@ namespace {
         "IsEnabled",
         "Enabled",
         "If this value is 'false', this dashboard will be invisible, regardless of the "
-        "state of the individual components"
+        "state of the individual components",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartPositionOffsetInfo = {

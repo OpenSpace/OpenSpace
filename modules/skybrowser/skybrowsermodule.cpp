@@ -93,7 +93,8 @@ namespace {
         "InverseZoomDirection",
         "Inverse Zoom Direction",
         "If checked, the zoom direction of the scroll over the AAS WWT browser will be "
-        "inversed"
+        "inversed",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SynchronizeAimInfo = {
