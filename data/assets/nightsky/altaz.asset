@@ -39,7 +39,7 @@ local grid = {
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {-1.57079, 0.0, 0.0}
+      Rotation = { -math.pi / 2.0, 0.0, 0.0 }
     },
   },
   Renderable = {
