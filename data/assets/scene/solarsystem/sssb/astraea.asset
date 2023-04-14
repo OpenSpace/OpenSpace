@@ -4,7 +4,7 @@ local horizons = asset.syncedResource({
   Name = "5 Astraea Trajectory",
   Type = "HttpSynchronization",
   Identifier = "astraea_horizons",
-  Version = 1
+  Version = 2
 })
 
 local AstraeaTrail = {
