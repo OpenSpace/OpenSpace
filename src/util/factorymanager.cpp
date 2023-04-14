@@ -43,14 +43,25 @@ using namespace openspace;
 using namespace openspace::documentation;
 
 void sortJson(nlohmann::json& json) {
-    std::sort(json.begin(), json.end(), []
-    (const nlohmann::json& lhs, const nlohmann::json& rhs) {
+    std::sort(
+        json.begin(),
+        json.end(),
+        [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
             std::string lhsString = lhs["Name"];
             std::string rhsString = rhs["Name"];
-            std::transform(lhsString.begin(), lhsString.end(), lhsString.begin(),
-                [](unsigned char c) { return std::tolower(c); });
-            std::transform(rhsString.begin(), rhsString.end(), rhsString.begin(),
-                [](unsigned char c) { return std::tolower(c); });
+            std::transform(
+                lhsString.begin(),
+                lhsString.end(),
+                lhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+            std::transform(
+                rhsString.begin(),
+                rhsString.end(),
+                rhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+
             return rhsString > lhsString;
         });
 }
@@ -65,7 +76,7 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
     for (const DocumentationEntry& p : d.entries) {
         nlohmann::json entry;
         entry["Name"] = p.key;
-        entry["Optional"] = p.optional ? true : false;
+        entry["Optional"] = p.optional.value;
         entry["Type"] = p.verifier->type();
         entry["Documentation"] = p.documentation;
 
@@ -176,7 +187,6 @@ std::string FactoryManager::generateJson() const {
         json["Data"].push_back(factory);
     }
 
-    // I did not check the output of this for correctness ---abock
     return json.dump();
 }
 
@@ -201,7 +211,8 @@ nlohmann::json FactoryManager::generateJsonJson() const {
             nlohmann::json documentation = generateJsonDocumentation(*factoryDoc);
             factory["Classes"].push_back(documentation);
             // Remove documentation from list check at the end if all docs got put in
-            docs.erase(factoryDoc);          }
+            docs.erase(factoryDoc);          
+        }
         else {
             nlohmann::json documentation;
             documentation["Name"] = factoryInfo.name;

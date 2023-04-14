@@ -82,14 +82,25 @@ namespace {
     }
 
     void sortJson(nlohmann::json& json) {
-        std::sort(json.begin(), json.end(), []
-        (const nlohmann::json& lhs, const nlohmann::json& rhs) {
+        std::sort(
+            json.begin(),
+            json.end(),
+            [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
                 std::string lhsString = lhs["Name"];
                 std::string rhsString = rhs["Name"];
-                std::transform(lhsString.begin(), lhsString.end(), lhsString.begin(),
-                    [](unsigned char c) { return std::tolower(c); });
-                std::transform(rhsString.begin(), rhsString.end(), rhsString.begin(),
-                    [](unsigned char c) { return std::tolower(c); });
+                std::transform(
+                    lhsString.begin(),
+                    lhsString.end(),
+                    lhsString.begin(),
+                    [](unsigned char c) { return std::tolower(c); }
+                );
+                std::transform(
+                    rhsString.begin(),
+                    rhsString.end(),
+                    rhsString.begin(),
+                    [](unsigned char c) { return std::tolower(c); }
+                );
+
                 return rhsString > lhsString;
             });
     }
@@ -476,7 +487,7 @@ nlohmann::json ScriptEngine::generateJsonJson() const {
         using namespace openspace::scripting;
 
         nlohmann::json library;
-        std::string libraryName = l.name == "" ? "openspace" : "openspace." + l.name;
+        std::string libraryName = l.name.empty() ? "openspace" : "openspace." + l.name;
         library["Name"] = libraryName;
 
         for (const LuaLibrary::Function& f : l.functions) {

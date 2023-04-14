@@ -42,14 +42,25 @@ namespace {
     constexpr std::string_view _loggerCat = "PropertyOwner";
 
     void sortJson(nlohmann::json& json) {
-        std::sort(json.begin(), json.end(), []
-        (const nlohmann::json& lhs, const nlohmann::json& rhs) {
+        std::sort(
+            json.begin(),
+            json.end(),
+            [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
                 std::string lhsString = lhs["Name"];
                 std::string rhsString = rhs["Name"];
-                std::transform(lhsString.begin(), lhsString.end(), lhsString.begin(),
-                    [](unsigned char c) { return std::tolower(c); });
-                std::transform(rhsString.begin(), rhsString.end(), rhsString.begin(),
-                    [](unsigned char c) { return std::tolower(c); });
+                std::transform(
+                    lhsString.begin(),
+                    lhsString.end(),
+                    lhsString.begin(),
+                    [](unsigned char c) { return std::tolower(c); }
+                );
+                std::transform(
+                    rhsString.begin(),
+                    rhsString.end(),
+                    rhsString.begin(),
+                    [](unsigned char c) { return std::tolower(c); }
+                );
+
                 return rhsString > lhsString;
             });
     }
