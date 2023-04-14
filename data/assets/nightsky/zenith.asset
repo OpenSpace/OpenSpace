@@ -15,16 +15,16 @@ local Position = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 0,
-      Longitude = 0,
-      Altitude = 100000000,
+      Latitude = 0.0,
+      Longitude = 0.0,
+      Altitude = 100000000.0,
       UseCamera = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 0,
-      Longitude = 0,
+      Latitude = 0.0,
+      Longitude = 0.0,
       UseHeightmap = false,
       UseCamera = true
     }
@@ -42,7 +42,7 @@ local Plane = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {-1.57079, 90.0, 0.0}
+      Rotation = { -math.pi, 90.0, 0.0 }
     },
   },
   Renderable = {
@@ -74,8 +74,8 @@ local showAction = {
     openspace.setPropertyValueSingle('Scene.ZenithPosition.Rotation.Latitude', lat);
     openspace.setPropertyValueSingle('Scene.ZenithPosition.Rotation.Longitude', lon);
     openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 0);
-    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 1, 1);
+    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 0.0);
+    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 1.0, 1.0);
   ]],
   Documentation = "Shows a dot for the local zenith",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -86,13 +86,12 @@ local hideAction = {
   Identifier = "os.hide_zenith",
   Name = "Hide local zenith",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 0, 1);
+    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 0.0, 1.0);
   ]],
   Documentation = "Hides the dot for the local zenith",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
-
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Position)
@@ -108,7 +107,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Position)
 end)
 
-asset.export(showAction)
-asset.export(hideAction)
-asset.export(Plane)
 asset.export(Position)
+asset.export(Plane)
+asset.export(hideAction)
+asset.export(showAction)

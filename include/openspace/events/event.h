@@ -569,7 +569,6 @@ struct EventCameraMovedPosition : public Event {
 
     /**
      * Creates an instance of an EventCameraMovedPosition event.
-     *
      */
     EventCameraMovedPosition();
 };

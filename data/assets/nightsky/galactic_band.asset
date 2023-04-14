@@ -28,9 +28,9 @@ local showAction = {
   Identifier = "os.show_galactic_band",
   Name = "Show galactic band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 0);
+    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 0.0);
     openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 1, 1);
+    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 1.0, 1.0);
   ]],
   Documentation = "Shows the galactic band",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -41,7 +41,7 @@ local hideAction = {
   Identifier = "os.hide_galactic_band",
   Name = "Hide galactic band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 0, 1);
+    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 0.0, 1.0);
   ]],
   Documentation = "Hides the galactic band",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -61,3 +61,5 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(band)
+asset.export(showAction)
+asset.export(hideAction)

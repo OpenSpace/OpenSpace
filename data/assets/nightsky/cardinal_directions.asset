@@ -7,7 +7,6 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-
 local Position = {
   Identifier = "CardinalDirectionsPosition",
   Parent = earthAsset.Earth.Identifier,
@@ -15,18 +14,18 @@ local Position = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 0,
-      Longitude = 0,
-      Altitude = 0,
+      Latitude = 0.0,
+      Longitude = 0.0,
+      Altitude = 0.0,
       UseCamera = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 0,
+      Latitude = 0.0,
       Longitude = 0,
       UseHeightmap = false,
-      Angle = 270
+      Angle = 270.0
     }
   },
   GUI = {
@@ -46,7 +45,7 @@ local sphere = {
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {-1.57079, 00.0, 0.0}
+      Rotation = { -math.pi, 0.0, 0.0 }
     },
   },
   Renderable = {
@@ -54,8 +53,8 @@ local sphere = {
     Enabled = asset.enabled,
     Size = 50000,
     Segments = 80,
-    Opacity = .9,
-    Texture = textures..'/sphere.png',
+    Opacity = 0.9,
+    Texture = textures .. 'sphere.png',
     Orientation = "Inside",
     MirrorTexture = true,
     RenderBinMode = "PostDeferredTransparent"
@@ -67,7 +66,6 @@ local sphere = {
 }
 
 local showCommand = [[
-
   local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
   local camera = openspace.navigation.getNavigationState();
   openspace.setParent('CardinalDirectionsPosition', camera.Anchor)
@@ -78,10 +76,9 @@ local showCommand = [[
   openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Latitude', lat);
   openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Longitude', lon);
   openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Enabled', true);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 1, 1);
+  openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0.0);
+  openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 1.0, 1.0);
 ]]
-
 
 local showBandAction = {
   Identifier = "os.show_nesw_band",
@@ -109,7 +106,7 @@ local hideAction = {
   Identifier = "os.hide_nesw",
   Name = "Hide cardinal directions",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0, 1);
+    openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0.0, 1.0);
   ]],
   Documentation = "Hides the cardinal directions",
   GuiPath = "/Night Sky/Directions",

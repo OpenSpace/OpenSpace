@@ -2,8 +2,8 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local equatorialRotationMatrix = {
     -0.05487554,  0.4941095, -0.8676661,
-    -0.8734371 , -0.4448296, -0.1980764,
-    -0.483835  ,  0.7469823,  0.4559838
+    -0.8734371,  -0.4448296, -0.1980764,
+    -0.483835,     0.7469823,  0.4559838
 }
 
 local band = {
@@ -38,9 +38,9 @@ local showAction = {
   Identifier = "os.show_equatorial_band",
   Name = "Show equatorial band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EquatorialBand.Renderable.Fade', 0);
+    openspace.setPropertyValueSingle('Scene.EquatorialBand.Renderable.Fade', 0.0);
     openspace.setPropertyValueSingle('Scene.EquatorialBand.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.EquatorialBand.Renderable.Fade', 1, 1);
+    openspace.setPropertyValueSingle('Scene.EquatorialBand.Renderable.Fade', 1.0, 1.0);
   ]],
   Documentation = "Shows the equatorial band",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -51,7 +51,7 @@ local hideAction = {
   Identifier = "os.hide_equatorial_band",
   Name = "Hide equatorial band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EquatorialBand.Renderable.Fade', 0, 1);
+    openspace.setPropertyValueSingle('Scene.EquatorialBand.Renderable.Fade', 0.0, 1.0);
   ]],
   Documentation = "Hides the equatorial band",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -71,4 +71,6 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(band)
+asset.export(showAction)
+asset.export(hideAction)
   

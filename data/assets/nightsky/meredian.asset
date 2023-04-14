@@ -14,16 +14,16 @@ local Position = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 0,
-      Longitude = 0,
-      Altitude = 0,
+      Latitude = 0.0,
+      Longitude = 0.0,
+      Altitude = 0.0,
       UseCamera = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 0,
-      Longitude = 0,
+      Latitude = 0.0,
+      Longitude = 0.0,
       UseCamera = true
     }
   },
@@ -41,10 +41,6 @@ local Plane = {
     Scale = {
       Type = "StaticScale",
       Scale = 1000000
-    },
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = {0, 0.0, 0.0}
     },
   },
   Renderable = {
@@ -77,8 +73,8 @@ local showAction = {
     openspace.setPropertyValueSingle('Scene.MeridianPosition.Rotation.Latitude', lat);
     openspace.setPropertyValueSingle('Scene.MeridianPosition.Rotation.Longitude', lon);
     openspace.setPropertyValueSingle('Scene.Meridian.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.Meridian.Renderable.Fade', 0);
-    openspace.setPropertyValueSingle('Scene.Meridian.Renderable.Fade', 1, 1);
+    openspace.setPropertyValueSingle('Scene.Meridian.Renderable.Fade', 0.0);
+    openspace.setPropertyValueSingle('Scene.Meridian.Renderable.Fade', 1.0, 1.0);
   ]],
   Documentation = "Shows a line for the local meridian",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -89,13 +85,12 @@ local hideAction = {
   Identifier = "os.hide_meridian",
   Name = "Hide local meridian",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.Meridian.Renderable.Fade', 0, 1);
+    openspace.setPropertyValueSingle('Scene.Meridian.Renderable.Fade', 0.0, 1.0);
   ]],
   Documentation = "Hides the line for the local meridian",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
-
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Position)
@@ -111,7 +106,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Position)
 end)
 
-asset.export(showAction)
-asset.export(hideAction)
-asset.export(Plane)
 asset.export(Position)
+asset.export(Plane)
+asset.export(hideAction)
+asset.export(showAction)

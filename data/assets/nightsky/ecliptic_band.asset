@@ -2,7 +2,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local eclipticRotationMatrix = {
     -0.05487554,  0.4941095, -0.8676661,
-    -0.9938214 , -0.1109906, -0.0003515167,
+    -0.9938214,  -0.1109906, -0.0003515167,
     -0.09647644,  0.8622859,  0.4971472
 }
 
@@ -38,9 +38,9 @@ local showAction = {
   Identifier = "os.show_ecliptic_band",
   Name = "Show ecliptic band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 0);
+    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 0.0);
     openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 1, 1);
+    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 1.0, 1.0);
   ]],
   Documentation = "Shows the ecliptic band",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -51,7 +51,7 @@ local hideAction = {
   Identifier = "os.hide_ecliptic_band",
   Name = "Hide ecliptic band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 0, 1);
+    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 0.0, 1.0);
   ]],
   Documentation = "Hides the ecliptic band",
   GuiPath = "/Night Sky/Lines and Grids",

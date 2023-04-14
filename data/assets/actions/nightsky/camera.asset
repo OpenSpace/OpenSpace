@@ -10,7 +10,7 @@ local level_horizon_yaw_action = {
     NewNavState["Position"] = currentNavState["Position"];
     NewNavState["Up"] = currentNavState["Up"];
     openspace.navigation.setNavigationState(NewNavState)
-    ]],
+  ]],
   Documentation = "Levels the horizon horizontally.",
   GuiPath = "/Night Sky/View",
   IsLocal = true
@@ -29,7 +29,7 @@ local level_horizon_pitch_action = {
     NewNavState["Position"] = currentNavState["Position"];
     NewNavState["Up"] = currentNavState["Up"];
     openspace.navigation.setNavigationState(NewNavState)
-    ]],
+  ]],
   Documentation = "Levels the horizon vertically.",
   GuiPath = "/Night Sky/View",
   IsLocal = true

@@ -7,16 +7,16 @@ local gridPosition = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 0,
-      Longitude = 0,
-      Altitude = 0,
+      Latitude = 0.0,
+      Longitude = 0.0,
+      Altitude = 0.0,
       UseHeightmap = false,
       UseCamera = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 0,
+      Latitude = 0.0,
       Longitude = 0.0,
       UseHeightmap = false,
       UseCamera = true
@@ -88,7 +88,6 @@ local hideAction = {
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
-
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(gridPosition)

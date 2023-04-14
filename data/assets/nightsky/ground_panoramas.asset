@@ -7,7 +7,6 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-
 local Position = {
   Identifier = "GroundPanoPosition",
   Parent = earthAsset.Earth.Identifier,
@@ -17,7 +16,7 @@ local Position = {
       Globe = earthAsset.Earth.Identifier,
       Latitude = 34.201639,
       Longitude = -118.171319,
-      Altitude = 10,
+      Altitude = 10.0,
       UseCamera = true,
       UseCameraAltitude = true
     },
@@ -27,7 +26,7 @@ local Position = {
       Latitude = 34.201639,
       Longitude = -118.171319,
       UseHeightmap = false,
-      Angle = 270
+      Angle = 270.0
     }
   },
   GUI = {
@@ -41,13 +40,9 @@ local sphere = {
   Identifier = "GroundPanoSphere",
   Parent = Position.Identifier,
   Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 1
-    },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {-1.57079, 00.0, 0.0}
+      Rotation = { -math.pi, 0.0, 0.0 }
     },
   },
   Renderable = {
@@ -82,8 +77,8 @@ local showCommand = [[
   openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Rotation.Latitude', lat);
   openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Rotation.Longitude', lon);
   openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Enabled', true);
-  openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 0);
-  openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 1, 1);
+  openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 0.0);
+  openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 1.0, 1.0);
 ]]
 
 local setTextureCommand = function(scene) 
@@ -152,7 +147,7 @@ local hideAction = {
   Name = "Hide ground panorama",
   Command = [[
     -- same position as above
-    openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 0, 0.5);
+    openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 0.0, 0.5);
   ]],
   Documentation = "Hides the ground panorama",
   GuiPath = "/Night Sky/Panoramas",
@@ -180,8 +175,10 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Position)
 end)
 
+asset.export(Position)
+asset.export(sphere)
+asset.export(hideAction)
 asset.export(showForestAction)
 asset.export(showCityAction)
-asset.export(hideAction)
-asset.export(sphere)
-asset.export(Position)
+asset.export(show3Action)
+asset.export(show4Action)
