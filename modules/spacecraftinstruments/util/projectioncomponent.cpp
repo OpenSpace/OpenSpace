@@ -74,14 +74,16 @@ namespace {
         "This value determines the size of the texture into which the images are "
         "projected and thus provides the limit to the resolution of projections that can "
         "be applied. Changing this value will not cause the texture to be automatically "
-        "updated, but triggering the 'ApplyTextureSize' property is required"
+        "updated, but triggering the 'ApplyTextureSize' property is required",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyTextureSizeInfo = {
         "ApplyTextureSize",
         "Apply Texture Size",
         "Triggering this property applies a new size to the underlying projection "
-        "texture. The old texture is resized and interpolated to fit the new size"
+        "texture. The old texture is resized and interpolated to fit the new size",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ProjectionComponent)]] Parameters {

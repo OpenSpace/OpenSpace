@@ -118,7 +118,8 @@ namespace {
         "PrintEvents",
         "Print Events",
         "If this is enabled, all events that are propagated through the system are "
-        "printed to the log"
+        "printed to the log",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
@@ -131,7 +132,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShowHiddenSceneInfo = {
         "ShowHiddenSceneGraphNodes",
         "Show Hidden Scene Graph Nodes",
-        "If checked, hidden scene graph nodes are visible in the UI"
+        "If checked, hidden scene graph nodes are visible in the UI",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeDurationInfo = {
@@ -140,7 +142,8 @@ namespace {
         "Controls how long time the fading in/out takes when enabling/disabling an "
         "object through a checkbox in the UI. Holding SHIFT while clicking the "
         "checkbox will enable/disable the renderable without fading, as will setting "
-        "this value to zero."
+        "this value to zero.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {

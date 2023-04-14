@@ -75,7 +75,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
         "Min/Max Text Size",
-        "Minimum and maximum label size, in pixels"
+        "Minimum and maximum label size, in pixels",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
@@ -102,7 +103,8 @@ namespace {
         "Fade-In Distances",
         "The distances above the globe's surface at which the labels start fading in or "
         "out, given in meters. The final distances are also adjusted by the specified "
-        "height offset"
+        "height offset",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInEnabledInfo = {

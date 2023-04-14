@@ -92,7 +92,8 @@ namespace {
         "Step Size",
         "Determines the distance between steps taken in the volume rendering. The lower "
         "the number is, the better the rendering looks, but also takes more "
-        "computational resources to render"
+        "computational resources to render",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AbsorptionMultiplyInfo = {
@@ -121,7 +122,8 @@ namespace {
         "StarRenderingMethod",
         "Star Rendering Method",
         "This value determines which rendering method is used for visualization of the "
-        "stars"
+        "stars",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
@@ -130,7 +132,8 @@ namespace {
         "The ratio of point-like stars that are rendered to produce the overall galaxy "
         "image. At a value of 0, no stars are rendered, at a value of 1 all points "
         "contained in the dataset are rendered. The specific value chosen is a "
-        "compromise between image fidelity and rendering performance"
+        "compromise between image fidelity and rendering performance",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo =
@@ -144,7 +147,8 @@ namespace {
     {
         "Steps",
         "Number of RayCasting Steps",
-        "This value set the number of integration steps during the raycasting procedure"
+        "This value set the number of integration steps during the raycasting procedure",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableGalaxy)]] Parameters {

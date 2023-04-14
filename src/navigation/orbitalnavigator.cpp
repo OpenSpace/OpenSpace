@@ -145,7 +145,8 @@ namespace {
         "Follow Anchor Node Rotation Distance",
         "A factor used to determine the distance at which the camera starts rotating "
         "with the anchor node. The actual distance will be computed by multiplying "
-        "this factor with the approximate radius of the node"
+        "this factor with the approximate radius of the node",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StereoInterpolationTimeInfo =
@@ -153,7 +154,8 @@ namespace {
         "StereoInterpolationTime",
         "Stereo Interpolation Time",
         "The time to interpolate to a new stereoscopic depth when the anchor node is "
-        "changed, in seconds"
+        "changed, in seconds",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -162,14 +164,16 @@ namespace {
         "RetargetAnchorInterpolationTime",
         "Retarget Interpolation Time",
         "The time to interpolate the camera rotation when the anchor or aim node is "
-        "changed, in seconds"
+        "changed, in seconds",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FollowRotationInterpTimeInfo =
     {
         "FollowRotationInterpolationTime",
         "Follow Rotation Interpolation Time",
-        "The interpolation time when toggling following focus node rotation"
+        "The interpolation time when toggling following focus node rotation",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo InvertMouseButtons = {
@@ -188,7 +192,8 @@ namespace {
         "Dynamically adjust the view scaling based on the distance to the surface of "
         "the anchor and aim nodes. If enabled, view scale will be set to "
         "StereoscopicDepthOfFocusSurface / min(anchorDistance, aimDistance). "
-        "If disabled, view scale will be set to 10^StaticViewScaleExponent"
+        "If disabled, view scale will be set to 10^StaticViewScaleExponent",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StaticViewScaleExponentInfo =
@@ -196,7 +201,8 @@ namespace {
         "StaticViewScaleExponent",
         "Static View Scale Exponent",
         "Statically scale the world by 10^StaticViewScaleExponent. Only used if "
-        "UseAdaptiveStereoscopicDepthInfo is set to false"
+        "UseAdaptiveStereoscopicDepthInfo is set to false",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -228,7 +234,8 @@ namespace {
         "IdleBehavior",
         "Idle Behavior",
         "The chosen camera behavior that will be triggered when the idle behavior is "
-        "applied. Each option represents a predefined camera behavior"
+        "applied. Each option represents a predefined camera behavior",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -252,7 +259,8 @@ namespace {
         "Speed Factor",
         "A factor that can be used to increase or slow down the speed of an applied "
         "idle behavior. A negative value will invert the direction. Note that a speed "
-        "of exactly 0 leads to no movement at all"
+        "of exactly 0 leads to no movement at all",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo InvertIdleBehaviorInfo = {

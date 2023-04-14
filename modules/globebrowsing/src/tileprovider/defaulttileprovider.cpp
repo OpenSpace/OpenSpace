@@ -36,7 +36,8 @@ namespace {
         "FilePath",
         "File Path",
         "The path of the GDAL file or the image file that is to be used in this tile "
-        "provider"
+        "provider",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TilePixelSizeInfo = {

@@ -83,7 +83,8 @@ namespace {
         "ShowOverlayOnClients",
         "Show Overlay Information on Clients",
         "If this value is enabled, the overlay information text is also automatically "
-        "rendered on client nodes. This values is disabled by default"
+        "rendered on client nodes. This values is disabled by default",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowLogInfo = {
@@ -105,7 +106,8 @@ namespace {
         "ShowVersion",
         "Shows the version on-screen information",
         "This value determines whether the Git version information (branch and commit) "
-        "hash are shown on the screen"
+        "hash are shown on the screen",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowCameraInfo = {
@@ -120,7 +122,8 @@ namespace {
         "Screenshow Window Ids",
         "The list of window identifiers whose screenshot will be taken the next time "
         "anyone triggers a screenshot. If this list is empty (the default), all windows "
-        "will have their screenshot taken. Id's that do not exist are silently ignored"
+        "will have their screenshot taken. Id's that do not exist are silently ignored",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
@@ -129,7 +132,8 @@ namespace {
         "This value determines whether a warping should be applied before taking a "
         "screenshot. If it is enabled, all post processing is applied as well, which "
         "includes everything rendered on top of the rendering, such as the user "
-        "interface"
+        "interface",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowStatisticsInfo = {
@@ -142,14 +146,16 @@ namespace {
         "ScreenshotUseDate",
         "Screenshot Folder uses Date",
         "If this value is set to 'true', screenshots will be saved to a folder that "
-        "contains the time at which this value was enabled"
+        "contains the time at which this value was enabled",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
         "ShowFrameInformation",
         "Show Frame Information",
         "If this value is enabled, the current frame number and frame times are rendered "
-        "into the window"
+        "into the window",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableMasterInfo = {
@@ -159,7 +165,8 @@ namespace {
         "Every other aspect of the application will be unaffected by this and it will "
         "still respond to user input. This setting is reasonably only useful in the case "
         "of multi-pipeline environments, such as planetariums, where the output of the "
-        "master node is not required and performance can be gained by disabling it"
+        "master node is not required and performance can be gained by disabling it",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GlobalRotationInfo = {
@@ -168,14 +175,16 @@ namespace {
         "Applies a global view rotation. Use this to rotate the position of the "
         "focus node away from the default location on the screen. This setting "
         "persists even when a new focus node is selected. Defined using pitch, yaw, "
-        "roll in radians"
+        "roll in radians",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSpaceRotationInfo = {
         "ScreenSpaceRotation",
         "Screen Space Rotation",
         "Applies a rotation to all screen space renderables. Defined using pitch, yaw, "
-        "roll in radians"
+        "roll in radians",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MasterRotationInfo = {
@@ -183,7 +192,8 @@ namespace {
         "Master Rotation",
         "Applies a view rotation for only the master node, defined using pitch, yaw, "
         "roll in radians.This can be used to compensate the master view direction for "
-        "tilted display systems in clustered immersive environments"
+        "tilted display systems in clustered immersive environments",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableHDRPipelineInfo = {
@@ -205,7 +215,8 @@ namespace {
         "Gamma",
         "Gamma Correction",
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
-        "tristimulus values in the image"
+        "tristimulus values in the image",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HueInfo = {

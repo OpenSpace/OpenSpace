@@ -44,7 +44,8 @@ namespace {
         "Constellation Names File Path",
         "Specifies the file that contains the mapping between constellation "
         "abbreviations and full names of the constellations. If this value is empty, the "
-        "abbreviations are used as the full names"
+        "abbreviations are used as the full names",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {

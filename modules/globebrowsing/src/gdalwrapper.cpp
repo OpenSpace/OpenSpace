@@ -48,7 +48,8 @@ namespace {
         "GdalMaximumCacheSize",
         "GDAL maximum cache size",
         "This function sets the maximum amount of RAM memory in MB that GDAL is "
-        "permitted to use for caching"
+        "permitted to use for caching",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     void gdalErrorHandler(CPLErr eErrClass, int, const char* msg) {

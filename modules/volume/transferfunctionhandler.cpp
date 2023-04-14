@@ -32,25 +32,29 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunction",
         "TransferFunction",
-        "All the envelopes used in the transfer function"
+        "All the envelopes used in the transfer function",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataUnitInfo = {
         "DataUnit",
         "DataUnit",
-        "Unit of the data"
+        "Unit of the data",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinValueInfo = {
         "MinValue",
         "MinValue",
-        "Minimum value in the data"
+        "Minimum value in the data",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxValueInfo = {
         "MaxValue",
         "MaxValue",
-        "Maximum value in the data"
+        "Maximum value in the data",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaveTransferFunctionInfo = {

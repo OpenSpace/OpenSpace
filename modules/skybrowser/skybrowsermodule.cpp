@@ -49,7 +49,8 @@ namespace {
         "ShowTitleInGuiBrowser",
         "Show Title in Gui Browser",
         "If true, the name of the currently selected sky browser is shown in the WebGUI "
-        "browser"
+        "browser",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AllowRotationInfo = {

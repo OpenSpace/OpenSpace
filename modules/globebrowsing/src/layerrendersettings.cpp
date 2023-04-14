@@ -49,7 +49,8 @@ namespace {
         "Offset",
         "Offset",
         "This value is used as an additive modifier to adjust the color applied after "
-        "the gamma exponent and the multiplier has been performed"
+        "the gamma exponent and the multiplier has been performed",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 

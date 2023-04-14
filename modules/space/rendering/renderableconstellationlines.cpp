@@ -50,7 +50,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeckInfo = {
         "File",
         "Constellation Data File Path",
-        "The file that contains the data for the constellation lines"
+        "The file that contains the data for the constellation lines",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
@@ -62,7 +63,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UnitInfo = {
         "Unit",
         "Unit",
-        "The distance unit used for the constellation lines data"
+        "The distance unit used for the constellation lines data",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorsInfo = {

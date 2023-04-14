@@ -45,7 +45,8 @@ namespace {
         "Quality of Texture",
         "A parameter to set the resolution of the texture. 1 is full resolution and "
         "slower frame rate. Lower value means lower resolution of texture and faster "
-        "frame rate"
+        "frame rate",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisplayCopyInfo = {
@@ -60,14 +61,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {
         "ShowDisplayCopy",
         "Show Display Copy",
-        "Show the display copy"
+        "Show the display copy",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IsHiddenInfo = {
         "IsHidden",
         "Is Hidden",
         "If checked, the browser will be not be displayed. If it is not checked, it will "
-        "be"
+        "be",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointSpacecraftInfo = {

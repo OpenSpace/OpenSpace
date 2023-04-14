@@ -50,34 +50,39 @@ namespace {
         "Password",
         "Password",
         "The general password that allows this OpenSpace instance access to the Wormhole "
-        "server"
+        "server",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HostPasswordInfo = {
         "HostPassword",
         "Host Password",
         "The password that is required to take control of the joint session and thus "
-        "send all commands to connected clients"
+        "send all commands to connected clients",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The port on which the Wormhole server is listening to connections from "
-        "OpenSpace"
+        "OpenSpace",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddressInfo = {
         "Address",
         "Address",
-        "The address of the Wormhole server either as a DNS name or an IP address"
+        "The address of the Wormhole server either as a DNS name or an IP address",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NameInfo = {
         "Name",
         "Connection Name",
         "The name of this OpenSpace instance that will be potentially broadcast to other "
-        "connected instances"
+        "connected instances",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {

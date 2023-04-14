@@ -95,7 +95,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffInfo = {
         "OzoneLayerCoeff",
         "Ozone Layer Extinction Coeff",
-        "Ozone scattering coefficients in meters"
+        "Ozone scattering coefficients in meters",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MieHeightScaleInfo = {
@@ -148,14 +149,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AtmosphereDimmingHeightInfo ={
         "AtmosphereDimmingHeight",
         "Atmosphere Dimming Height",
-        "Percentage of the atmosphere where other objects, such as the stars, are faded"
+        "Percentage of the atmosphere where other objects, such as the stars, are faded",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SunsetAngleInfo = {
         "AtmosphereDimmingSunsetAngle",
         "Atmosphere Dimming Sunset Angle",
         "The angle (degrees) between the Camera and the Sun where the sunset starts, and "
-        "the atmosphere starts to fade in objects such as the stars"
+        "the atmosphere starts to fade in objects such as the stars",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {

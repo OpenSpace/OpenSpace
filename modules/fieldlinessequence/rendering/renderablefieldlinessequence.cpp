@@ -52,7 +52,8 @@ namespace {
         "ColorMethod",
         "Color Method",
         "Color lines uniformly or using color tables based on extra quantities like, for "
-        "examples, temperature or particle density"
+        "examples, temperature or particle density",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
         "ColorQuantity",
@@ -62,12 +63,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorMinMaxInfo = {
         "ColorQuantityMinMax",
         "ColorTable Min Value",
-        "Value to map to the lowest and highest end of the color table"
+        "Value to map to the lowest and highest end of the color table",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
         "Path to Color Table",
-        "Color Table/Transfer Function to use for 'By Quantity' coloring"
+        "Color Table/Transfer Function to use for 'By Quantity' coloring",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
         "Color",
@@ -77,7 +80,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
         "Additive Blending",
-        "Activate/deactivate additive blending"
+        "Activate/deactivate additive blending",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
@@ -87,22 +91,26 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DomainXInfo = {
         "LimitsX",
         "X-limits",
-        "Valid range along the X-axis. [Min, Max]"
+        "Valid range along the X-axis. [Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainYInfo = {
         "LimitsY",
         "Y-limits",
-        "Valid range along the Y-axis. [Min, Max]"
+        "Valid range along the Y-axis. [Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainZInfo = {
         "LimitsZ",
         "Z-limits",
-        "Valid range along the Z-axis. [Min, Max]"
+        "Valid range along the Z-axis. [Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainRInfo = {
         "LimitsR",
         "Radial limits",
-        "Valid radial range. [Min, Max]"
+        "Valid radial range. [Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
         "FlowColor",
@@ -141,17 +149,20 @@ namespace {
         "Enable/disable masking. Use masking to show lines where a given quantity is "
         "within a given range, for example, if you only want to see where the "
         "temperature is between 10 and 20 degrees. Also used for masking out line "
-        "topologies like solar wind & closed lines"
+        "topologies like solar wind & closed lines",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingMinMaxInfo = {
         "MaskingMinLimit",
         "Lower Limit",
-        "Lower and upper limit of the valid masking range"
+        "Lower and upper limit of the valid masking range",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
         "Quantity used for Masking",
-        "Quantity used for masking"
+        "Quantity used for masking",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",

@@ -41,7 +41,8 @@ namespace {
         "Format String",
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will contain the value "
-        "of the elapsed time."
+        "of the elapsed time.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReferenceTimeInfo = {

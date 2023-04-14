@@ -47,7 +47,8 @@ namespace {
         "File",
         "Vertex File Path",
         "The file pointed to with this value contains the vertex locations of the "
-        "constellations"
+        "constellations",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {

@@ -94,19 +94,22 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile Cache Size",
-        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU"
+        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MRFCacheEnabledInfo = {
         "MRFCacheEnabled",
         "MRF Cache Enabled",
-        "Determines whether automatic caching of globe browsing data is enabled."
+        "Determines whether automatic caching of globe browsing data is enabled.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MRFCacheLocationInfo = {
         "MRFCacheLocation",
         "MRF Cache Location",
-        "The location of the root folder for the MRF cache of globe browsing data."
+        "The location of the root folder for the MRF cache of globe browsing data.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     openspace::GlobeBrowsingModule::Capabilities

@@ -41,7 +41,8 @@ namespace {
         "NodeLine",
         "Node Line",
         "Property to track a nodeline. When tracking the label text will be updating the "
-        "distance from the nodeline start and end"
+        "distance from the nodeline start and end",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceUnitInfo = {
@@ -55,7 +56,8 @@ namespace {
         "CustomUnitDescriptor",
         "Custom Unit Descriptor",
         "Property to define a custom unit descriptor to use to describe the distance "
-        "value. Defaults to the units SI descriptor if not specified"
+        "value. Defaults to the units SI descriptor if not specified",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableDistanceLabel)]] Parameters {

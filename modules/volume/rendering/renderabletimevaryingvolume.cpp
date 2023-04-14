@@ -69,26 +69,30 @@ namespace {
         "SecondsBefore",
         "Seconds before",
         "Specifies the number of seconds to show the first timestep before its "
-        "actual time. The default value is 0"
+        "actual time. The default value is 0",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
         "SecondsAfter",
         "Seconds after",
         "Specifies the number of seconds to show the the last timestep after its "
-        "actual time"
+        "actual time",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
         "SourceDirectory",
         "Source Directory",
-        "Specifies the path to load timesteps from"
+        "Specifies the path to load timesteps from",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
         "Transfer Function Path",
-        "Specifies the transfer function file path"
+        "Specifies the transfer function file path",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {

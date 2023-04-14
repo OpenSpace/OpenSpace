@@ -49,14 +49,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TimeFrameInfo = {
         "TimeFrame",
         "Time Frame",
-        "The time frame in which the spice kernels are valid"
+        "The time frame in which the spice kernels are valid",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
         "Fixed Date",
         "A time to lock the rotation to. Setting this to an empty string will "
-        "unlock the time and return to rotation based on current simulation time"
+        "unlock the time and return to rotation based on current simulation time",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(SpiceRotation)]] Parameters {

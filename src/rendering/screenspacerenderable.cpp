@@ -134,7 +134,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma Correction",
-        "Sets the gamma correction of the texture"
+        "Sets the gamma correction of the texture",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     float wrap(float value, float min, float max) {

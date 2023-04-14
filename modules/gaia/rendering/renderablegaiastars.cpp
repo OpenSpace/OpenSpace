@@ -57,7 +57,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "File",
         "File Path",
-        "The path to the file with data for the stars to be rendered"
+        "The path to the file with data for the stars to be rendered",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileReaderOptionInfo = {
@@ -78,7 +79,8 @@ namespace {
         "Render Mode",
         "This value determines which predefined columns to use in rendering. If "
         "'Static' only the position of the stars is used. 'Color' uses position + color "
-        "parameters and 'Motion' uses pos, color as well as velocity for the stars"
+        "parameters and 'Motion' uses pos, color as well as velocity for the stars",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShaderOptionInfo = {
@@ -89,14 +91,16 @@ namespace {
         "filter. If 'Billboard_*' is chosen then the geometry shaders will generate "
         "screen-faced billboards for all stars. For '*_SSBO' the data will be stored in "
         "Shader Storage Buffer Objects while '*_VBO' uses Vertex Buffer Objects for the "
-        "streaming. OBS! SSBO won't work on Apple"
+        "streaming. OBS! SSBO won't work on Apple",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PsfTextureInfo = {
         "Texture",
         "Point Spread Function Texture",
         "The path to the texture that should be used as a point spread function for the "
-        "stars"
+        "stars",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LuminosityMultiplierInfo = {
@@ -137,21 +141,24 @@ namespace {
         "CloseUpBoostDist",
         "Close-Up Boost Distance [pc]",
         "Set the distance where stars starts to increase in size. Unit is Parsec [Works "
-        "only with billboards]"
+        "only with billboards]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TmPointFilterSizeInfo = {
         "FilterSize",
         "Filter Size [px]",
         "Set the filter size in pixels used in tonemapping for point splatting rendering"
-        "[Works only with points]"
+        "[Works only with points]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TmPointSigmaInfo = {
         "Sigma",
         "Normal Distribution Sigma",
         "Set the normal distribution sigma used in tonemapping for point splatting "
-        "rendering. [Works only with points]"
+        "rendering. [Works only with points]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AdditionalNodesInfo = {
@@ -160,7 +167,8 @@ namespace {
         "Determines how many additional nodes around the camera that will be fetched "
         "from disk. The first value determines how many additional layers of parents "
         "that will be fetched. The second value determines how many layers of descendant "
-        "that will be fetched from the found parents"
+        "that will be fetched from the found parents",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TmPointPxThresholdInfo = {
@@ -169,14 +177,16 @@ namespace {
         "Set the threshold for how big the elliptic weight of a pixel has to be to "
         "contribute to the final elliptic shape. A smaller value gives a more visually "
         "pleasing result while a bigger value will speed up the rendering on skewed "
-        "frustums (aka Domes)"
+        "frustums (aka Domes)",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "Color Texture",
         "The path to the texture that is used to convert from the magnitude of the star "
-        "to its color. The texture is used as a one dimensional lookup function"
+        "to its color. The texture is used as a one dimensional lookup function",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FirstRowInfo = {
@@ -184,7 +194,8 @@ namespace {
         "First Row to Read",
         "Defines the first row that will be read from the specified FITS file No need to "
         "define if data already has been processed. [Works only with "
-        "FileReaderOption::Fits]"
+        "FileReaderOption::Fits]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LastRowInfo = {
@@ -192,7 +203,8 @@ namespace {
         "Last Row to Read",
         "Defines the last row that will be read from the specified FITS file; has to be "
         "equal to or greater than FirstRow. No need to define if data already has been "
-        "processed. [Works only with FileReaderOption::Fits]"
+        "processed. [Works only with FileReaderOption::Fits]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColumnNamesInfo = {
@@ -226,7 +238,8 @@ namespace {
         "LodPixelThreshold",
         "LOD Pixel Threshold",
         "The number of total pixels a nodes AABB can have in clipping space before its "
-        "parent is fetched as LOD cache"
+        "parent is fetched as LOD cache",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxGpuMemoryPercentInfo = {
@@ -247,7 +260,8 @@ namespace {
         "PosX Threshold",
         "If defined then only stars with Position X values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
-        "read as +Inf). Measured in kiloParsec"
+        "read as +Inf). Measured in kiloParsec",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterPosYInfo = {
@@ -255,7 +269,8 @@ namespace {
         "PosY Threshold",
         "If defined then only stars with Position Y values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
-        "read as +Inf). Measured in kiloParsec"
+        "read as +Inf). Measured in kiloParsec",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterPosZInfo = {
@@ -263,7 +278,8 @@ namespace {
         "PosZ Threshold",
         "If defined then only stars with Position Z values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
-        "read as +Inf). Measured in kiloParsec"
+        "read as +Inf). Measured in kiloParsec",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterGMagInfo = {
@@ -272,7 +288,8 @@ namespace {
         "If defined then only stars with G mean magnitude values between [min, max] will "
         "be rendered (if min is set to 20.0 it is read as -Inf, if max is set to 20.0 it "
         "is read as +Inf). If min = max then all values equal min|max will be filtered "
-        "away"
+        "away",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterBpRpInfo = {
@@ -280,7 +297,8 @@ namespace {
         "Bp-Rp Threshold",
         "If defined then only stars with Bp-Rp color values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
-        "read as +Inf). If min = max then all values equal min|max will be filtered away"
+        "read as +Inf). If min = max then all values equal min|max will be filtered away",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterDistInfo = {
@@ -288,7 +306,8 @@ namespace {
         "Dist Threshold",
         "If defined then only stars with Distances values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
-        "read as +Inf). Measured in kParsec"
+        "read as +Inf). Measured in kParsec",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReportGlErrorsInfo = {

@@ -67,7 +67,8 @@ namespace {
         "RenderInfo",
         "Render Playback Information",
         "If enabled, information about a currently played back session recording is "
-        "rendering to screen"
+        "rendering to screen",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IgnoreRecordedScaleInfo = {

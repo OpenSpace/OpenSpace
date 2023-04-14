@@ -68,8 +68,8 @@ namespace {
         "DimInAtmosphere",
         "Dim In Atmosphere",
         "Enables/Disables if the object should be dimmed when the camera is in the "
-        "sunny part of an atmosphere",
-        openspace::properties::Property::Visibility::Developer
+        "sunny part of an atmosphere",,
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(Renderable)]] Parameters {

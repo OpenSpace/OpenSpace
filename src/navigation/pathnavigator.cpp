@@ -58,13 +58,15 @@ namespace {
         "Default Path Type",
         "The default path type chosen when generating a path or flying to a target. "
         "See wiki for alternatives. The shape of the generated path will be different "
-        "depending on the path type"
+        "depending on the path type",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
         "IncludeRoll",
         "Include Roll",
-        "If disabled, roll is removed from the interpolation of camera orientation"
+        "If disabled, roll is removed from the interpolation of camera orientation",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
@@ -88,7 +90,8 @@ namespace {
         "A factor used to compute the default distance from a target scene graph node "
         "when creating a camera path. The factor will be multipled with the node's "
         "bounding sphere to compute the target height from the bounding sphere of the "
-        "object"
+        "object",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationSpeedFactorInfo = {
@@ -104,7 +107,8 @@ namespace {
         "Minimal Valid Bounding Sphere",
         "The minimal allowed value for a bounding sphere, in meters. Used for "
         "computation of target positions and path generation, to avoid issues when "
-        "there is no bounding sphere"
+        "there is no bounding sphere",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RelevantNodeTagsInfo = {

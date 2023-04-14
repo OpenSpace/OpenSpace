@@ -48,7 +48,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
         "TargetNode",
         "Target object",
-        "This value sets which scene graph node to target with the light speed indicator"
+        "This value sets which scene graph node to target with the light speed indicator",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {

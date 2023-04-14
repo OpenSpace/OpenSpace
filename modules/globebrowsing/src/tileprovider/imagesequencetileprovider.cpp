@@ -46,7 +46,8 @@ namespace {
         "FolderPath",
         "Folder Path",
         "The path that is used to look for images for this image provider. The path must "
-        "point to an existing folder that contains images"
+        "point to an existing folder that contains images",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ImageSequenceTileProvider)]] Parameters {

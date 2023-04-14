@@ -50,19 +50,22 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AddressInfo = {
         "Address",
         "Address",
-        "The network address to use when connecting to OpenSpace from the Web GUI"
+        "The network address to use when connecting to OpenSpace from the Web GUI",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
-        "The network port to use when serving the Web GUI over HTTP"
+        "The network port to use when serving the Web GUI over HTTP",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo WebSocketInterfaceInfo = {
         "WebSocketInterface",
         "WebSocket Interface",
-        "The identifier of the websocket interface to use when communicating"
+        "The identifier of the websocket interface to use when communicating",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ServerProcessEntryPointInfo =
@@ -93,7 +96,8 @@ namespace {
         "Directories that are currently served. This value is set by the server process, "
         "as a verification of the actually served directories. For example, an onChange "
         "callback can be registered to this, to reload browsers when the server is "
-        "ready. Manual changes to this property have no effect"
+        "ready. Manual changes to this property have no effect",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(WebGuiModule)]] Parameters {

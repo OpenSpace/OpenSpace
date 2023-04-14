@@ -63,13 +63,15 @@ namespace {
         "DisableKeybindings",
         "Disable all Keybindings",
         "Disables all keybindings without removing them. Please note that this does not "
-        "apply to the key to open the console"
+        "apply to the key to open the console",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
         "Disable all mouse inputs",
-        "Disables all mouse inputs and prevents them from affecting the camera"
+        "Disables all mouse inputs and prevents them from affecting the camera",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableJoystickInputInfo = {

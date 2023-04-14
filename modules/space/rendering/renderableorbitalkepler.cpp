@@ -48,7 +48,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",
         "Path",
-        "The file path to the data file to read"
+        "The file path to the data file to read",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
@@ -84,13 +85,15 @@ namespace {
         "StartRenderIdx",
         "Contiguous Starting Index of Render",
         "Index of object in renderable group to start rendering (all prior objects will "
-        "be ignored)"
+        "be ignored)",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderSizeInfo = {
         "RenderSize",
         "Contiguous Size of Render Block",
-        "Number of objects to render sequentially from StartRenderIdx"
+        "Number of objects to render sequentially from StartRenderIdx",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ContiguousModeInfo = {

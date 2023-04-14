@@ -61,7 +61,7 @@ namespace {
         "ScreenVisibility",
         "ScreenVisibility",
         "Determines if the node is currently visible on screen",
-        openspace::properties::Property::Visibility::Hidden
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
@@ -83,7 +83,7 @@ namespace {
         "VisibilityDistance",
         "The distace in world coordinates between node and camera at which the "
         "screenspace object will become visible",
-        openspace::properties::Property::Visibility::Hidden
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
@@ -94,7 +94,7 @@ namespace {
         "only used as an override to the bounding sphere calculated by the Renderable, "
         "if present. If this value is -1, the Renderable's computed bounding sphere is "
         "used",
-        openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo InteractionSphereInfo = {
@@ -104,7 +104,7 @@ namespace {
         "node. This value is only used as an override to the bounding sphere calculated "
         "by the Renderable, if present. If this value is -1, the Renderable's computed "
         "interaction sphere is used",
-        openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApproachFactorInfo = {
