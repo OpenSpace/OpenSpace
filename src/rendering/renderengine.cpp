@@ -202,7 +202,8 @@ namespace {
        "Disable HDR Rendering",
        "If this value is enabled, the rendering will disable the HDR color handling and "
        "the LDR color pipeline will be used. Be aware of possible over exposure in the "
-        "final colors"
+        "final colors",
+        openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo HDRExposureInfo = {

@@ -75,7 +75,8 @@ namespace {
         "IgnoreRecordedScale",
         "Ignore Recorded Scale",
         "If this value is enabled, the scale value from a recording is ignored and the "
-        "computed values are used instead"
+        "computed values are used instead",
+        openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr bool UsingTimeKeyframes = false;
