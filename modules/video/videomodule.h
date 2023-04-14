@@ -37,7 +37,6 @@ public:
 
     VideoModule();
 
-    scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;
 
 protected:

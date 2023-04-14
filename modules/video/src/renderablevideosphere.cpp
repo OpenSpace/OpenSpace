@@ -157,7 +157,7 @@ RenderableVideoSphere::RenderableVideoSphere(const ghoul::Dictionary& dictionary
         { static_cast<int>(Orientation::Outside), "Outside" },
         { static_cast<int>(Orientation::Inside), "Inside" },
         { static_cast<int>(Orientation::Both), "Both" }
-        });
+    });
 
     if (p.orientation.has_value()) {
         _orientation = static_cast<int>(codegen::map<Orientation>(*p.orientation));
@@ -171,7 +171,7 @@ RenderableVideoSphere::RenderableVideoSphere(const ghoul::Dictionary& dictionary
     _size.onChange([this]() {
         setBoundingSphere(_size);
         _sphereIsDirty = true;
-        });
+    });
     addProperty(_size);
 
     addProperty(_segments);

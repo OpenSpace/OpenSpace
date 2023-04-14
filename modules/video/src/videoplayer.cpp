@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,8 +42,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VideoInfo = {
         "Video",
         "Video",
-        "This should point to the video that should be played. It can "
-        "be either a file path or a url to a youtube video."
+        "This should point to the video file that should be played."
     };
 
     constexpr openspace::properties::Property::PropertyInfo PlayInfo = {
@@ -124,6 +123,8 @@ namespace {
 
 namespace openspace {
 
+namespace {
+
 bool checkMpvError(int status) {
     if (status < 0) {
         LERROR(fmt::format("Libmpv API error: {}", mpv_error_string(status)));
@@ -137,8 +138,9 @@ void* getOpenGLProcAddress(void*, const char* name) {
         global::windowDelegate->openGLProcedureAddress(name)
     );
 }
+} // namespace
 
-void VideoPlayer::on_mpv_render_update(void* ctx) {
+void VideoPlayer::onMpvRenderUpdate(void* ctx) {
     // The wakeup flag is set here to enable the mpv_render_context_render
     // path in the main loop.
     // The pattern here with a static function and a void pointer to the the class
@@ -155,8 +157,7 @@ void VideoPlayer::observePropertyMpv(MpvKey key) {
     );
 }
 
-void VideoPlayer::setPropertyStringMpv(const char* name, const char* value)
-{
+void VideoPlayer::setPropertyStringMpv(const char* name, const char* value) {
     int result = mpv_set_property_string(_mpvHandle, name, value);
     if (!checkMpvError(result)) {
         LWARNING(fmt::format("Error setting property {}", name));
@@ -271,22 +272,23 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
     if (p.playbackMode.has_value()) {
         switch (*p.playbackMode) {
-        case Parameters::PlaybackMode::RealTimeLoop:
-            _playbackMode = PlaybackMode::RealTimeLoop;
-            break;
-        case Parameters::PlaybackMode::MapToSimulationTime:
-            _playbackMode = PlaybackMode::MapToSimulationTime;
-            break;
-        default:
-            LERROR("Missing playback mode in VideoTileProvider");
-            throw ghoul::MissingCaseException();
+            case Parameters::PlaybackMode::RealTimeLoop:
+                _playbackMode = PlaybackMode::RealTimeLoop;
+                break;
+            case Parameters::PlaybackMode::MapToSimulationTime:
+                _playbackMode = PlaybackMode::MapToSimulationTime;
+                break;
+            default:
+                LERROR("Missing playback mode in VideoTileProvider");
+                throw ghoul::MissingCaseException();
         }
     }
 
     if (_playbackMode == PlaybackMode::MapToSimulationTime) {
         if (!p.startTime.has_value() || !p.endTime.has_value()) {
             LERROR("Video tile layer tried to map to simulation time but lacked start or"
-                " end time");
+                " end time"
+            );
             return;
         }
         _startJ200Time = Time::convertTime(*p.startTime);
@@ -297,33 +299,34 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     global::syncEngine->addSyncable(this);
 
     keys = {
-        {MpvKey::Pause, "pause"},
-        {MpvKey::Params, "video-params"},
-        {MpvKey::Time, "time-pos"},
-        {MpvKey::Duration, "duration"},
-        {MpvKey::Height, "height"},
-        {MpvKey::Width, "width"},
-        {MpvKey::Meta, "metadata"},
-        {MpvKey::Fps, "container-fps"},
-        {MpvKey::IsSeeking, "seeking"},
-        {MpvKey::Mute, "mute"},
-        {MpvKey::Seek, "seek"}
+        { MpvKey::Pause, "pause" },
+        { MpvKey::Params, "video-params" },
+        { MpvKey::Time, "time-pos" },
+        { MpvKey::Duration, "duration" },
+        { MpvKey::Height, "height" },
+        { MpvKey::Width, "width" },
+        { MpvKey::Meta, "metadata" },
+        { MpvKey::Fps, "container-fps" },
+        { MpvKey::IsSeeking, "seeking" },
+        { MpvKey::Mute, "mute" },
+        { MpvKey::Seek, "seek" }
     };
 
     formats = {
-        {MpvKey::Pause, MPV_FORMAT_FLAG},
-        {MpvKey::Params, MPV_FORMAT_NODE},
-        {MpvKey::Time, MPV_FORMAT_DOUBLE},
-        {MpvKey::Duration, MPV_FORMAT_DOUBLE},
-        {MpvKey::Height, MPV_FORMAT_INT64},
-        {MpvKey::Width, MPV_FORMAT_INT64},
-        {MpvKey::Meta, MPV_FORMAT_NODE},
-        {MpvKey::Fps, MPV_FORMAT_DOUBLE},
-        {MpvKey::IsSeeking, MPV_FORMAT_FLAG},
-        {MpvKey::Mute, MPV_FORMAT_STRING}
+        { MpvKey::Pause, MPV_FORMAT_FLAG },
+        { MpvKey::Params, MPV_FORMAT_NODE },
+        { MpvKey::Time, MPV_FORMAT_DOUBLE },
+        { MpvKey::Duration, MPV_FORMAT_DOUBLE },
+        { MpvKey::Height, MPV_FORMAT_INT64 },
+        { MpvKey::Width, MPV_FORMAT_INT64 },
+        { MpvKey::Meta, MPV_FORMAT_NODE },
+        { MpvKey::Fps, MPV_FORMAT_DOUBLE },
+        { MpvKey::IsSeeking, MPV_FORMAT_FLAG },
+        { MpvKey::Mute, MPV_FORMAT_STRING }
     };
-
 }
+
+VideoPlayer::~VideoPlayer() {}
 
 void VideoPlayer::pause() {
     int isPaused = 1;
@@ -400,13 +403,9 @@ void VideoPlayer::initializeMpv() {
     // Starting MPV in a paused state seems to reduce problems with initialization
     setPropertyStringMpv("pause", "");
 
-    //setPropertyStringMpv("load-stats-overlay", "");
-
-    //mpv_set_property_string(_mpvHandle, "script-opts", "autoload-disabled=yes");
-
-    // Verbose mode
-    mpv_set_property_string(_mpvHandle, "msg-level", "all=v");
-    //mpv_request_log_messages(_mpvHandle, "debug");
+    // Verbose mode for debug purposes
+    // setPropertyStringMpv("msg-level", "all=v");
+    // mpv_request_log_messages(_mpvHandle, "debug");
 
     if (mpv_initialize(_mpvHandle) < 0) {
         LINFO("mpv init failed");
@@ -419,16 +418,17 @@ void VideoPlayer::initializeMpv() {
     int blockTime = 0;
 
     mpv_render_param params[]{
-        {MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL)},
-        {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
-        {MPV_RENDER_PARAM_ADVANCED_CONTROL, &adv},
-        {MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME, &blockTime},
-        {MPV_RENDER_PARAM_INVALID, nullptr}
+        { MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL) },
+        { MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params },
+        { MPV_RENDER_PARAM_ADVANCED_CONTROL, &adv },
+        { MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME, &blockTime },
+        { MPV_RENDER_PARAM_INVALID, nullptr }
     };
 
     // This makes mpv use the currently set GL context. It will use the callback
     // (passed via params) to resolve GL builtin functions, as well as extensions.
-    if (mpv_render_context_create(&_mpvRenderContext, _mpvHandle, params) < 0) {
+    int result = mpv_render_context_create(&_mpvRenderContext, _mpvHandle, params);
+    if (result < 0) {
         LINFO("Failed to initialize libmpv OpenGL context");
     }
 
@@ -438,7 +438,7 @@ void VideoPlayer::initializeMpv() {
     //  users which run OpenGL on a different thread.)
     mpv_render_context_set_update_callback(
         _mpvRenderContext,
-        on_mpv_render_update,
+        onMpvRenderUpdate,
         this
     );
 
@@ -468,7 +468,7 @@ void VideoPlayer::initializeMpv() {
     _isInitialized = true;
 }
 
-void VideoPlayer::seekToTime(double time, bool pauseAfter) {
+void VideoPlayer::seekToTime(double time, PauseAfterSeek pauseAfter) {
     if (_isSeeking || abs(_currentVideoTime - time) < glm::epsilon<double>()) {
         return;
     }
@@ -500,7 +500,8 @@ void VideoPlayer::renderMpv() {
     handleMpvEvents();
 
     if (_wakeup) {
-        if ((mpv_render_context_update(_mpvRenderContext) & MPV_RENDER_UPDATE_FRAME)) {
+        uint64_t result = mpv_render_context_update(_mpvRenderContext);
+        if ((result & MPV_RENDER_UPDATE_FRAME)) {
             // Save the currently bound fbo
             GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
 
@@ -514,12 +515,12 @@ void VideoPlayer::renderMpv() {
                 _videoResolution.y,
                 0
             };
-            int flip_y{ 1 };
+            int flipY{ 1 };
 
             mpv_render_param params[] = {
-                {MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo},
-                {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
-                {MPV_RENDER_PARAM_INVALID, nullptr}
+                { MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo },
+                { MPV_RENDER_PARAM_FLIP_Y, &flipY },
+                { MPV_RENDER_PARAM_INVALID, nullptr }
             };
             // This "renders" to the video_framebuffer "linked by ID" in the
             // params_fbo
@@ -584,25 +585,7 @@ void VideoPlayer::handleMpvEvents() {
                 mpv_event_log_message* msg =
                     reinterpret_cast<mpv_event_log_message*>(event->data);
                 std::stringstream ss;
-                ss << "[" << msg->prefix << "] " << msg->level << ": " << msg->text;
-                LINFO(ss.str());
-                break;
-            }
-            case MPV_EVENT_COMMAND_REPLY: {
-                MpvKey key = static_cast<MpvKey>(event->reply_userdata);
-
-                switch (key) {
-                    case MpvKey::Command: {
-
-                        break;
-                    }
-                    case MpvKey::Seek: {
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
-                }
+                LINFO(fmt::format("[{}] {}: {}", msg->prefix, msg->level, msg->text));
                 break;
             }
             default: {
@@ -730,7 +713,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
         }
         case MpvKey::Pause: {
             int* videoIsPaused = reinterpret_cast<int*>(prop->data);
-            _isPaused = *videoIsPaused == 1;
+            _isPaused = (* videoIsPaused == 1);
             LINFO(fmt::format("Is Paused: {}", _isPaused));
             break;
         }
@@ -795,10 +778,8 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
             break;
         }
-
         default: {
             throw ghoul::MissingCaseException();
-            break;
         }
     }
 }
@@ -815,12 +796,7 @@ void VideoPlayer::destroy() {
 }
 
 void VideoPlayer::preSync(bool isMaster) {
-    if (isMaster) {
-        _correctPlaybackTime = _currentVideoTime;
-    }
-    else {
-        _correctPlaybackTime = -1.0;
-    }
+    _correctPlaybackTime = isMaster ? _currentVideoTime : -1.0;
 }
 
 void VideoPlayer::encode(SyncBuffer* syncBuffer) {
@@ -943,7 +919,5 @@ void VideoPlayer::resizeFBO(int width, int height) {
 
     createFBO(width, height);
 }
-
-VideoPlayer::~VideoPlayer() {}
 
 } // namespace openspace::video

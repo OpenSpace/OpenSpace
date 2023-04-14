@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,37 +38,33 @@
 namespace {
     constexpr std::string_view _loggerCat = "VideoTileProvider";
 
-    struct [[codegen::Dictionary(VideoTileProvider)]] Parameters {
-
-    };
 #include "videotileprovider_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation VideoTileProvider::Documentation() {
-    return codegen::doc<Parameters>("video_videotileprovider");
+namespace {
+
+constexpr bool isDifferent(double first, double second) {
+    return abs(first - second) > glm::epsilon<double>();
 }
 
-bool isDifferent(double first, double second) {
-    return abs(first - second) > glm::epsilon<double>();
 }
 
 VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     : _videoPlayer(dictionary)
 {
     ZoneScoped
-
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-
     addPropertySubOwner(_videoPlayer);
 }
 
-Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
+VideoTileProvider::~VideoTileProvider() {}
+
+globebrowsing::Tile VideoTileProvider::tile(const globebrowsing::TileIndex& tileIndex) {
     ZoneScoped
 
     if (!_videoPlayer.isInitialized()) {
-        return Tile();
+        return globebrowsing::Tile();
     }
 
     // Always check that our framebuffer is ok
@@ -83,28 +79,28 @@ Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
         foundTile->second.texture != _videoPlayer.frameTexture().get();
 
     if (foundTile == _tileCache.end() || textureChanged) {
-        _tileCache[hash] = Tile{
+        _tileCache[hash] = globebrowsing::Tile{
             _videoPlayer.frameTexture().get(),
             std::nullopt,
-            Tile::Status::OK
+            globebrowsing::Tile::Status::OK
         };
     }
     return _tileCache[hash];
 }
 
-Tile::Status VideoTileProvider::tileStatus(const TileIndex& tileIndex) {
+globebrowsing::Tile::Status VideoTileProvider::tileStatus(const globebrowsing::TileIndex& tileIndex) {
     if (tileIndex.level > maxLevel()) {
-        return Tile::Status::OutOfRange;
+        return globebrowsing::Tile::Status::OutOfRange;
     }
     else if (_tileIsReady) {
-        return Tile::Status::OK;
+        return globebrowsing::Tile::Status::OK;
     }
     else {
-        return Tile::Status::Unavailable;
+        return globebrowsing::Tile::Status::Unavailable;
     }
 }
 
-TileDepthTransform VideoTileProvider::depthTransform() {
+globebrowsing::TileDepthTransform VideoTileProvider::depthTransform() {
     return { 0.f, 1.f };
 }
 
@@ -116,13 +112,18 @@ void VideoTileProvider::reset() {
     _videoPlayer.reset();
 }
 
-ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
+globebrowsing::ChunkTile VideoTileProvider::chunkTile(globebrowsing::TileIndex tileIndex, 
+                                                            int parents, int maxParents) {
+    using namespace globebrowsing;
+    std::function<void(TileIndex&, TileUvTransform&)> ascendToParent = []
+        (TileIndex& ti, TileUvTransform& uv) {
+            ti.level--;
+        };
 
-    lambda ascendToParent = [](TileIndex& ti, TileUvTransform& uv) {
-        ti.level--;
+    glm::vec2 noOfTiles = { 
+        std::pow(2, tileIndex.level), 
+        std::pow(2, tileIndex.level - 1) 
     };
-
-    glm::vec2 noOfTiles = { pow(2, tileIndex.level), pow(2, tileIndex.level - 1) };
     glm::vec2 ratios = { 1.f / noOfTiles.x, 1.f / noOfTiles.y };
     float offsetX = ratios.x * static_cast<float>(tileIndex.x);
     // The tiles on the y-axis should be traversed backwards
@@ -151,10 +152,8 @@ void VideoTileProvider::internalInitialize() {
     _videoPlayer.initialize();
 }
 
-VideoTileProvider::~VideoTileProvider() {}
-
 void VideoTileProvider::internalDeinitialize() {
     _videoPlayer.destroy();
 }
 
-} // namespace openspace::video
+} // namespace openspace

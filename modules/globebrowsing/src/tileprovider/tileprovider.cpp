@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -88,7 +88,7 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
 void TileProvider::initializeDefaultTile() {
     ZoneScoped;
 
-        ghoul_assert(!DefaultTile.texture, "Default tile should not have been created");
+    ghoul_assert(!DefaultTile.texture, "Default tile should not have been created");
     using namespace ghoul::opengl;
 
     // Create pixel data
@@ -118,8 +118,8 @@ void TileProvider::deinitializeDefaultTile() {
     DefaultTileTexture = nullptr;
 }
 
-TileProvider::TileProvider() : 
-    properties::PropertyOwner({ "TileProvider", "Tile Provider" }) 
+TileProvider::TileProvider() 
+    : properties::PropertyOwner({ "TileProvider", "Tile Provider" }) 
 {}
 
 void TileProvider::initialize() {
@@ -153,7 +153,9 @@ void TileProvider::deinitialize() {
 }
 
 ChunkTile TileProvider::traverseTree(TileIndex tileIndex, int parents, int maxParents, 
-    std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent, TileUvTransform& uvTransform) {
+                        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent, 
+                                                             TileUvTransform& uvTransform) 
+{
     // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller
     for (int i = 0; i < parents && tileIndex.level > 1; i++) {
         ascendToParent(tileIndex, uvTransform);
@@ -198,16 +200,17 @@ ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParen
 
     ghoul_assert(isInitialized, "TileProvider was not initialized");
 
-    lambda ascendToParent = [](TileIndex& ti, TileUvTransform& uv) {
-        uv.uvOffset *= 0.5;
-        uv.uvScale *= 0.5;
+    std::function<void(TileIndex&, TileUvTransform&)> ascendToParent = []
+        (TileIndex& ti, TileUvTransform& uv) {
+            uv.uvOffset *= 0.5;
+            uv.uvScale *= 0.5;
 
-        uv.uvOffset += ti.positionRelativeParent();
+            uv.uvOffset += ti.positionRelativeParent();
 
-        ti.x /= 2;
-        ti.y /= 2;
-        ti.level--;
-    };
+            ti.x /= 2;
+            ti.y /= 2;
+            ti.level--;
+        };
 
     TileUvTransform uvTransform = {
        .uvOffset = glm::vec2(0.f, 0.f),

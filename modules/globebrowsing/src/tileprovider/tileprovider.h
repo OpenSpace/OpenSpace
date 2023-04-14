@@ -71,8 +71,6 @@ enum class Type {
     FfmpegTileProvider
 };
 
-using lambda = std::function<void(TileIndex&, TileUvTransform&)>;
-
 struct TileProvider : public properties::PropertyOwner {
     static unsigned int NumTileProviders;
 
@@ -134,7 +132,8 @@ struct TileProvider : public properties::PropertyOwner {
     virtual float noDataValueAsFloat() = 0;
 
 
-    virtual ChunkTile chunkTile(TileIndex tileIndex, int parents = 0, int maxParents = 1337);
+    virtual ChunkTile chunkTile(TileIndex tileIndex, int parents = 0, 
+        int maxParents = 1337);
     ChunkTilePile chunkTilePile(TileIndex tileIndex, int pileSize);
 
 
@@ -144,7 +143,8 @@ struct TileProvider : public properties::PropertyOwner {
     bool isInitialized = false;
 protected:
     ChunkTile traverseTree(TileIndex tileIndex, int parents, int maxParents, 
-        lambda& ascendToParent, TileUvTransform& uvTransform);
+        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent, 
+        TileUvTransform& uvTransform);
 
 private:
     virtual void internalInitialize();

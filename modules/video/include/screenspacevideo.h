@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEVIDEO___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEVIDEO___H__
+#ifndef __OPENSPACE_MODULE_VIDEO___SCREENSPACEVIDEO___H__
+#define __OPENSPACE_MODULE_VIDEO___SCREENSPACEVIDEO___H__
 
 #include <openspace/rendering/screenspacerenderable.h>
 
@@ -55,4 +55,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEVIDEO___H__
+#endif // __OPENSPACE_MODULE_VIDEO___SCREENSPACEVIDEO___H__

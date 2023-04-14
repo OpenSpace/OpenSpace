@@ -27,25 +27,12 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
-namespace {
-    struct [[codegen::Dictionary(RenderableVideoPlane)]] Parameters {
-
-    };
-#include "renderablevideoplane_codegen.cpp"
-} // namespace
-
 namespace openspace {
-
-documentation::Documentation RenderableVideoPlane::Documentation() {
-    return codegen::doc<Parameters>("renderable_video_plane");
-}
 
 RenderableVideoPlane::RenderableVideoPlane(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _videoPlayer(dictionary)
 {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-
     addPropertySubOwner(_videoPlayer);
 }
 
@@ -64,11 +51,9 @@ bool RenderableVideoPlane::isReady() const {
 }
 
 void RenderableVideoPlane::render(const RenderData& data, RendererTasks& rendererTask) {
-    if (!_videoPlayer.isInitialized()) {
-        return;
+    if (_videoPlayer.isInitialized()) {
+        RenderablePlane::render(data, rendererTask);
     }
-
-    RenderablePlane::render(data, rendererTask);
 }
 
 void RenderableVideoPlane::update(const UpdateData& data) {

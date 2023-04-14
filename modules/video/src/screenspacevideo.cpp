@@ -35,25 +35,12 @@
 #include <filesystem>
 #include <optional>
 
-namespace {
-    struct [[codegen::Dictionary(ScreenSpaceVideo)]] Parameters {
-
-    };
-#include "screenspacevideo_codegen.cpp"
-} // namespace
-
 namespace openspace {
-
-documentation::Documentation ScreenSpaceVideo::Documentation() {
-    return codegen::doc<Parameters>("screenspace_video");
-}
 
 ScreenSpaceVideo::ScreenSpaceVideo(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _videoPlayer(dictionary)
 {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-
     // @TODO (abock, 2021-02-02) Should this be the name variable? The identifier wasn't
     // declared in the documentation
     std::string identifier;
@@ -82,10 +69,9 @@ void ScreenSpaceVideo::update() {
 }
 
 void ScreenSpaceVideo::render() {
-    if (!_videoPlayer.isInitialized()) {
-        return;
+    if (_videoPlayer.isInitialized()) {
+        ScreenSpaceRenderable::render();
     }
-    ScreenSpaceRenderable::render();
 }
 
 bool ScreenSpaceVideo::initializeGL() {

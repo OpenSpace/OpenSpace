@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/video/videomodule.h>
+
 #include <modules/video/include/videotileprovider.h>
 #include <modules/video/include/screenspacevideo.h>
 #include <modules/video/include/renderablevideosphere.h>
@@ -60,12 +61,11 @@ VideoModule::VideoModule()
 
 void VideoModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
-    using namespace globebrowsing;
 
     _enabled = p.enabled.value_or(_enabled);
 
-    ghoul::TemplateFactory<TileProvider>* fTileProvider =
-        FactoryManager::ref().factory<TileProvider>();
+    ghoul::TemplateFactory<globebrowsing::TileProvider>* fTileProvider =
+        FactoryManager::ref().factory<globebrowsing::TileProvider>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
     fTileProvider->registerClass<VideoTileProvider>("VideoTileLayer");
 
@@ -87,15 +87,6 @@ std::vector<documentation::Documentation> VideoModule::documentations() const {
         VideoTileProvider::Documentation(),
     };
     return std::vector<documentation::Documentation>();
-}
-
-scripting::LuaLibrary VideoModule::luaLibrary() const {
-    return {
-        "video",
-        {
-
-        }
-    };
 }
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__VIDEOTILEPROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__VIDEOTILEPROVIDER___H__
+#ifndef __OPENSPACE_MODULE_VIDEO___VIDEOTILEPROVIDER___H__
+#define __OPENSPACE_MODULE_VIDEO___VIDEOTILEPROVIDER___H__
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
-#include <modules/video/include/videoplayer.h>
 
+#include <modules/video/include/videoplayer.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
@@ -40,9 +40,8 @@
 namespace openspace { struct Documentation; }
 
 namespace openspace {
-using namespace globebrowsing;
 
-class VideoTileProvider : public TileProvider {
+class VideoTileProvider : public globebrowsing::TileProvider {
 public:
     VideoTileProvider(const ghoul::Dictionary& dictionary);
     ~VideoTileProvider();
@@ -52,10 +51,12 @@ public:
     int minLevel() override final;
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
-    ChunkTile chunkTile(TileIndex tileIndex, int parents, int maxParents = 1337) override;
-    Tile tile(const TileIndex& tileIndex) override final;
-    Tile::Status tileStatus(const TileIndex& tileIndex) override final;
-    TileDepthTransform depthTransform() override final;
+    globebrowsing::ChunkTile chunkTile(globebrowsing::TileIndex tileIndex, int parents, 
+        int maxParents = 1337) override;
+    globebrowsing::Tile tile(const globebrowsing::TileIndex& tileIndex) override final;
+    globebrowsing::Tile::Status tileStatus(
+        const globebrowsing::TileIndex& tileIndex) override final;
+    globebrowsing::TileDepthTransform depthTransform() override final;
 
     static documentation::Documentation Documentation();
 
@@ -64,12 +65,13 @@ private:
     void internalDeinitialize() override final;
 
     // Tile handling
-    std::map<TileIndex::TileHashKey, Tile> _tileCache; // Cache for rendering 1 frame
+    // Cache for rendering 1 frame
+    std::map<globebrowsing::TileIndex::TileHashKey, globebrowsing::Tile> _tileCache; 
     bool _tileIsReady = false;
 
     VideoPlayer _videoPlayer;
 };
 
-} // namespace video::globebrowsing
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__VIDEOTILEPROVIDER___H__
+#endif // __OPENSPACE_MODULE_VIDEO___VIDEOTILEPROVIDER___H__

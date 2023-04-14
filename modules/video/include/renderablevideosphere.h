@@ -89,7 +89,6 @@ private:
     bool _sphereIsDirty = false;
 };
 
-
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOSPHERE___H__
