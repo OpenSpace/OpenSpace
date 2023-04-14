@@ -46,6 +46,107 @@ SceneLicenseWriter::SceneLicenseWriter()
     )
 {}
 
+void sortJson(nlohmann::json& json) {
+    std::sort(
+        json.begin(),
+        json.end(),
+        [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
+            std::string lhsString = lhs["Name"];
+            std::string rhsString = rhs["Name"];
+            std::transform(
+                lhsString.begin(),
+                lhsString.end(),
+                lhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+            std::transform(
+                rhsString.begin(),
+                rhsString.end(),
+                rhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+
+            return rhsString > lhsString;
+        });
+}
+
+nlohmann::json SceneLicenseWriter::generateJsonJson() const {
+    nlohmann::json json;
+
+    std::vector<const Asset*> assets =
+        global::openSpaceEngine->assetManager().allAssets();
+
+    int metaTotal = 0;
+    int metaCount = 0;
+    for (const Asset* asset : assets) {
+        std::optional<Asset::MetaInformation> meta = asset->metaInformation();
+        if (!meta.has_value()) {
+            continue;
+        }
+        metaTotal++;
+    }
+
+    if (global::profile->meta.has_value()) {
+        metaTotal++;
+        nlohmann::json metaJson;
+        metaJson["Name"] = "Profile";
+        metaJson["ProfileName"] = global::profile->meta->name.value_or("");
+        metaJson["Version"] = global::profile->meta->version.value_or("");
+        metaJson["Description"] = global::profile->meta->description.value_or("");
+        metaJson["Author"] = global::profile->meta->author.value_or("");
+        metaJson["Url"] = global::profile->meta->url.value_or("");
+        metaJson["License"] = global::profile->meta->license.value_or("");
+        metaJson["Type"] = "license";
+        json.push_back(std::move(metaJson));
+    }
+
+    std::map<std::string, nlohmann::json> assetLicenses;
+    for (const Asset* asset : assets) {
+        std::optional<Asset::MetaInformation> meta = asset->metaInformation();
+
+        nlohmann::json assetJson;
+        if (!meta.has_value()) {
+            assetJson["Name"] = "";
+            assetJson["Version"] = "";
+            assetJson["Description"] = "";
+            assetJson["Author"] = "";
+            assetJson["Url"] = "";
+            assetJson["License"] = "No license";
+            assetJson["Identifiers"] = "";
+            assetJson["Path"] = asset->path().string();
+
+            assetLicenses["No license"].push_back(assetJson);
+        }
+        else {
+            std::string license = meta->license == "" ? "No license" : meta->license;
+            assetJson["Name"] = meta->name;
+            assetJson["Version"] = meta->version;
+            assetJson["Description"] = meta->description;
+            assetJson["Author"] = meta->author;
+            assetJson["Url"] = meta->url;
+            assetJson["License"] = license;
+            assetJson["Identifiers"] = meta->identifiers;
+            assetJson["Path"] = asset->path().string();
+
+            assetLicenses[license].push_back(assetJson);
+        }
+    }
+    
+    nlohmann::json assetsJson;
+    assetsJson["Name"] = "Assets";
+    assetsJson["Type"] = "Licenses";
+
+    for (const std::pair<std::string, nlohmann::json>& assetLicense : assetLicenses) {
+        nlohmann::json entry;
+        entry["Name"] = assetLicense.first;
+        entry["Assets"] = assetLicense.second;
+        sortJson(entry["Assets"]);
+        assetsJson["Licenses"].push_back(entry);
+    }
+    json.push_back(assetsJson);
+    return json;
+}
+
 std::string SceneLicenseWriter::generateJson() const {
     ZoneScoped;
 

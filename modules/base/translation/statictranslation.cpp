@@ -60,6 +60,7 @@ StaticTranslation::StaticTranslation()
         requireUpdate();
         notifyObservers();
     });
+    _type = "StaticTranslation";
 }
 
 StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
@@ -67,6 +68,7 @@ StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _position = p.position;
+    _type = "StaticTranslation";
 }
 
 glm::dvec3 StaticTranslation::position(const UpdateData&) const {

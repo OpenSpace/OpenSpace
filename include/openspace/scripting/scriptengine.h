@@ -27,8 +27,8 @@
 
 #include <openspace/util/syncable.h>
 #include <openspace/documentation/documentationgenerator.h>
-
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/json.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
 #include <filesystem>
@@ -96,6 +96,7 @@ public:
     std::vector<std::string> allLuaFunctions() const;
 
     std::string generateJson() const override;
+    nlohmann::json generateJsonJson() const;
 
 private:
     BooleanType(Replace);

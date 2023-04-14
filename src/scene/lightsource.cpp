@@ -76,6 +76,7 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
     LightSource* source = factory->create(p.type, dictionary);
     source->setIdentifier(p.identifier);
 
+    source->_type = p.type;
     return std::unique_ptr<LightSource>(source);
 }
 
