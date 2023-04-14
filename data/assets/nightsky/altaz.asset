@@ -71,7 +71,7 @@ local showAction = {
     openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Rotation.Longitude', lon);
     openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Enabled', true);
     openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 1, 1);
+    openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 1.0, 1.0);
   ]],
   Documentation = "Shows the Alt/Az grid",
   GuiPath = "/Night Sky/Lines and Grids",
