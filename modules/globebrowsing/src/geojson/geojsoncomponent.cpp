@@ -272,7 +272,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     , _enabled(EnabledInfo, true)
     , _globeNode(globe)
     , _geoJsonFile(FileInfo)
-    , _heightOffset(HeightOffsetInfo, 0.f, -1e12f, 1e12f)
+    , _heightOffset(HeightOffsetInfo, 10.f, -1e12f, 1e12f)
     , _latLongOffset(
         CoordinateOffsetInfo,
         glm::vec2(0.f),
