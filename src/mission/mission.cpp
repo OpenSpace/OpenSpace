@@ -157,21 +157,23 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         _actions = p.actions.value_or(_actions);
     }
 
-    _milestones.reserve(p.milestones->size());
-    for (const Parameters::Milestone& milestone : *p.milestones) {
-        std::string name = milestone.name;
-        Time newTime = Time(milestone.date);
-        Milestone newDate = { name, newTime };
-        if (milestone.description.has_value()) {
-            newDate.description = milestone.description.value();
+    if (p.milestones.has_value()) {
+        _milestones.reserve(p.milestones->size());
+        for (const Parameters::Milestone& milestone : *p.milestones) {
+            std::string name = milestone.name;
+            Time newTime = Time(milestone.date);
+            Milestone newDate = { name, newTime };
+            if (milestone.description.has_value()) {
+                newDate.description = milestone.description.value();
+            }
+            if (milestone.image.has_value()) {
+                newDate.image = milestone.image.value();
+            }
+            if (milestone.link.has_value()) {
+                newDate.link = milestone.link.value();
+            }
+            _milestones.emplace_back(newDate);
         }
-        if (milestone.image.has_value()) {
-            newDate.image = milestone.image.value();
-        }
-        if (milestone.link.has_value()) {
-            newDate.link = milestone.link.value();
-        }
-        _milestones.emplace_back(newDate);
     }
 }
 
