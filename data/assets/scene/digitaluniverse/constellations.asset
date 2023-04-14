@@ -105,7 +105,7 @@ local show_constellations = {
     openspace.fadeIn("Scene.Constellations.Renderable")
   ]],
   Documentation = "Shows all the constellations lines",
-  GuiPath = "/Constellations/Lines",
+  GuiPath = "/Night Sky/Constellations/Lines",
   IsLocal = false
 }
 
@@ -116,7 +116,7 @@ local hide_constellations = {
     openspace.fadeOut("Scene.Constellations.Renderable", nil, "openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', false); openspace.setPropertyValueSingle('Scene.Constellations.Renderable.ConstellationSelection', {})")
   ]],
   Documentation = "Hides all the constellations lines",
-  GuiPath = "/Constellations/Lines",
+  GuiPath = "/Night Sky/Constellations/Lines",
   IsLocal = false
 }
 
@@ -128,7 +128,7 @@ local show_zodiacs = {
     openspace.fadeIn("Scene.Constellations.Renderable")
   ]],
   Documentation = "Shows the zodiac constellations lines",
-  GuiPath = "/Constellations/Lines",
+  GuiPath = "/Night Sky/Constellations/Lines",
   IsLocal = false
 }
 

@@ -101,7 +101,7 @@ local show_art = {
     openspace.fadeIn("Scene.ImageConstellation*.Renderable")
   ]],
   Documentation = "Enables and fades up constellation art work",
-  GuiPath = "/Night Sky/Constellations",
+  GuiPath = "/Night Sky/Constellations/Art",
   IsLocal = false
 }
 asset.export("ShowArtAction", show_art)
@@ -113,7 +113,7 @@ local hide_art = {
     openspace.fadeOut("Scene.ImageConstellation*.Renderable")
   ]],
   Documentation = "Fades out constellation artwork",
-  GuiPath = "/Night Sky/Constellations",
+  GuiPath = "/Night Sky/Constellations/Art",
   IsLocal = false
 }
 asset.export("HideArtAction", hide_art)
@@ -125,7 +125,7 @@ local disable_art = {
     openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)
   ]],
   Documentation = "Disable constellation artwork",
-  GuiPath = "/Night Sky/Constellations",
+  GuiPath = "/Night Sky/Constellations/Art",
   IsLocal = false
 }
 asset.export("DisableArtAction", disable_art)
@@ -137,7 +137,7 @@ local show_zodiac_art = {
     openspace.fadeIn("{zodiac}")
   ]],
   Documentation = "Enables and fades up zodiac art work",
-  GuiPath = "/Night Sky/Constellations",
+  GuiPath = "/Night Sky/Constellations/Art",
   IsLocal = false
 }
 asset.export("ShowZodiacArt", show_zodiac_art)
@@ -149,7 +149,7 @@ local hide_zodiac_art = {
     openspace.fadeOut("{zodiac}")
   ]],
   Documentation = "Fades down zodiac art work",
-  GuiPath = "/Night Sky/Constellations",
+  GuiPath = "/Night Sky/Constellations/Art",
   IsLocal = false
 }
 asset.export("HideZodiacArt", hide_zodiac_art)
