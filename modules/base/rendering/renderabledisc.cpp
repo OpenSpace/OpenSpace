@@ -92,19 +92,19 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texturePath = p.texture.string();
-    _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath.value()); });
+    _texturePath.onChange([this]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
 
     _size.setExponent(13.f);
     _size = p.size.value_or(_size);
     setBoundingSphere(_size);
-    _size.onChange([&]() { _planeIsDirty = true; });
+    _size.onChange([this]() { _planeIsDirty = true; });
     addProperty(_size);
 
     _width = p.width.value_or(_width);
     addProperty(_width);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
 }

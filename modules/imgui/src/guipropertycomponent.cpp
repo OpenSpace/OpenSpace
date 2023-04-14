@@ -363,14 +363,14 @@ void GuiPropertyComponent::render() {
                              (dynamic_cast<SceneGraphNode*>(*owners.begin()) &&
                        dynamic_cast<SceneGraphNode*>(*owners.begin())->guiPath().empty());
 
-    auto renderProp = [&](properties::PropertyOwner* pOwner) {
+    auto renderProp = [this, owners](properties::PropertyOwner* pOwner) {
         const int count = nVisibleProperties(pOwner->propertiesRecursive());
 
         if (count == 0) {
             return;
         }
 
-        auto header = [&]() -> bool {
+        auto header = [&owners, &pOwner]() -> bool {
             if (owners.size() > 1) {
                 // Create a header in case we have multiple owners
                 return ImGui::CollapsingHeader(pOwner->guiName().c_str());

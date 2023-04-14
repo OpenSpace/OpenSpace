@@ -53,20 +53,29 @@ namespace documentation { struct Documentation; }
 
 class Camera;
 
+// Unfortunately we can't move this struct into the Renderable until
+// https://bugs.llvm.org/show_bug.cgi?id=36684 is fixed
+struct RenderableSettings {
+    bool automaticallyUpdateRenderBin = true;
+    bool shouldUpdateIfDisabled = false;
+};
+
 class Renderable : public properties::PropertyOwner, public Fadeable {
 public:
     enum class RenderBin : int {
         Background = 1,
         Opaque = 2,
         PreDeferredTransparent = 4,
-        PostDeferredTransparent = 8,
-        Overlay = 16
+        Overlay = 8,
+        PostDeferredTransparent = 16,
+        Sticker = 32
     };
 
     static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
         ghoul::Dictionary dictionary);
 
-    Renderable(const ghoul::Dictionary& dictionary);
+    Renderable(const ghoul::Dictionary& dictionary,
+        RenderableSettings settings = RenderableSettings());
     virtual ~Renderable() override = default;
 
     virtual void initialize();
@@ -76,12 +85,12 @@ public:
 
     virtual bool isReady() const = 0;
     bool isEnabled() const;
-    bool shouldUpdateIfDisabled() const;
+    bool shouldUpdateIfDisabled() const noexcept;
 
-    double boundingSphere() const;
-    double interactionSphere() const;
+    double boundingSphere() const noexcept;
+    double interactionSphere() const noexcept;
 
-    std::string_view typeAsString() const;
+    std::string_view typeAsString() const noexcept;
 
     virtual void update(const UpdateData& data);
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
@@ -118,15 +127,15 @@ protected:
     void setInteractionSphere(double interactionSphere);
 
     void setRenderBinFromOpacity();
-    void registerUpdateRenderBinFromOpacity();
 
     /// Returns the full opacity constructed from the _opacity and _fade property values
-    float opacity() const override;
+    float opacity() const noexcept override;
 
-    double _boundingSphere = 0.0;
-    double _interactionSphere = 0.0;
-    SceneGraphNode* _parent = nullptr;
-    bool _shouldUpdateIfDisabled = false;
+    SceneGraphNode* parent() const noexcept;
+
+    bool automaticallyUpdatesRenderBin() const noexcept;
+    bool hasOverrideRenderBin() const noexcept;
+
     RenderBin _renderBin = RenderBin::Opaque;
 
     // An optional renderbin that renderables can use for certain components, in cases
@@ -134,6 +143,15 @@ protected:
     std::optional<RenderBin> _secondaryRenderBin;
 
 private:
+    void registerUpdateRenderBinFromOpacity();
+
+    double _boundingSphere = 0.0;
+    double _interactionSphere = 0.0;
+    SceneGraphNode* _parent = nullptr;
+    const bool _shouldUpdateIfDisabled = false;
+    bool _automaticallyUpdateRenderBin = true;
+    bool _hasOverrideRenderBin = false;
+
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want
     // to provide a set method for this. Otherwise, anyone might mess around with our
     // parentage and that's no bueno

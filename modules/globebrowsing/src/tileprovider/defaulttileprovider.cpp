@@ -48,9 +48,24 @@ namespace {
         "complete image if a single image is used"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo CompressionInfo = {
+        "Compression",
+        "Compression Algorithm",
+        "The compression algorithm to use for MRF cached tiles"
+    };
+
+    enum class [[codegen::stringify()]] Compression {
+        PNG = 0,
+        JPEG,
+        LERC
+    };
+
     struct [[codegen::Dictionary(DefaultTileProvider)]] Parameters {
         // User-facing name of this tile provider
         std::optional<std::string> name;
+
+        // Identifier of the enclosing layer to which tiles are provided
+        std::optional<std::string> identifier;
 
         // The path to the file that is loaded by GDAL to produce tiles. Since GDAL
         // supports it, this can also be the textual representation of the contents of a
@@ -69,6 +84,32 @@ namespace {
 
         // Determines if the tiles should be preprocessed before uploading to the GPU
         std::optional<bool> performPreProcessing;
+
+        struct CacheSettings {
+            // Specifies whether to use caching or not
+            std::optional<bool> enabled;
+
+            // [[codegen::verbatim(CompressionInfo.description)]]
+            enum class [[codegen::map(Compression)]] Compression {
+                PNG = 0,
+                JPEG,
+                LERC
+            };
+
+            // The compression algorithm to use for cached tiles
+            std::optional<Compression> compression;
+
+            // The quality setting of the compression alogrithm, only valid for JPEG
+            std::optional<int> quality [[codegen::inrange(0, 100)]];
+
+            // The block-size of the MRF cache
+            std::optional<int> blockSize [[codegen::greater(0)]];
+        };
+        // Specifies the cache settings that should be applied to this layer
+        std::optional<CacheSettings> cacheSettings;
+
+        // The name of the enclosing globe
+        std::optional<std::string> globeName;
 
     };
 #include "defaulttileprovider_codegen.cpp"
@@ -105,17 +146,53 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     _performPreProcessing = _layerGroupID == layers::Group::ID::HeightLayers;
     _performPreProcessing = p.performPreProcessing.value_or(_performPreProcessing);
 
+    // Get the name of the layergroup to which this layer belongs
+    auto it = std::find_if(
+        layers::Groups.begin(),
+        layers::Groups.end(),
+        [id = _layerGroupID](const layers::Group& gi) {
+            return gi.id == id;
+        }
+    );
+    auto layerGroup = it != layers::Groups.end() ? it->name : std::to_string(static_cast<int>(_layerGroupID));
+
+    std::string identifier = p.identifier.value_or("unspecified");
+    std::string enclosing = p.globeName.value_or("unspecified");
+
+    std::string path = fmt::format("{}/{}/{}/", enclosing, layerGroup, identifier);
+
+    GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
+    bool enabled = module.isMRFCachingEnabled();
+    Compression compression =
+        _layerGroupID == layers::Group::ID::HeightLayers ? Compression::LERC : Compression::JPEG;
+    int quality = 75;
+    int blockSize = 1024;
+    if (p.cacheSettings.has_value()) {
+        enabled = p.cacheSettings->enabled.value_or(enabled);
+        if (p.cacheSettings->compression.has_value()) {
+            compression = codegen::map<Compression>(*p.cacheSettings->compression);
+        }
+        quality = p.cacheSettings->quality.value_or(quality);
+        blockSize = p.cacheSettings->blockSize.value_or(blockSize);
+    }
+
+    _cacheProperties.enabled = enabled;
+    _cacheProperties.path = path;
+    _cacheProperties.quality = quality;
+    _cacheProperties.blockSize = blockSize;
+    _cacheProperties.compression = codegen::toString(compression);
+
     TileTextureInitData initData(
         tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
     );
     _tilePixelSize = initData.dimensions.x;
-    initAsyncTileDataReader(initData);
+    initAsyncTileDataReader(initData, _cacheProperties);
 
     addProperty(_filePath);
     addProperty(_tilePixelSize);
 }
 
-void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) {
+void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData, TileCacheProperties cacheProperties) {
     ZoneScoped;
 
     _asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
@@ -123,6 +200,7 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) 
         std::make_unique<RawTileDataReader>(
             _filePath,
             initData,
+            cacheProperties,
             RawTileDataReader::PerformPreprocessing(_performPreProcessing)
         )
     );
@@ -189,7 +267,8 @@ void DefaultTileProvider::update() {
 
     if (_asyncTextureDataProvider->shouldBeDeleted()) {
         initAsyncTileDataReader(
-            tileTextureInitData(_layerGroupID, _padTiles, _tilePixelSize)
+            tileTextureInitData(_layerGroupID, _padTiles, _tilePixelSize),
+            _cacheProperties
         );
     }
 }

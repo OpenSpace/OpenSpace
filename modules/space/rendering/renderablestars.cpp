@@ -540,8 +540,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _dataMapping.bvColor = p.dataMapping.bv.value_or("");
     _dataMapping.bvColor.onChange([this]() { _dataIsDirty = true; });
@@ -578,7 +577,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_dataMappingContainer);
 
     _speckFile = p.speckFile.string();
-    _speckFile.onChange([&]() { _speckFileIsDirty = true; });
+    _speckFile.onChange([this]() { _speckFileIsDirty = true; });
     addProperty(_speckFile);
 
     _colorTexturePath = p.colorMap.string();
@@ -638,14 +637,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     _queuedOtherData = p.otherData.value_or(_queuedOtherData);
 
-    _otherDataOption.onChange([&]() { _dataIsDirty = true; });
+    _otherDataOption.onChange([this]() { _dataIsDirty = true; });
     addProperty(_otherDataOption);
 
     _otherDataRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(_otherDataRange);
 
     addProperty(_otherDataColorMapPath);
-    _otherDataColorMapPath.onChange([&]() {
+    _otherDataColorMapPath.onChange([this]() {
         if (std::filesystem::exists(_otherDataColorMapPath.value())) {
             _otherDataColorMapIsDirty = true;
         }
@@ -684,7 +683,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _psfMethodOption.addOption(PsfMethodSpencer, "Spencer's Function");
     _psfMethodOption.addOption(PsfMethodMoffat, "Moffat's Function");
     _psfMethodOption = PsfMethodSpencer;
-    _psfMethodOption.onChange([&]() { renderPSFToTexture(); });
+    _psfMethodOption.onChange([this]() { renderPSFToTexture(); });
     _parametersOwner.addProperty(_psfMethodOption);
 
     _psfMultiplyOption.addOption(AppBrightness, "Use Star's Apparent Brightness");
@@ -714,7 +713,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _magnitudeExponent = p.magnitudeExponent.value_or(_magnitudeExponent);
     _parametersOwner.addProperty(_magnitudeExponent);
 
-    auto renderPsf = [&]() { renderPSFToTexture(); };
+    auto renderPsf = [this]() { renderPSFToTexture(); };
 
     _spencerPSFParamOwner.addProperty(_p0Param);
     _p0Param.onChange(renderPsf);
@@ -889,7 +888,7 @@ void RenderableStars::loadPSFTexture() {
             _pointSpreadFunctionTexturePath.value()
         );
         _pointSpreadFunctionFile->setCallback(
-            [&]() { _pointSpreadFunctionTextureIsDirty = true; }
+            [this]() { _pointSpreadFunctionTextureIsDirty = true; }
         );
     }
     _pointSpreadFunctionTextureIsDirty = false;

@@ -166,9 +166,9 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     addProperty(_enabled);
 
     _opacity = p.opacity.value_or(_opacity);
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
-    addProperty(_fade);
+    addProperty(Fadeable::_fade);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);

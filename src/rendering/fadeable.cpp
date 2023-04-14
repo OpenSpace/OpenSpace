@@ -75,7 +75,7 @@ bool Fadeable::isVisible() const {
     return opacity() > 0.f;
 }
 
-float Fadeable::opacity() const {
+float Fadeable::opacity() const noexcept {
     float fadeFromParent = 1.f;
     if (_parentFadeable) {
         // Note that we only care about the fade here, not the full opacity of the

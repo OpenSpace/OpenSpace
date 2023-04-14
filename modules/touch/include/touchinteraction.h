@@ -172,7 +172,8 @@ private:
     properties::FloatProperty _zoomSensitivityExponential;
     properties::FloatProperty _zoomSensitivityProportionalDist;
     properties::FloatProperty _zoomSensitivityDistanceThreshold;
-    properties::FloatProperty _zoomBoundarySphereMultiplier;
+    properties::FloatProperty _zoomInBoundarySphereMultiplier;
+    properties::FloatProperty _zoomOutBoundarySphereMultiplier;
     properties::DoubleProperty _zoomInLimit;
     properties::DoubleProperty _zoomOutLimit;
     properties::FloatProperty _inputStillThreshold;

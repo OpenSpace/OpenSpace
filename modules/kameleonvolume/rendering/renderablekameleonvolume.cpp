@@ -277,7 +277,7 @@ void RenderableKameleonVolume::initializeGL() {
 
     global::raycasterManager->attachRaycaster(*_raycaster.get());
 
-    auto onChange = [&](bool enabled) {
+    auto onChange = [this](bool enabled) {
         if (enabled) {
             global::raycasterManager->attachRaycaster(*_raycaster.get());
         }

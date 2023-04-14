@@ -238,7 +238,7 @@ documentation::Documentation RenderableLabel::Documentation() {
 }
 
 RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+    : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _fontSize(FontSizeInfo, 50.f, 1.f, 100.f)
@@ -259,14 +259,13 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _blendMode.addOptions({
         { BlendMode::Normal, "Normal" },
-        { BlendMode::Additive, "Additive"}
+        { BlendMode::Additive, "Additive" }
     });
-    _blendMode.onChange([&]() {
+    _blendMode.onChange([this]() {
         switch (_blendMode) {
             case BlendMode::Normal:
                 setRenderBinFromOpacity();
@@ -302,7 +301,7 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     addProperty(_color);
 
     _fontSize = p.fontSize.value_or(_fontSize);
-    _fontSize.onChange([&]() {
+    _fontSize.onChange([this]() {
         _font = global::fontManager->font(
             "Mono",
             _fontSize,

@@ -160,8 +160,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _numberOfPoints = p.numberOfPoints.value_or(_numberOfPoints);
     addProperty(_numberOfPoints);
