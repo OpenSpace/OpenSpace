@@ -31,7 +31,7 @@ asset.export(spec)
 
 asset.meta = {
   Name = "Video Stretched To Time",
-  Version = "1.1",
+  Version = "1.0",
   Description = "This is a video mapped to the simulation time in OpenSpace.",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
