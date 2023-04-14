@@ -70,7 +70,7 @@ local showAction = {
     openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Rotation.Latitude', lat);
     openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Rotation.Longitude', lon);
     openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 0);
+    openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 0.0);
     openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 1, 1);
   ]],
   Documentation = "Shows the Alt/Az grid",
