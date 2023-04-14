@@ -128,7 +128,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FlyToFeatureInfo = {
         "FlyToFeature",
         "Fly To Feature",
-        "Triggering this leads to the camera flying to a position that show the GeoJSON "
+        "Triggering this leads to the camera flying to a position that show the GeoJson "
         "feature. The flight will account for any lat, long or height offset",
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -597,7 +597,7 @@ void GeoJsonComponent::readFile() {
 
         if (_geometryFeatures.empty()) {
             LWARNING(fmt::format(
-                "No GeoJSON features could be successfully created for GeoJSON layer "
+                "No GeoJson features could be successfully created for GeoJson layer "
                 "with identifier '{}'. Disabling layer.", identifier()
             ));
             _enabled = false;
@@ -605,8 +605,8 @@ void GeoJsonComponent::readFile() {
     }
     catch (const geos::util::GEOSException& e) {
         LERROR(fmt::format(
-            "Error creating GeoJSON layer with identifier '{}'. Problem reading "
-            "GeoJSON file '{}'. Error: '{}'", identifier(), _geoJsonFile, e.what()
+            "Error creating GeoJson layer with identifier '{}'. Problem reading "
+            "GeoJson file '{}'. Error: '{}'", identifier(), _geoJsonFile, e.what()
         ));
     }
 
@@ -658,8 +658,8 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
         }
         catch (const ghoul::MissingCaseException&) {
             LERROR(fmt::format(
-                "Error creating GeoJSON layer with identifier '{}'. Problem reading "
-                "feature {} in GeoJSON file '{}'.", identifier(), index, _geoJsonFile
+                "Error creating GeoJson layer with identifier '{}'. Problem reading "
+                "feature {} in GeoJson file '{}'.", identifier(), index, _geoJsonFile
             ));
             // Do nothing
         }

@@ -105,7 +105,7 @@ namespace {
             const std::vector<geos::io::GeoJSONValue>& val = value.getArray();
             if (val.size() != 3) {
                 // @TODO: Should add some more information on which file the reading failed for
-                LERRORC("GeoJSON", fmt::format(
+                LERRORC("GeoJson", fmt::format(
                     "Failed reading color property. Expected 3 values, got {}", val.size()
                 ));
             }
@@ -490,7 +490,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
                 result.pointTextureAnchor = GeoJsonProperties::PointTextureAnchor::Center;
             }
             else {
-                LERRORC("GeoJSON", fmt::format(
+                LERRORC("GeoJson", fmt::format(
                     "Point texture anchor mode '{}' not supported", mode
                 ));
             }
@@ -512,7 +512,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
             //    result.altitudeMode = GeoJsonProperties::AltitudeMode::ClampToGround;
             //}
             else {
-                LERRORC("GeoJSON", fmt::format(
+                LERRORC("GeoJson", fmt::format(
                     "Altitude mode '{}' not supported", mode
                 ));
             }
@@ -535,8 +535,8 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
         }
         catch (const geos::io::GeoJSONValue::GeoJSONTypeError&) {
             // @TODO: Should add some more information on which file the reading failed for
-            LERRORC("GeoJSON", fmt::format(
-                "Error reading GeoJSON property '{}'. Value has wrong type", key
+            LERRORC("GeoJson", fmt::format(
+                "Error reading GeoJson property '{}'. Value has wrong type", key
             ));
         }
     }
