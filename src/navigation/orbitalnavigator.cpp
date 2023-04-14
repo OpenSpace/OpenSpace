@@ -667,7 +667,7 @@ void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputSt
         _websocketStates.hasNonZeroVelocities(true) ||
         _scriptStates.hasNonZeroVelocities(true);
 
-    if (cameraLocationChanged && (_movementTimer < 0.0)) {
+    if (cameraLocationChanged && (_movementTimer < 0.f)) {
         global::eventEngine->publishEvent<events::EventCameraMovedPosition>();
         _movementTimer = _idleBehavior.idleWaitTime;
     }
