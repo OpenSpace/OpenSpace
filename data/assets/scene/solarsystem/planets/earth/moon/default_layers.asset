@@ -7,6 +7,7 @@ asset.require("./layers/colorlayers/uvvishybrid_utah", false)
 asset.require("./layers/colorlayers/uvvishybrid_sweden", false)
 asset.require("./layers/colorlayers/kaguya_utah", false)
 asset.require("./layers/colorlayers/kaguya_sweden", false)
+asset.require("./layers/colorlayers/kaguya_amnh", false)
 asset.require("./layers/colorlayers/lola_clr_shade_utah", false)
 asset.require("./layers/colorlayers/lola_clr_shade_sweden", false)
 asset.require("./layers/colorlayers/lola_shade_utah", false)
@@ -15,6 +16,7 @@ asset.require("./layers/colorlayers/lola_shade_sweden", false)
 -- Height layers
 asset.require("./layers/heightlayers/loladem_utah", true)
 asset.require("./layers/heightlayers/loladem_sweden", false)
+asset.require("./layers/heightlayers/loladem_amnh", false)
 
 
 asset.meta = {

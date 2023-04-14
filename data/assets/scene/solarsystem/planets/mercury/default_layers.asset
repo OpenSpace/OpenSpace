@@ -10,6 +10,7 @@ asset.require("./layers/colorlayers/messenger_mosaic2_sweden", false)
 --bdr
 asset.require("./layers/colorlayers/messenger_bdr_utah", true)
 asset.require("./layers/colorlayers/messenger_bdr_sweden", false)
+asset.require("./layers/colorlayers/messenger_bdr_amnh", false)
 --mdr
 asset.require("./layers/colorlayers/messenger_mdr_utah", false)
 --mp3
