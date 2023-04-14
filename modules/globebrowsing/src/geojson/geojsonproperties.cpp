@@ -129,41 +129,47 @@ namespace {
         "Opacity",
         "Opacity",
         "This value determines the opacity of this object. A value of 0 means "
-        "completely transparent"
+        "completely transparent",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the rendered geometry. For points it will be used as a multiply"
-        "color for any provided texture"
+        "color for any provided texture",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FillOpacityInfo = {
         "FillOpacity",
         "Fill Opacity",
         "This value determines the opacity of the filled portion of a polygon. Will "
-        "also be used for extruded features"
+        "also be used for extruded features",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FillColorInfo = {
         "FillColor",
         "Fill Color",
         "The color of the filled portion of a rendered polygon. Will also be used for "
-        "extruded features"
+        "extruded features",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The width of any rendered lines"
+        "The width of any rendered lines",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
         "PointSize",
         "Point Size",
         "The size of any rendered points. The size will be scaled based on the "
-        "bounding sphere of the globe"
+        "bounding sphere of the globe",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointTextureInfo = {
@@ -171,13 +177,15 @@ namespace {
         "Point Texture",
         "A texture to be used for rendering points. No value means to use the default "
         "texture provided by the GlobeBrowsing module. If no texture is provided there "
-        "either, the point will be rendered as a plane and colored by the color value."
+        "either, the point will be rendered as a plane and colored by the color value.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ExtrudeInfo = {
         "Extrude",
         "Extrude",
-        "If true, extrude the mesh or line to intersect the globe"
+        "If true, extrude the mesh or line to intersect the globe",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
@@ -185,7 +193,8 @@ namespace {
         "Perform Shading",
         "If true, perform shading on any create meshes, either from polygons or "
         "extruded lines. The shading will be computed based on any light sources of the "
-        "GeoJson component"
+        "GeoJson component",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AltitudeModeInfo = {
@@ -195,14 +204,16 @@ namespace {
         "be interpreted. Absolute means that the height is interpreted as the height "
         "above the reference ellipsoid, while RelativeToGround takes the height map "
         "into account. For coordinates with only two values (latitude and longitude), "
-        "the height is considered to be equal to zero"
+        "the height is considered to be equal to zero",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointAnchorOptionInfo = {
         "PointTextureAnchor",
         "Point Texture Anchor",
         "Decides the placement of the point texture in relation to the position. "
-        "Default is a the bottom of the texture, but it can also be put at the center"
+        "Default is a the bottom of the texture, but it can also be put at the center",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TessellationEnabledInfo = {
@@ -211,7 +222,8 @@ namespace {
         "If false, no tessellation to bend the geometry based on the curvature of the "
         "planet is performed. This leads to increased performance, but tessellation is "
         "neccessary for large geometry that spans a big portion of the globe. Otherwise "
-        "it may intersect the surface"
+        "it may intersect the surface",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseTessellationLevelInfo = {
@@ -220,7 +232,8 @@ namespace {
         "If true, use the 'Tesselation Level' to control the level of detail for the "
         "tessellation. The distance used will be the 'Tesselation Distance' divided by "
         "the 'Tesselation Level', so the higher the level value, the smaller each "
-        "segment in the geomoetry will be"
+        "segment in the geomoetry will be",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TessellationLevelInfo = {
@@ -228,8 +241,9 @@ namespace {
         "Tessellation Level",
         "When manual tessellation is enabled, this value will be used to determine how "
         "much tessellation to apply. The resulting distance used for subdividing the "
-        "geometry will be the 'Tessellation Distance' divided by this value. Zero menas "
-        "to use the "
+        "geometry will be the 'Tessellation Distance' divided by this value. Zero means "
+        "to use the 'Tessellation Distance' as is.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TessellationDistanceInfo = {
@@ -239,7 +253,8 @@ namespace {
         "larger than this distance will be automatically subdivided into smaller pieces "
         "matching this distance, while anything smaller will not be subdivided. Per "
         "default this will be set to a distance corresponding to about 1 degree "
-        "longitude on the globe"
+        "longitude on the globe",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(GeoJsonProperties)]] Parameters {

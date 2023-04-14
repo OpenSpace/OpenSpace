@@ -62,20 +62,23 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this object will be visible or not"
+        "This setting determines whether this object will be visible or not",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "File",
-        "Path to the GeoJSON file to base the rendering on"
+        "Path to the GeoJSON file to base the rendering on",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HeightOffsetInfo = {
         "HeightOffset",
         "Height Offset",
         "A height offset value, in meters. Useful for moving a feature closer to or "
-        "farther away from the surface"
+        "farther away from the surface",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CoordinateOffsetInfo = {
@@ -84,13 +87,15 @@ namespace {
         "A latitude and longitude offset value, in decimal degrees. Can be used to "
         "move the object on the surface and correct potential mismatches with other "
         "renderings. Note that changing it during runtime leads to all positions being "
-        "recomputed"
+        "recomputed",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawWireframeInfo = {
         "DrawWireframe",
         "Wireframe",
-        "If true, draw the wire frame of the polygons. Used for testing",
+        "If true, draw the wire frame of the polygons. Used for testing and to "
+        "investigate tessellation results",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -99,20 +104,16 @@ namespace {
         "Prevent Update From Heightmap",
         "If true, the polygon mesh will not be automatically updated based on the "
         "heightmap, even if the 'RelativeToGround' altitude option is set and the "
-        "heightmap updates. The data can still be force updated"
+        "heightmap updates. The data can still be force updated",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ForceUpdateHeightDataInfo = {
         "ForceUpdateHeightData",
         "Force Update Height Data",
         "Triggering this leads to a recomputation of the heights based on the globe "
-        "height map value at the geometry's positions"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
-        "LightSources",
-        "Light Sources",
-        "A list of light sources that this object should accept light from"
+        "height map value at the geometry's positions",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointRenderModeInfo = {
@@ -120,35 +121,40 @@ namespace {
         "Points Aligned to",
         "Decides how the billboards for the points should be rendered in terms of up "
         "direction and whether the plane should face the camera. See details on the "
-        "different options in the wiki"
+        "different options in the wiki",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FlyToFeatureInfo = {
         "FlyToFeature",
         "Fly To Feature",
         "Triggering this leads to the camera flying to a position that show the GeoJSON "
-        "feature. The flight will account for any lat, long or height offset"
+        "feature. The flight will account for any lat, long or height offset",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CentroidCoordinateInfo = {
         "CentroidCoordinate",
         "Centroid Coordinate",
         "The lat long coordinate of the centroid position of the read geometry. Note "
-        "that this value does not incude the offset"
+        "that this value does not incude the offset",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BoundingBoxInfo = {
         "BoundingBox",
         "Bounding Box",
         "The lat long coordinates of the lower and upper corner of the bounding box of "
-        "the read geometry. Note that this value does not incude the offset"
+        "the read geometry. Note that this value does not incude the offset",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeScaleInfo = {
         "PointSizeScale",
         "Point Size Scale",
         "An extra scale value that can be used to increase or decrease the scale of any "
-        "rendered points in the component, even if a value is set from the GeoJson file"
+        "rendered points in the component, even if a value is set from the GeoJson file",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthScaleInfo = {
@@ -156,7 +162,8 @@ namespace {
         "Line Width Scale",
         "An extra scale value that can be used to increase or decrease the width of any "
         "rendered lines in the component, even if a value is set from the GeoJson file. "
-        "Note that there is a max limit for how wide lines can be."
+        "Note that there is a max limit for how wide lines can be.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(GeoJsonComponent)]] Parameters {
@@ -217,7 +224,7 @@ namespace {
         std::optional<ghoul::Dictionary> defaultProperties
             [[codegen::reference("globebrowsing_geojsonproperties")]];
 
-        // [[codegen::verbatim(LightSourcesInfo.description)]]
+        // A list of light sources that this object should accept light from
         std::optional<std::vector<ghoul::Dictionary>> lightSources
             [[codegen::reference("core_light_source")]];
     };
@@ -248,6 +255,7 @@ GeoJsonComponent::SubFeatureProps::SubFeatureProps(
         glm::vec4(90.f, 180.f, 90.f, 180.f)
     )
 {
+    _opacity.setVisibility(openspace::properties::Property::Visibility::AdvancedUser);
     addProperty(Fadeable::_opacity);
     addProperty(Fadeable::_fade);
 
