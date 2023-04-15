@@ -28,7 +28,6 @@ asset.require("./layers/colorlayers/hirisels", false)
 -- Height layers
 asset.require("./layers/heightlayers/mola_utah", false)
 asset.require("./layers/heightlayers/mola_sweden", false)
--- asset.require("./layers/heightlayers/mola_newyork", false)
 asset.require("./layers/heightlayers/MDEM200M", true)
 asset.require("./layers/heightlayers/hirisels", false)
 
