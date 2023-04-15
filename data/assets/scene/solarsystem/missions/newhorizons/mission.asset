@@ -2,7 +2,7 @@
 -- Many of the values (especially days of the month if 01 or 30 or 31  and  hh::mm::ss if all 0)
 -- are approximate and need fixing
 
-return {
+local Mission = {
   Name = "New Horizons",
   Phases = {
     {
@@ -120,3 +120,12 @@ return {
   }
 }
 
+asset.onInitialize(function()
+  openspace.loadMission(Mission)
+ end)
+ 
+ asset.onDeinitialize(function()
+  openspace.unloadMission(Mission.Name)
+ end)
+ 
+ 

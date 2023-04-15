@@ -271,7 +271,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     }
 
     addProperty(_selectorName);
-    _selectorName.onChange([&]() {
+    _selectorName.onChange([this]() {
         Selector s;
         std::string newSelectorName = _selectorName;
         if (newSelectorName == "simple") {
@@ -423,7 +423,7 @@ void RenderableMultiresVolume::initializeGL() {
 
     global::raycasterManager->attachRaycaster(*_raycaster);
 
-    auto onChange = [&](bool enabled) {
+    auto onChange = [this](bool enabled) {
         if (enabled) {
             global::raycasterManager->attachRaycaster(*_raycaster);
         }

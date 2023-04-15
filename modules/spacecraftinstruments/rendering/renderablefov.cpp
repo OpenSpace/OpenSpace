@@ -555,7 +555,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
     // Each boundary in _instrument.bounds has 'InterpolationSteps' steps between
     auto indexForBounds = [](size_t idx) -> size_t { return idx * InterpolationSteps; };
 
-    auto copyFieldOfViewValues = [&](size_t iBound, size_t begin, size_t end) -> void {
+    auto copyFieldOfViewValues = [this](size_t iBound, size_t begin, size_t end) -> void {
         std::fill(
             _orthogonalPlane.data.begin() + begin,
             _orthogonalPlane.data.begin() + end,

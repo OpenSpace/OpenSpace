@@ -272,10 +272,10 @@ MemoryAwareTileCache::MemoryAwareTileCache(int tileCacheSize)
 
     createDefaultTextureContainers();
 
-    _clearTileCache.onChange([&]() { clear(); });
+    _clearTileCache.onChange([this]() { clear(); });
     addProperty(_clearTileCache);
 
-    _applyTileCacheSize.onChange([&](){
+    _applyTileCacheSize.onChange([this](){
         setSizeEstimated(uint64_t(_tileCacheSize) * 1024ul * 1024ul);
     });
     addProperty(_applyTileCacheSize);
@@ -381,8 +381,8 @@ bool MemoryAwareTileCache::exist(const ProviderTileKey& key) const {
     const TextureContainerMap::const_iterator result = std::find_if(
         _textureContainerMap.cbegin(),
         _textureContainerMap.cend(),
-        [&](const std::pair<const TileTextureInitData::HashKey,
-                            TextureContainerTileCache>& p)
+        [&key](const std::pair<const TileTextureInitData::HashKey,
+                               TextureContainerTileCache>& p)
         {
             return p.second.second->exist(key);
         }
@@ -396,8 +396,8 @@ Tile MemoryAwareTileCache::get(const ProviderTileKey& key) {
     const TextureContainerMap::const_iterator it = std::find_if(
         _textureContainerMap.cbegin(),
         _textureContainerMap.cend(),
-        [&](const std::pair<const TileTextureInitData::HashKey,
-                            TextureContainerTileCache>& p)
+        [&key](const std::pair<const TileTextureInitData::HashKey,
+                               TextureContainerTileCache>& p)
         {
             return p.second.second->exist(key);
         }

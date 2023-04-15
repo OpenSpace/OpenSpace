@@ -21,7 +21,7 @@ local Nix = {
   },
   Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor" },
   GUI = {
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Nix"
   }
 }
 
@@ -47,7 +47,7 @@ local NixTrail = {
   },
   GUI = {
     Name = "Nix Trail",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Nix"
   }
 }
 
@@ -70,8 +70,8 @@ local NixLabel = {
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
-    Name = "Cheron Label",
-    Path = "/Solar System/Dwarf Planets/Pluto/Moons",
+    Name = "Nix Label",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Nix",
     Description = "Label for Pluto's moon Nix"
   }
 }

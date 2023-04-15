@@ -1,0 +1,50 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local OneAU = 1.496e+8
+
+local Translation = {
+  Type = "KeplerTranslation",
+  Eccentricity = 0.4979719595192342,
+  SemiMajorAxis = 67.28272930394145 * OneAU,
+  Inclination = 30.6429146610929,
+  AscendingNode = 336.8562311756138,
+  ArgumentOfPeriapsis = 207.244325413599,
+  MeanAnomaly = 108.9504644269052,
+  Epoch = "2022 11 25 17:18:20",
+  Period = 201582.9642396014*60*60*24
+}
+
+
+local Position = {
+  Identifier = "GonggongPosition",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Transform = {
+    Translation = Translation
+  },
+  GUI = {
+    Name = "Gonggong Position",
+    Path = "/Solar System/Dwarf Planets/Gonggong",
+    Hidden = true
+  }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(Position)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(Position)
+end)
+
+asset.export("Translation", Translation)
+asset.export("Position", Position)
+
+asset.meta = {
+    Name = "Gonggong Position (Keplerian)",
+    Version = "1.0",
+    Description = [[Position of Gonggong. KeplerTranslation Version Data from
+      JPL Horizons]],
+    Author = "OpenSpace Team",
+    URL = "https://ssd.jpl.nasa.gov/sbdb.cgi?sstr=Gonggong",
+    License = "JPL/NASA"
+}
+  

@@ -53,22 +53,28 @@
 namespace {
     constexpr std::string_view _loggerCat = "RingsComponent";
 
-    constexpr std::array<const char*, 9> UniformNames = {
+    constexpr std::array<const char*, 10> UniformNames = {
         "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",
         "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture",
-        "zFightingPercentage"
+        "zFightingPercentage", "opacity"
     };
 
-    constexpr std::array<const char*, 15> UniformNamesAdvancedRings = {
+    constexpr std::array<const char*, 16> UniformNamesAdvancedRings = {
         "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",
         "sunPosition", "sunPositionObj", "camPositionObj", "ringTextureFwrd",
         "ringTextureBckwrd", "ringTextureUnlit", "ringTextureColor",
         "ringTextureTransparency", "shadowMatrix", "shadowMapTexture",
-        "zFightingPercentage"
+        "zFightingPercentage", "opacity"
     };
 
     constexpr std::array<const char*, 3> GeomUniformNames = {
         "modelViewProjectionMatrix", "textureOffset", "ringTexture"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "Enable/Disable Rings"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -158,6 +164,12 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RingsComponent)]] Parameters {
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
+
+        // This value determines the overall opacity of the rings
+        std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
+
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<std::filesystem::path> texture;
 
@@ -215,7 +227,7 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
     , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
     , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
     , _colorFilter(ColorFilterInfo, 0.15f, 0.f, 1.f)
-    , _enabled({ "Enabled", "Enabled", "Enable/Disable Rings" }, true)
+    , _enabled(EnabledInfo, true)
     , _zFightingPercentage(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f)
     , _nShadowSamples(NumberShadowSamplesInfo, 2, 1, 7)
     , _ringsDictionary(dictionary)
@@ -247,11 +259,15 @@ void RingsComponent::initialize() {
 
     const Parameters p = codegen::bake<Parameters>(_ringsDictionary);
 
+    _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
+    _opacity = p.opacity.value_or(_opacity);
+    addProperty(Fadeable::_opacity);
+    addProperty(Fadeable::_fade);
 
     _size.setExponent(15.f);
     _size = p.size.value_or(_size);
-    _size.onChange([&]() { _planeIsDirty = true; });
+    _size.onChange([this]() { _planeIsDirty = true; });
     addProperty(_size);
 
     if (p.texture.has_value()) {
@@ -473,6 +489,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
                 _uniformCacheAdvancedRings.ringTextureTransparency,
                 ringTextureTransparencyUnit
             );
+            _shader->setUniform(_uniformCacheAdvancedRings.opacityValue, opacity());
 
             // Adding the model transformation to the final shadow matrix so we have a
             // complete transformation from the model coordinates to the clip space of
@@ -507,7 +524,6 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
             glEnable(GL_DEPTH_TEST);
             glEnablei(GL_BLEND, 0);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
         }
         else {
             _shader->setUniform(
@@ -523,6 +539,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
                 _uniformCache.modelViewProjectionMatrix,
                 modelViewProjectionTransform
             );
+            _shader->setUniform(_uniformCache.opacityValue, opacity());
 
             ringTextureUnit.activate();
             _texture->bind();

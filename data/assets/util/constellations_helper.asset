@@ -1,0 +1,52 @@
+local data = asset.syncedResource({
+  Name = "Constellation Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_constellations_data",
+  Version = 1
+})
+
+-- Function that returns the full name of a constellation given its abbreviation
+-- The function uses the constellations.dat file to find the name
+-- If the file does not exist or if a match could not be found, it returns nil
+local findFullName = function(abbreviation)
+  local namesFile = data .. "constellations.dat"
+  local file = io.open(namesFile, "r")
+  local fullName = ""
+
+  if file == nil then
+    file:close()
+    return nil
+  end
+
+  for line in io.lines(namesFile) do
+    -- Try and find the identifier in the file
+    local index, length = line:find(abbreviation)
+    if index ~= nil and index < 4 then
+      fullName = line:sub(length + 2)
+      break
+    end
+
+    -- Try and find the identifier in lower case instead
+    local fullLine = line
+    local lowerLine = line:lower()
+    index, length = lowerLine:find(abbreviation:lower())
+
+    if index ~= nil and index < 4 then
+      fullName = fullLine:sub(length + 2)
+      break
+    end
+  end
+
+  file:close()
+  if fullName == "" then
+    openspace.printError(
+      "Error when calling function 'findFullName' in file 'util/constellations_helper': " ..
+      "Identifier '" .. abbreviation .. "' could not be found in list of constellations"
+    )
+    return nil
+  else
+    return fullName
+  end
+end
+
+asset.export("findFullName", findFullName)

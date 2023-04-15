@@ -68,7 +68,7 @@ HorizonsTranslation::HorizonsTranslation()
 {
     addProperty(_horizonsTextFiles);
 
-    _horizonsTextFiles.onChange([&](){
+    _horizonsTextFiles.onChange([this](){
         requireUpdate();
         notifyObservers();
         loadData();

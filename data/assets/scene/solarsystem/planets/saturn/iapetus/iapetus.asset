@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat375
+local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
 
 local labelsPath = asset.syncedResource({
@@ -46,7 +46,7 @@ local Iapetus = {
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
   GUI = {
     Name = "Iapetus",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus",
     Description = "Third largest moon of Saturn"
   }
 }
@@ -71,7 +71,7 @@ local IapetusLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Iapetus Label",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus",
     Description = "Label for Saturn's moon Iapetus"
   }
 }

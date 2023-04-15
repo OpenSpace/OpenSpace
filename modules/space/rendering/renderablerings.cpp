@@ -120,7 +120,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
 
     _size = p.size;
     setBoundingSphere(_size);
-    _size.onChange([&]() { _planeIsDirty = true; });
+    _size.onChange([this]() { _planeIsDirty = true; });
     addProperty(_size);
 
     _texturePath = absPath(p.texture).string();
@@ -130,7 +130,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     _offset.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(_offset);
 
-    _texturePath.onChange([&]() { loadTexture(); });
+    _texturePath.onChange([this]() { loadTexture(); });
     addProperty(_texturePath);
 
     _textureFile->setCallback([this]() { _textureIsDirty = true; });

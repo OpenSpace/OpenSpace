@@ -1,0 +1,35 @@
+local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+
+local layer = {
+  Identifier = "LO_MR_Mosaic_Sweden",
+  Name = "Moon Lunar Orbiter Digital Photographic Global Mosaic 59m v1 [Sweden]",
+  Enabled = asset.enabled,
+  Description = [[This Lunar Orbiter (LO) mosaic of the Moon was constructed using photographs acquired by LO III, IV and V. Work towards constructing the global mosaic spanned over seven years. Earlier work involved scanning and processing more than 30, 000 35-mm film strips from the LO high- and medium-resolution cameras (HR and MR, respectively).
+
+  Digital film strips were cartographically processed to construct more than 200 individual frames and then geodetically corrected using the most recent lunar control network and topographic model (Gaddis et al., 2001). The result of this work is a moderate resolution, near-global, cartographically controlled digital mosaic of the Moon (Becker et al., 2008). The nominal resolution of the mosaic is ~60 meters per pixel (m).
+
+  This represents new Jpeg2000 mosaic which includes a couple updated tiles that were missing from the original March 2008 release. For this image a lossy compression using a quality flag of 10 was used. There should be almost no noticeable loss of data. ]],
+  FilePath = asset.localResource("lo_mr_mosaic_sweden.wms")
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Moon Lunar Orbiter Digital Photographic Global Mosaic [Sweden]",
+  Version = "1.0",
+  Description = [[Moon Lunar Orbiter Digital Photographic Global Mosaic 59m v1. This
+    map is hosted on the OpenSpace server in Sweden]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Moon/LMMP/LOLA-derived/Lunar_LRO_LOLA_ClrShade_Global_128ppd_v04",
+  License = "NASA/PDS"
+}

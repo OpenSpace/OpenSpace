@@ -84,6 +84,8 @@ private:
     UniformCache(ProjectorMatrix, ModelTransform) _depthFboUniformCache;
 
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
+    double _modelScale = 1.0;
+    bool _invertModelScale = false;
 
     glm::dmat3 _instrumentMatrix = glm::dmat3(1.0);
 

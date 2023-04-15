@@ -32,14 +32,6 @@ namespace {
         "values"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
-        "Opacity",
-        "Opacity",
-        "This value sets the transparency of this layer. If this value is equal to '1', "
-        "the layer is completely opaque. If this value is equal to '0', the layer is "
-        "completely transparent"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma",
@@ -65,20 +57,17 @@ namespace openspace::globebrowsing {
 
 LayerRenderSettings::LayerRenderSettings()
     : properties::PropertyOwner({ "Settings" })
-    , opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , gamma(GammaInfo, 1.f, 0.f, 5.f)
     , multiplier(MultiplierInfo, 1.f, 0.f, 20.f)
     , offset(OffsetInfo, 0.f, -10000.f, 10000.f)
     , setDefault(SetDefaultInfo)
 {
-    addProperty(opacity);
     addProperty(gamma);
     addProperty(multiplier);
     addProperty(offset);
     addProperty(setDefault);
 
     setDefault.onChange([this](){
-        opacity = 1.f;
         gamma = 1.f;
         multiplier = 1.f;
         offset = 0.f;
@@ -86,7 +75,6 @@ LayerRenderSettings::LayerRenderSettings()
 }
 
 void LayerRenderSettings::onChange(std::function<void()> callback) {
-    opacity.onChange(callback);
     gamma.onChange(callback);
     multiplier.onChange(callback);
     multiplier.onChange(callback);
@@ -95,7 +83,7 @@ void LayerRenderSettings::onChange(std::function<void()> callback) {
 
 float LayerRenderSettings::performLayerSettings(float v) const {
     return
-        ((glm::sign(v) * glm::pow(glm::abs(v), gamma) * multiplier) + offset) * opacity;
+        ((glm::sign(v) * glm::pow(glm::abs(v), gamma) * multiplier) + offset);
 }
 
 glm::vec4 LayerRenderSettings::performLayerSettings(const glm::vec4& currentValue) const {

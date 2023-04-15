@@ -25,6 +25,7 @@
 #include <openspace/mission/mission.h>
 
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
@@ -41,14 +42,36 @@ namespace {
         // A description of this mission or mission phase
         std::optional<std::string> description;
 
+        struct TimeRange {
+            std::string start [[codegen::annotation("A string representing a valid date")]];
+            std::optional<std::string> end
+                [[codegen::annotation("A string representing a valid date")]];
+        };
         // The time range for which this mission or mission phase is valid. If no time
         // range is specified, the ranges of sub mission phases are used instead
-        std::optional<ghoul::Dictionary> timeRange
-            [[codegen::reference("core_util_timerange")]];
+        std::optional<TimeRange> timeRange;
 
         // The phases into which this mission or mission phase is separated
         std::optional<std::vector<ghoul::Dictionary>> phases
             [[codegen::reference("core_mission_mission")]];
+
+        // An image that can be presented to the user during this phase of a mission
+        std::optional<std::string> image;
+        std::optional<std::string> link;
+
+        // Actions associated with this phase
+        std::optional<std::vector<std::string>> actions;
+
+        // Important dates
+        struct Milestone {
+            // An image that can be presented to the user during this phase of a mission
+            std::string date;
+            std::string name;
+            std::optional<std::string> description;
+            std::optional<std::string> image;
+            std::optional<std::string> link;
+        };
+        std::optional<std::vector<Milestone>> milestones;
     };
 #include "mission_codegen.cpp"
 } // namespace
@@ -64,6 +87,8 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
 
     _name = p.name;
     _description = p.description.value_or(_description);
+    _image = p.image.value_or(_image);
+    _link = p.link.value_or(_link);
 
     if (p.phases.has_value()) {
         _subphases.reserve(p.phases->size());
@@ -87,7 +112,14 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
 
         // user may specify an overall time range. In that case expand this timerange
         if (p.timeRange.has_value()) {
-            TimeRange overallTimeRange(*p.timeRange);
+            std::string start = p.timeRange->start;
+            std::string end = p.timeRange->end.value_or(start);
+
+            TimeRange overallTimeRange = TimeRange(
+                SpiceManager::ref().ephemerisTimeFromDate(start),
+                SpiceManager::ref().ephemerisTimeFromDate(end)
+            );
+
             if (!overallTimeRange.includes(timeRangeSubPhases)) {
                 throw ghoul::RuntimeError(fmt::format(
                     "User specified time range must at least include its subphases'",
@@ -105,13 +137,42 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     }
     else {
         if (p.timeRange.has_value()) {
-            _timeRange = TimeRange(*p.timeRange); // throws exception if unable to parse
+            std::string start = p.timeRange->start;
+            std::string end = p.timeRange->end.value_or(start);
+
+            _timeRange = TimeRange(
+                SpiceManager::ref().ephemerisTimeFromDate(start),
+                SpiceManager::ref().ephemerisTimeFromDate(end)
+            );
         }
         else {
             throw ghoul::RuntimeError(fmt::format(
                 "If there are no subphases specified, the time range has to be specified",
                 "Mission ({})", _name
             ));
+        }
+    }
+
+    if (p.actions.has_value()) {
+        _actions = p.actions.value_or(_actions);
+    }
+
+    if (p.milestones.has_value()) {
+        _milestones.reserve(p.milestones->size());
+        for (const Parameters::Milestone& milestone : *p.milestones) {
+            std::string name = milestone.name;
+            Time newTime = Time(milestone.date);
+            Milestone newDate = { name, newTime };
+            if (milestone.description.has_value()) {
+                newDate.description = milestone.description.value();
+            }
+            if (milestone.image.has_value()) {
+                newDate.image = milestone.image.value();
+            }
+            if (milestone.link.has_value()) {
+                newDate.link = milestone.link.value();
+            }
+            _milestones.emplace_back(newDate);
         }
     }
 }
@@ -128,8 +189,24 @@ const std::string& MissionPhase::description() const {
     return _description;
 }
 
+const std::string& MissionPhase::image() const {
+    return _image;
+}
+
+const std::string& MissionPhase::link() const {
+    return _link;
+}
+
+const std::vector<Milestone>& MissionPhase::milestones() const {
+    return _milestones;
+}
+
 const std::vector<MissionPhase>& MissionPhase::phases() const {
     return _subphases;
+}
+
+const std::vector<std::string>& MissionPhase::actions() const {
+    return _actions;
 }
 
 MissionPhase::Trace MissionPhase::phaseTrace(double time, int maxDepth) const {

@@ -34,7 +34,7 @@
 TEST_CASE("ScriptScheduler: Simple Forward", "[scriptscheduler]") {
     using namespace openspace;
     using namespace openspace::scripting;
-    
+
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
         absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()

@@ -36,7 +36,7 @@ local PhobosGlobe = {
   Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
   GUI = {
     Name = "Phobos_Globe",
-    Path = "/Solar System/Planets/Mars",
+    Path = "/Solar System/Planets/Mars/Moons/Phobos",
     Description = "One of two moons of Mars"
   }
 }

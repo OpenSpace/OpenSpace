@@ -84,7 +84,7 @@ local AquaLabel = {
 
 asset.onInitialize(function ()
   local a = openspace.space.readKeplerFile(omm .. "Aqua.txt", "OMM")
-  AquaTrail.Renderable.Period = a[0].Period / (60 * 60 * 24)
+  AquaTrail.Renderable.Period = a[1].Period / (60 * 60 * 24)
 
   openspace.addSceneGraphNode(Aqua)
   openspace.addSceneGraphNode(AquaTrail)

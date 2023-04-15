@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "scene/solarsystem/dwarf_planets/ceres/ceres",
     "scene/solarsystem/dwarf_planets/ceres/default_layers",
     "scene/solarsystem/dwarf_planets/ceres/trail",

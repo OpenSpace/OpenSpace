@@ -282,7 +282,7 @@ void IswaCygnet::initializeGroup() {
     groupEvent.subscribe(
         identifier(),
         "enabledChanged",
-        [&](const ghoul::Dictionary& dict) {
+        [this](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event enabledChanged");
             _enabled = dict.value<bool>("enabled");
         }
@@ -291,19 +291,23 @@ void IswaCygnet::initializeGroup() {
     groupEvent.subscribe(
         identifier(),
         "alphaChanged",
-        [&](const ghoul::Dictionary& dict) {
+        [this](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event alphaChanged");
             _alpha = static_cast<float>(dict.value<double>("alpha"));
         }
     );
 
-    groupEvent.subscribe(identifier(), "clearGroup", [&](ghoul::Dictionary) {
-        LDEBUG(identifier() + " Event clearGroup");
-        global::scriptEngine->queueScript(
-            "openspace.removeSceneGraphNode('" + identifier() + "')",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    });
+    groupEvent.subscribe(
+        identifier(),
+        "clearGroup",
+        [this](ghoul::Dictionary) {
+            LDEBUG(identifier() + " Event clearGroup");
+            global::scriptEngine->queueScript(
+                "openspace.removeSceneGraphNode('" + identifier() + "')",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+    );
 }
 
 } //namespace openspace

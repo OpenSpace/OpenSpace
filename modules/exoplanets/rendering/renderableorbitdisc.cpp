@@ -117,17 +117,17 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _offset = p.offset.value_or(_offset);
-    _offset.onChange([&]() { _planeIsDirty = true; });
+    _offset.onChange([this]() { _planeIsDirty = true; });
     addProperty(_offset);
 
     _size = p.size;
-    _size.onChange([&]() { _planeIsDirty = true; });
+    _size.onChange([this]() { _planeIsDirty = true; });
     addProperty(_size);
 
     setBoundingSphere(_size + _offset.value().y * _size);
 
     _texturePath = p.texture.string();
-    _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath.value()); });
+    _texturePath.onChange([this]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
@@ -135,10 +135,10 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     addProperty(_multiplyColor);
 
     _eccentricity = p.eccentricity;
-    _eccentricity.onChange([&]() { _planeIsDirty = true; });
+    _eccentricity.onChange([this]() { _planeIsDirty = true; });
     addProperty(_eccentricity);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 }
 
 bool RenderableOrbitDisc::isReady() const {

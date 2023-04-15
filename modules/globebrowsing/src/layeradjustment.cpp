@@ -86,7 +86,7 @@ LayerAdjustment::LayerAdjustment()
     _typeOption.setValue(static_cast<int>(layers::Adjustment::ID::None));
     _type = static_cast<layers::Adjustment::ID>(_typeOption.value());
 
-    _typeOption.onChange([&]() {
+    _typeOption.onChange([this]() {
         switch (type()) {
             case layers::Adjustment::ID::None:
                 break;

@@ -19,8 +19,7 @@ local SunGlare = {
     Billboard = true,
     Texture = textures .. "halo.png",
     BlendMode = "Additive",
-    Opacity = 0.65,
-    RenderBinMode = "PreDeferredTransparent"
+    Opacity = 0.65
   },
   GUI = {
     Name = "Sun Glare",

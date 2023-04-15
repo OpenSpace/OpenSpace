@@ -208,7 +208,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     }
 
     addProperty(_brightness);
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 }
 
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
@@ -277,7 +277,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
     _raycaster->initialize();
     global::raycasterManager->attachRaycaster(*_raycaster.get());
-    onEnabledChange([&](bool enabled) {
+    onEnabledChange([this](bool enabled) {
         if (enabled) {
             global::raycasterManager->attachRaycaster(*_raycaster.get());
         }
