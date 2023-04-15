@@ -1,10 +1,10 @@
 local globeIdentifier = asset.require("../../moon").Moon.Identifier
 
 local layer = {
-  Identifier = "Kaguya_AMNH",
+  Identifier = "Kaguya_NewYork",
   Name = "Kaguya [New York]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("kaguya_amnh.vrt"),
+  FilePath = asset.localResource("kaguya_newyork.vrt"),
   Settings = {
     Gamma = 1.0,
     Multiplier = 1.23

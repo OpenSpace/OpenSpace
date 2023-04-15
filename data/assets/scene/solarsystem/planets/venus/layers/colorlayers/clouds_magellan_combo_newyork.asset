@@ -9,7 +9,7 @@ local texturesPath = asset.syncedResource({
 })
 
 local combo = {
-  Identifier = "Clouds_Magellan_Combo_AMNH",
+  Identifier = "Clouds_Magellan_Combo_NewYork",
   Name = "Clouds Magellan Combo [New York]",
   Enabled = asset.enabled,
   Type = "ByLevelTileLayer",
@@ -25,9 +25,9 @@ local combo = {
     {
       MaxLevel = 7,
       TileProvider = {
-        Identifier = "Magellan_Mosaic_amnh",
+        Identifier = "Magellan_Mosaic_NewYork",
         Name = "Magellan Mosaic [New York]",
-        FilePath = asset.localResource("magellan_mosaic_amnh.vrt"),
+        FilePath = asset.localResource("magellan_mosaic_newyork.vrt"),
         BlendMode = "Color",
         Settings = {
           Gamma = 2.0

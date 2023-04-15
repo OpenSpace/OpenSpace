@@ -1,7 +1,7 @@
 local globeIdentifier = asset.require("../../venus").Venus.Identifier
 
 local layer = {
-  Identifier = "MagellanElevation_AMNH",
+  Identifier = "MagellanElevation_NewYork",
   Name = "Magellan Elevation [New York]",
   Enabled = asset.enabled,
   Description = [[Elevation layer for Venus. The represents the version 2
@@ -14,7 +14,7 @@ local layer = {
     the in-plane elements of each spacecraft orbit, and then originally re-sampled
     into sinusoidal, Mercator, and north and south polar stereographic projections
     at a resolution of 5 kilometers per pixel (4641 meters per pixel [m])]],
-  FilePath = asset.localResource("magellan_amnh.wms"),
+  FilePath = asset.localResource("magellan_newyork.wms"),
   TilePixelSize = 256,
   Settings = {
     Gamma = 1.72,

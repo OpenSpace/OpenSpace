@@ -4,7 +4,7 @@
   <VRTRasterBand dataType="Byte" band="1">
     <ColorInterp>Gray</ColorInterp>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">magellan_mosaic_amnh.wms</SourceFilename>
+      <SourceFilename relativeToVRT="1">magellan_mosaic_newyork.wms</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="506928" RasterYSize="230948" DataType="Byte" BlockXSize="512" BlockYSize="512" />
       <SrcRect xOff="0" yOff="0" xSize="506928" ySize="230948" />
@@ -15,7 +15,7 @@
     <ColorInterp>Alpha</ColorInterp>
      <NoDataValue>0</NoDataValue>
    <ComplexSource>
-      <SourceFilename relativeToVRT="1">magellan_mosaic_amnh.wms</SourceFilename>
+      <SourceFilename relativeToVRT="1">magellan_mosaic_newyork.wms</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="506928" RasterYSize="230948" DataType="Byte" BlockXSize="512" BlockYSize="512" />
       <SrcRect xOff="0" yOff="0" xSize="506928" ySize="230948" />

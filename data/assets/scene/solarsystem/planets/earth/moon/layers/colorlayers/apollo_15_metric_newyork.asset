@@ -1,10 +1,10 @@
 local globeIdentifier = asset.require("../../moon").Moon.Identifier
 
 local layer = {
-  Identifier = "Apollo15Metric_AMNH",
+  Identifier = "Apollo15Metric_NewYork",
   Name = "Apollo 15 Metric Cam [New York]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("apollo_15_metric_amnh.wms"),
+  FilePath = asset.localResource("apollo_15_metric_newyork.wms"),
   Settings = {
     Gamma = 1.0,
     Multiplier = 1.0

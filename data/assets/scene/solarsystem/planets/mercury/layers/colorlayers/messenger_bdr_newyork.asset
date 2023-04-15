@@ -1,10 +1,10 @@
 local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 
 local layer = {
-  Identifier = "Messenger_BDR_AMNH",
+  Identifier = "Messenger_BDR_NewYork",
   Name = "Messenger BDR [New York]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("messenger_bdr_amnh.wms"),
+  FilePath = asset.localResource("messenger_bdr_newyork.wms"),
   TilePixelSize = 360,
   Description = [[The Map Projected Basemap RDR (BDR) data set consists of a global
   monochrome map of reflectance at a resolution of 256 pixels per degree (~166 m/p).

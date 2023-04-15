@@ -1,7 +1,7 @@
 local globeIdentifier = asset.require("../../venus").Venus.Identifier
 
 local layer = {
-  Identifier = "Magellan_Mosaic_AMNH",
+  Identifier = "Magellan_Mosaic_NewYork",
   Name = "Magellan Mosaic [New York]",
   Enabled = asset.enabled,
   Description = [[Color layer for Venus. This mosaic was created from the Magellan
@@ -20,7 +20,7 @@ local layer = {
     the radar system was sending signals to the left of the spacecraft. The SAR
     operated in this left-looking mode during cycles 1 and 3 of the mission.
     (Description from USGS)]],
-  FilePath = asset.localResource("magellan_mosaic_amnh.vrt"),
+  FilePath = asset.localResource("magellan_mosaic_newyork.vrt"),
   BlendMode = "Color",
   Settings = {
     Gamma = 2.0
