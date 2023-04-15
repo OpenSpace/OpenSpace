@@ -22,41 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___FADEABLE___H__
-#define __OPENSPACE_CORE___FADEABLE___H__
+#include "fragment.glsl"
 
-#include <openspace/properties/scalar/floatproperty.h>
+in float vs_depth;
+flat in vec3 vs_normal;
+in vec4 vs_positionViewSpace;
 
-namespace openspace {
+uniform vec3 color;
+uniform float opacity;
 
-/**
- * This class is an interface for all things fadeable in the software; things that need
- * a fade and opacity property, which will be combined into a final opacity value
- *
- * A Fadeable can also be dependent on the fade value from a specified parent fadeable,
- * so that it fades out together with the parent
- */
-class Fadeable {
-public:
-    Fadeable();
-    virtual ~Fadeable() = default;
+uniform float ambientIntensity = 0.2;
+uniform float diffuseIntensity = 0.8;
+uniform bool performShading = true;
 
-    void setFade(float fade);
-    void setParentFadeable(Fadeable* parent);
+uniform unsigned int nLightSources;
+uniform vec3 lightDirectionsViewSpace[8];
+uniform float lightIntensities[8];
 
-    float fade() const;
-    virtual bool isVisible() const;
+const vec3 LightColor = vec3(1.0);
 
-    /// Returns the full opacity constructed from the _opacity and _fade property values
-    virtual float opacity() const noexcept;
+Fragment getFragment() {
+  Fragment frag;
 
-protected:
-    properties::FloatProperty _opacity;
-    properties::FloatProperty _fade;
+  if (opacity == 0.0) {
+    discard;
+  }
+  frag.color = vec4(color, opacity);
 
-    Fadeable* _parentFadeable = nullptr;
-};
+  // Simple diffuse phong shading based on light sources
+  if (performShading && nLightSources > 0) {
+    // @TODO: Fix faulty triangle normals. This should not have to be inverted
+    vec3 n = -normalize(vs_normal);
 
-} // namespace openspace
+    // Ambient color
+    vec3 shadedColor = ambientIntensity  * color;
 
-#endif // __OPENSPACE_CORE___FADEABLE___H__
+    for (int i = 0; i < nLightSources; ++i) {
+      vec3 l = lightDirectionsViewSpace[i];
+
+      // Diffuse
+      vec3 diffuseColor = diffuseIntensity * max(dot(n,l), 0.0) * color;
+
+      // Light contribution
+      shadedColor += lightIntensities[i] * (LightColor * diffuseColor);
+    }
+    frag.color.xyz = shadedColor;
+  }
+
+  frag.depth = vs_depth;
+  frag.gPosition = vs_positionViewSpace;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+  return frag;
+}

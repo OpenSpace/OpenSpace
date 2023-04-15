@@ -22,41 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___FADEABLE___H__
-#define __OPENSPACE_CORE___FADEABLE___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GEOJSONMANAGER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GEOJSONMANAGER___H__
 
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/propertyowner.h>
 
-namespace openspace {
+#include <modules/globebrowsing/src/geojson/geojsoncomponent.h>
+
+#include <functional>
+#include <memory>
+#include <vector>
+
+namespace ghoul { class Dictionary; }
+namespace openspace { struct RenderData; }
+namespace openspace::documentation { struct Documentation; }
+
+namespace openspace::globebrowsing {
+
+class RenderableGlobe;
 
 /**
- * This class is an interface for all things fadeable in the software; things that need
- * a fade and opacity property, which will be combined into a final opacity value
- *
- * A Fadeable can also be dependent on the fade value from a specified parent fadeable,
- * so that it fades out together with the parent
+ * Manages multiple GeoJSON objects of a globe
  */
-class Fadeable {
+class GeoJsonManager : public properties::PropertyOwner {
 public:
-    Fadeable();
-    virtual ~Fadeable() = default;
+    GeoJsonManager();
 
-    void setFade(float fade);
-    void setParentFadeable(Fadeable* parent);
+    void initialize(RenderableGlobe* globe);
+    void deinitializeGL();
 
-    float fade() const;
-    virtual bool isVisible() const;
+    bool isReady() const;
 
-    /// Returns the full opacity constructed from the _opacity and _fade property values
-    virtual float opacity() const noexcept;
+    void addGeoJsonLayer(const ghoul::Dictionary& layerDict);
+    //void addGeoJsonLayer(const std::string& filePath); // TODO: just add from file
+    void deleteLayer(const std::string& layerIdentifier);
 
-protected:
-    properties::FloatProperty _opacity;
-    properties::FloatProperty _fade;
+    void update();
+    void render(const RenderData& data);
 
-    Fadeable* _parentFadeable = nullptr;
+    //void onChange(std::function<void(Layer* l)> callback);
+
+    static documentation::Documentation Documentation();
+
+private:
+    std::vector<std::unique_ptr<GeoJsonComponent>> _geoJsonObjects;
+    RenderableGlobe* _parentGlobe = nullptr;
 };
 
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_CORE___FADEABLE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GEOJSONMANAGER___H__

@@ -1,0 +1,39 @@
+local earth = asset.require('scene/solarsystem/planets/earth/earth')
+local earthIdentifier = earth.Earth.Identifier
+
+local data = asset.syncedResource({
+  Name = "GeoJSON Example Lines",
+  Type = "UrlSynchronization",
+  Identifier = "geojson_example_lines",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/lines.geojson"
+})
+
+local Example_Lines = {
+  Identifier = "Lines-Example",
+  File = data .. "lines.geojson",
+  HeightOffset = 20000.0,
+  DefaultProperties = {
+    LineWidth = 2.0
+  },
+  Name = "Example Lines"
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Lines)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Lines)
+end)
+
+asset.export(Example_Lines)
+
+
+asset.meta = {
+  Name = "GeoJson Example - Lines",
+  Version = "1.0",
+  Description = [[GeoJson example asset with lines]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

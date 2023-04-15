@@ -22,41 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___FADEABLE___H__
-#define __OPENSPACE_CORE___FADEABLE___H__
+#version __CONTEXT__
 
-#include <openspace/properties/scalar/floatproperty.h>
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec3 in_normal;
+layout(location = 2) in float in_height;
 
-namespace openspace {
+out float vs_depth;
+out vec3 vs_normal;
+out vec4 vs_positionViewSpace;
 
-/**
- * This class is an interface for all things fadeable in the software; things that need
- * a fade and opacity property, which will be combined into a final opacity value
- *
- * A Fadeable can also be dependent on the fade value from a specified parent fadeable,
- * so that it fades out together with the parent
- */
-class Fadeable {
-public:
-    Fadeable();
-    virtual ~Fadeable() = default;
+uniform dmat4 modelTransform;
+uniform dmat4 viewTransform;
+uniform dmat4 projectionTransform;
+uniform mat3 normalTransform;
 
-    void setFade(float fade);
-    void setParentFadeable(Fadeable* parent);
+uniform float heightOffset;
+uniform bool useHeightMapData;
 
-    float fade() const;
-    virtual bool isVisible() const;
+void main() {
+    dvec4 modelPos = dvec4(in_position, 1.0);
 
-    /// Returns the full opacity constructed from the _opacity and _fade property values
-    virtual float opacity() const noexcept;
+    // Offset model pos based on height info
+    if (length(in_position) > 0) {
+        dvec3 outDirection = normalize(dvec3(in_position));
+        float height = heightOffset;
+        if (useHeightMapData) {
+          height += in_height;
+        }
+        modelPos += dvec4(outDirection * double(height), 0.0);
+    }
 
-protected:
-    properties::FloatProperty _opacity;
-    properties::FloatProperty _fade;
+    vs_positionViewSpace = vec4(viewTransform * modelTransform * modelPos);
+    vec4 positionScreenSpace = vec4(projectionTransform * vs_positionViewSpace);
+    vs_depth = positionScreenSpace.w;
+    vs_normal = normalize(normalTransform * in_normal);
+    gl_Position = positionScreenSpace;
 
-    Fadeable* _parentFadeable = nullptr;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___FADEABLE___H__
+    // Set z to 0 to disable near and far plane, unique handling for perspective in space
+    gl_Position.z = 0.0;
+}

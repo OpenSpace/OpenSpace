@@ -32,6 +32,11 @@ namespace ghoul::opengl {
     class Texture;
 } // namespace ghoul::opengl
 
+namespace openspace {
+    class LightSource;
+    struct RenderData;
+} // namespace openspace
+
 namespace openspace::rendering::helper {
 
 enum class Anchor {
@@ -109,6 +114,11 @@ struct VertexXYZ {
     GLfloat xyz[3];
 };
 
+struct VertexXYZNormal {
+    GLfloat xyz[3];
+    GLfloat normal[3];
+};
+
 VertexXYZ convertToXYZ(const Vertex& v);
 
 std::vector<VertexXYZ> convert(std::vector<Vertex> v);
@@ -118,6 +128,20 @@ std::vector<Vertex> createRing(int nSegments, float radius,
 
 std::pair<std::vector<Vertex>, std::vector<GLushort>>
 createSphere(int nSegments, glm::vec3 radii, glm::vec4 colors = glm::vec4(1.f));
+
+/**
+ * Data structure that can be used for rendering using multiple light directions
+ */
+struct LightSourceRenderData {
+    unsigned int nLightSources = 0;
+
+    // Buffers for uniform uploading
+    std::vector<float> intensitiesBuffer;
+    std::vector<glm::vec3> directionsViewSpaceBuffer;
+
+    void updateBasedOnLightSources(const RenderData& renderData,
+        const std::vector<std::unique_ptr<LightSource>>& sources);
+};
 
 } // namespace openspace::rendering::helper
 

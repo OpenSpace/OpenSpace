@@ -28,6 +28,9 @@
 #include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 #include <modules/globebrowsing/src/gdalwrapper.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/geojson/geojsoncomponent.h>
+#include <modules/globebrowsing/src/geojson/geojsonmanager.h>
+#include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/globetranslation.h>
 #include <modules/globebrowsing/src/globerotation.h>
@@ -96,6 +99,14 @@ namespace {
         "Tile Cache Size",
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU",
         openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        DefaultGeoPointTextureInfo =
+    {
+        "DefaultGeoPointTexture",
+        "Default Geo Point Texture",
+        "A path to a texture to use as default for GeoJson points"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MRFCacheEnabledInfo = {
@@ -173,6 +184,9 @@ namespace {
         // [[codegen::verbatim(TileCacheSizeInfo.description)]]
         std::optional<int> tileCacheSize;
 
+        // [[codegen::verbatim(DefaultGeoPointTextureInfo.description)]]
+        std::optional<std::string> defaultGeoPointTexture;
+
         // [[codegen::verbatim(MRFCacheEnabledInfo.description)]]
         std::optional<bool> mrfCacheEnabled [[codegen::key("MRFCacheEnabled")]];
 
@@ -187,10 +201,14 @@ namespace openspace {
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule(Name)
     , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
+    , _defaultGeoPointTexturePath(DefaultGeoPointTextureInfo)
     , _mrfCacheEnabled(MRFCacheEnabledInfo, false)
     , _mrfCacheLocation(MRFCacheLocationInfo, "${BASE}/cache_mrf")
 {
     addProperty(_tileCacheSizeMB);
+
+    addProperty(_defaultGeoPointTexturePath);
+
     addProperty(_mrfCacheEnabled);
     addProperty(_mrfCacheLocation);
 }
@@ -200,6 +218,28 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     const Parameters p = codegen::bake<Parameters>(dict);
     _tileCacheSizeMB = p.tileCacheSize.value_or(_tileCacheSizeMB);
+
+    _defaultGeoPointTexturePath.onChange([this]() {
+        if (_defaultGeoPointTexturePath.value().empty()) {
+            _hasDefaultGeoPointTexture = false;
+            return;
+        }
+        std::filesystem::path path = _defaultGeoPointTexturePath.value();
+        if (std::filesystem::exists(path)) {
+            _hasDefaultGeoPointTexture = true;
+        }
+        else {
+            LWARNINGC("GlobeBrowsingModule", fmt::format(
+                "The provided texture file {} for the default geo point texture "
+                "does not exist", path
+            ));
+        }
+    });
+
+    if (p.defaultGeoPointTexture.has_value()) {
+        _defaultGeoPointTexturePath = absPath(*p.defaultGeoPointTexture).string();
+    }
+
     _mrfCacheEnabled = p.mrfCacheEnabled.value_or(_mrfCacheEnabled);
     _mrfCacheLocation = p.mrfCacheLocation.value_or(_mrfCacheLocation);
 
@@ -298,6 +338,9 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::TemporalTileProvider::Documentation(),
         globebrowsing::TileProviderByIndex::Documentation(),
         globebrowsing::TileProviderByLevel::Documentation(),
+        globebrowsing::GeoJsonManager::Documentation(),
+        globebrowsing::GeoJsonComponent::Documentation(),
+        globebrowsing::GeoJsonProperties::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
         ShadowComponent::Documentation()
@@ -634,6 +677,14 @@ const std::string GlobeBrowsingModule::mrfCacheLocation() const {
     return _mrfCacheLocation;
 }
 
+bool GlobeBrowsingModule::hasDefaultGeoPointTexture() const {
+    return _hasDefaultGeoPointTexture;
+}
+
+std::string_view GlobeBrowsingModule::defaultGeoPointTexture() const {
+    return _defaultGeoPointTexturePath;
+}
+
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
     return {
         .name = "globebrowsing",
@@ -651,7 +702,10 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             codegen::lua::GetGeoPositionForCamera,
             codegen::lua::LoadWMSCapabilities,
             codegen::lua::RemoveWMSServer,
-            codegen::lua::CapabilitiesWMS
+            codegen::lua::CapabilitiesWMS,
+            codegen::lua::AddGeoJson,
+            codegen::lua::DeleteGeoJson,
+            codegen::lua::AddGeoJsonFromFile
         },
         .scripts = {
             absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")

@@ -22,41 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___FADEABLE___H__
-#define __OPENSPACE_CORE___FADEABLE___H__
+#include "fragment.glsl"
 
-#include <openspace/properties/scalar/floatproperty.h>
+flat in float vs_screenSpaceDepth;
+in vec4 vs_positionViewSpace;
+flat in vec3 vs_normal; // TODO: not needed for shading, remove somehow
+in vec2 texCoord;
 
-namespace openspace {
+uniform sampler2D pointTexture;
+uniform bool hasTexture;
+uniform vec3 color;
+uniform float opacity;
 
-/**
- * This class is an interface for all things fadeable in the software; things that need
- * a fade and opacity property, which will be combined into a final opacity value
- *
- * A Fadeable can also be dependent on the fade value from a specified parent fadeable,
- * so that it fades out together with the parent
- */
-class Fadeable {
-public:
-    Fadeable();
-    virtual ~Fadeable() = default;
+// Can be used to preserve the whites in a point texture
+bool preserveWhite = true;
 
-    void setFade(float fade);
-    void setParentFadeable(Fadeable* parent);
+Fragment getFragment() {
+  Fragment frag;
 
-    float fade() const;
-    virtual bool isVisible() const;
+  if (hasTexture) {
+    frag.color = texture(pointTexture, texCoord);
+    if (!preserveWhite || frag.color.r * frag.color.g * frag.color.b < 0.95) {
+      frag.color.rgb *= color;
+    }
+    frag.color.a *= opacity;
+  }
+  else {
+    frag.color = vec4(color * vs_normal, opacity);
+  }
 
-    /// Returns the full opacity constructed from the _opacity and _fade property values
-    virtual float opacity() const noexcept;
+  if (frag.color.a < 0.01) {
+    discard;
+  }
 
-protected:
-    properties::FloatProperty _opacity;
-    properties::FloatProperty _fade;
-
-    Fadeable* _parentFadeable = nullptr;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___FADEABLE___H__
+  frag.depth = vs_screenSpaceDepth;
+  frag.gPosition = vs_positionViewSpace;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+  return frag;
+}
