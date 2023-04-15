@@ -1,10 +1,10 @@
 local globeIdentifier = asset.require("../../europa").Europa.Identifier
 
 local layer = {
-  Identifier = "Voyager_Global_Mosaic_sweden",
-  Name = "Voyager Global Mosaic [Sweden]",
+  Identifier = "Voyager_Global_Mosaic_NewYork",
+  Name = "Voyager Global Mosaic [New York]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("voyager_global_mosaic_sweden.wms"),
+  FilePath = asset.localResource("voyager_global_mosaic_newyork.wms"),
   BlendMode = "Color",
 }
 
@@ -21,7 +21,7 @@ asset.export("layer", layer)
 
 
 asset.meta = {
-  Name = "Voyager Global Mosaic [Sweden]",
+  Name = "Voyager Global Mosaic [New York]",
   Version = "1.1",
   Description = [[Europa Voyager - Galileo SSI Global Mosaic 500m v2. This global map
     base of Europa utilizes the best image quality and moderate resolution coverage

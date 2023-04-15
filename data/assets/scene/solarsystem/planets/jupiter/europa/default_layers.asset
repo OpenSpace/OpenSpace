@@ -1,7 +1,9 @@
 local colorLayersPath = "./layers/colorlayers"
 
 asset.require(colorLayersPath .. "/europa_texture", false)
-asset.require(colorLayersPath .. "/voyager_global_mosaic_local", true)
+asset.require(colorLayersPath .. "/voyager_global_mosaic_local", false)
+asset.require(colorLayersPath .. "/voyager_global_mosaic_sweden", false)
+asset.require(colorLayersPath .. "/voyager_global_mosaic_newyork", true)
 
 
 asset.meta = {

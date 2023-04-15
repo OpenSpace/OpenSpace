@@ -1,0 +1,35 @@
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+
+local layer = {
+  Identifier = "Messenger_SHADE_NewYork",
+  Name = "Messenger SHADE [New York]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("messenger_shade_newyork.wms"),
+  Settings = {
+    Gamma = 1.33,
+    Multiplier = 1.15
+  },
+  BlendMode = "Multiply"
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Messenger SHADE [New York]",
+  Version = "1.0",
+  Description = [[Mercury SHADE layer for Mercury globe. This map is hosted on the
+    OpenSpace server in New York]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Mercury/Topography/MESSENGER/Mercury_Messenger_USGS_ClrShade_Global_2km",
+  License = "NASA/PDS"
+}

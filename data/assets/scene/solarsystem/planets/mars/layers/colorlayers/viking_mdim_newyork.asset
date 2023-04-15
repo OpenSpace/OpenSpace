@@ -1,0 +1,50 @@
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
+
+local layer = {
+  Identifier = "Viking_MDIM_NewYork",
+  Name = "Viking MDIM [New York]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("viking_mdim_newyork.wms"),
+  Description = [[This global image map of Mars has a resolution of 256 pixels/degree
+    (scale approximately 232 meters per pixel (m) at the equator). The colorized
+    mosaic was completed by NASA AMES which warped the original Viking colorized
+    mosaic and blended over the latest black/white Mars Digital Image Model
+    (MDIM 2.1). The positional accuracy of features in MDIM 2.1 is estimated to be
+    roughly one pixel (200 m), compared to 3 km for MDIM 2.0 released in 2001 and >6
+    km for MDIM 1.0 released in 1991. In addition to relatively imprecise geodetic
+    control, the previous mosaics were affected by changing definitions of
+    cartographic parameters (such as the definition of zero longitude),
+    resulting in an overall longitude shift of as much as 0.2° between the early MDIMs
+    and other datasets. The new mosaic uses the most recent coordinate system
+    definitions for Mars. These definitions have been widely adopted by NASA missions
+    and other users of planetary data and are likely to remain in use for a decade or
+    more. As a result, MDIM 2.1 not only registers precisely with data from current
+    missions such as Mars Global Surveyor (MGS) and 2001 Mars Odyssey but will serve
+    as an accurate basemap on which data from future missions can be plotted.
+    (Description from URL). <br><br> References: Williams, D. R. (2018). Viking
+    Mission to Mars. https://nssdc.gsfc.nasa.gov/planetary/viking.html Additional
+    references available here: http://astrogeology.usgs.gov/maps/mdim-2-1]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Viking MDIM [New York]",
+  Version = "1.1",
+  Description = [[Alternate image layer for Mars. This map is hosted on the OpenSpace
+    server in New York]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Mars/Viking/MDIM21/" ..
+    "Mars_Viking_MDIM21_ClrMosaic_global_232m",
+  License = "NASA/PDS"
+}

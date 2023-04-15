@@ -1,10 +1,10 @@
 local globeIdentifier = asset.require("../../enceladus").Enceladus.Identifier
 
 local layer = {
-  Identifier = "Global_Mosaic_100m_HPF",
-  Name = "Cassini Global Mosaic 100m HPF",
+  Identifier = "Global_Mosaic_100m_HPF_Sweden",
+  Name = "Cassini Global Mosaic 100m HPF [Sweden]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("global_mosaic_100m_hpf.wms"),
+  FilePath = asset.localResource("global_mosaic_100m_hpf_sweden.wms"),
   Description = [[This mosaic represents the completion of a global control network of
     Enceladus containing Cassini Imaging Science Subsystem (ISS) images. A total of
     586 images in CLR, GRN, UV3, and IR3 filters were selected for the control
@@ -26,7 +26,7 @@ asset.export("layer", layer)
 
 
 asset.meta = {
-  Name = "Cassini Global Mosaic 100m HPF",
+  Name = "Cassini Global Mosaic 100m HPF [Sweden]",
   Version = "1.0",
   Description = [[Cassini Global mosaic for Enceladus. This map is hosted on the OpenSpace
     server in Sweden]],
