@@ -93,6 +93,31 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
             }
         });
     }
+
+    _autoScale.onChange([this]() {
+        if (!_autoScale) {
+            return;
+        }
+
+        // Shape the plane based on the aspect ration of the image
+        glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        if (_textureDimensions != textureDim) {
+            float aspectRatio = textureDim.x / textureDim.y;
+            float planeAspectRatio = _size.value().x / _size.value().y;
+
+            if (std::abs(planeAspectRatio - aspectRatio) >
+                std::numeric_limits<float>::epsilon())
+            {
+                glm::vec2 newSize =
+                    aspectRatio > 0.f ?
+                    glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                    glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+                _size = newSize;
+            }
+
+            _textureDimensions = textureDim;
+        }
+    });
 }
 
 bool RenderablePlaneImageLocal::isReady() const {
@@ -162,6 +187,29 @@ void RenderablePlaneImageLocal::loadTexture() {
 
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
         _textureFile->setCallback([this]() { _textureIsDirty = true; });
+
+        if (!_autoScale) {
+            return;
+        }
+
+        // Shape the plane based on the aspect ration of the image
+        glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        if (_textureDimensions != textureDim) {
+            float aspectRatio = textureDim.x / textureDim.y;
+            float planeAspectRatio = _size.value().x / _size.value().y;
+
+            if (std::abs(planeAspectRatio - aspectRatio) >
+                std::numeric_limits<float>::epsilon())
+            {
+                glm::vec2 newSize =
+                    aspectRatio > 0.f ?
+                    glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                    glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+                _size = newSize;
+            }
+
+            _textureDimensions = textureDim;
+        }
     }
 }
 

@@ -57,6 +57,8 @@ ghoul::mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
 
     TimeFrame* result = FactoryManager::ref().factory<TimeFrame>()->create(p.type, dict);
     result->setIdentifier("TimeFrame");
+    result->_type = p.type;
+
     return ghoul::mm_unique_ptr<TimeFrame>(result);
 }
 

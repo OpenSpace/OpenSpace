@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___MISSION___H__
 
 #include <openspace/util/timerange.h>
+#include <openspace/util/time.h>
 
 #include <string>
 #include <vector>
@@ -35,6 +36,14 @@ namespace ghoul { class Dictionary; }
 namespace openspace {
 
 namespace documentation {  struct Documentation; }
+
+struct Milestone {
+    std::string name;
+    Time date;
+    std::optional<std::string> description;
+    std::optional<std::string> image;
+    std::optional<std::string> link;
+};
 
 /**
  * Used to represent a named period of time within a mission. Allows nested phases, i.e.
@@ -82,11 +91,43 @@ public:
     const std::string& description() const;
 
     /**
+     * Returns the associated image of this MissionPhase. If no image is associated, this
+     * string will be empty.
+     *
+     * \return The associated image of the MissionPhase or the empty string
+     */
+    const std::string& image() const;
+
+    /**
+     * Returns the associated link of this MissionPhase. If no link is associated, this
+     * string will be empty.
+     * 
+     * \return The associated link of the MissionPhase or the empty string
+     */
+    const std::string& link() const;
+
+    /**
      * Returns all subphases sorted by start time.
      *
      * \return All subphases sorted by start time
      */
     const std::vector<MissionPhase>& phases() const;
+
+
+    /**
+     * Returns all important dates.
+     *
+     * \return All important dates
+     */
+    const std::vector<Milestone>& milestones() const;
+
+
+    /**
+     * Returns all actions.
+     *
+     * \return All actions
+     */
+    const std::vector<std::string>& actions() const;
 
     using Trace = std::vector<std::reference_wrapper<const MissionPhase>>;
 
@@ -131,6 +172,14 @@ protected:
     TimeRange _timeRange;
     /// A list of subphases into which this MissionPhase is separated
     std::vector<MissionPhase> _subphases;
+    /// Image that is associated with this phase
+    std::string _image;
+    /// Link that is associated with this phase
+    std::string _link;
+    /// Actions associated with the phase
+    std::vector<std::string> _actions;
+    /// Important dates 
+    std::vector<Milestone> _milestones;
 };
 
 /**

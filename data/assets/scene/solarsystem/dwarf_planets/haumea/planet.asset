@@ -1,0 +1,55 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
+local transforms = asset.require("./transforms")
+
+local modelFolder = asset.syncedResource({
+  Name = "Hamuea Model",
+  Type = "HttpSynchronization",
+  Identifier = "hamuea_model",
+  Version = 1
+})
+
+local Planet = {
+  Identifier = "HamueaModel",
+  Parent = transforms.Position.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = {0.0, 0.0, 1.0},
+      RotationRate = 1.0/(3.9154*60.0*60.0)
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. 'Haumea_1_1000.glb',
+    SpecularIntensity = 0.0,
+    AmbientIntensity = 0.0,
+    LightSources = {
+      sun.LightSource
+    },
+  },
+  GUI = {
+    Name = "Haumea",
+    Path = "/Solar System/Dwarf Planets/Haumea",
+    Description = [[A 3D model of Haumea, Credit: NASA Visualization Technology 
+      Applications and Development (VTAD)."]]
+  } 
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Planet)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Planet)
+end)
+
+asset.export("Planet", Planet)
+
+asset.meta = {
+  Name = "Haumea Model",
+  Version = "1.0",
+  Description = [[Model of Haumea]],
+  Author = "OpenSpace Team",
+  URL = "https://solarsystem.nasa.gov/planets/dwarf-planets/haumea/in-depth/",
+  License = "JPL/NASA"
+}

@@ -46,7 +46,7 @@ local Enceladus = {
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
   GUI = {
     Name = "Enceladus",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Enceladus",
     Description = "Enceladus globe with labels"
   }
 }
@@ -72,7 +72,7 @@ local EnceladusLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Enceladus Label",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Enceladus",
     Description = "Label for Saturn's moon Enceladus"
   }
 }

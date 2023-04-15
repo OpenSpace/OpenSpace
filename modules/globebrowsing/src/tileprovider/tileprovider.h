@@ -57,6 +57,7 @@ namespace openspace::globebrowsing {
 
 namespace openspace::globebrowsing {
 
+// If you add a new type, also add it to shaders/texturetilemapping.glsl
 enum class Type {
     DefaultTileProvider = 0,
     SingleImageTileProvider,
@@ -66,9 +67,9 @@ enum class Type {
     TileIndexTileProvider,
     ByIndexTileProvider,
     ByLevelTileProvider,
-    InterpolateTileProvider
+    InterpolateTileProvider,
+    FfmpegTileProvider
 };
-
 
 struct TileProvider : public properties::PropertyOwner {
     static unsigned int NumTileProviders;
@@ -131,7 +132,8 @@ struct TileProvider : public properties::PropertyOwner {
     virtual float noDataValueAsFloat() = 0;
 
 
-    ChunkTile chunkTile(TileIndex tileIndex, int parents = 0, int maxParents = 1337);
+    virtual ChunkTile chunkTile(TileIndex tileIndex, int parents = 0, 
+        int maxParents = 1337);
     ChunkTilePile chunkTilePile(TileIndex tileIndex, int pileSize);
 
 
@@ -139,6 +141,10 @@ struct TileProvider : public properties::PropertyOwner {
 
     uint16_t uniqueIdentifier = 0;
     bool isInitialized = false;
+protected:
+    ChunkTile traverseTree(TileIndex tileIndex, int parents, int maxParents, 
+        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent, 
+        TileUvTransform& uvTransform);
 
 private:
     virtual void internalInitialize();

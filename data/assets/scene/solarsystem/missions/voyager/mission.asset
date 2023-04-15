@@ -1,0 +1,63 @@
+--voyager/mission.asset
+
+-- Source:  http://pluto.jhuapl.edu/Mission/index.php
+-- Many of the values (especially days of the month if 01 or 30 or 31  and  hh::mm::ss if all 0)
+-- are approximate and need fixing
+
+local Mission = {
+  Name = "Voyager",
+  Phases = {
+    {
+      Name = "Launches",
+      TimeRange = { Start = "1977 AUG 20 00:00:00", End = "1977 SEP 05 00:00:00" },
+      Phases = {
+        {
+          Name = "Voyager 2 Launch",
+          TimeRange = { Start = "1977 AUG 20 00:00:00", End = "1977 AUG 20 00:00:00" }
+        },
+        {
+          Name = "Voyager 1 Launch",
+          TimeRange = { Start = "1977 SEP 05 00:00:00", End = "1977 SEP 05 00:00:00" }
+        },
+      }
+    },
+    {
+      Name = "Encounters",
+      TimeRange = { Start = "1979 MAR 05 00:00:00", End = "1989 AUG 25 00:00:00" },
+      Phases = {
+        {
+          Name = "Voyager 1 Jupiter Encounter",
+          TimeRange = { Start = "1979 MAR 05 00:00:00", End = "1979 MAR 05 00:00:00" }
+        },
+        {
+          Name = "Voyager 2 Jupiter Encounter",
+          TimeRange = { Start = "1979 JUL 09 00:00:00", End = "1979 JUL 09 00:00:00" }
+        },
+		    {
+          Name = "Voyager 1 Saturn Encounter",
+          TimeRange = { Start = "1980 NOV 09 00:00:00", End = "1980 NOV 09 00:00:00" }
+        },
+        {
+          Name = "Voyager 2 Saturn Encounter",
+          TimeRange = { Start = "1981 AUG 25 00:00:00", End = "1981 AUG 25 00:00:00" }
+        },
+        {
+          Name = "Voyager 2 Uranus Encounter",
+          TimeRange = { Start = "1986 JAN 24 00:00:00", End = "1986 JAN 24 00:00:00" }
+        },
+        {
+          Name = "Voyager 2 Neptune Encounter",
+          TimeRange = { Start = "1989 AUG 25 00:00:00", End = "1989 AUG 25 00:00:00" }
+        }               
+      }
+    }
+  }
+}
+
+asset.onInitialize(function()
+  openspace.loadMission(Mission)
+ end)
+ 
+ asset.onDeinitialize(function()
+  openspace.unloadMission(Mission.Name)
+ end)

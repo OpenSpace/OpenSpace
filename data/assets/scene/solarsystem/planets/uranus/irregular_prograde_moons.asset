@@ -28,7 +28,7 @@ local irregularMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Irregular Prograde Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Prograde Moons/Margaret"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1694.8,
@@ -61,7 +61,7 @@ for i, moon in ipairs(irregularMoons) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Uranus/Moons",
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Prograde Moons/" .. moon.Identifier,
       Description = "Label for Uranus' moon " .. moonName .. " (Irregular prograde group)"
     }
   }

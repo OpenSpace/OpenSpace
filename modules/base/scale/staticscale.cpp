@@ -58,11 +58,13 @@ StaticScale::StaticScale() : _scaleValue(ScaleInfo, 1.f, 0.1f, 100.f) {
     _scaleValue.onChange([this]() {
         requireUpdate();
     });
+    _type = "StaticScale";
 }
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary) : StaticScale() {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _scaleValue = p.scale;
+    _type = "StaticScale";
 }
 
 } // namespace openspace
