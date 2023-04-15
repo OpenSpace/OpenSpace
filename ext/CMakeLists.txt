@@ -46,7 +46,9 @@ endif ()
 
 # Ghoul
 add_subdirectory(ghoul)
-set_target_properties(GhoulTest PROPERTIES FOLDER "Unit Tests")
+if (TARGET GhoulTest)
+  set_target_properties(GhoulTest PROPERTIES FOLDER "Unit Tests")
+endif ()
 
 # Spice
 begin_dependency("Spice")

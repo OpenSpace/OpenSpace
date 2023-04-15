@@ -1,0 +1,82 @@
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local sunAsset = asset.require('scene/solarsystem/sun/sun')
+
+local modelFolder = asset.syncedResource({
+  Name = "Scale Burj Khalifa",
+  Type = "UrlSynchronization",
+  Identifier = "scale_model_burj_khalifa",
+  Url = "https://wms.openspace.amnh.org/static/sync/url/scalemodels/Burj_Khalifa.osmodel",
+  Filename = "Burj_Khalifa.osmodel",
+  Override = false
+})
+
+local scaleModel = {
+  Identifier = "Scale_BurjKhalifa",
+  Parent = earthAsset.Earth.Identifier,
+  --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 25.196715,
+      Longitude = 55.273972,
+      Altitude = -3.0,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 25.196715,
+      Longitude = 55.273972,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. "Burj_Khalifa.osmodel",
+    LightSources = { sunAsset.LightSource },
+    ModelScale = "Centimeter"
+  },
+  GUI = {
+    Name = "Burj Khalifa",
+    Path = "/Scale Objects"
+  }
+}
+
+local updatePositionAction = {
+  Identifier = "os.scale_models.drop_burj_khalifa",
+  Name = "Drop Burj Khalifa under camera",
+  Command = [[
+    openspace.globebrowsing.setNodePositionFromCamera('Scale_BurjKhalifa')
+  ]],
+  Documentation = "Updates the Burj Khalifa position based on the globe location of the camera",
+  GuiPath = "/Scale Objects",
+  IsLocal = false
+}
+
+local resetPositionAction = {
+  Identifier = "os.os.scale_models.reset_burj_khalifa",
+  Name = "Reset Burj Khalifa position",
+  Command = [[
+    openspace.globebrowsing.setNodePosition('Scale_BurjKhalifa', ']] .. earthAsset.Earth.Identifier .. [[', 25.196715, 55.273972)
+  ]],
+  Documentation = "Resets the Burj Khalifa back to it's actual location",
+  GuiPath = "/Scale Objects",
+  IsLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(scaleModel)
+  openspace.action.registerAction(updatePositionAction)
+  openspace.action.registerAction(resetPositionAction)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(resetPositionAction)
+  openspace.action.removeAction(updatePositionAction)
+  openspace.removeSceneGraphNode(scaleModel)
+end)
+
+asset.export(scaleModel)
+asset.export(updatePositionAction)
+asset.export(resetPositionAction)

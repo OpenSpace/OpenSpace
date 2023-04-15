@@ -1,0 +1,34 @@
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
+
+local layer = {
+  Identifier = "WAC_NewYork",
+  Name = "WAC [New York]",
+  Enabled = asset.enabled,
+  Description = [[Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera (WAC) aboard the Lunar Reconnaissance Orbiter (LRO) has allowed the instrument team to create a global mosaic comprised of over 15,000 images acquired between November 2009 and February 2011. The WAC maps the whole Moon in one month, however the solar incidence angle at the equator changes about 28° from the beginning to the end of the month. To even out the incidence angle variations (generally angles between 55-75 degrees), this morphology mosaic (at 643 nm), is comprised of data collected over three periods (1/20/2010 to 1/28/2010, 5/30/2010 to 6/6/2010, 7/24/2010 to 7/31/2010).
+
+  The South Pole mosaic images were acquired 8/10/10 to 9/19/10 and the north polar images 4/22/10 to 5/19/10. Some gores were filled with data taken at other times. The non-polar images were map projected onto the GLD100, WAC-derived 100 meters per pixel (m), while polar images were map projected on the Lunar Orbiter Laser Altimeter (LOLA) shape model (80° to 90° N/S) and the GLD100 (60° to 80° N/S). In addition, the LOLA derived crossover corrected ephemeris and an improved camera pointing provide accurate positioning of each WAC image. Because the polar images were acquired at a different season than the equatorial images, and the lunar photometric function is not perfectly known, there can be a brightness difference where the polar mosaics meet the equatorial mosaics. This has been greatly reduced in version 3 (created in June 2013). (Description from URL)]],
+  FilePath = asset.localResource("wac_newyork.wms"),
+  Settings = { Gamma = 0.84 }
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "WAC [New York]",
+  Version = "2.0",
+  Description = [[Wide Angle Color map of the Moon. This map is hosted on the OpenSpace
+    server in New York]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Moon/LRO/LROC_WAC/Lunar_LRO_LROC-WAC_Mosaic_global_100m_June2013",
+  License = "NASA/PDS"
+}

@@ -121,7 +121,9 @@ target_link_libraries(OpenSpace PRIVATE sgct)
 
 set_target_properties(sgct PROPERTIES FOLDER "External")
 set_target_properties(glfw PROPERTIES FOLDER "External")
-set_target_properties(SGCTTest PROPERTIES FOLDER "External")
+if (TARGET SGCTTest)
+  set_target_properties(SGCTTest PROPERTIES FOLDER "External")
+endif ()
 
 if (UNIX AND (NOT APPLE))
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
