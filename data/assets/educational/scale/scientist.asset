@@ -1,22 +1,70 @@
-local helper = asset.require('util/scale_model_helper')
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
-local name = "Scientist"
-local identifier = "ScaleScientist"
-local lat = 34.201639
-local lon = -118.171319
-local altitude = 0.78
-local scale = 1
-local rotationVector = { 0.0, 90.0, 0.0 }
+local modelFolder = asset.syncedResource({
+  Name = "Scale Model Scientist",
+  Type = "HttpSynchronization",
+  Identifier = "scale_model_scientist",
+  Version = 1
+})
 
-local modelFolder = helper.createModelFolder(name, "scale_model_scientist")
-local model = helper.createModel(identifier, lat, lon, altitude, scale, "Meter", 
-  rotationVector, name, modelFolder, "scientist.gltf")
+local scaleModel = {
+  Identifier = "Scale_Scientist",
+  Parent = earthAsset.Earth.Identifier,
+  --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 34.201639,
+      Longitude = -118.171319,
+      Altitude = 0.78,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 34.201639,
+      Longitude = -118.171319,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. "scientist.gltf",
+    RotationVector = { 0.0, 90.0, 0.0 },
+    LightSources = { sunAsset.LightSource }
+  },
+  GUI = {
+    Name = "Scientist",
+    Path = "/Scale Objects"
+  }
+}
 
-local updatePositionAction = helper.createDropAction(identifier, name, 'Scale Objects')
-local resetPositionAction = helper.createResetAction(identifier, name, lat, lon, 'Scale Objects')
+local updatePositionAction = {
+  Identifier = "os.scale_models.drop_scientist",
+  Name = "Drop Scientist under camera",
+  Command = [[
+    openspace.globebrowsing.setNodePositionFromCamera('Scale_Scientist')
+  ]],
+  Documentation = "Updates the Scientist position based on the globe location of the camera",
+  GuiPath = "/Scale Objects",
+  IsLocal = false
+}
+
+local resetPositionAction = {
+  Identifier = "os.os.scale_models.reset_scientist",
+  Name = "Reset Scientist position",
+  Command = [[
+    openspace.globebrowsing.setNodePosition('Scale_Scientist', ']] .. earthAsset.Earth.Identifier .. [[', 34.201639, -118.171319)
+  ]],
+  Documentation = "Resets the Scientist back to it's actual location",
+  GuiPath = "/Scale Objects",
+  IsLocal = false
+}
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(model)
+  openspace.addSceneGraphNode(scaleModel)
   openspace.action.registerAction(updatePositionAction)
   openspace.action.registerAction(resetPositionAction)
 end)
@@ -24,9 +72,9 @@ end)
 asset.onDeinitialize(function()
   openspace.action.removeAction(resetPositionAction)
   openspace.action.removeAction(updatePositionAction)
-  openspace.removeSceneGraphNode(model)
+  openspace.removeSceneGraphNode(scaleModel)
 end)
 
-asset.export(model)
+asset.export(scaleModel)
 asset.export(updatePositionAction)
 asset.export(resetPositionAction)
