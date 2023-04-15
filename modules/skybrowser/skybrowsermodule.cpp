@@ -42,7 +42,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Decides if the GUI for this module should be enabled"
+        "Decides if the GUI for this module should be enabled",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowTitleInGuiBrowserInfo = {
@@ -57,7 +59,9 @@ namespace {
         "AllowCameraRotation",
         "Allow Camera Rotation",
         "Toggles if the camera should rotate to look at the sky target if it is going "
-        "outside of the current field of view"
+        "outside of the current field of view",
+        // @VISIBILITY(1.75)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CameraRotSpeedInfo = {
@@ -86,7 +90,9 @@ namespace {
         "HideTargetsBrowsersWithGui",
         "Hide Targets and Browsers with GUI",
         "If checked, the targets and browsers will be disabled when the sky browser "
-        "panel is minimized"
+        "panel is minimized",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo InverseZoomInfo = {
@@ -100,20 +106,26 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SynchronizeAimInfo = {
         "SynchronizeAim",
         "Synchronize Aim",
-        "If checked, the target and the browser will have synchronized aim."
+        "If checked, the target and the browser will have synchronized aim.",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpaceCraftTimeInfo = {
         "SpaceCraftAnimationTime",
         "Space Craft Animation Time",
         "Sets the duration (in seconds) of the animation of the space craft when it is "
-        "pointed to where the target is aiming"
+        "pointed to where the target is aiming",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ImageCollectionInfo = {
        "WwtImageCollectionUrl",
        "AAS WorldWide Telescope Image Collection Url",
-       "The url of the image collection which is loaded into AAS WorldWide Telescope"
+       "The url of the image collection which is loaded into AAS WorldWide Telescope",
+       // @VISIBILITY(3.75)
+       openspace::properties::Property::Visibility::AdvancedUser
     };
 
 

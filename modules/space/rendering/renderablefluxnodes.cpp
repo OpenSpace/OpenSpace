@@ -72,7 +72,9 @@ namespace {
         "ColorMode",
         "Color Mode",
         "Color lines uniformly or using color tables based on specific values on nodes, "
-        "for examples flux values"
+        "for examples flux values",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
@@ -85,13 +87,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StreamColorInfo = {
         "Color",
         "Color",
-        "Color of particles"
+        "Color of particles",
+        // @VISIBILITY(1.5)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NodeSizeInfo = {
        "NodeSize",
        "Size of nodes",
-       "Change the size of the rendered points of the nodes"
+       "Change the size of the rendered points of the nodes",
+       // @VISIBILITY(2.5)
+       openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ThresholdFluxInfo = {
@@ -257,13 +263,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo pulseEnabledInfo = {
         "PulseEnabled",
         "Nodes close to Earth pulsate",
-        "Toggles the pulse for nodes close to Earth"
+        "Toggles the pulse for nodes close to Earth",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo gaussianPulseEnabledInfo = {
         "GaussianPulseEnabled",
         "Nodes close to Earth pulsate with alpha by gaussian",
-        "Toggles the pulse with alpha by gaussian for nodes close to Earth"
+        "Toggles the pulse with alpha by gaussian for nodes close to Earth",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableFluxNodes)]] Parameters {

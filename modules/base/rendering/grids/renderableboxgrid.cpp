@@ -39,7 +39,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered"
+        "This value determines the color of the grid lines that are rendered",
+        // @VISIBILITY(1.17)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {

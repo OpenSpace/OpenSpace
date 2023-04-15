@@ -49,7 +49,9 @@ namespace {
         "DistanceUnit",
         "Distance Unit",
         "Property to define the unit in which the distance should be displayed. "
-        "Defaults to 'km' if not specified"
+        "Defaults to 'km' if not specified",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo CustomUnitDescriptorInfo = {

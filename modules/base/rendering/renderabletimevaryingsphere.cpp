@@ -81,7 +81,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
-        "This value specifies the number of segments that the sphere is separated in"
+        "This value specifies the number of segments that the sphere is separated in",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
@@ -110,7 +112,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
         "DisableFadeInOut",
         "Disable Fade-In/Fade-Out effects",
-        "Enables/Disables the Fade-In/Out effects"
+        "Enables/Disables the Fade-In/Out effects",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingSphere)]] Parameters {

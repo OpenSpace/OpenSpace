@@ -70,7 +70,9 @@ namespace {
         "AlwaysDrawFov",
         "Always Draw FOV",
         "If this value is enabled, the field of view will always be drawn, regardless of "
-        "whether image information has been loaded or not"
+        "whether image information has been loaded or not",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DefaultStartColorInfo = {

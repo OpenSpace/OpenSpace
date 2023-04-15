@@ -99,7 +99,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "If the DU mesh is of wire type, this value determines the width of the lines"
+        "If the DU mesh is of wire type, this value determines the width of the lines",
+        // @VISIBILITY(1.75)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
@@ -119,7 +121,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MeshColorInfo = {
         "MeshColor",
         "Meshes colors",
-        "The defined colors for the meshes to be rendered"
+        "The defined colors for the meshes to be rendered",
+        // @VISIBILITY(1.25)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {

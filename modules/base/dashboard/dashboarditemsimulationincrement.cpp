@@ -41,14 +41,18 @@ namespace {
         "Time Simplification",
         "If this value is enabled, the time is displayed in nuanced units, such as "
         "minutes, hours, days, years, etc. If this value is disabled, it is always "
-        "displayed in seconds"
+        "displayed in seconds",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this time unit is used as a destination to "
-        "convert the seconds into"
+        "convert the seconds into",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransitionFormatInfo = {

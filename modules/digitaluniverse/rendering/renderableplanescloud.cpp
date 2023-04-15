@@ -62,7 +62,9 @@ namespace {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point"
+        "size of each point",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
@@ -102,13 +104,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LuminosityInfo = {
         "Luminosity",
         "Luminosity variable",
-        "Datavar variable to control the luminosity/size of the astronomical objects"
+        "Datavar variable to control the luminosity/size of the astronomical objects",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleLuminosityInfo = {
         "ScaleLuminosity",
         "ScaleLuminosity variable",
-        "Scaling control for the luminosity/size of the astronomical objects"
+        "Scaling control for the luminosity/size of the astronomical objects",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {

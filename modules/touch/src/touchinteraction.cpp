@@ -74,13 +74,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DisableZoomInfo = {
         "DisableZoom",
         "Disable zoom navigation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableRollInfo = {
         "DisableRoll",
         "Disable roll navigation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
@@ -100,7 +104,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DecelatesPerSecondInfo = {
         "DeceleratesPerSecond",
         "Number of times velocity is decelerated per second",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TouchScreenSizeInfo = {
@@ -135,13 +141,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ZoomSensitivityExpInfo = {
         "ZoomSensitivityExp",
         "Sensitivity of exponential zooming in relation to distance from focus node",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZoomSensitivityPropInfo = {
         "ZoomSensitivityProp",
         "Sensitivity of zooming proportional to distance from focus node",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -150,7 +160,9 @@ namespace {
         "ZoomSensitivityDistanceThreshold",
         "Threshold of distance to target node for whether or not to use exponential "
         "zooming",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -159,7 +171,9 @@ namespace {
         "ZoomInBoundarySphereMultiplier",
         "Multiplies a node's boundary sphere by this in order to limit zoom in & prevent "
         "surface collision",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -208,7 +222,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FrictionInfo = {
         "Friction",
         "Friction for different interactions (orbit, zoom, roll, pan)",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZoomOutLimitInfo = {
@@ -216,7 +232,9 @@ namespace {
         "Zoom Out Limit",
         "The maximum distance you are allowed to navigate away from the anchor. "
         "This should always be larger than the zoom in value if you want to be able "
-        "to zoom. Defaults to maximum allowed double"
+        "to zoom. Defaults to maximum allowed double",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZoomInLimitInfo = {
@@ -224,7 +242,9 @@ namespace {
         "Zoom In Limit",
         "The minimum distance from the anchor that you are allowed to navigate to. "
         "Its purpose is to limit zooming in on a node. If this value is not set it "
-        "defaults to the surface of the current anchor."
+        "defaults to the surface of the current anchor.",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo

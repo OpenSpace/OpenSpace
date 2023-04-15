@@ -67,7 +67,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width"
+        "This value specifies the line width",
+        // @VISIBILITY(1.75)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartOffsetInfo = {

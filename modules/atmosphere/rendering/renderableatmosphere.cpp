@@ -103,13 +103,17 @@ namespace {
         "MieHeightScale",
         "Mie Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
-        "constant factor"
+        "constant factor",
+        // @VISIBILITY(3.2)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffInfo = {
         "MieScatteringCoeff",
         "Mie Scattering Coeff",
-        "Mie sea-level scattering coefficients in meters"
+        "Mie sea-level scattering coefficients in meters",
+        // @VISIBILITY(3.2)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -117,19 +121,25 @@ namespace {
     {
         "MieScatteringExtinctionPropCoefficient",
         "Mie Scattering/Extinction Proportion Coefficient (%)",
-        "Mie Scattering/Extinction Proportion Coefficient (%)"
+        "Mie Scattering/Extinction Proportion Coefficient (%)",
+        // @VISIBILITY(3.2)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MieAsymmetricFactorGInfo = {
         "MieAsymmetricFactorG",
         "Mie Asymmetric Factor G",
-        "Averaging of the scattering angle over a high number of scattering events"
+        "Averaging of the scattering angle over a high number of scattering events",
+        // @VISIBILITY(3.2)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SunIntensityInfo = {
         "SunIntensity",
         "Sun Intensity",
-        "Unitless for now"
+        "Unitless for now",
+        // @VISIBILITY(2.6)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -144,7 +154,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
         "EclipseHardShadowsInfo",
         "Enable Hard Shadows for Eclipses",
-        "Enable/Disables hard shadows through the atmosphere"
+        "Enable/Disables hard shadows through the atmosphere",
+        // @VISIBILITY(2.8)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereDimmingHeightInfo ={

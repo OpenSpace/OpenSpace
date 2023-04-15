@@ -93,14 +93,17 @@ namespace {
         "Show the on-screen log",
         "This value determines whether the on-screen log will be shown or hidden. Even "
         "if it is shown, all 'Debug' and 'Trace' level messages are omitted from this "
-        "log"
+        "log",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo VerticalLogOffsetInfo = {
         "VerticalLogOffset",
         "Vertical Log Offset",
         "The vertical offset for the on-screen log in [0,1] coordinates, a factor that "
-        "is scaled with the vertical resolution"
+        "is scaled with the vertical resolution",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowVersionInfo = {
@@ -115,7 +118,9 @@ namespace {
         "ShowCamera",
         "Shows information about the current camera state, such as friction",
         "This value determines whether the information about the current camera state is "
-        "shown on the screen"
+        "shown on the screen",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenshotWindowIdsInfo = {
@@ -140,7 +145,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShowStatisticsInfo = {
         "ShowStatistics",
         "Show Statistics",
-        "Show updating, rendering, and network statistics on all rendering nodes"
+        "Show updating, rendering, and network statistics on all rendering nodes",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenshotUseDateInfo = {
@@ -210,7 +217,9 @@ namespace {
         "HDRExposure",
         "HDR Exposure",
         "This value determines the amount of light per unit area reaching the equivalent "
-        "of an electronic image sensor"
+        "of an electronic image sensor",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
@@ -246,7 +255,9 @@ namespace {
         "FramerateLimit",
         "Framerate Limit",
         "If set to a value bigger than 0, the framerate will be limited to that many "
-        "frames per second without using V-Sync"
+        "frames per second without using V-Sync",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HorizFieldOfViewInfo = {
@@ -262,13 +273,17 @@ namespace {
         "BlackoutFactor",
         "Blackout Factor",
         "The blackout factor of the rendering. This can be used for fading in or out the "
-        "rendering window"
+        "rendering window",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FXAAInfo = {
         "FXAA",
         "Enable FXAA",
-        "Enable FXAA"
+        "Enable FXAA",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledFontColorInfo = {

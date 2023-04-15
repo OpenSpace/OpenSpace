@@ -40,7 +40,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
-        "The globe on which the longitude/latitude is specified"
+        "The globe on which the longitude/latitude is specified",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LatitudeInfo = {
@@ -48,7 +50,9 @@ namespace {
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
-        "globe. The default value is 0.0"
+        "globe. The default value is 0.0",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LongitudeInfo = {
@@ -56,7 +60,9 @@ namespace {
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0"
+        "globe. The default value is 0.0",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AngleInfo = {
@@ -72,7 +78,9 @@ namespace {
         "Use Heightmap",
         "If set to true, the heightmap will be used when computing the surface normal. "
         "This means that the object will be rotated to lay flat on the surface at the "
-        "given coordinate and follow the shape of the landscape"
+        "given coordinate and follow the shape of the landscape",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(GlobeRotation)]] Parameters {

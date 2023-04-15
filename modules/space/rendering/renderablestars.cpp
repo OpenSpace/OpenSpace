@@ -261,7 +261,9 @@ namespace {
         "Magnitude Exponent",
         "Adjust star magnitude by 10^MagnitudeExponent. Stars closer than this distance "
         "are given full opacity. Farther away, stars dim proportionally to the "
-        "logarithm of their distance"
+        "logarithm of their distance",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderMethodOptionInfo = {

@@ -85,7 +85,8 @@ namespace {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "
-        "than using the mouse interaction"
+        "than using the mouse interaction",
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 

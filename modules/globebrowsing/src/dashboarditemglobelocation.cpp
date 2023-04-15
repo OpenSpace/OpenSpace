@@ -52,7 +52,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SignificantDigitsInfo = {
         "SignificantDigits",
         "Significant Digits",
-        "Determines the number of significant digits that are shown in the location text"
+        "Determines the number of significant digits that are shown in the location text",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(DashboardItemGlobeLocation)]] Parameters {

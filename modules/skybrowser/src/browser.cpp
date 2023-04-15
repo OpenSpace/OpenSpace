@@ -39,13 +39,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser Dimensions",
-        "Set the dimensions of the web browser window"
+        "Set the dimensions of the web browser window",
+        // @VISIBILITY(3.75)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
-        "The URL to load"
+        "The URL to load",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {

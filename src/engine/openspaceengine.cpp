@@ -151,7 +151,9 @@ namespace {
         "DisableMouseInputs",
         "Disable All Mouse Inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
-        "double inputs on touch (from both touch input and inserted mouse inputs)"
+        "double inputs on touch (from both touch input and inserted mouse inputs)",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 } // namespace
 

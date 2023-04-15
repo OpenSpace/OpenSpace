@@ -114,7 +114,9 @@ namespace {
         "ShowComparisonCircle",
         "Show Comparison Circle",
         "If true, the 1 AU size comparison circle is enabled per default when an "
-        "exoplanet system is created"
+        "exoplanet system is created",
+        // @VISIBILITY(1.8)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHabitableZoneInfo = {
@@ -129,14 +131,18 @@ namespace {
         "UseOptimisticZone",
         "Use Optimistic Zone Boundaries",
         "If true, the habitable zone is computed with optimistic boundaries per default "
-        "when an exoplanet system is created"
+        "when an exoplanet system is created",
+        // @VISIBILITY(2.8)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HabitableZoneOpacityInfo = {
         "HabitableZoneOpacity",
         "Habitable Zone Opacity",
         "The opacity value used for the habitable zone renderable for a created "
-        "exoplanet system"
+        "exoplanet system",
+        // @VISIBILITY(1.5)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr std::string_view ExoplanetsDataFileName = "exoplanets_data.bin";

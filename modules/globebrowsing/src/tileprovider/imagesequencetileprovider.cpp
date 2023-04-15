@@ -33,13 +33,17 @@ namespace {
         "Index",
         "Index",
         "The index into the list of images that is used to pick the currently displayed "
-        "image"
+        "image",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo CurrentImageInfo = {
         "CurrentImage",
         "Current Image",
-        "The read-only value of the currently selected image"
+        "The read-only value of the currently selected image",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FolderPathInfo = {

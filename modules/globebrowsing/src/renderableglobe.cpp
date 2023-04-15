@@ -127,7 +127,9 @@ namespace {
         "ResetTileProviders",
         "Reset tile providers",
         "If this property is triggered, all tile provides for the globe are reset and "
-        "data is reloaded from scratch"
+        "data is reloaded from scratch",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelSpaceRenderingInfo = {
@@ -164,7 +166,9 @@ namespace {
         "Use Accurate Normals",
         "This value determines whether higher-accuracy normals should be used in the "
         "rendering. These normals are calculated based on the height field information "
-        "and are thus only available if the planet has a height map"
+        "and are thus only available if the planet has a height map",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EclipseInfo = {
@@ -177,13 +181,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
         "EclipseHardShadows",
         "Eclipse Hard Shadows",
-        "Enables the rendering of eclipse shadows using hard shadows"
+        "Enables the rendering of eclipse shadows using hard shadows",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowMappingInfo = {
         "ShadowMapping",
         "Shadow Mapping",
-        "Enables shadow mapping algorithm. Used by renderable rings too"
+        "Enables shadow mapping algorithm. Used by renderable rings too",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderAtDistanceInfo = {
@@ -191,7 +199,9 @@ namespace {
         "Render at Distance",
         "Tells the rendering engine not to perform distance based performance culling "
         "for this globe. Turning this property on will let the globe to be seen at far "
-        "away distances when normally it would be hidden"
+        "away distances when normally it would be hidden",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
@@ -237,14 +247,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient Intensity",
-        "The intensity factor for the ambient light used for light shading"
+        "The intensity factor for the ambient light used for light shading",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo NActiveLayersInfo = {
         "NActiveLayers",
         "Number of active layers",
         "This is the number of currently active layers, if this value reaches the "
-        "maximum, bad things will happen"
+        "maximum, bad things will happen",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableGlobe)]] Parameters {

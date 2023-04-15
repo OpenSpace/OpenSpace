@@ -72,7 +72,9 @@ namespace {
     {
         "UsePerspectiveProjection",
         "Use Perspective Projection",
-        "Determines whetether the z/radius values affects the size of the plane or not"
+        "Determines whetether the z/radius values affects the size of the plane or not",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CartesianPositionInfo = {
@@ -97,7 +99,9 @@ namespace {
         "Scale Value",
         "This value determines a scale factor for the plane. The default size of a plane "
         "is determined by the concrete instance and reflects, for example, the size of "
-        "the image being displayed"
+        "the image being displayed",
+        // @VISIBILITY(1.6)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LocalRotationInfo = {
@@ -128,14 +132,18 @@ namespace {
         "Delete",
         "Delete",
         "If this property is triggered, this screen space plane is removed from the "
-        "scene"
+        "scene",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
         "FaceCamera",
         "Face Camera",
         "If enabled, the local rotation is applied after the plane is rotated to face "
-        "the camera"
+        "the camera",
+        // @VISIBILITY(1.25)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {

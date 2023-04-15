@@ -39,7 +39,9 @@ namespace {
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed"
+        "and displayed",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {

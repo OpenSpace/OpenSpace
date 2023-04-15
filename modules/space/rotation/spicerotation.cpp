@@ -36,14 +36,16 @@ namespace {
         "SourceFrame",
         "Source",
         "This value specifies the source frame that is used as the basis for the "
-        "coordinate transformation. This has to be a valid SPICE name"
+        "coordinate transformation. This has to be a valid SPICE name",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationInfo = {
         "DestinationFrame",
         "Destination",
         "This value specifies the destination frame that is used for the coordinate "
-        "transformation. This has to be a valid SPICE name"
+        "transformation. This has to be a valid SPICE name",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeFrameInfo = {

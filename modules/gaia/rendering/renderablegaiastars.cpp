@@ -71,7 +71,9 @@ namespace {
         "data, construct an Octree and render it. 'BinaryOctree' will read a constructed "
         "Octree from binary file and render full data. 'StreamOctree' will read an index "
         "file with full Octree structure and then stream nodes during runtime. (This "
-        "option is suited for bigger datasets)"
+        "option is suited for bigger datasets)",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderModeInfo = {
@@ -107,14 +109,18 @@ namespace {
         "LuminosityMultiplier",
         "Luminosity Multiplier",
         "Factor by which to multiply the luminosity with. [Works in Color and Motion "
-        "modes]"
+        "modes]",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MagnitudeBoostInfo = {
         "MagnitudeBoost",
         "Magnitude Boost",
         "Sets what percent of the star magnitude that will be used as boost to star "
-        "size. [Works only with billboards in Color and Motion modes]"
+        "size. [Works only with billboards in Color and Motion modes]",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo CutOffThresholdInfo = {
@@ -122,7 +128,9 @@ namespace {
         "Cut Off Threshold",
         "Set threshold for when to cut off star rendering. Stars closer than this "
         "threshold are given full opacity. Farther away, stars dim proportionally to the "
-        "4-logarithm of their distance"
+        "4-logarithm of their distance",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SharpnessInfo = {
@@ -212,26 +220,35 @@ namespace {
         "Column Names",
         "A list of strings with the names of all the columns that are to be read from "
         "the specified FITS file. No need to define if data already has been processed. "
-        "[Works only with FileReaderOption::Fits]"
+        "[Works only with FileReaderOption::Fits]",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumRenderedStarsInfo = {
         "NumRenderedStars",
         "Rendered Stars",
-        "The number of rendered stars in the current frame"
+        "The number of rendered stars in the current frame",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CpuRamBudgetInfo = {
         "CpuRamBudget",
         "CPU RAM Budget",
-        "Current remaining budget (bytes) on the CPU RAM for loading more node data files"
+        "Current remaining budget (bytes) on the CPU RAM for loading more node data "
+        "files",
+        // @VISIBILITY(3.33)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GpuStreamBudgetInfo = {
         "GpuStreamBudget",
         "GPU Stream Budget",
         "Current remaining memory budget [in number of chunks] on the GPU for streaming "
-        "additional stars"
+        "additional stars",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LodPixelThresholdInfo = {
@@ -245,14 +262,18 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MaxGpuMemoryPercentInfo = {
         "MaxGpuMemoryPercent",
         "Max GPU Memory",
-        "Sets the max percent of existing GPU memory budget that the streaming will use"
+        "Sets the max percent of existing GPU memory budget that the streaming will use",
+        // @VISIBILITY(3.33)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxCpuMemoryPercentInfo = {
         "MaxCpuMemoryPercent",
         "Max CPU Memory",
         "Sets the max percent of existing CPU memory budget that the streaming of files "
-        "will use"
+        "will use",
+        // @VISIBILITY(3.33)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterPosXInfo = {
@@ -313,7 +334,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ReportGlErrorsInfo = {
         "ReportGlErrors",
         "Report GL Errors",
-        "If set to true, any OpenGL errors will be reported if encountered"
+        "If set to true, any OpenGL errors will be reported if encountered",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableGaiaStars)]] Parameters {

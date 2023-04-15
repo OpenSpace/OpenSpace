@@ -65,28 +65,36 @@ namespace {
         "Enabled",
         "If this value is enabled, the layer will be used for the final composition of "
         "the planet. If this value is disabled, the layer will be ignored in the "
-        "composition"
+        "composition",
+        // @VISIBILITY(1.17)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
         "Reset",
         "Reset",
         "If this value is triggered, this layer will be reset. This will delete the "
-        "local cache for this layer and will trigger a fresh load of all tiles"
+        "local cache for this layer and will trigger a fresh load of all tiles",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RemoveInfo = {
         "Remove",
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
-        "layer before the next frame"
+        "layer before the next frame",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "If the 'Type' of this layer is a solid color, this value determines what this "
-        "solid color is"
+        "solid color is",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {

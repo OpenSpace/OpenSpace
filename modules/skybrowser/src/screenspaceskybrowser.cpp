@@ -55,7 +55,9 @@ namespace {
         "Display a copy of this sky browser at an additional position. This copy will "
         "not be interactive. The position is in RAE (Radius, Azimuth, Elevation) "
         "coordinates or Cartesian, depending on if the browser uses RAE or Cartesian "
-        "coordinates"
+        "coordinates",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {

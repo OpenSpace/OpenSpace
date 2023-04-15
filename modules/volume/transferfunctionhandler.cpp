@@ -60,7 +60,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SaveTransferFunctionInfo = {
         "SaveTransferFunction",
         "Save Transfer Function",
-        "Save your transfer function"
+        "Save your transfer function",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 

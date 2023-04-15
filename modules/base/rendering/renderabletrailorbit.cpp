@@ -111,7 +111,9 @@ namespace {
        "RenderableType",
        "RenderableType",
        "This value specifies if the orbit should be rendered in the Background,"
-       "Opaque, Transparent, or Overlay rendering step. Default is Transparent"
+       "Opaque, Transparent, or Overlay rendering step. Default is Transparent",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {

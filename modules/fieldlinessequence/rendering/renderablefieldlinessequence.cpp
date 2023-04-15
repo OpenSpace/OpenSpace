@@ -58,7 +58,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
         "ColorQuantity",
         "Quantity to Color By",
-        "Quantity used to color lines if the 'By Quantity' color method is selected"
+        "Quantity used to color lines if the 'By Quantity' color method is selected",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo ColorMinMaxInfo = {
         "ColorQuantityMinMax",
@@ -75,7 +77,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
         "Color",
         "Uniform Line Color",
-        "The uniform color of lines shown when 'Color Method' is set to 'Uniform'"
+        "The uniform color of lines shown when 'Color Method' is set to 'Uniform'",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
@@ -116,13 +120,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
         "FlowColor",
         "Flow Color",
-        "Color of particles flow direction indication"
+        "Color of particles flow direction indication",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
         "Flow Direction",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
-        "illustrate magnetic flow"
+        "illustrate magnetic flow",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo FlowReversedInfo = {
         "Reversed",
@@ -133,12 +141,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
         "ParticleSize",
         "Particle Size",
-        "Size of the particles"
+        "Size of the particles",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
         "ParticleSpacing",
         "Particle Spacing",
-        "Spacing inbetween particles"
+        "Spacing inbetween particles",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
         "Speed",
@@ -170,7 +182,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the fieldlines"
+        "This value specifies the line width of the fieldlines",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
         "TimeJumpToStart",

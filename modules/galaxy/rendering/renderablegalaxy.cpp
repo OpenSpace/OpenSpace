@@ -103,14 +103,18 @@ namespace {
         "Absorption Multiplier",
         "A unit-less scale factor for the probability of dust absorbing a light "
         "particle. The amount of absorption determines the spectrum of the light that is "
-        "emitted from the galaxy"
+        "emitted from the galaxy",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EmissionMultiplyInfo = {
         "EmissionMultiply",
         "Emission Multiplier",
         "A unit-less scale factor for the amount of light being emitted by dust in the "
-        "galaxy"
+        "galaxy",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
@@ -142,7 +146,9 @@ namespace {
     {
         "Downscale",
         "Downscale Factor Volume Rendering",
-        "This value sets the downscaling factor when rendering the current volume"
+        "This value sets the downscaling factor when rendering the current volume",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberOfRayCastingStepsInfo =

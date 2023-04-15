@@ -52,28 +52,36 @@ namespace {
         "SourceType",
         "Source Type",
         "The type of position that is used as the source to calculate the distance. The "
-        "default value is 'Camera'"
+        "default value is 'Camera'",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
         "SourceNodeName",
         "Source Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the source for computing the distance"
+        "node that is to be used as the source for computing the distance",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
         "Destination Type",
         "The type of position that is used as the destination to calculate the distance. "
-        "The default value for this is 'Focus'"
+        "The default value for this is 'Focus'",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
         "DestinationNodeName",
         "Destination Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the destination for computing the distance"
+        "node that is to be used as the destination for computing the distance",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {

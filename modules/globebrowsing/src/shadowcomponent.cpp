@@ -57,20 +57,26 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SaveDepthTextureInfo = {
         "SaveDepthTextureInfo",
         "Save Depth Texture",
-        "Debug"
+        "Debug",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceFractionInfo = {
         "DistanceFraction",
         "Distance Fraction",
         "Distance fraction of original distance from light source to the globe to be "
-        "considered as the new light source distance"
+        "considered as the new light source distance",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DepthMapSizeInfo = {
         "DepthMapSize",
         "Depth Map Size",
-        "The depth map size in pixels. You must entry the width and height values"
+        "The depth map size in pixels. You must entry the width and height values",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr GLfloat ShadowBorder[] = { 1.f, 1.f, 1.f, 1.f };

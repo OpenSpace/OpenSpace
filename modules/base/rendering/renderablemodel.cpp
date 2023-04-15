@@ -95,19 +95,25 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient Intensity",
-        "A multiplier for ambient lighting"
+        "A multiplier for ambient lighting",
+        // @VISIBILITY(2.4)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
         "Diffuse Intensity",
-        "A multiplier for diffuse lighting"
+        "A multiplier for diffuse lighting",
+        // @VISIBILITY(2.4)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
         "Specular Intensity",
-        "A multiplier for specular lighting"
+        "A multiplier for specular lighting",
+        // @VISIBILITY(2.4)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadingInfo = {
@@ -121,7 +127,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnableFaceCullingInfo = {
         "EnableFaceCulling",
         "Enable Face Culling",
-        "Enable OpenGL automatic face culling optimization"
+        "Enable OpenGL automatic face culling optimization",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
@@ -135,7 +142,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
         "RotationVector",
         "Rotation Vector",
-        "Rotation Vector using degrees"
+        "Rotation Vector using degrees",
+        // @VISIBILITY(3.75)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {

@@ -57,7 +57,9 @@ namespace {
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
         "that is applied to this sphere. This image is expected to be an equirectangular "
-        "projection"
+        "projection",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
@@ -78,7 +80,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
-        "This value specifies the number of segments that the sphere is separated in"
+        "This value specifies the number of segments that the sphere is separated in",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {

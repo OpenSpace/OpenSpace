@@ -70,7 +70,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "Font size for the rendering labels. This is different fromt text size"
+        "Font size for the rendering labels. This is different fromt text size",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
@@ -83,20 +85,26 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "LabelsSize",
         "Labels Size",
-        "This value affects the size scale of the labels"
+        "This value affects the size scale of the labels",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HeightOffsetInfo = {
         "HeightOffset",
         "Height Offset",
         "This value moves the label away from the globe surface by the specified "
-        "distance (in meters)"
+        "distance (in meters)",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The text color of the labels"
+        "The text color of the labels",
+        // @VISIBILITY(1.2)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeDistancesInfo = {
@@ -141,7 +149,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AlignmentOptionInfo = {
         "AlignmentOption",
         "Alignment Option",
-        "Labels are aligned horizontally or circularly related to the planet"
+        "Labels are aligned horizontally or circularly related to the planet",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(GlobeLabelsComponent)]] Parameters {

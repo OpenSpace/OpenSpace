@@ -76,7 +76,8 @@ namespace {
         "ScreenSizeRadius",
         "ScreenSizeRadius",
         "The screen size of the radius of the node",
-        openspace::properties::Property::Visibility::Hidden
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
@@ -112,14 +113,18 @@ namespace {
         "ApproachFactor",
         "Approach Factor",
         "This value is a multiplication factor for the interaction sphere that "
-        "determines when the camera is 'approaching' the scene graph node"
+        "determines when the camera is 'approaching' the scene graph node",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReachFactorInfo = {
         "ReachFactor",
         "Reach Factor",
         "This value is a multiplication factor for the interaction sphere that "
-        "determines when the camera has 'reached' the scene graph node"
+        "determines when the camera has 'reached' the scene graph node",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
@@ -158,7 +163,8 @@ namespace {
         "Show Debug Sphere",
         "If enabled the bounding sphere of this scene graph node is rendered as a debug "
         "method",
-        openspace::properties::Property::Visibility::Developer
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo

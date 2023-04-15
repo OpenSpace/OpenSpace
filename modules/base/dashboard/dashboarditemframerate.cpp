@@ -48,7 +48,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FrametimeInfo = {
         "FrametimeType",
         "Type of the frame time display",
-        "This value determines the units in which the frame time is displayed"
+        "This value determines the units in which the frame time is displayed",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ClearCacheInfo = {

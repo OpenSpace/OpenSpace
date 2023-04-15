@@ -55,14 +55,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
-        "Specifies how often to sample on the raycaster. Lower step -> higher resolution"
+        "Specifies how often to sample on the raycaster. Lower step -> higher resolution",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid Type",
         "Spherical or Cartesian grid",
-        openspace::properties::Property::Visibility::Developer
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
@@ -112,19 +115,25 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BrightnessInfo = {
         "Brightness",
         "Brightness",
-        "The volume renderer's general brightness"
+        "The volume renderer's general brightness",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo rNormalizationInfo = {
         "RNormalization",
         "Radius normalization",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo rUpperBoundInfo = {
         "RUpperBound",
         "Radius upper bound",
-        "Limit the volume's radius"
+        "Limit the volume's radius",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {

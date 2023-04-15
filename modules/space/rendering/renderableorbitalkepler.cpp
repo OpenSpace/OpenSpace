@@ -58,7 +58,9 @@ namespace {
         "A segment quality value for the orbital trail. A value from 1 (lowest) to "
         "10 (highest) that controls the number of line segments in the rendering of the "
         "orbital trail. This does not control the direct number of segments because "
-        "these automatically increase according to the eccentricity of the orbit"
+        "these automatically increase according to the eccentricity of the orbit",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -80,7 +82,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
         "Trail Fade",
-        "This value determines how fast the trail fades and is an appearance property."
+        "This value determines how fast the trail fades and is an appearance property.",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {

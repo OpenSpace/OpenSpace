@@ -29,20 +29,26 @@ namespace {
         "SetDefault",
         "Set Default",
         "If this value is triggered it will reset all of these values to their default "
-        "values"
+        "values",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma",
-        "This value is used as an exponent to adjust the color for each tile"
+        "This value is used as an exponent to adjust the color for each tile",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplierInfo = {
         "Multiplier",
         "Multiplier",
         "This value is used as a multiplier to adjust the color applied after taking the "
-        "gamma value as an exponent"
+        "gamma value as an exponent",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {

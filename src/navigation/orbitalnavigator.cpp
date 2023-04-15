@@ -53,28 +53,36 @@ namespace {
         "Anchor",
         "The name of the scene graph node that is the origin of the camera interaction. "
         "The camera follows, orbits and dollies towards this node. Any scene graph node "
-        "can be the anchor node"
+        "can be the anchor node",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AimInfo = {
         "Aim",
         "Aim",
         "The name of the scene graph node that is the aim of the camera. The camera "
-        "direction is relative to the vector from the camera position to this node"
+        "direction is relative to the vector from the camera position to this node",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RetargetAnchorInfo = {
         "RetargetAnchor",
         "Retarget Anchor",
         "When triggered, this property starts an interpolation to reset the "
-        "camera direction to the anchor node"
+        "camera direction to the anchor node",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RetargetAimInfo = {
         "RetargetAim",
         "Retarget Aim",
         "When triggered, this property starts an interpolation to reset the "
-        "camera direction to the aim node"
+        "camera direction to the aim node",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RollFrictionInfo = {
@@ -82,7 +90,9 @@ namespace {
         "Roll Friction",
         "If this is enabled, a small friction is applied to the rolling part of the "
         "camera motion, thus slowing it down within a small time period. If this value "
-        "is disabled, the camera will roll forever"
+        "is disabled, the camera will roll forever",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationalFrictionInfo = {
@@ -90,7 +100,9 @@ namespace {
         "Rotational Friction",
         "If this is enabled, a small friction is applied to the rotational part of the "
         "camera motion, thus slowing it down within a small time period. If this value "
-        "is disabled, the camera will rotate forever"
+        "is disabled, the camera will rotate forever",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZoomFrictionInfo = {
@@ -98,7 +110,9 @@ namespace {
         "Zoom Friction",
         "If this is enabled, a small friction is applied to the zoom part of the camera "
         "motion, thus slowing it down within a small time period. If this value is "
-        "disabled, the camera will zoom in or out forever"
+        "disabled, the camera will zoom in or out forever",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
@@ -186,7 +200,9 @@ namespace {
         "Invert Left and Right Mouse Buttons",
         "If this value is 'false', the left mouse button causes the camera to rotate "
         "around the object and the right mouse button causes the zooming motion. If this "
-        "value is 'true', these two functionalities are reversed"
+        "value is 'true', these two functionalities are reversed",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -217,7 +233,9 @@ namespace {
         "Stereoscopic Depth of the Surface in Focus",
         "Set the stereoscopically perceived distance (in meters) to the closest point "
         "out of the surface of the anchor and the center of the aim node. Only used if "
-        "UseAdaptiveStereoscopicDepthInfo is set to true"
+        "UseAdaptiveStereoscopicDepthInfo is set to true",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ConstantVelocityFlight = {
@@ -225,14 +243,18 @@ namespace {
         "Constant Velocitry Flight",
         "If this value is enabled, the camera motion will not be affected by the "
         "distance of the camera to the surface of a planet. When enabling this setting "
-        "consider adjusting the mouse sensitivity to a lower value"
+        "consider adjusting the mouse sensitivity to a lower value",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyIdleBehaviorInfo = {
         "ApplyIdleBehavior",
         "Apply Idle Behavior",
         "When set to true, the chosen idle behavior will be applied to the camera, "
-        "moving the camera accordingly"
+        "moving the camera accordingly",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorInfo = {
@@ -283,7 +305,9 @@ namespace {
         "If set to true, the idle behavior is aborted on camera interaction. If false, "
         "the behavior will be reapplied after the interaction. Examples of camera "
         "interaction are: changing the anchor node, starting a camera path or session "
-        "recording playback, or navigating manually using an input device"
+        "recording playback, or navigating manually using an input device",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -292,7 +316,9 @@ namespace {
         "DampenInterpolationTime",
         "Start/End Dampen Interpolation Time",
         "The time to interpolate to/from full speed when an idle behavior is triggered "
-        "or canceled, in seconds"
+        "or canceled, in seconds",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LimitZoomInfo = {
@@ -308,14 +334,17 @@ namespace {
         "EnabledMinimumAllowedDistance",
         "Enable minimum allowed distance limit",
         "Enables or disables that the camera cannot go closer to an object than "
-        "the set minimum allowed distance"
+        "the set minimum allowed distance",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
         "MinimumAllowedDistance",
         "Minimum Allowed Distance",
         "The limit of how close the camera can get to an object. The distance is given "
-        "in meters above the surface"
+        "in meters above the surface",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledMaximumDistanceInfo = {

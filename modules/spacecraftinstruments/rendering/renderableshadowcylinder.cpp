@@ -59,7 +59,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShadowColorInfo = {
         "ShadowColor",
         "Shadow Color",
-        "This value determines the color that is used for the shadow cylinder"
+        "This value determines the color that is used for the shadow cylinder",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
@@ -106,7 +108,9 @@ namespace {
         "Aberration",
         "Aberration",
         "This value determines the aberration method that is used to compute the shadow "
-        "cylinder"
+        "cylinder",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {

@@ -99,25 +99,33 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The label text color"
+        "The label text color",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "The font size (in points) for the label"
+        "The font size (in points) for the label",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value affects the size scale of the label"
+        "This value affects the size scale of the label",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextInfo = {
         "Text",
         "Text",
-        "The text that will be displayed on screen"
+        "The text that will be displayed on screen",
+        // @VISIBILITY(1.8)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
@@ -130,13 +138,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
-        "Transformation matrix to be applied to the label"
+        "Transformation matrix to be applied to the label",
+        // @VISIBILITY(3.6)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrientationOptionInfo = {
         "OrientationOption",
         "Orientation Option",
-        "Label orientation rendering mode"
+        "Label orientation rendering mode",
+        // @VISIBILITY(2.8)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableFadingEffectInfo = {

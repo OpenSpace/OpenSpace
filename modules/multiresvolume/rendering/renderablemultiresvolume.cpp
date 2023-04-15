@@ -78,25 +78,33 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CurrentTimeInfo = {
         "CurrentTime",
         "Current Time",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MemoryBudgetInfo = {
         "MemoryBudget",
         "Memory Budget",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StreamingBudgetInfo = {
         "StreamingBudget",
         "Streaming Budget",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseGlobalTimeInfo = {
         "UseGlobalTime",
         "Global Time",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LoopInfo = {
@@ -109,7 +117,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SelectorNameInfo = {
         "Selector",
         "Brick Selector",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StatsToFileInfo = {

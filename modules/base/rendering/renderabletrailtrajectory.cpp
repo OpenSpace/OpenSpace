@@ -84,7 +84,9 @@ namespace {
         "ShowFullTrail",
         "Render Full Trail",
         "If this value is set to 'true', the entire trail will be rendered; if it is "
-        "'false', only the trail until the current time in the application will be shown"
+        "'false', only the trail until the current time in the application will be shown",
+        // @VISIBILITY(1.25)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SweepChunkSizeInfo = {
@@ -92,7 +94,9 @@ namespace {
         "Sweep Chunk Size",
         "The number of vertices that will be calculated each frame whenever the trail "
         "needs to be recalculated. "
-        "A greater value will result in more calculations per frame."
+        "A greater value will result in more calculations per frame.",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrailTrajectory)]] Parameters {

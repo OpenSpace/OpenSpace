@@ -37,7 +37,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
         "Intensity",
         "Intensity",
-        "The intensity of this light source"
+        "The intensity of this light source",
+        // @VISIBILITY(1.75)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NodeInfo = {

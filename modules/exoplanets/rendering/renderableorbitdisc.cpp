@@ -82,7 +82,9 @@ namespace {
         "MultiplyColor",
         "Multiply Color",
         "If set, the disc's texture is multiplied with this color. Useful for applying a "
-        "color grayscale images"
+        "color grayscale images",
+        // @VISIBILITY(1.5)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {

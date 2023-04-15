@@ -42,7 +42,9 @@ namespace {
         "Enabled",
         "If this value is 'true', all the machinery of this rotation is used, of it is "
         "'false', it provides the ability to change its attributes without risking some "
-        "undefined behavior"
+        "undefined behavior",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo XAxisTypeInfo = {

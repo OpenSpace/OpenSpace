@@ -51,13 +51,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The line width of the constellation"
+        "The line width of the constellation",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation Selection",
-        "The constellations that are selected are displayed on the celestial sphere"
+        "The constellations that are selected are displayed on the celestial sphere",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     const static openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {

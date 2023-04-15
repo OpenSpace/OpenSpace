@@ -101,7 +101,9 @@ namespace {
         "Rotation Speed Factor (Linear Path)",
         "Affects how fast the camera rotates to the target rotation during a linear "
         "path. A value of 1 means that the camera will rotate 90 degrees in about 5 "
-        "seconds. A value of 2 means twice that fast, and so on"
+        "seconds. A value of 2 means twice that fast, and so on",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
@@ -117,7 +119,9 @@ namespace {
         "RelevantNodeTags",
         "Relevant Node Tags",
         "List of tags for the nodes that are relevant for path creation, for example "
-        "when avoiding collisions"
+        "when avoiding collisions",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 

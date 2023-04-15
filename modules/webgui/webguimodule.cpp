@@ -44,7 +44,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ServerProcessEnabledInfo = {
         "ServerProcessEnabled",
         "Enable Server Process",
-        "Enable the node js based process used to serve the Web GUI"
+        "Enable the node js based process used to serve the Web GUI",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddressInfo = {
@@ -72,7 +74,9 @@ namespace {
     {
         "ServerProcessEntryPoint",
         "Server Process Entry Point",
-        "The node js command to invoke"
+        "The node js command to invoke",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DirectoriesInfo = {
@@ -81,13 +85,17 @@ namespace {
         "Directories from which to to serve static content, as a string list "
         "with entries expressed as pairs, where every odd is the endpoint name and every "
         "even is the directory",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DefaultEndpointInfo = {
         "DefaultEndpoint",
         "Default Endpoint",
         "The 'default' endpoint. The server will redirect http requests from / to "
-        "/<DefaultEndpoint>"
+        "/<DefaultEndpoint>",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ServedDirectoriesInfo = {
