@@ -4,7 +4,7 @@ local data = asset.syncedResource({
   Name = "Example Globe Video",
   Type = "UrlSynchronization",
   Identifier = "example_globe_video",
-  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/test-video.mp4"
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/video/test-video.mp4"
 })
 
 
