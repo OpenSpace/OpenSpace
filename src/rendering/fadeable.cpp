@@ -33,7 +33,8 @@ namespace {
         "Opacity",
         "Opacity",
         "This value determines the opacity of this object. A value of 0 means "
-        "completely transparent"
+        "completely transparent",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
@@ -45,7 +46,7 @@ namespace {
         "components of the system programmatically",
         // The Developer mode should be used once the properties in the UI listen to this
         // openspace::properties::Property::Visibility::Developer
-        openspace::properties::Property::Visibility::Hidden
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 

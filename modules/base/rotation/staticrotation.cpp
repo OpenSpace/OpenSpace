@@ -32,7 +32,9 @@ namespace {
         "Rotation",
         "Rotation",
         "This value is the used as a 3x3 rotation matrix that is applied to the scene "
-        "graph node that this transformation is attached to relative to its parent"
+        "graph node that this transformation is attached to relative to its parent",
+        // @VISIBILITY(3.0)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     // Conversion from rotation matrix to euler angles, given that the rotation is a pure

@@ -35,7 +35,9 @@ namespace {
         "TimeFrames",
         "Time Frames",
         "A vector of time frames to combine into one. The time frame is active when any "
-        "of the contained time frames are, but not in gaps between contained time frames"
+        "of the contained time frames are, but not in gaps between contained time frames",
+        // @VISIBILITY(3.75)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(TimeFrameUnion)]] Parameters {

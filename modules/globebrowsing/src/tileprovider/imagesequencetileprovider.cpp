@@ -33,20 +33,25 @@ namespace {
         "Index",
         "Index",
         "The index into the list of images that is used to pick the currently displayed "
-        "image"
+        "image",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo CurrentImageInfo = {
         "CurrentImage",
         "Current Image",
-        "The read-only value of the currently selected image"
+        "The read-only value of the currently selected image",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FolderPathInfo = {
         "FolderPath",
         "Folder Path",
         "The path that is used to look for images for this image provider. The path must "
-        "point to an existing folder that contains images"
+        "point to an existing folder that contains images",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ImageSequenceTileProvider)]] Parameters {

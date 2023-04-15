@@ -42,73 +42,90 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Decides if the GUI for this module should be enabled"
+        "Decides if the GUI for this module should be enabled",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowTitleInGuiBrowserInfo = {
         "ShowTitleInGuiBrowser",
         "Show Title in Gui Browser",
         "If true, the name of the currently selected sky browser is shown in the WebGUI "
-        "browser"
+        "browser",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AllowRotationInfo = {
         "AllowCameraRotation",
         "Allow Camera Rotation",
         "Toggles if the camera should rotate to look at the sky target if it is going "
-        "outside of the current field of view"
+        "outside of the current field of view",
+        // @VISIBILITY(1.75)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CameraRotSpeedInfo = {
         "CameraRotationSpeed",
         "Camera Rotation Speed",
         "The speed of the rotation of the camera when the camera rotates to look at a "
-        "coordinate which is outside of the field of view"
+        "coordinate which is outside of the field of view",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetSpeedInfo = {
         "TargetAnimationSpeed",
         "Target Animation Speed",
-        "This determines the speed of the animation of the sky target"
+        "This determines the speed of the animation of the sky target",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrowserSpeedInfo = {
         "BrowserAnimationSpeed",
         "Field of View Animation Speed",
-        "This determines the speed of the animation of the field of view in the browser"
+        "This determines the speed of the animation of the field of view in the browser",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HideWithGuiInfo = {
         "HideTargetsBrowsersWithGui",
         "Hide Targets and Browsers with GUI",
         "If checked, the targets and browsers will be disabled when the sky browser "
-        "panel is minimized"
+        "panel is minimized",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo InverseZoomInfo = {
         "InverseZoomDirection",
         "Inverse Zoom Direction",
         "If checked, the zoom direction of the scroll over the AAS WWT browser will be "
-        "inversed"
+        "inversed",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SynchronizeAimInfo = {
         "SynchronizeAim",
         "Synchronize Aim",
-        "If checked, the target and the browser will have synchronized aim."
+        "If checked, the target and the browser will have synchronized aim.",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpaceCraftTimeInfo = {
         "SpaceCraftAnimationTime",
         "Space Craft Animation Time",
         "Sets the duration (in seconds) of the animation of the space craft when it is "
-        "pointed to where the target is aiming"
+        "pointed to where the target is aiming",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ImageCollectionInfo = {
        "WwtImageCollectionUrl",
        "AAS WorldWide Telescope Image Collection Url",
-       "The url of the image collection which is loaded into AAS WorldWide Telescope"
+       "The url of the image collection which is loaded into AAS WorldWide Telescope",
+       // @VISIBILITY(3.75)
+       openspace::properties::Property::Visibility::AdvancedUser
     };
 
 

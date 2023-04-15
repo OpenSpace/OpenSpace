@@ -43,50 +43,61 @@ namespace {
         "Enabled",
         "Is Enabled",
         "This setting determines whether the labels will be visible or not. They are "
-        "disabled per default"
+        "disabled per default",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "File",
-        "The speck label file with the data for the labels"
+        "The speck label file with the data for the labels",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The color of the labels"
+        "The color of the labels",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "The size of the labels in pixels"
+        "The size of the labels in pixels",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "Font size for the labels. This is different from the text size"
+        "Font size for the labels. This is different from the text size",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxInfo = {
         "MinMaxSize",
         "Min/Max Size",
-        "The minimum and maximum size (in pixels) of the labels"
+        "The minimum and maximum size (in pixels) of the labels",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
         "FaceCamera",
         "Face Camera",
         "If enabled, the labels will be rotated to face the camera. For non-linear "
-        "display rendering (for example fisheye) this should be set to false."
+        "display rendering (for example fisheye) this should be set to false.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
-        "Transformation matrix to be applied to the labels"
+        "Transformation matrix to be applied to the labels",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {

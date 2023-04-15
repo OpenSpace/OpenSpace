@@ -45,26 +45,31 @@ namespace {
         "StartNode",
         "Start Node",
         "The identifier of the node the line starts from. Defaults to 'Root' if not "
-        "specified."
+        "specified.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
         "EndNode",
         "End Node",
         "The identifier of the node the line ends at. Defaults to 'Root' if not "
-        "specified."
+        "specified.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line"
+        "This value determines the RGB color for the line",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width"
+        "This value specifies the line width",
+        // @VISIBILITY(1.75)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartOffsetInfo = {

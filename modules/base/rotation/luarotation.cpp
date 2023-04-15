@@ -43,7 +43,9 @@ namespace {
         "'rotation' that takes the current simulation time in seconds past the J2000 "
         "epoch as the first argument, the current wall time as milliseconds past the "
         "J2000 epoch as the second argument and computes the rotation returned as 9 "
-        "values"
+        "values",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(LuaRotation)]] Parameters {

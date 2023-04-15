@@ -112,7 +112,8 @@ namespace {
         "ShowChunkEdges",
         "Show chunk edges",
         "If this value is set to 'true', the borders between chunks are shown using a "
-        "red highlight"
+        "red highlight",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo LevelProjectedAreaInfo = {
@@ -120,14 +121,18 @@ namespace {
         "Level by projected area (else distance)",
         "If this value is set to 'true', the tile level is determined by the area "
         "projected on screen. If it is 'false', the distance to the center of the tile "
-        "is used instead"
+        "is used instead",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResetTileProviderInfo = {
         "ResetTileProviders",
         "Reset tile providers",
         "If this property is triggered, all tile provides for the globe are reset and "
-        "data is reloaded from scratch"
+        "data is reloaded from scratch",
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelSpaceRenderingInfo = {
@@ -136,7 +141,8 @@ namespace {
         "This value determines the tile level that is used as the cut off between "
         "rendering tiles using the globe model rendering vs the flat in-game rendering "
         "method. This value is a tradeoff between not having precision errors in the "
-        "rendering and represting a tile as flat or curved"
+        "rendering and represting a tile as flat or curved",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DynamicLodIterationCountInfo =
@@ -145,7 +151,8 @@ namespace {
         "Data availability checks before LOD factor impact",
         "The number of checks that have to fail/succeed in a row before the dynamic "
         "level-of-detail adjusts the actual level-of-detail up or down during a session "
-        "recording"
+        "recording",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
@@ -153,7 +160,8 @@ namespace {
         "Perform shading",
         "This value determines whether there should be lighting applied to the surface "
         "of the globe. Note that if there is an atmosphere attached to the planet, there "
-        "is a separate setting to control the shadowing induced by the atmosphere part"
+        "is a separate setting to control the shadowing induced by the atmosphere part",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AccurateNormalsInfo = {
@@ -161,25 +169,32 @@ namespace {
         "Use Accurate Normals",
         "This value determines whether higher-accuracy normals should be used in the "
         "rendering. These normals are calculated based on the height field information "
-        "and are thus only available if the planet has a height map"
+        "and are thus only available if the planet has a height map",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EclipseInfo = {
         "Eclipse",
         "Eclipse",
-        "Enables/Disable Eclipse shadows"
+        "Enables/Disable Eclipse shadows",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
         "EclipseHardShadows",
         "Eclipse Hard Shadows",
-        "Enables the rendering of eclipse shadows using hard shadows"
+        "Enables the rendering of eclipse shadows using hard shadows",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowMappingInfo = {
         "ShadowMapping",
         "Shadow Mapping",
-        "Enables shadow mapping algorithm. Used by renderable rings too"
+        "Enables shadow mapping algorithm. Used by renderable rings too",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderAtDistanceInfo = {
@@ -187,21 +202,25 @@ namespace {
         "Render at Distance",
         "Tells the rendering engine not to perform distance based performance culling "
         "for this globe. Turning this property on will let the globe to be seen at far "
-        "away distances when normally it would be hidden"
+        "away distances when normally it would be hidden",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
         "ZFightingPercentage",
         "Z-Fighting Percentage",
         "The percentage of the correct distance to the surface being shadowed. Possible "
-        "values: [0.0, 1.0]"
+        "values: [0.0, 1.0]",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberShadowSamplesInfo = {
         "NumberShadowSamples",
         "Number of Shadow Samples",
         "The number of samples used during shadow mapping calculation (Percentage Closer "
-        "Filtering)"
+        "Filtering)",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetLodScaleFactorInfo = {
@@ -209,33 +228,39 @@ namespace {
         "Target Level of Detail Scale Factor",
         "Determines the targeted level-of-detail of the tiles for this globe. A higher "
         "value means that the tiles rendered are a higher resolution for the same "
-        "distance of the camera to the planet"
+        "distance of the camera to the planet",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CurrentLodScaleFactorInfo = {
         "CurrentLodScaleFactor",
         "Current Level of Detail Scale Factor (Read Only)",
         "The currently used scale factor whose target value is deteremined by "
-        "'TargetLodScaleFactor'"
+        "'TargetLodScaleFactor'",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrenNayarRoughnessInfo = {
         "OrenNayarRoughness",
         "orenNayarRoughness",
-        "The roughness factor that is used for the Oren-Nayar lighting mode"
+        "The roughness factor that is used for the Oren-Nayar lighting mode",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient Intensity",
-        "The intensity factor for the ambient light used for light shading"
+        "The intensity factor for the ambient light used for light shading",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo NActiveLayersInfo = {
         "NActiveLayers",
         "Number of active layers",
         "This is the number of currently active layers, if this value reaches the "
-        "maximum, bad things will happen"
+        "maximum, bad things will happen",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableGlobe)]] Parameters {

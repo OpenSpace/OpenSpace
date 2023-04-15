@@ -34,13 +34,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "RotationAxis",
         "Rotation Axis",
-        "This value is the rotation axis around which the object will rotate"
+        "This value is the rotation axis around which the object will rotate",
+        // @VISIBILITY(3.33)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationRateInfo = {
         "RotationRate",
         "Rotation Rate",
-        "This value determines the number of revolutions per in-game second"
+        "This value determines the number of revolutions per in-game second",
+        // @VISIBILITY(3.33)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ConstantRotation)]] Parameters {
