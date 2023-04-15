@@ -48,6 +48,10 @@ namespace {
     constexpr double AngleEpsilon = 1e-7;
     constexpr double DistanceRatioAimThreshold = 1e-4;
 
+    constexpr std::string_view IdleKeyOrbit = "Orbit";
+    constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
+    constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
+
     constexpr openspace::properties::Property::PropertyInfo AnchorInfo = {
         "Anchor",
         "Anchor",
@@ -271,14 +275,18 @@ namespace {
         "ShouldTriggerWhenIdle",
         "Should Trigger When Idle",
         "If true, the chosen idle behavior will trigger automatically after a certain "
-        "time (see 'IdleWaitTime' property)"
+        "time (see 'IdleWaitTime' property)",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleWaitTimeInfo = {
         "IdleWaitTime",
         "Idle Wait Time",
         "The time (seconds) until idle behavior starts, if no camera interaction "
-        "has been performed. Note that friction counts as camera interaction"
+        "has been performed. Note that friction counts as camera interaction",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorSpeedInfo = {
@@ -295,7 +303,9 @@ namespace {
         "Invert",
         "If true, the direction of the idle behavior motion will be inverted compared "
         "to the default. For example, the 'Orbit' option rotates to the right per "
-        "default, and will rotate to the left when inverted"
+        "default, and will rotate to the left when inverted",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AbortOnCameraInteractionInfo =
@@ -351,19 +361,19 @@ namespace {
         "EnableMaximumAllowedDistance",
         "Enable Maximum Allowed Distance limit",
         "Enables or disables that the camera cannot go further away from an object than "
-        "the set maximum allowed distance"
+        "the set maximum allowed distance",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaximumDistanceInfo = {
         "MaximumAllowedDistance",
         "Maximum Allowed Distance",
         "The limit of how far away the camera can get from an object. The distance is "
-        "given in meters above the surface"
+        "given in meters above the surface",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
-
-    constexpr std::string_view IdleKeyOrbit = "Orbit";
-    constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
-    constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
 } // namespace
 
 namespace openspace::interaction {

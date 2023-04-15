@@ -74,7 +74,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Enable/Disable Rings"
+        "Enable/Disable Rings",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {

@@ -43,7 +43,9 @@ namespace {
         "Enabled",
         "Is Enabled",
         "This setting determines whether the labels will be visible or not. They are "
-        "disabled per default"
+        "disabled per default",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
@@ -93,7 +95,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
-        "Transformation matrix to be applied to the labels"
+        "Transformation matrix to be applied to the labels",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {

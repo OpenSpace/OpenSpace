@@ -67,7 +67,8 @@ namespace {
         "relatively spherical objects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
-}
+} // namespace openspace
+
 namespace openspace {
 
 TouchModule::TouchModule()

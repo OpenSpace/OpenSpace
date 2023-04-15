@@ -54,6 +54,13 @@
 namespace {
     constexpr std::string_view _loggerCat = "ShadowComponent";
 
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "Enable/Disable Shadows",
+        openspace::properties::Property::Visibility::User
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SaveDepthTextureInfo = {
         "SaveDepthTextureInfo",
         "Save Depth Texture",
@@ -164,7 +171,7 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "ShadowsComponent" })
     , _saveDepthTexture(SaveDepthTextureInfo)
     , _distanceFraction(DistanceFractionInfo, 20, 1, 10000)
-    , _enabled({ "Enabled", "Enabled", "Enable/Disable Shadows" }, true)
+    , _enabled(EnabledInfo, true)
 {
     using ghoul::filesystem::File;
 

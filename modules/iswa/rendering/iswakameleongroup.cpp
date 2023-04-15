@@ -48,7 +48,6 @@ namespace {
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
-
 } // namespace
 
 namespace openspace{

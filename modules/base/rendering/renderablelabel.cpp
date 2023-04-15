@@ -154,7 +154,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnableFadingEffectInfo = {
         "EnableFading",
         "Enable/Disable Fade-in Effect",
-        "Enable/Disable the Fade-in effect"
+        "Enable/Disable the Fade-in effect",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeWidthsInfo = {

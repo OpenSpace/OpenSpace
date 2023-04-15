@@ -136,13 +136,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SharpnessInfo = {
         "Sharpness",
         "Sharpness",
-        "Adjust star sharpness. [Works only with billboards]"
+        "Adjust star sharpness. [Works only with billboards]",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BillboardSizeInfo = {
         "BillboardSize",
         "Billboard Size",
-        "Set the billboard size of all stars. [Works only with billboards]"
+        "Set the billboard size of all stars. [Works only with billboards]",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CloseUpBoostDistInfo = {

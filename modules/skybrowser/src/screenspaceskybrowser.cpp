@@ -79,7 +79,9 @@ namespace {
         "PointSpacecraft",
         "Point Spacecraft",
         "If checked, spacecrafts will point towards the coordinate of an image upon "
-        "selection."
+        "selection.",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {

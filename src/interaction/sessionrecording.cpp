@@ -63,6 +63,8 @@
 namespace {
     constexpr std::string_view _loggerCat = "SessionRecording";
 
+    constexpr bool UsingTimeKeyframes = false;
+
     constexpr openspace::properties::Property::PropertyInfo RenderPlaybackInfo = {
         "RenderInfo",
         "Render Playback Information",
@@ -78,8 +80,6 @@ namespace {
         "computed values are used instead",
         openspace::properties::Property::Visibility::Hidden
     };
-
-    constexpr bool UsingTimeKeyframes = false;
 } // namespace
 
 namespace openspace::interaction {
