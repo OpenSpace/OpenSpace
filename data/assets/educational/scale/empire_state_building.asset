@@ -2,68 +2,67 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
 local modelFolder = asset.syncedResource({
-  Name = "Scale Eiffel Tower",
+  Name = "Scale Empire State Building",
   Type = "HttpSynchronization",
-  Identifier = "scale_model_eiffel_tower",
+  Identifier = "scale_model_empire_state",
   Version = 1
 })
 
 local scaleModel = {
-  Identifier = "Scale_EiffelTower",
+  Identifier = "Scale_EmpireStateBuilding",
   Parent = earthAsset.Earth.Identifier,
   --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 48.85824,
-      Longitude = 2.29448,
+      Latitude = 40.748441,
+      Longitude = -73.985664,
       Altitude = 0.0,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 48.85824,
-      Longitude = 2.29448,
+      Latitude = 40.748441,
+      Longitude = -73.985664,
       UseHeightmap = false
     },
     Scale = {
       Type = "StaticScale",
-      Scale = 4.38
+      Scale = 0.5
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = modelFolder .. "eiffeltower.osmodel",
-    RotationVector = { 0.0, 45.0, 0.0 },
-    LightSources = { sunAsset.LightSource },
-    ModelScale = "Centimeter"
+    GeometryFile = modelFolder .. "Empire_State_fbx.osmodel",
+    RotationVector = { 0.0, 60.0, 0.0 },
+    LightSources = { sunAsset.LightSource }
   },
   GUI = {
-    Name = "Eiffel Tower",
+    Name = "Empire State Building",
     Path = "/Scale Objects"
   }
 }
 
 local updatePositionAction = {
-  Identifier = "os.scale_models.drop_eiffel_tower",
-  Name = "Drop Eiffel Tower under camera",
+  Identifier = "os.scale_models.drop_empire_state_building",
+  Name = "Drop Empire State Building under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_EiffelTower')
+    openspace.globebrowsing.setNodePositionFromCamera('Scale_EmpireStateBuilding')
   ]],
-  Documentation = "Updates the Eiffel Tower position based on the globe location of the camera",
+  Documentation = "Updates the Empire State Building position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
 local resetPositionAction = {
-  Identifier = "os.os.scale_models.reset_eiffel_tower",
-  Name = "Reset Eiffel Tower position",
+  Identifier = "os.os.scale_models.reset_empire_state_building",
+  Name = "Reset Empire State Building position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_EiffelTower', ']] .. earthAsset.Earth.Identifier .. [[', 48.85824, 2.29448)
+    openspace.globebrowsing.setNodePosition('Scale_EmpireStateBuilding', ']] .. earthAsset.Earth.Identifier .. [[', 40.748441, -73.985664)
   ]],
-  Documentation = "Resets the Eiffel Tower back to it's actual location",
+  Documentation = "Resets the Empire State Building back to it's actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }

@@ -2,68 +2,70 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
 local modelFolder = asset.syncedResource({
-  Name = "Scale Eiffel Tower",
-  Type = "HttpSynchronization",
-  Identifier = "scale_model_eiffel_tower",
-  Version = 1
+  Name = "Scale Golden Gate Bridge",
+  Type = "UrlSynchronization",
+  Identifier = "scale_model_golden_gate_bridge",
+  Url = "https://wms.openspace.amnh.org/static/sync/url/scalemodels/golden_gate.osmodel",
+  Filename = "golden_gate.osmodel",
+  Override = false
 })
 
 local scaleModel = {
-  Identifier = "Scale_EiffelTower",
+  Identifier = "Scale_GoldenGateBridge",
   Parent = earthAsset.Earth.Identifier,
   --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 48.85824,
-      Longitude = 2.29448,
-      Altitude = 0.0,
+      Latitude = 37.816116,
+      Longitude = -122.477890,
+      Altitude = 120.0,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 48.85824,
-      Longitude = 2.29448,
+      Latitude = 37.816116,
+      Longitude = -122.477890,
       UseHeightmap = false
     },
     Scale = {
       Type = "StaticScale",
-      Scale = 4.38
+      Scale = 0.2
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = modelFolder .. "eiffeltower.osmodel",
-    RotationVector = { 0.0, 45.0, 0.0 },
-    LightSources = { sunAsset.LightSource },
-    ModelScale = "Centimeter"
+    GeometryFile = modelFolder .. "golden_gate.osmodel",
+    ForceRenderInvisible = true,
+    RotationVector = { 0.0, 95.4, 0.0 },
+    LightSources = { sunAsset.LightSource }
   },
   GUI = {
-    Name = "Eiffel Tower",
+    Name = "Golden Gate Bridge",
     Path = "/Scale Objects"
   }
 }
 
 local updatePositionAction = {
-  Identifier = "os.scale_models.drop_eiffel_tower",
-  Name = "Drop Eiffel Tower under camera",
+  Identifier = "os.scale_models.drop_golden_gate_bridge",
+  Name = "Drop Golden Gate Bridge under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_EiffelTower')
+    openspace.globebrowsing.setNodePositionFromCamera('Scale_GoldenGateBridge')
   ]],
-  Documentation = "Updates the Eiffel Tower position based on the globe location of the camera",
+  Documentation = "Updates the Golden Gate Bridge position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
 local resetPositionAction = {
-  Identifier = "os.os.scale_models.reset_eiffel_tower",
-  Name = "Reset Eiffel Tower position",
+  Identifier = "os.os.scale_models.reset_golden_gate_bridge",
+  Name = "Reset Golden Gate Bridge position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_EiffelTower', ']] .. earthAsset.Earth.Identifier .. [[', 48.85824, 2.29448)
+    openspace.globebrowsing.setNodePosition('Scale_GoldenGateBridge', ']] .. earthAsset.Earth.Identifier .. [[', 37.816116, -122.477890)
   ]],
-  Documentation = "Resets the Eiffel Tower back to it's actual location",
+  Documentation = "Resets the Golden Gate Bridge back to it's actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }

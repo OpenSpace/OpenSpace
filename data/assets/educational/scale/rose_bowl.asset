@@ -2,68 +2,63 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
 local modelFolder = asset.syncedResource({
-  Name = "Scale Eiffel Tower",
+  Name = "Scale Rose Bowl",
   Type = "HttpSynchronization",
-  Identifier = "scale_model_eiffel_tower",
+  Identifier = "scale_model_rose_bowl",
   Version = 1
 })
 
 local scaleModel = {
-  Identifier = "Scale_EiffelTower",
+  Identifier = "Scale_RoseBowl",
   Parent = earthAsset.Earth.Identifier,
   --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 48.85824,
-      Longitude = 2.29448,
+      Latitude = 34.161318,
+      Longitude = -118.167623,
       Altitude = 0.0,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 48.85824,
-      Longitude = 2.29448,
+      Latitude = 34.161318,
+      Longitude = -118.167623,
       UseHeightmap = false
-    },
-    Scale = {
-      Type = "StaticScale",
-      Scale = 4.38
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = modelFolder .. "eiffeltower.osmodel",
-    RotationVector = { 0.0, 45.0, 0.0 },
-    LightSources = { sunAsset.LightSource },
-    ModelScale = "Centimeter"
+    GeometryFile = modelFolder .. "rose_bowl.gltf",
+    RotationVector = { 0.0, 98.68, 0.0 },
+    LightSources = { sunAsset.LightSource }
   },
   GUI = {
-    Name = "Eiffel Tower",
+    Name = "Rose Bowl",
     Path = "/Scale Objects"
   }
 }
 
 local updatePositionAction = {
-  Identifier = "os.scale_models.drop_eiffel_tower",
-  Name = "Drop Eiffel Tower under camera",
+  Identifier = "os.scale_models.drop_rose_bowl",
+  Name = "Drop Rose Bowl under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_EiffelTower')
+    openspace.globebrowsing.setNodePositionFromCamera('Scale_RoseBowl')
   ]],
-  Documentation = "Updates the Eiffel Tower position based on the globe location of the camera",
+  Documentation = "Updates the Rose Bowl position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
 local resetPositionAction = {
-  Identifier = "os.os.scale_models.reset_eiffel_tower",
-  Name = "Reset Eiffel Tower position",
+  Identifier = "os.os.scale_models.reset_rose_bowl",
+  Name = "Reset Rose Bowl position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_EiffelTower', ']] .. earthAsset.Earth.Identifier .. [[', 48.85824, 2.29448)
+    openspace.globebrowsing.setNodePosition('Scale_RoseBowl', ']] .. earthAsset.Earth.Identifier .. [[', 34.161318, -118.167623)
   ]],
-  Documentation = "Resets the Eiffel Tower back to it's actual location",
+  Documentation = "Resets the Rose Bowl back to it's actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }

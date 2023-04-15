@@ -705,10 +705,11 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             codegen::lua::CapabilitiesWMS,
             codegen::lua::AddGeoJson,
             codegen::lua::DeleteGeoJson,
-            codegen::lua::AddGeoJsonFromFile
+            codegen::lua::AddGeoJsonFromFile,
         },
         .scripts = {
-            absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
+            absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"),
+            absPath("${MODULE_GLOBEBROWSING}/scripts/node_support.lua")
         }
     };
 }

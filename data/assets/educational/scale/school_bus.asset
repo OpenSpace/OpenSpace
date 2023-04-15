@@ -2,68 +2,63 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
 local modelFolder = asset.syncedResource({
-  Name = "Scale Eiffel Tower",
+  Name = "Scale School Bus",
   Type = "HttpSynchronization",
-  Identifier = "scale_model_eiffel_tower",
+  Identifier = "scale_model_school_bus",
   Version = 1
 })
 
 local scaleModel = {
-  Identifier = "Scale_EiffelTower",
+  Identifier = "Scale_SchoolBus",
   Parent = earthAsset.Earth.Identifier,
   --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 48.85824,
-      Longitude = 2.29448,
-      Altitude = 0.0,
+      Latitude = 40.780671,
+      Longitude = -73.971701,
+      Altitude = 0.78,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 48.85824,
-      Longitude = 2.29448,
+      Latitude = 40.780671,
+      Longitude = -73.971701,
       UseHeightmap = false
-    },
-    Scale = {
-      Type = "StaticScale",
-      Scale = 4.38
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = modelFolder .. "eiffeltower.osmodel",
-    RotationVector = { 0.0, 45.0, 0.0 },
-    LightSources = { sunAsset.LightSource },
-    ModelScale = "Centimeter"
+    GeometryFile = modelFolder .. "school_bus.gltf",
+    RotationVector = { 0.0, 90.0, 0.0 },
+    LightSources = { sunAsset.LightSource }
   },
   GUI = {
-    Name = "Eiffel Tower",
+    Name = "School bus",
     Path = "/Scale Objects"
   }
 }
 
 local updatePositionAction = {
-  Identifier = "os.scale_models.drop_eiffel_tower",
-  Name = "Drop Eiffel Tower under camera",
+  Identifier = "os.scale_models.drop_school_bus",
+  Name = "Drop school bus under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_EiffelTower')
+    openspace.globebrowsing.setNodePositionFromCamera('Scale_SchoolBus')
   ]],
-  Documentation = "Updates the Eiffel Tower position based on the globe location of the camera",
+  Documentation = "Updates the school bus position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
 local resetPositionAction = {
-  Identifier = "os.os.scale_models.reset_eiffel_tower",
-  Name = "Reset Eiffel Tower position",
+  Identifier = "os.os.scale_models.reset_school_bus",
+  Name = "Reset School bus position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_EiffelTower', ']] .. earthAsset.Earth.Identifier .. [[', 48.85824, 2.29448)
+    openspace.globebrowsing.setNodePosition('Scale_SchoolBus', ']] .. earthAsset.Earth.Identifier .. [[', 40.780671, -73.971701)
   ]],
-  Documentation = "Resets the Eiffel Tower back to it's actual location",
+  Documentation = "Resets the school bus back to it's actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
