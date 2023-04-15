@@ -5,10 +5,10 @@ local layer = {
   Name = "Triton Voyager2 Mosaic [New York]",
   Enabled = asset.enabled,
   FilePath = asset.localResource("Triton_Voyager2_ClrMosaic_GlobalFill_600m_newyork.vrt"),
-  Description = [[Voyager 2 data was used to construct the best-ever global color map of Triton. 
-  This map has a resolution of 1,970 feet (600 meters per pixel [m]). Color was synthesized by 
-  combining high-resolution images taken through orange, violet, and ultraviolet filters; these 
-  images were displayed as red, green, and blue images and combined to create this 
+  Description = [[Voyager 2 data was used to construct the best-ever global color map of Triton.
+  This map has a resolution of 1,970 feet (600 meters per pixel [m]). Color was synthesized by
+  combining high-resolution images taken through orange, violet, and ultraviolet filters; these
+  images were displayed as red, green, and blue images and combined to create this
   color version (Smith et al., 1989).]],
 }
 
