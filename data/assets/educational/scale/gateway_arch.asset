@@ -3,9 +3,11 @@ local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
 local modelFolder = asset.syncedResource({
   Name = "Scale Gateway Arch",
-  Type = "HttpSynchronization",
+  Type = "UrlSynchronization",
   Identifier = "scale_model_gateway_arch",
-  Version = 1
+  Url = "https://wms.openspace.amnh.org/static/sync/url/scalemodels/GatewayArch_fbx.osmodel",
+  Filename = "GatewayArch_fbx.osmodel",
+  Override = false
 })
 
 local scaleModel = {

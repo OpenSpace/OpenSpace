@@ -3,9 +3,11 @@ local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
 local modelFolder = asset.syncedResource({
   Name = "Scale Golden Gate Bridge",
-  Type = "HttpSynchronization",
+  Type = "UrlSynchronization",
   Identifier = "scale_model_golden_gate_bridge",
-  Version = 1
+  Url = "https://wms.openspace.amnh.org/static/sync/url/scalemodels/golden_gate.osmodel",
+  Filename = "golden_gate.osmodel",
+  Override = false
 })
 
 local scaleModel = {
