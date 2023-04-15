@@ -1,0 +1,35 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local data = asset.syncedResource({
+  Name = "Example Globe Video",
+  Type = "UrlSynchronization",
+  Identifier = "example_globe_video",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/video/test-video.mp4"
+})
+
+local layer = {
+  Identifier = "ExampleVideo",
+  Video = data .. "/test-video.mp4",
+  Name = "Example Video",
+  Enabled = true,
+  Type = "VideoTileLayer"
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(earth.Earth.Identifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(earth.Earth.Identifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+asset.meta = {
+  Name = "Video Player Test",
+  Version = "1.0",
+  Description = "An example asset that shows how to include a video on Earth",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT"
+}

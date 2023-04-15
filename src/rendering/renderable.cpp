@@ -45,14 +45,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this object will be visible or not"
+        "This setting determines whether this object will be visible or not",
+        // @VISIBILITY(0.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
         "Type",
         "Renderable Type",
         "This tells the type of the renderable",
-        openspace::properties::Property::Visibility::Hidden
+        // @VISIBILITY(3.4)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableRenderBinModeInfo =
@@ -61,7 +64,8 @@ namespace {
         "Render Bin Mode",
         "This value specifies if the renderable should be rendered in the Background,"
         "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step",
-        openspace::properties::Property::Visibility::Developer
+        // @VISIBILITY(3.2)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DimInAtmosphereInfo = {
@@ -69,7 +73,7 @@ namespace {
         "Dim In Atmosphere",
         "Enables/Disables if the object should be dimmed when the camera is in the "
         "sunny part of an atmosphere",
-        openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(Renderable)]] Parameters {
@@ -130,12 +134,13 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
         dictionary,
         &global::memoryManager->PersistentMemory
     );
+    result->_type = renderableType;
     return ghoul::mm_unique_ptr<Renderable>(result);
 }
 
 
 
-Renderable::Renderable(const ghoul::Dictionary& dictionary, Settings settings)
+Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings settings)
     : properties::PropertyOwner({ "Renderable" })
     , Fadeable()
     , _enabled(EnabledInfo, true)
@@ -150,6 +155,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, Settings settings)
 
     if (p.renderBinMode.has_value()) {
         _automaticallyUpdateRenderBin = false;
+        _hasOverrideRenderBin = true;
         setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
     }
 
@@ -187,7 +193,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, Settings settings)
     // We don't add the property here as subclasses should decide on their own whether
     // they to expose the opacity or not
 
-    addProperty(_fade);
+    addProperty(Fadeable::_fade);
 
     // set type for UI
     _renderableType = p.type.value_or(_renderableType);
@@ -324,6 +330,10 @@ SceneGraphNode* Renderable::parent() const noexcept {
 
 bool Renderable::automaticallyUpdatesRenderBin() const noexcept {
     return _automaticallyUpdateRenderBin;
+}
+
+bool Renderable::hasOverrideRenderBin() const noexcept {
+    return _hasOverrideRenderBin;
 }
 
 }  // namespace openspace

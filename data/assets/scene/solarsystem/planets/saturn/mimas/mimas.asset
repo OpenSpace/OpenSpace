@@ -46,7 +46,7 @@ local Mimas = {
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
   GUI = {
     Name = "Mimas",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Mimas",
     Description = "That's no moon..."
   }
 }
@@ -72,7 +72,7 @@ local MimasLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Mimas Label",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Mimas",
     Description = "Label for Saturn's moon Mimas"
   }
 }

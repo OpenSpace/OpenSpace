@@ -39,7 +39,9 @@ namespace {
         "Enabled",
         "This enables or disables the ScriptScheduler. If disabled, no scheduled scripts "
         "will be executed. If enabled, scheduled scripts will be executed at their given "
-        "time as normal"
+        "time as normal",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
@@ -47,7 +49,8 @@ namespace {
         "Should Run All Time Jump",
         "If 'true': In a time jump, all scheduled scripts between the old time and the "
         "new time is executed. If 'false': In a time jump, no scripts scheduled between "
-        "the new time and the old time is executed"
+        "the new time and the old time is executed",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ScheduledScript)]] Parameters {

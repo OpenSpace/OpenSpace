@@ -41,6 +41,7 @@
 #include <ghoul/glm.h>
 #include <glm/gtx/string_cast.hpp>
 #include <optional>
+#include <variant>
 
 namespace {
     enum BlendMode {
@@ -53,7 +54,8 @@ namespace {
         "Billboard mode",
         "This value specifies whether the plane is a billboard, which means that it is "
         "always facing the camera. If this is false, it can be oriented using other "
-        "transformations"
+        "transformations",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorBacksideInfo = {
@@ -61,26 +63,38 @@ namespace {
         "Mirror backside of image plane",
         "If this value is set to false, the image plane will not be mirrored when "
         "looking from the backside. This is usually desirable when the image shows "
-        "data at a specific location, but not if it is displaying text for example"
+        "data at a specific location, but not if it is displaying text for example",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
-        "This value specifies the size of the plane in meters"
+        "This value specifies the size of the plane in meters",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo AutoScaleInfo = {
+        "AutoScale",
+        "Auto Scale",
+        "When true, the plane will automatically adjust in size to match the aspect "
+        "ratio of the content. Otherwise it will remain in the given size."
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to this plane"
+        "This determines the blending mode that is applied to this plane",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply Color",
         "If set, the plane's texture is multiplied with this color. Useful for applying "
-        "a color grayscale images"
+        "a color grayscale images",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {
@@ -91,7 +105,7 @@ namespace {
         std::optional<bool> mirrorBackside;
 
         // [[codegen::verbatim(SizeInfo.description)]]
-        float size;
+        std::variant<float, glm::vec2> size;
 
         enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,
@@ -117,14 +131,21 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _billboard(BillboardInfo, false)
     , _mirrorBackside(MirrorBacksideInfo, false)
-    , _size(SizeInfo, 10.f, 0.f, 1e25f)
+    , _size(SizeInfo, glm::vec2(10.f), glm::vec2(0.f), glm::vec2(1e25f))
+    , _autoScale(AutoScaleInfo, false)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
-    _size = p.size;
+    if (std::holds_alternative<float>(p.size)) {
+        _size = glm::vec2(std::get<float>(p.size));
+    }
+    else {
+        _size = std::get<glm::vec2>(p.size);
+    }
+
     _billboard = p.billboard.value_or(_billboard);
     _mirrorBackside = p.mirrorBackside.value_or(_mirrorBackside);
 
@@ -132,7 +153,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         { static_cast<int>(BlendMode::Normal), "Normal" },
         { static_cast<int>(BlendMode::Additive), "Additive"}
     });
-    _blendMode.onChange([&]() {
+    _blendMode.onChange([this]() {
         switch (_blendMode) {
             case static_cast<int>(BlendMode::Normal):
                 setRenderBinFromOpacity();
@@ -145,7 +166,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         }
     });
 
-    _opacity.onChange([&]() {
+    _opacity.onChange([this]() {
         if (_blendMode == static_cast<int>(BlendMode::Normal)) {
             setRenderBinFromOpacity();
         }
@@ -164,9 +185,11 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     addProperty(_size);
     _size.onChange([this](){ _planeIsDirty = true; });
 
+    addProperty(_autoScale);
+
     addProperty(_multiplyColor);
 
-    setBoundingSphere(_size);
+    setBoundingSphere(glm::compMax(_size.value()));
 }
 
 bool RenderablePlane::isReady() const {
@@ -298,15 +321,16 @@ void RenderablePlane::update(const UpdateData&) {
 }
 
 void RenderablePlane::createPlane() {
-    const GLfloat size = _size;
+    const GLfloat sizeX = _size.value().x;
+    const GLfloat sizeY = _size.value().y;
     const GLfloat vertexData[] = {
-        //      x      y     z     w     s     t
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
-        -size, size, 0.f, 0.f, 0.f, 1.f,
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, -size, 0.f, 0.f, 1.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
+        //   x       y    z    w    s    t
+        -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
+         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f,
+        -sizeX,  sizeY, 0.f, 0.f, 0.f, 1.f,
+        -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
+         sizeX, -sizeY, 0.f, 0.f, 1.f, 0.f,
+         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f,
     };
 
     glBindVertexArray(_quad);

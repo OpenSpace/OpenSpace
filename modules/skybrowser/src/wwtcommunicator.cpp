@@ -121,7 +121,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VerticalFovInfo = {
         "VerticalFov",
         "Vertical Field Of View",
-        "The vertical field of view of the target."
+        "The vertical field of view of the target.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(WwtCommunicator)]] Parameters {

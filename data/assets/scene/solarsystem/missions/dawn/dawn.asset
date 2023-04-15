@@ -1,7 +1,6 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
-
 local kernels = asset.syncedResource({
   Name = "Dawn Kernels",
   Type = "HttpSynchronization",
@@ -20,7 +19,7 @@ local models = asset.syncedResource({
   Name = "Dawn Models",
   Type = "HttpSynchronization",
   Identifier = "dawn_model",
-  Version = 1
+  Version = 2
 })
 
 local KernelFiles = {
@@ -75,8 +74,8 @@ local LightSources = {
   }
 }
 
-local Dawn = {
-  Identifier = "Dawn",
+local DawnPosition = {
+  Identifier = "DawnPosition",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
@@ -85,6 +84,23 @@ local Dawn = {
       Observer = "SSB",
       Kernels = KernelFiles
     },
+    -- Rotation for model version 2
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { math.pi/2.0, 0.0, math.pi/2.0 }
+    }
+  },
+  GUI = {
+    Name = "Dawn Position",
+    Path = "/Solar System/Missions/Dawn",
+    Hidden = true
+  }
+}
+
+local Dawn = {
+  Identifier = "Dawn",
+  Parent = DawnPosition.Identifier,
+  Transform = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "DAWN_SPACECRAFT",
@@ -94,67 +110,11 @@ local Dawn = {
   },
   Renderable = {
     Type = "RenderableModel",
-    Body = "DAWN",
-    GeometryFile = models .. "mainbodydawn.obj",
+    GeometryFile = models .. "Dawn_19.glb",
     LightSources = LightSources
   },
   GUI = {
-    Path = "/Solar System/Missions/Dawn"
-  }
-}
-
--- Dawn Solar Array module 1
-local DawnSolarArray1 = {
-  Identifier = "DawnSolar1",
-  Parent = Dawn.Identifier,
-  Transform = {
-    -- JCC: Spice rotations are commented because spice ck files
-    -- are not present.
-    -- Rotation = {
-    --   Type = "SpiceRotation",
-    --   SourceFrame = "DAWN_SA-Y",
-    --   DestinationFrame = "DAWN_SPACECRAFT"
-    -- }
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = { 0.0, 4.71225, 0.0 }
-    }
-  },
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "DAWN",
-    GeometryFile = models .. "solarpanelleft.obj",
-    LightSources = LightSources
-  },
-  GUI = {
-    Name = "Dawn Solar 1",
-    Path = "/Solar System/Missions/Dawn"
-  }
-}
-
--- Dawn Solar Array module 2
-local DawnSolarArray2 = {
-  Identifier = "DawnSolar2",
-  Parent = Dawn.Identifier,
-  Transform = {
-    -- Rotation = {
-    --   Type = "SpiceRotation",
-    --   SourceFrame = "DAWN_SA+Y",
-    --   DestinationFrame = "DAWN_SPACECRAFT"
-    -- }
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = { math.pi, math.pi/2, 0.0 }
-    }
-  },
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "DAWN",
-    GeometryFile = models .. "solarpanelright.obj",
-    LightSources = LightSources
-  },
-  GUI = {
-    Name = "Dawn Solar 2",
+    Name = "Dawn",
     Path = "/Solar System/Missions/Dawn"
   }
 }
@@ -229,9 +189,8 @@ local DawnFramingCamera2 = {
 }
 
 local nodes = {
+  DawnPosition,
   Dawn,
-  DawnSolarArray1,
-  DawnSolarArray2,
   DawnTrail,
   DawnFramingCamera1,
   DawnFramingCamera2
@@ -256,7 +215,7 @@ end
 
 asset.meta = {
   Name = "Dawn",
-  Version = "1.0",
+  Version = "2.0",
   Description = "Dawn spacecraft and trail",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

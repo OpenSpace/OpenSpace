@@ -36,7 +36,8 @@ namespace {
         "FilePath",
         "File Path",
         "The path of the GDAL file or the image file that is to be used in this tile "
-        "provider"
+        "provider",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TilePixelSizeInfo = {
@@ -45,13 +46,16 @@ namespace {
         "This value is the preferred size (in pixels) for each tile. Choosing the right "
         "value is a tradeoff between more efficiency (larger images) and better quality "
         "(smaller images). The tile pixel size has to be smaller than the size of the "
-        "complete image if a single image is used"
+        "complete image if a single image is used",
+        // @VISIBILITY(3.33)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CompressionInfo = {
         "Compression",
         "Compression Algorithm",
-        "The compression algorithm to use for MRF cached tiles"
+        "The compression algorithm to use for MRF cached tiles",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     enum class [[codegen::stringify()]] Compression {

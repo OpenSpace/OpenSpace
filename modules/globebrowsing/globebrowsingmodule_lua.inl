@@ -530,6 +530,122 @@ getGeoPositionForCamera(bool useEyePosition = false)
     return res;
 }
 
+/**
+ * Add a GeoJson layer specified by the given table to the globe specified by the
+ * 'globeName' argument
+ */
+[[codegen::luawrap]] void addGeoJson(std::string globeName, ghoul::Dictionary table)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
+
+    // Get the node and make sure it exists
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeName);
+    if (!n) {
+        throw ghoul::lua::LuaError("Unknown globe name: " + globeName);
+    }
+
+    // Get the renderable globe
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        throw ghoul::lua::LuaError("Renderable is not a globe: " + globeName);
+    }
+
+    // Get the dictionary defining the layer
+    globe->geoJsonManager().addGeoJsonLayer(table);
+}
+
+/**
+ * Remove the GeoJson layer specified by the given table or string identifier from the
+ * globe specified by the 'globeName' argument
+ */
+[[codegen::luawrap]] void deleteGeoJson(std::string globeName,
+                          std::variant<std::string, ghoul::Dictionary> tableOrIdentifier)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
+
+    // Get the node and make sure it exists
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeName);
+    if (!n) {
+        throw ghoul::lua::LuaError("Unknown globe name: " + globeName);
+    }
+
+    // Get the renderable globe
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        throw ghoul::lua::LuaError("Renderable is not a globe: " + globeName);
+    }
+
+    std::string identifier;
+    if (std::holds_alternative<std::string>(tableOrIdentifier)) {
+        identifier = std::get<std::string>(tableOrIdentifier);
+    }
+    else {
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(tableOrIdentifier);
+        if (!d.hasValue<std::string>("Identifier")) {
+            throw ghoul::lua::LuaError(
+                "Table passed to deleteLayer does not contain an Identifier"
+            );
+        }
+        identifier = d.value<std::string>("Identifier");
+    }
+
+    globe->geoJsonManager().deleteLayer(identifier);
+}
+
+/**
+ * Add a GeoJson layer from the given file name and add it to the current anchor node,
+ * if it is a globe. Note that you might have to increase the height offset for the
+ * added feature to be visible on the globe, if using a height map
+ */
+[[codegen::luawrap]] void addGeoJsonFromFile(std::string filename,
+                                             std::optional<std::string> name)
+{
+    using namespace openspace;
+    using namespace globebrowsing;
+
+    std::filesystem::path path = absPath(filename);
+    if (!std::filesystem::is_regular_file(path)) {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Could not find the provided file: '{}'", filename
+        ));
+    }
+
+    if (path.extension() != ".geojson") {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Unexpected file type: '{}'. Expected '.geojson' file", filename
+        ));
+    }
+
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(
+        global::navigationHandler->anchorNode()->identifier()
+    );
+    if (!n) {
+        throw ghoul::lua::LuaError("Invalid anchor node");
+    }
+
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        throw ghoul::lua::LuaError(
+            "Current anchor is not a globe (Expected 'RenderableGlobe')"
+        );
+    }
+
+    // Make a minimal dictionary to represent the geojson component
+    ghoul::Dictionary d;
+
+    std::string identifier = makeIdentifier(name.value_or(path.stem().string()));
+    d.setValue("Identifier", identifier);
+    d.setValue("File", path.string());
+    if (name.has_value()) {
+        d.setValue("Name", *name);
+    }
+
+    // Get the dictionary defining the layer
+    globe->geoJsonManager().addGeoJsonLayer(d);
+}
+
 #include "globebrowsingmodule_lua_codegen.cpp"
 
 } // namespace

@@ -58,6 +58,7 @@ private:
 
     properties::StringProperty _texturePath;
     ghoul::opengl::Texture* _texture = nullptr;
+    glm::vec2 _textureDimensions = glm::vec2(0.f);
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
     bool _isLoadingLazily = false;

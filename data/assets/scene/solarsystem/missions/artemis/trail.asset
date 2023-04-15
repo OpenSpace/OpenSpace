@@ -1,0 +1,83 @@
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+asset.require("spice/base")
+local artemisSpiceId = "-1023"
+
+local kernels = asset.syncedResource({
+  Name = "Artemis Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "artemis_1_kernels",
+  Version = 1
+})
+
+local ArtemisEarthTrail = {
+  Identifier = "ArtemisEarthTrail",
+  Parent = earthTransforms.EarthCenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = artemisSpiceId,
+      Observer = "EARTH",
+      Frame = "GALACTIC",
+      Kernels = kernels .. "artemis.bsp"
+    },
+    Color = { 0.2, 0.78, 0.635 },
+    Fade = 7.0,
+    StartTime = "2022 NOV 16 08:19:00.000",
+    EndTime = "2022 DEC 11 17:20:45.065",
+    SampleInterval = 60 -- Sample rate of once per minute
+  },
+  GUI = {
+    Name = "Artemis-1 Earth Trail",
+    Path = "/Solar System/Missions/Artemis/Trails",
+    Description = "Artemis-1 trail relative to Earth",
+  }
+}
+
+local ArtemisMoonTrail= {
+  Identifier = "ArtemisMoonTrail",
+  Parent = moonTransforms.Moon.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = artemisSpiceId,
+      Observer = "MOON",
+      Frame = "IAU_MOON",
+      Kernels = kernels .. "artemis.bsp"
+    },
+    Color = { 0.78, 0.43, 0.20 },
+    Fade = 7.0,
+    StartTime = "2022 NOV 16 08:19:00.000",
+    EndTime = "2022 DEC 11 17:20:45.065",
+    SampleInterval = 60 -- Sample rate of once per minute
+  },
+  GUI = {
+    Name = "Artemis-1 Moon Trail",
+    Path = "/Solar System/Missions/Artemis/Trails",
+    Description = "Artemis-1 trail relative to the Moon",
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(ArtemisEarthTrail)
+  openspace.addSceneGraphNode(ArtemisMoonTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ArtemisMoonTrail)
+  openspace.removeSceneGraphNode(ArtemisEarthTrail)
+end)
+
+asset.export(ArtemisEarthTrail)
+asset.export(ArtemisMoonTrail)
+
+asset.meta = {
+  Name = "Artemis-1 Trails",
+  Version = "1.0",
+  Description = "Trail of Artemis-1 in respect to Earth and the Moon",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

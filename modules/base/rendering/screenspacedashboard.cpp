@@ -41,7 +41,8 @@ namespace {
         "UseMainDashboard",
         "Use main dashboard",
         "If this value is set to 'true', this ScreenSpaceDashboard will use the "
-        "main dashboard instead of creating an independent one"
+        "main dashboard instead of creating an independent one",
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {

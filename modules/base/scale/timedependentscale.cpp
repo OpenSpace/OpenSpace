@@ -37,14 +37,18 @@ namespace {
         "The date at which this scale will be 0. The current value of the scale is "
         "computed by taking the difference between the current time and the reference "
         "date and multiplying it by the speed. This field must be formatted as: "
-        "YYYY-MM-DDThh:mm:ss.uuu  where h is a 24h clock and u microseconds"
+        "YYYY-MM-DDThh:mm:ss.uuu  where h is a 24h clock and u microseconds",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
         "Speed",
         "Speed",
         "The speed at which the value grows or shrinks. The units for this are meters "
-        "per second. The default value is 1 m/s"
+        "per second. The default value is 1 m/s",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ClampToPositiveInfo = {
@@ -52,7 +56,8 @@ namespace {
         "Clamp to Positive",
         "If this value is true, the velocity computation will never result in any "
         "negative values. This is useful for instantaneous events that only propagate "
-        "forwards. The default value is 'true'"
+        "forwards. The default value is 'true'",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(TimeDependentScale)]] Parameters {

@@ -4,7 +4,7 @@ local trajectory = asset.syncedResource({
   Name = "'Oumuamua Trajectory",
   Type = "HttpSynchronization",
   Identifier = "oumuamua_horizons",
-  Version = 2
+  Version = 3
 })
 
 local OumuamuaTrail = {

@@ -61,6 +61,7 @@ ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
         dictionary,
         &global::memoryManager->PersistentMemory
     );
+    result->_type = p.type;
     return ghoul::mm_unique_ptr<Rotation>(result);
 }
 

@@ -65,12 +65,105 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "properties": [
+    {
+      "name": "Scene.sssb_transneptunian_object_asteroid.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_amor_asteroid.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_apollo_asteroid.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_aten_asteroid.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_atira_asteroid.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_centaur_asteroid.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_jupiter_trojan_asteroid.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_jupiter-family_comet.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_mars-crossing_asteroid.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_pha.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_outer_main_belt_asteroid.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_main_belt_asteroid.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_chiron-type_comet.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_encke-type_comet.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_halley-type_comet.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.sssb_inner_main_belt_asteroid.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.C2019Q4BorisovTrail.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    },
+    {
+      "name": "Scene.OumuamuaTrail.Renderable.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "0"
+    }
+  ],
   "time": {
+    "is_paused": false,
     "type": "relative",
     "value": "-1d"
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 2
   }
 }

@@ -201,7 +201,7 @@ void EventHandler::initialize() {
 
     global::callback::touchDetected->emplace(
         global::callback::touchDetected->begin(),
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             if (!_browserInstance) {
                 return false;
             }
@@ -241,7 +241,7 @@ void EventHandler::initialize() {
 
     global::callback::touchUpdated->emplace(
         global::callback::touchUpdated->begin(),
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             if (!_browserInstance || _validTouchStates.empty()) {
                 return false;
             }
@@ -249,7 +249,7 @@ void EventHandler::initialize() {
             auto it = std::find_if(
                 _validTouchStates.cbegin(),
                 _validTouchStates.cend(),
-                [&](const TouchInput& state){
+                [&input](const TouchInput& state) {
                     return state.fingerId == input.fingerId &&
                            state.touchDeviceId == input.touchDeviceId;
                 }
@@ -281,7 +281,7 @@ void EventHandler::initialize() {
 
     global::callback::touchExit->emplace(
         global::callback::touchExit->begin(),
-        [&](TouchInput input) {
+        [this](TouchInput input) {
             if (!_browserInstance) {
                 return;
             }
@@ -292,7 +292,7 @@ void EventHandler::initialize() {
             const auto found = std::find_if(
                 _validTouchStates.cbegin(),
                 _validTouchStates.cend(),
-                [&](const TouchInput& state){
+                [&input](const TouchInput& state) {
                     return state.fingerId == input.fingerId &&
                     state.touchDeviceId == input.touchDeviceId;
                 }

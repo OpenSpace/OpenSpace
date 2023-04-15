@@ -47,7 +47,6 @@ local colorbar_human_impact = {
   Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "HumanImpactColorbar.png",
-  Enabled = false,
   FaceCamera = false,
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }

@@ -33,7 +33,6 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/util/distanceconversion.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -93,21 +92,21 @@ private:
     properties::FloatProperty _specularIntensity;
 
     properties::BoolProperty _performShading;
-    properties::BoolProperty _disableFaceCulling;
+    properties::BoolProperty _enableFaceCulling;
     properties::DMat4Property _modelTransform;
     properties::Vec3Property _rotationVec;
 
-    properties::BoolProperty _disableDepthTest;
-    properties::BoolProperty _enableOpacityBlending;
+    properties::BoolProperty _enableDepthTest;
     properties::OptionProperty _blendingFuncOption;
 
     std::string _vertexShaderPath;
     std::string _fragmentShaderPath;
     ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
+    UniformCache(nLightSources, lightDirectionsViewSpace, lightIntensities,
         modelViewTransform, normalTransform, projectionTransform,
         performShading, ambientIntensity, diffuseIntensity,
-        specularIntensity, opacityBlending) _uniformCache;
+        specularIntensity, performManualDepthTest, gBufferDepthTexture,
+        resolution, opacity) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
 
@@ -116,6 +115,20 @@ private:
     std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
 
     properties::PropertyOwner _lightSourcePropertyOwner;
+
+    // Framebuffer and screen space quad
+    GLuint _framebuffer = 0;
+    GLuint _quadVao = 0;
+    GLuint _quadVbo = 0;
+    bool _shouldRenderTwice = false;
+
+    // Opacity program
+    ghoul::opengl::ProgramObject* _quadProgram = nullptr;
+    UniformCache(opacity, colorTexture, depthTexture, viewport,
+        resolution) _uniformOpacityCache;
+
+    // Store the original RenderBin
+    Renderable::RenderBin _originalRenderBin;
 };
 
 }  // namespace openspace

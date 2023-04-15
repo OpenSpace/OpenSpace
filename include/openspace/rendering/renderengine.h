@@ -68,6 +68,8 @@ public:
     RenderEngine();
     virtual ~RenderEngine() override;
 
+    const FramebufferRenderer& renderer() const;
+
     void initialize();
     void initializeGL();
     void deinitializeGL();

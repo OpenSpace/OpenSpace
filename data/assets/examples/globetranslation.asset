@@ -1,3 +1,4 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
@@ -22,8 +23,10 @@ local Example_Fixed_Height = {
   },
   Renderable = {
     Type = "RenderableModel",
-    Body = "NEW HORIZONS",
-    GeometryFile = models .. "NewHorizonsCleanModel.obj"
+    GeometryFile = models .. "NewHorizonsCleanModel.obj",
+    LightSources = {
+      sun.LightSource
+    }
   },
   GUI = {
     Path = "/Example"
@@ -44,8 +47,10 @@ local Example_Adaptive_Height = {
   },
   Renderable = {
     Type = "RenderableModel",
-    Body = "NEW HORIZONS",
-    GeometryFile = models .. "NewHorizonsCleanModel.obj"
+    GeometryFile = models .. "NewHorizonsCleanModel.obj",
+    LightSources = {
+      sun.LightSource
+    }
   },
   GUI = {
     Path = "/Example"

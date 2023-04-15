@@ -32,7 +32,7 @@ namespace openspace {
 /**
  * This class is an interface for all things fadeable in the software; things that need
  * a fade and opacity property, which will be combined into a final opacity value
- * 
+ *
  * A Fadeable can also be dependent on the fade value from a specified parent fadeable,
  * so that it fades out together with the parent
  */
