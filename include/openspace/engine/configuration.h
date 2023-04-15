@@ -47,6 +47,7 @@ struct Configuration {
     std::string windowConfiguration = "${CONFIG}/single.xml";
     std::string asset;
     std::string profile;
+    std::vector<std::string> readOnlyWindowConfigs;
     std::vector<std::string> readOnlyProfiles;
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {

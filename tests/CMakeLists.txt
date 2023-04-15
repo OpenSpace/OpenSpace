@@ -39,6 +39,7 @@ add_executable(
   test_profile.cpp
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
+  test_sgctedit.cpp
   test_spicemanager.cpp
   test_timeconversion.cpp
   test_timeline.cpp
@@ -53,8 +54,14 @@ add_executable(
 
 set_openspace_compile_settings(OpenSpaceTest)
 
+target_include_directories(OpenSpaceTest
+  PUBLIC
+    "../apps/OpenSpace/ext/sgct/ext/json/include"
+    "../apps/OpenSpace/ext/sgct/ext/json-schema-validator/src"
+)
+
 target_compile_definitions(OpenSpaceTest PUBLIC "GHL_THROW_ON_ASSERT")
-target_link_libraries(OpenSpaceTest PUBLIC Catch2 openspace-core)
+target_link_libraries(OpenSpaceTest PUBLIC Catch2 openspace-core sgct)
 
 foreach (library_name ${all_enabled_modules})
   get_target_property(library_type ${library_name} TYPE)

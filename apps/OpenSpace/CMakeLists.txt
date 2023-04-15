@@ -127,6 +127,13 @@ if (UNIX AND (NOT APPLE))
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
 endif ()
 
+add_custom_command(TARGET OpenSpace POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/sgct.schema.json
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../config/schema/sgct.schema.json
+  COMMAND_EXPAND_LISTS
+)
+
 end_header("Dependency: SGCT")
 
 begin_header("Dependency: Profile Editor")
