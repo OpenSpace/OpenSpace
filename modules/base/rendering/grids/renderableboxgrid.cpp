@@ -39,19 +39,23 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered"
+        "This value determines the color of the grid lines that are rendered",
+        // @VISIBILITY(1.17)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the spherical grid"
+        "This value specifies the line width of the spherical grid",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid Size",
-        "This value species the size of each dimensions of the box"
+        "This value species the size of each dimensions of the box",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
@@ -91,7 +95,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
@@ -101,7 +105,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     addProperty(_lineWidth);
 
     _size = p.size.value_or(_size);
-    _size.onChange([&]() { _gridIsDirty = true; });
+    _size.onChange([this]() { _gridIsDirty = true; });
     addProperty(_size);
 
     if (p.labels.has_value()) {

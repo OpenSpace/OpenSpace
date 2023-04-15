@@ -30,7 +30,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe"
     },
     TrailColor = trailColor,
     OrbitPeriod = 545.09,
@@ -47,7 +47,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skathi"
     },
     TrailColor = trailColor,
     OrbitPeriod = 732.52,
@@ -65,7 +65,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2007 S 2",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S2"
     },
     TrailColor = trailColor,
     OrbitPeriod = 792.96,
@@ -82,7 +82,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skoll"
     },
     TrailColor = trailColor,
     OrbitPeriod = 862.37,
@@ -100,7 +100,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 13",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S13"
     },
     TrailColor = trailColor,
     OrbitPeriod = 905.85,
@@ -117,7 +117,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Greip"
     },
     TrailColor = trailColor,
     OrbitPeriod = 906.56,
@@ -134,7 +134,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hyrrokkin"
     },
     TrailColor = trailColor,
     OrbitPeriod = 914.29,
@@ -151,7 +151,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Jarnsaxa"
     },
     TrailColor = trailColor,
     OrbitPeriod = 943.78,
@@ -168,7 +168,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari"
     },
     TrailColor = trailColor,
     OrbitPeriod = 956.70,
@@ -186,7 +186,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2006 S 1",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S1"
     },
     TrailColor = trailColor,
     OrbitPeriod = 972.41,
@@ -204,7 +204,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 17",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S17"
     },
     TrailColor = trailColor,
     OrbitPeriod = 985.45,
@@ -221,7 +221,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bergelmir"
     },
     TrailColor = trailColor,
     OrbitPeriod = 985.83,
@@ -238,7 +238,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Narvi"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1008.45,
@@ -255,7 +255,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Suttungr"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1022.82,
@@ -272,7 +272,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hati"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1033.05,
@@ -290,7 +290,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 12",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S12"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1048.54,
@@ -307,7 +307,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Farbauti"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1054.78,
@@ -324,7 +324,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thrymr"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1078.09,
@@ -341,7 +341,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Aegir"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1094.46,
@@ -359,7 +359,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2007 S 3",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S3"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1100,
@@ -376,7 +376,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bestla"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1101.45,
@@ -394,7 +394,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 7",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S7"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1101.99,
@@ -412,14 +412,14 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2006 S 3",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S3"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1142.37,
     Kernels = kernel452
   },
   {
-    Identifier = "FENRIR",
+    Identifier = "Fenrir",
     Parent = {
       Identifier = parentIdentifier,
       Spice = parentSpice
@@ -429,7 +429,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fenrir"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1212.53,
@@ -445,7 +445,7 @@ local norseGroup = {
     Radii = { 6000, 6000, 6000 },
     Tags = tags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Surtur"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1297.7,
@@ -462,7 +462,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1245.06,
@@ -479,7 +479,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Ymir"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1254.15,
@@ -496,7 +496,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Loge"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1300.95,
@@ -513,7 +513,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fornjot"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1432.16,
@@ -530,7 +530,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skadi"
     },
     TrailColor = trailColor,
     OrbitPeriod = 728.2,
@@ -547,7 +547,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gridr"
     },
     TrailColor = trailColor,
     OrbitPeriod = 990.23,
@@ -564,7 +564,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Angrboda"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1080.4,
@@ -581,7 +581,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skrymir"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1164.3,
@@ -598,7 +598,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gerd"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1095.0,
@@ -616,7 +616,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 26",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S26"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1624.2,
@@ -633,7 +633,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Eggther"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1033.0,
@@ -650,7 +650,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Beli"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1084.1,
@@ -667,7 +667,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gunnlod"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1175.3,
@@ -684,7 +684,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thiazzi"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1361.5,
@@ -702,7 +702,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 34",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S34"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1412.5,
@@ -719,7 +719,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Alvaldi"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1208.1,
@@ -736,7 +736,7 @@ local norseGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Geirrod"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1295.8,
@@ -754,7 +754,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 28",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S28"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1197.2,
@@ -772,7 +772,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 21",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S21"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1365.1,
@@ -790,7 +790,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 36",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S36"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1354.2,
@@ -808,7 +808,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 37",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S37"
     },
     TrailColor = trailColor,
     OrbitPeriod = 752.88,
@@ -826,7 +826,7 @@ local norseGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 39",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S39"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1277.5,
@@ -859,7 +859,7 @@ for i, moon in ipairs(norseGroup) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Saturn/Moons",
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/" .. moon.Identifier,
       Description = "Label for Saturn's moon " .. moonName .. " (Norse group)"
     }
   }

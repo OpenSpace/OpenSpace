@@ -37,7 +37,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "If this value is set to 'true' this dashboard item is shown in the dashboard"
+        "If this value is set to 'true' this dashboard item is shown in the dashboard",
+        // @VISIBILITY(1.75)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(DashboardItem)]] Parameters {
@@ -68,6 +70,8 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
     const std::string& dashboardType = dictionary.value<std::string>(KeyType);
 
     DashboardItem* item = factory->create(dashboardType, std::move(dictionary));
+    item->_type = dashboardType;
+
     return std::unique_ptr<DashboardItem>(item);
 }
 

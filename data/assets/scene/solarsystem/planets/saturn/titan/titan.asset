@@ -46,7 +46,7 @@ local Titan = {
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
   GUI = {
     Name = "Titan",
-    Path = "/Solar System/Planets/Saturn/Moons/Titan",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Titan",
     Description = "Largest moon of Saturn"
   }
 }
@@ -72,7 +72,7 @@ local TitanLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Titan Label",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Titan",
     Description = "Label for Saturn's moon Titan"
   }
 }

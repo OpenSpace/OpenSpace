@@ -45,7 +45,7 @@ local Tethys = {
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
   GUI = {
-    Path = "/Solar System/Planets/Saturn/Moons"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Tethys"
   }
 }
 
@@ -70,7 +70,7 @@ local TethysLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Tethys Label",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Tethys",
     Description = "Label for Saturn's moon Tethys"
   }
 }

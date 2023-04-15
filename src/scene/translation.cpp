@@ -59,6 +59,7 @@ ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(
         dictionary,
         &global::memoryManager->PersistentMemory
     );
+    result->_type = p.type;
     return ghoul::mm_unique_ptr<Translation>(result);
 }
 

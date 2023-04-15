@@ -39,7 +39,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
-        "The globe on which the longitude/latitude is specified"
+        "The globe on which the longitude/latitude is specified",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LatitudeInfo = {
@@ -47,7 +49,9 @@ namespace {
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
-        "globe. The default value is 0.0"
+        "globe. The default value is 0.0",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LongitudeInfo = {
@@ -55,7 +59,9 @@ namespace {
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0"
+        "globe. The default value is 0.0",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AltitudeInfo = {
@@ -63,7 +69,9 @@ namespace {
         "Altitude",
         "The altitude in meters. If the 'UseHeightmap' property is 'true', this is an "
         "offset from the actual surface of the globe. If not, this is an offset from the "
-        "reference ellipsoid. The default value is 0.0"
+        "reference ellipsoid. The default value is 0.0",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseHeightmapInfo = {
@@ -71,7 +79,9 @@ namespace {
         "Use Heightmap",
         "If this value is 'true', the altitude specified in 'Altitude' will be treated "
         "as an offset from the heightmap. Otherwise, it will be an offset from the "
-        "globe's reference ellipsoid. The default value is 'false'"
+        "globe's reference ellipsoid. The default value is 'false'",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {

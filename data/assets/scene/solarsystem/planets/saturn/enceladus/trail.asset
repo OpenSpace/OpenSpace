@@ -21,7 +21,7 @@ local EnceladusTrail = {
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
   GUI = {
     Name = "Enceladus Trail",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Enceladus",
     Description = "Trail of Saturn's moon Enceladus as observed by Saturn",
   }
 }

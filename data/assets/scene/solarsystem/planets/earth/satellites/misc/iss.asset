@@ -17,8 +17,8 @@ local omm = asset.syncedResource({
   Override = true
 })
 
-local iss = {
-  Identifier = "ISS",
+local issPosition = {
+  Identifier = "ISSPosition",
   Parent = transforms.EarthInertial.Identifier,
   BoundingSphere = 54.5, -- half the width
   Transform = {
@@ -36,18 +36,19 @@ local iss = {
   },
   Tag = { "earth_satellite", "ISS" },
   GUI = {
-    Name = "ISS",
-    Path = "/Solar System/Planets/Earth/Satellites/ISS"
+    Name = "ISS Position",
+    Path = "/Solar System/Planets/Earth/Satellites/ISS",
+    Hidden = true
   }
 }
 
-local parentNode = {
-  Identifier = "ISSModel",
-  Parent = iss.Identifier,
+local issModel = {
+  Identifier = "ISS",
+  Parent = issPosition.Identifier,
   Transform = {
     Rotation = {
       Type = "FixedRotation",
-      Attached = "ISSModel",
+      Attached = "ISS",
       XAxis = { 0.01, -1.0, 0.56 },
       XAxisOrthogonal = true,
       YAxis = transforms.EarthInertial.Identifier
@@ -60,11 +61,11 @@ local parentNode = {
     LightSources = {
       sun.LightSource
     },
-    PerformShading = true,
-    DisableFaceCulling = true
+    PerformShading = true
   },
+  Tag = { "earth_satellite", "ISS" },
   GUI = {
-    Name = "ISS Model",
+    Name = "ISS",
     Path = "/Solar System/Planets/Earth/Satellites/ISS"
   }
 }
@@ -95,7 +96,7 @@ local issTrail = {
 -- @TODO (emmbr, 2021-05-27) add to scene when label rendering issues have been fixed
 local IssLabel = {
   Identifier = "IssLabel",
-  Parent = iss.Identifier,
+  Parent = issPosition.Identifier,
   Renderable = {
     Enabled = false,
     Type = "RenderableLabel",
@@ -133,11 +134,11 @@ asset.onInitialize(function ()
   local i = openspace.space.readKeplerFile(omm .. "ISS.txt", "OMM")
   issTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
 
-  openspace.addSceneGraphNode(iss)
-  openspace.addSceneGraphNode(parentNode)
-  openspace.setPropertyValueSingle("Scene.ISSModel.Rotation.yAxisInvertObject", true)
+  openspace.addSceneGraphNode(issPosition)
+  openspace.addSceneGraphNode(issModel)
   openspace.addSceneGraphNode(issTrail)
 
+  openspace.setPropertyValueSingle("Scene.ISS.Rotation.yAxisInvertObject", true)
   openspace.action.registerAction(focus_iss)
 end)
 
@@ -145,20 +146,19 @@ asset.onDeinitialize(function ()
   openspace.action.removeAction(focus_iss)
 
   openspace.removeSceneGraphNode(issTrail)
-  openspace.removeSceneGraphNode(parentNode)
-  openspace.removeSceneGraphNode(iss)
+  openspace.removeSceneGraphNode(issModel)
+  openspace.removeSceneGraphNode(issPosition)
 end)
 
 asset.export(issTrail)
-asset.export(parentNode)
-asset.export(iss)
-
+asset.export(issModel)
+asset.export(issPosition)
 
 asset.meta = {
   Name = "ISS",
-  Version = "1.1",
+  Version = "2.0",
   Description = [[Model and Trail for ISS. Model from NASA 3D models, trail from
-    Celestrak]],
+    Celestrak.]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/",
   License = "NASA"

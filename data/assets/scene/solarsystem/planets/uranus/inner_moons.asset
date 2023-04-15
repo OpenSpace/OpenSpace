@@ -30,7 +30,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cordelia"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.335034,
@@ -47,7 +47,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Ophelia"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.376400,
@@ -64,7 +64,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Bianca"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.434579,
@@ -81,7 +81,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cressida"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.463570,
@@ -98,7 +98,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Desdemona"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.473650,
@@ -115,7 +115,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Juliet"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.493065,
@@ -132,7 +132,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Portia"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.513196,
@@ -149,7 +149,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Rosalind"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.558460,
@@ -166,7 +166,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cupid"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.618,
@@ -183,7 +183,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Belinda"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.623527,
@@ -200,7 +200,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Perdita"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.638,
@@ -217,7 +217,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Puck"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.761833,
@@ -234,7 +234,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Mab"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.923,
@@ -267,7 +267,7 @@ for i, moon in ipairs(innerMoons) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Uranus/Moons",
+      Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/" .. moon.Identifier,
       Description = "Label for Uranus' moon " .. moonName .. " (inner group)"
     }
   }

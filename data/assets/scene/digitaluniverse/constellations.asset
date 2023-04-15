@@ -1,3 +1,5 @@
+local constellations_helper = asset.require("util/constellations_helper")
+
 local speck = asset.syncedResource({
   Name = "Constellation Files",
   Type = "HttpSynchronization",
@@ -6,8 +8,7 @@ local speck = asset.syncedResource({
 })
 
 local zodiacs = {
-  "Cancer", "Taurus", "Pisces", "Aries", "Libra", "Aquarius", "Capricornus", "Scorpius",
-  "Virgo", "Sagittarius", "Gemini", "Leo"
+  "CNC", "TAU", "PSC", "ARI", "LIB", "AQR", "CAP", "SCO", "VIR", "SGR", "GEM", "LEO"
 }
 
 local constellationsExtragalactic = {
@@ -71,12 +72,80 @@ local constellations = {
   }
 }
 
+
+local getZodiacsString = function(zodiacsList)
+  local zodiacsString = "{"
+  local isFirst = true
+
+  for k, zodiac in pairs(zodiacsList) do
+    local fullName = constellations_helper.findFullName(zodiac)
+    if fullName ~= nil then
+      if isFirst then
+        isFirst = false
+      else
+        zodiacsString = zodiacsString .. ", "
+      end
+
+      zodiacsString = zodiacsString .. '"' .. fullName .. '"'
+    end
+  end
+
+  zodiacsString = zodiacsString .. "}"
+  return zodiacsString
+end
+
+local zodiacsString = getZodiacsString(zodiacs)
+
+-- Actions
+local show_constellations = {
+  Identifier = "constellations.show",
+  Name = "Show all",
+  Command = [[
+    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", {})
+    openspace.fadeIn("Scene.Constellations.Renderable")
+  ]],
+  Documentation = "Shows all the constellations lines",
+  GuiPath = "/Constellations/Lines",
+  IsLocal = false
+}
+
+local hide_constellations = {
+  Identifier = "constellations.hide",
+  Name = "Hide all",
+  Command = [[
+    openspace.fadeOut("Scene.Constellations.Renderable", nil, "openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', false); openspace.setPropertyValueSingle('Scene.Constellations.Renderable.ConstellationSelection', {})")
+  ]],
+  Documentation = "Hides all the constellations lines",
+  GuiPath = "/Constellations/Lines",
+  IsLocal = false
+}
+
+local show_zodiacs = {
+  Identifier = "constellation.show_zodiacs",
+  Name = "Show zodiac",
+  Command = [[
+    openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", ]] .. zodiacsString .. [[)
+    openspace.fadeIn("Scene.Constellations.Renderable")
+  ]],
+  Documentation = "Shows the zodiac constellations lines",
+  GuiPath = "/Constellations/Lines",
+  IsLocal = false
+}
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(constellationsExtragalactic)
   openspace.addSceneGraphNode(constellations)
+
+  openspace.action.registerAction(show_constellations)
+  openspace.action.registerAction(hide_constellations)
+  openspace.action.registerAction(show_zodiacs)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(show_zodiacs)
+  openspace.action.removeAction(hide_constellations)
+  openspace.action.removeAction(show_constellations)
+
   openspace.removeSceneGraphNode(constellations)
   openspace.removeSceneGraphNode(constellationsExtragalactic)
 end)
@@ -88,7 +157,7 @@ asset.export(constellations)
 
 asset.meta = {
   Name = "Constellations",
-  Version = "1.2",
+  Version = "1.3",
   Description = "Digital Universe asset for constellation lines",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

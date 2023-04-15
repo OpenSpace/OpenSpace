@@ -22,7 +22,7 @@ local CallistoTrail = {
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
   GUI = {
     Name = "Callisto Trail",
-    Path = "/Solar System/Planets/Jupiter/Moons"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Callisto"
   }
 }
 

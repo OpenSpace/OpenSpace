@@ -29,7 +29,7 @@ local otherGroups = {
     TrailTags = trailTags,
     GUI = {
       Name = "Eupheme",
-      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Groups/Eupheme"
     },
     TrailColor = trailColor,
     OrbitPeriod = 628.06,
@@ -47,7 +47,7 @@ local otherGroups = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2003 J 19",
-      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Groups/S2003J19"
     },
     TrailColor = trailColor,
     OrbitPeriod = 699.12,
@@ -65,7 +65,7 @@ local otherGroups = {
     TrailTags = trailTags,
     GUI = {
       Name = "Valetudo",
-      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Groups/Valetudo"
     },
     TrailColor = trailColor,
     OrbitPeriod = 527.41,
@@ -98,7 +98,7 @@ for i, moon in ipairs(otherGroups) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Jupiter/Moons",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Groups/" .. moon.Identifier,
       Description = "Label for Jupiter's moon " .. moonName .. " (other groups)"
     }
   }
@@ -136,7 +136,7 @@ asset.meta = {
   Name = "Jupiter Pasiphae Other Moons",
   Version = "1.0",
   Description = [[Procedural Globe asset containing Jupiter's Other Group moons: S2003J12,
-    S/2003J3, S2011J1, S2003J19, S2003J10, S2003J23, S2003J9, and S2003J2. Blank globes
+    S/2003J3, S2011J1, S2003J19, S2003J10, S2003J9, and S2003J2. Blank globes
     and SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

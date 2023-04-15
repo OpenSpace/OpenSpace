@@ -47,13 +47,17 @@ namespace {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture to be used for the color"
+        "texture to be used for the color",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the outer radius of the disc in meter"
+        "This value specifies the outer radius of the disc in meter",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
@@ -61,7 +65,8 @@ namespace {
         "Width",
         "This value is used to set the width of the disc. The actual width is set "
         "based on the given size and this value should be set between 0 and 1. A value "
-        "of 1 results in a full circle and 0.5 a disc with an inner radius of 0.5*size"
+        "of 1 results in a full circle and 0.5 a disc with an inner radius of 0.5*size",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableDisc)]] Parameters {
@@ -92,19 +97,19 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texturePath = p.texture.string();
-    _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath.value()); });
+    _texturePath.onChange([this]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
 
     _size.setExponent(13.f);
     _size = p.size.value_or(_size);
     setBoundingSphere(_size);
-    _size.onChange([&]() { _planeIsDirty = true; });
+    _size.onChange([this]() { _planeIsDirty = true; });
     addProperty(_size);
 
     _width = p.width.value_or(_width);
     addProperty(_width);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
 }

@@ -23,7 +23,7 @@ local majorMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+      Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.413479,
@@ -40,7 +40,7 @@ local majorMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+      Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
     },
     TrailColor = trailColor,
     OrbitPeriod = 2.520379,
@@ -57,7 +57,7 @@ local majorMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+      Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
     },
     TrailColor = trailColor,
     OrbitPeriod = 4.144177,
@@ -74,7 +74,7 @@ local majorMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+      Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
     },
     TrailColor = trailColor,
     OrbitPeriod = 8.705872,
@@ -91,7 +91,7 @@ local majorMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+      Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
     },
     TrailColor = trailColor,
     OrbitPeriod = 13.463239,
@@ -124,7 +124,7 @@ for i, moon in ipairs(majorMoons) do
     Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Uranus/Moons",
+      Path = "/Solar System/Planets/Uranus/Major Moons/" .. moon.Identifier,
       Description = "Label for Uranus' moon " .. moonName .. " (Major moon)"
     }
   }

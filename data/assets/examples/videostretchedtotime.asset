@@ -1,0 +1,39 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local data = asset.syncedResource({
+  Name = "Example Globe Video",
+  Type = "UrlSynchronization",
+  Identifier = "example_globe_video",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/test-video.mp4"
+})
+
+local spec = {
+  Identifier = "TestVideo",
+  Video = data .. "/test-video.mp4",
+  StartTime = '2023 01 29 20:00:00',
+  EndTime = '2023 01 29 21:00:00',
+  Name = "Test Video",
+  PlaybackMode = "MapToSimulationTime",
+  Enabled = asset.enabled,
+  Type = "VideoTileLayer",
+  Description = [[Video stretched to time]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(earth.Earth.Identifier, "ColorLayers", spec)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(earth.Earth.Identifier, "ColorLayers", spec)
+end)
+
+asset.export(spec)
+
+asset.meta = {
+  Name = "Video Stretched To Time",
+  Version = "1.0",
+  Description = "This is a video mapped to the simulation time in OpenSpace.",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT"
+}

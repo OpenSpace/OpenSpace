@@ -28,7 +28,7 @@ local gallicGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix"
     },
     TrailColor = trailColor,
     OrbitPeriod = 774.58,
@@ -45,7 +45,7 @@ local gallicGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn"
     },
     TrailColor = trailColor,
     OrbitPeriod = 838.77,
@@ -62,7 +62,7 @@ local gallicGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus"
     },
     TrailColor = trailColor,
     OrbitPeriod = 844.89,
@@ -79,7 +79,7 @@ local gallicGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos"
     },
     TrailColor = trailColor,
     OrbitPeriod = 944.23,
@@ -112,7 +112,7 @@ for i, moon in ipairs(gallicGroup) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Saturn/Moons",
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/" .. moon.Identifier,
       Description = "Label for Saturn's moon " .. moonName .. " (Gallic group)"
     }
   }

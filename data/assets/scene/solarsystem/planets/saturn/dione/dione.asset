@@ -45,7 +45,7 @@ local Dione = {
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
   GUI = {
-    Path = "/Solar System/Planets/Saturn/Moons"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Dione"
   }
 }
 
@@ -70,7 +70,7 @@ local DioneLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Dione Label",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Dione",
     Description = "Label for Saturn's moon Dione"
   }
 }

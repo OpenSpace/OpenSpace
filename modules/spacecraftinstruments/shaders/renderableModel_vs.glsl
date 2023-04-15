@@ -37,7 +37,6 @@ out vec4 vs_positionCameraSpace;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
-uniform vec3 cameraDirectionWorldSpace;
 uniform mat4 meshTransform;
 uniform mat4 meshNormalTransform;
 

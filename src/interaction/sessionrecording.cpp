@@ -63,21 +63,23 @@
 namespace {
     constexpr std::string_view _loggerCat = "SessionRecording";
 
+    constexpr bool UsingTimeKeyframes = false;
+
     constexpr openspace::properties::Property::PropertyInfo RenderPlaybackInfo = {
         "RenderInfo",
         "Render Playback Information",
         "If enabled, information about a currently played back session recording is "
-        "rendering to screen"
+        "rendering to screen",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IgnoreRecordedScaleInfo = {
         "IgnoreRecordedScale",
         "Ignore Recorded Scale",
         "If this value is enabled, the scale value from a recording is ignored and the "
-        "computed values are used instead"
+        "computed values are used instead",
+        openspace::properties::Property::Visibility::Hidden
     };
-
-    constexpr bool UsingTimeKeyframes = false;
 } // namespace
 
 namespace openspace::interaction {

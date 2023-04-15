@@ -35,3 +35,6 @@
 [submodule "modules/globebrowsing/ext/geos"]
 	path = modules/globebrowsing/ext/geos
 	url = https://github.com/OpenSpace/geos.git
+[submodule "documentation"]
+	path = documentation
+	url = https://github.com/OpenSpace/OpenSpace-Documentation-Dist.git

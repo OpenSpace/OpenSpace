@@ -38,32 +38,37 @@ namespace {
         "CpuAllocatedTileData",
         "CPU allocated tile data (MB)",
         "This value denotes the amount of RAM memory (in MB) that this tile cache is "
-        "utilizing"
+        "utilizing",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo GpuAllocatedDataInfo = {
         "GpuAllocatedTileData",
         "GPU allocated tile data (MB)",
         "This value denotes the amount of GPU memory (in MB) that this tile cache is "
-        "utilizing"
+        "utilizing",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile cache size",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyTileCacheInfo = {
         "ApplyTileCacheSize",
         "Apply tile cache size",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ClearTileCacheInfo = {
         "ClearTileCache",
         "Clear tile cache",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     GLenum toGlTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
@@ -272,10 +277,10 @@ MemoryAwareTileCache::MemoryAwareTileCache(int tileCacheSize)
 
     createDefaultTextureContainers();
 
-    _clearTileCache.onChange([&]() { clear(); });
+    _clearTileCache.onChange([this]() { clear(); });
     addProperty(_clearTileCache);
 
-    _applyTileCacheSize.onChange([&](){
+    _applyTileCacheSize.onChange([this](){
         setSizeEstimated(uint64_t(_tileCacheSize) * 1024ul * 1024ul);
     });
     addProperty(_applyTileCacheSize);
@@ -381,8 +386,8 @@ bool MemoryAwareTileCache::exist(const ProviderTileKey& key) const {
     const TextureContainerMap::const_iterator result = std::find_if(
         _textureContainerMap.cbegin(),
         _textureContainerMap.cend(),
-        [&](const std::pair<const TileTextureInitData::HashKey,
-                            TextureContainerTileCache>& p)
+        [&key](const std::pair<const TileTextureInitData::HashKey,
+                               TextureContainerTileCache>& p)
         {
             return p.second.second->exist(key);
         }
@@ -396,8 +401,8 @@ Tile MemoryAwareTileCache::get(const ProviderTileKey& key) {
     const TextureContainerMap::const_iterator it = std::find_if(
         _textureContainerMap.cbegin(),
         _textureContainerMap.cend(),
-        [&](const std::pair<const TileTextureInitData::HashKey,
-                            TextureContainerTileCache>& p)
+        [&key](const std::pair<const TileTextureInitData::HashKey,
+                               TextureContainerTileCache>& p)
         {
             return p.second.second->exist(key);
         }

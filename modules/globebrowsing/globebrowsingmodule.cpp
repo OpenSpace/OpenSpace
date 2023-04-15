@@ -97,7 +97,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile Cache Size",
-        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU"
+        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -111,13 +112,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MRFCacheEnabledInfo = {
         "MRFCacheEnabled",
         "MRF Cache Enabled",
-        "Determines whether automatic caching of globe browsing data is enabled."
+        "Determines whether automatic caching of globe browsing data is enabled.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MRFCacheLocationInfo = {
         "MRFCacheLocation",
         "MRF Cache Location",
-        "The location of the root folder for the MRF cache of globe browsing data."
+        "The location of the root folder for the MRF cache of globe browsing data.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     openspace::GlobeBrowsingModule::Capabilities
@@ -241,7 +244,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     _mrfCacheLocation = p.mrfCacheLocation.value_or(_mrfCacheLocation);
 
     // Initialize
-    global::callback::initializeGL->emplace_back([&]() {
+    global::callback::initializeGL->emplace_back([this]() {
         ZoneScopedN("GlobeBrowsingModule");
 
         _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
@@ -264,14 +267,14 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     });
 
     // Render
-    global::callback::render->emplace_back([&]() {
+    global::callback::render->emplace_back([this]() {
         ZoneScopedN("GlobeBrowsingModule");
 
         _tileCache->update();
     });
 
     // Deinitialize
-    global::callback::deinitialize->emplace_back([&]() {
+    global::callback::deinitialize->emplace_back([]() {
         ZoneScopedN("GlobeBrowsingModule");
 
         GdalWrapper::destroy();

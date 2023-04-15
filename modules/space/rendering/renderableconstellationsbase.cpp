@@ -37,24 +37,31 @@
 #include <optional>
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderableConstellationsBase";
+
     constexpr openspace::properties::Property::PropertyInfo NamesFileInfo = {
         "NamesFile",
         "Constellation Names File Path",
         "Specifies the file that contains the mapping between constellation "
         "abbreviations and full names of the constellations. If this value is empty, the "
-        "abbreviations are used as the full names"
+        "abbreviations are used as the full names",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The line width of the constellation"
+        "The line width of the constellation",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation Selection",
-        "The constellations that are selected are displayed on the celestial sphere"
+        "The constellations that are selected are displayed on the celestial sphere",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     const static openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
@@ -95,13 +102,13 @@ RenderableConstellationsBase::RenderableConstellationsBase(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     // Avoid reading files here, instead do it in multithreaded initialize()
     if (p.namesFile.has_value()) {
         _namesFilename = absPath(p.namesFile.value().string()).string();
     }
-    _namesFilename.onChange([&]() { loadConstellationFile(); });
+    _namesFilename.onChange([this]() { loadConstellationFile(); });
     addProperty(_namesFilename);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
@@ -125,8 +132,7 @@ std::string RenderableConstellationsBase::constellationFullName(
                                                       const std::string& identifier) const
 {
     if (_namesTranslation.empty() || identifier.empty()) {
-        std::string message = "List of constellations or the given identifier was empty";
-        LWARNINGC("RenderableConstellationsBase", message);
+        LWARNING("List of constellations or the given identifier was empty");
         return "";
     }
 
@@ -134,11 +140,9 @@ std::string RenderableConstellationsBase::constellationFullName(
         return _namesTranslation.at(identifier);
     }
 
-    std::string message = fmt::format(
+    throw ghoul::RuntimeError(fmt::format(
         "Identifier '{}' could not be found in list of constellations", identifier
-    );
-    LERRORC("RenderableConstellationsBase", message);
-    return "";
+    ));
 }
 
 void RenderableConstellationsBase::loadConstellationFile() {
