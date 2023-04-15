@@ -1,0 +1,32 @@
+local data = asset.syncedResource({
+  Name = "Example Globe Video",
+  Type = "UrlSynchronization",
+  Identifier = "example_globe_video",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/video/chlorophyll_model_2048.mp4"
+})
+
+local spec = {
+  Type = "ScreenSpaceVideo",
+  Identifier = "ScreenSpaceVideoExample",
+  Name = "Screen Space Video Example",
+  Video = data .. "/chlorophyll_model_2048.mp4"
+};
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(spec)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(spec)
+end)
+
+asset.export(spec)
+
+asset.meta = {
+  Name = "Video ScreenSpace",
+  Version = "1.0",
+  Description = "An example asset that shows how to include a video in screen space",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT"
+}

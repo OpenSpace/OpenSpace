@@ -21,7 +21,7 @@ local IapetusTrail = {
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
   GUI = {
     Name = "Iapetus Trail",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus",
     Description = "Trail of Saturn's moon Iapetus as observed by Saturn",
   }
 }

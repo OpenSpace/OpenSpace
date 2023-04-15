@@ -29,7 +29,7 @@ local carpoGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Carpo Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo"
     },
     TrailColor = trailColor,
     OrbitPeriod = 458.62,
@@ -47,7 +47,7 @@ local carpoGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2018 J 4",
-      Path = "/Solar System/Planets/Jupiter/Moons/Carpo Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4"
     },
     TrailColor = trailColor,
     OrbitPeriod = 427.631,
@@ -80,7 +80,7 @@ for i, moon in ipairs(carpoGroup) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Jupiter/Moons",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/" .. moon.Identifier,
       Description = "Label for Jupiter's moon " .. moonName .. " (Carpo group)"
     }
   }
@@ -107,7 +107,7 @@ for i, moon in ipairs(carpoGroup) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label (Near)",
-      Path = "/Solar System/Planets/Jupiter/Moons",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/" .. moon.Identifier,
       Description = "Transitional Label for close-range viewing of " .. moonName .. " (Carpo group)"
     }
   }

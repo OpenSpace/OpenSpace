@@ -40,7 +40,7 @@ local Atmosphere = {
   },
   GUI = {
     Name = "Titan Atmosphere",
-    Path = "/Solar System/Planets/Saturn/Moons/Titan"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Titan"
   }
 }
 

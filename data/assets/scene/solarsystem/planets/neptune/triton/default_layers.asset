@@ -1,0 +1,11 @@
+asset.require("./layers/colorlayers/Triton_Voyager2_ClrMosaic_GlobalFill_600m_newyork", true)
+
+
+asset.meta = {
+  Name = "Default Triton Layers",
+  Version = "1.0",
+  Description = "Default Triton layers are: Voyager2 Mosaic",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

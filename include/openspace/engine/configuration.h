@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___CONFIGURATION___H__
 #define __OPENSPACE_CORE___CONFIGURATION___H__
 
+#include <openspace/properties/property.h>
 #include <openspace/util/keys.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/dictionary.h>
@@ -47,6 +48,11 @@ struct Configuration {
     std::string windowConfiguration = "${CONFIG}/single.xml";
     std::string asset;
     std::string profile;
+
+    properties::Property::Visibility propertyVisibility =
+        properties::Property::Visibility::User;
+
+    std::vector<std::string> readOnlyWindowConfigs;
     std::vector<std::string> readOnlyProfiles;
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {

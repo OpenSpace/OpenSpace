@@ -41,6 +41,7 @@
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
+#include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/network/parallelpeer.h>
@@ -118,20 +119,23 @@ namespace {
         "PrintEvents",
         "Print Events",
         "If this is enabled, all events that are propagated through the system are "
-        "printed to the log"
+        "printed to the log",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "PropertyVisibility",
         "Property Visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
-        "are"
+        "are",
+        openspace::properties::Property::Visibility::Always
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHiddenSceneInfo = {
         "ShowHiddenSceneGraphNodes",
         "Show Hidden Scene Graph Nodes",
-        "If checked, hidden scene graph nodes are visible in the UI"
+        "If checked, hidden scene graph nodes are visible in the UI",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeDurationInfo = {
@@ -140,14 +144,17 @@ namespace {
         "Controls how long time the fading in/out takes when enabling/disabling an "
         "object through a checkbox in the UI. Holding SHIFT while clicking the "
         "checkbox will enable/disable the renderable without fading, as will setting "
-        "this value to zero."
+        "this value to zero.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
         "Disable All Mouse Inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
-        "double inputs on touch (from both touch input and inserted mouse inputs)"
+        "double inputs on touch (from both touch input and inserted mouse inputs)",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 } // namespace
 
@@ -168,10 +175,6 @@ OpenSpaceEngine::OpenSpaceEngine()
     TransformationManager::initialize();
 
     addProperty(_printEvents);
-    addProperty(_visibility);
-    addProperty(_showHiddenSceneGraphNodes);
-    addProperty(_fadeOnEnableDuration);
-    addProperty(_disableAllMouseInputs);
 
     using Visibility = openspace::properties::Property::Visibility;
     _visibility.addOptions({
@@ -181,6 +184,11 @@ OpenSpaceEngine::OpenSpaceEngine()
         { static_cast<int>(Visibility::Developer), "Developer" },
         { static_cast<int>(Visibility::Hidden), "Everything" },
     });
+    addProperty(_visibility);
+
+    addProperty(_showHiddenSceneGraphNodes);
+    addProperty(_fadeOnEnableDuration);
+    addProperty(_disableAllMouseInputs);
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {}
@@ -224,6 +232,7 @@ void OpenSpaceEngine::initialize() {
     );
 
     _printEvents = global::configuration->isPrintingEvents;
+    _visibility = static_cast<int>(global::configuration->propertyVisibility);
 
     std::string cacheFolder = absPath("${CACHE}").string();
     if (global::configuration->usePerProfileCache) {
@@ -1029,13 +1038,13 @@ void OpenSpaceEngine::writeDocumentation() {
     path = absPath(path).string() + '/';
 
     // Start the async requests as soon as possible so they are finished when we need them
-    std::future<std::string> root = std::async(
-        &properties::PropertyOwner::generateJson,
+    std::future<nlohmann::json> settings = std::async(
+        &properties::PropertyOwner::generateJsonJson,
         global::rootPropertyOwner
     );
 
-    std::future<std::string> scene = std::async(
-        &properties::PropertyOwner::generateJson,
+    std::future<nlohmann::json> scene = std::async(
+        &properties::PropertyOwner::generateJsonJson,
         _scene.get()
     );
 
@@ -1044,56 +1053,41 @@ void OpenSpaceEngine::writeDocumentation() {
     DocEng.addHandlebarTemplates(FactoryManager::ref().templatesToRegister());
     DocEng.addHandlebarTemplates(DocEng.templatesToRegister());
 
-    std::string json = "{\"documentation\":[";
+    nlohmann::json scripting;
+    scripting["Name"] = "Scripting API";
+    scripting["Data"] = global::scriptEngine->generateJsonJson();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Scripting",
-        global::scriptEngine->jsonName(),
-        global::scriptEngine->generateJson()
-    );
+    nlohmann::json factory;
+    factory["Name"] = "Asset Types";
+    factory["Data"] = FactoryManager::ref().generateJsonJson();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Top Level", DocEng.jsonName(), DocEng.generateJson()
-    );
-
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Factory", FactoryManager::ref().jsonName(), FactoryManager::ref().generateJson()
-    );
-
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Keybindings",
-        global::keybindingManager->jsonName(),
-        global::keybindingManager->generateJson()
-    );
+    nlohmann::json keybindings;
+    keybindings["Name"] = "Keybindings";
+    keybindings["Keybindings"] = global::keybindingManager->generateJsonJson();
 
     SceneLicenseWriter writer;
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Scene License Information", writer.jsonName(), writer.generateJson()
-    );
+    nlohmann::json license;
+    license["Name"] = "Licenses";
+    license["Data"] = writer.generateJsonJson();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Scene Properties", "propertylist", root.get()
-    );
+    nlohmann::json sceneProperties;
+    sceneProperties["Name"] = "Settings";
+    sceneProperties["Data"] = settings.get();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}})",
-        "Scene Graph Information", "propertylist", scene.get()
-    );
+    nlohmann::json sceneGraph;
+    sceneGraph["Name"] = "Scene";
+    sceneGraph["Data"] = scene.get();
 
-    json += "]}";
+    nlohmann::json documentation = { 
+        sceneGraph, sceneProperties, keybindings, license, scripting, factory 
+    };
 
-    // Add templates for the JSONs we just registered
-    DocEng.addHandlebarTemplates(global::keybindingManager->templatesToRegister());
-    DocEng.addHandlebarTemplates(writer.templatesToRegister());
-    DocEng.addHandlebarTemplates(global::rootPropertyOwner->templatesToRegister());
+    nlohmann::json result;
+    result["documentation"] = documentation;
 
-    DocEng.writeDocumentationHtml(path, json);
+    std::ofstream out(absPath("${DOCUMENTATION}/documentationData.js"));
+    out << "var data = " << result.dump();
+    out.close();
 }
 
 void OpenSpaceEngine::preSynchronization() {
@@ -1167,8 +1161,6 @@ void OpenSpaceEngine::preSynchronization() {
     if (_isRenderingFirstFrame) {
         setCameraFromProfile(*global::profile);
         setAdditionalScriptsFromProfile(*global::profile);
-
-        global::scriptEngine->runScriptFile(absPath("${SCRIPTS}/developer_settings.lua"));
     }
 
     // Handle callback(s) for change in engine mode

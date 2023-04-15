@@ -21,7 +21,7 @@ local DioneTrail = {
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
   GUI = {
     Name = "Dione Trail",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Dione",
     Description = "Trail of Saturn's moon Dione as observed by Saturn",
   }
 }

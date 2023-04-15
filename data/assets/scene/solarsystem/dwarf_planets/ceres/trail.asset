@@ -13,7 +13,7 @@ local CeresTrail = {
       Observer = "SSB",
       Kernels = kernels
     },
-    Color = { 0.7, 0.8, 0.7 },
+    Color = { 0.2, 0.8, 0.3 },
     Period = 1680,
     Resolution = 1000
   },

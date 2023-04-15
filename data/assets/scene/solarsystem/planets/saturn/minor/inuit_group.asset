@@ -28,7 +28,7 @@ local inuitGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq"
     },
     TrailColor = trailColor,
     OrbitPeriod = 448.16,
@@ -45,7 +45,7 @@ local inuitGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq"
     },
     TrailColor = trailColor,
     OrbitPeriod = 451.77,
@@ -62,7 +62,7 @@ local inuitGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq"
     },
     TrailColor = trailColor,
     OrbitPeriod = 692.98,
@@ -79,7 +79,7 @@ local inuitGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq"
     },
     TrailColor = trailColor,
     OrbitPeriod = 884.88,
@@ -96,7 +96,7 @@ local inuitGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq"
     },
     TrailColor = trailColor,
     OrbitPeriod = 894.86,
@@ -114,7 +114,7 @@ local inuitGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 29",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29"
     },
     TrailColor = trailColor,
     OrbitPeriod = 858.77,
@@ -132,7 +132,7 @@ local inuitGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2004 S 31",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31"
     },
     TrailColor = trailColor,
     OrbitPeriod = 853.80,
@@ -150,7 +150,7 @@ local inuitGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2019 S 01",
-      Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01"
     },
     TrailColor = trailColor,
     OrbitPeriod = 443.78,
@@ -183,7 +183,7 @@ for i, moon in ipairs(inuitGroup) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Saturn/Moons",
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/" .. moon.Identifier,
       Description = "Label for Saturn's moon " .. moonName .. " (Inuit group)"
     }
   }

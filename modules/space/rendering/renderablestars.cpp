@@ -120,108 +120,124 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
         "SpeckFile",
         "Speck File",
-        "The speck file that is loaded to get the data for rendering these stars"
+        "The speck file that is loaded to get the data for rendering these stars",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "ColorBV Texture",
         "The path to the texture that is used to convert from the B-V value of the star "
-        "to its color. The texture is used as a one dimensional lookup function"
+        "to its color. The texture is used as a one dimensional lookup function",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingBvInfo = {
         "MappingBV",
         "Mapping (bv-color)",
         "The name of the variable in the speck file that is used as the b-v color "
-        "variable"
+        "variable",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingLuminanceInfo = {
         "MappingLuminance",
         "Mapping (luminance)",
         "The name of the variable in the speck file that is used as the luminance "
-        "variable"
+        "variable",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingAbsMagnitudeInfo = {
         "MappingAbsMagnitude",
         "Mapping (absolute magnitude)",
         "The name of the variable in the speck file that is used as the absolute "
-        "magnitude variable"
+        "magnitude variable",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingAppMagnitudeInfo = {
         "MappingAppMagnitude",
         "Mapping (apparent magnitude)",
         "The name of the variable in the speck file that is used as the apparent "
-        "magnitude variable"
+        "magnitude variable",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingVxInfo = {
         "MappingVx",
         "Mapping (vx)",
         "The name of the variable in the speck file that is used as the star velocity "
-        "along the x-axis"
+        "along the x-axis",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingVyInfo = {
         "MappingVy",
         "Mapping (vy)",
         "The name of the variable in the speck file that is used as the star velocity "
-        "along the y-axis"
+        "along the y-axis",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingVzInfo = {
         "MappingVz",
         "Mapping (vz)",
         "The name of the variable in the speck file that is used as the star velocity "
-        "along the z-axis"
+        "along the z-axis",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingSpeedInfo = {
         "MappingSpeed",
         "Mapping (speed)",
-        "The name of the variable in the speck file that is used as the speed"
+        "The name of the variable in the speck file that is used as the speed",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
         "This value determines which quantity is used for determining the color of the "
-        "stars"
+        "stars",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataOptionInfo = {
         "OtherData",
         "Other Data Column",
-        "The index of the speck file data column that is used as the color input"
+        "The index of the speck file data column that is used as the color input",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataValueRangeInfo = {
         "OtherDataValueRange",
         "Range of the other data values",
         "This value is the min/max value range that is used to normalize the other data "
-        "values so they can be used by the specified color map"
+        "values so they can be used by the specified color map",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FixedColorInfo = {
         "FixedColorValue",
         "Color used for fixed star colors",
-        "The color that should be used if the 'Fixed Color' value is used"
+        "The color that should be used if the 'Fixed Color' value is used",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataColorMapInfo = {
         "OtherDataColorMap",
         "Other Data Color Map",
-        "The color map that is used if the 'Other Data' rendering method is selected"
+        "The color map that is used if the 'Other Data' rendering method is selected",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterOutOfRangeInfo = {
         "FilterOutOfRange",
         "Filter Out of Range",
         "Determines whether other data values outside the value range should be visible "
-        "or filtered away"
+        "or filtered away",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     // Old Method
@@ -229,7 +245,8 @@ namespace {
         "Texture",
         "Point Spread Function Texture",
         "The path to the texture that should be used as a point spread function for the "
-        "stars"
+        "stars",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     //constexpr openspace::properties::Property::PropertyInfo ShapeTextureInfo = {
@@ -244,13 +261,16 @@ namespace {
         "Magnitude Exponent",
         "Adjust star magnitude by 10^MagnitudeExponent. Stars closer than this distance "
         "are given full opacity. Farther away, stars dim proportionally to the "
-        "logarithm of their distance"
+        "logarithm of their distance",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderMethodOptionInfo = {
         "RenderMethod",
         "Render Method",
-        "Render method for the stars"
+        "Render method for the stars",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo
@@ -279,31 +299,36 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PSFMethodOptionInfo = {
         "PSFMethodOptionInfo",
         "PSF Method Option",
-        "Debug option for PSF main function: Spencer or Moffat"
+        "Debug option for PSF main function: Spencer or Moffat",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeCompositionOptionInfo = {
         "SizeComposition",
         "Size Composition Option",
-        "Base multiplyer for the final stars' sizes"
+        "Base multiplyer for the final stars' sizes",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LumPercentInfo = {
         "LumPercent",
         "Luminosity Contribution",
-        "Luminosity Contribution"
+        "Luminosity Contribution",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusPercentInfo = {
         "RadiusPercent",
         "Radius Contribution",
-        "Radius Contribution"
+        "Radius Contribution",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrightnessPercentInfo = {
         "BrightnessPercent",
         "App Brightness Contribution",
-        "App Brightness Contribution"
+        "App Brightness Contribution",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo
@@ -317,25 +342,29 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo P0ParamInfo = {
         "P0Param",
         "P0",
-        "P0 parameter contribution"
+        "P0 parameter contribution",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo P1ParamInfo = {
         "P1Param",
         "P1",
-        "P1 parameter contribution"
+        "P1 parameter contribution",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo P2ParamInfo = {
         "P2Param",
         "P2",
-        "P2 parameter contribution"
+        "P2 parameter contribution",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AlphaConstInfo = {
         "AlphaConst",
         "Alpha",
-        "Empirical Alpha Constant"
+        "Empirical Alpha Constant",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo
@@ -349,13 +378,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FWHMInfo = {
         "FWHM",
         "FWHM",
-        "Moffat's FWHM"
+        "Moffat's FWHM",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BetaInfo = {
         "Beta",
         "Beta",
-        "Moffat's Beta Constant"
+        "Moffat's Beta Constant",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
@@ -363,13 +394,15 @@ namespace {
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
         "our galaxy from which the astronomical object will start and end "
-        "fading-in"
+        "fading-in",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
         "Disable Fade-in effect",
-        "Enables/Disables the Fade-in effect"
+        "Enables/Disables the Fade-in effect",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableStars)]] Parameters {
@@ -512,7 +545,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _lumCent(LumPercentInfo, 0.5f, 0.f, 3.f)
     , _radiusCent(RadiusPercentInfo, 0.5f, 0.f, 3.f)
     , _brightnessCent(BrightnessPercentInfo, 0.5f, 0.f, 3.f)
-    , _magnitudeExponent(MagnitudeExponentInfo, 4.f, 0.f, 8.f)
+    , _magnitudeExponent(MagnitudeExponentInfo, 6.2f, 5.f, 8.f)
     , _spencerPSFParamOwner(SpencerPSFParamOwnerInfo)
     , _p0Param(P0ParamInfo, 0.384f, 0.f, 1.f)
     , _p1Param(P1ParamInfo, 0.478f, 0.f, 1.f)

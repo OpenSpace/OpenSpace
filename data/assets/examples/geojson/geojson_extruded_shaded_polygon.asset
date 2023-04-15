@@ -1,0 +1,49 @@
+local earth = asset.require('scene/solarsystem/planets/earth/earth')
+local earthIdentifier = earth.Earth.Identifier
+
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+local data = asset.syncedResource({
+  Name = "GeoJSON Example Africa",
+  Type = "UrlSynchronization",
+  Identifier = "geojson_example_polygon_extruded_africa",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_extruded_africa.geojson"
+})
+
+local Example_Polygon = {
+  Identifier = "Earth-Polygon-withLights",
+  File = data .. "polygon_extruded_africa.geojson",
+  HeightOffset = 20000.0,
+  DefaultProperties = {
+    Color = { 0.0, 1.0, 0.0 },
+    FillColor = { 0.5, 0.6, 0.5 },
+    LineWidth = 0.5,
+    FillOpacity = 1.0,
+    PerformShading = true
+  },
+  LightSources = {
+    sun.LightSource
+  },
+  Name = "Extruded and Shaded Polygon (lit by Sun)"
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Polygon)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Polygon)
+end)
+
+asset.export(Example_Polygon)
+
+
+asset.meta = {
+  Name = "GeoJson Example - Extruded and Shaded Polygon",
+  Version = "1.0",
+  Description = [[GeoJson example asset demonstrating how to apply shading from light
+    sources on polygons]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

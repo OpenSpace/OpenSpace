@@ -4,7 +4,7 @@ local trajectory = asset.syncedResource({
   Name = "C-2019 Q4 Borisov Trajectory",
   Type = "HttpSynchronization",
   Identifier = "borisov_horizons",
-  Version = 2
+  Version = 3
 })
 
 local C2019Q4BorisovTrail = {

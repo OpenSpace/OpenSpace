@@ -47,7 +47,7 @@ local Io = {
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
   GUI = {
-    Path = "/Solar System/Planets/Jupiter/Moons"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Io"
   }
 }
 
@@ -72,7 +72,7 @@ local IoLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Io Label",
-    Path = "/Solar System/Planets/Jupiter/Moons",
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Io",
     Description = "Label for Jupiter's moon Io"
   }
 }
