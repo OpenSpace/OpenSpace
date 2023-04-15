@@ -1,8 +1,8 @@
 local globeIdentifier = asset.require("../../venus").Venus.Identifier
 
 local layer = {
-  Identifier = "MagellanElevation_Utah",
-  Name = "Magellan Elevation [Utah]",
+  Identifier = "MagellanElevation_NewYork",
+  Name = "Magellan Elevation [New York]",
   Enabled = asset.enabled,
   Description = [[Elevation layer for Venus. The represents the version 2
     (1997 release) of the Global Topographic Data Record (GTDR-SINUS.3;2).
@@ -14,7 +14,7 @@ local layer = {
     the in-plane elements of each spacecraft orbit, and then originally re-sampled
     into sinusoidal, Mercator, and north and south polar stereographic projections
     at a resolution of 5 kilometers per pixel (4641 meters per pixel [m])]],
-  FilePath = asset.localResource("magellan_utah.wms"),
+  FilePath = asset.localResource("magellan_newyork.wms"),
   TilePixelSize = 256,
   Settings = {
     Gamma = 1.72,
@@ -38,7 +38,7 @@ asset.meta = {
   Name = "Venus Magellan DEM",
   Version = "1.0",
   Description = [[Map layer for Venus containting Venus Magellan DEM from the USGS.
-    Hosted on the OpenSpace servers in Utah]],
+    Hosted on the OpenSpace servers in New York]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Venus/Magellan/RadarProperties" ..
     "/Venus_Magellan_Topography_Global_4641m_v02",
