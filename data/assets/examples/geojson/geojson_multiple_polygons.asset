@@ -1,9 +1,19 @@
 local earth = asset.require('scene/solarsystem/planets/earth/earth')
 local earthIdentifier = earth.Earth.Identifier
 
+local data = asset.syncedResource({
+  Name = "GeoJSON Example Polygon Multiple",
+  Type = "UrlSynchronization",
+  Identifier = "geojson_example_polygon_multiple",
+  Url = {
+    "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_multiple.geojson",
+    "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_different_heights.geojson"
+  }
+})
+
 local Example_Polygon = {
   Identifier = "Earth-Polygon",
-  File = asset.localResource("./files/polygon_multiple.geojson"),
+  File = data .. "polygon_multiple.geojson",
   HeightOffset = 20000.0,
   DefaultProperties = {
     Color = { 1.0, 0.0, 0.0 },
@@ -14,7 +24,7 @@ local Example_Polygon = {
 
 local Example_Polygon_Diff_Heights = {
   Identifier = "Earth-Polygon-Different-Heights",
-  File = asset.localResource("./files/polygon_different_heights.geojson"),
+  File = data .. "polygon_different_heights.geojson",
   HeightOffset = 20000.0,
   DefaultProperties = {
     Color = { 0.5, 0.0, 1.0 },

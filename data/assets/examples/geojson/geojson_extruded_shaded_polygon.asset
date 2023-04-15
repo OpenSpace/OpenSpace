@@ -3,9 +3,16 @@ local earthIdentifier = earth.Earth.Identifier
 
 local sun = asset.require("scene/solarsystem/sun/sun")
 
+local data = asset.syncedResource({
+  Name = "GeoJSON Example Africa",
+  Type = "UrlSynchronization",
+  Identifier = "geojson_example_polygon_extruded_africa",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_extruded_africa.geojson"
+})
+
 local Example_Polygon = {
   Identifier = "Earth-Polygon-withLights",
-  File = asset.localResource("./files/polygon_extruded_africa.geojson"),
+  File = data .. "polygon_extruded_africa.geojson",
   HeightOffset = 20000.0,
   DefaultProperties = {
     Color = { 0.0, 1.0, 0.0 },

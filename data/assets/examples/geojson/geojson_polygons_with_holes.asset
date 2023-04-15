@@ -1,9 +1,16 @@
 local earth = asset.require('scene/solarsystem/planets/earth/earth')
 local earthIdentifier = earth.Earth.Identifier
 
+local data = asset.syncedResource({
+  Name = "GeoJSON Example Polygon with holes",
+  Type = "UrlSynchronization",
+  Identifier = "geojson_example_polygon_with_holes",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_with_holes.geojson"
+})
+
 local Example_Holes = {
   Identifier = "PolygonWithHoles",
-  File = asset.localResource("./files/polygon_with_holes.geojson"),
+  File = data .. "polygon_with_holes.geojson",
   HeightOffset = 2000.0,
   DefaultProperties = {
     Color = { 0.0, 1.0, 1.0 }
@@ -20,7 +27,6 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Example_Holes)
-asset.export(Example_Holes_Overlapping)
 
 
 asset.meta = {

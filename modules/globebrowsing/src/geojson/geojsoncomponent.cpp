@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/json.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/lightsource.h>
@@ -40,17 +41,15 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <geos/geom/Geometry.h>
-#include <geos/io/GeoJSON.h>
-#include <geos/io/GeoJSONReader.h>
 #include <filesystem>
 #include <fstream>
 #include <functional>
 #include <optional>
 
-// This has to be included after the geos files, since they have their own version
-// of the nlohmann json library. Doing it in the other order leads to conflicts..
-#include <openspace/json.h>
+namespace geos_nlohmann = nlohmann;
+#include <geos/geom/Geometry.h>
+#include <geos/io/GeoJSON.h>
+#include <geos/io/GeoJSONReader.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "GeoJsonComponent";

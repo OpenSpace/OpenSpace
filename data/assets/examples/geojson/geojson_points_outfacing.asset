@@ -1,9 +1,16 @@
 local earth = asset.require('scene/solarsystem/planets/earth/earth')
 local earthIdentifier = earth.Earth.Identifier
 
+local data = asset.syncedResource({
+  Name = "GeoJSON Example Outfacing",
+  Type = "UrlSynchronization",
+  Identifier = "geojson_example_points",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/points.geojson"
+})
+
 local Example_Points = {
   Identifier = "Points-Example-outfacing",
-  File = asset.localResource("./files/points.geojson"),
+  File = data .. "points.geojson",
   HeightOffset = 20000.0,
   DefaultProperties = {
     PointSize = 10.0

@@ -1,9 +1,16 @@
 local mars = asset.require('scene/solarsystem/planets/mars/mars')
 local marsIdentifier = mars.Mars.Identifier
 
+local data = asset.syncedResource({
+  Name = "GeoJSON Example Path Perseverance",
+  Type = "UrlSynchronization",
+  Identifier = "geojson_example_path_perseverance",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/path_perseverance.geojson"
+})
+
 local Example_RoverPath = {
   Identifier = "Mars-Perseverance-Path",
-  File = asset.localResource("./files/path_perseverance.geojson"),
+  File = data .. "path_perseverance.geojson",
   HeightOffset = 10.0,
   IgnoreHeights = true, -- Ignores height values from the file itself
   DefaultProperties = {

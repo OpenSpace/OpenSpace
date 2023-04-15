@@ -1,9 +1,16 @@
 local earth = asset.require('scene/solarsystem/planets/earth/earth')
 local earthIdentifier = earth.Earth.Identifier
 
+local data = asset.syncedResource({
+  Name = "GeoJSON Example Toronto Neighborhoods",
+  Type = "UrlSynchronization",
+  Identifier = "geojson_example_toronto_neighborhoods",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/toronto_neighborhoods.geojson"
+})
+
 local Example_Toronto = {
   Identifier = "Toronto-Neighborhoods",
-  File = asset.localResource("./files/toronto_neighborhoods.geojson"),
+  File = data .. "toronto_neighborhoods.geojson",
   HeightOffset = 1000.0,
   DefaultProperties = {
     Color = { 0.0, 1.0, 0.0 },
