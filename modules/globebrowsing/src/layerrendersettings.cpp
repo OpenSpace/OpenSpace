@@ -31,7 +31,7 @@ namespace {
         "If this value is triggered it will reset all of these values to their default "
         "values",
         // @VISIBILITY(1.67)
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {

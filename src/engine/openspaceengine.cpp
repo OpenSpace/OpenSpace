@@ -175,10 +175,6 @@ OpenSpaceEngine::OpenSpaceEngine()
     TransformationManager::initialize();
 
     addProperty(_printEvents);
-    addProperty(_visibility);
-    addProperty(_showHiddenSceneGraphNodes);
-    addProperty(_fadeOnEnableDuration);
-    addProperty(_disableAllMouseInputs);
 
     using Visibility = openspace::properties::Property::Visibility;
     _visibility.addOptions({
@@ -188,6 +184,11 @@ OpenSpaceEngine::OpenSpaceEngine()
         { static_cast<int>(Visibility::Developer), "Developer" },
         { static_cast<int>(Visibility::Hidden), "Everything" },
     });
+    addProperty(_visibility);
+
+    addProperty(_showHiddenSceneGraphNodes);
+    addProperty(_fadeOnEnableDuration);
+    addProperty(_disableAllMouseInputs);
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {}
@@ -231,6 +232,7 @@ void OpenSpaceEngine::initialize() {
     );
 
     _printEvents = global::configuration->isPrintingEvents;
+    _visibility = static_cast<int>(global::configuration->propertyVisibility);
 
     std::string cacheFolder = absPath("${CACHE}").string();
     if (global::configuration->usePerProfileCache) {
@@ -1159,8 +1161,6 @@ void OpenSpaceEngine::preSynchronization() {
     if (_isRenderingFirstFrame) {
         setCameraFromProfile(*global::profile);
         setAdditionalScriptsFromProfile(*global::profile);
-
-        global::scriptEngine->runScriptFile(absPath("${SCRIPTS}/developer_settings.lua"));
     }
 
     // Handle callback(s) for change in engine mode
