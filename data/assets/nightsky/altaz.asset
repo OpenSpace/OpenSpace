@@ -57,7 +57,7 @@ local grid = {
 }
 
 local showAction = {
-  Identifier = "os.show_altaz",
+  Identifier = "os.nightsky.show_altaz",
   Name = "Show Alt/Az grid",
   Command = [[
     local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
@@ -73,13 +73,13 @@ local showAction = {
     openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 0.0);
     openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 1.0, 1.0);
   ]],
-  Documentation = "Shows the Alt/Az grid",
+  Documentation = "Shows a local Altitude/Azimuth grid centered around your position",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
 
 local hideAction = {
-  Identifier = "os.hide_altaz",
+  Identifier = "os.nightsky.hide_altaz",
   Name = "Hide Alt/Az grid",
   Command = [[
     openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 0, 1);

@@ -1,6 +1,7 @@
 {
   "additional_scripts": [
-    "openspace.action.triggerAction(\"os.planetarium.level_horizon_pitch\")"
+    "openspace.action.triggerAction(\"os.nightsky.level_horizon_pitch\")",
+    ""
   ],
   "assets": [
     "base",
@@ -31,20 +32,6 @@
     7200.0,
     14400.0
   ],
-  "keybindings": [
-    {
-      "action": "os.solarsystem.earth.togglesatellitetrails",
-      "key": "S"
-    },
-    {
-      "action": "os.solarsystem.earth.iss.focus",
-      "key": "I"
-    },
-    {
-      "action": "os.solarsystem.earth.focus",
-      "key": "HOME"
-    }
-  ],
   "mark_nodes": [
     "Earth",
     "Mars",
@@ -55,7 +42,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles",
+    "description": "A profile starting at night on the surface of earth looking out at the horizon. The city lights map has been disabled.",
     "license": "MIT License",
     "name": "Default",
     "url": "https://www.openspaceproject.com",

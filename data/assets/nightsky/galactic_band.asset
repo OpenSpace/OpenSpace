@@ -25,7 +25,7 @@ local band = {
 }
 
 local showAction = {
-  Identifier = "os.show_galactic_band",
+  Identifier = "os.nightsky.show_galactic_band",
   Name = "Show galactic band",
   Command = [[
     openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 0.0);
@@ -38,7 +38,7 @@ local showAction = {
 }
   
 local hideAction = {
-  Identifier = "os.hide_galactic_band",
+  Identifier = "os.nightsky.hide_galactic_band",
   Name = "Hide galactic band",
   Command = [[
     openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 0.0, 1.0);

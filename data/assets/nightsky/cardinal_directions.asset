@@ -23,8 +23,8 @@ local Position = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
       Latitude = 0.0,
-      Longitude = 0,
-      UseHeightmap = false,
+      Longitude = 0.0,
+      UseCamera = true,
       Angle = 270.0
     }
   },
@@ -39,10 +39,6 @@ local sphere = {
   Identifier = "CardinalDirectionSphere",
   Parent = Position.Identifier,
   Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 1
-    },
     Rotation = {
       Type = "StaticRotation",
       Rotation = { -math.pi, 0.0, 0.0 }
@@ -81,18 +77,18 @@ local showCommand = [[
 ]]
 
 local showBandAction = {
-  Identifier = "os.show_nesw_band",
+Identifier = "os.nightsky.show_nesw_band",
   Name = "Show cardinal directions (with ticks)",
   Command = "openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Texture','"
   .. textures:gsub("\\","/") .. "sphere5.png')"
   .. showCommand,
-  Documentation = "Shows the cardinal direction sphere with letters and a band",
+  Documentation = "Shows the cardinal direction sphere with letters and circle with tick marks",
   GuiPath = "/Night Sky/Directions",
   IsLocal = false
 }
 
 local showLettersAction = {
-  Identifier = "os.show_nesw_letters",
+  Identifier = "os.nightsky.show_nesw_letters",
   Name = "Show cardinal directions (letters only)",
   Command = "openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Texture','"
   .. textures:gsub("\\","/") .. "sphere.png')"
@@ -103,7 +99,7 @@ local showLettersAction = {
 }
 
 local hideAction = {
-  Identifier = "os.hide_nesw",
+  Identifier = "os.nightsky.hide_nesw",
   Name = "Hide cardinal directions",
   Command = [[
     openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0.0, 1.0);

@@ -7,8 +7,7 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-
-local Position = {
+local position = {
   Identifier = "ZenithPosition",
   Parent = earthAsset.Earth.Identifier,
   Transform = {
@@ -36,13 +35,13 @@ local Position = {
   }
 }
 
-local Plane = {
+local plane = {
   Identifier = "ZenithDot",
-  Parent = Position.Identifier,
+  Parent = position.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi, 90.0, 0.0 }
+      Rotation = { -math.pi, 0.0, 0.0 }
     },
   },
   Renderable = {
@@ -61,7 +60,7 @@ local Plane = {
 }
 
 local showAction = {
-  Identifier = "os.show_zenith",
+  Identifier = "os.nigthsky.show_zenith",
   Name = "Show local zenith",
   Command = [[
     local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
@@ -83,7 +82,7 @@ local showAction = {
 }
 
 local hideAction = {
-  Identifier = "os.hide_zenith",
+  Identifier = "os.nigthsky.hide_zenith",
   Name = "Hide local zenith",
   Command = [[
     openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 0.0, 1.0);
@@ -94,8 +93,8 @@ local hideAction = {
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Position)
-  openspace.addSceneGraphNode(Plane)
+  openspace.addSceneGraphNode(position)
+  openspace.addSceneGraphNode(plane)
   openspace.action.registerAction(hideAction)
   openspace.action.registerAction(showAction)
 end)
@@ -103,11 +102,11 @@ end)
 asset.onDeinitialize(function()
   openspace.action.removeAction(showAction)
   openspace.action.removeAction(hideAction)
-  openspace.removeSceneGraphNode(Plane)
-  openspace.removeSceneGraphNode(Position)
+  openspace.removeSceneGraphNode(plane)
+  openspace.removeSceneGraphNode(position)
 end)
 
-asset.export(Position)
-asset.export(Plane)
+asset.export(position)
+asset.export(plane)
 asset.export(hideAction)
 asset.export(showAction)

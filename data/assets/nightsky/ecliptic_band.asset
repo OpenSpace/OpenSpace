@@ -70,5 +70,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(band)
 end)
   
-  asset.export(band)
-  
+asset.export(band)
+asset.export(showAction)
+asset.export(hideAction)

@@ -7,7 +7,7 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-local Position = {
+local position = {
   Identifier = "MeridianPosition",
   Parent = earthAsset.Earth.Identifier,
   Transform = {
@@ -34,9 +34,9 @@ local Position = {
   }
 }
 
-local Plane = {
+local plane = {
   Identifier = "Meridian",
-  Parent = Position.Identifier,
+  Parent = position.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -60,7 +60,7 @@ local Plane = {
 }
 
 local showAction = {
-  Identifier = "os.show_meridian",
+  Identifier = "os.nightsky.show_meridian",
   Name = "Show local meridian",
   Command = [[
     local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
@@ -82,7 +82,7 @@ local showAction = {
 }
 
 local hideAction = {
-  Identifier = "os.hide_meridian",
+  Identifier = "os.nightsky.hide_meridian",
   Name = "Hide local meridian",
   Command = [[
     openspace.setPropertyValueSingle('Scene.Meridian.Renderable.Fade', 0.0, 1.0);
@@ -93,8 +93,8 @@ local hideAction = {
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Position)
-  openspace.addSceneGraphNode(Plane)
+  openspace.addSceneGraphNode(position)
+  openspace.addSceneGraphNode(plane)
   openspace.action.registerAction(hideAction)
   openspace.action.registerAction(showAction)
 end)
@@ -102,11 +102,11 @@ end)
 asset.onDeinitialize(function()
   openspace.action.removeAction(showAction)
   openspace.action.removeAction(hideAction)
-  openspace.removeSceneGraphNode(Plane)
-  openspace.removeSceneGraphNode(Position)
+  openspace.removeSceneGraphNode(plane)
+  openspace.removeSceneGraphNode(position)
 end)
 
-asset.export(Position)
-asset.export(Plane)
+asset.export(position)
+asset.export(plane)
 asset.export(hideAction)
 asset.export(showAction)

@@ -98,7 +98,7 @@ public:
     void tickIdleBehaviorTimer(double deltaTime);
     void triggerIdleBehavior(std::string_view choice = "");
 
-    void tickMovementTimer(double deltaTime);
+    void tickMovementTimer(float deltaTime);
 
     Camera* camera() const;
     void setCamera(Camera* camera);
