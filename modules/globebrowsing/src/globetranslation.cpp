@@ -89,7 +89,7 @@ namespace {
         "Use Camera",
         "If this value is 'true', the lat and lon are updated to match the camera",
         // @VISIBILITY(?)
-        openspace::properties::PropertyInfo::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseCameraAltitudeInfo = {
@@ -97,7 +97,7 @@ namespace {
         "Use Camera Altitude",
         "If this value is 'true', the altitude is updated to match the camera",
         // @VISIBILITY(?)
-        openspace::properties::PropertyInfo::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {

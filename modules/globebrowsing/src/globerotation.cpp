@@ -88,7 +88,7 @@ namespace {
         "Use Camera",
         "If this value is 'true', the lat and lon are updated to match the camera",
         // @VISIBILITY(?)
-        openspace::properties::PropertyInfo::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(GlobeRotation)]] Parameters {
