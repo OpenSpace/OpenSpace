@@ -104,6 +104,6 @@ else (WIN32)
   find_package(Vulkan REQUIRED)
 
   target_include_directories(openspace-module-video SYSTEM PRIVATE ${Libmpv_INCLUDE_DIRS})
-  target_link_libraries(openspace-module-video PRIVATE ${LIBMPV_LIBRARIES} Vulkan::Vulkan)
-  mark_as_advanced(LIBMPV_CONFIG LIBMPV_INCLUDE_DIRS LIBMPV_LIBRARIES)
+  target_link_libraries(openspace-module-video PRIVATE ${Libmpv_LIBRARIES} Vulkan::Vulkan)
+  mark_as_advanced(LIBMPV_CONFIG Libmpv_INCLUDE_DIRS Libmpv_LIBRARIES)
 endif () # WIN32
