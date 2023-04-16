@@ -19,19 +19,19 @@ openspace.globebrowsing.documentation = {
   },
   {
     Name = "getSunriseTime",
-    Arguments = { time = "String"},
+    Arguments = { globeIdentifier = "String", time = "String"},
     Documentation =
         "Returns the next sunrise time after the supplied date " ..
         "Usage: openspace.globebrowsing.getSunriseTime(" ..
-        "\"2023-04-16T12:36:28.773\")"
+        "\"Earth\", \"2023-04-16T12:36:28.773\")"
   },
   {
     Name = "getSunsetTime",
-    Arguments = { time = "String"},
+    Arguments = { globeIdentifier = "String", time = "String"},
     Documentation =
         "Returns the next sunset time after the supplied date " ..
         "Usage: openspace.globebrowsing.getSunsetTime(" ..
-        "\"2023-04-16T12:36:28.773\")"
+        "\"Earth\", \"2023-04-16T12:36:28.773\")"
   }
 }
 
@@ -65,7 +65,11 @@ openspace.globebrowsing.setNodePositionFromCamera = function (node_identifer, us
     end
 end
 
-openspace.globebrowsing.getSunriseTime = function(date)
+openspace.globebrowsing.getSunriseTime = function(globe, date)
+  if globe ~= "Earth" then
+    openspace.printWarning('Currently only Earth is supported for sunrise times')
+    return date
+  end
   local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
   local angle = noaa_sun_position(lat, lon, date)[1]
   local newTime = date;
@@ -84,7 +88,11 @@ openspace.globebrowsing.getSunriseTime = function(date)
     return newTime;
 end
 
-openspace.globebrowsing.getSunsetTime = function(date)
+openspace.globebrowsing.getSunsetTime = function(globe, date)
+  if globe ~= "Earth" then
+    openspace.printWarning('Currently only Earth is supported for sunset times')
+    return date
+  end
   local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
   local angle = noaa_sun_position(lat, lon, date)[1]
   local newTime = date;
