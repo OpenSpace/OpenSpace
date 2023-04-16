@@ -1,12 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local textures = asset.syncedResource({
-  Name = "Planetarium Textures",
-  Type = "HttpSynchronization",
-  Identifier = "planetarium_textures",
-  Version = 1
-})
-
 local equatorialRotationMatrix = {
     -0.05487554,  0.4941095, -0.8676661,
     -0.8734371,  -0.4448296, -0.1980764,

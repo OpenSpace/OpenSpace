@@ -1,9 +1,9 @@
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
 local textures = asset.syncedResource({
-  Name = "Planetarium Textures",
+  Name = "Zenith Textures",
   Type = "HttpSynchronization",
-  Identifier = "planetarium_textures",
+  Identifier = "zenith_textures",
   Version = 1
 })
 
