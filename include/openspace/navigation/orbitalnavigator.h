@@ -98,6 +98,8 @@ public:
     void tickIdleBehaviorTimer(double deltaTime);
     void triggerIdleBehavior(std::string_view choice = "");
 
+    void tickMovementTimer(float deltaTime);
+
     Camera* camera() const;
     void setCamera(Camera* camera);
     void clearPreviousState();
@@ -252,6 +254,8 @@ private:
 
     IdleBehavior _idleBehavior;
     float _idleBehaviorTriggerTimer = 0.f;
+
+    float _movementTimer = 0.f;
 
     /**
      * Decomposes the camera's rotation in to a global and a local rotation defined by

@@ -1,22 +1,22 @@
 openspace.globebrowsing.documentation = {
-    {
-        Name = "setNodePosition",
-        Arguments = { nodeIdentifer = "String", globeIdentifier = "String", latitude = "Number", longitude = "Number", altitude = "Number" },
-        Documentation =
-            "Sets the position of a SceneGraphNode that has GlobeTranslation/GlobeRotations. " ..
-            "Usage: openspace.globebrowsing.setNodePosition(" ..
-            "\"Scale_StatueOfLiberty\", \"Earth\", 40.000, -117.5, optionalAltitude)"
-    },
-    {
-        Name = "setNodePositionFromCamera",
-        Arguments = { nodeIdentifer = "String", useAltitude = "Number" },
-        Documentation =
-            "Sets the position of a SceneGraphNode that has GlobeTranslation/GlobeRotations" ..
-            " to match the camera. Only uses camera position not rotation. If useAltitude" ..
-            " is true, then the position will also be updated to the camera's altitude." ..
-            "Usage: openspace.globebrowsing.setNodePositionFromCamera(" ..
-            "\"Scale_StatueOfLiberty\", optionalUseAltitude)"
-    }    
+  {
+    Name = "setNodePosition",
+    Arguments = { nodeIdentifer = "String", globeIdentifier = "String", latitude = "Number", longitude = "Number", altitude = "Number" },
+    Documentation =
+        "Sets the position of a SceneGraphNode that has GlobeTranslation/GlobeRotations. " ..
+        "Usage: openspace.globebrowsing.setNodePosition(" ..
+        "\"Scale_StatueOfLiberty\", \"Earth\", 40.000, -117.5, optionalAltitude)"
+  },
+  {
+    Name = "setNodePositionFromCamera",
+    Arguments = { nodeIdentifer = "String", useAltitude = "Boolean" },
+    Documentation =
+        "Sets the position of a SceneGraphNode that has GlobeTranslation/GlobeRotations" ..
+        " to match the camera. Only uses camera position not rotation. If useAltitude" ..
+        " is true, then the position will also be updated to the camera's altitude." ..
+        "Usage: openspace.globebrowsing.setNodePositionFromCamera(" ..
+        "\"Scale_StatueOfLiberty\", optionalUseAltitude)"
+  }
 }
 
 openspace.globebrowsing.setNodePosition = function (node_identifer, globe_identifier, lat, lon, altitude)
@@ -48,6 +48,3 @@ openspace.globebrowsing.setNodePositionFromCamera = function (node_identifer, us
         openspace.setPropertyValueSingle('Scene.' .. node_identifer .. '.Translation.Altitude', alt);
     end
 end
-
-
-

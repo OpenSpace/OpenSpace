@@ -713,6 +713,19 @@ void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputSt
     else {
         tickIdleBehaviorTimer(deltaTime);
     }
+
+    bool cameraLocationChanged = _mouseStates.hasNonZeroVelocities(true) ||
+        _joystickStates.hasNonZeroVelocities(true) ||
+        _websocketStates.hasNonZeroVelocities(true) ||
+        _scriptStates.hasNonZeroVelocities(true);
+
+    if (cameraLocationChanged && (_movementTimer < 0.f)) {
+        global::eventEngine->publishEvent<events::EventCameraMovedPosition>();
+        _movementTimer = _idleBehavior.idleWaitTime;
+    }
+    else if (!cameraLocationChanged) {
+        tickMovementTimer(deltaTime);
+    }
 }
 
 void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
@@ -900,6 +913,10 @@ void OrbitalNavigator::updateOnCameraInteraction() {
     if (_idleBehavior.apply && _idleBehavior.abortOnCameraInteraction) {
         resetIdleBehavior();
     }
+}
+
+void OrbitalNavigator::tickMovementTimer(float deltaTime) {
+    _movementTimer -= deltaTime;
 }
 
 void OrbitalNavigator::tickIdleBehaviorTimer(double deltaTime) {

@@ -1,0 +1,75 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+local equatorialRotationMatrix = {
+    -0.05487554,  0.4941095, -0.8676661,
+    -0.8734371,  -0.4448296, -0.1980764,
+    -0.483835,     0.7469823,  0.4559838
+}
+
+local line = {
+  Identifier = "EquatorialLine",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 4.28601E17;
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = equatorialRotationMatrix
+    }
+  },
+  Renderable = {
+    Type = "RenderableRadialGrid",
+    Opacity = 0.8,
+    Color = { 1.0, 1.0, 1.0 },
+    LineWidth = 3.0,
+    GridSegments = { 1, 1 },
+    Radii = { 0.5, 0.5 },
+    Enabled = asset.enabled
+  },
+  GUI = {
+    Name = "Equatorial Line",
+    Path = "/Other/Lines"
+  }
+}
+
+local showLineAction = {
+  Identifier = "os.nightsky.show_equatorial_line",
+  Name = "Show equatorial line",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Fade', 0.0);
+    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Enabled', true);
+    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Fade', 1.0, 1.0);
+  ]],
+  Documentation = "Shows the equatorial line",
+  GuiPath = "/Night Sky/Lines and Grids",
+  IsLocal = false
+}
+
+local hideLineAction = {
+  Identifier = "os.nightsky.hide_equatorial_line",
+  Name = "Hide equatorial line",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Fade', 0.0, 1.0);
+  ]],
+  Documentation = "Hides the equatorial line",
+  GuiPath = "/Night Sky/Lines and Grids",
+  IsLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(line)
+  openspace.action.registerAction(showLineAction)
+  openspace.action.registerAction(hideLineAction)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.action.removeAction(hideLineAction)
+  openspace.action.removeAction(showLineAction)
+  openspace.removeSceneGraphNode(line)
+end)
+  
+asset.export(line)
+asset.export(showLineAction)
+asset.export(hideLineAction)
