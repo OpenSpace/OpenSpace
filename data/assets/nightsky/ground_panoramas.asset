@@ -2,9 +2,18 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
 local textures = asset.syncedResource({
   Name = "Ground Panorama Textures",
-  Type = "HttpSynchronization",
+  Type = "UrlSynchronization",
   Identifier = "ground_panorama_textures",
-  Version = 1
+  Url = {
+    "https://wms.openspace.amnh.org/static/sync/url/panos/0.png",
+    "https://wms.openspace.amnh.org/static/sync/url/panos/1.png",
+    "https://wms.openspace.amnh.org/static/sync/url/panos/2.png",
+    "https://wms.openspace.amnh.org/static/sync/url/panos/3.png",
+    "https://wms.openspace.amnh.org/static/sync/url/panos/4.png",
+    "https://wms.openspace.amnh.org/static/sync/url/panos/5.png",
+    "https://wms.openspace.amnh.org/static/sync/url/panos/6.png",
+  },
+  Override = false
 })
 
 local position = {
