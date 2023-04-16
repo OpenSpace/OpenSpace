@@ -45,7 +45,7 @@ local sphere = {
   },
   GUI = {
     Name = "Light Pollution Sphere",
-    Path = "/Night Sky/Light Pollution",
+    Path = "/Other/Night Sky",
     Hidden = false
   }
 }

@@ -27,7 +27,7 @@ local Mercury = {
   Tag = { "nightsky_billboard"},
   GUI = {
     Name = "Night Sky Mercury",
-    Path = "/Night Sky/Planets"
+    Path = "/Other/Night Sky/Planets"
   }
 }
 
@@ -47,7 +47,7 @@ local Venus = {
   Tag = { "nightsky_billboard"},
   GUI = {
     Name = "Night Sky Venus",
-    Path = "/Night Sky/Planets"
+    Path = "/Other/Night Sky/Planets"
   }
 }
 
@@ -67,7 +67,7 @@ local Mars = {
   Tag = { "nightsky_billboard"},
   GUI = {
     Name = "Night Sky Mars",
-    Path = "/Night Sky/Planets"
+    Path = "/Other/Night Sky/Planets"
   }
 }
 
@@ -87,7 +87,7 @@ local Jupiter = {
   Tag = { "nightsky_billboard"},
   GUI = {
     Name = "Night Sky Jupiter",
-    Path = "/Night Sky/Planets"
+    Path = "/Other/Night Sky/Planets"
   }
 }
 
@@ -107,7 +107,7 @@ local Saturn = {
   Tag = { "nightsky_billboard"},
   GUI = {
     Name = "Night Sky Saturn",
-    Path = "/Night Sky/Planets"
+    Path = "/Other/Night Sky/Planets"
   }
 }
 

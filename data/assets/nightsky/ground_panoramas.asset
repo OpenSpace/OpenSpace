@@ -40,8 +40,8 @@ local position = {
   },
   GUI = {
     Name = "Ground Pano Position",
-    Path = "/Night Sky/Panoramas",
-    Hidden = false
+    Path = "/Other/Night Sky",
+    Hidden = true
   }
 }
 
@@ -69,7 +69,7 @@ local sphere = {
   },
   GUI = {
     Name = "Ground Panorama",
-    Path = "/Night Sky/Panoramas"
+    Path = "/Other/Night Sky"
   }
 }
 

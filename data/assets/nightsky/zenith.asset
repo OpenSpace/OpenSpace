@@ -30,8 +30,8 @@ local position = {
   },
   GUI = {
     Name = "Zenith Position",
-    Path = "/Night Sky/Lines and Grids",
-    Hidden = false
+    Path = "/Other/Points",
+    Hidden = true
   }
 }
 
@@ -55,7 +55,7 @@ local plane = {
   },
   GUI = {
     Name = "Zenith",
-    Path = "/Night Sky/Lines and Grids"
+    Path = "/Other/Points"
   }
 }
 

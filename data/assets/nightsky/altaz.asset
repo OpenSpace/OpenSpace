@@ -24,7 +24,7 @@ local gridPosition = {
   },
   GUI = {
     Name = "Altitude/Azimuth Grid Position",
-    Path = "/Night Sky/Lines and Grids",
+    Path = "/Other/Grids",
     Hidden = true
   }
 }
@@ -52,7 +52,7 @@ local grid = {
   },
   GUI = {
     Name = "Altitude/Azimuth Grid",
-    Path = "/Night Sky/Lines and Grids"
+    Path = "/Other/Grids"
   }
 }
 

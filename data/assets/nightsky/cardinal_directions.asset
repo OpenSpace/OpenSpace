@@ -37,7 +37,7 @@ local Position = {
   },
   GUI = {
     Name = "Cardinal Directions Position",
-    Path = "/Night Sky/Directions",
+    Path = "/Other/Night Sky",
     Hidden = true
   }
 }
@@ -64,7 +64,7 @@ local sphere = {
   },
   GUI = {
     Name = "Cardinal Directions",
-    Path = "/Night Sky/Directions"
+    Path = "/Other/Night Sky"
   }
 }
 

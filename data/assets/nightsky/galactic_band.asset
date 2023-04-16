@@ -20,7 +20,7 @@ local band = {
     },
     GUI = {
         Name = "Galactic Band",
-        Path = "/Night Sky/Lines and Grids"
+        Path = "/Other/Lines"
     }
 }
 
