@@ -52,33 +52,6 @@ local gotoSunsetInstant = {
   IsLocal = false
 }
 
-local gotoNoon10Seconds = {
-  Identifier = "os.nightsky.goto_noon_10s",
-  Name = "Goto noon (10s)",
-  Command = "openspace.time.interpolateTime(openspace.globebrowsing.getNoonTime(openspace.time.UTC()), 10);",
-  Documentation = "Interoplates the time to the next noon over 10 seconds",
-  GuiPath = "/Night Sky/Time/Sun",
-  IsLocal = false
-}
-
-local gotoNoonDefault = {
-  Identifier = "os.nightsky.goto_noon_default",
-  Name = "Goto noon (default)",
-  Command = "openspace.time.interpolateTime(openspace.globebrowsing.getNoonTime(openspace.time.UTC()));",
-  Documentation = "Interoplates the time to the next noon using the defaultTimeInterpolate setting",
-  GuiPath = "/Night Sky/Time/Sun",
-  IsLocal = false
-}
-
-local gotoNoonInstant = {
-  Identifier = "os.nightsky.goto_noon_instant",
-  Name = "Goto noon (instant)",
-  Command = "openspace.time.setTime(openspace.globebrowsing.getNoonTime(openspace.time.UTC()));",
-  Documentation = "Sets the time to the next noon instantly",
-  GuiPath = "/Night Sky/Time/Sun",
-  IsLocal = false
-}
-
 asset.onInitialize(function()
   openspace.action.registerAction(gotoSunrise10Seconds)
   openspace.action.registerAction(gotoSunriseDefault)
@@ -86,9 +59,6 @@ asset.onInitialize(function()
   openspace.action.registerAction(gotoSunset10Seconds)
   openspace.action.registerAction(gotoSunsetDefault)
   openspace.action.registerAction(gotoSunsetInstant)
-  openspace.action.registerAction(gotoNoon10Seconds)
-  openspace.action.registerAction(gotoNoonDefault)
-  openspace.action.registerAction(gotoNoonInstant)
 end)
 
 asset.onDeinitialize(function()
@@ -98,9 +68,6 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(gotoSunset10Seconds)
   openspace.action.removeAction(gotoSunsetDefault)
   openspace.action.removeAction(gotoSunsetInstant)
-  openspace.action.removeAction(gotoNoon10Seconds)
-  openspace.action.removeAction(gotoNoonDefault)
-  openspace.action.removeAction(gotoNoonInstant)
 end)
 
 asset.export(gotoSunrise10Seconds)
@@ -109,6 +76,3 @@ asset.export(gotoSunriseInstant)
 asset.export(gotoSunset10Seconds)
 asset.export(gotoSunsetDefault)
 asset.export(gotoSunsetInstant)
-asset.export(gotoNoon10Seconds)
-asset.export(gotoNoonDefault)
-asset.export(gotoNoonInstant)

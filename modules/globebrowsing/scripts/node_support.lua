@@ -32,16 +32,7 @@ openspace.globebrowsing.documentation = {
         "Returns the next sunset time after the supplied date " ..
         "Usage: openspace.globebrowsing.getSunsetTime(" ..
         "\"2023-04-16T12:36:28.773\")"
-  },
-  {
-    Name = "getNoonTime",
-    Arguments = { time = "String"},
-    Documentation =
-        "Returns the next noon time after the supplied date " ..
-        "Usage: openspace.globebrowsing.getNoonTime(" ..
-        "\"2023-04-16T12:36:28.773\")"
   }
-
 }
 
 openspace.globebrowsing.setNodePosition = function (node_identifer, globe_identifier, lat, lon, altitude)
@@ -104,23 +95,6 @@ openspace.globebrowsing.getSunsetTime = function (date)
   end
   if (counter > 1440) then
     openspace.printWarning('No sunset time found')
-  end
-  return newTime;
-end
-
-openspace.globebrowsing.getNoonTime = function (date)
-  local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
-  local angle = noaa_sun_position(lat, lon, date)[1]
-  local newTime = date;
-  local counter = 0;
-  while ( (angle < 257) or (angle > 258) ) do
-    newTime = openspace.time.advancedTime(newTime, "1m")
-    angle = noaa_sun_position(lat, lon, newTime)[1]
-    counter = counter + 1
-    if (counter == 1441) then break end
-  end
-  if (counter > 1440) then
-    openspace.printWarning('No noon time found')
   end
   return newTime;
 end
