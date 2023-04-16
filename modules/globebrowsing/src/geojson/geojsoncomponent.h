@@ -66,6 +66,7 @@ class RenderableGlobe;
 class GeoJsonComponent : public properties::PropertyOwner, public Fadeable {
 public:
     GeoJsonComponent(const ghoul::Dictionary& dictionary, RenderableGlobe& globe);
+    virtual ~GeoJsonComponent();
 
     void initialize();
     void initializeGL();
