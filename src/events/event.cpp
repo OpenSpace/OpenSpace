@@ -207,10 +207,7 @@ void log(int i, const EventCameraPathFinished& e) {
 
 void log(int i, const EventCameraMovedPosition& e) {
     ghoul_assert(e.type == EventCameraMovedPosition::Type, "Wrong type");
-    LINFO(fmt::format(
-        "[{}] EventCameraMovedPosition",
-        i
-    ));
+    LINFO(fmt::format("[{}] EventCameraMovedPosition", i));
 }
 
 void log(int i, const CustomEvent& e) {

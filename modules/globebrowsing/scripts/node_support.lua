@@ -9,7 +9,7 @@ openspace.globebrowsing.documentation = {
   },
   {
     Name = "setNodePositionFromCamera",
-    Arguments = { nodeIdentifer = "String", useAltitude = "Number" },
+    Arguments = { nodeIdentifer = "String", useAltitude = "Boolean" },
     Documentation =
         "Sets the position of a SceneGraphNode that has GlobeTranslation/GlobeRotations" ..
         " to match the camera. Only uses camera position not rotation. If useAltitude" ..
@@ -65,16 +65,18 @@ openspace.globebrowsing.setNodePositionFromCamera = function (node_identifer, us
     end
 end
 
-openspace.globebrowsing.getSunriseTime = function (date)
+openspace.globebrowsing.getSunriseTime = function(date)
   local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
   local angle = noaa_sun_position(lat, lon, date)[1]
   local newTime = date;
   local counter = 0;
-  while ( (angle < 128) or (angle > 129) ) do
+  while ((angle < 128.0) or (angle > 129.0)) do
     newTime = openspace.time.advancedTime(newTime, "1m")
     angle = noaa_sun_position(lat, lon, newTime)[1]
     counter = counter + 1
-    if (counter == 1441) then break end
+    if (counter == 1441) then
+        break
+    end
   end
   if (counter > 1440) then
     openspace.printWarning('No sunrise time found')
@@ -82,16 +84,18 @@ openspace.globebrowsing.getSunriseTime = function (date)
     return newTime;
 end
 
-openspace.globebrowsing.getSunsetTime = function (date)
+openspace.globebrowsing.getSunsetTime = function(date)
   local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
   local angle = noaa_sun_position(lat, lon, date)[1]
   local newTime = date;
   local counter = 0;
-  while ( (angle < 353) or (angle > 354) ) do
+  while ((angle < 353.0) or (angle > 354.0)) do
     newTime = openspace.time.advancedTime(newTime, "1m")
     angle = noaa_sun_position(lat, lon, newTime)[1]
     counter = counter + 1
-    if (counter == 1441) then break end
+    if (counter == 1441) then
+        break
+    end
   end
   if (counter > 1440) then
     openspace.printWarning('No sunset time found')
@@ -109,29 +113,37 @@ function noaa_sun_position(lat, long, datetime, tzoffset)
 
   datetime = os.date("!*t", convertedTimestamp)
   tzoffset = tzoffset or -5
-  local datetime= os.date("*t",os.time(datetime) - 5 * 60 * 60)
+  local datetime = os.date("*t",os.time(datetime) - 5 * 60 * 60)
   local day_of_year = os.date("%j", os.time(datetime))
   local fract_year = (2 * math.pi / 365) * ( day_of_year - 1 + (os.date("*t").hour - 5 - 12) / 24)
 
-  local eqtime = 229.18*
-                      (0.000075+
-                      0.001868*math.cos(fract_year)
-                  - 0.032077 * math.sin(fract_year)
-                  - 0.014615 * math.cos(2*fract_year)
-                  - 0.040849 * math.sin(2*fract_year))
-  local decl = 0.006918
-          - 0.399912*math.cos(fract_year )
-          + 0.070257*math.sin(fract_year )
-          - 0.006758*math.cos(2*fract_year )
-          + 0.000907*math.sin(2*fract_year )
-          -0.002697*math.cos(3*fract_year )
-          + 0.00148*math.sin (3*fract_year )
+  local eqtime = 229.18 *
+    (0.000075+ 0.001868 * math.cos(fract_year) -
+     0.032077 * math.sin(fract_year) -
+     0.014615 * math.cos(2 * fract_year) -
+     0.040849 * math.sin(2 * fract_year))
+  local decl = 0.006918 - 0.399912 * math.cos(fract_year) +
+    0.070257 * math.sin(fract_year) -
+    0.006758 * math.cos(2 * fract_year) +
+    0.000907 * math.sin(2 * fract_year) -
+    0.002697 * math.cos(3 * fract_year) +
+    0.00148 * math.sin(3 * fract_year)
   local time_offset = eqtime + 4 * long - 60 * -5
-  local tst = datetime.hour*60 + datetime.min  + datetime.sec/60 + time_offset
-  local ha = (tst / 4) -180
-  local cos_zenith =  math.sin(math.rad(lat))*math.sin(decl) + math.cos(math.rad(lat))* math.cos(decl) *math.cos(math.rad(ha))
-  local azimuth = math.atan(-math.cos(math.rad(decl)) * math.sin(math.rad(ha)), math.sin(math.rad(decl)) * math.cos(math.rad(lat)) - math.cos(math.rad(decl)) * math.sin(math.rad(lat)) * math.cos(math.rad(ha)))
-  return {((math.deg(azimuth) > 0 and math.deg(azimuth)) or ( math.deg(azimuth) + 360 )) , 90-math.deg(math.acos(cos_zenith)) , ha, decl}
+  local tst = datetime.hour * 60 + datetime.min  + datetime.sec / 60 + time_offset
+  local ha = (tst / 4) - 180
+  local cos_zenith = math.sin(math.rad(lat))*math.sin(decl) +
+    math.cos(math.rad(lat))* math.cos(decl) *math.cos(math.rad(ha))
+  local azimuth = math.atan(
+    -math.cos(math.rad(decl)) * math.sin(math.rad(ha)),
+    math.sin(math.rad(decl)) * math.cos(math.rad(lat)) -
+      math.cos(math.rad(decl)) * math.sin(math.rad(lat)) * math.cos(math.rad(ha))
+  )
+  return {
+    ((math.deg(azimuth) > 0 and math.deg(azimuth)) or (math.deg(azimuth) + 360)),
+    90 - math.deg(math.acos(cos_zenith)),
+    ha,
+    decl
+  }
 end
 
 
