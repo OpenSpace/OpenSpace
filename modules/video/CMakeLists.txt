@@ -92,7 +92,7 @@ if (WIN32)
 
   target_link_libraries(openspace-module-globebrowsing PUBLIC libmpv libopenh264)
 else (WIN32)
-  find_package(LIBMPV REQUIRED)
+  find_package(Libmpv REQUIRED)
 
   target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${LIBMPV_INCLUDE_DIR})
   target_link_libraries(openspace-module-globebrowsing PRIVATE ${LIBMPV_LIBRARY})
