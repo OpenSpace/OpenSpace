@@ -45,6 +45,13 @@ set(SOURCE_FILES
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
+create_new_module(
+  "Video"
+  video_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES}
+)
+
 # Libmpv
 if (WIN32)
   set(LIBMPV_ROOT "${CMAKE_CURRENT_BINARY_DIR}/ext/libmpv" CACHE INTERNAL "LIBMPV_ROOT")
@@ -90,18 +97,13 @@ if (WIN32)
     IMPORTED_IMPLIB "${LIBMPV_ROOT}/libmpv/lib/mpv.lib"
   )
 
-  target_link_libraries(openspace-module-globebrowsing PUBLIC libmpv libopenh264)
+  target_link_libraries(openspace-module-video PUBLIC libmpv libopenh264)
 else (WIN32)
-  find_package(LIBMPV REQUIRED)
+  find_package(Libmpv REQUIRED)
+  # For some reason libmpv on Ubuntu doesn't link if Vulkan is not included too
+  find_package(Vulkan REQUIRED)
 
-  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${LIBMPV_INCLUDE_DIR})
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${LIBMPV_LIBRARY})
-  mark_as_advanced(LIBMPV_CONFIG LIBMPV_INCLUDE_DIR LIBMPV_LIBRARY)
+  target_include_directories(openspace-module-video SYSTEM PRIVATE ${Libmpv_INCLUDE_DIRS})
+  target_link_libraries(openspace-module-video PRIVATE ${Libmpv_LIBRARIES} Vulkan::Vulkan)
+  mark_as_advanced(LIBMPV_CONFIG Libmpv_INCLUDE_DIRS Libmpv_LIBRARIES)
 endif () # WIN32
-
-create_new_module(
-  "Video"
-  video_module
-  STATIC
-  ${HEADER_FILES} ${SOURCE_FILES}
-)

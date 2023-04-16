@@ -429,6 +429,8 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     addPropertySubOwner(_featuresPropertyOwner);
 }
 
+GeoJsonComponent::~GeoJsonComponent() {}
+
 bool GeoJsonComponent::enabled() const {
     return _enabled;
 }
