@@ -55,8 +55,9 @@ local constellations = {
     NamesFile = speck .. "constellations.dat",
     Colors = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
     Unit = "pc",
-    -- Selection = zodiacs
+    DimInAtmosphere = true
   },
+  Tag = {"daytime_hidden"},
   GUI = {
     Name = "Constellations",
     Path = "/Milky Way/Constellations",

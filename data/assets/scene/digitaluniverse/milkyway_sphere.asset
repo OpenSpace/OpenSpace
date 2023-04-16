@@ -26,6 +26,7 @@ local sphere = {
     Background = true,
     DimInAtmosphere = true,
   },
+  Tag = {"daytime_hidden"},
   GUI = {
     Name = "Milky Way Sphere",
     Path = "/Milky Way",
