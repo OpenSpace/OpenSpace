@@ -42,7 +42,7 @@ local sphere = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi, 0.0, 0.0 }
+      Rotation = { -math.pi/2, 0.0, 0.0 }
     },
   },
   Renderable = {
