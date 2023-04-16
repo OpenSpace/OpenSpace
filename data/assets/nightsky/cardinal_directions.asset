@@ -2,9 +2,16 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
 local textures = asset.syncedResource({
   Name = "Cardinal Direction Textures",
-  Type = "HttpSynchronization",
+  Type = "UrlSynchronization",
   Identifier = "cardinal_direction_textures",
-  Version = 1
+  Url = {
+    "https://wms.openspace.amnh.org/static/sync/url/directions/sphere.png",
+    "https://wms.openspace.amnh.org/static/sync/url/directions/sphere2.png",
+    "https://wms.openspace.amnh.org/static/sync/url/directions/sphere3.png",
+    "https://wms.openspace.amnh.org/static/sync/url/directions/sphere4.png",
+    "https://wms.openspace.amnh.org/static/sync/url/directions/sphere5.png"
+  },
+  Override = false
 })
 
 local Position = {
