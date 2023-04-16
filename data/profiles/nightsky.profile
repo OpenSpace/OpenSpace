@@ -11,7 +11,7 @@
     "scene/solarsystem/planets/earth/satellites/satellites"
   ],
   "camera": {
-    "altitude": 10.0,
+    "altitude": 50.0,
     "anchor": "Earth",
     "latitude": 58.5877,
     "longitude": 16.1652,

@@ -1,0 +1,114 @@
+local gotoSunrise10Seconds = {
+  Identifier = "os.nightsky.goto_sunrise_10s",
+  Name = "Goto sunrise (10s)",
+  Command = "openspace.time.interpolateTime(openspace.globebrowsing.getSunriseTime(openspace.time.UTC()), 10);",
+  Documentation = "Interoplates the time to the next sunrise over 10 seconds",
+  GuiPath = "/Night Sky/Time/Sun",
+  IsLocal = false
+}
+
+local gotoSunriseDefault = {
+  Identifier = "os.nightsky.goto_sunrise_default",
+  Name = "Goto sunrise (default)",
+  Command = "openspace.time.interpolateTime(openspace.globebrowsing.getSunriseTime(openspace.time.UTC()));",
+  Documentation = "Interoplates the time to the next sunrise using the defaultTimeInterpolate setting",
+  GuiPath = "/Night Sky/Time/Sun",
+  IsLocal = false
+}
+
+local gotoSunriseInstant = {
+  Identifier = "os.nightsky.goto_sunrise_instant",
+  Name = "Goto sunrise (instant)",
+  Command = "openspace.time.setTime(openspace.globebrowsing.getSunriseTime(openspace.time.UTC()));",
+  Documentation = "Sets the time to the next sunset instantly",
+  GuiPath = "/Night Sky/Time/Sun",
+  IsLocal = false
+}
+
+local gotoSunset10Seconds = {
+  Identifier = "os.nightsky.goto_sunset_10s",
+  Name = "Goto sunset (10s)",
+  Command = "openspace.time.interpolateTime(openspace.globebrowsing.getSunsetTime(openspace.time.UTC()), 10);",
+  Documentation = "Interoplates the time to the next sunset over 10 seconds",
+  GuiPath = "/Night Sky/Time/Sun",
+  IsLocal = false
+}
+
+local gotoSunsetDefault = {
+  Identifier = "os.nightsky.goto_sunset_default",
+  Name = "Goto sunset (default)",
+  Command = "openspace.time.interpolateTime(openspace.globebrowsing.getSunsetTime(openspace.time.UTC()));",
+  Documentation = "Interoplates the time to the next sunset using the defaultTimeInterpolate setting",
+  GuiPath = "/Night Sky/Time/Sun",
+  IsLocal = false
+}
+
+local gotoSunsetInstant = {
+  Identifier = "os.nightsky.goto_sunset_instant",
+  Name = "Goto sunset (instant)",
+  Command = "openspace.time.setTime(openspace.globebrowsing.getSunsetTime(openspace.time.UTC()));",
+  Documentation = "Sets the time to the next sunset instantly",
+  GuiPath = "/Night Sky/Time/Sun",
+  IsLocal = false
+}
+
+local gotoNoon10Seconds = {
+  Identifier = "os.nightsky.goto_noon_10s",
+  Name = "Goto noon (10s)",
+  Command = "openspace.time.interpolateTime(openspace.globebrowsing.getNoonTime(openspace.time.UTC()), 10);",
+  Documentation = "Interoplates the time to the next noon over 10 seconds",
+  GuiPath = "/Night Sky/Time/Sun",
+  IsLocal = false
+}
+
+local gotoNoonDefault = {
+  Identifier = "os.nightsky.goto_noon_default",
+  Name = "Goto noon (default)",
+  Command = "openspace.time.interpolateTime(openspace.globebrowsing.getNoonTime(openspace.time.UTC()));",
+  Documentation = "Interoplates the time to the next noon using the defaultTimeInterpolate setting",
+  GuiPath = "/Night Sky/Time/Sun",
+  IsLocal = false
+}
+
+local gotoNoonInstant = {
+  Identifier = "os.nightsky.goto_noon_instant",
+  Name = "Goto noon (instant)",
+  Command = "openspace.time.setTime(openspace.globebrowsing.getNoonTime(openspace.time.UTC()));",
+  Documentation = "Sets the time to the next noon instantly",
+  GuiPath = "/Night Sky/Time/Sun",
+  IsLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(gotoSunrise10Seconds)
+  openspace.action.registerAction(gotoSunriseDefault)
+  openspace.action.registerAction(gotoSunriseInstant)
+  openspace.action.registerAction(gotoSunset10Seconds)
+  openspace.action.registerAction(gotoSunsetDefault)
+  openspace.action.registerAction(gotoSunsetInstant)
+  openspace.action.registerAction(gotoNoon10Seconds)
+  openspace.action.registerAction(gotoNoonDefault)
+  openspace.action.registerAction(gotoNoonInstant)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(gotoSunrise10Seconds)
+  openspace.action.removeAction(gotoSunriseDefault)
+  openspace.action.removeAction(gotoSunriseInstant)
+  openspace.action.removeAction(gotoSunset10Seconds)
+  openspace.action.removeAction(gotoSunsetDefault)
+  openspace.action.removeAction(gotoSunsetInstant)
+  openspace.action.removeAction(gotoNoon10Seconds)
+  openspace.action.removeAction(gotoNoonDefault)
+  openspace.action.removeAction(gotoNoonInstant)
+end)
+
+asset.export(gotoSunrise10Seconds)
+asset.export(gotoSunriseDefault)
+asset.export(gotoSunriseInstant)
+asset.export(gotoSunset10Seconds)
+asset.export(gotoSunsetDefault)
+asset.export(gotoSunsetInstant)
+asset.export(gotoNoon10Seconds)
+asset.export(gotoNoonDefault)
+asset.export(gotoNoonInstant)
