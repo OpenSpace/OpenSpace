@@ -60,7 +60,7 @@ local plane = {
 }
 
 local showAction = {
-  Identifier = "os.nigthsky.show_zenith",
+  Identifier = "os.nightsky.show_zenith",
   Name = "Show local zenith",
   Command = [[
     local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
@@ -82,7 +82,7 @@ local showAction = {
 }
 
 local hideAction = {
-  Identifier = "os.nigthsky.hide_zenith",
+  Identifier = "os.nightsky.hide_zenith",
   Name = "Hide local zenith",
   Command = [[
     openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 0.0, 1.0);
