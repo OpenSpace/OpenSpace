@@ -70,14 +70,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
-        "The path to the texture that should be used as the point sprite"
+        "The path to the texture that should be used as the point sprite",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point"
+        "size of each point",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseColorMapInfo = {
@@ -85,25 +88,32 @@ namespace {
         "Use Color Map",
         "If this value is set to 'true', the provided color map is used (if one was "
         "provided in the configuration). If no color map was provided, changing this "
-        "setting does not do anything"
+        "setting does not do anything",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value is used to define the color of the astronomical object"
+        "This value is used to define the color of the astronomical object",
+        // @VISIBILITY(1.5)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
-        "The path to the color map file of the astronomical object"
+        "The path to the color map file of the astronomical object",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the astronomical objects"
+        "Enables/Disables the drawing of the astronomical objects",
+        // @VISIBILITY(1.25)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
@@ -116,27 +126,31 @@ namespace {
         "ColorOption",
         "Color Option",
         "This value determines which paramenter is used for default color of the "
-        "astronomical objects"
+        "astronomical objects",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OptionColorRangeInfo = {
         "OptionColorRange",
         "Option Color Range",
-        "This value changes the range of values to be mapped with the current color map"
+        "This value changes the range of values to be mapped with the current color map",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
         "SizeOption",
         "Size Option Variable",
         "This value determines which paramenter (datavar) is used for scaling of the "
-        "astronomical objects"
+        "astronomical objects",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
         "Option wether the billboards should face the camera or not. Used for non-linear "
-        "display envierments such as fisheye."
+        "display environments such as fisheye.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
@@ -144,27 +158,32 @@ namespace {
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
         "our galaxy from which the astronomical object will start and end "
-        "fading-in"
+        "fading-in",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
         "Disable Fade-in Effect",
-        "Enables/Disables the Fade-in effect"
+        "Enables/Disables the Fade-in effect",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
         "EnablePixelSizeControl",
         "Enable Pixel Size Control",
         "Enable pixel size control for rectangular projections. If set to true, the "
-        "billboard size is restricted by the min/max size in pixels property"
+        "billboard size is restricted by the min/max size in pixels property",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BillboardMinMaxSizeInfo = {
         "BillboardMinMaxSize",
         "Billboard Min/Max Size in Pixels",
         "The minimum and maximum size (in pixels) for the billboard representing the "
-        "astronomical object"
+        "astronomical object",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -172,26 +191,31 @@ namespace {
     {
         "CorrectionSizeEndDistance",
         "Distance in 10^X meters where correction size stops acting",
-        "Distance in 10^X meters where correction size stops acting"
+        "Distance in 10^X meters where correction size stops acting",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {
         "CorrectionSizeFactor",
         "Control variable for distance size",
-        ""
+        "",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseLinearFiltering = {
         "UseLinearFiltering",
         "Use Linear Filtering",
         "Determines whether the provided color map should be sampled nearest neighbor "
-        "(=off) or linearly (=on)"
+        "(=off) or linearly (=on)",
+        // @VISIBILITY(3.25)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SetRangeFromData = {
         "SetRangeFromData",
         "Set Data Range from Data",
-        "Set the data range based on the available data"
+        "Set the data range based on the available data",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableBillboardsCloud)]] Parameters {

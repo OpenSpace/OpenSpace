@@ -119,20 +119,23 @@ namespace {
         "PrintEvents",
         "Print Events",
         "If this is enabled, all events that are propagated through the system are "
-        "printed to the log"
+        "printed to the log",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "PropertyVisibility",
         "Property Visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
-        "are"
+        "are",
+        openspace::properties::Property::Visibility::Always
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHiddenSceneInfo = {
         "ShowHiddenSceneGraphNodes",
         "Show Hidden Scene Graph Nodes",
-        "If checked, hidden scene graph nodes are visible in the UI"
+        "If checked, hidden scene graph nodes are visible in the UI",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeDurationInfo = {
@@ -141,14 +144,17 @@ namespace {
         "Controls how long time the fading in/out takes when enabling/disabling an "
         "object through a checkbox in the UI. Holding SHIFT while clicking the "
         "checkbox will enable/disable the renderable without fading, as will setting "
-        "this value to zero."
+        "this value to zero.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
         "Disable All Mouse Inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
-        "double inputs on touch (from both touch input and inserted mouse inputs)"
+        "double inputs on touch (from both touch input and inserted mouse inputs)",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 } // namespace
 
@@ -169,10 +175,6 @@ OpenSpaceEngine::OpenSpaceEngine()
     TransformationManager::initialize();
 
     addProperty(_printEvents);
-    addProperty(_visibility);
-    addProperty(_showHiddenSceneGraphNodes);
-    addProperty(_fadeOnEnableDuration);
-    addProperty(_disableAllMouseInputs);
 
     using Visibility = openspace::properties::Property::Visibility;
     _visibility.addOptions({
@@ -182,6 +184,11 @@ OpenSpaceEngine::OpenSpaceEngine()
         { static_cast<int>(Visibility::Developer), "Developer" },
         { static_cast<int>(Visibility::Hidden), "Everything" },
     });
+    addProperty(_visibility);
+
+    addProperty(_showHiddenSceneGraphNodes);
+    addProperty(_fadeOnEnableDuration);
+    addProperty(_disableAllMouseInputs);
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {}
@@ -225,6 +232,7 @@ void OpenSpaceEngine::initialize() {
     );
 
     _printEvents = global::configuration->isPrintingEvents;
+    _visibility = static_cast<int>(global::configuration->propertyVisibility);
 
     std::string cacheFolder = absPath("${CACHE}").string();
     if (global::configuration->usePerProfileCache) {
@@ -1153,8 +1161,6 @@ void OpenSpaceEngine::preSynchronization() {
     if (_isRenderingFirstFrame) {
         setCameraFromProfile(*global::profile);
         setAdditionalScriptsFromProfile(*global::profile);
-
-        global::scriptEngine->runScriptFile(absPath("${SCRIPTS}/developer_settings.lua"));
     }
 
     // Handle callback(s) for change in engine mode

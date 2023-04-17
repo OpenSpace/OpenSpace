@@ -1,0 +1,30 @@
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+
+local layer = {
+  Identifier = "Messenger_Mosaic_NewYork",
+  Name = "Messenger Mosaic [New York]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("messenger_mosaic_newyork.wms")
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Messenger Mosaic [New York]",
+  Version = "1.0",
+  Description = [[Mercury Messenger Mosaic layer for Mercury globe. This map is hosted on
+    the OpenSpace server in New York]],
+  Author = "USGS",
+  URL = "",
+  License = "NASA/PDS"
+}

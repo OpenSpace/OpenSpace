@@ -45,14 +45,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this object will be visible or not"
+        "This setting determines whether this object will be visible or not",
+        // @VISIBILITY(0.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
         "Type",
         "Renderable Type",
         "This tells the type of the renderable",
-        openspace::properties::Property::Visibility::Hidden
+        // @VISIBILITY(3.4)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableRenderBinModeInfo =
@@ -61,7 +64,8 @@ namespace {
         "Render Bin Mode",
         "This value specifies if the renderable should be rendered in the Background,"
         "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step",
-        openspace::properties::Property::Visibility::Developer
+        // @VISIBILITY(3.2)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DimInAtmosphereInfo = {
@@ -69,7 +73,7 @@ namespace {
         "Dim In Atmosphere",
         "Enables/Disables if the object should be dimmed when the camera is in the "
         "sunny part of an atmosphere",
-        openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(Renderable)]] Parameters {

@@ -49,20 +49,23 @@ namespace {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for the color"
+        "texture which is used for the color",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the semi-major axis of the orbit, in meter"
+        "This value specifies the semi-major axis of the orbit, in meter",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
         "This value determines the eccentricity, that is the deviation from a perfect "
-        "sphere, for this orbit"
+        "sphere, for this orbit",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
@@ -71,14 +74,17 @@ namespace {
         "This property determines the width of the disc. The values specify the lower "
         "and upper deviation from the semi major axis, respectively. The values are "
         "relative to the size of the semi-major axis. That is, 0 means no deviation "
-        "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation"
+        "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply Color",
         "If set, the disc's texture is multiplied with this color. Useful for applying a "
-        "color grayscale images"
+        "color grayscale images",
+        // @VISIBILITY(1.5)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {

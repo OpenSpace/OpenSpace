@@ -58,7 +58,9 @@ namespace {
         "Perform Shading",
         "If this value is enabled, the model will be shaded based on the relative "
         "location to the Sun. If this value is disabled, shading is disabled and the "
-        "entire model is rendered brightly"
+        "entire model is rendered brightly",
+        // @VISIBILITY(1.5)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {

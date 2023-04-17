@@ -42,38 +42,48 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",
         "Speed of travel",
-        "The speed of light is the default value"
+        "The speed of light is the default value",
+        // @VISIBILITY(1.25)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
         "TargetNode",
         "Target object",
-        "This value sets which scene graph node to target with the light speed indicator"
+        "This value sets which scene graph node to target with the light speed indicator",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line"
+        "This value determines the RGB color for the line",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width"
+        "This value specifies the line width",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IndicatorLengthInfo = {
         "IndicatorLength",
         "Indicator Length",
-        "This value specifies the length of the light indicator set in light seconds"
+        "This value specifies the length of the light indicator set in light seconds",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeLengthInfo = {
         "FadeLength",
         "Fade Length",
         "This value specifies the length of the faded tail of the light indicator "
-        "set in light seconds"
+        "set in light seconds",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableLightTravel)]] Parameters {

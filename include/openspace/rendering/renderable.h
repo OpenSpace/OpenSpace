@@ -141,8 +141,6 @@ protected:
     // An optional renderbin that renderables can use for certain components, in cases
     // where all parts of the renderable should not be rendered in the same bin
     std::optional<RenderBin> _secondaryRenderBin;
-
-    void registerUpdateRenderBinFromOpacity();
 private:
 
     double _boundingSphere = 0.0;
@@ -151,6 +149,8 @@ private:
     const bool _shouldUpdateIfDisabled = false;
     bool _automaticallyUpdateRenderBin = true;
     bool _hasOverrideRenderBin = false;
+
+    void registerUpdateRenderBinFromOpacity();
 
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want
     // to provide a set method for this. Otherwise, anyone might mess around with our

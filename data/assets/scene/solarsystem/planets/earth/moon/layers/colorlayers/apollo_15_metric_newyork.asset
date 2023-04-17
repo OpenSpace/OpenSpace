@@ -1,0 +1,42 @@
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
+
+local layer = {
+  Identifier = "Apollo15Metric_NewYork",
+  Name = "Apollo 15 Metric Cam [New York]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("apollo_15_metric_newyork.wms"),
+  Settings = {
+    Gamma = 1.0,
+    Multiplier = 1.0
+  },
+  Description = [[The Apollo 15 Metric (Mapping) Camera obtained high-quality metric photographs,
+   on black and white film, with high geometric precision of the lunar surface from lunar orbit
+  combined with time-correlated stellar photography for selenodetic/cartographic control. 
+  A laser altimeter was operated with it. The Metric Camera also provided supporting 
+  photographic data for the Scientific Instrument Module (SIM) Panoramic Camera and 
+  other Command Service Module (CSM) photographic experiments. The Apollo 15 metric camera 
+  took 3375 frames, some of which were taken over unlighted terrain in support 
+  of the laser altimeter. (Description from NASA PDS)]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Kaguya [New York]",
+  Version = "1.1",
+  Description = [[Moon SELENE Kaguya TC Global Orthomosaic 474m v2 layer for Moon globe.
+    This map is hosted on the OpenSpace server in New York]],
+  Author = "USGS",
+  URL = "https://trek.nasa.gov/moon/TrekWS/rest/cat/metadata/fgdc/html?label=Apollo15_MetricCam_Mosaic_Global_4096ppd",
+  License = "NASA/PDS"
+}

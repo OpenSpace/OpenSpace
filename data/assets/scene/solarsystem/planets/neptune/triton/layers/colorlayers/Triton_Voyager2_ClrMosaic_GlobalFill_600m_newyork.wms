@@ -1,0 +1,20 @@
+<GDAL_WMS>
+  <Service name="TMS">
+    <ServerUrl>http://wms.openspace.amnh.org/Triton/Triton_Voyager2_ClrMosaic_GlobalFill_600m/tile/${z}/${y}/${x}</ServerUrl>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>-180.0</UpperLeftX>
+    <UpperLeftY>90.0</UpperLeftY>
+    <LowerRightX>180.0</LowerRightX>
+    <LowerRightY>-90.0</LowerRightY>
+    <SizeX>14138</SizeX>
+    <SizeY>7069</SizeY>
+    <TileLevel>5</TileLevel>
+    <YOrigin>top</YOrigin>
+  </DataWindow>
+  <Projection>EPSG:4326</Projection>
+  <BlockSizeX>512</BlockSizeX>
+  <BlockSizeY>512</BlockSizeY>
+  <BandsCount>4</BandsCount>
+  <MaxConnections>10</MaxConnections>
+</GDAL_WMS>

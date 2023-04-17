@@ -1,0 +1,31 @@
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
+
+local layer = {
+  Identifier = "CTX_Mosaic_NewYork",
+  Name = "CTX Mosaic [New York]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("ctx_mosaic_newyork.wms"),
+  BlendMode = "Color"
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "CTX Mosaic [New York]",
+  Version = "1.0",
+  Description = [[CTX Mosaic layer for Mars globe. This layer is served from the
+    OpenSpace servers in New York]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -162,7 +162,7 @@ endfunction ()
 
 
 
-
+option(OPENSPACE_ENABLE_ALL_MODULES "If this is ON, all modules will be enabled by default")
 set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")
 set(internal_module_path "${PROJECT_SOURCE_DIR}/modules")
 set(all_enabled_modules "")
@@ -209,7 +209,11 @@ foreach(val RANGE ${all_module_names_count})
 
   get_module_attribute_default(${path} is_default_module)
   create_option_name(${name} optionName)
-  option(${optionName} "Build ${path} Module" ${is_default_module})
+  if (${OPENSPACE_ENABLE_ALL_MODULES})
+    option(${optionName} "Build ${path} Module" ON)
+  else ()
+    option(${optionName} "Build ${path} Module" ${is_default_module})
+  endif ()
 
   if (${optionName})
     list(APPEND enabled_module_names ${name})

@@ -68,73 +68,87 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Dimensions",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo VariableInfo = {
         "Variable",
         "Variable",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LowerDomainBoundInfo = {
         "LowerDomainBound",
         "Lower Domain Bound",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UpperDomainBoundInfo = {
         "UpperDomainBound",
         "Upper Domain Bound",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DomainScaleInfo = {
         "DomainScale",
         "Domain scale",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LowerValueBoundInfo = {
         "LowerValueBound",
         "Lower Value Bound",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UpperValueBoundInfo = {
         "UpperValueBound",
         "Upper Value Bound",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid Type",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourcePathInfo = {
         "SourcePath",
         "Source Path",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
         "Transfer Function Path",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CacheInfo = {
         "Cache",
         "Cache",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 

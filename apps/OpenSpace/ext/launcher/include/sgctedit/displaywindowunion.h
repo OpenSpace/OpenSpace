@@ -48,10 +48,12 @@ public:
      * \param winColors An array of QColor objects for window colors. The indexing of
      *                  this array matches the window indexing used elsewhere in the
      *                  class. This allows for a unique color for each window.
+     * \param resetToDefault If set to true, all display and window settings will be
+     *                       initialized to their default values.
      * \param parent The parent to which this widget belongs
      */
     DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
-        int nMaxWindows, const std::array<QColor, 4>& windowColors,
+        int nMaxWindows, const std::array<QColor, 4>& windowColors, bool resetToDefault,
         QWidget* parent = nullptr);
     
     /**
@@ -59,7 +61,15 @@ public:
      *
      * \return vector of pointers of WindowControl objects
      */
-    std::vector<WindowControl*> windowControls() const;
+    std::vector<WindowControl*> activeWindowControls() const;
+
+    /**
+     * Returns a vector of pointers to the WindowControl objects for all windows, whether
+     * they are visible or not.
+     *
+     * \return vector of pointers of all WindowControl objects
+     */
+    std::vector<WindowControl*>& windowControls();
 
     /**
      * When called will add a new window to the set of windows, which will, in turn, send
@@ -72,6 +82,14 @@ public:
      * turn, send out all of the corresponding signals described below.
      */
     void removeWindow();
+
+    /**
+     * Returns the number of windows that are displayed (there can be more window
+     * objects than are currently displayed).
+     *
+     * \return the number of displayed windows in the current configuration
+     */
+    unsigned int numWindowsDisplayed() const;
 
 signals:
     /**
@@ -92,7 +110,7 @@ signals:
 
 private:
     void createWidgets(int nMaxWindows, std::vector<QRect> monitorResolutions,
-        std::array<QColor, 4> windowColors);
+        std::array<QColor, 4> windowColors, bool resetToDefault);
     void showWindows();
 
     unsigned int _nWindowsDisplayed = 0;

@@ -75,9 +75,10 @@ local createConstellations = function (baseIdentifier, guiPath, constellationfil
           LazyLoading = true,
           Texture = images .. imageName,
           BlendMode = "Additive",
-          Opacity = 0.1
+          Opacity = 0.1,
+          DimInAtmosphere = true
         },
-        Tag = { "ImageConstellation", group },
+        Tag = { "ImageConstellation", group, "daytime_hidden" },
         GUI = {
           Name = name .. " Image",
           Path = "/Milky Way/" .. guiPath,
@@ -148,7 +149,7 @@ local hide_zodiac_art = {
   Command =  [[
     openspace.fadeOut("{zodiac}")
   ]],
-  Documentation = "fades down zodiac art work",
+  Documentation = "Fades down zodiac art work",
   GuiPath = "/Constellations/Art",
   IsLocal = false
 }

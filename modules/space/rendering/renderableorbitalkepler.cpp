@@ -48,7 +48,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",
         "Path",
-        "The file path to the data file to read"
+        "The file path to the data file to read",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
@@ -57,7 +58,9 @@ namespace {
         "A segment quality value for the orbital trail. A value from 1 (lowest) to "
         "10 (highest) that controls the number of line segments in the rendering of the "
         "orbital trail. This does not control the direct number of segments because "
-        "these automatically increase according to the eccentricity of the orbit"
+        "these automatically increase according to the eccentricity of the orbit",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -65,32 +68,38 @@ namespace {
         "Line Width",
         "This value specifies the line width of the trail if the selected rendering "
         "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored"
+        "ignored",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB main color for the lines and points of the trail"
+        "This value determines the RGB main color for the lines and points of the trail",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
         "Trail Fade",
-        "This value determines how fast the trail fades and is an appearance property."
+        "This value determines how fast the trail fades and is an appearance property.",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
         "StartRenderIdx",
         "Contiguous Starting Index of Render",
         "Index of object in renderable group to start rendering (all prior objects will "
-        "be ignored)"
+        "be ignored)",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderSizeInfo = {
         "RenderSize",
         "Contiguous Size of Render Block",
-        "Number of objects to render sequentially from StartRenderIdx"
+        "Number of objects to render sequentially from StartRenderIdx",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
@@ -99,7 +108,8 @@ namespace {
         "If enabled, then the contiguous set of objects starting from StartRenderIdx "
         "of size RenderSize will be rendered. If disabled, then the number of objects "
         "defined by UpperLimit will rendered from an evenly dispersed sample of the "
-        "full length of the data file."
+        "full length of the data file.",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {

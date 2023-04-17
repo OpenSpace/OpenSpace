@@ -1,0 +1,81 @@
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local sunAsset = asset.require('scene/solarsystem/sun/sun')
+
+local modelFolder = asset.syncedResource({
+  Name = "Scale Model Big Ben",
+  Type = "HttpSynchronization",
+  Identifier = "scale_model_big_ben",
+  Version = 1
+})
+
+local scaleModel = {
+  Identifier = "Scale_BigBen",
+  Parent = earthAsset.Earth.Identifier,
+  --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 51.50079,
+      Longitude = -0.124279,
+      Altitude = 0.0,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 51.50079,
+      Longitude = -0.124279,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. "bigben.osmodel",
+    RotationVector = { 0.0, 265.0, 0.0 },
+    LightSources = { sunAsset.LightSource },
+    ModelScale = "Millimeter"
+  },
+  GUI = {
+    Name = "Big Ben",
+    Path = "/Scale Objects"
+  }
+}
+
+local updatePositionAction = {
+  Identifier = "os.scale_models.drop_big_ben",
+  Name = "Drop Big Ben under camera",
+  Command = [[
+    openspace.globebrowsing.setNodePositionFromCamera('Scale_BigBen')
+  ]],
+  Documentation = "Updates the Big Ben position based on the globe location of the camera",
+  GuiPath = "/Scale Objects",
+  IsLocal = false
+}
+
+local resetPositionAction = {
+  Identifier = "os.scale_models.reset_big_ben",
+  Name = "Reset Big Ben position",
+  Command = [[
+    openspace.globebrowsing.setNodePosition('Scale_BigBen', ']] .. earthAsset.Earth.Identifier .. [[', 51.50079, -0.124279)
+  ]],
+  Documentation = "Resets the Big Ben back to it's actual location",
+  GuiPath = "/Scale Objects",
+  IsLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(scaleModel)
+  openspace.action.registerAction(updatePositionAction)
+  openspace.action.registerAction(resetPositionAction)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(resetPositionAction)
+  openspace.action.removeAction(updatePositionAction)
+  openspace.removeSceneGraphNode(scaleModel)
+end)
+
+asset.export(scaleModel)
+asset.export(updatePositionAction)
+asset.export(resetPositionAction)

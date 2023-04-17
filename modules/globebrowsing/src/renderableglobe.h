@@ -29,6 +29,7 @@
 
 #include <modules/globebrowsing/src/ellipsoid.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/geojson/geojsonmanager.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
@@ -114,6 +115,9 @@ public:
     const Ellipsoid& ellipsoid() const;
     const LayerManager& layerManager() const;
     LayerManager& layerManager();
+    const GeoJsonManager& geoJsonManager() const;
+    GeoJsonManager& geoJsonManager();
+
     const glm::dmat4& modelTransform() const;
 
     static documentation::Documentation Documentation();
@@ -251,6 +255,8 @@ private:
     Ellipsoid _ellipsoid;
     SkirtedGrid _grid;
     LayerManager _layerManager;
+
+    GeoJsonManager _geoJsonManager;
 
     glm::dmat4 _cachedModelTransform = glm::dmat4(1.0);
     glm::dmat4 _cachedInverseModelTransform = glm::dmat4(1.0);

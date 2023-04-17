@@ -28,6 +28,7 @@
 #include <QDialog>
 
 #include <sgct/config.h>
+#include <sgctedit/windowcontrol.h>
 #include <QColor>
 #include <array>
 #include <filesystem>
@@ -38,18 +39,38 @@ class SettingsWidget;
 class QBoxLayout;
 class QWidget;
 
+const sgct::config::GeneratorVersion versionMin { "SgctWindowConfig", 1, 1 };
+const sgct::config::GeneratorVersion versionLegacy18 { "OpenSpace", 0, 18 };
+const sgct::config::GeneratorVersion versionLegacy19 { "OpenSpace", 0, 19 };
+
 class SgctEdit final : public QDialog {
 Q_OBJECT
 public:
     /**
      * Constructor for SgctEdit class, the underlying class for the full window
-     * configuration editor
+     * configuration editor. Used when creating a new config.
      *
      * \param parent The Qt QWidget parent object
      * \param userConfigPath A string containing the file path of the user config
      *                       directory where all window configs are stored
      */
     SgctEdit(QWidget* parent, std::string userConfigPath);
+
+    /**
+     * Constructor for SgctEdit class, the underlying class for the full window
+     * configuration editor. Used when editing an existing config.
+     *
+     * \param cluster The #sgct::config::Cluster object containing all data of the
+     *                imported window cluster configuration.
+     * \param configName The name of the window configuration filename
+     * \param configBasePath The path to the folder where default config files reside
+     * \param configsReadOnly vector list of window config names that are read-only and
+     *                         must not be overwritten
+     * \param parent Pointer to parent Qt widget
+     */
+    SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
+        std::string& configBasePath, const std::vector<std::string>& configsReadOnly,
+        QWidget* parent);
 
     /**
      * Returns the saved filename
@@ -66,8 +87,16 @@ public:
     sgct::config::Cluster cluster() const;
 
 private:
-    void createWidgets(const std::vector<QRect>& monitorSizes);
-    sgct::config::Cluster generateConfiguration() const;
+    std::vector<QRect> createMonitorInfoSet();
+    void createWidgets(const std::vector<QRect>& monitorSizes, unsigned int nWindows,
+        bool setToDefaults);
+    void generateConfiguration();
+    void generateConfigSetupVsync();
+    void generateConfigUsers();
+    void generateConfigAddresses(sgct::config::Node& node);
+    void generateConfigResizeWindowsAccordingToSelected(sgct::config::Node& node);
+    void generateConfigIndividualWindowSettings(sgct::config::Node& node);
+    void setupProjectionTypeInGui(sgct::config::Viewport& vPort, WindowControl* wCtrl);
 
     void save();
     void apply();
@@ -82,12 +111,15 @@ private:
         QColor(0x44, 0xAF, 0x69),
         QColor(0xF8, 0x33, 0x3C)
     };
+    std::string _configurationFilename;
+    const std::vector<std::string> _readOnlyConfigs;
 
     QBoxLayout* _layoutButtonBox = nullptr;
     QPushButton* _saveButton = nullptr;
     QPushButton* _cancelButton = nullptr;
     QPushButton* _applyButton = nullptr;
     std::string _saveTarget;
+    bool _didImportValues = false;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
