@@ -54,7 +54,6 @@ set(CEF_VERSION "102.0.10+gf249b2e+chromium-102.0.5005.115")
 if (WIN32 OR UNIX)
   option(USE_SANDBOX OFF)
 endif ()
-
 # Add this project's cmake/ directory to the module path.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(cef_support)
@@ -163,7 +162,11 @@ set(WEBBROWSER_RESOURCES_SRCS
 
 # Place Helper in separate executable
 # The naming style "<ApplicationName> Helper" is required by Chromium.
-set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+if (OS_MACOSX)
+  set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+else ()
+  set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+endif ()
 set(CEF_HELPER_TARGET_GPU "OpenSpace Helper (GPU)" CACHE INTERNAL "CEF_HELPER_TARGET_GPU")
 set(CEF_HELPER_TARGET_RENDERER "OpenSpace Helper (Renderer)" CACHE INTERNAL "CEF_HELPER_TARGET_RENDERER")
 

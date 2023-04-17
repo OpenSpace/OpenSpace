@@ -242,10 +242,10 @@ void RenderableTrail::initializeGL() {
 
 #ifdef __APPLE__
     _programObject = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "EphemerisProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "EphemerisProgram",
                 absPath("${MODULE_BASE}/shaders/renderabletrail_apple_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
             );
