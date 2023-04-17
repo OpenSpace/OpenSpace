@@ -79,7 +79,7 @@ BrowserInstance::~BrowserInstance() {
 
 void BrowserInstance::initialize() {
     reshape(static_cast<glm::ivec2>(
-        static_cast<glm::vec2>(global::windowDelegate->currentSubwindowSize()) *
+        static_cast<glm::vec2>(global::windowDelegate->guiWindowResolution()) *
         global::windowDelegate->dpiScaling()
     ));
     _isInitialized = true;

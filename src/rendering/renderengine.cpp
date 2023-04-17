@@ -615,7 +615,7 @@ glm::ivec2 RenderEngine::fontResolution() const {
         return global::windowDelegate->currentViewportSize();
     }
     else {
-        return global::windowDelegate->currentSubwindowSize();
+        return global::windowDelegate->currentViewportResolution();
     }
 }
 
@@ -835,7 +835,7 @@ void RenderEngine::renderEndscreen() {
 
     const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate->currentSubwindowSize()) / dpiScaling;
+        glm::vec2(global::windowDelegate->firstWindowResolution()) / dpiScaling;
     glViewport(0, 0, res.x, res.y);
 
     constexpr std::string_view Text = "Shutting down";
