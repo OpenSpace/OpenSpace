@@ -2,6 +2,7 @@
 local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere') -- skapar en variabel som ar en asset
 
 -- Change to location on your machine
+local fieldlinesDirectory = 'C:/Dev/OpenSpaceLocalData/simonmans' --old: 'C:/Users/HEM/Documents/Liu/Data_Fieldlines'
 local providedSeedPointFilePath = 'C:/Dev/OpenSpaceLocalData/simonmans/seedpoint_dayside_test.txt' --old: 'C:/Dev/OpenSpaceLocalData/simonmans/seedpoint_dayside_test.txt'
 local providedSeedPointCSVFilePath = 'C:/Dev/OpenSpace/sync/http/seed_points/dayside_seedpoints.csv' -- '${SYNC}/http/seed_points/dayside_seedpoints.csv'
 
