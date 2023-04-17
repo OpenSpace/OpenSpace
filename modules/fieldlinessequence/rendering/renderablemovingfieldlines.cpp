@@ -98,7 +98,7 @@ namespace {
         // Path to file with seed points
         std::filesystem::path providedSeedPointFilePath;
         // Path to csv file with seed points
-        std::filesystem::path providedSeedPointCSVFilePath;
+        //std::filesystem::path providedSeedPointCSVFilePath;
         // Extra variables such as rho, p or t
         std::optional<std::vector<std::string>> extraVariables;
         // Which variable in CDF file to trace. 'u_perp_b' is default.
@@ -228,7 +228,7 @@ namespace openspace {
         std::sort(_sourceFiles.begin(), _sourceFiles.end());
 
         _providedSeedFilePath = p.providedSeedPointFilePath;
-        _providedSeedCSVFilePath = p.providedSeedPointCSVFilePath;
+        //_providedSeedCSVFilePath = p.providedSeedPointCSVFilePath;
         _useSeedPointProvider = p.useSeedPointProvider.value_or(_useSeedPointProvider);
         _seedPointsFromProvider = p.seedPointsFromProvider.value_or(_seedPointsFromProvider);
         _extraVars = p.extraVariables.value_or(_extraVars);
@@ -318,8 +318,8 @@ namespace openspace {
         }
         else if (
             !_useSeedPointProvider &&
-            _providedSeedFilePath.empty() &&
-            _providedSeedCSVFilePath.empty()
+            _providedSeedFilePath.empty() //&&
+            //_providedSeedCSVFilePath.empty()
         )
         {
             throw ghoul::RuntimeError(
@@ -522,9 +522,9 @@ namespace openspace {
                     );
                 }
                 // Use provided .csv file with seedpoints
-                else if (!_useSeedPointProvider && !_providedSeedCSVFilePath.empty()) {
+                else if (!_useSeedPointProvider && _providedSeedFilePath.extension().string() == ".csv") {
                     selectAndModifySeedpoints(
-                        _providedSeedCSVFilePath,
+                        _providedSeedFilePath,
                         seedPoints,
                         birthTimes,
                         startTime
