@@ -41,6 +41,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <map>
 #include <optional>
 #include <thread>
@@ -183,6 +184,9 @@ namespace {
 
         // Needed for hdf5-files
         std::optional<std::vector<std::string>> hierarchy;
+
+        // Scaling unit for hdf5-files, AU, RE or RS 
+        std::optional<std::string> scalingUnit;
 
         // Currently supports: batsrus, enlil & pfss
         std::optional<std::string> simulationModel;
@@ -482,6 +486,16 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     }
 
     _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
+    _hierarchy = p.hierarchy.value_or(_hierarchy);
+
+    _scalingUnit = p.scalingUnit.value_or(_scalingUnit);
+    std::transform(_scalingUnit.begin(), _scalingUnit.end(), _scalingUnit.begin(),
+        [](unsigned char c) { return std::tolower(c); });
+    // Set the scaling of the coordinates      
+    if (_scalingUnit.compare("au") == 0)  _scalingFactor = fls::AuToMeter;
+    else if (_scalingUnit.compare("re") == 0) _scalingFactor = fls::ReToMeter;
+    else if (_scalingUnit.compare("rs") == 0) _scalingFactor = fls::RsToMeter;
+    else return;
 }
 
 void RenderableFieldlinesSequence::initialize() {
@@ -621,8 +635,11 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM() {
 
 bool RenderableFieldlinesSequence::loadHdf5StatesIntoRAM() {
     for (const std::string& filePath : _sourceFiles) {
+
         FieldlinesState newState;
-        bool success = newState.loadStateFromHdf5(filePath); //asset file
+        bool success = newState.loadStateFromHdf5(filePath, 
+            _hierarchy,
+            _scalingFactor); //asset file
         if (success) {
             addStateToSequence(newState);
         }

@@ -30,6 +30,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <fstream>
 #include <iomanip>
+#include <cctype>
+#include <string>
 
 #include <../modules/fieldlinessequence/ext/HighFive/include/highfive/H5File.hpp>
  
@@ -38,6 +40,9 @@ namespace {
     constexpr int CurrentVersion = 0;
     using json = nlohmann::json;
 } // namespace
+
+using namespace HighFive;
+using namespace std;
 
 namespace openspace {
 
@@ -219,16 +224,8 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 }
 
 #ifdef FLS_HAVE_HDF5
-bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File) {
-
-    // --------------------- ENSURE FILE IS VALID, THEN PARSE IT --------------------- //
-   /* std::ifstream ifs(pathToHdf5File);
-
-    if (!ifs.is_open()) {
-        LERROR(fmt::format("FAILED TO OPEN FILE: {}", pathToHdf5File));
-        return false;
-    }*/
-
+bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File, std::vector<std::string> hierarchy, float scalingFactor)
+{
     HighFive::File file(pathToHdf5File, HighFive::File::ReadOnly);
 
     // ----- EXTRACT THE EXTRA QUANTITY NAMES & TRIGGER TIME (same for all lines) ----- //
@@ -241,7 +238,6 @@ bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File) {
     HighFive::Group firstLine = g.getGroup(firstLineName);
     const size_t nVariables = firstLine.getNumberObjects(); //Number of datasets
     const std::vector<std::string> variableNameVec = firstLine.listObjectNames(); //All names of dataset
-
 
     for (size_t i = 0; i < nVariables; ++i) { //Store all variables data except LCon
         if (variableNameVec[i] != "LCon" && variableNameVec[i] != "xyz") {
@@ -274,7 +270,7 @@ bool FieldlinesState::loadStateFromHdf5(const std::string& pathToHdf5File) {
             const size_t zIdx = 2;
             // Expects the x, y and z variables to be stored first!
             _vertexPositions.push_back(
-                fls::ReToMeter *
+                scalingFactor *
                 glm::vec3(
                     points[xIdx],
                     points[yIdx],

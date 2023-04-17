@@ -88,6 +88,8 @@ private:
     SourceFileType _inputFileType;
     // strings for navigating the hierarchical of h5-files 
     std::vector<std::string> _hierarchy;
+    // scaling unit of the coordinates
+    std::string _scalingUnit;
     // Output folder path in case of file conversion
     std::string _outputFolderPath;
     // which tracing vaiable to trace. 'b' for fieldline is default
