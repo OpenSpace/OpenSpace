@@ -91,7 +91,7 @@ function (get_module_attribute_supported path result)
 endfunction()
 
 
-# Returns the path for the 'module_name'. If the module has not been seen before by 
+# Returns the path for the 'module_name'. If the module has not been seen before by
 # get_individual_modules, an empty string is returned
 function (find_path_for_module module_name module_names module_paths result)
   list(FIND module_names ${module_name} i)
@@ -121,7 +121,7 @@ function (get_recursive_dependencies module_name module_path module_names module
           "${module_names}" "${module_paths}"
           res
         )
-        # 1. We add "base" to the list of dependencies as we always want it 
+        # 1. We add "base" to the list of dependencies as we always want it
         # 2. We add dependencies in this order such that when we later traverse
         #    this list, we automatically get them in the correct order (meaning
         #    that we include a dependency first)
@@ -162,7 +162,7 @@ endfunction ()
 
 
 
-
+option(OPENSPACE_ENABLE_ALL_MODULES "If this is ON, all modules will be enabled by default")
 set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")
 set(internal_module_path "${PROJECT_SOURCE_DIR}/modules")
 set(all_enabled_modules "")
@@ -209,7 +209,11 @@ foreach(val RANGE ${all_module_names_count})
 
   get_module_attribute_default(${path} is_default_module)
   create_option_name(${name} optionName)
-  option(${optionName} "Build ${path} Module" ${is_default_module})
+  if (${OPENSPACE_ENABLE_ALL_MODULES})
+    option(${optionName} "Build ${path} Module" ON)
+  else ()
+    option(${optionName} "Build ${path} Module" ${is_default_module})
+  endif ()
 
   if (${optionName})
     list(APPEND enabled_module_names ${name})
@@ -241,7 +245,7 @@ foreach (val RANGE ${enabled_module_count})
   set(dependencies ${dependencies} ${deps})
 endforeach()
 
-# We can remove the duplicates here.  We constructed the list such that nested 
+# We can remove the duplicates here.  We constructed the list such that nested
 # dependencies are order left to right.  REMOVE_DUPLICATES will keep the left most
 # value in the case of duplicates, so that will still work
 list(REMOVE_DUPLICATES dependencies)

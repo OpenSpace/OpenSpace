@@ -3,7 +3,7 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 local generic_action = {
   Identifier = "os.example.generic",
-  Name = "Generic Example",
+  Name = "Generic example",
   Command = [[
     openspace.printInfo("Node: " .. args.Node)
     openspace.printInfo("Transition: " .. args.Transition)
@@ -32,14 +32,14 @@ local obj = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = model .. "BoxAnimated.glb",
-    ModelScale = 1.0,
+    ModelScale = 1000,
     LightSources = {
       sun.LightSource
-    },
-    PerformShading = true,
-    DisableFaceCulling = true
+    }
   },
-  InteractionSphere = 1000.0,
+  InteractionSphere = 900,
+  ApproachFactor = 50.0,
+  ReachFactor = 5.0,
   OnApproach = { "os.example.generic" },
   OnReach = { "os.example.generic" },
   OnRecede = { "os.example.generic" },

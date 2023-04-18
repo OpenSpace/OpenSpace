@@ -108,7 +108,7 @@ private:
     // line segments
     bool _shouldUpdateMaskingBuffer = false;
     // note Elon: rework the case of only one state
-    // hasBeenUpdated only gets sets once, first iteration of update function, to 
+    // hasBeenUpdated only gets sets once, first iteration of update function, to
     // guarantee the vertext position buffer to be initialized.
     bool _hasBeenUpdated = false;
 

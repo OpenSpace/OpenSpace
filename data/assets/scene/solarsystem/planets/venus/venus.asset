@@ -22,11 +22,6 @@ local Venus = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_VENUS",
       DestinationFrame = "GALACTIC"
-    },
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "VENUS",
-      Observer = "VENUS BARYCENTER"
     }
   },
   Renderable = {

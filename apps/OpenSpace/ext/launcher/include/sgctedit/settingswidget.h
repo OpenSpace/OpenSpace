@@ -62,6 +62,23 @@ public:
      */
     bool showUiOnFirstWindow() const;
 
+    /**
+     * Sets the value of the checkbox for putting the GUI only on the first window.
+     * If this is enabled, then the first window will draw2D but not draw3D. All
+     * subsequent windows will be the opposite of this.
+     * 
+     * \param setUiOnFirstWindow boolean value, if set true then the GUI will only
+     *                           be on the first window
+     */
+    void setShowUiOnFirstWindow(bool setUiOnFirstWindow);
+
+    /**
+     * Sets the value of the checkbox for enabling VSync.
+     * 
+     * \param enableVsync boolean value, if set true then VSync is enabled
+     */
+    void setVsync(bool enableVsync);
+
 private:
     sgct::quat _orientationValue = sgct::quat(0.f, 0.f, 0.f, 0.f);
     QCheckBox* _checkBoxVsync = nullptr;

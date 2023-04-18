@@ -59,6 +59,18 @@ namespace {
         // global rebinding of keys from the default
         std::optional<std::vector<std::string>> globalCustomizationScripts;
 
+        enum class [[codegen::map(openspace::properties::Property::Visibility)]]
+        Visibility
+        {
+            NoviceUser = 0,
+            User,
+            AdvancedUser,
+            Developer
+        };
+        // Determines the property visibility level that is selected when starting up
+        // OpenSpace. If it is not provided, it defaults to 'User'
+        std::optional<Visibility> propertyVisibility;
+
         // A list of paths that are automatically registered with the file system. If a
         // key X is used in the table, it is then useable by referencing ${X} in all other
         // configuration files or scripts
@@ -291,6 +303,9 @@ namespace {
         // displayed while the scene graph is created and initialized
         std::optional<LoadingScreen> loadingScreen;
 
+        // List of window configurations that cannot be overwritten by user
+        std::optional<std::vector<std::string>> readOnlyWindowConfigs;
+
         // List of profiles that cannot be overwritten by user
         std::optional<std::vector<std::string>> readOnlyProfiles;
 
@@ -342,6 +357,12 @@ void parseLuaState(Configuration& configuration) {
     c.profile = p.profile.value_or(c.profile);
     c.globalCustomizationScripts =
         p.globalCustomizationScripts.value_or(c.globalCustomizationScripts);
+
+    if (p.propertyVisibility.has_value()) {
+        c.propertyVisibility = codegen::map<properties::Property::Visibility>(
+            *p.propertyVisibility
+        );
+    }
     c.pathTokens = p.paths;
     c.fonts = p.fonts.value_or(c.fonts);
     c.fontSize.frameInfo = p.fontSize.frameInfo;
@@ -438,6 +459,7 @@ void parseLuaState(Configuration& configuration) {
         c.httpProxy.password = p.httpProxy->password.value_or(c.httpProxy.password);
     }
 
+    c.readOnlyWindowConfigs = p.readOnlyWindowConfigs.value_or(c.readOnlyWindowConfigs);
     c.readOnlyProfiles = p.readOnlyProfiles.value_or(c.readOnlyProfiles);
     c.bypassLauncher = p.bypassLauncher.value_or(c.bypassLauncher);
 }

@@ -92,10 +92,11 @@ public:
 
     void removeWMSServer(const std::string& name);
 
-    bool isWMSCachingEnabled() const;
-    bool isInOfflineMode() const;
-    std::string wmsCacheLocation() const;
-    uint64_t wmsCacheSize() const; // bytes
+    bool isMRFCachingEnabled() const;
+    const std::string mrfCacheLocation() const;
+
+    bool hasDefaultGeoPointTexture() const;
+    std::string_view defaultGeoPointTexture() const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -113,11 +114,11 @@ private:
     glm::dquat lookDownCameraRotation(const globebrowsing::RenderableGlobe& globe,
         glm::dvec3 cameraPositionModelSpace, globebrowsing::Geodetic2 geo2);
 
-    properties::BoolProperty _wmsCacheEnabled;
-    properties::BoolProperty _offlineMode;
-    properties::StringProperty _wmsCacheLocation;
-    properties::UIntProperty _wmsCacheSizeMB;
     properties::UIntProperty _tileCacheSizeMB;
+
+    properties::StringProperty _defaultGeoPointTexturePath;
+    properties::BoolProperty _mrfCacheEnabled;
+    properties::StringProperty _mrfCacheLocation;
 
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 
@@ -127,6 +128,8 @@ private:
     std::map<std::string, Capabilities> _capabilitiesMap;
 
     std::multimap<std::string, UrlInfo> _urlList;
+
+    bool _hasDefaultGeoPointTexture = false;
 };
 
 } // namespace openspace

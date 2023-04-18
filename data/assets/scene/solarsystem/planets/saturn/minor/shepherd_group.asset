@@ -15,7 +15,7 @@ local kernels = {
 
 local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
-local guiPath = "/Solar System/Planets/Saturn/Moons/Shepherd Moons"
+local guiPath = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons"
 local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_shepherd", "moon_minor", "moon_minor_saturn" }
 local trailColor = { 0.5, 0.3, 0.3 }
 local trailTags = {
@@ -38,7 +38,7 @@ local shepherdGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = guiPath
+      Path = guiPath .. "/Prometheus"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.612990038,
@@ -55,7 +55,7 @@ local shepherdGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = guiPath
+      Path = guiPath .. "/Pandora"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.628504213,
@@ -72,7 +72,7 @@ local shepherdGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = guiPath
+      Path = guiPath .. "/Atlas"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.6016947883,
@@ -89,7 +89,7 @@ local shepherdGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = guiPath
+      Path = guiPath .. "/Janus"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.694660342,
@@ -106,7 +106,7 @@ local shepherdGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = guiPath
+      Path = guiPath .. "/Epimetheus"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.694333517,
@@ -123,7 +123,7 @@ local shepherdGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = guiPath
+      Path = guiPath .. "/Daphnis"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.5940798,
@@ -140,7 +140,7 @@ local shepherdGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = guiPath
+      Path = guiPath .. "/Pan"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.575050718,
@@ -173,7 +173,7 @@ for i, moon in ipairs(shepherdGroup) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Saturn/Moons",
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/" .. moon.Identifier,
       Description = "Label for Saturn's moon " .. moonName .. " (Shepherd group)"
     }
   }

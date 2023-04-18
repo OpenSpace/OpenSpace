@@ -43,7 +43,9 @@ namespace {
         "translation for this transformation. The script needs to define a function "
         "'translate' that takes the current simulation time in seconds past the J2000 "
         "epoch as the first argument, the current wall time as milliseconds past the "
-        "J2000 epoch as the second argument and computes the translation"
+        "J2000 epoch as the second argument and computes the translation",
+        // @VISIBILITY(3.75)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(LuaTranslation)]] Parameters {
@@ -65,7 +67,7 @@ LuaTranslation::LuaTranslation()
 {
     addProperty(_luaScriptFile);
 
-    _luaScriptFile.onChange([&]() {
+    _luaScriptFile.onChange([this]() {
         requireUpdate();
         _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
         _fileHandle->setCallback([this]() {

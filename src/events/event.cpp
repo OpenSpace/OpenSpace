@@ -205,6 +205,11 @@ void log(int i, const EventCameraPathFinished& e) {
     ));
 }
 
+void log(int i, const EventCameraMovedPosition& e) {
+    ghoul_assert(e.type == EventCameraMovedPosition::Type, "Wrong type");
+    LINFO(fmt::format("[{}] EventCameraMovedPosition", i));
+}
+
 void log(int i, const CustomEvent& e) {
     ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
     LINFO(fmt::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
@@ -234,6 +239,7 @@ std::string_view toString(Event::Type type) {
         case Event::Type::RenderableDisabled: return "RenderableDisabled";
         case Event::Type::CameraPathStarted: return "CameraPathStarted";
         case Event::Type::CameraPathFinished: return "CameraPathFinished";
+        case Event::Type::CameraMovedPosition: return "CameraMovedPosition";
         case Event::Type::Custom: return "Custom";
         default:
             throw ghoul::MissingCaseException();
@@ -303,6 +309,9 @@ Event::Type fromString(std::string_view str) {
     }
     else if (str == "CameraPathFinished") {
         return Event::Type::CameraPathFinished;
+    }
+    else if (str == "CameraMovedPosition") {
+        return Event::Type::CameraMovedPosition;
     }
     else if (str == "Custom") {
         return Event::Type::Custom;
@@ -723,6 +732,10 @@ EventCameraPathFinished::EventCameraPathFinished(const SceneGraphNode* origin_,
     : Event(Type)
     , origin(temporaryString(origin_->identifier()))
     , destination(temporaryString(destination_->identifier()))
+{}
+
+EventCameraMovedPosition::EventCameraMovedPosition()
+    : Event(Type)
 {}
 
 CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)

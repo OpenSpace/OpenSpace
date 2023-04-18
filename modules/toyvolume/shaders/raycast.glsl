@@ -60,7 +60,7 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
 
     backColor = clamp(backColor, 0.0, 1.0);
     backAlpha = clamp(backAlpha, 0.0, 1.0);
-    
+
     vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
     accumulatedColor += oneMinusFrontAlpha * backColor;
     accumulatedAlpha += oneMinusFrontAlpha * backAlpha;

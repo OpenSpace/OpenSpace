@@ -36,6 +36,8 @@
 #include "SpiceUsr.h"
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderableConstellationBounds";
+
     constexpr float convertHrsToRadians(float rightAscension) {
         // 360 degrees / 24h = 15 degrees/h
         return glm::radians(rightAscension * 15);
@@ -45,14 +47,16 @@ namespace {
         "File",
         "Vertex File Path",
         "The file pointed to with this value contains the vertex locations of the "
-        "constellations"
+        "constellations",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color of constellation lines",
         "Specifies the color of the constellation lines. The lines are always drawn at "
-        "full opacity"
+        "full opacity",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {
@@ -81,7 +85,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 
     // Avoid reading files here, instead do it in multithreaded initialize()
     _vertexFilename = absPath(p.file.string()).string();
-    _vertexFilename.onChange([&](){ loadData(); });
+    _vertexFilename.onChange([this](){ loadData(); });
     addProperty(_vertexFilename);
 
     _color.setViewOption(properties::Property::ViewOptions::Color);
@@ -99,13 +103,24 @@ void RenderableConstellationBounds::initialize() {
         std::set<std::string> selectedConstellations;
 
         for (const std::string& s : _assetSelection) {
-            const auto it = std::find(options.begin(), options.end(), s);
+            auto it = std::find(options.begin(), options.end(), s);
             if (it == options.end()) {
-                // The user has specified a constellation name that doesn't exist
-                LWARNINGC(
-                    "RenderableConstellationsBase",
-                    fmt::format("Option '{}' not found in list of constellations", s)
+                // Test if the provided name was an identifier instead of the full name
+                it = std::find(
+                    options.begin(),
+                    options.end(),
+                    constellationFullName(s)
                 );
+
+                if (it == options.end()) {
+                    // The user has specified a constellation name that doesn't exist
+                    LWARNING(fmt::format(
+                        "Option '{}' not found in list of constellations", s
+                    ));
+                }
+                else {
+                    selectedConstellations.insert(constellationFullName(s));
+                }
             }
             else {
                 selectedConstellations.insert(s);
@@ -246,12 +261,9 @@ bool RenderableConstellationBounds::loadVertexFile() {
         if (!s.good()) {
             // If this evaluates to true, the stream was not completely filled, which
             // means that the line was incomplete, so there was an error
-            LERRORC(
-                "RenderableConstellationBounds",
-                fmt::format(
-                    "Error reading file {} at line #{}", fileName, currentLineNumber
-                )
-            );
+            LERROR(fmt::format(
+                "Error reading file {} at line #{}", fileName, currentLineNumber
+            ));
             break;
         }
 

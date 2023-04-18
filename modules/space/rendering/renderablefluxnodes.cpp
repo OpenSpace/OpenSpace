@@ -64,130 +64,154 @@ namespace {
         "GOES Energy",
         "Select which energy bin you want to show. GOES = Geostationary Operational "
         "Environmental Satellites. Emin01 is values > 10 MeV, Default is Emin03 where "
-        "values > 100 MeV"
+        "values > 100 MeV",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorModeInfo = {
         "ColorMode",
         "Color Mode",
         "Color lines uniformly or using color tables based on specific values on nodes, "
-        "for examples flux values"
+        "for examples flux values",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
         "Path to Color Table",
-        "Color Table/Transfer Function to use for 'By Flux Value' coloring"
+        "Color Table/Transfer Function to use for 'By Flux Value' coloring",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StreamColorInfo = {
         "Color",
         "Color",
-        "Color of particles"
+        "Color of particles",
+        // @VISIBILITY(1.5)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NodeSizeInfo = {
        "NodeSize",
        "Size of nodes",
-       "Change the size of the rendered points of the nodes"
+       "Change the size of the rendered points of the nodes",
+       // @VISIBILITY(2.5)
+       openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ThresholdFluxInfo = {
        "ThresholdFlux",
        "Threshold flux value",
-       "This value specifies the threshold that will be changed with the flux value"
+       "This value specifies the threshold that will be changed with the flux value",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilteringInfo = {
         "FilterLower",
         "Filtering Lower Value in AU",
-        "Use filtering to show nodes within a given range"
+        "Use filtering to show nodes within a given range",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilteringUpperInfo = {
         "FilterUpper",
         "Filtering Upper Value in AU",
-        "Use filtering to show nodes within a given range"
+        "Use filtering to show nodes within a given range",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmountofNodesInfo = {
         "AmountOfNodes",
         "Every nth node to render in",
-        "Show only every nth node"
+        "Show only every nth node",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DefaultNodeSkipInfo = {
         "NodeSkip",
         "Every nth node to render default",
-        "Show only every nth node outside of skippingmethod"
+        "Show only every nth node outside of skippingmethod",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EarthNodeSkipInfo = {
        "NodeSkipEarth",
        "Every nth node to render close to Earth",
-       "Show only every nth node outside of skippingmethod"
+       "Show only every nth node outside of skippingmethod",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScalingmethodInfo = {
         "ScalingFlux",
         "Scale the flux value with color table",
-        "Use scaling to color nodes with a given method"
+        "Use scaling to color nodes with a given method",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NodeskipMethodInfo = {
         "SkippingNodes",
         "How to select nodes to skip",
-        "Methods to select nodes to skip"
+        "Methods to select nodes to skip",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo colorTableRangeInfo = {
         "ColorTableRange",
         "Color Table Range",
         "Valid range for the color table as the exponent, with base 10, of flux values. "
-        "[Min, Max]"
+        "[Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DomainZInfo = {
         "ZLimit",
         "Z-limits",
-        "Valid range along the Z-axis. [Min, Max]"
+        "Valid range along the Z-axis. [Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FluxColorAlphaInfo = {
         "FluxColorAlpha",
         "Flux Color Alpha",
-        "The value of alpha for the flux color mode"
+        "The value of alpha for the flux color mode",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FluxNodeskipThresholdInfo = {
         "SkippingNodesByFlux",
         "Skipping Nodes By Flux",
-        "Select nodes to skip depending on flux value"
+        "Select nodes to skip depending on flux value",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
                                                            RadiusNodeSkipThresholdInfo = {
         "SkippingNodesByRadius",
         "Skipping Nodes By Radius",
-        "Select nodes to skip depending on Radius"
+        "Select nodes to skip depending on Radius",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
         "DistancePlanetThreshold",
         "Threshold for distance between planet",
-        "Changes threshold distance for highlighting nodes close to earth"
+        "Changes threshold distance for highlighting nodes close to earth",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ProximityNodesSizeInfo = {
         "ProximityNodesSize",
         "Earths Proximity Nodes Size",
-        "Changes size of nodes only close to earth"
+        "Changes size of nodes only close to earth",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxNodeDistanceSizeInfo = {
         "MaxNodeDistanceSize",
         "Max Node Distance Size",
-        "The maximum size of the nodes at a certin distance"
+        "The maximum size of the nodes at a certin distance",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -195,25 +219,29 @@ namespace {
         "CameraPerspectiveEnabled",
         "Use Camera perspective",
         "Camera perspective changes the size of the nodes dependent on the distance from "
-        "camera"
+        "camera",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawingCirclesInfo = {
         "RenderingCircles",
         "Render as circles",
-        "Using fragment shader to draw nodes as circles instead of squares"
+        "Using fragment shader to draw nodes as circles instead of squares",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawingHollowInfo = {
         "RenderingHollowCircles",
         "Render as hollow circles",
-        "Using fragment shader to draw nodes as hollow circles"
+        "Using fragment shader to draw nodes as hollow circles",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GaussiandAlphaFilterInfo = {
         "RenderingGaussianAlphaFilter",
         "Alpha by Gaussian",
-        "Using fragment shader to draw nodes with Gaussian filter for alpha value"
+        "Using fragment shader to draw nodes with Gaussian filter for alpha value",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -221,25 +249,31 @@ namespace {
         "PerspectiveDistanceFactor",
         "Perspective Distance factor",
         "This value decides how far away the camera must be to start impacting the node "
-        "size"
+        "size",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxNodeSizeInfo = {
         "MinMaxNodeSize",
         "Min & Max node size",
-        "The minimum and maximum node size"
+        "The minimum and maximum node size",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo pulseEnabledInfo = {
         "PulseEnabled",
         "Nodes close to Earth pulsate",
-        "Toggles the pulse for nodes close to Earth"
+        "Toggles the pulse for nodes close to Earth",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo gaussianPulseEnabledInfo = {
         "GaussianPulseEnabled",
         "Nodes close to Earth pulsate with alpha by gaussian",
-        "Toggles the pulse with alpha by gaussian for nodes close to Earth"
+        "Toggles the pulse with alpha by gaussian for nodes close to Earth",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableFluxNodes)]] Parameters {

@@ -42,7 +42,9 @@ namespace {
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed. The size of the image will also automatically set the default "
-        "size of this plane"
+        "size of this plane",
+        // @VISIBILITY(2.4)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {

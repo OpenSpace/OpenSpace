@@ -47,14 +47,14 @@ const int TRANSMITTANCE_STEPS = 500;
 // r := height of starting point vect(x)
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 // H := Thickness of atmosphere if its density were uniform (used for Rayleigh and Mie)
-float opticalDepth(float r, float mu, float H) {    
+float opticalDepth(float r, float mu, float H) {
   float r2 = r * r;
   // Is ray below horizon? The transmittance table will have only the values for
   // transmittance starting at r (x) until the light ray touches the atmosphere or the
   // ground and only for view angles v between 0 and pi/2 + eps. That's because we can
   // calculate the transmittance for angles bigger than pi/2 just inverting the ray
   // direction and starting and ending points.
-  
+
   // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
   float cosZenithHorizon = -sqrt(1.0 - ((Rg * Rg) / r2));
   if (mu < cosZenithHorizon) {
@@ -67,7 +67,7 @@ float opticalDepth(float r, float mu, float H) {
   float deltaStep = b_a / float(TRANSMITTANCE_STEPS);
   // cosine law
   float y_i = exp(-(r - Rg) / H);
-  
+
   float accumulation = 0.0;
   for (int i = 1; i <= TRANSMITTANCE_STEPS; ++i) {
     float x_i = float(i) * deltaStep;
@@ -84,11 +84,11 @@ float opticalDepth(float r, float mu, float H) {
 void main() {
   float u_mu  = gl_FragCoord.x / float(TRANSMITTANCE.x);
   float u_r = gl_FragCoord.y / float(TRANSMITTANCE.y);
-  
+
   // In the paper u_r^2 = (r^2-Rg^2)/(Rt^2-Rg^2)
   // So, extracting r from u_r in the above equation:
   float r = Rg + (u_r * u_r) * (Rt - Rg);
-  
+
   // In the paper the Bruneton suggest mu = dot(v,x)/||x|| with ||v|| = 1.0
   // Later he proposes u_mu = (1-exp(-3mu-0.6))/(1-exp(-3.6))
   // But the below one is better. See Collienne.
@@ -99,9 +99,9 @@ void main() {
   if (ozoneLayerEnabled) {
     ozoneContribution = betaOzoneExtinction * 0.0000006 * opticalDepth(r, muSun, HO);
   }
-  vec3 opDepth = ozoneContribution + 
+  vec3 opDepth = ozoneContribution +
     betaMieExtinction * opticalDepth(r, muSun, HM) +
     betaRayleigh * opticalDepth(r, muSun, HR);
-  
+
   renderTableColor = vec4(exp(-opDepth), 0.0);
 }

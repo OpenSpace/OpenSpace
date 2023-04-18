@@ -39,7 +39,6 @@ local L1 = {
   Parent = L1Position.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    RenderBinMode = "Opaque",
     Billboard = true,
     Size = 700E5,
     Texture = circle .. "circle.png",

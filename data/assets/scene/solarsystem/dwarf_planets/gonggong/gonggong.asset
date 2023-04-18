@@ -1,0 +1,12 @@
+asset.require("./planet")
+asset.require("./trail")
+asset.require("./label", false)
+
+asset.meta = {
+  Name = "Gonggong meta asset",
+  Version = "1.0",
+  Description = [[Trail, Model and Label of Gonggong.]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

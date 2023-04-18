@@ -37,7 +37,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextInfo = {
         "Text",
         "Text",
-        "The text to be displayed"
+        "The text to be displayed",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemText)]] Parameters {

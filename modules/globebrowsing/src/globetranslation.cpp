@@ -39,7 +39,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
-        "The globe on which the longitude/latitude is specified"
+        "The globe on which the longitude/latitude is specified",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LatitudeInfo = {
@@ -47,7 +49,9 @@ namespace {
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
-        "globe. The default value is 0.0"
+        "globe. The default value is 0.0",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LongitudeInfo = {
@@ -55,7 +59,9 @@ namespace {
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0"
+        "globe. The default value is 0.0",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AltitudeInfo = {
@@ -63,7 +69,9 @@ namespace {
         "Altitude",
         "The altitude in meters. If the 'UseHeightmap' property is 'true', this is an "
         "offset from the actual surface of the globe. If not, this is an offset from the "
-        "reference ellipsoid. The default value is 0.0"
+        "reference ellipsoid. The default value is 0.0",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseHeightmapInfo = {
@@ -71,7 +79,25 @@ namespace {
         "Use Heightmap",
         "If this value is 'true', the altitude specified in 'Altitude' will be treated "
         "as an offset from the heightmap. Otherwise, it will be an offset from the "
-        "globe's reference ellipsoid. The default value is 'false'"
+        "globe's reference ellipsoid. The default value is 'false'",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseCameraInfo = {
+        "UseCamera",
+        "Use Camera",
+        "If this value is 'true', the lat and lon are updated to match the camera",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseCameraAltitudeInfo = {
+        "UseCameraAltitude",
+        "Use Camera Altitude",
+        "If this value is 'true', the altitude is updated to match the camera",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {
@@ -90,6 +116,12 @@ namespace {
 
         // [[codegen::verbatim(UseHeightmapInfo.description)]]
         std::optional<bool> useHeightmap;
+
+        // [[codegen::verbatim(UseCameraInfo.description)]]
+        std::optional<bool> useCamera;
+
+        // [[codegen::verbatim(UseCameraAltitudeInfo.description)]]
+        std::optional<bool> useCameraAltitude;
     };
 #include "globetranslation_codegen.cpp"
 } // namespace
@@ -106,6 +138,8 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _altitude(AltitudeInfo, 0.0, -1e12, 1e12)
     , _useHeightmap(UseHeightmapInfo, false)
+    , _useCamera(UseCameraInfo, false)
+    , _useCameraAltitude(UseCameraAltitudeInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -133,6 +167,14 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     _useHeightmap = p.useHeightmap.value_or(_useHeightmap);
     _useHeightmap.onChange([this]() { setUpdateVariables(); });
     addProperty(_useHeightmap);
+
+    _useCamera = p.useCamera.value_or(_useCamera);
+    _useCamera.onChange([this]() { setUpdateVariables(); });
+    addProperty(_useCamera);
+
+    _useCameraAltitude = p.useCameraAltitude.value_or(_useCameraAltitude);
+    _useCameraAltitude.onChange([this]() { setUpdateVariables(); });
+    addProperty(_useCameraAltitude);
 }
 
 void GlobeTranslation::fillAttachedNode() {
@@ -158,7 +200,7 @@ void GlobeTranslation::setUpdateVariables() {
 }
 
 void GlobeTranslation::update(const UpdateData& data) {
-    if (_useHeightmap) {
+    if (_useHeightmap || _useCamera) {
         // If we use the heightmap, we have to compute the height every frame
         setUpdateVariables();
     }
@@ -182,11 +224,25 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
 
     GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
 
+    double lat = _latitude;
+    double lon = _longitude;
+    double alt = _altitude;
+
+    if (_useCamera) {
+        glm::dvec3 position = mod->geoPosition();
+        lat = position.x;
+        lon = position.y;
+        if (_useCameraAltitude) {
+            alt = position.z;
+        }
+    }
+
     if (_useHeightmap) {
+
         glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
-            _latitude,
-            _longitude,
+            lat,
+            lon,
             0.0
         );
 
@@ -195,18 +251,18 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
 
         _position = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
-            _latitude,
-            _longitude,
-            h.heightToSurface + _altitude
+            lat,
+            lon,
+            h.heightToSurface + alt
         );
         return _position;
     }
     else {
         _position = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
-            _latitude,
-            _longitude,
-            _altitude
+            lat,
+            lon,
+            alt
         );
         _positionIsDirty = false;
         return _position;

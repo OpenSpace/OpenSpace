@@ -30,9 +30,9 @@ uniform ivec2 OTHER_TEXTURES;
 uniform sampler2D deltaETexture;
 
 
-void main() {   
+void main() {
   vec2 uv = gl_FragCoord.xy / vec2(OTHER_TEXTURES);
 
   // Update texture E with E plus deltaE textures.
-  renderTableColor = texture(deltaETexture, uv);   
+  renderTableColor = texture(deltaETexture, uv);
 }

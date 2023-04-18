@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat375
+local kernel = asset.require("../kernels").sat441
 
 
 
@@ -21,7 +21,7 @@ local IapetusTrail = {
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
   GUI = {
     Name = "Iapetus Trail",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus",
     Description = "Trail of Saturn's moon Iapetus as observed by Saturn",
   }
 }

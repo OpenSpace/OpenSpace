@@ -1,5 +1,6 @@
 asset.require("./layers/colorlayers/enceladus_texture", false)
-asset.require("./layers/colorlayers/global_mosaic_100m_hpf", true)
+asset.require("./layers/colorlayers/global_mosaic_100m_hpf_sweden", false)
+asset.require("./layers/colorlayers/global_mosaic_100m_hpf_newyork", true)
 
 
 asset.meta = {

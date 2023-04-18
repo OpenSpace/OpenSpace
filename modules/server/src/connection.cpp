@@ -32,6 +32,7 @@
 #include <modules/server/include/topics/flightcontrollertopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
+#include <modules/server/include/topics/missiontopic.h>
 #include <modules/server/include/topics/sessionrecordingtopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
 #include <modules/server/include/topics/shortcuttopic.h>
@@ -56,6 +57,7 @@ namespace {
     constexpr std::string_view MessageKeyType = "type";
     constexpr std::string_view MessageKeyPayload = "payload";
     constexpr std::string_view MessageKeyTopic = "topic";
+
 } // namespace
 
 namespace openspace {
@@ -81,6 +83,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
         }
     );
 
+    _topicFactory.registerClass<MissionTopic>("missions");
     _topicFactory.registerClass<DocumentationTopic>("documentation");
     _topicFactory.registerClass<GetPropertyTopic>("get");
     _topicFactory.registerClass<LuaScriptTopic>("luascript");
