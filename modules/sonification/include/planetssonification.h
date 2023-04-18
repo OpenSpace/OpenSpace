@@ -66,10 +66,35 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
+    // Indices for data items
     const int NumDataItems = 3;
     const int DistanceIndex = 0;
     const int HAngleIndex = 1;
     const int VAngleIndex = 2;
+
+    // Set the differnet levels of precision
+    const double LowDistancePrecision = 10000.0;
+    const double HighDistancePrecision = 1000.0;
+    const double LowAnglePrecision = 0.1;
+    const double HighAnglePrecision = 0.05;
+
+    // Indices for the planets
+    const int MercuryIndex = 0;
+    const int VenusIndex = 1;
+    const int EarthIndex = 2;
+    const int MarsIndex = 3;
+    const int JupiterIndex = 4;
+    const int SaturnIndex = 5;
+    const int UranusIndex = 6;
+    const int NeptuneIndex = 7;
+
+    // Indices for the settings for the planets
+    const int SizeDayIndex = 0;
+    const int GravityIndex = 1;
+    const int TemperatureIndex = 2;
+    const int AtmosphereIndex = 3;
+    const int MoonsIndex = 4;
+    const int RingsIndex = 5;
 
     // Struct to hold data for all the planets
     struct Planet {
