@@ -17,8 +17,7 @@
     "cosmic_view/superfamily",
     "events/toggle_image_trail",
     "modules/sonification/actions",
-    "modules/sonification/cosmic",
-    "modules/sonification/planets"
+    "modules/sonification/cosmic"
   ],
   "camera": {
     "aim": "",
