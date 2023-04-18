@@ -38,7 +38,7 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
   shaders/atmosphere_common.glsl
-  shaders/atmosphere_deferred_vs.glsl 
+  shaders/atmosphere_deferred_vs.glsl
   shaders/atmosphere_deferred_fs.glsl
   shaders/calculation_gs.glsl
   shaders/calculation_vs.glsl

@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBELABELSCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -47,7 +48,7 @@ struct RenderData;
 namespace documentation { struct Documentation; }
 namespace globebrowsing { class RenderableGlobe; }
 
-class GlobeLabelsComponent : public properties::PropertyOwner {
+class GlobeLabelsComponent : public properties::PropertyOwner, public Fadeable {
 public:
     GlobeLabelsComponent();
     ~GlobeLabelsComponent() override = default;
@@ -85,14 +86,11 @@ private:
     };
 
     properties::BoolProperty _enabled;
+    properties::Vec3Property _color;
     properties::FloatProperty _fontSize;
     properties::FloatProperty _size;
     properties::IVec2Property _minMaxSize;
     properties::FloatProperty _heightOffset;
-
-    properties::Vec3Property _color;
-    properties::FloatProperty _opacity;
-
     properties::Vec2Property _fadeDistances;
     properties::BoolProperty _fadeInEnabled;
     properties::BoolProperty _fadeOutEnabled;

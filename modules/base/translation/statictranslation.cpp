@@ -32,7 +32,9 @@ namespace {
         "Position",
         "Position",
         "This value is used as a static offset (in meters) that is applied to the scene "
-        "graph node that this transformation is attached to relative to its parent"
+        "graph node that this transformation is attached to relative to its parent",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(StaticTranslation)]] Parameters {
@@ -60,6 +62,7 @@ StaticTranslation::StaticTranslation()
         requireUpdate();
         notifyObservers();
     });
+    _type = "StaticTranslation";
 }
 
 StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
@@ -67,6 +70,7 @@ StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _position = p.position;
+    _type = "StaticTranslation";
 }
 
 glm::dvec3 StaticTranslation::position(const UpdateData&) const {

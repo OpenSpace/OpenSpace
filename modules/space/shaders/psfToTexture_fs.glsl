@@ -42,7 +42,7 @@ const int PsfMethodMoffat = 1;
 
 void main() {
   vec4 fullColor = vec4(0.0, 0.0, 0.0, 1.0);
-  if (psfMethod == PsfMethodSpencer) { 
+  if (psfMethod == PsfMethodSpencer) {
     // PSF Functions from paper: Physically-Based Galre Effects for Digital
     // Images - Spencer, Shirley, Zimmerman and Greenberg.
     float theta = sqrt((psfCoords.y * psfCoords.y + psfCoords.x * psfCoords.x)) * 90.0;
@@ -59,10 +59,10 @@ void main() {
     float moffat = pow(1.0 + (r/alpha) * (r/alpha), -betaConstant);
     fullColor = vec4(moffat);
   }
-  
+
   if (fullColor.a == 0) {
     discard;
   }
-  
+
   renderTableColor = fullColor;
 }

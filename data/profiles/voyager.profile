@@ -3,6 +3,7 @@
     "base",
     "base_keybindings",
     "scene/solarsystem/missions/voyager/dashboard",
+    "scene/solarsystem/missions/voyager/mission",
     "scene/solarsystem/missions/voyager/voyager1",
     "scene/solarsystem/missions/voyager/voyager2",
     "scene/solarsystem/missions/voyager/actions",
@@ -68,9 +69,9 @@
     }
   ],
   "mark_nodes": [
+    "Voyager_1",
+    "Voyager_2",
     "Earth",
-    "Voyager 1",
-    "Voyager 2",
     "Jupiter",
     "Saturn",
     "Uranus",

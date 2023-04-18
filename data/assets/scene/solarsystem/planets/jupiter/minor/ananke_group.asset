@@ -1,6 +1,7 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup341
+local kernel = asset.require("../kernels").jup344
+local kernel346 = asset.require("../kernels").jup346
 
 
 
@@ -29,7 +30,7 @@ local anankeGroup = {
     TrailTags = trailTags,
     GUI = {
       Name = "S/2010 J 2",
-      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2010J2"
     },
     TrailColor = trailColor,
     OrbitPeriod = 588.36,
@@ -46,7 +47,7 @@ local anankeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thelxinoe"
     },
     TrailColor = trailColor,
     OrbitPeriod = 597.61,
@@ -63,7 +64,7 @@ local anankeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Euanthe"
     },
     TrailColor = trailColor,
     OrbitPeriod = 598.09,
@@ -80,7 +81,7 @@ local anankeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Iocaste"
     },
     TrailColor = trailColor,
     OrbitPeriod = 609.43,
@@ -92,13 +93,13 @@ local anankeGroup = {
       Identifier = parentIdentifier,
       Spice = parentSpice
     },
-    Spice = "55068",
+    Spice = "55506",
     Radii = { 2000, 2000, 2000 },
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
       Name = "S/2003 J 16",
-      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J16"
     },
     TrailColor = trailColor,
     OrbitPeriod = 610.36,
@@ -115,7 +116,7 @@ local anankeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Praxidike"
     },
     TrailColor = trailColor,
     OrbitPeriod = 613.90,
@@ -132,7 +133,7 @@ local anankeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Harpalyke"
     },
     TrailColor = trailColor,
     OrbitPeriod = 624.54,
@@ -149,7 +150,7 @@ local anankeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Mneme"
     },
     TrailColor = trailColor,
     OrbitPeriod = 627.48,
@@ -166,7 +167,7 @@ local anankeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Hermippe"
     },
     TrailColor = trailColor,
     OrbitPeriod = 629.81,
@@ -183,7 +184,7 @@ local anankeGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thyone"
     },
     TrailColor = trailColor,
     OrbitPeriod = 639.80,
@@ -200,10 +201,172 @@ local anankeGroup = {
     TrailTags = trailTags,
     Tags = tags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Ananke"
     },
     TrailColor = trailColor,
     OrbitPeriod = 640.38,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2021J1",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55512",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2021 J 1",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J1"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 606.99,
+    Kernels = kernel346
+  },
+  {
+    Identifier = "S2021J2",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55513",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2021 J 2",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J2"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 627.96,
+    Kernels = kernel346
+  },
+  {
+    Identifier = "S2021J3",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55514",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2021 J 3",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J3"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 643.85,
+    Kernels = kernel346
+  },
+  {
+    Identifier = "S2022J3",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55523",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2022 J 3",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2022J3"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 617.82,
+    Kernels = kernel346
+  },
+  {
+    Identifier = "S2017J3",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "564",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2017 J 3",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J3"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 606.3,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2017J7",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "568",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2017 J 7",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J7"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 602.6,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2017J9",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "570",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2017 J 9",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J9"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 639.2,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J2",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55501",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 2",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J2"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 602.02,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J12",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55505",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 12",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J12"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 646.64,
     Kernels = kernel
   }
 }
@@ -233,7 +396,7 @@ for i, moon in ipairs(anankeGroup) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Jupiter/Moons",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/" .. moon.Identifier,
       Description = "Label for Jupiter's moon " .. moonName .. " (Ananke group)"
     }
   }

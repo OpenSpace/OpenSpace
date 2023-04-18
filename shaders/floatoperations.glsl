@@ -53,7 +53,7 @@ float denormalizeFloat(float inpt) {
 /**
  * Compute the length of a vector.
  * Supporting huge vectors, where the square of any of the components is too large to be
- * represented as a float. 
+ * represented as a float.
  */
 float safeLength(vec4 v) {
   float m = max(max(max(abs(v.x), abs(v.y)), abs(v.z)), abs(v.w));

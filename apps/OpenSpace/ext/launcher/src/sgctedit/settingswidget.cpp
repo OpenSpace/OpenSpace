@@ -80,3 +80,11 @@ bool SettingsWidget::vsync() const {
 bool SettingsWidget::showUiOnFirstWindow() const {
     return _showUiOnFirstWindow->isChecked();
 }
+
+void SettingsWidget::setShowUiOnFirstWindow(bool setUiOnFirstWindow) {
+    _showUiOnFirstWindow->setChecked(setUiOnFirstWindow);
+}
+
+void SettingsWidget::setVsync(bool enableVsync) {
+    _checkBoxVsync->setChecked(enableVsync);
+}

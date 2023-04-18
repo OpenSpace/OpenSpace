@@ -50,7 +50,7 @@ namespace {
         CHECK(t.ISO8601() == expected);
     }
 
-    void singleResolutionTest(globebrowsing::TimeQuantizer& tq, std::string resolution, 
+    void singleResolutionTest(globebrowsing::TimeQuantizer& tq, std::string resolution,
                               std::string expectedType, bool expectFailure)
     {
         std::string res;
@@ -69,7 +69,7 @@ namespace {
         }
     }
 
-    void singleStartTimeTest(globebrowsing::TimeQuantizer& tq, std::string startTime, 
+    void singleStartTimeTest(globebrowsing::TimeQuantizer& tq, std::string startTime,
                              std::string expectedErrSubstring, bool expectFailure)
     {
         std::string res;

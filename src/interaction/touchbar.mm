@@ -74,7 +74,7 @@ NSArray* focusIdentifiers;
 
         // Set the default ordering of items.
         touchBar.defaultItemIdentifiers = objs;
-            
+
         touchBar.customizationAllowedItemIdentifiers = objs;
         if ([focusIdentifiers count] > 0) {
             touchBar.principalItemIdentifier = [focusIdentifiers firstObject];
@@ -90,7 +90,7 @@ NSArray* focusIdentifiers;
         (void)touchBar;
 
         if ([identifier isEqualToString:pauseResultId]) {
-            NSButton* button = [NSButton 
+            NSButton* button = [NSButton
                 buttonWithTitle:NSLocalizedString(
                     (global::timeManager->isPaused() ? @"Resume" : @"Pause"),
                     @""
@@ -112,7 +112,7 @@ NSArray* focusIdentifiers;
         }
 
         if ([identifier isEqualToString:hideOnScreenTextId]) {
-            NSButton* button = [NSButton 
+            NSButton* button = [NSButton
                 buttonWithTitle:@"Toggle Text"
                 target:self action:@selector(hideTextAction:)
             ];
@@ -241,7 +241,7 @@ void showTouchbar() {
         g_TouchBarDelegate = [[TouchBarDelegate alloc] init];
         [NSApplication sharedApplication].automaticCustomizeTouchBarMenuItemEnabled = YES;
     }
-    
+
     std::vector<SceneGraphNode*> ns = global::renderEngine->scene()->allSceneGraphNodes();
 
     std::sort(

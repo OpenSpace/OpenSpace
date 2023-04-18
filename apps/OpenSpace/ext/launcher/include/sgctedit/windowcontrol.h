@@ -41,6 +41,14 @@ class QSpinBox;
 class WindowControl final : public QWidget {
 Q_OBJECT
 public:
+    enum class ProjectionIndices {
+        Planar = 0,
+        Fisheye,
+        SphericalMirror,
+        Cylindrical,
+        Equirectangular
+    };
+
     /**
      * Constructor for WindowControl class, which contains settings and configuration
      * for individual windows
@@ -52,7 +60,8 @@ public:
      * \param winColor A QColor object for this window's unique color
      */
     WindowControl(int monitorIndex, int windowIndex,
-        const std::vector<QRect>& monitorDims, const QColor& winColor, QWidget* parent);
+        const std::vector<QRect>& monitorDims, const QColor& winColor,
+        bool resetToDefault, QWidget* parent);
     
     /**
      * Makes the window label at top of a window control column visible
@@ -66,20 +75,100 @@ public:
      */
     void resetToDefaults();
 
-    sgct::config::Window generateWindowInformation() const;
+    /**
+     * Sets the window dimensions
+     *
+     * \param newDims The x, y dimensions to set the window to
+     */
+    void setDimensions(QRectF newDims);
+                                   
+    /**
+     * Sets the monitor selection combobox
+     *
+     * \param monitorIndex The zero-based monitor index to set the combobox selection to
+     */
+    void setMonitorSelection(int monitorIndex);
+
+    /**
+     * Sets the window name in the text edit box
+     *
+     * \param windowName The window title to set
+     */
+    void setWindowName(const std::string& windowName);
+
+    /**
+     * Sets the window's decoration status. If set to true, then the window has a
+     * border. If false it is borderless
+     *
+     * \param hasWindowDecoration boolean for if window has decoration (border)
+     */
+    void setDecorationState(bool hasWindowDecoration);
+
+    /**
+     * Generates window configuration (sgct::config::Window struct) based on the
+     * GUI settings. 
+     *
+     * \param window The sgct::config::Window struct that is passed into the function
+     *               and modified with the generated window content
+     */
+    void generateWindowInformation(sgct::config::Window& window) const;
+
+    /**
+     * Sets the window's projection type to planar, with the accompanying parameters
+     * for horizontal and vertical FOV.
+     *
+     * \param hfov float value for horizontal field of view angle (degrees)
+     * \param vfov float value for vertical field of view angle (degrees)
+     */
+    void setProjectionPlanar(float hfov, float vfov);
+
+    /**
+     * Sets the window's projection type to fisheye, with the accompanying quality
+     * setting and spout option
+     *
+     * \param quality int value for number of vertical lines of resolution. This will
+     *                be compared against the QualityValues array in order to set the
+     *                correct combobox index
+     * \param spoutOutput bool for enabling the spout output option
+     */
+    void setProjectionFisheye(int quality, bool spoutOutput);
+
+    /**
+     * Sets the window's projection type to spherical mirror, with the accompanying
+     * quality setting
+     *
+     * \param quality int value for number of vertical lines of resolution. This will
+     *                be compared against the QualityValues array in order to set the
+     *                correct combobox index
+     */
+    void setProjectionSphericalMirror(int quality);
+
+    /**
+     * Sets the window's projection type to cylindrical, with the accompanying quality
+     * setting and height offset value
+     *
+     * \param quality int value for number of vertical lines of resolution. This will
+     *                be compared against the QualityValues array in order to set the
+     *                correct combobox index
+     * \param heightOffset float value for height offset to be applied
+     */
+    void setProjectionCylindrical(int quality, float heightOffset);
+
+    /**
+     * Sets the window's projection type to equirectangular, with the accompanying
+     * quality setting and spout option
+     *
+     * \param quality int value for number of vertical lines of resolution. This will
+     *                be compared against the QualityValues array in order to set the
+     *                correct combobox index
+     * \param spoutOutput bool for enabling the spout output option
+     */
+    void setProjectionEquirectangular(int quality, bool spoutOutput);
 
 signals:
     void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
 
 private:
-    enum class ProjectionIndices {
-        Planar = 0,
-        Fisheye,
-        SphericalMirror,
-        Cylindrical,
-        Equirectangular
-    };
-
     void createWidgets(const QColor& windowColor);
     QWidget* createPlanarWidget();
     QWidget* createFisheyeWidget();
@@ -98,6 +187,7 @@ private:
 
     sgct::config::Projections generateProjectionInformation() const;
     void updatePlanarLockedFov();
+    void setQualityComboBoxFromLinesResolution(int lines, QComboBox* combo);
 
     static constexpr float IdealAspectRatio = 16.f / 9.f;
     float _aspectRatioSize = IdealAspectRatio;

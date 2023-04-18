@@ -1,7 +1,7 @@
 local transforms = asset.require("../transforms")
 asset.require("spice/base")
 asset.require("./trail")
-local kernel = asset.require("../kernels").jup310
+local kernel = asset.require("../kernels").jup365
 
 local labelsPath = asset.syncedResource({
   Name = "Jupiter Labels",
@@ -47,7 +47,7 @@ local Europa = {
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
   GUI = {
-    Path = "/Solar System/Planets/Jupiter/Moons"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Europa"
   }
 }
 
@@ -71,7 +71,7 @@ local EuropaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Europa Label",
-    Path = "/Solar System/Planets/Jupiter/Moons",
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Europa",
     Description = "Label for Jupiter's moon Europa"
   }
 }
@@ -92,7 +92,7 @@ asset.export(Europa)
 
 
 asset.meta = {
-  Name = "Mimas",
+  Name = "Europa",
   Version = "1.1",
   Description = "Europa globe with labels",
   Author = "OpenSpace Team",

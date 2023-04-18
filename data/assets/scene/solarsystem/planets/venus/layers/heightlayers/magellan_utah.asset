@@ -1,7 +1,7 @@
 local globeIdentifier = asset.require("../../venus").Venus.Identifier
 
 local layer = {
-  Identifier = "Magellan",
+  Identifier = "MagellanElevation_Utah",
   Name = "Magellan Elevation [Utah]",
   Enabled = asset.enabled,
   Description = [[Elevation layer for Venus. The represents the version 2

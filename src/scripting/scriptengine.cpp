@@ -39,7 +39,6 @@
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <filesystem>
 #include <fstream>
-
 #include "scriptengine_lua.inl"
 
 namespace {
@@ -80,6 +79,52 @@ namespace {
         }
 
         return result;
+    }
+
+    void sortJson(nlohmann::json& json) {
+        std::sort(
+            json.begin(),
+            json.end(),
+            [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
+                std::string lhsString = lhs["Name"];
+                std::string rhsString = rhs["Name"];
+                std::transform(
+                    lhsString.begin(),
+                    lhsString.end(),
+                    lhsString.begin(),
+                    [](unsigned char c) { return std::tolower(c); }
+                );
+                std::transform(
+                    rhsString.begin(),
+                    rhsString.end(),
+                    rhsString.begin(),
+                    [](unsigned char c) { return std::tolower(c); }
+                );
+
+                return rhsString > lhsString;
+            });
+    }
+
+    nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f) {
+        using namespace openspace;
+        using namespace openspace::scripting;
+        nlohmann::json function;
+        function["Name"] = f.name;
+        nlohmann::json arguments = nlohmann::json::array();
+
+        for (const LuaLibrary::Function::Argument& arg : f.arguments) {
+            nlohmann::json argument;
+            argument["Name"] = arg.name;
+            argument["Type"] = arg.type;
+            argument["Default Value"] = arg.defaultValue.value_or("");
+            arguments.push_back(argument);
+        }
+
+        function["Arguments"] = arguments;
+        function["Return Type"] = f.returnType;
+        function["Help"] = f.helpText;
+
+        return function;
     }
 
     void toJson(const openspace::scripting::LuaLibrary& library, std::stringstream& json)
@@ -528,6 +573,34 @@ std::string ScriptEngine::generateJson() const {
     json << "]";
 
     return json.str();
+}
+
+nlohmann::json ScriptEngine::generateJsonJson() const {
+    ZoneScoped
+
+    nlohmann::json json;
+
+    for (const LuaLibrary& l : _registeredLibraries) {
+        using namespace openspace;
+        using namespace openspace::scripting;
+
+        nlohmann::json library;
+        std::string libraryName = l.name.empty() ? "openspace" : "openspace." + l.name;
+        library["Name"] = libraryName;
+
+        for (const LuaLibrary::Function& f : l.functions) {
+            library["Functions"].push_back(toJson(f));
+        }
+
+        for (const LuaLibrary::Function& f : l.documentations) {
+            library["Functions"].push_back(toJson(f));
+        }
+        sortJson(library["Functions"]);
+        json.push_back(library);
+
+        sortJson(json);
+    }
+    return json;
 }
 
 void ScriptEngine::writeLog(const std::string& script) {

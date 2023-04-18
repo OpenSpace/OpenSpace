@@ -7,11 +7,11 @@ local Description = [[Carbon monoxide is known as "The Silent Killer" because it
 colorless, odorless, tasteless gas that is poisonous to humans and other oxygen breathing
 organisms. It is also naturally occurring in the atmosphere. Only in high concentrations
 is carbon monoxide deadly. At the Earth's surface the concentration of carbon monoxide is
-100 ppb (parts per billion), however, in urban areas it can get up to 10 ppm (parts per 
+100 ppb (parts per billion), however, in urban areas it can get up to 10 ppm (parts per
 million) or 100 times higher. One of the main anthropogenic sources of carbon monoxide in
-the atmosphere is emissions from automobiles. In areas with heavy traffic the carbon 
-monoxide can be measured at 50 ppm. The natural sources of carbon monoxide include 
-volcanoes and brush burning. Between the anthropogenic and natural sources, scientists 
+the atmosphere is emissions from automobiles. In areas with heavy traffic the carbon
+monoxide can be measured at 50 ppm. The natural sources of carbon monoxide include
+volcanoes and brush burning. Between the anthropogenic and natural sources, scientists
 estimate that the annual production of carbon monoxide is 2-5 gigatons]]
 local URL = "https://sos.noaa.gov/catalog/datasets/carbon-monoxide-2000/"
 

@@ -4,7 +4,7 @@ local sync = asset.syncedResource({
   Name = "Swift Tuttle Orbit",
   Type = "HttpSynchronization",
   Identifier = "swift_tuttle_horizons",
-  Version = 2
+  Version = 3
 })
 
 local SwiftTuttleTrail = {

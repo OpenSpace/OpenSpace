@@ -97,7 +97,7 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
         resolutionRatio
     );
     std::function<glm::tvec4<GLfloat>(glm::ivec3)> sampleFunction =
-        [&](glm::ivec3 outCoord) {
+        [this, resolutionRatio, sampler](glm::ivec3 outCoord) {
             const glm::vec3 inCoord = ((glm::vec3(outCoord) + glm::vec3(0.5f)) *
                                       resolutionRatio) - glm::vec3(0.5f);
             const glm::tvec4<GLfloat> value = sampler.sample(inCoord);

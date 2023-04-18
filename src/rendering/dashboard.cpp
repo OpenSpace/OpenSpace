@@ -38,14 +38,17 @@ namespace {
         "IsEnabled",
         "Enabled",
         "If this value is 'false', this dashboard will be invisible, regardless of the "
-        "state of the individual components"
+        "state of the individual components",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartPositionOffsetInfo = {
         "StartPositionOffset",
         "Start Position Offset",
         "A 2D vector controlling where the dashboard rendering starts. Adding an offset "
-        "in x and y-direction on screen"
+        "in x and y-direction on screen",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 } // namespace
 

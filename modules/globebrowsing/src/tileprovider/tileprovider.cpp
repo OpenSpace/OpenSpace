@@ -118,8 +118,8 @@ void TileProvider::deinitializeDefaultTile() {
     DefaultTileTexture = nullptr;
 }
 
-TileProvider::TileProvider()
-    : properties::PropertyOwner({ "TileProvider", "Tile Provider"})
+TileProvider::TileProvider() 
+    : properties::PropertyOwner({ "TileProvider", "Tile Provider" }) 
 {}
 
 void TileProvider::initialize() {
@@ -152,30 +152,10 @@ void TileProvider::deinitialize() {
     internalDeinitialize();
 }
 
-void TileProvider::internalInitialize() {}
-void TileProvider::internalDeinitialize() {}
-
-ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
-    ZoneScoped;
-
-    ghoul_assert(isInitialized, "TileProvider was not initialized");
-
-    auto ascendToParent = [](TileIndex& ti, TileUvTransform& uv) {
-        uv.uvOffset *= 0.5;
-        uv.uvScale *= 0.5;
-
-        uv.uvOffset += ti.positionRelativeParent();
-
-        ti.x /= 2;
-        ti.y /= 2;
-        ti.level--;
-    };
-
-    TileUvTransform uvTransform = {
-        .uvOffset = glm::vec2(0.f, 0.f),
-        .uvScale = glm::vec2(1.f, 1.f)
-    };
-
+ChunkTile TileProvider::traverseTree(TileIndex tileIndex, int parents, int maxParents, 
+                        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent, 
+                                                             TileUvTransform& uvTransform) 
+{
     // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller
     for (int i = 0; i < parents && tileIndex.level > 1; i++) {
         ascendToParent(tileIndex, uvTransform);
@@ -190,7 +170,7 @@ ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParen
         maxParents--;
     }
     if (maxParents < 0) {
-        return ChunkTile { Tile(), uvTransform, TileDepthTransform() };
+        return ChunkTile{ Tile(), uvTransform, TileDepthTransform() };
     }
 
     // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that
@@ -200,16 +180,44 @@ ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParen
         Tile t = tile(tileIndex);
         if (t.status != Tile::Status::OK) {
             if (--maxParents < 0) {
-                return ChunkTile { Tile(), uvTransform, TileDepthTransform() };
+                return ChunkTile{ Tile(), uvTransform, TileDepthTransform() };
             }
             ascendToParent(tileIndex, uvTransform);
         }
         else {
-            return ChunkTile { std::move(t), uvTransform, TileDepthTransform() };
+            return ChunkTile{ std::move(t), uvTransform, TileDepthTransform() };
         }
     }
 
-    return ChunkTile { Tile(), uvTransform, TileDepthTransform() };
+    return ChunkTile{ Tile(), uvTransform, TileDepthTransform() };
+}
+
+void TileProvider::internalInitialize() {}
+void TileProvider::internalDeinitialize() {}
+
+ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
+    ZoneScoped;
+
+    ghoul_assert(isInitialized, "TileProvider was not initialized");
+
+    std::function<void(TileIndex&, TileUvTransform&)> ascendToParent = []
+        (TileIndex& ti, TileUvTransform& uv) {
+            uv.uvOffset *= 0.5;
+            uv.uvScale *= 0.5;
+
+            uv.uvOffset += ti.positionRelativeParent();
+
+            ti.x /= 2;
+            ti.y /= 2;
+            ti.level--;
+        };
+
+    TileUvTransform uvTransform = {
+       .uvOffset = glm::vec2(0.f, 0.f),
+       .uvScale = glm::vec2(1.f, 1.f)
+    };
+
+    return traverseTree(tileIndex, parents, maxParents, ascendToParent, uvTransform);
 }
 
 ChunkTilePile TileProvider::chunkTilePile(TileIndex tileIndex, int pileSize) {

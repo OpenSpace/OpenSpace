@@ -1,0 +1,34 @@
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
+
+local layer = {
+  Identifier = "MOLA_HRSC_NewYork",
+  Name = "MOLA HRSC [New York]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("mola_hrsc_newyork.wms"),
+  Description = [[This map layer is colorzied based elevation data from MOLA and HRSC.
+    Compared to MOLA Psuedo Color, this layer has no terrain shading, which is
+    suitable for use when combing with other layers. Data Reference:
+    https://astrogeology.usgs.gov/search/map/Mars/Topography/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "MOLA HRSC [New York]",
+  Version = "1.1",
+  Description = [[Colorzied elevation data for Mars. This map is hosted on the OpenSpace
+    server in New York]],
+  Author = "OpenSpace Team",
+  URL = "http://www.openspaceproject.com",
+  License = "NASA/PDS"
+}

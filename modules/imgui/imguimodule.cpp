@@ -55,26 +55,30 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this object will be visible or not"
+        "This setting determines whether this object will be visible or not",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo CollapsedInfo = {
         "Collapsed",
         "Is Collapsed",
-        "This setting determines whether this window is collapsed or not"
+        "This setting determines whether this window is collapsed or not",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHelpInfo = {
         "ShowHelpText",
         "Show tooltip help",
         "If this value is enabled these kinds of tooltips are shown for most properties "
-        "explaining what impact they have on the visuals"
+        "explaining what impact they have on the visuals",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
         "HelpTextDelay",
         "Tooltip Delay (in s)",
-        "This value determines the delay in seconds after which the tooltip is shown"
+        "This value determines the delay in seconds after which the tooltip is shown",
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 
@@ -125,7 +129,7 @@ ImGUIModule::ImGUIModule()
         addProperty(_helpTextDelay);
     }
 
-    global::callback::draw2D->emplace_back([&]() {
+    global::callback::draw2D->emplace_back([this]() {
         ZoneScopedN("ImGUI");
 
         if (!_isEnabled) {
@@ -153,8 +157,8 @@ ImGUIModule::ImGUIModule()
     });
 
     global::callback::keyboard->emplace_back(
-        [&](Key key, KeyModifier mod, KeyAction action,
-            IsGuiWindow isGuiWindow) -> bool
+        [this](Key key, KeyModifier mod, KeyAction action,
+               IsGuiWindow isGuiWindow) -> bool
         {
             ZoneScopedN("ImGUI");
 
@@ -166,8 +170,8 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::character->emplace_back(
-        [&](unsigned int codepoint, KeyModifier modifier,
-            IsGuiWindow isGuiWindow) -> bool
+        [this](unsigned int codepoint, KeyModifier modifier,
+               IsGuiWindow isGuiWindow) -> bool
         {
             ZoneScopedN("ImGUI");
 
@@ -179,7 +183,7 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mousePosition->emplace_back(
-        [&](double x, double y, IsGuiWindow isGuiWindow) {
+        [this](double x, double y, IsGuiWindow isGuiWindow) {
             if (!isGuiWindow) {
                 return; // do nothing
             }
@@ -188,8 +192,8 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mouseButton->emplace_back(
-        [&](MouseButton button, MouseAction action, KeyModifier,
-            IsGuiWindow isGuiWindow) -> bool
+        [this](MouseButton button, MouseAction action, KeyModifier,
+               IsGuiWindow isGuiWindow) -> bool
         {
             ZoneScopedN("ImGUI");
 
@@ -209,7 +213,7 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mouseScrollWheel->emplace_back(
-        [&](double, double posY, IsGuiWindow isGuiWindow) -> bool {
+        [this](double, double posY, IsGuiWindow isGuiWindow) -> bool {
             ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled) {
@@ -220,19 +224,19 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::touchDetected->emplace_back(
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             return touchDetectedCallback(input);
         }
     );
 
     global::callback::touchUpdated->emplace_back(
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             return touchUpdatedCallback(input);
         }
     );
 
     global::callback::touchExit->emplace_back(
-        [&](TouchInput input) {
+        [this](TouchInput input) {
             touchExitCallback(input);
         }
     );
@@ -729,7 +733,7 @@ bool ImGUIModule::touchUpdatedCallback(TouchInput input) {
     auto it = std::find_if(
         _validTouchStates.cbegin(),
         _validTouchStates.cend(),
-        [&](const TouchInput& state) {
+        [&input](const TouchInput& state) {
             return state.fingerId == input.fingerId &&
                    state.touchDeviceId == input.touchDeviceId;
         }
@@ -755,7 +759,7 @@ void ImGUIModule::touchExitCallback(TouchInput input) {
     const auto found = std::find_if(
         _validTouchStates.cbegin(),
         _validTouchStates.cend(),
-        [&](const TouchInput& state) {
+        [&input](const TouchInput& state) {
             return state.fingerId == input.fingerId &&
                    state.touchDeviceId == input.touchDeviceId;
         }
