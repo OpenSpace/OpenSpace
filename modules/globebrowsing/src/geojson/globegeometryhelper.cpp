@@ -295,8 +295,16 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     using namespace geos::geom;
 
     GeometryFactory::Ptr geometryFactory = GeometryFactory::create();
-    std::unique_ptr<MultiPoint> points = geometryFactory->createMultiPoint(pointCoords);
-
+    // @TODO (emmbr, 2023-04-18): This is a bit of a temporary workaround to make the
+    // createMultiPoint call compile on Mac. It should work with just passing in the
+    // pointCoords variable directly, but for some reason it didn't. We should come up
+    // with a solution that does not iterate over the (quite big) std::vector an extra time
+    std::vector<std::unique_ptr<Point>> geosPoints;
+    geosPoints.reserve(pointCoords.size());
+    for (const Coordinate& c : pointCoords) {
+        geosPoints.emplace_back(geometryFactory->createPoint(c));
+    }
+    std::unique_ptr<MultiPoint> points = geometryFactory->createMultiPoint(std::move(geosPoints));
     // Create triangulation of points
     geos::triangulate::DelaunayTriangulationBuilder builder;
     builder.setSites(*points->getCoordinates());
