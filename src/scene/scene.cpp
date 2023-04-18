@@ -859,10 +859,11 @@ std::string makeIdentifier(std::string s) {
     // in the puncutation check
     std::replace(s.begin(), s.end(), '_', ' ');
     std::replace_if(
-                    s.begin(),
-                    s.end(),
-                    [](char c) { return std::ispunct(c) == 0; },
-                    '-');
+        s.begin(),
+        s.end(),
+        [](char c) { return std::ispunct(c) == 0; },
+        '-'
+    );
     std::replace(s.begin(), s.end(), ' ', '_');
     return s;
 }
