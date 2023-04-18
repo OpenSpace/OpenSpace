@@ -84,7 +84,6 @@ void OscConnection::send(const std::string& label, const std::vector<OscDataType
 
     _stream << osc::EndMessage;
     _socket.Send(_stream.Data(), _stream.Size());
-
 }
 
 } // namespace openspace
