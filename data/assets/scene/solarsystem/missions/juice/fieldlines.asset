@@ -14,13 +14,17 @@ local magnetosphere = {
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = data,
-    LineWidth = 1.0,
+    LineWidth = 3.0,
     InputFileType = "Json",
     ColorMethod = "By Quantity",
     ColorQuantity = 0,
     ColorTableRanges = { { 62.556353386366766, 1665.5534182835445 } },
     ColorTablePaths = { asset.localResource("CMR-illuminance2.txt") },
-    Color = { 1.0, 0.725, 0.75, 0.8 }
+    Color = { 0.03, 0.0, 0.0, 1.0 },
+    ParticleSpacing = 42.0,
+    ParticleSize = 30.0,
+    FlowColor = { 1.0, 1.0, 1.0, 0.1 }
+
   },
   GUI = {
     Name = "Ganymede Magnetosphere",

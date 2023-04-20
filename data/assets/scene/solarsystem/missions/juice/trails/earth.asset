@@ -15,7 +15,7 @@ local JuiceTrailEarth = {
     },
     Color = { 0.30, 0.70, 0.20 },
     StartTime = "2023 APR 05 12:00:00.000",
-    EndTime = "2033 JUN 04 02:51:00.546",
+    EndTime = "2035 OCT 05 01:58:58.683",
     SampleInterval = 3600
   },
   GUI = {
