@@ -226,7 +226,7 @@ df.dec.fillna(temp_df.dec, inplace=True)
 
 print("Reading data from prepared APOGEE and GALAH files...")
 
-abundanceDatafolder = "https://weber.itn.liu.se/~emmbr26/exo_star_abundances/"
+abundanceDatafolder = "https://data.openspaceproject.com/release/ExoplanetExplorer/misc/exo_star_abundances/"
 apogeePath = abundanceDatafolder + "abundances_apogee.csv"
 galahPath = abundanceDatafolder + "abundances_galah.csv"
 

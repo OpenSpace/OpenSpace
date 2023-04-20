@@ -81,7 +81,7 @@ namespace {
         "hesitate to reach out with any questions, input or feedback";
 
     constexpr char GetInTouchLink[] =
-        "https://weber.itn.liu.se/~emmbr26/ExoplanetExplorer/get_in_touch";
+        "https://data.openspaceproject.com/release/ExoplanetExplorer/misc/get_in_touch";
 
     bool caseInsensitiveLessThan(const char* lhs, const char* rhs) {
         int res = _stricmp(lhs, rhs);
