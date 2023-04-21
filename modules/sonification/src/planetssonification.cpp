@@ -570,12 +570,6 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
             );
         }
 
-        double moonVAngle = SonificationBase::calculateElevationAngleFromAToB(
-            camera,
-            _planets[planetIndex].identifier,
-            _planets[planetIndex].moons[m].first
-        );
-
         if (std::abs(_planets[planetIndex].moons[m].second[MoonVAngleIndex] - moonVAngle) >
             _anglePrecision)
         {
