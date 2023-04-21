@@ -375,14 +375,11 @@ void PlanetsSonification::sendSettings(int planetIndex) {
 
     // Moons
     for (size_t m = 0; m < _planets[planetIndex].moons.size(); ++m) {
-        // Distance
-        data.push_back(_planets[planetIndex].moons[m].second[DistanceIndex]);
-
         // Horizontal Angle
-        data.push_back(_planets[planetIndex].moons[m].second[HAngleIndex]);
+        data.push_back(_planets[planetIndex].moons[m].second[MoonHAngleIndex]);
 
         // Vertical Angle
-        data.push_back(_planets[planetIndex].moons[m].second[VAngleIndex]);
+        data.push_back(_planets[planetIndex].moons[m].second[MoonVAngleIndex]);
     }
 
     data.shrink_to_fit();
@@ -519,24 +516,6 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
     // Also calculate angle to moons if this planet is in focus
     bool updateMoons = false;
     for (int m = 0; m < _planets[planetIndex].moons.size(); ++m) {
-        // Distance
-        double dist = SonificationBase::calculateDistanceTo(
-            camera,
-            _planets[planetIndex].moons[m].first,
-            DistanceUnit::Kilometer
-        );
-
-        if (std::abs(dist) < std::numeric_limits<double>::epsilon()) {
-            return false;
-        }
-
-        if (std::abs(_planets[planetIndex].moons[m].second[DistanceIndex] - dist) >
-            _distancePrecision)
-        {
-            updateMoons = true;
-            _planets[planetIndex].moons[m].second[DistanceIndex] = dist;
-        }
-
         // Horizontal angle
         double moonHAngle = SonificationBase::calculateAngleFromAToB(
             camera,
@@ -544,11 +523,11 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
             _planets[planetIndex].moons[m].first
         );
 
-        if (std::abs(_planets[planetIndex].moons[m].second[HAngleIndex] - moonHAngle) >
+        if (std::abs(_planets[planetIndex].moons[m].second[MoonHAngleIndex] - moonHAngle) >
             _anglePrecision)
         {
             updateMoons = true;
-            _planets[planetIndex].moons[m].second[HAngleIndex] = moonHAngle;
+            _planets[planetIndex].moons[m].second[MoonHAngleIndex] = moonHAngle;
         }
 
         // Vertical angle
@@ -558,11 +537,11 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
             _planets[planetIndex].moons[m].first
         );
 
-        if (std::abs(_planets[planetIndex].moons[m].second[VAngleIndex] - moonVAngle) >
+        if (std::abs(_planets[planetIndex].moons[m].second[MoonVAngleIndex] - moonVAngle) >
             _anglePrecision)
         {
             updateMoons = true;
-            _planets[planetIndex].moons[m].second[VAngleIndex] = moonVAngle;
+            _planets[planetIndex].moons[m].second[MoonVAngleIndex] = moonVAngle;
         }
     }
 

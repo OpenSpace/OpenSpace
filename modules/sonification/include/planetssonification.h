@@ -71,6 +71,8 @@ private:
     const int DistanceIndex = 0;
     const int HAngleIndex = 1;
     const int VAngleIndex = 2;
+    const int MoonHAngleIndex = 0;
+    const int MoonVAngleIndex = 1;
 
     // Set the differnet levels of precision
     const double LowDistancePrecision = 10000.0;
@@ -107,7 +109,7 @@ private:
         // Distance, horizontal angle, vertical angle
         std::vector<double> data = std::vector<double>(3);
 
-        // <name of moon, <distance, horizontal angle, vertical angle>>
+        // <name of moon, <horizontal angle, vertical angle>>
         std::vector<std::pair<std::string, std::vector<double>>> moons;
     };
 
