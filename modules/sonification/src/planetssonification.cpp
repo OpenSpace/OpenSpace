@@ -516,12 +516,32 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
     // Also calculate angle to moons if this planet is in focus
     bool updateMoons = false;
     for (int m = 0; m < _planets[planetIndex].moons.size(); ++m) {
+        SonificationModule* module = global::moduleEngine->module<SonificationModule>();
+        if (!module) {
+            LERROR("Could not find the SonificationModule");
+            return 0.0;
+        }
+        SonificationModule::SurroundMode mode = module->surroundMode();
+
         // Horizontal angle
-        double moonHAngle = SonificationBase::calculateAngleFromAToB(
-            camera,
-            _planets[planetIndex].identifier,
-            _planets[planetIndex].moons[m].first
-        );
+        double moonHAngle = 0.0;
+        if (mode == SonificationModule::SurroundMode::Horizontal ||
+            mode == SonificationModule::SurroundMode::HorizontalWithElevation)
+        {
+            moonHAngle = SonificationBase::calculateAngleFromAToB(
+                camera,
+                _planets[planetIndex].identifier,
+                _planets[planetIndex].moons[m].first
+            );
+        }
+        else if (mode == SonificationModule::SurroundMode::Circular ||
+                 mode == SonificationModule::SurroundMode::CircularWithElevation)
+        {
+            moonHAngle = SonificationBase::calculateAngleTo(
+                camera,
+                _planets[planetIndex].moons[m].first
+            );
+        }
 
         if (std::abs(_planets[planetIndex].moons[m].second[MoonHAngleIndex] - moonHAngle) >
             _anglePrecision)
@@ -531,6 +551,25 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
         }
 
         // Vertical angle
+        double moonVAngle = 0.0;
+        if (mode == SonificationModule::SurroundMode::Horizontal ||
+            mode == SonificationModule::SurroundMode::HorizontalWithElevation)
+        {
+            moonVAngle = SonificationBase::calculateElevationAngleFromAToB(
+                camera,
+                _planets[planetIndex].identifier,
+                _planets[planetIndex].moons[m].first
+            );
+        }
+        else if (mode == SonificationModule::SurroundMode::Circular ||
+                 mode == SonificationModule::SurroundMode::CircularWithElevation)
+        {
+            moonVAngle = SonificationBase::calculateElevationAngleTo(
+                camera,
+                _planets[planetIndex].moons[m].first
+            );
+        }
+
         double moonVAngle = SonificationBase::calculateElevationAngleFromAToB(
             camera,
             _planets[planetIndex].identifier,
