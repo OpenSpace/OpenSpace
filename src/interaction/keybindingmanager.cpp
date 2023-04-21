@@ -38,37 +38,10 @@
 
 namespace openspace::interaction {
 
-void sortJson(nlohmann::json& json) {
-    std::sort(
-        json.begin(),
-        json.end(), 
-        [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
-            std::string lhsString = lhs["Name"];
-            std::string rhsString = rhs["Name"];
-            std::transform(
-                lhsString.begin(), 
-                lhsString.end(), 
-                lhsString.begin(),
-                [](unsigned char c) { return std::tolower(c); }
-            );
-            std::transform(
-                rhsString.begin(), 
-                rhsString.end(), 
-                rhsString.begin(),
-                [](unsigned char c) { return std::tolower(c); }
-            );
-
-            return rhsString > lhsString;
-        });
-}
-
 KeybindingManager::KeybindingManager()
     : DocumentationGenerator(
         "Keybindings",
-        "keybinding",
-        {
-            { "keybindingTemplate", "${WEB}/documentation/keybinding.hbs" }
-        }
+        "keybinding"
     )
 {}
 
@@ -177,7 +150,10 @@ nlohmann::json KeybindingManager::generateJsonJson() const {
     }
     sortJson(json);
 
-    return json;
+    nlohmann::json result;
+    result[NameTag] = "Keybindings";
+    result["Keybindings"] = json;
+    return result;
 }
 
 scripting::LuaLibrary KeybindingManager::luaLibrary() {

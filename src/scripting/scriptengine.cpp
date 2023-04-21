@@ -81,29 +81,7 @@ namespace {
         return result;
     }
 
-    void sortJson(nlohmann::json& json) {
-        std::sort(
-            json.begin(),
-            json.end(),
-            [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
-                std::string lhsString = lhs["Name"];
-                std::string rhsString = rhs["Name"];
-                std::transform(
-                    lhsString.begin(),
-                    lhsString.end(),
-                    lhsString.begin(),
-                    [](unsigned char c) { return std::tolower(c); }
-                );
-                std::transform(
-                    rhsString.begin(),
-                    rhsString.end(),
-                    rhsString.begin(),
-                    [](unsigned char c) { return std::tolower(c); }
-                );
 
-                return rhsString > lhsString;
-            });
-    }
 
     nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f) {
         using namespace openspace;
@@ -216,10 +194,7 @@ namespace openspace::scripting {
 ScriptEngine::ScriptEngine()
     : DocumentationGenerator(
         "Script Documentation",
-        "scripting",
-        {
-            { "scriptingTemplate","${WEB}/documentation/scripting.hbs" },
-        }
+        "scripting"
     )
 {
     //tracy::LuaRegister(_state);
@@ -600,7 +575,12 @@ nlohmann::json ScriptEngine::generateJsonJson() const {
 
         sortJson(json);
     }
-    return json;
+
+    nlohmann::json result;
+    result[NameTag] = "Scripting API";
+    result[DataTag] = json;
+
+    return result;
 }
 
 void ScriptEngine::writeLog(const std::string& script) {

@@ -41,30 +41,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "PropertyOwner";
 
-    void sortJson(nlohmann::json& json) {
-        std::sort(
-            json.begin(),
-            json.end(),
-            [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
-                std::string lhsString = lhs["Name"];
-                std::string rhsString = rhs["Name"];
-                std::transform(
-                    lhsString.begin(),
-                    lhsString.end(),
-                    lhsString.begin(),
-                    [](unsigned char c) { return std::tolower(c); }
-                );
-                std::transform(
-                    rhsString.begin(),
-                    rhsString.end(),
-                    rhsString.begin(),
-                    [](unsigned char c) { return std::tolower(c); }
-                );
-
-                return rhsString > lhsString;
-            });
-    }
-
     nlohmann::json createJson(openspace::properties::PropertyOwner* owner) {
         ZoneScoped
 
@@ -89,14 +65,12 @@ namespace {
 
             json["Properties"].push_back(propertyJson);
         }
-        sortJson(json["Properties"]);
 
         auto propertyOwners = owner->propertySubOwners();
         for (properties::PropertyOwner* o : propertyOwners) {
             nlohmann::json propertyOwner;
             json["PropertyOwners"].push_back(createJson(o));
         }
-        sortJson(json["PropertyOwners"]);
 
         return json;
     }
@@ -107,12 +81,7 @@ namespace openspace::properties {
 PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
     : DocumentationGenerator(
         "Property Owners",
-        "propertyOwners",
-        {
-            { "propertyOwnersTemplate","${WEB}/documentation/propertyowners.hbs" },
-            { "propertyTemplate","${WEB}/documentation/property.hbs" },
-            { "propertylistTemplate","${WEB}/documentation/propertylist.hbs" }
-        }
+        "propertyOwners"
     )
     , _identifier(std::move(info.identifier))
     , _guiName(std::move(info.guiName))
@@ -437,12 +406,20 @@ nlohmann::json PropertyOwner::generateJsonJson() const {
     std::vector<PropertyOwner*> subOwners = propertySubOwners();
     for (PropertyOwner* owner : subOwners) {
         if (owner->identifier() != "Scene") {
-            json.push_back(createJson(owner));
+            nlohmann::json jsonOwner = createJson(owner);
+            sortJson(jsonOwner["Properties"]);
+            sortJson(jsonOwner["PropertyOwners"]);
+
+            json.push_back(jsonOwner);
         }
     }
     sortJson(json);
 
-    return json;
+    nlohmann::json result;
+    result[NameTag] = "PropertyOwner";
+    result[DataTag] = json;
+
+    return result;
 }
 
 } // namespace openspace::properties

@@ -32,30 +32,45 @@
 
 namespace openspace {
 
+const std::string DocumentationGenerator::DataTag = "Data";
+const std::string DocumentationGenerator::NameTag = "Name";
+
 DocumentationGenerator::DocumentationGenerator(std::string name,
-                                               std::string jsonName,
-                                        std::vector<HandlebarTemplate> handlebarTemplates)
+                                               std::string jsonName)
     : _name(std::move(name))
     , _jsonName(std::move(jsonName))
-    , _handlebarTemplates(std::move(handlebarTemplates))
 {
     ghoul_precondition(!_name.empty(), "name must not be empty");
     ghoul_precondition(!_jsonName.empty(), "jsonName must not be empty");
-    for (const HandlebarTemplate& t : _handlebarTemplates) {
-        (void)t; // Unused variable in Release mode
-        ghoul_precondition(!t.name.empty(), "name must not be empty");
-        ghoul_precondition(!t.filename.empty(), "filename must not be empty");
-    }
 }
 
-std::vector<DocumentationGenerator::HandlebarTemplate>
-DocumentationGenerator::templatesToRegister()
-{
-    return _handlebarTemplates;
-}
 
 std::string DocumentationGenerator::jsonName() {
     return _jsonName;
+}
+
+void DocumentationGenerator::sortJson(nlohmann::json& json) const {
+    std::sort(
+        json.begin(),
+        json.end(),
+        [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
+            std::string lhsString = lhs["Name"];
+            std::string rhsString = rhs["Name"];
+            std::transform(
+                lhsString.begin(),
+                lhsString.end(),
+                lhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+            std::transform(
+                rhsString.begin(),
+                rhsString.end(),
+                rhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+
+            return rhsString > lhsString;
+        });
 }
 
 } // namespace openspace

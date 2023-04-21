@@ -42,30 +42,6 @@ namespace {
 using namespace openspace;
 using namespace openspace::documentation;
 
-void sortJson(nlohmann::json& json) {
-    std::sort(
-        json.begin(),
-        json.end(),
-        [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
-            std::string lhsString = lhs["Name"];
-            std::string rhsString = rhs["Name"];
-            std::transform(
-                lhsString.begin(),
-                lhsString.end(),
-                lhsString.begin(),
-                [](unsigned char c) { return std::tolower(c); }
-            );
-            std::transform(
-                rhsString.begin(),
-                rhsString.end(),
-                rhsString.begin(),
-                [](unsigned char c) { return std::tolower(c); }
-            );
-
-            return rhsString > lhsString;
-        });
-}
-
 nlohmann::json generateJsonDocumentation(const Documentation& d) {
     nlohmann::json json;
 
@@ -113,7 +89,6 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
         }
         json["Members"].push_back(entry);
     }
-    sortJson(json["Members"]);
 
     return json;
 }
@@ -133,10 +108,7 @@ FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
 FactoryManager::FactoryManager()
     : DocumentationGenerator(
         "Factory Documentation",
-        "factory",
-        {
-            { "factoryTemplate", "${WEB}/documentation/factory.hbs" }
-        }
+        "factory"
     )
 {}
 
@@ -252,11 +224,15 @@ nlohmann::json FactoryManager::generateJsonJson() const {
     for (const Documentation& doc : docs) {
         leftovers["Classes"].push_back(generateJsonDocumentation(doc));
     }
-    sortJson(leftovers["Classes"]);
+    sortJson(json["Classes"]["Members"]);
     json.push_back(leftovers);
-    sortJson(json);
+
     // I did not check the output of this for correctness ---abock
-    return json;
+    nlohmann::json result;
+    result[NameTag] = "Asset Types";
+    result[DataTag] = json;
+        
+    return result;
 }
 
 }  // namespace openspace

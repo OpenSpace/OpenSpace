@@ -1047,36 +1047,17 @@ void OpenSpaceEngine::writeDocumentation() {
         &properties::PropertyOwner::generateJsonJson,
         _scene.get()
     );
-
-
-    DocEng.addHandlebarTemplates(global::scriptEngine->templatesToRegister());
-    DocEng.addHandlebarTemplates(FactoryManager::ref().templatesToRegister());
-    DocEng.addHandlebarTemplates(DocEng.templatesToRegister());
-
-    nlohmann::json scripting;
-    scripting["Name"] = "Scripting API";
-    scripting["Data"] = global::scriptEngine->generateJsonJson();
-
-    nlohmann::json factory;
-    factory["Name"] = "Asset Types";
-    factory["Data"] = FactoryManager::ref().generateJsonJson();
-
-    nlohmann::json keybindings;
-    keybindings["Name"] = "Keybindings";
-    keybindings["Keybindings"] = global::keybindingManager->generateJsonJson();
-
     SceneLicenseWriter writer;
-    nlohmann::json license;
-    license["Name"] = "Licenses";
-    license["Data"] = writer.generateJsonJson();
 
-    nlohmann::json sceneProperties;
-    sceneProperties["Name"] = "Settings";
-    sceneProperties["Data"] = settings.get();
-
-    nlohmann::json sceneGraph;
-    sceneGraph["Name"] = "Scene";
-    sceneGraph["Data"] = scene.get();
+    nlohmann::json scripting = global::scriptEngine->generateJsonJson();
+    nlohmann::json factory = FactoryManager::ref().generateJsonJson();
+    nlohmann::json keybindings = global::keybindingManager->generateJsonJson();
+    nlohmann::json license = writer.generateJsonJson();
+    nlohmann::json sceneProperties = settings.get();
+    nlohmann::json sceneGraph = scene.get();
+    
+    sceneProperties[DocumentationGenerator::NameTag] = "Settings";
+    sceneGraph[DocumentationGenerator::NameTag] = "Scene";
 
     nlohmann::json documentation = { 
         sceneGraph, sceneProperties, keybindings, license, scripting, factory 

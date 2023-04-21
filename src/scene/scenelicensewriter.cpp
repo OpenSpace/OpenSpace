@@ -39,36 +39,9 @@ namespace openspace {
 SceneLicenseWriter::SceneLicenseWriter()
     : DocumentationGenerator(
         "Scene Licenses",
-        "sceneLicense",
-        {
-            { "sceneLicenseTemplate",  "${WEB}/documentation/scenelicense.hbs" }
-        }
+        "sceneLicense"
     )
 {}
-
-void sortJson(nlohmann::json& json) {
-    std::sort(
-        json.begin(),
-        json.end(),
-        [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
-            std::string lhsString = lhs["Name"];
-            std::string rhsString = rhs["Name"];
-            std::transform(
-                lhsString.begin(),
-                lhsString.end(),
-                lhsString.begin(),
-                [](unsigned char c) { return std::tolower(c); }
-            );
-            std::transform(
-                rhsString.begin(),
-                rhsString.end(),
-                rhsString.begin(),
-                [](unsigned char c) { return std::tolower(c); }
-            );
-
-            return rhsString > lhsString;
-        });
-}
 
 nlohmann::json SceneLicenseWriter::generateJsonJson() const {
     nlohmann::json json;
@@ -144,7 +117,12 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
         assetsJson["Licenses"].push_back(entry);
     }
     json.push_back(assetsJson);
-    return json;
+
+    nlohmann::json result;
+    result[NameTag] = "Licenses";
+    result[DataTag] = json;
+    
+    return result;
 }
 
 std::string SceneLicenseWriter::generateJson() const {
