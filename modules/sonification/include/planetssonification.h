@@ -226,6 +226,7 @@ private:
     void sendSettings(int planetIndex);
 
     // Properties onChange
+    void onEnabledChanged();
     void onToggleAllChanged();
 
     //Mercury
@@ -263,6 +264,7 @@ private:
     double _anglePrecision;
     double _distancePrecision;
     std::vector<Planet> _planets;
+    bool _inSolarPerspective = false;
 
     // Properties
     struct PlanetProperty : properties::PropertyOwner {

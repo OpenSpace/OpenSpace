@@ -24,6 +24,8 @@
 
 #include <modules/sonification/include/solarsonification.h>
 
+#include <modules/sonification/sonificationmodule.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 
@@ -109,6 +111,7 @@ SolarSonification::SolarSonification(const std::string& ip, int port)
     , _neptuneEnabled(EnableNeptuneInfo, false)
 {
     // Add onChange functions to the properties
+    _enabled.onChange([this]() { onEnabledChanged(); });
     _toggleAll.onChange([this]() { onToggleAllChanged(); });
     _mercuryEnabled.onChange([this]() { sendSettings(); });
     _venusEnabled.onChange([this]() { sendSettings(); });
@@ -161,6 +164,37 @@ void SolarSonification::sendSettings() {
     data[0] = createSettingsVector();
 
     _connection->send(label, data);
+}
+
+void SolarSonification::onEnabledChanged() {
+    SonificationModule* module = global::moduleEngine->module<SonificationModule>();
+    if (!module) {
+        LERROR("Could not find the SonificationModule");
+        return;
+    }
+    SonificationBase* compare = module->sonification("CompareSonification");
+    if (!compare) {
+        LERROR("Could not find the CompareSonification");
+        return;
+    }
+    SonificationBase* planeraty = module->sonification("PlanetsSonification");
+    if (!planeraty) {
+        LERROR("Could not find the PlanetsSonification");
+        return;
+    }
+
+    bool compareEnabled = compare->enabled();
+    bool planeratyEnabled = planeraty->enabled();
+
+    if (_enabled && (compareEnabled || planeratyEnabled)) {
+        LINFO(
+            "Turning off the Compare and Planets sonification in favor for the Solar "
+            "sonification"
+        );
+        compare->setEnabled(false);
+        planeraty->setEnabled(false);
+        return;
+    }
 }
 
 void SolarSonification::onToggleAllChanged() {

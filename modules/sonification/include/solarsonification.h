@@ -74,6 +74,7 @@ private:
     void sendSettings();
 
     // Properties onChange
+    void onEnabledChanged();
     void onToggleAllChanged();
 
     // Properties

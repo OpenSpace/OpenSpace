@@ -171,6 +171,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _distancePrecision = LowDistancePrecision;
 
     // Add onChange for the properties
+    _enabled.onChange([this]() { onEnabledChanged(); });
     _toggleAll.onChange([this]() { onToggleAllChanged(); });
 
     // Mercury
@@ -386,6 +387,37 @@ void PlanetsSonification::sendSettings(int planetIndex) {
     _connection->send(label, data);
 }
 
+void PlanetsSonification::onEnabledChanged() {
+    SonificationModule* module = global::moduleEngine->module<SonificationModule>();
+    if (!module) {
+        LERROR("Could not find the SonificationModule");
+        return;
+    }
+    SonificationBase* solar = module->sonification("SolarSonification");
+    if (!solar) {
+        LERROR("Could not find the SolarSonification");
+        return;
+    }
+    SonificationBase* compare = module->sonification("CompareSonification");
+    if (!compare) {
+        LERROR("Could not find the CompareSonification");
+        return;
+    }
+
+    bool solarEnabled = solar->enabled();
+    bool compareEnabled = compare->enabled();
+
+    if (_enabled && (solarEnabled || compareEnabled)) {
+        LINFO(
+            "Turning off the Solar and Compare sonification in favor for the Planets "
+            "sonification"
+        );
+        solar->setEnabled(false);
+        compare->setEnabled(false);
+        return;
+    }
+}
+
 void PlanetsSonification::onToggleAllChanged() {
     // Set all the settings
     _mercuryProperty.toggleAll.setValue(_toggleAll);
@@ -494,37 +526,63 @@ void PlanetsSonification::onNeptuneSettingChanged() {
 
 // Extract data from the given identifier
 bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
+    SonificationModule* module = global::moduleEngine->module<SonificationModule>();
+    if (!module) {
+        LERROR("Could not find the SonificationModule");
+        return 0.0;
+    }
+    SonificationModule::SurroundMode mode = module->surroundMode();
+
+    // Distance
     double distance = SonificationBase::calculateDistanceTo(
         camera,
         _planets[planetIndex].identifier,
         DistanceUnit::Kilometer
-    );
-    double HAngle = SonificationBase::calculateAngleTo(
-        camera,
-        _planets[planetIndex].identifier
-    );
-
-    double VAngle = SonificationBase::calculateElevationAngleTo(
-        camera,
-        _planets[planetIndex].identifier
     );
 
     if (std::abs(distance) < std::numeric_limits<double>::epsilon()) {
         return false;
     }
 
+    // Angle
+    double HAngle = 0.0, VAngle = 0.0;
+    bool inACircularMode =
+        mode == SonificationModule::SurroundMode::Circular ||
+        mode == SonificationModule::SurroundMode::CircularWithElevation;
+    // Don't do solar perspective when in circular surround mode
+    if (_inSolarPerspective && !inACircularMode) {
+        HAngle = SonificationBase::calculateAngleFromAToB(
+            camera,
+            "Sun",
+            _planets[planetIndex].identifier
+        );
+
+        VAngle = SonificationBase::calculateElevationAngleFromAToB(
+            camera,
+            "Sun",
+            _planets[planetIndex].identifier
+        );
+        LDEBUG("Use Solar Persective");
+    }
+    else {
+        HAngle = SonificationBase::calculateAngleTo(
+            camera,
+            _planets[planetIndex].identifier
+        );
+
+        VAngle = SonificationBase::calculateElevationAngleTo(
+            camera,
+            _planets[planetIndex].identifier
+        );
+        LDEBUG("Use Camera Persective");
+    }
+
+    // Moons
     // Also calculate angle to moons if this planet is in focus
     bool updateMoons = false;
     for (int m = 0; m < _planets[planetIndex].moons.size(); ++m) {
-        SonificationModule* module = global::moduleEngine->module<SonificationModule>();
-        if (!module) {
-            LERROR("Could not find the SonificationModule");
-            return 0.0;
-        }
-        SonificationModule::SurroundMode mode = module->surroundMode();
-
-        // Horizontal angle
-        double moonHAngle = 0.0;
+        // Angles
+        double moonHAngle = 0.0, moonVAngle = 0.0;
         if (mode == SonificationModule::SurroundMode::Horizontal ||
             mode == SonificationModule::SurroundMode::HorizontalWithElevation)
         {
@@ -533,11 +591,23 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
                 _planets[planetIndex].identifier,
                 _planets[planetIndex].moons[m].identifier
             );
+
+            moonVAngle = SonificationBase::calculateElevationAngleFromAToB(
+                camera,
+                _planets[planetIndex].identifier,
+                _planets[planetIndex].moons[m].identifier
+            );
         }
+        // Don't do "You are the planet"-perspective when in circular surround mode
         else if (mode == SonificationModule::SurroundMode::Circular ||
                  mode == SonificationModule::SurroundMode::CircularWithElevation)
         {
             moonHAngle = SonificationBase::calculateAngleTo(
+                camera,
+                _planets[planetIndex].moons[m].identifier
+            );
+
+            moonVAngle = SonificationBase::calculateElevationAngleTo(
                 camera,
                 _planets[planetIndex].moons[m].identifier
             );
@@ -548,26 +618,6 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
         {
             updateMoons = true;
             _planets[planetIndex].moons[m].addHAngle(moonHAngle);
-        }
-
-        // Vertical angle
-        double moonVAngle = 0.0;
-        if (mode == SonificationModule::SurroundMode::Horizontal ||
-            mode == SonificationModule::SurroundMode::HorizontalWithElevation)
-        {
-            moonVAngle = SonificationBase::calculateElevationAngleFromAToB(
-                camera,
-                _planets[planetIndex].identifier,
-                _planets[planetIndex].moons[m].identifier
-            );
-        }
-        else if (mode == SonificationModule::SurroundMode::Circular ||
-                 mode == SonificationModule::SurroundMode::CircularWithElevation)
-        {
-            moonVAngle = SonificationBase::calculateElevationAngleTo(
-                camera,
-                _planets[planetIndex].moons[m].identifier
-            );
         }
 
         if (std::abs(_planets[planetIndex].moons[m].VAngle() - moonVAngle) >
@@ -621,6 +671,12 @@ void PlanetsSonification::update(const Camera* camera) {
 
     if (!_enabled && !solarEnabled && !compareEnabled) {
         return;
+    }
+    else if (!_enabled && (solarEnabled || compareEnabled)) {
+        _inSolarPerspective = true;
+    }
+    else {
+        _inSolarPerspective = false;
     }
 
     const SceneGraphNode* focusNode =

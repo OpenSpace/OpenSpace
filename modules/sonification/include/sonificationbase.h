@@ -66,6 +66,11 @@ public:
     bool enabled() const;
 
     /**
+    * Set if the sonification should be enabled or not
+    */
+    void setEnabled(bool value);
+
+    /**
      * Calculate the distance from the camera to the node with the given identifier, in
      * the given distance unit
      *

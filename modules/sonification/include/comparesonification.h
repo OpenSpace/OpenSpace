@@ -85,6 +85,7 @@ private:
         properties::OptionProperty& notChangedPlanet, std::string& prevChangedPlanet);
 
     // Properties onChange
+    void onEnabledChanged();
     void onFirstChanged();
     void onSecondChanged();
     void onToggleAllChanged();

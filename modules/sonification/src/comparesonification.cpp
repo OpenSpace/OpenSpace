@@ -24,6 +24,8 @@
 
 #include <modules/sonification/include/comparesonification.h>
 
+#include <modules/sonification/sonificationmodule.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -138,6 +140,7 @@ CompareSonification::CompareSonification(const std::string& ip, int port)
     });
 
     // Add onChange for the properties
+    _enabled.onChange([this]() { onEnabledChanged(); });
     _firstPlanet.onChange([this]() { onFirstChanged(); });
     _secondPlanet.onChange([this]() { onSecondChanged(); });
     _toggleAll.onChange([this]() { onToggleAllChanged(); });
@@ -234,6 +237,37 @@ void CompareSonification::planetSelectionChanged(
     }
 
     sendSettings();
+}
+
+void CompareSonification::onEnabledChanged() {
+    SonificationModule* module = global::moduleEngine->module<SonificationModule>();
+    if (!module) {
+        LERROR("Could not find the SonificationModule");
+        return;
+    }
+    SonificationBase* solar = module->sonification("SolarSonification");
+    if (!solar) {
+        LERROR("Could not find the SolarSonification");
+        return;
+    }
+    SonificationBase* planeraty = module->sonification("PlanetsSonification");
+    if (!planeraty) {
+        LERROR("Could not find the PlanetsSonification");
+        return;
+    }
+
+    bool solarEnabled = solar->enabled();
+    bool planeratyEnabled = planeraty->enabled();
+
+    if (_enabled && (solarEnabled || planeratyEnabled)) {
+        LINFO(
+            "Turning off the Solar and Planets sonification in favor for the Compare "
+            "sonification"
+        );
+        solar->setEnabled(false);
+        planeraty->setEnabled(false);
+        return;
+    }
 }
 
 void CompareSonification::onFirstChanged() {

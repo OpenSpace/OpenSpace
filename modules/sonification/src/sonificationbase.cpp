@@ -73,6 +73,10 @@ bool SonificationBase::enabled() const {
     return _enabled;
 }
 
+void SonificationBase::setEnabled(bool value) {
+    _enabled = value;
+}
+
 double SonificationBase::calculateDistanceTo(const Camera* camera,
                                         std::variant<std::string, glm::dvec3> nodeIdOrPos,
                                              DistanceUnit unit)
@@ -92,8 +96,7 @@ double SonificationBase::calculateDistanceTo(const Camera* camera,
 
 // Horizontal angle
 double SonificationBase::calculateAngleTo(const Camera* camera,
-                                          std::variant<std::string,
-                                          glm::dvec3> nodeIdOrPos)
+                                        std::variant<std::string, glm::dvec3> nodeIdOrPos)
 {
     glm::dvec3 nodePosition = getNodePosition(nodeIdOrPos);
     if (glm::length(nodePosition) < std::numeric_limits<glm::f64>::epsilon()) {
@@ -157,10 +160,8 @@ double SonificationBase::calculateAngleTo(const Camera* camera,
 }
 
 double SonificationBase::calculateAngleFromAToB(const Camera* camera,
-                                                std::variant<std::string,
-                                                glm::dvec3> nodeIdOrPosA,
-                                                std::variant<std::string,
-                                                glm::dvec3> nodeIdOrPosB)
+                                       std::variant<std::string, glm::dvec3> nodeIdOrPosA,
+                                       std::variant<std::string, glm::dvec3> nodeIdOrPosB)
 {
     glm::dvec3 nodeAPos = getNodePosition(nodeIdOrPosA);
     glm::dvec3 nodeBPos = getNodePosition(nodeIdOrPosB);
@@ -229,8 +230,7 @@ double SonificationBase::calculateAngleFromAToB(const Camera* camera,
 
 // Elevation angle
 double SonificationBase::calculateElevationAngleTo(const Camera* camera,
-                                                   std::variant<std::string,
-                                                   glm::dvec3> nodeIdOrPos)
+                                        std::variant<std::string, glm::dvec3> nodeIdOrPos)
 {
     glm::dvec3 nodePosition = getNodePosition(nodeIdOrPos);
     if (glm::length(nodePosition) < std::numeric_limits<glm::f64>::epsilon()) {
@@ -301,10 +301,8 @@ double SonificationBase::calculateElevationAngleTo(const Camera* camera,
 }
 
 double SonificationBase::calculateElevationAngleFromAToB(const Camera* camera,
-                                                         std::variant<std::string,
-                                                         glm::dvec3> nodeIdOrPosA,
-                                                         std::variant<std::string,
-                                                         glm::dvec3> nodeIdOrPosB)
+                                       std::variant<std::string, glm::dvec3> nodeIdOrPosA,
+                                       std::variant<std::string, glm::dvec3> nodeIdOrPosB)
 {
     glm::dvec3 nodeAPos = getNodePosition(nodeIdOrPosA);
     glm::dvec3 nodeBPos = getNodePosition(nodeIdOrPosB);
@@ -403,8 +401,8 @@ void SonificationBase::addValueToRingBuffer(std::vector<double>& values,
     ++ringBufferIndex;
 }
 
-glm::dvec3 SonificationBase::getNodePosition(std::variant<std::string,
-                                             glm::dvec3> nodeIdOrPos)
+glm::dvec3 SonificationBase::getNodePosition(
+                                        std::variant<std::string, glm::dvec3> nodeIdOrPos)
 {
     if (std::holds_alternative<std::string>(nodeIdOrPos)) {
         std::string identifier = std::get<std::string>(nodeIdOrPos);
