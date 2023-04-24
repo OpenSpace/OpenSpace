@@ -75,25 +75,139 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    const int DistanceIndex = 0;
-    const int HAngleIndex = 1;
-    const int VAngleIndex = 2;
-    const int NumDataItems = 3;
+    // Precision of distances and angles
+    const double AnglePrecision = 0.05;
+    const double DistancePrecision = 0.1;
+
+    // Number of samples to smooth out the data for the sonification
+    static const int NumSamples = 10;
 
     struct LabelsData {
+    public:
+        // Get a smoothed out value from the data
+        double distance() const {
+            return SonificationBase::calcMedian(distances);
+        }
+        double HAngle() const {
+            return SonificationBase::calcMedian(horizontalAngles);
+        }
+        double VAngle() const {
+            return SonificationBase::calcMedian(verticalAngles);
+        }
+
+        // Add values to ring buffers
+        void addDistance(const double distance) {
+            SonificationBase::addValueToRingBuffer(
+                distances,
+                ringBufferIndex,
+                NumSamples,
+                distance
+            );
+        }
+        void addHAngle(const double angle) {
+            SonificationBase::addValueToRingBuffer(
+                horizontalAngles,
+                ringBufferIndex,
+                NumSamples,
+                angle
+            );
+        }
+        void addVAngle(const double angle) {
+            SonificationBase::addValueToRingBuffer(
+                verticalAngles,
+                ringBufferIndex,
+                NumSamples,
+                angle
+            );
+        }
+
+    private:
+        // Distance, horizontal angle, vertical angle
+        std::vector<double> distances = std::vector<double>(NumSamples, 0.0);
+        std::vector<double> horizontalAngles = std::vector<double>(NumSamples, 0.0);
+        std::vector<double> verticalAngles = std::vector<double>(NumSamples, 0.0);
+
+        // The first "empty" slot in the ring buffer order. The "oldest" value
+        int ringBufferIndex = 0;
+    };
+
+    struct Labels {
+        Labels(std::string id = "") {
+            identifier = id;
+        }
+
+        bool operator==(const std::string& id) {
+            return identifier == id;
+        }
+
+        std::string identifier;
         speck::Labelset* labels = nullptr;
         DistanceUnit unit;
         bool isInitialized = false;
-
-        // std::vector<std::vector<distance, angle>>
-        std::vector<std::vector<double>> data;
+        std::vector<LabelsData> data;
     };
 
-    // std::map<<Identifier, std::vector<distance, angle>>>
-    std::map<std::string, std::vector<double>> _nodes;
+    struct NodeData {
+    public:
+        NodeData(std::string id = "") {
+            identifier = id;
+        }
 
-    // std::map<Identifier, Labels data>
-    std::map<std::string, LabelsData> _labels;
+        bool operator==(const std::string& id) {
+            return identifier == id;
+        }
+
+        std::string identifier;
+
+        // Get a smoothed out value from the data
+        double distance() const {
+            return SonificationBase::calcMedian(distances);
+        }
+        double HAngle() const {
+            return SonificationBase::calcMedian(horizontalAngles);
+        }
+        double VAngle() const {
+            return SonificationBase::calcMedian(verticalAngles);
+        }
+
+        // Add values to ring buffers
+        void addDistance(const double distance) {
+            SonificationBase::addValueToRingBuffer(
+                distances,
+                ringBufferIndex,
+                NumSamples,
+                distance
+            );
+        }
+        void addHAngle(const double angle) {
+            SonificationBase::addValueToRingBuffer(
+                horizontalAngles,
+                ringBufferIndex,
+                NumSamples,
+                angle
+            );
+        }
+        void addVAngle(const double angle) {
+            SonificationBase::addValueToRingBuffer(
+                verticalAngles,
+                ringBufferIndex,
+                NumSamples,
+                angle
+            );
+        }
+
+    private:
+        // Distance, horizontal angle, vertical angle
+        std::vector<double> distances = std::vector<double>(NumSamples, 0.0);
+        std::vector<double> horizontalAngles = std::vector<double>(NumSamples, 0.0);
+        std::vector<double> verticalAngles = std::vector<double>(NumSamples, 0.0);
+
+        // The first "empty" slot in the ring buffer order. The "oldest" value
+        int ringBufferIndex = 0;
+    };
+
+    std::vector<NodeData> _nodes;
+    std::vector<Labels> _labels;
 };
 
 } // openspace namespace

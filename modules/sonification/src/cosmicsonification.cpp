@@ -36,8 +36,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "CosmicSonification";
-    constexpr double AnglePrecision = 0.05;
-    constexpr double DistancePrecision = 0.1;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         CosmicSonificationInfo =
@@ -73,9 +71,9 @@ void CosmicSonification::update(const Camera* camera) {
     }
 
     // Update node data
-    for (auto& [identifier, nodeData] : _nodes) {
-        std::string id = identifier;
-        if (identifier == "Focus") {
+    for (NodeData& nodeData : _nodes) {
+        std::string id = nodeData.identifier;
+        if (nodeData.identifier == "Focus") {
             id = focusNode->identifier();
         }
 
@@ -93,34 +91,34 @@ void CosmicSonification::update(const Camera* camera) {
 
         // Check if this data is new, otherwise don't send it
         bool shouldSendData = false;
-        if (std::abs(nodeData[DistanceIndex] - distance) > DistancePrecision ||
-            std::abs(nodeData[HAngleIndex] - angleH) > AnglePrecision ||
-            std::abs(nodeData[VAngleIndex] - angleV) > AnglePrecision)
+        if (std::abs(nodeData.distance() - distance) > DistancePrecision ||
+            std::abs(nodeData.HAngle() - angleH) > AnglePrecision ||
+            std::abs(nodeData.VAngle() - angleV) > AnglePrecision)
         {
             // Update the saved data for the planet
-            nodeData[DistanceIndex] = distance;
-            nodeData[HAngleIndex] = angleH;
-            nodeData[VAngleIndex] = angleV;
+            nodeData.addDistance(distance);
+            nodeData.addHAngle(angleH);
+            nodeData.addVAngle(angleV);
             shouldSendData = true;
         }
 
         if (shouldSendData) {
-            std::string label = "/" + identifier;
+            std::string label = "/" + nodeData.identifier;
             std::vector<OscDataType> oscData;
 
-            if (identifier == "Focus") {
+            if (nodeData.identifier == "Focus") {
                 // Also send the name of the focus node
                 oscData.push_back(id);
             }
 
             // Distance
-            oscData.push_back(nodeData[DistanceIndex]);
+            oscData.push_back(nodeData.distance());
 
             // Horizontal angle
-            oscData.push_back(nodeData[HAngleIndex]);
+            oscData.push_back(nodeData.HAngle());
 
             // Vertical angle
-            oscData.push_back(nodeData[VAngleIndex]);
+            oscData.push_back(nodeData.VAngle());
 
             oscData.shrink_to_fit();
             _connection->send(label, oscData);
@@ -128,11 +126,11 @@ void CosmicSonification::update(const Camera* camera) {
     }
 
     // Update labels data
-    for (auto& [identifier, labelsData] : _labels) {
+    for (Labels& label : _labels) {
         // Find the node
-        SceneGraphNode* node = sceneGraphNode(identifier);
+        SceneGraphNode* node = sceneGraphNode(label.identifier);
         if (!node) {
-            LWARNING(fmt::format("Could not find node {}", identifier));
+            LWARNING(fmt::format("Could not find node {}", label.identifier));
             continue;
         }
 
@@ -140,7 +138,7 @@ void CosmicSonification::update(const Camera* camera) {
         Renderable* renderable = node->renderable();
 
         if (!renderable) {
-            LWARNING(fmt::format("Could not find renderable for node {}", identifier));
+            LWARNING(fmt::format("Could not find renderable for node {}", label.identifier));
             continue;
         }
 
@@ -155,21 +153,18 @@ void CosmicSonification::update(const Camera* camera) {
             reinterpret_cast<RenderableCosmicPoints*>(renderable);
 
         // Get labels if not set already
-        if (!labelsData.isInitialized) {
-            labelsData.labels = cosmicRenderable->labels();
-            labelsData.unit = cosmicRenderable->unit();
-            labelsData.data.resize(
-                labelsData.labels->entries.size(),
-                std::vector<double>(NumDataItems)
-            );
+        if (!label.isInitialized) {
+            label.labels = cosmicRenderable->labels();
+            label.unit = cosmicRenderable->unit();
+            label.data.resize(label.labels->entries.size());
 
-            labelsData.isInitialized = true;
+            label.isInitialized = true;
         }
 
         // Update distances to all labels
-        for (int i = 0; i < labelsData.labels->entries.size(); ++i) {
-            glm::vec3 scaledPos(labelsData.labels->entries[i].position);
-            scaledPos *= toMeter(labelsData.unit);
+        for (int i = 0; i < label.labels->entries.size(); ++i) {
+            glm::vec3 scaledPos(label.labels->entries[i].position);
+            scaledPos *= toMeter(label.unit);
 
             double distance = SonificationBase::calculateDistanceTo(
                 camera,
@@ -191,35 +186,35 @@ void CosmicSonification::update(const Camera* camera) {
 
             // Check if this data is new, otherwise don't send it
             bool shouldSendData = false;
-            if (std::abs(labelsData.data[i][DistanceIndex] - distance) > DistancePrecision ||
-                std::abs(labelsData.data[i][HAngleIndex] - angleH) > AnglePrecision ||
-                std::abs(labelsData.data[i][VAngleIndex] - angleV) > AnglePrecision)
+            if (std::abs(label.data[i].distance() - distance) > DistancePrecision ||
+                std::abs(label.data[i].HAngle() - angleH) > AnglePrecision ||
+                std::abs(label.data[i].VAngle() - angleV) > AnglePrecision)
             {
                 // Update the saved data for the planet
-                labelsData.data[i][DistanceIndex] = distance;
-                labelsData.data[i][HAngleIndex] = angleH;
-                labelsData.data[i][VAngleIndex] = angleV;
+                label.data[i].addDistance(distance);
+                label.data[i].addHAngle(angleH);
+                label.data[i].addVAngle(angleV);
                 shouldSendData = true;
             }
 
             if (shouldSendData) {
-                std::string label = "/" + identifier;
+                std::string osclabel = "/" + label.identifier;
                 std::vector<OscDataType> oscData;
 
                 // Label name
-                oscData.push_back(labelsData.labels->entries[i].text);
+                oscData.push_back(label.labels->entries[i].text);
 
                 // Distance
-                oscData.push_back(labelsData.data[i][DistanceIndex]);
+                oscData.push_back(label.data[i].distance());
 
                 // Horizontal angle
-                oscData.push_back(labelsData.data[i][HAngleIndex]);
+                oscData.push_back(label.data[i].HAngle());
 
                 // Vertical angle
-                oscData.push_back(labelsData.data[i][VAngleIndex]);
+                oscData.push_back(label.data[i].VAngle());
 
                 oscData.shrink_to_fit();
-                _connection->send(label, oscData);
+                _connection->send(osclabel, oscData);
             }
         }
     }
@@ -230,21 +225,21 @@ void CosmicSonification::stop() {
 }
 
 void CosmicSonification::addNode(const std::string& nodeId) {
-    if (_nodes.find(nodeId) != _nodes.end()) {
+    if (std::find(_nodes.begin(), _nodes.end(), nodeId) != _nodes.end()) {
         LERROR(fmt::format("Identifier {} already exist in the internal nodes list", nodeId));
         return;
     }
 
-    _nodes[nodeId] = std::vector<double>(NumDataItems);
+    _nodes.push_back(nodeId);
 }
 
 void CosmicSonification::addLabelNode(const std::string& labelId) {
-    if (_labels.find(labelId) != _labels.end()) {
+    if (std::find(_labels.begin(), _labels.end(), labelId) != _labels.end()) {
         LERROR(fmt::format("Identifier {} already exist in the internal labels list", labelId));
         return;
     }
 
-    _labels[labelId] = LabelsData();
+    _labels.push_back(labelId);
 }
 
 scripting::LuaLibrary CosmicSonification::luaLibrary() {
