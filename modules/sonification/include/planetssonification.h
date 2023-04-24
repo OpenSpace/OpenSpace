@@ -67,6 +67,7 @@ public:
 
 private:
     // Indices for data items
+    const int NumSettings = 6;
     const int NumDataItems = 3;
     const int DistanceIndex = 0;
     const int HAngleIndex = 1;

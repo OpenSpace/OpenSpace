@@ -280,75 +280,80 @@ PlanetsSonification::PlanetProperty::PlanetProperty(
 }
 
 osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
-    bool settings[6] = { false };
+    std::vector<bool> settings(NumSettings, false);
 
     if (planetIndex == MercuryIndex) {
         // Mercury
-        settings[SizeDayIndex] = _mercuryProperty.sizeDayEnabled;
-        settings[GravityIndex] = _mercuryProperty.gravityEnabled;
-        settings[TemperatureIndex] = _mercuryProperty.temperatureEnabled;
+        settings[SizeDayIndex] = _mercuryProperty.sizeDayEnabled.value();
+        settings[GravityIndex] = _mercuryProperty.gravityEnabled.value();
+        settings[TemperatureIndex] = _mercuryProperty.temperatureEnabled.value();
     }
     else if (planetIndex == VenusIndex) {
         // Venus
-        settings[SizeDayIndex] = _venusProperty.sizeDayEnabled;
-        settings[GravityIndex] = _venusProperty.gravityEnabled;
-        settings[TemperatureIndex] = _venusProperty.temperatureEnabled;
-        settings[AtmosphereIndex] = _venusProperty.atmosphereEnabled;
+        settings[SizeDayIndex] = _venusProperty.sizeDayEnabled.value();
+        settings[GravityIndex] = _venusProperty.gravityEnabled.value();
+        settings[TemperatureIndex] = _venusProperty.temperatureEnabled.value();
+        settings[AtmosphereIndex] = _venusProperty.atmosphereEnabled.value();
     }
     else if (planetIndex == EarthIndex) {
         // Earth
-        settings[SizeDayIndex] = _earthProperty.sizeDayEnabled;
-        settings[GravityIndex] = _earthProperty.gravityEnabled;
-        settings[TemperatureIndex] = _earthProperty.temperatureEnabled;
-        settings[AtmosphereIndex] = _earthProperty.atmosphereEnabled;
-        settings[MoonsIndex] = _earthProperty.moonsEnabled;
+        settings[SizeDayIndex] = _earthProperty.sizeDayEnabled.value();
+        settings[GravityIndex] = _earthProperty.gravityEnabled.value();
+        settings[TemperatureIndex] = _earthProperty.temperatureEnabled.value();
+        settings[AtmosphereIndex] = _earthProperty.atmosphereEnabled.value();
+        settings[MoonsIndex] = _earthProperty.moonsEnabled.value();
     }
     else if (planetIndex == MarsIndex) {
         // Mars
-        settings[SizeDayIndex] = _marsProperty.sizeDayEnabled;
-        settings[GravityIndex] = _marsProperty.gravityEnabled;
-        settings[TemperatureIndex] = _marsProperty.temperatureEnabled;
-        settings[AtmosphereIndex] = _marsProperty.atmosphereEnabled;
-        settings[MoonsIndex] = _marsProperty.moonsEnabled;
+        settings[SizeDayIndex] = _marsProperty.sizeDayEnabled.value();
+        settings[GravityIndex] = _marsProperty.gravityEnabled.value();
+        settings[TemperatureIndex] = _marsProperty.temperatureEnabled.value();
+        settings[AtmosphereIndex] = _marsProperty.atmosphereEnabled.value();
+        settings[MoonsIndex] = _marsProperty.moonsEnabled.value();
     }
     else if (planetIndex == JupiterIndex) {
         // Jupiter
-        settings[SizeDayIndex] = _jupiterProperty.sizeDayEnabled;
-        settings[GravityIndex] = _jupiterProperty.gravityEnabled;
-        settings[TemperatureIndex] = _jupiterProperty.temperatureEnabled;
-        settings[AtmosphereIndex] = _jupiterProperty.atmosphereEnabled;
-        settings[MoonsIndex] = _jupiterProperty.moonsEnabled;
+        settings[SizeDayIndex] = _jupiterProperty.sizeDayEnabled.value();
+        settings[GravityIndex] = _jupiterProperty.gravityEnabled.value();
+        settings[TemperatureIndex] = _jupiterProperty.temperatureEnabled.value();
+        settings[AtmosphereIndex] = _jupiterProperty.atmosphereEnabled.value();
+        settings[MoonsIndex] = _jupiterProperty.moonsEnabled.value();
     }
     else if (planetIndex == SaturnIndex) {
         // Saturn
-        settings[SizeDayIndex] = _saturnProperty.sizeDayEnabled;
-        settings[GravityIndex] = _saturnProperty.gravityEnabled;
-        settings[TemperatureIndex] = _saturnProperty.temperatureEnabled;
-        settings[AtmosphereIndex] = _saturnProperty.atmosphereEnabled;
-        settings[MoonsIndex] = _saturnProperty.moonsEnabled;
-        settings[RingsIndex] = _saturnProperty.ringsEnabled;
+        settings[SizeDayIndex] = _saturnProperty.sizeDayEnabled.value();
+        settings[GravityIndex] = _saturnProperty.gravityEnabled.value();
+        settings[TemperatureIndex] = _saturnProperty.temperatureEnabled.value();
+        settings[AtmosphereIndex] = _saturnProperty.atmosphereEnabled.value();
+        settings[MoonsIndex] = _saturnProperty.moonsEnabled.value();
+        settings[RingsIndex] = _saturnProperty.ringsEnabled.value();
     }
     else if (planetIndex == UranusIndex) {
         // Uranus
-        settings[SizeDayIndex] = _uranusProperty.sizeDayEnabled;
-        settings[GravityIndex] = _uranusProperty.gravityEnabled;
-        settings[TemperatureIndex] = _uranusProperty.temperatureEnabled;
-        settings[AtmosphereIndex] = _uranusProperty.atmosphereEnabled;
-        settings[MoonsIndex] = _uranusProperty.moonsEnabled;
+        settings[SizeDayIndex] = _uranusProperty.sizeDayEnabled.value();
+        settings[GravityIndex] = _uranusProperty.gravityEnabled.value();
+        settings[TemperatureIndex] = _uranusProperty.temperatureEnabled.value();
+        settings[AtmosphereIndex] = _uranusProperty.atmosphereEnabled.value();
+        settings[MoonsIndex] = _uranusProperty.moonsEnabled.value();
     }
     else if (planetIndex == NeptuneIndex) {
         // Neptune
-        settings[SizeDayIndex] = _neptuneProperty.sizeDayEnabled;
-        settings[GravityIndex] = _neptuneProperty.gravityEnabled;
-        settings[TemperatureIndex] = _neptuneProperty.temperatureEnabled;
-        settings[AtmosphereIndex] = _neptuneProperty.atmosphereEnabled;
-        settings[MoonsIndex] = _neptuneProperty.moonsEnabled;
+        settings[SizeDayIndex] = _neptuneProperty.sizeDayEnabled.value();
+        settings[GravityIndex] = _neptuneProperty.gravityEnabled.value();
+        settings[TemperatureIndex] = _neptuneProperty.temperatureEnabled.value();
+        settings[AtmosphereIndex] = _neptuneProperty.atmosphereEnabled.value();
+        settings[MoonsIndex] = _neptuneProperty.moonsEnabled.value();
     }
     else {
         throw ghoul::MissingCaseException();
     }
 
-    return osc::Blob(settings, 6);
+    int arr[6] = { false };
+    for (size_t i = 0; i < settings.size(); ++i) {
+        arr[i] = static_cast<int>(settings[i]);
+    }
+
+    return osc::Blob(arr, 6);
 }
 
 void PlanetsSonification::sendSettings(int planetIndex) {
