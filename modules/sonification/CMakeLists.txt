@@ -28,6 +28,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/include/comparesonification.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/cosmicsonification.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/focussonification.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/modesonification.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/planetssonification.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/solarsonification.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/sonificationbase.h
@@ -40,6 +41,7 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/cosmicsonification.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/cosmicsonification_lua.inl
 	${CMAKE_CURRENT_SOURCE_DIR}/src/focussonification.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/modesonification.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification_lua.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/src/solarsonification.cpp

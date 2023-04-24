@@ -27,6 +27,7 @@
 #include <modules/sonification/include/comparesonification.h>
 #include <modules/sonification/include/cosmicsonification.h>
 #include <modules/sonification/include/focussonification.h>
+#include <modules/sonification/include/modesonification.h>
 #include <modules/sonification/include/planetssonification.h>
 #include <modules/sonification/include/solarsonification.h>
 #include <modules/sonification/include/timesonification.h>
@@ -143,7 +144,7 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
         _surroundMode = codegen::map<SurroundMode>(mode);
     }
 
-    // Fill sonification list
+    // Register sonifications
     SonificationBase* sonification = new CompareSonification(_ipAddress, _port);
     addSonification(sonification);
 
@@ -151,6 +152,9 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
     addSonification(sonification);
 
     sonification = new FocusSonification(_ipAddress, _port);
+    addSonification(sonification);
+
+    sonification = new ModeSonification(_ipAddress, _port);
     addSonification(sonification);
 
     sonification = new PlanetsSonification(_ipAddress, _port);
