@@ -63,8 +63,12 @@ void OscConnection::send(const std::string& label, const std::vector<OscDataType
 
     for (const OscDataType& item : data) {
         std::visit(overloaded {
-            [this](const osc::Blob& value) {
-                _stream << value;
+            [this](const std::vector<int>& value) {
+                _stream << osc::BeginArray;
+                for (const int& v : value) {
+                    _stream << v;
+                }
+                _stream << osc::EndArray;
             },
             [this](double value) {
                 _stream << value;

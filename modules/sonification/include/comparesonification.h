@@ -50,13 +50,22 @@ public:
     virtual void stop() override;
 
 private:
+    // Indices for the settings for the planets
+    const int NumSettings = 6;
+    const int SizeDayIndex = 0;
+    const int GravityIndex = 1;
+    const int TemperatureIndex = 2;
+    const int AtmosphereIndex = 3;
+    const int MoonsIndex = 4;
+    const int RingsIndex = 5;
+
     /**
-     * Create a osc::Blob object with current sonification settings.
+     * Create a vector with current sonification settings.
      * Order of settings: size/day, gravity, temperature, atmosphere, moons, rings
      *
      * \return a osc::Blob object with current sonificaiton settings
      */
-    osc::Blob createSettingsBlob() const;
+    std::vector<int> createSettingsVector() const;
 
     /**
      * Send current sonification settings over the osc connection

@@ -165,17 +165,17 @@ CompareSonification::~CompareSonification() {
     stop();
 }
 
-osc::Blob CompareSonification::createSettingsBlob() const {
-    bool settings[6] = { false };
+std::vector<int> CompareSonification::createSettingsVector() const {
+    std::vector<int> settings(NumSettings, false);
 
-    settings[0] = _sizeDayEnabled;
-    settings[1] = _gravityEnabled;
-    settings[2] = _temperatureEnabled;
-    settings[3] = _atmosphereEnabled;
-    settings[4] = _moonsEnabled;
-    settings[5] = _ringsEnabled;
+    settings[SizeDayIndex] = _sizeDayEnabled;
+    settings[GravityIndex] = _gravityEnabled;
+    settings[TemperatureIndex] = _temperatureEnabled;
+    settings[AtmosphereIndex] = _atmosphereEnabled;
+    settings[MoonsIndex] = _moonsEnabled;
+    settings[RingsIndex] = _ringsEnabled;
 
-    return osc::Blob(settings, 6);
+    return settings;
 }
 
 void CompareSonification::sendSettings() {
@@ -188,7 +188,7 @@ void CompareSonification::sendSettings() {
 
     data[0] = _firstPlanet;
     data[1] = _secondPlanet;
-    data[2] = createSettingsBlob();
+    data[2] = createSettingsVector();
 
     _connection->send(label, data);
 }

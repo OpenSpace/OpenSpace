@@ -49,13 +49,24 @@ public:
     virtual void stop() override;
 
 private:
+    // Indices for the planets
+    const int NumPlanets = 8;
+    const int MercuryIndex = 0;
+    const int VenusIndex = 1;
+    const int EarthIndex = 2;
+    const int MarsIndex = 3;
+    const int JupiterIndex = 4;
+    const int SaturnIndex = 5;
+    const int UranusIndex = 6;
+    const int NeptuneIndex = 7;
+
     /**
-     * Create a osc::Blob object with current sonification settings.
+     * Create a vector with current sonification settings.
      * Order of settings: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune
      *
      * \return a osc::Blob object with current sonificaiton settings
      */
-    osc::Blob createSettingsBlob() const;
+    std::vector<int> createSettingsVector() const;
 
     /**
      * Send current sonification settings over the osc connection

@@ -127,7 +127,7 @@ private:
     bool getData(const Camera* camera, int planetIndex);
 
     /**
-     * Create a osc::Blob object with current sonification settings for the indicated
+     * Create a vector with current sonification settings for the indicated
      * planet. Order of settings: size/day, gravity, temperature, (atmosphere, moons,
      * rings).
      *
@@ -135,7 +135,7 @@ private:
      *
      * \return a osc::Blob object with current sonificaiton settings
      */
-    osc::Blob createSettingsBlob(int planetIndex) const;
+    std::vector<int> createSettingsVector(int planetIndex) const;
 
     /**
      * Send current sonification settings for the indicated planet over the osc connection

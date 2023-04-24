@@ -135,19 +135,19 @@ SolarSonification::~SolarSonification() {
     stop();
 }
 
-osc::Blob SolarSonification::createSettingsBlob() const {
-    bool settings[8] = { false };
+std::vector<int> SolarSonification::createSettingsVector() const {
+    std::vector<int> settings(NumPlanets, false);
 
-    settings[0] = _mercuryEnabled;
-    settings[1] = _venusEnabled;
-    settings[2] = _earthEnabled;
-    settings[3] = _marsEnabled;
-    settings[4] = _jupiterEnabled;
-    settings[5] = _saturnEnabled;
-    settings[6] = _uranusEnabled;
-    settings[7] = _neptuneEnabled;
+    settings[MercuryIndex] = _mercuryEnabled;
+    settings[VenusIndex] = _venusEnabled;
+    settings[EarthIndex] = _earthEnabled;
+    settings[MarsIndex] = _marsEnabled;
+    settings[JupiterIndex] = _jupiterEnabled;
+    settings[SaturnIndex] = _saturnEnabled;
+    settings[UranusIndex] = _uranusEnabled;
+    settings[NeptuneIndex] = _neptuneEnabled;
 
-    return osc::Blob(settings, 8);
+    return settings;
 }
 
 void SolarSonification::sendSettings() {
@@ -158,7 +158,7 @@ void SolarSonification::sendSettings() {
     std::string label = "/Sun";
     std::vector<OscDataType> data(1);
 
-    data[0] = createSettingsBlob();
+    data[0] = createSettingsVector();
 
     _connection->send(label, data);
 }
