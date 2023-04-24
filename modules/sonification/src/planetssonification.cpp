@@ -562,7 +562,6 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
             "Sun",
             _planets[planetIndex].identifier
         );
-        LDEBUG("Use Solar Persective");
     }
     else {
         HAngle = SonificationBase::calculateAngleTo(
@@ -574,7 +573,6 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
             camera,
             _planets[planetIndex].identifier
         );
-        LDEBUG("Use Camera Persective");
     }
 
     // Moons
