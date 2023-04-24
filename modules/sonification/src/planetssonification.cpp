@@ -361,13 +361,13 @@ void PlanetsSonification::sendSettings(int planetIndex) {
     std::vector<OscDataType> data;
 
     // Distance
-    data.push_back(_planets[planetIndex].data[DistanceIndex]);
+    data.push_back(_planets[planetIndex].distance());
 
     // Horizontal Angle
-    data.push_back(_planets[planetIndex].data[HAngleIndex]);
+    data.push_back(_planets[planetIndex].HAngle());
 
     // Vertical Angle
-    data.push_back(_planets[planetIndex].data[VAngleIndex]);
+    data.push_back(_planets[planetIndex].VAngle());
 
     // Settings
     std::vector<int> settingsBlob = createSettingsVector(planetIndex);
@@ -376,10 +376,10 @@ void PlanetsSonification::sendSettings(int planetIndex) {
     // Moons
     for (size_t m = 0; m < _planets[planetIndex].moons.size(); ++m) {
         // Horizontal Angle
-        data.push_back(_planets[planetIndex].moons[m].second[MoonHAngleIndex]);
+        data.push_back(_planets[planetIndex].moons[m].HAngle());
 
         // Vertical Angle
-        data.push_back(_planets[planetIndex].moons[m].second[MoonVAngleIndex]);
+        data.push_back(_planets[planetIndex].moons[m].VAngle());
     }
 
     data.shrink_to_fit();
@@ -531,7 +531,7 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
             moonHAngle = SonificationBase::calculateAngleFromAToB(
                 camera,
                 _planets[planetIndex].identifier,
-                _planets[planetIndex].moons[m].first
+                _planets[planetIndex].moons[m].identifier
             );
         }
         else if (mode == SonificationModule::SurroundMode::Circular ||
@@ -539,15 +539,15 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
         {
             moonHAngle = SonificationBase::calculateAngleTo(
                 camera,
-                _planets[planetIndex].moons[m].first
+                _planets[planetIndex].moons[m].identifier
             );
         }
 
-        if (std::abs(_planets[planetIndex].moons[m].second[MoonHAngleIndex] - moonHAngle) >
+        if (std::abs(_planets[planetIndex].moons[m].HAngle() - moonHAngle) >
             _anglePrecision)
         {
             updateMoons = true;
-            _planets[planetIndex].moons[m].second[MoonHAngleIndex] = moonHAngle;
+            _planets[planetIndex].moons[m].addHAngle(moonHAngle);
         }
 
         // Vertical angle
@@ -558,7 +558,7 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
             moonVAngle = SonificationBase::calculateElevationAngleFromAToB(
                 camera,
                 _planets[planetIndex].identifier,
-                _planets[planetIndex].moons[m].first
+                _planets[planetIndex].moons[m].identifier
             );
         }
         else if (mode == SonificationModule::SurroundMode::Circular ||
@@ -566,22 +566,22 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
         {
             moonVAngle = SonificationBase::calculateElevationAngleTo(
                 camera,
-                _planets[planetIndex].moons[m].first
+                _planets[planetIndex].moons[m].identifier
             );
         }
 
-        if (std::abs(_planets[planetIndex].moons[m].second[MoonVAngleIndex] - moonVAngle) >
+        if (std::abs(_planets[planetIndex].moons[m].VAngle() - moonVAngle) >
             _anglePrecision)
         {
             updateMoons = true;
-            _planets[planetIndex].moons[m].second[MoonVAngleIndex] = moonVAngle;
+            _planets[planetIndex].moons[m].addVAngle(moonVAngle);
         }
     }
 
     // Check if this data is new, otherwise don't send it
-    double prevDistance = _planets[planetIndex].data[DistanceIndex];
-    double prevHAngle = _planets[planetIndex].data[HAngleIndex];
-    double prevVAngle = _planets[planetIndex].data[VAngleIndex];
+    double prevDistance = _planets[planetIndex].distance();
+    double prevHAngle = _planets[planetIndex].HAngle();
+    double prevVAngle = _planets[planetIndex].VAngle();
 
     bool shouldSendData = false;
     if (std::abs(prevDistance - distance) > _distancePrecision ||
@@ -590,9 +590,9 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex) {
         updateMoons)
     {
         // Update the saved data for the planet
-        _planets[planetIndex].data[DistanceIndex] = distance;
-        _planets[planetIndex].data[HAngleIndex] = HAngle;
-        _planets[planetIndex].data[VAngleIndex] = VAngle;
+        _planets[planetIndex].addDistance(distance);
+        _planets[planetIndex].addHAngle(HAngle);
+        _planets[planetIndex].addVAngle(VAngle);
         shouldSendData = true;
     }
 
@@ -661,7 +661,7 @@ void PlanetsSonification::addPlanet(ghoul::Dictionary dict) {
 
     if (p.moons.has_value()) {
         for (const std::string& moon : *p.moons) {
-            planet.moons.push_back({ moon, std::vector<double>(NumDataItems) });
+            planet.moons.push_back({ moon });
         }
     }
 

@@ -67,13 +67,7 @@ public:
 
 private:
     // Indices for data items
-    const int NumSettings = 6;
-    const int NumDataItems = 3;
-    const int DistanceIndex = 0;
-    const int HAngleIndex = 1;
-    const int VAngleIndex = 2;
-    const int MoonHAngleIndex = 0;
-    const int MoonVAngleIndex = 1;
+    static const int NumSettings = 6;
 
     // Set the differnet levels of precision
     const double LowDistancePrecision = 10000.0;
@@ -82,36 +76,124 @@ private:
     const double HighAnglePrecision = 0.05;
 
     // Indices for the planets
-    const int MercuryIndex = 0;
-    const int VenusIndex = 1;
-    const int EarthIndex = 2;
-    const int MarsIndex = 3;
-    const int JupiterIndex = 4;
-    const int SaturnIndex = 5;
-    const int UranusIndex = 6;
-    const int NeptuneIndex = 7;
+    static const int MercuryIndex = 0;
+    static const int VenusIndex = 1;
+    static const int EarthIndex = 2;
+    static const int MarsIndex = 3;
+    static const int JupiterIndex = 4;
+    static const int SaturnIndex = 5;
+    static const int UranusIndex = 6;
+    static const int NeptuneIndex = 7;
 
     // Indices for the settings for the planets
-    const int SizeDayIndex = 0;
-    const int GravityIndex = 1;
-    const int TemperatureIndex = 2;
-    const int AtmosphereIndex = 3;
-    const int MoonsIndex = 4;
-    const int RingsIndex = 5;
+    static const int SizeDayIndex = 0;
+    static const int GravityIndex = 1;
+    static const int TemperatureIndex = 2;
+    static const int AtmosphereIndex = 3;
+    static const int MoonsIndex = 4;
+    static const int RingsIndex = 5;
 
-    // Struct to hold data for all the planets
-    struct Planet {
-        Planet(std::string id = "") {
+    // Number of samples to smooth out the data for the sonification
+    static const int NumSamples = 10;
+
+    // Struct to hold data for all the planets and moons
+    struct Moon {
+    public:
+        Moon(std::string id = "") {
             identifier = id;
+        }
+
+        // Get a smoothed out value from the data
+        double HAngle() const {
+            return SonificationBase::calcMedian(horizontalAngles);
+        }
+        double VAngle() const {
+            return SonificationBase::calcMedian(verticalAngles);
+        }
+
+        // Add value to ring buffers
+        void addHAngle(double angle) {
+            SonificationBase::addValueToRingBuffer(
+                horizontalAngles,
+                ringBufferIndex,
+                NumSamples,
+                angle
+            );
+        }
+        void addVAngle(double angle) {
+            SonificationBase::addValueToRingBuffer(
+                verticalAngles,
+                ringBufferIndex,
+                NumSamples,
+                angle
+            );
         }
 
         std::string identifier;
 
-        // Distance, horizontal angle, vertical angle
-        std::vector<double> data = std::vector<double>(3);
+    private:
+        // Horizontal and vertical angle
+        std::vector<double> horizontalAngles = std::vector<double>(NumSamples, 0.0);
+        std::vector<double> verticalAngles = std::vector<double>(NumSamples, 0.0);
 
-        // <name of moon, <horizontal angle, vertical angle>>
-        std::vector<std::pair<std::string, std::vector<double>>> moons;
+        // The first "empty" slot in the ring buffer order. The "oldest" value
+        int ringBufferIndex = 0;
+    };
+
+    struct Planet {
+    public:
+        Planet(std::string id = "") {
+            identifier = id;
+        }
+
+        // Get a smoothed out value from the data
+        double distance() const {
+            return SonificationBase::calcMedian(distances);
+        }
+        double HAngle() const {
+            return SonificationBase::calcMedian(horizontalAngles);
+        }
+        double VAngle() const {
+            return SonificationBase::calcMedian(verticalAngles);
+        }
+
+        // Add values to ring buffers
+        void addDistance(const double distance) {
+            SonificationBase::addValueToRingBuffer(
+                distances,
+                ringBufferIndex,
+                NumSamples,
+                distance
+            );
+        }
+        void addHAngle(const double angle) {
+            SonificationBase::addValueToRingBuffer(
+                horizontalAngles,
+                ringBufferIndex,
+                NumSamples,
+                angle
+            );
+        }
+        void addVAngle(const double angle) {
+            SonificationBase::addValueToRingBuffer(
+                verticalAngles,
+                ringBufferIndex,
+                NumSamples,
+                angle
+            );
+        }
+
+        std::string identifier;
+        std::vector<Moon> moons;
+
+    private:
+        // Distance, horizontal angle, vertical angle
+        std::vector<double> distances = std::vector<double>(NumSamples, 0.0);
+        std::vector<double> horizontalAngles = std::vector<double>(NumSamples, 0.0);
+        std::vector<double> verticalAngles = std::vector<double>(NumSamples, 0.0);
+
+        // The first "empty" slot in the ring buffer order. The "oldest" value
+        int ringBufferIndex = 0;
     };
 
     /**

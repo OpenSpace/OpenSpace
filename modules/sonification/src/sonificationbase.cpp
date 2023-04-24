@@ -376,6 +376,33 @@ double SonificationBase::calculateElevationAngleFromAToB(const Camera* camera,
     }
 }
 
+double SonificationBase::calcMedian(std::vector<double> values) {
+    size_t size = values.size();
+    ghoul_assert(size != 0);
+
+    std::sort(values.begin(), values.end());
+    if (size % 2 == 0) {
+        // Average the two middle values
+        return (values[size / 2 - 1] + values[size / 2]) / 2;
+    }
+    else {
+        // Take the middle value
+        return values[size / 2];
+    }
+}
+
+void SonificationBase::addValueToRingBuffer(std::vector<double>& values,
+                                            int& ringBufferIndex,
+                                            const int ringBufferSize,
+                                            const double newValue)
+{
+    if (ringBufferIndex == ringBufferSize) {
+        ringBufferIndex = 0;
+    }
+    values[ringBufferIndex] = newValue;
+    ++ringBufferIndex;
+}
+
 glm::dvec3 SonificationBase::getNodePosition(std::variant<std::string,
                                              glm::dvec3> nodeIdOrPos)
 {

@@ -144,6 +144,27 @@ public:
         std::variant<std::string, glm::dvec3> nodeIdOrPosA,
         std::variant<std::string, glm::dvec3> nodeIdOrPosB);
 
+    /**
+     * Calculate the median value of the given sequence. Note that call by value is used to
+     * ensure that the original sequence is not changed
+     *
+     * \param values the sequence of values to calculate the median of
+     *
+     * \return the median value of the given sequence
+     */
+    static double calcMedian(std::vector<double> values);
+
+    /**
+     * Add the given value to the given ring buffer
+     *
+     * \param values the sequence of values to add the new value to
+     * \param ringBufferIndex the current ring buffer index for the given ring buffer
+     * \param ringBufferSize the size of the given ring buffer
+     * \param newValue the new value to add to the given ring buffer
+     */
+    static void addValueToRingBuffer(std::vector<double>& values, int& ringBufferIndex,
+        const int ringBufferSize, const double newValue);
+
 protected:
     std::string _identifier;
     properties::BoolProperty _enabled;
