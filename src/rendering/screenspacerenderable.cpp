@@ -49,9 +49,9 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Is Enabled",
+        "Enabled",
         "This setting determines whether this sceen space plane will be visible or not",
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
