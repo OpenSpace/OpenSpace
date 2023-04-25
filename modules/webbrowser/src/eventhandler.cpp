@@ -405,7 +405,6 @@ bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     keyEvent.character = mapFromGlfwToCharacter(Key(charCode));
     keyEvent.native_key_code = mapFromGlfwToNative(Key(charCode));
     keyEvent.modifiers = static_cast<uint32>(modifier);
-
     keyEvent.type = KEYEVENT_CHAR;
 
     return _browserInstance->sendKeyEvent(keyEvent);
