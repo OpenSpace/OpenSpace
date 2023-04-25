@@ -191,14 +191,7 @@ namespace {
 
 namespace openspace::scripting {
 
-ScriptEngine::ScriptEngine()
-    : DocumentationGenerator(
-        "Script Documentation",
-        "scripting"
-    )
-{
-    //tracy::LuaRegister(_state);
-}
+ScriptEngine::ScriptEngine() {}
 
 void ScriptEngine::initialize() {
     ZoneScoped;
@@ -577,8 +570,8 @@ nlohmann::json ScriptEngine::generateJsonJson() const {
     }
 
     nlohmann::json result;
-    result[NameTag] = "Scripting API";
-    result[DataTag] = json;
+    result["Name"] = "Scripting API";
+    result["Data"] = json;
 
     return result;
 }

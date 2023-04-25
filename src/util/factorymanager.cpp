@@ -105,12 +105,7 @@ FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
     ghoul_assert(!type.empty(), "Type must not be empty");
 }
 
-FactoryManager::FactoryManager()
-    : DocumentationGenerator(
-        "Factory Documentation",
-        "factory"
-    )
-{}
+FactoryManager::FactoryManager() {}
 
 void FactoryManager::initialize() {
     ghoul_assert(!_manager, "Factory Manager must not have been initialized");
@@ -229,8 +224,8 @@ nlohmann::json FactoryManager::generateJsonJson() const {
 
     // I did not check the output of this for correctness ---abock
     nlohmann::json result;
-    result[NameTag] = "Asset Types";
-    result[DataTag] = json;
+    result["Name"] = "Asset Types";
+    result["Data"] = json;
         
     return result;
 }

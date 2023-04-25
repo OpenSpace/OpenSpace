@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___SCRIPTENGINE___H__
 
 #include <openspace/util/syncable.h>
-#include <openspace/documentation/documentationgenerator.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/json.h>
 #include <ghoul/lua/luastate.h>
@@ -49,7 +48,7 @@ namespace openspace::scripting {
  * `openspace` namespace prefix in Lua. The same functions can be exposed to
  * other Lua states by passing them to the #initializeLuaState method.
  */
-class ScriptEngine : public Syncable, public DocumentationGenerator {
+class ScriptEngine : public Syncable {
 public:
     using ScriptCallback = std::function<void(ghoul::Dictionary)>;
     BooleanType(RemoteScripting);

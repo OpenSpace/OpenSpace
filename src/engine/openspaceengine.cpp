@@ -1056,8 +1056,8 @@ void OpenSpaceEngine::writeDocumentation() {
     nlohmann::json sceneProperties = settings.get();
     nlohmann::json sceneGraph = scene.get();
     
-    sceneProperties[DocumentationGenerator::NameTag] = "Settings";
-    sceneGraph[DocumentationGenerator::NameTag] = "Scene";
+    sceneProperties["Data"] = "Settings";
+    sceneGraph["Name"] = "Scene";
 
     nlohmann::json documentation = { 
         sceneGraph, sceneProperties, keybindings, license, scripting, factory 

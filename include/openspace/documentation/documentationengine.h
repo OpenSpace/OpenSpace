@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 #define __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 
-#include <openspace/documentation/documentationgenerator.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/json.h>
 #include <ghoul/misc/exception.h>
@@ -38,7 +36,7 @@ namespace openspace::documentation {
  * produced in the application an write them out as a documentation file for human
  * consumption.
  */
-class DocumentationEngine : public DocumentationGenerator {
+class DocumentationEngine {
 public:
     /**
      * This exception is thrown by the addDocumentation method if a provided Documentation

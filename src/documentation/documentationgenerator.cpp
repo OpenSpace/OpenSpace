@@ -22,32 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationgenerator.h>
-
 #include <openspace/openspace.h>
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/invariants.h>
 #include <fstream>
-
-namespace openspace {
-
-const std::string DocumentationGenerator::DataTag = "Data";
-const std::string DocumentationGenerator::NameTag = "Name";
-
-DocumentationGenerator::DocumentationGenerator(std::string name,
-                                               std::string jsonName)
-    : _name(std::move(name))
-    , _jsonName(std::move(jsonName))
-{
-    ghoul_precondition(!_name.empty(), "name must not be empty");
-    ghoul_precondition(!_jsonName.empty(), "jsonName must not be empty");
-}
-
-
-std::string DocumentationGenerator::jsonName() {
-    return _jsonName;
-}
-
-
-} // namespace openspace

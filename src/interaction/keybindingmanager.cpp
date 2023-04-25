@@ -38,12 +38,7 @@
 
 namespace openspace::interaction {
 
-KeybindingManager::KeybindingManager()
-    : DocumentationGenerator(
-        "Keybindings",
-        "keybinding"
-    )
-{}
+KeybindingManager::KeybindingManager() {}
 
 void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
@@ -151,7 +146,7 @@ nlohmann::json KeybindingManager::generateJsonJson() const {
     sortJson(json, "Name");
 
     nlohmann::json result;
-    result[NameTag] = "Keybindings";
+    result["Name"] = "Keybindings";
     result["Keybindings"] = json;
     return result;
 }

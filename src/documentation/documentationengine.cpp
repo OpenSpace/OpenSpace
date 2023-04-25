@@ -55,12 +55,7 @@ DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationExce
     , documentation(std::move(doc))
 {}
 
-DocumentationEngine::DocumentationEngine()
-    : DocumentationGenerator(
-        "Top Level",
-        "toplevel"
-    )
-{}
+DocumentationEngine::DocumentationEngine() {}
 
 void DocumentationEngine::initialize() {
     ghoul_assert(!isInitialized(), "DocumentationEngine is already initialized");

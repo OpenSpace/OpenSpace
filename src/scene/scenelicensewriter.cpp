@@ -36,12 +36,7 @@
 
 namespace openspace {
 
-SceneLicenseWriter::SceneLicenseWriter()
-    : DocumentationGenerator(
-        "Scene Licenses",
-        "sceneLicense"
-    )
-{}
+SceneLicenseWriter::SceneLicenseWriter() {}
 
 nlohmann::json SceneLicenseWriter::generateJsonJson() const {
     nlohmann::json json;
@@ -119,8 +114,8 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
     json.push_back(assetsJson);
 
     nlohmann::json result;
-    result[NameTag] = "Licenses";
-    result[DataTag] = json;
+    result["Name"] = "Licenses";
+    result["Data"] = json;
     
     return result;
 }

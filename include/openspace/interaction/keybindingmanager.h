@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
 #define __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
 
-#include <openspace/documentation/documentationgenerator.h>
-
 #include <openspace/util/keys.h>
 
 namespace openspace {
@@ -38,7 +36,7 @@ namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 
-class KeybindingManager : public DocumentationGenerator {
+class KeybindingManager {
 public:
     KeybindingManager();
 

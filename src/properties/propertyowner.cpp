@@ -79,11 +79,7 @@ namespace {
 namespace openspace::properties {
 
 PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
-    : DocumentationGenerator(
-        "Property Owners",
-        "propertyOwners"
-    )
-    , _identifier(std::move(info.identifier))
+    : _identifier(std::move(info.identifier))
     , _guiName(std::move(info.guiName))
     , _description(std::move(info.description))
 {
@@ -416,8 +412,8 @@ nlohmann::json PropertyOwner::generateJsonJson() const {
     sortJson(json, "Name");
 
     nlohmann::json result;
-    result[NameTag] = "PropertyOwner";
-    result[DataTag] = json;
+    result["Name"] = "PropertyOwner";
+    result["Data"] = json;
 
     return result;
 }
