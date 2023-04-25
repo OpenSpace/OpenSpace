@@ -87,20 +87,20 @@ namespace {
         using namespace openspace;
         using namespace openspace::scripting;
         nlohmann::json function;
-        function["Name"] = f.name;
+        function["name"] = f.name;
         nlohmann::json arguments = nlohmann::json::array();
 
         for (const LuaLibrary::Function::Argument& arg : f.arguments) {
             nlohmann::json argument;
-            argument["Name"] = arg.name;
-            argument["Type"] = arg.type;
-            argument["Default Value"] = arg.defaultValue.value_or("");
+            argument["name"] = arg.name;
+            argument["type"] = arg.type;
+            argument["defaultValue"] = arg.defaultValue.value_or("");
             arguments.push_back(argument);
         }
 
-        function["Arguments"] = arguments;
-        function["Return Type"] = f.returnType;
-        function["Help"] = f.helpText;
+        function["arguments"] = arguments;
+        function["returnType"] = f.returnType;
+        function["help"] = f.helpText;
 
         return function;
     }
@@ -553,25 +553,25 @@ nlohmann::json ScriptEngine::generateJsonJson() const {
         using namespace openspace::scripting;
 
         nlohmann::json library;
-        std::string libraryName = l.name.empty() ? "openspace" : "openspace." + l.name;
-        library["Name"] = libraryName;
+        std::string libraryName = l.name;
+        library["name"] = libraryName;
 
         for (const LuaLibrary::Function& f : l.functions) {
-            library["Functions"].push_back(toJson(f));
+            library["functions"].push_back(toJson(f));
         }
 
         for (const LuaLibrary::Function& f : l.documentations) {
-            library["Functions"].push_back(toJson(f));
+            library["functions"].push_back(toJson(f));
         }
-        sortJson(library["Functions"], "Name");
+        sortJson(library["functions"], "name");
         json.push_back(library);
 
-        sortJson(json, "Name");
+        sortJson(json, "name");
     }
 
     nlohmann::json result;
-    result["Name"] = "Scripting API";
-    result["Data"] = json;
+    result["name"] = "scripting";
+    result["data"] = json;
 
     return result;
 }

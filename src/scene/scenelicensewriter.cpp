@@ -57,14 +57,14 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
     if (global::profile->meta.has_value()) {
         metaTotal++;
         nlohmann::json metaJson;
-        metaJson["Name"] = "Profile";
-        metaJson["ProfileName"] = global::profile->meta->name.value_or("");
-        metaJson["Version"] = global::profile->meta->version.value_or("");
-        metaJson["Description"] = global::profile->meta->description.value_or("");
-        metaJson["Author"] = global::profile->meta->author.value_or("");
-        metaJson["Url"] = global::profile->meta->url.value_or("");
-        metaJson["License"] = global::profile->meta->license.value_or("");
-        metaJson["Type"] = "license";
+        metaJson["name"] = "profile";
+        metaJson["profileName"] = global::profile->meta->name.value_or("");
+        metaJson["version"] = global::profile->meta->version.value_or("");
+        metaJson["description"] = global::profile->meta->description.value_or("");
+        metaJson["author"] = global::profile->meta->author.value_or("");
+        metaJson["url"] = global::profile->meta->url.value_or("");
+        metaJson["license"] = global::profile->meta->license.value_or("");
+        metaJson["type"] = "license";
         json.push_back(std::move(metaJson));
     }
 
@@ -74,48 +74,48 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
 
         nlohmann::json assetJson;
         if (!meta.has_value()) {
-            assetJson["Name"] = "";
-            assetJson["Version"] = "";
-            assetJson["Description"] = "";
-            assetJson["Author"] = "";
-            assetJson["Url"] = "";
-            assetJson["License"] = "No license";
-            assetJson["Identifiers"] = "";
-            assetJson["Path"] = asset->path().string();
+            assetJson["name"] = "";
+            assetJson["version"] = "";
+            assetJson["description"] = "";
+            assetJson["author"] = "";
+            assetJson["url"] = "";
+            assetJson["license"] = "No license";
+            assetJson["identifiers"] = "";
+            assetJson["path"] = asset->path().string();
 
-            assetLicenses["No license"].push_back(assetJson);
+            assetLicenses["noLicense"].push_back(assetJson);
         }
         else {
-            std::string license = meta->license == "" ? "No license" : meta->license;
-            assetJson["Name"] = meta->name;
-            assetJson["Version"] = meta->version;
-            assetJson["Description"] = meta->description;
-            assetJson["Author"] = meta->author;
-            assetJson["Url"] = meta->url;
-            assetJson["License"] = license;
-            assetJson["Identifiers"] = meta->identifiers;
-            assetJson["Path"] = asset->path().string();
+            std::string license = meta->license == "" ? "No License" : meta->license;
+            assetJson["name"] = meta->name;
+            assetJson["version"] = meta->version;
+            assetJson["description"] = meta->description;
+            assetJson["author"] = meta->author;
+            assetJson["url"] = meta->url;
+            assetJson["license"] = license;
+            assetJson["identifiers"] = meta->identifiers;
+            assetJson["path"] = asset->path().string();
 
             assetLicenses[license].push_back(assetJson);
         }
     }
     
     nlohmann::json assetsJson;
-    assetsJson["Name"] = "Assets";
-    assetsJson["Type"] = "Licenses";
+    assetsJson["name"] = "assets";
+    assetsJson["type"] = "licenses";
 
     for (const std::pair<std::string, nlohmann::json>& assetLicense : assetLicenses) {
         nlohmann::json entry;
-        entry["Name"] = assetLicense.first;
-        entry["Assets"] = assetLicense.second;
-        sortJson(entry["Assets"], "Name");
-        assetsJson["Licenses"].push_back(entry);
+        entry["name"] = assetLicense.first;
+        entry["assets"] = assetLicense.second;
+        sortJson(entry["assets"], "name");
+        assetsJson["licenses"].push_back(entry);
     }
     json.push_back(assetsJson);
 
     nlohmann::json result;
-    result["Name"] = "Licenses";
-    result["Data"] = json;
+    result["name"] = "licenses";
+    result["data"] = json;
     
     return result;
 }

@@ -163,8 +163,8 @@ nlohmann::json FactoryManager::generateJsonJson() const {
 
     for (const FactoryInfo& factoryInfo : _factories) {
         nlohmann::json factory;
-        factory["Name"] = factoryInfo.name;
-        factory["Identifier"] = "category" + factoryInfo.name;
+        factory["name"] = factoryInfo.name;
+        factory["identifier"] = "category" + factoryInfo.name;
 
         ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
         // Add documentation about base class
@@ -176,15 +176,15 @@ nlohmann::json FactoryManager::generateJsonJson() const {
             });
         if (factoryDoc != docs.end()) {
             nlohmann::json documentation = generateJsonDocumentation(*factoryDoc);
-            factory["Classes"].push_back(documentation);
+            factory["classes"].push_back(documentation);
             // Remove documentation from list check at the end if all docs got put in
             docs.erase(factoryDoc);          
         }
         else {
             nlohmann::json documentation;
-            documentation["Name"] = factoryInfo.name;
-            documentation["Identifier"] = factoryInfo.name;
-            factory["Classes"].push_back(documentation);
+            documentation["name"] = factoryInfo.name;
+            documentation["identifier"] = factoryInfo.name;
+            factory["classes"].push_back(documentation);
         }
 
         // Add documentation about derived classes
@@ -198,34 +198,34 @@ nlohmann::json FactoryManager::generateJsonJson() const {
                 });
             if (found != docs.end()) {
                 nlohmann::json documentation = generateJsonDocumentation(*found);
-                factory["Classes"].push_back(documentation);
+                factory["classes"].push_back(documentation);
                 docs.erase(found);
             }
             else {
                 nlohmann::json documentation;
-                documentation["Name"] = c;
-                documentation["Identifier"] = c;
-                factory["Classes"].push_back(documentation);
+                documentation["name"] = c;
+                documentation["identifier"] = c;
+                factory["classes"].push_back(documentation);
             }
         }
-        sortJson(factory["Classes"], "Name");
+        sortJson(factory["classes"], "name");
         json.push_back(factory);
     }
     // Add all leftover docs
     nlohmann::json leftovers;
-    leftovers["Name"] = "Other";
-    leftovers["Identifier"] = "other";
+    leftovers["name"] = "other";
+    leftovers["identifier"] = "other";
 
     for (const Documentation& doc : docs) {
-        leftovers["Classes"].push_back(generateJsonDocumentation(doc));
+        leftovers["classes"].push_back(generateJsonDocumentation(doc));
     }
-    sortJson(json["Classes"]["Members"], "Name");
+    sortJson(json["classes"]["members"], "name");
     json.push_back(leftovers);
 
     // I did not check the output of this for correctness ---abock
     nlohmann::json result;
-    result["Name"] = "Asset Types";
-    result["Data"] = json;
+    result["name"] = "assetTypes";
+    result["data"] = json;
         
     return result;
 }

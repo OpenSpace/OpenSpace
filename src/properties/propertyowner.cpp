@@ -389,7 +389,7 @@ std::string PropertyOwner::generateJson() const {
     nlohmann::json json;
     std::vector<PropertyOwner*> subOwners = propertySubOwners();
     for (PropertyOwner* owner : subOwners) {
-        json["Data"].push_back(createJson(owner));
+        json["data"].push_back(createJson(owner));
     }
 
     return json.dump();
@@ -403,17 +403,17 @@ nlohmann::json PropertyOwner::generateJsonJson() const {
     for (PropertyOwner* owner : subOwners) {
         if (owner->identifier() != "Scene") {
             nlohmann::json jsonOwner = createJson(owner);
-            sortJson(jsonOwner["Properties"], "Name");
-            sortJson(jsonOwner["PropertyOwners"], "Name");
+            sortJson(jsonOwner["properties"], "name");
+            sortJson(jsonOwner["propertyOwners"], "name");
 
             json.push_back(jsonOwner);
         }
     }
-    sortJson(json, "Name");
+    sortJson(json, "name");
 
     nlohmann::json result;
-    result["Name"] = "PropertyOwner";
-    result["Data"] = json;
+    result["name"] = "propertyOwner";
+    result["data"] = json;
 
     return result;
 }

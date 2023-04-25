@@ -139,15 +139,15 @@ nlohmann::json KeybindingManager::generateJsonJson() const {
 
     for (const std::pair<const KeyWithModifier, std::string>& p : _keyLua) {
         nlohmann::json keybind;
-        keybind["Name"] = ghoul::to_string(p.first);
-        keybind["Action"] = p.second;
+        keybind["name"] = ghoul::to_string(p.first);
+        keybind["action"] = p.second;
         json.push_back(std::move(keybind));
     }
-    sortJson(json, "Name");
+    sortJson(json, "name");
 
     nlohmann::json result;
-    result["Name"] = "Keybindings";
-    result["Keybindings"] = json;
+    result["name"] = "keybindings";
+    result["keybindings"] = json;
     return result;
 }
 
