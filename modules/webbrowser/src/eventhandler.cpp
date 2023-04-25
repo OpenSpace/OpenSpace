@@ -405,6 +405,7 @@ bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     keyEvent.character = mapFromGlfwToCharacter(Key(charCode));
     keyEvent.native_key_code = mapFromGlfwToNative(Key(charCode));
     keyEvent.modifiers = static_cast<uint32>(modifier);
+
     keyEvent.type = KEYEVENT_CHAR;
 
     return _browserInstance->sendKeyEvent(keyEvent);
@@ -427,17 +428,37 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
     return _browserInstance->sendKeyEvent(keyEvent);
 }
 
-bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction) {
+bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
     switch (key) {
-        case Key::F5:
-            _browserInstance->reloadBrowser();
-            return true;
         case Key::A:
             if (hasKeyModifier(mod, KeyModifier::Super)) {
                 _browserInstance->selectAll();
                 return true;
             }
             return false;
+        case Key::Minus:
+            if (hasKeyModifier(mod, KeyModifier::Shift)) {
+                CefKeyEvent keyEvent;
+                keyEvent.windows_key_code = mapFromGlfwToWindows(Key(45));
+                keyEvent.character = mapFromGlfwToCharacter(Key(45));
+                keyEvent.native_key_code = mapFromGlfwToNative(Key(45));
+                keyEvent.modifiers = static_cast<uint32>(mod);
+                keyEvent.type = keyEventType(action);
+                _browserInstance->sendKeyEvent(keyEvent);
+                return true;
+            }
+            return false;
+        case Key::Period:
+            {
+                CefKeyEvent keyEvent;
+                keyEvent.windows_key_code = mapFromGlfwToWindows(Key::KeypadDecimal);
+                keyEvent.character = mapFromGlfwToCharacter(Key::KeypadDecimal);
+                keyEvent.native_key_code = mapFromGlfwToNative(Key::KeypadDecimal);
+                keyEvent.modifiers = static_cast<uint32>(mod);
+                keyEvent.type = keyEventType(action);
+                _browserInstance->sendKeyEvent(keyEvent);
+                return true;
+            }
         default:
             return false;
     }
