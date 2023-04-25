@@ -90,7 +90,7 @@ protected:
     /**
      * Should create a new texture and populate the _textures vector.
      *
-     * \return \c true if update was successful
+     * \return `true` if update was successful
      */
     virtual bool updateTexture() = 0;
 
@@ -98,7 +98,7 @@ protected:
      * Is called before updateTexture. For IswaCygnets getting data from a HTTP request,
      * this function should get the dataFile from the future object.
      *
-     * \return \c true if update was successful
+     * \return `true` if update was successful
      */
     virtual bool updateTextureResource() = 0;
 
@@ -107,7 +107,7 @@ protected:
      * Texture cygnets, this should be an image. For DataCygnets, this should be the data
      * file.
      *
-     * \return \c true if update was successful
+     * \return `true` if update was successful
      */
     virtual bool downloadTextureResource(double timestamp) = 0;
 

@@ -41,15 +41,4 @@ int DoubleProperty::typeLua() const {
     return LUA_TNUMBER;
 }
 
-double DoubleProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        double val = lua_tonumber(state, -1);
-        return val;
-    }
-    else {
-        return 0.0;
-    }
-}
-
 } // namespace openspace::properties

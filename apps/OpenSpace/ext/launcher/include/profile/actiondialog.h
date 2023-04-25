@@ -33,6 +33,7 @@ class QCheckBox;
 class QComboBox;
 class QDialogButtonBox;
 class QGridLayout;
+class QLabel;
 class QLineEdit;
 class QListWidget;
 class QPushButton;
@@ -58,7 +59,7 @@ private:
     void clearActionFields();
     void actionRejected();
     void chooseScripts();
-    void appendScriptsToTextfield(std::string scripts);
+    void appendScriptsToTextfield(std::vector<std::string> scripts);
 
     openspace::Profile::Keybinding* selectedKeybinding();
     void keybindingAdd();
@@ -77,6 +78,7 @@ private:
     struct {
         QListWidget* list = nullptr;
         QLineEdit* identifier = nullptr;
+        QLabel* infoText = nullptr;
         QLineEdit* name = nullptr;
         QLineEdit* guiPath = nullptr;
         QLineEdit* documentation = nullptr;
@@ -101,7 +103,7 @@ private:
         QDialogButtonBox* saveButtons = nullptr;
     } _keybindingWidgets;
 
-    QDialogButtonBox* _mainButtons = nullptr;
+    QDialogButtonBox* _mainButton = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ACTIONDIALOG___H__

@@ -42,9 +42,8 @@ int StringProperty::typeLua() const {
     return LUA_TSTRING;
 }
 
-std::string StringProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = lua_isstring(state, -1) == 1;
-    return success ? lua_tostring(state, -1) : "";
+std::string StringProperty::fromLuaConversion(lua_State* state) const {
+    return ghoul::lua::value<std::string>(state);
 }
 
 void StringProperty::toLuaConversion(lua_State* state) const {

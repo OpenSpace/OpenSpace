@@ -49,8 +49,4 @@ int IVec4Property::typeLua() const {
     return LUA_TTABLE;
 }
 
-glm::ivec4 IVec4Property::fromLuaConversion(lua_State* state, bool& success) const {
-    return ghoul::lua::tryGetValue<glm::ivec4>(state, success);
-}
-
 } // namespace openspace::properties

@@ -83,7 +83,7 @@ SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary
 }
 
 bool SceneGraphLightSource::initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     _sceneGraphNode =
         global::renderEngine->scene()->sceneGraphNode(_sceneGraphNodeReference);

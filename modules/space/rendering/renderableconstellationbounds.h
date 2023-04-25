@@ -39,7 +39,7 @@ namespace documentation { struct Documentation; }
  * celestial sky for the different constellations and is used to determine in which region
  * of the sky a specific object is located.
  * The bounds are drawn as lines on a sphere with variable radius, set by the
- * <code>_distance</code> property. Currently, all constellation bounds are lines, which
+ * `_distance` property. Currently, all constellation bounds are lines, which
  * leads to artifacts if the radius is very small.
  */
 class RenderableConstellationBounds : public RenderableConstellationsBase {
@@ -71,14 +71,13 @@ private:
      * variable, as well as the _vertexValues list. If this method fails, the content of
      * either destination is undefined.
      *
-     * \return \c true if the loading succeeded, \c false otherwise
+     * \return `true` if the loading succeeded, `false` otherwise
      */
     bool loadVertexFile();
     bool loadData();
 
     /**
-     * Callback method that gets triggered when <code>_constellationSelection</code>
-     * changes.
+     * Callback method that gets triggered when `_constellationSelection` changes.
      */
     void selectionPropertyHasChanged() override;
 

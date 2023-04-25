@@ -116,7 +116,7 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
 }
 
 void DashboardItemInstruments::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     double currentTime = global::timeManager->time().j2000Seconds();
 

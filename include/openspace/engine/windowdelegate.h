@@ -81,6 +81,8 @@ struct WindowDelegate {
     unsigned int (*takeScreenshot)(bool applyWarping, std::vector<int> windowIds) =
         [](bool, std::vector<int>) { return 0u; };
 
+    void (*resetScreenshotNumber)() = []() {};
+
     void (*swapBuffer)() = []() {};
 
     int (*nWindows)() = []() { return 0; };

@@ -318,9 +318,12 @@ void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
     disableHoverCircle();
 }
 
-void SkyBrowserModule::moveHoverCircle(int i, bool useScript) {
-    const ImageData& image = _dataHandler.image(i);
-
+void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScript) {
+    std::optional<const ImageData> found = _dataHandler.image(imageUrl);
+    if (!found.has_value()) {
+        return;
+    }
+    const ImageData image = *found;
     // Only move and show circle if the image has coordinates
     if (!(_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem)) {
         return;
@@ -537,7 +540,6 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::ScrollOverBrowser,
             codegen::lua::LoadingImageCollectionComplete,
             codegen::lua::ShowAllTargetsAndBrowsers,
-            codegen::lua::PointSpaceCraft,
             codegen::lua::GetWwtImageCollectionUrl,
             codegen::lua::StopAnimations,
             codegen::lua::SetBorderRadius,

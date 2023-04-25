@@ -2,7 +2,7 @@
     { "type": "pause", 
       "value": "true"},
     { "type": "action", 
-      "value": "profile.setup.apollo11"},
+      "value": "os.missions.apollo11.setup.landingsite"},
     { "type": "wait", 
       "value": "10"},
     { "type": "navigationstate", 

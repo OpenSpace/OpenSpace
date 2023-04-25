@@ -88,10 +88,9 @@ struct TileProvider : public properties::PropertyOwner {
     virtual Tile tile(const TileIndex& tileIndex) = 0;
 
     /**
-     * Returns the status of a <code>Tile</code>. The <code>Tile::Status</code>
-     * corresponds the <code>Tile</code> that would be returned if the function
-     * <code>tile</code> would be invoked with the same <code>TileIndex</code> argument at
-     * this point in time.
+     * Returns the status of a `Tile`. The `Tile::Status` corresponds the `Tile` that
+     * would be returned if the function `tile` would be invoked with the same `TileIndex`
+     * argument at this point in time.
      */
     virtual Tile::Status tileStatus(const TileIndex& index) = 0;
 
@@ -115,13 +114,13 @@ struct TileProvider : public properties::PropertyOwner {
     virtual void reset() = 0;
 
     /**
-     * \return The minimum level as defined by the <code>TileIndex</code> that this
+     * \return The minimum level as defined by the `TileIndex` that this
      *         TileProvider is capable of providing.
      */
     virtual int minLevel() = 0;
 
     /**
-     * \return The maximum level as defined by <code>TileIndex</code> that this
+     * \return The maximum level as defined by `TileIndex` that this
      *         TileProvider is able provide.
      */
     virtual int maxLevel() = 0;
