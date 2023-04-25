@@ -213,7 +213,7 @@ nlohmann::json FactoryManager::generateJsonJson() const {
                 factory["Classes"].push_back(documentation);
             }
         }
-        sortJson(factory["Classes"]);
+        sortJson(factory["Classes"], "Name");
         json.push_back(factory);
     }
     // Add all leftover docs
@@ -224,7 +224,7 @@ nlohmann::json FactoryManager::generateJsonJson() const {
     for (const Documentation& doc : docs) {
         leftovers["Classes"].push_back(generateJsonDocumentation(doc));
     }
-    sortJson(json["Classes"]["Members"]);
+    sortJson(json["Classes"]["Members"], "Name");
     json.push_back(leftovers);
 
     // I did not check the output of this for correctness ---abock

@@ -109,7 +109,7 @@ public:
     template <class T>
     ghoul::TemplateFactory<T>* factory() const;
 
-    std::string generateJson() const override;
+    std::string generateJson() const;
     nlohmann::json generateJsonJson() const;
 
 private:

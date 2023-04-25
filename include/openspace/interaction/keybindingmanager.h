@@ -55,7 +55,7 @@ public:
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
-    std::string generateJson() const override;
+    std::string generateJson() const;
     nlohmann::json generateJsonJson() const;
 
     const std::multimap<KeyWithModifier, std::string>& keyBindings() const;

@@ -148,7 +148,7 @@ nlohmann::json KeybindingManager::generateJsonJson() const {
         keybind["Action"] = p.second;
         json.push_back(std::move(keybind));
     }
-    sortJson(json);
+    sortJson(json, "Name");
 
     nlohmann::json result;
     result[NameTag] = "Keybindings";

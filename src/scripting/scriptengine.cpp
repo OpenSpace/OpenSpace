@@ -570,10 +570,10 @@ nlohmann::json ScriptEngine::generateJsonJson() const {
         for (const LuaLibrary::Function& f : l.documentations) {
             library["Functions"].push_back(toJson(f));
         }
-        sortJson(library["Functions"]);
+        sortJson(library["Functions"], "Name");
         json.push_back(library);
 
-        sortJson(json);
+        sortJson(json, "Name");
     }
 
     nlohmann::json result;

@@ -113,7 +113,7 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
         nlohmann::json entry;
         entry["Name"] = assetLicense.first;
         entry["Assets"] = assetLicense.second;
-        sortJson(entry["Assets"]);
+        sortJson(entry["Assets"], "Name");
         assetsJson["Licenses"].push_back(entry);
     }
     json.push_back(assetsJson);

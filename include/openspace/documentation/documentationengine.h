@@ -89,7 +89,7 @@ public:
      */
     static DocumentationEngine& ref();
 
-    std::string generateJson() const override;
+    std::string generateJson() const;
 
     nlohmann::json generateJsonJson() const;
 

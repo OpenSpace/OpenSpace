@@ -407,13 +407,13 @@ nlohmann::json PropertyOwner::generateJsonJson() const {
     for (PropertyOwner* owner : subOwners) {
         if (owner->identifier() != "Scene") {
             nlohmann::json jsonOwner = createJson(owner);
-            sortJson(jsonOwner["Properties"]);
-            sortJson(jsonOwner["PropertyOwners"]);
+            sortJson(jsonOwner["Properties"], "Name");
+            sortJson(jsonOwner["PropertyOwners"], "Name");
 
             json.push_back(jsonOwner);
         }
     }
-    sortJson(json);
+    sortJson(json, "Name");
 
     nlohmann::json result;
     result[NameTag] = "PropertyOwner";

@@ -95,7 +95,7 @@ public:
 
     std::vector<std::string> allLuaFunctions() const;
 
-    std::string generateJson() const override;
+    std::string generateJson() const;
     nlohmann::json generateJsonJson() const;
 
 private:

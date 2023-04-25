@@ -79,7 +79,6 @@ public:
      */
     virtual std::string generateJson() const = 0;
 
-    void sortJson(nlohmann::json& json) const;
 private:
     const std::string _name;
     const std::string _jsonName;

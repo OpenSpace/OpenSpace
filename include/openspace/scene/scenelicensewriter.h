@@ -35,7 +35,7 @@ namespace openspace {
 class SceneLicenseWriter : public DocumentationGenerator {
 public:
     SceneLicenseWriter();
-    std::string generateJson() const override;
+    std::string generateJson() const;
     nlohmann::json generateJsonJson() const;
 };
 

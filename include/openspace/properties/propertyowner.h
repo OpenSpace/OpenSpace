@@ -297,7 +297,7 @@ public:
     void removeTag(const std::string& tag);
 
     // Generate JSON for documentation
-    std::string generateJson() const override;
+    std::string generateJson() const;
 
     nlohmann::json generateJsonJson() const;
 
