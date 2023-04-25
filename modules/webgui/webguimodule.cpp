@@ -224,7 +224,7 @@ void WebGuiModule::notifyEndpointListeners(const std::string& endpoint, bool exi
 }
 
 void WebGuiModule::startProcess() {
-    ZoneScoped
+    ZoneScoped;
 
     _endpoints.clear();
 

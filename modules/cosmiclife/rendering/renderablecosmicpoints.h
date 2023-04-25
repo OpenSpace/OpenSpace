@@ -77,16 +77,23 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+<<<<<<< HEAD
     std::vector<float> createDataSlice(const RenderData& data);
     void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
         GLuint textureHeight);
+=======
+    std::vector<float> createDataSlice();
+>>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
     void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
     void updateRenderData(const RenderData& data);
     float fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e, float thresholdDistance);
 
+<<<<<<< HEAD
     glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
 
+=======
+>>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
     // bool variables
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
@@ -96,7 +103,13 @@ private:
     bool _hasColorMapFile = false;
     bool _isColorMapExact = false;
     bool _hasDatavarSize = false;
+<<<<<<< HEAD
     bool _hasPolygon = false;
+=======
+    bool _hasLabel = false;
+
+   
+>>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
 
     GLuint _pTexture = 0;
 
@@ -121,6 +134,10 @@ private:
 
     ghoul::opengl::Texture* _spriteTexture = nullptr;
     ghoul::opengl::ProgramObject* _program = nullptr;
+<<<<<<< HEAD
+=======
+
+>>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
 
     // variables that are sent to the shaders
     UniformCache(

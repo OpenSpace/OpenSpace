@@ -86,7 +86,7 @@ std::vector<Parameters> readOmmFile(std::filesystem::path file);
 std::vector<Parameters> readSbdbFile(std::filesystem::path file);
 
 /**
- * The different formats that the #readFile function is capable of loading
+ * The different formats that the readFile function is capable of loading
  */
 enum class Format {
     TLE,

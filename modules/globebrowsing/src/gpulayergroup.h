@@ -45,27 +45,26 @@ struct LayerGroup;
 struct TileIndex;
 
 /**
- * Manages a GPU representation of a <code>LayerGroup</code>
+ * Manages a GPU representation of a `LayerGroup`
  */
 class GPULayerGroup {
 public:
     /**
-     * Sets the value of <code>LayerGroup</code> to its corresponding
-     * GPU struct. OBS! Users must ensure bind has been
-     * called before setting using this method.
+     * Sets the value of `LayerGroup` to its corresponding GPU struct. OBS! Users must
+     * ensure bind has been called before setting using this method.
      */
     void setValue(ghoul::opengl::ProgramObject& programObject,
         const LayerGroup& layerGroup, const TileIndex& tileIndex);
 
     /**
-     * Binds this object with GLSL variables with identifiers starting
-     * with nameBase within the provided shader program.
-     * After this method has been called, users may invoke setValue.
+     * Binds this object with GLSL variables with identifiers starting with nameBase
+     * within the provided shader program. After this method has been called, users may
+     * invoke setValue.
      */
     void bind(ghoul::opengl::ProgramObject& programObject, const LayerGroup& layerGroup);
 
     /**
-    * Deactivates any <code>TextureUnit</code>s assigned by this object.
+    * Deactivates any `TextureUnit`s assigned by this object.
     * This method should be called after the OpenGL draw call.
     */
     void deactivate();

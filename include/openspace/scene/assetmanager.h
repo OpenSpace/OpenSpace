@@ -98,10 +98,10 @@ public:
      * Loads the provided \p asset as a child of the provided \p parent. Loading an asset
      * means that asset file gets executed and the meta information is extracted from it.
      * The \p parent is the asset file that caused this loading to happen and can be a
-     * \c nullptr if the asset is to be loaded as a root asset.
+     * `nullptr` if the asset is to be loaded as a root asset.
      *
      * \param asset The asset that should be loaded
-     * \param parent The parent of the loaded asset file or \c nullptr if the asset is a
+     * \param parent The parent of the loaded asset file or `nullptr` if the asset is a
      *        root asset
      * \pre \p asset must not be a nullptr
      */

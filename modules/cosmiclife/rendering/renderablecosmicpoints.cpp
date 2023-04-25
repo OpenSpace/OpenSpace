@@ -57,6 +57,10 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableCosmicPoints";
     constexpr const char* ProgramObjectName = "RenderableCosmicPoints";
+<<<<<<< HEAD
+=======
+
+>>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
 
     constexpr const std::array<const char*, 20> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
@@ -240,6 +244,28 @@ namespace {
         // entrered value
         std::optional<bool> exactColorMap;
 
+<<<<<<< HEAD
+=======
+        // [[codegen::verbatim(DrawLabelInfo.description)]]
+        std::optional<bool> drawLabels;
+
+        // [[codegen::verbatim(TextColorInfo.description)]]
+        std::optional<glm::vec3> textColor [[codegen::color()]];
+
+        // [[codegen::verbatim(TextOpacityInfo.description)]]
+        std::optional<float> textOpacity;
+
+        // [[codegen::verbatim(TextSizeInfo.description)]]
+        std::optional<float> textSize;
+
+        // The path to the label file that contains information about the astronomical
+        // objects being rendered
+        std::optional<std::string> labelFile;
+
+        // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
+        std::optional<glm::ivec2> textMinMaxSize;
+
+>>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
         // [[codegen::verbatim(ColorOptionInfo.description)]]
         std::optional<std::vector<std::string>> colorOption;
 
@@ -410,6 +436,45 @@ RenderableCosmicPoints::RenderableCosmicPoints(const ghoul::Dictionary& dictiona
         _hasDatavarSize = true;
     }
 
+<<<<<<< HEAD
+=======
+    if (p.labelFile.has_value()) {
+        _drawLabels = p.drawLabels.value_or(_drawLabels);
+        addProperty(_drawLabels);
+
+        _enableLabelFadingEffect = p.enableLabelFading.value_or(_enableLabelFadingEffect);
+        addProperty(_enableLabelFadingEffect);
+
+        _labelFile = absPath(*p.labelFile).string();
+        _hasLabel = true;
+
+        _textColor = p.textColor.value_or(_textColor);
+        _hasLabel = p.textColor.has_value();
+        _textColor.setViewOption(properties::Property::ViewOptions::Color);
+        addProperty(_textColor);
+        _textColor.onChange([&]() { _textColorIsDirty = true; });
+
+        _textOpacity = p.textOpacity.value_or(_textOpacity);
+        addProperty(_textOpacity);
+
+        _textSize = p.textSize.value_or(_textSize);
+        addProperty(_textSize);
+
+        _textMinMaxSize = p.textMinMaxSize.value_or(_textMinMaxSize);
+        _textMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        addProperty(_textMinMaxSize);
+
+        _fadeLabelDistances = p.fadeLabelDistances.value_or(_fadeLabelDistances);
+        _fadeLabelDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        addProperty(_fadeLabelDistances);
+
+        _fadeLabelWidths = p.fadeLabelWidths.value_or(_fadeLabelWidths);
+        addProperty(_fadeLabelWidths);
+
+
+    }
+
+>>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
     _pixelSizeControl = p.enablePixelSizeControl.value_or(_pixelSizeControl);
@@ -497,7 +562,26 @@ void RenderableCosmicPoints::initializeGL() {
         }
     );
 
+<<<<<<< HEAD
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+=======
+
+
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+
+
+    if (_hasLabel) {
+        if (!_font) {
+            size_t _fontSize = 8;
+            _font = global::fontManager->font(
+                "Mono",
+                static_cast<float>(_fontSize),
+                ghoul::fontrendering::FontManager::Outline::Yes,
+                ghoul::fontrendering::FontManager::LoadGlyphs::No
+            );
+        }
+    }
+>>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
 }
 
 // vao = vertex array object
@@ -516,6 +600,11 @@ void RenderableCosmicPoints::deinitializeGL() {
     );
     _program = nullptr;
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
     CosmicLifeModule::TextureManager.release(_spriteTexture);
     _spriteTexture = nullptr;
 }
@@ -578,7 +667,11 @@ void RenderableCosmicPoints::renderPoints(const RenderData& data,
     _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
 
     ghoul::opengl::TextureUnit textureUnit;
+<<<<<<< HEAD
     textureUnit.activate(); 
+=======
+    textureUnit.activate();
+>>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
     if (_spriteTexture) {
         _spriteTexture->bind();
     }
@@ -1017,6 +1110,7 @@ std::vector<float> RenderableCosmicPoints::createDataSlice(const RenderData& dat
     return result;
 }
 
+<<<<<<< HEAD
 void RenderableCosmicPoints::renderToTexture(GLuint textureToRenderTo,
                                                 GLuint textureWidth, GLuint textureHeight)
 {
@@ -1045,6 +1139,34 @@ void RenderableCosmicPoints::renderToTexture(GLuint textureToRenderTo,
     glDeleteFramebuffers(1, &textureFBO);
 }
 
+=======
+float RenderableCosmicPoints::computeFadeFactor(float distanceNodeToCamera) const {
+    float distanceUnit = toMeter(_unit);
+
+    float x = distanceNodeToCamera;
+    float startX = _fadeLabelDistances.value().x * distanceUnit;
+    float endX = _fadeLabelDistances.value().y * distanceUnit;
+
+    // The distances over which the fading should happen
+    float fadingStartDistance = _fadeLabelWidths.value().x * distanceUnit;
+    float fadingEndDistance = _fadeLabelWidths.value().y * distanceUnit;
+
+    if (x <= endX) {
+        float f1 = 1.f - (startX - x) / fadingStartDistance;
+        return std::clamp(f1, 0.f, 1.f);
+    }
+    else if (x > startX && x < endX) {
+        return 1.f;
+    }
+    else { // x >= endX
+        float f2 = 1.f - (x - endX) / fadingEndDistance;
+        return std::clamp(f2, 0.f, 1.f);
+    }
+}
+
+
+
+>>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
 } // namespace openspace
 
 

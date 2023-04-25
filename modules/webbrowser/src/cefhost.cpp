@@ -88,7 +88,7 @@ void CefHost::attachDebugSettings(CefSettings &settings) {
 }
 
 void CefHost::doMessageLoopWork() {
-    ZoneScoped
+    ZoneScoped;
 
     CefDoMessageLoopWork();
 }

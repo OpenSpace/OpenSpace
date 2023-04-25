@@ -82,7 +82,7 @@ namespace openspace {
 using datamessagestructures::TimeKeyframe;
 
 TimeManager::TimeManager()
-    : properties::PropertyOwner({ "TimeManager" })
+    : properties::PropertyOwner({ "TimeManager", "Time Manager" })
     , _defaultTimeInterpolationDuration(DefaultTimeInterpolationDurationInfo,
         2.f,
         0.f,
@@ -156,7 +156,7 @@ void TimeManager::interpolateTimeRelative(double delta, double durationSeconds) 
 }
 
 void TimeManager::preSynchronization(double dt) {
-    ZoneScoped
+    ZoneScoped;
 
     removeKeyframesBefore(_latestConsumedTimestamp);
     progressTime(dt);
@@ -165,11 +165,11 @@ void TimeManager::preSynchronization(double dt) {
     const double newTime = time().j2000Seconds();
 
     if (newTime != _lastTime) {
-        ZoneScopedN("newTime != _lastTime")
+        ZoneScopedN("newTime != _lastTime");
         using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _timeChangeCallbacks) {
-            ZoneScopedN("tcc")
+            ZoneScopedN("tcc");
             it.second();
         }
     }
@@ -177,11 +177,11 @@ void TimeManager::preSynchronization(double dt) {
         _timePaused != _lastTimePaused ||
         _targetDeltaTime != _lastTargetDeltaTime)
     {
-        ZoneScopedN("delta time changed")
+        ZoneScopedN("delta time changed");
         using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
-            ZoneScopedN("dtcc")
+            ZoneScopedN("dtcc");
             it.second();
         }
     }
@@ -193,11 +193,11 @@ void TimeManager::preSynchronization(double dt) {
         }
     }
     if (_timelineChanged) {
-        ZoneScopedN("timeline changed")
+        ZoneScopedN("timeline changed");
         using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _timelineChangeCallbacks) {
-            ZoneScopedN("tlcc")
+            ZoneScopedN("tlcc");
             it.second();
         }
     }
@@ -255,7 +255,7 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
 }
 
 void TimeManager::progressTime(double dt) {
-    ZoneScoped
+    ZoneScoped;
 
     OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::CameraPath) {
@@ -927,18 +927,20 @@ bool TimeManager::isPlayingBackSessionRecording() const {
 
 void TimeManager::setTimeFromProfile(const Profile& p) {
     if (p.time.has_value()) {
-        switch (p.time.value().type) {
+        switch (p.time->type) {
             case Profile::Time::Type::Relative:
-                Time::setTimeRelativeFromProfile(p.time.value().value);
+                Time::setTimeRelativeFromProfile(p.time->value);
                 break;
 
             case Profile::Time::Type::Absolute:
-                Time::setTimeAbsoluteFromProfile(p.time.value().value);
+                Time::setTimeAbsoluteFromProfile(p.time->value);
                 break;
 
             default:
                 throw ghoul::MissingCaseException();
         }
+
+        setPause(p.time->startPaused);
     }
     else {
         // No value was specified so we are using 'now' instead

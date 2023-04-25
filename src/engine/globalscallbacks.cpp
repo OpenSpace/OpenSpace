@@ -58,7 +58,7 @@ namespace {
 } // namespace
 
 void create() {
-    ZoneScoped
+    ZoneScoped;
 
 #ifdef WIN32
     std::fill(DataStorage.begin(), DataStorage.end(), std::byte(0));

@@ -248,7 +248,16 @@ namespace {
         "SpeedFactor",
         "Speed Factor",
         "A factor that can be used to increase or slow down the speed of an applied "
-        "idle behavior"
+        "idle behavior. A negative value will invert the direction. Note that a speed "
+        "of exactly 0 leads to no movement at all"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InvertIdleBehaviorInfo = {
+        "Invert",
+        "Invert",
+        "If true, the direction of the idle behavior motion will be inverted compared "
+        "to the default. For example, the 'Orbit' option rotates to the right per "
+        "default, and will rotate to the left when inverted"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AbortOnCameraInteractionInfo =
@@ -291,12 +300,13 @@ OrbitalNavigator::Friction::Friction()
 }
 
 OrbitalNavigator::IdleBehavior::IdleBehavior()
-    : properties::PropertyOwner({ "IdleBehavior" })
+    : properties::PropertyOwner({ "IdleBehavior", "Idle Behavior" })
     , apply(ApplyIdleBehaviorInfo, false)
     , shouldTriggerWhenIdle(ShouldTriggerIdleBehaviorWhenIdleInfo, false)
     , idleWaitTime(IdleWaitTimeInfo, 5.f, 0.f, 3600.f)
     , abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
-    , speedScale(IdleBehaviorSpeedInfo, 1.f, 0.01f, 5.f)
+    , invert(InvertIdleBehaviorInfo, false)
+    , speedScaleFactor(IdleBehaviorSpeedInfo, 1.f, -5.f, 5.f)
     , dampenInterpolationTime(IdleBehaviorDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
     , defaultBehavior(IdleBehaviorInfo)
 {
@@ -320,13 +330,14 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     addProperty(shouldTriggerWhenIdle);
     addProperty(idleWaitTime);
     idleWaitTime.setExponent(2.2f);
-    addProperty(speedScale);
+    addProperty(invert);
+    addProperty(speedScaleFactor);
     addProperty(abortOnCameraInteraction);
     addProperty(dampenInterpolationTime);
 }
 
 OrbitalNavigator::OrbitalNavigator()
-    : properties::PropertyOwner({ "OrbitalNavigator" })
+    : properties::PropertyOwner({ "OrbitalNavigator", "Orbital Navigator" })
     , _anchor(AnchorInfo)
     , _aim(AimInfo)
     , _retargetAnchor(RetargetAnchorInfo)
@@ -539,6 +550,20 @@ glm::quat OrbitalNavigator::anchorNodeToCameraRotation() const {
     return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
 }
 
+
+glm::dvec3 OrbitalNavigator::pushToSurfaceOfAnchor(
+                                                  const glm::dvec3& cameraPosition) const
+{
+    const SurfacePositionHandle posHandle =
+        calculateSurfacePositionHandle(*_anchorNode, cameraPosition);
+
+     return pushToSurface(
+         cameraPosition,
+         _anchorNode->worldPosition(),
+         posHandle
+    );
+}
+
 void OrbitalNavigator::resetVelocities() {
     _mouseStates.resetVelocities();
     _joystickStates.resetVelocities();
@@ -703,7 +728,6 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // Perform the vertical movements based on user input
     pose.position = translateVertically(deltaTime, pose.position, anchorPos, posHandle);
     pose.position = pushToSurface(
-        _minimumAllowedDistance,
         pose.position,
         anchorPos,
         posHandle
@@ -990,6 +1014,10 @@ bool OrbitalNavigator::hasZoomFriction() const {
 
 bool OrbitalNavigator::hasRollFriction() const {
     return _friction.roll;
+}
+
+double OrbitalNavigator::minAllowedDistance() const {
+    return _minimumAllowedDistance;
 }
 
 OrbitalNavigator::CameraRotationDecomposition
@@ -1473,8 +1501,7 @@ glm::dquat OrbitalNavigator::rotateHorizontally(double deltaTime,
     return mouseCameraRollRotation * globalCameraRotation;
 }
 
-glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
-                                           const glm::dvec3& cameraPosition,
+glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
                                            const glm::dvec3& objectPosition,
                                         const SurfacePositionHandle& positionHandle) const
 {
@@ -1495,7 +1522,7 @@ glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
         glm::sign(dot(actualSurfaceToCamera, referenceSurfaceOutDirection));
 
     return cameraPosition + referenceSurfaceOutDirection *
-        glm::max(minHeightAboveGround - surfaceToCameraSigned, 0.0);
+        glm::max(_minimumAllowedDistance - surfaceToCameraSigned, 0.0);
 }
 
 glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
@@ -1520,7 +1547,7 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
 
 SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
                                                 const SceneGraphNode& node,
-                                                const glm::dvec3 cameraPositionWorldSpace)
+                                        const glm::dvec3& cameraPositionWorldSpace) const
 {
     ghoul_assert(
         glm::length(cameraPositionWorldSpace) > 0.0,
@@ -1634,8 +1661,12 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
         glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
         1.0; // same as horizontal translation
 
-    speedScale *= _idleBehavior.speedScale;
+    speedScale *= _idleBehavior.speedScaleFactor;
     speedScale *= 0.05; // without this scaling, the motion is way too fast
+
+    if (_idleBehavior.invert) {
+        speedScale *= -1.0;
+    }
 
     // Interpolate so that the start and end are smooth
     double s = _idleBehaviorDampenInterpolator.value();

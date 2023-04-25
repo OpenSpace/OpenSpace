@@ -203,7 +203,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
 }
 
 void DashboardItemFramerate::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     if (_shouldClearCache) {
         _minDeltaTimeCache = 1.0;
@@ -243,7 +243,7 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemFramerate::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     const FrametimeType t = FrametimeType(_frametimeType.value());
     char* end = format(_buffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);

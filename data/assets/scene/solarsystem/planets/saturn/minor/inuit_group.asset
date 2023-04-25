@@ -6,13 +6,14 @@ local kernel = asset.require("../kernels").sat368
 
 local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_inuit", "moon_minor" }
+local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_inuit", "moon_minor", "moon_minor_saturn" }
 local trailColor = { 0.5, 0.3, 0.3 }
 local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_saturn",
-  "moonTrail_minor"
+  "moonTrail_minor",
+  "moonTrail_minor_saturn"
 }
 
 local inuitGroup = {

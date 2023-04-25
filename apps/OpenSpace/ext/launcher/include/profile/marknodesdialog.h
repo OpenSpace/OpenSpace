@@ -58,9 +58,7 @@ private:
     void listItemRemove();
     void parseSelections();
 
-    std::vector<QListWidgetItem*> _markedNodesListItems;
     std::vector<std::string>* _markedNodes;
-    std::vector<std::string> _markedNodesData;
 
     QListWidget* _list = nullptr;
     QPushButton* _removeButton = nullptr;

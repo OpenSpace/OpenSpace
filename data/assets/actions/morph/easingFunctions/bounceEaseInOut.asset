@@ -1,0 +1,29 @@
+local bounceEaseInOut = {
+    Identifier = "os.bounceEaseInOut",
+    Name = "BounceEaseInOut",
+    Command = [[
+      if (openspace.getPropertyValue("Scene.morph_sequences.Renderable.InterpolationValue") < 0.01 ) then
+        openspace.setPropertyValueSingle("Scene.morph_sequences.Renderable.InterpolationValue", 1 , 5, "BounceEaseInOut");
+      else
+        openspace.setPropertyValueSingle("Scene.morph_sequences.Renderable.InterpolationValue", 0, 5, "BounceEaseInOut");
+      end
+    ]],
+    Documentation = [[Morph with easing function BounceEaseInOut]],
+    GuiPath = "/morph/easingFunctions",
+    IsLocal = true
+  }
+  asset.export("bounceEaseInOut", bounceEaseInOut.Identifier)
+  
+  asset.onInitialize(function()
+      openspace.action.registerAction(bounceEaseInOut)
+    end)
+  
+    asset.meta = {
+      Name = "Actions - Morphing",
+      Version = "1.0",
+      Description = "Asset providing actions to morph",
+      Author = "OpenSpace Team",
+      URL = "http://openspaceproject.com",
+      License = "MIT license"
+    }
+  

@@ -60,7 +60,7 @@ ghoul::mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
     return ghoul::mm_unique_ptr<TimeFrame>(result);
 }
 
-TimeFrame::TimeFrame() : properties::PropertyOwner({ "TimeFrame" }) {}
+TimeFrame::TimeFrame() : properties::PropertyOwner({ "TimeFrame", "Time Frame" }) {}
 
 bool TimeFrame::initialize() {
     return true;

@@ -44,7 +44,7 @@ public:
      * Returns if this component is enabled, that is, if it is currently active and
      * visible on the screen.
      *
-     * \return \c true if this component is enabled, \c false otherwise
+     * \return `true` if this component is enabled, `false` otherwise
      */
     bool isEnabled() const;
 
@@ -75,10 +75,10 @@ public:
     void setShowHelpTooltipDelay(double delay);
 
 protected:
-    /// \c true if this component is enabled and visible on the screen
+    /// `true` if this component is enabled and visible on the screen
     properties::BoolProperty _isEnabled;
 
-    /// if \c true this window is currently collapsed. This setting mirrors the ImGui
+    /// if `true` this window is currently collapsed. This setting mirrors the ImGui
     /// internal state of the window
     properties::BoolProperty _isCollapsed;
 

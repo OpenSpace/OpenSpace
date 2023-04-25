@@ -174,7 +174,7 @@ void Scene::markNodeRegistryDirty() {
 }
 
 void Scene::updateNodeRegistry() {
-    ZoneScoped
+    ZoneScoped;
 
     sortTopologically();
     _dirtyNodeRegistry = false;
@@ -262,7 +262,7 @@ bool Scene::isInitializing() const {
 }
 
 void Scene::update(const UpdateData& data) {
-    ZoneScoped
+    ZoneScoped;
 
     std::vector<SceneGraphNode*> initializedNodes = _initializer->takeInitializedNodes();
     for (SceneGraphNode* node : initializedNodes) {
@@ -288,11 +288,11 @@ void Scene::update(const UpdateData& data) {
 }
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
-    ZoneScoped
+    ZoneScoped;
     ZoneName(
         renderBinToString(data.renderBinMask),
         strlen(renderBinToString(data.renderBinMask))
-    )
+    );
 
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
@@ -307,7 +307,7 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
     }
 
     {
-        ZoneScopedN("Get Error Hack")
+        ZoneScopedN("Get Error Hack");
 
         // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
         // thread and the CPU thread from diverging too much, particularly the uploading
@@ -508,7 +508,7 @@ void Scene::removePropertyInterpolation(properties::Property* prop) {
 }
 
 void Scene::updateInterpolations() {
-    ZoneScoped
+    ZoneScoped;
 
     using namespace std::chrono;
 
@@ -810,11 +810,19 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the value is interpolated at each step in between. The fourth "
                 "parameter is an optional easing function if a 'duration' has been "
                 "specified. If 'duration' is 0, this parameter value is ignored. "
-                "Otherwise, it has to be 'linear', 'easein', 'easeout', or 'easeinout'. "
+                "Otherwise, it has to be one of the easing functions defined in the list below. "
                 "This is the same as calling the setValue method and passing 'single' as "
                 "the fourth argument to setPropertyValue. The fifth argument is another "
                 "Lua script that will be executed when the interpolation provided in "
-                "parameter 3 finishes."
+                "parameter 3 finishes. "
+                "\n Avaiable easing functions: "
+                "Linear, QuadraticEaseIn, QuadraticEaseOut, QuadraticEaseInOut, "
+                "CubicEaseIn, CubicEaseOut, CubicEaseInOut, QuarticEaseIn, "
+                "QuarticEaseOut, QuarticEaseInOut, QuinticEaseIn, QuinticEaseOut, "
+                "QuinticEaseInOut, SineEaseIn, SineEaseOut, SineEaseInOut, CircularEaseIn, "
+                "CircularEaseOut, CircularEaseInOut, ExponentialEaseIn, ExponentialEaseOut, "
+                "ExponentialEaseInOut, ElasticEaseIn, ElasticEaseOut, ElasticEaseInOut, "
+                "BounceEaseIn, BounceEaseOut, BounceEaseInOut"
             },
             {
                 "getPropertyValue",

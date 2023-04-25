@@ -51,7 +51,7 @@ DashboardItemParallelConnection::DashboardItemParallelConnection(
 {}
 
 void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     const ParallelConnection::Status status = global::parallelPeer->status();
     const size_t nConnections = global::parallelPeer->nConnections();
@@ -106,7 +106,7 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemParallelConnection::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     ParallelConnection::Status status = global::parallelPeer->status();
     size_t nConnections = global::parallelPeer->nConnections();

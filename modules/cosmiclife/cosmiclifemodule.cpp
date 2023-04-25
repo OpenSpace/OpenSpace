@@ -25,6 +25,7 @@
 #include <modules/cosmiclife/cosmiclifemodule.h>
 
 #include <modules/cosmiclife/rendering/renderablecosmicpoints.h>
+#include <modules/cosmiclife/rendering/renderableinterpolation.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
@@ -46,6 +47,7 @@ void CosmicLifeModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
     fRenderable->registerClass<RenderableCosmicPoints>("RenderableCosmicPoints");
+    fRenderable->registerClass<RenderableInterpolation>("RenderableInterpolation");
 }
 
 void CosmicLifeModule::internalDeinitializeGL() {
@@ -55,7 +57,8 @@ void CosmicLifeModule::internalDeinitializeGL() {
 
 std::vector<documentation::Documentation> CosmicLifeModule::documentations() const {
     return {
-        RenderableCosmicPoints::Documentation()
+        RenderableCosmicPoints::Documentation(),
+        RenderableInterpolation::Documentation()
     };
 }
 

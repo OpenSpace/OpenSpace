@@ -204,7 +204,7 @@ bool ShadowComponent::isReady() const {
 }
 
 void ShadowComponent::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     createDepthTexture();
     createShadowFBO();
@@ -353,7 +353,7 @@ void ShadowComponent::end() {
 }
 
 void ShadowComponent::update(const UpdateData&) {
-    ZoneScoped
+    ZoneScoped;
 
     SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
     if (sun) {

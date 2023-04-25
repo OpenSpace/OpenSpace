@@ -428,7 +428,7 @@ glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(const TransformData
 }
 
 void RenderableAtmosphere::render(const RenderData& data, RendererTasks& renderTask) {
-    ZoneScoped
+    ZoneScoped;
 
     DeferredcasterTask task{ _deferredcaster.get(), data };
     renderTask.deferredcasterTasks.push_back(task);
