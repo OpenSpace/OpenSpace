@@ -183,6 +183,12 @@ namespace {
         "This value determines the second dataset that will be morphed"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DirectoryPathInfo = {
+    "DirectoryPathInfo",
+    "Directory Path Info",
+    "Directory Paths "
+    };
+
     struct [[codegen::Dictionary(RenderableInterpolation)]] Parameters {
         // The path to the SPECK file that contains information about the astronomical
         // object being rendered
@@ -206,12 +212,6 @@ namespace {
         // [[codegen::verbatim(RenderOptionInfo.description)]]
         std::optional<RenderOption> renderOption;
 
-        //enum class [[codegen::map(dataSetOneOption)]] dataSetOneOption {
-        //    ViewDirection [[codegen::key("Camera View Direction")]],
-        //    PositionNormal [[codegen::key("Camera Position Normal")]]
-        //};
-        //// [[codegen::verbatim(dataSetOneOptionInfo.description)]]
-        //std::optional<dataSetOneOption> dataSetOneOption;
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
@@ -266,6 +266,11 @@ namespace {
 
         // [[codegen::verbatim(InterpolationValueInfo.description)]]
         std::optional<float> interpolationValue;
+
+        // [[codegen::verbatim(DirectoryPathInfo.description)]]
+        std::optional<std::string> directoryPath;
+
+
     };
 #include "renderableinterpolation_codegen.cpp"
 }  // namespace
@@ -304,30 +309,24 @@ namespace openspace {
         , _interpolationValue(InterpolationValueInfo,0,0.f,1.f)
         , _dataSetOneOption(DataSetOneOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _dataSetTwoOption(DataSetTwoOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+        , _directoryPath(DirectoryPathInfo)
     {
+        const Parameters p = codegen::bake<Parameters>(dictionary);
 
 
-        //for (const auto& file : std::filesystem::recursive_directory_iterator(umap_directory_path)) {
-        //    if (file.path().extension() == ".speck") {
-        //        std::string sequence_name = file.path().stem().string();
-        //        std::string sequence_path = file.path().string();
-        //        _filePaths[sequence_name] = sequence_path;
-        //    }
-        //}
+        _directoryPath = p.directoryPath.value_or(_directoryPath);
+
+        std::filesystem::path directoryPath = std::filesystem::path(_directoryPath.value());
+        for (const auto& file : std::filesystem::recursive_directory_iterator(directoryPath)) {
+            if (file.path().extension() == ".speck") {
+                std::string sequence_name = file.path().stem().string();
+                std::string sequence_path = file.path().string();
+                _filePaths[sequence_name] = sequence_path;
+            }
+        }
 
         std::vector<std::string> fileOptionNames;
-  
 
-        //for (const auto& [name, path] : _filePaths) {
-        //    std::string modified_name = name;
-        //    if (path.find("umap") != std::string::npos) {
-        //        modified_name = "umap_" + modified_name;
-        //    }
-        //    else if (path.find("mds") != std::string::npos) {
-        //        modified_name = "mds_" + modified_name;
-        //    }
-        //    fileOptionNames.push_back(modified_name);
-        //}
 
         for (const auto& [name, path] : _filePaths) {
             fileOptionNames.push_back(name);
@@ -338,26 +337,20 @@ namespace openspace {
 
 
         auto func = [this]() {
+            _dataSetOne =_datasets[_dataSetOneOption.getDescriptionByValue(_dataSetOneOption.value())];
+            _dataSetTwo =_datasets[_dataSetTwoOption.getDescriptionByValue(_dataSetTwoOption.value())];
+
+            _dataSetTwo = sort(_dataSetOne, _dataSetTwo);
+
             _dataIsDirty = true;
         };
+
         _dataSetOneOption.onChange(func);
         _dataSetTwoOption.onChange(func);
 
         addProperty(_dataSetOneOption);
         addProperty(_dataSetTwoOption);
 
-
-        const Parameters p = codegen::bake<Parameters>(dictionary);
-        //const Point v = codegen::bake<Point>(dictionary);
-
-        //if (p.file.has_value()) {   
-            _speckFile.push_back(absPath(*p.file).string());  
-        //}
-
-        //if (p.file2.has_value()) {
-            _speckFile.push_back(absPath(*p.file2).string());
-        //}
-        _hasSpeckFile = p.file.has_value() && p.file2.has_value();
 
 
         _interpolationValue = p.interpolationValue.value_or(_interpolationValue);
@@ -368,7 +361,6 @@ namespace openspace {
             });
         addProperty(_interpolationValue); //puts it on the GUI 
 
-        _hasSpeckFile = p.file2.has_value();
 
         _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
         _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
@@ -509,21 +501,25 @@ namespace openspace {
     speck::Dataset RenderableInterpolation::sort(const speck::Dataset& d1, const speck::Dataset& d2) {
         speck::Dataset result{ d2 };
 
+        if (d1.entries.size() != d2.entries.size()) {
+            return d2;
+        }
+
         for (int i = 0; i < d1.entries.size(); i++) {
             bool found = false;
             int j = 0;
 
             while (j < d2.entries.size()) {
+                //replace if statement with a function call that 
                 //TO DO replace if statement with a function call that 
                 //finds the id in the comment.
                 if (d1.entries[i].comment == d2.entries[j].comment) {
                     found = true;
                     break;
                 }
-                ++j;    
+                ++j;
             }
-
-            if(found) {
+            if (found) {
                 result.entries[i] = d2.entries[j];
             }
             else {
@@ -531,18 +527,15 @@ namespace openspace {
                 result.entries[i] = d1.entries[i];
             }
         }
+        return result;
 
-        return result;     
-            
     }
 
     void RenderableInterpolation::initialize() {
         for (const auto& [name, path] : _filePaths) {
             _datasets[name] = speck::data::loadFileWithCache(path);
         }
-        //for (const std::string& path : _speckFile) {
-        //    _datasets.push_back(speck::data::loadFileWithCache(path));
-        //}
+
 
         
         if (_hasColorMapFile) {
@@ -702,9 +695,9 @@ namespace openspace {
         }
         glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
-        if (_hasSpeckFile) {
+
             renderPoints(data, modelMatrix, orthoRight, orthoUp, 1);
-        }
+  
     }
 
     speck::Dataset::Entry RenderableInterpolation::interpol(const speck::Dataset::Entry& e1, const speck::Dataset::Entry& e2, float iv) {
@@ -726,7 +719,7 @@ namespace openspace {
         return result;
     }
     void RenderableInterpolation::update(const UpdateData&) {
-        if (_dataIsDirty && _hasSpeckFile) {
+        if (_dataIsDirty) {
             ZoneScopedN("Data dirty")
                 TracyGpuZone("Data dirty")
                 LDEBUG("Regenerating data");

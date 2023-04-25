@@ -85,7 +85,6 @@ namespace openspace {
         speck::Dataset interpolationFunc(const speck::Dataset& d1, const speck::Dataset& d2, float iv);
         speck::Dataset::Entry interpol(const speck::Dataset::Entry& e1, const speck::Dataset::Entry& e2, float iv);
         speck::Dataset sort(const speck::Dataset& d1, const speck::Dataset& d2);
-        //speck::Dataset extractComment(const speck::Dataset& d1, const speck::Dataset& d2);
 
         // bool variables
         bool _hasSpeckFile = true;
@@ -117,17 +116,11 @@ namespace openspace {
         properties::FloatProperty _interpolationValue;
         properties::OptionProperty _dataSetOneOption;
         properties::OptionProperty _dataSetTwoOption;
-
-        
-        //const std::string umap_directory_path = "C:/OpenSpace/OpenSpace/user/data/assets/cosmic_life/morphing/data/umap";
-        //const std::string mds_directory_path = "C:/OpenSpace/OpenSpace/user/data/assets/cosmic_life/morphing/data/mds";
- //std::map<std::string, std::string> _filePaths; 
+        properties::StringProperty _directoryPath;
 
 
-        const std::map<std::string, std::string> _filePaths{ 
-            {"umap sequences", "C:/OpenSpace/OpenSpace/user/data/assets/cosmic_life/morphing/data/umap/sequences/sequences.speck"},
-            {"mds sequences", "C:/OpenSpace/OpenSpace/user/data/assets/cosmic_life/morphing/data/mds/sequences/sequences.speck"}
-        };
+        //const std::string directory_path = "C:/OpenSpace/OpenSpace/user/data/assets/cosmic_life/morphing/data";
+        std::map<std::string, std::string> _filePaths; 
 
         std::vector<Point> _MDS_points;
         std::vector<Point> _Umap_points;
@@ -150,7 +143,6 @@ namespace openspace {
         std::shared_ptr<ghoul::fontrendering::Font> _font;
 
         // String variables
-        std::vector<std::string> _speckFile;//_files //TODO remove
         std::string _colorMapFile;
         std::string _colorOptionString;
         std::string _datavarSizeOptionString;
@@ -162,6 +154,9 @@ namespace openspace {
         //speck::Dataset _dataset;
         std::map<std::string, speck::Dataset> _datasets;
         speck::Dataset _interpolationDataset;
+        speck::Dataset _dataSetOne;
+        speck::Dataset _dataSetTwo;
+
         speck::ColorMap _colorMap;
 
         // range data, do we need conversion map?
