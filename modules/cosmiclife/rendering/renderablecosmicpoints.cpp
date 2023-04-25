@@ -58,12 +58,12 @@ namespace {
     constexpr const char* _loggerCat = "RenderableCosmicPoints";
     constexpr const char* ProgramObjectName = "RenderableCosmicPoints";
 
-    constexpr const std::array<const char*, 19> UniformNames = {
+    constexpr const std::array<const char*, 20> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize",
         "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
         "scaleFactor", "up", "right", "screenSize", "spriteTexture",
-        "hasColorMap", "enabledRectSizeControl", "hasDvarScaling"
+        "hasColorMap", "enabledRectSizeControl", "hasDvarScaling", "frameColor"
     };
 
     enum RenderOption {
@@ -81,6 +81,12 @@ namespace {
         "FadeInfo",
         "Fade Info",
         "This value is used to tell if the asset should be faded or not."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FrameColorInfo = {
+        "FrameColor",
+        "Frame Color",
+        "This value gives the color of the frame around each point."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeThresholdInfo = {
@@ -195,6 +201,9 @@ namespace {
         // [[codegen::verbatim(FadeInfo.description)]]
         std::optional<bool> useFade;
 
+        // [[codegen::verbatim(FadeInfo.description)]]
+        std::optional<glm::vec3> frameColor;
+
         // [[codegen::verbatim(FadeThresholdInfo.description)]]
         std::optional<float> fadeThreshold;
 
@@ -258,6 +267,8 @@ namespace {
 
         // [[codegen::verbatim(UseLinearFiltering.description)]]
         std::optional<bool> useLinearFiltering;
+
+        std::optional<std::string> uniqueSpecies;
     };
 #include "renderablecosmicpoints_codegen.cpp"
 }  // namespace
@@ -272,6 +283,7 @@ RenderableCosmicPoints::RenderableCosmicPoints(const ghoul::Dictionary& dictiona
     : Renderable(dictionary)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
     , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _frameColor(FrameColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _spriteTexturePath(SpriteTextureInfo)
     , _useFade(FadeInfo, false)
     , _fadeThreshold(FadeThresholdInfo, 10000.f)
@@ -306,8 +318,10 @@ RenderableCosmicPoints::RenderableCosmicPoints(const ghoul::Dictionary& dictiona
         _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
         addProperty(_drawElements);
 
+        _uniqueSpecies = p.uniqueSpecies;
         _useFade = p.useFade.value_or(_useFade);
         _fadeThreshold = p.fadeThreshold.value_or(_fadeThreshold);
+        _frameColor = p.frameColor.value_or(_frameColor);
     }
     
     _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
@@ -443,6 +457,17 @@ bool RenderableCosmicPoints::isReady() const {
 void RenderableCosmicPoints::initialize() {
     if (_hasSpeckFile) {
         _dataset = speck::data::loadFileWithCache(_speckFile);
+
+        if (_uniqueSpecies.has_value()) {
+            //Find all occurences in _dataset that correspond to specie store those instead
+            std::vector<openspace::speck::Dataset::Entry> newdataset;
+            std::copy_if(_dataset.entries.begin(), _dataset.entries.end(), std::back_inserter(newdataset), [this](const openspace::speck::Dataset::Entry& entry) {
+                //function to find species
+                return entry.comment == _uniqueSpecies.value();
+            });
+
+            _dataset.entries = std::move(newdataset);
+        }
     }
 
     if (_hasColorMapFile) {
@@ -545,6 +570,8 @@ void RenderableCosmicPoints::renderPoints(const RenderData& data,
     _program->setUniform(_uniformCache.enabledRectSizeControl, _pixelSizeControl);
 
     _program->setUniform(_uniformCache.hasDvarScaling, _hasDatavarSize);
+
+    _program->setUniform(_uniformCache.frameColor, _frameColor);
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);

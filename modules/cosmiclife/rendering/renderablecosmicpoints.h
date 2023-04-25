@@ -46,6 +46,7 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <functional>
 #include <unordered_map>
+#include <algorithm>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::fontrendering { class Font; }
@@ -101,6 +102,7 @@ private:
 
     properties::FloatProperty _scaleFactor;
     properties::Vec3Property _pointColor;
+    properties::Vec3Property _frameColor;
     properties::StringProperty _spriteTexturePath;
     properties::BoolProperty _useFade;
     properties::FloatProperty _fadeThreshold;
@@ -116,6 +118,7 @@ private:
     properties::TriggerProperty _setRangeFromData;
     properties::OptionProperty _renderOption;
 
+
     ghoul::opengl::Texture* _spriteTexture = nullptr;
     ghoul::opengl::ProgramObject* _program = nullptr;
 
@@ -124,11 +127,13 @@ private:
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
         minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
         correctionSizeFactor, color, alphaValue, scaleFactor, up, right,
-        screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling
+        screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling, frameColor
     ) _uniformCache;
 
     // font variable from ghoul library
     std::shared_ptr<ghoul::fontrendering::Font> _font;
+
+    std::optional<std::string> _uniqueSpecies;
 
     // String variables
     std::string _speckFile;

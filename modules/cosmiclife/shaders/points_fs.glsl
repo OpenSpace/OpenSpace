@@ -32,16 +32,17 @@ in float gs_opacity;
 
 uniform float alphaValue;
 uniform vec3 color;
+uniform vec3 frameColor;
 uniform sampler2D spriteTexture;
 uniform bool hasColorMap;
 
 Fragment getFragment() {
   
-  
   vec4 textureColor = texture(spriteTexture, texCoord);
-  
-
+ 
   vec4 fullColor = textureColor;
+
+  vec4 frame_col = vec4(frameColor, 1);
     
   if (hasColorMap) {
     fullColor *= gs_colorMap;
@@ -55,14 +56,21 @@ Fragment getFragment() {
   fullColor.a = max(fullColor.a, 0.0f);
   fullColor.a = min(fullColor.a, 1.0f);
 
-  if(fullColor.a < 1e-4)
-    discard;
-
-
   float textureOpacity = dot(fullColor.rgb, vec3(fullColor.a));
 
   Fragment frag;
-  frag.color = fullColor;
+
+  float borderWidth = 0.05;
+  float u = texCoord.x;
+  float v = texCoord.y;
+
+  if (u < borderWidth || u > 1.0 - borderWidth || v < borderWidth || v > 1.0 - borderWidth) {
+    frag.color = frame_col;
+  }
+  else {
+    frag.color = fullColor; // set the color to the original fullColor
+  }
+
   frag.depth = vs_screenSpaceDepth;
   // Setting the position of the billboards to not interact with the ATM
   frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
