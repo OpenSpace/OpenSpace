@@ -447,17 +447,16 @@ bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
                 return true;
             }
             return false;
-        case Key::Period:
-            {
-                CefKeyEvent keyEvent;
-                keyEvent.windows_key_code = mapFromGlfwToWindows(Key::KeypadDecimal);
-                keyEvent.character = mapFromGlfwToCharacter(Key::KeypadDecimal);
-                keyEvent.native_key_code = mapFromGlfwToNative(Key::KeypadDecimal);
-                keyEvent.modifiers = static_cast<uint32>(mod);
-                keyEvent.type = keyEventType(action);
-                _browserInstance->sendKeyEvent(keyEvent);
-                return true;
-            }
+        case Key::Period: {
+            CefKeyEvent keyEvent;
+            keyEvent.windows_key_code = mapFromGlfwToWindows(Key::KeypadDecimal);
+            keyEvent.character = mapFromGlfwToCharacter(Key::KeypadDecimal);
+            keyEvent.native_key_code = mapFromGlfwToNative(Key::KeypadDecimal);
+            keyEvent.modifiers = static_cast<uint32>(mod);
+            keyEvent.type = keyEventType(action);
+            _browserInstance->sendKeyEvent(keyEvent);
+            return true;
+        }
         default:
             return false;
     }
