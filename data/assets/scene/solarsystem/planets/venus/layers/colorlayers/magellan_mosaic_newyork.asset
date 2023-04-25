@@ -1,0 +1,51 @@
+local globeIdentifier = asset.require("../../venus").Venus.Identifier
+
+local layer = {
+  Identifier = "Magellan_Mosaic_NewYork",
+  Name = "Magellan Mosaic [New York]",
+  Enabled = asset.enabled,
+  Description = [[Color layer for Venus. This mosaic was created from the Magellan
+    F-BIDRs, (Full resolution Basic Image Data Records), the highest resolution
+    radar images of the Venus surface (~75 m/pixel). Because Venus is shrouded by a
+    dense, opaque atmosphere, conventional optical cameras cannot be used to image
+    its surface. Instead, Magellan's imaging radar uses bursts of microwave energy
+    somewhat like a camera flash to illuminate the planet's surface. The radar pulses
+    are not sent directly downward but rather at a slight angle to the side of the
+    spacecraft--the radar is thus called "side-looking radar." In addition, special
+    processing techniques are used on the radar data to result in higher resolution
+    as if the radar had a larger antenna, or "aperture"; the technique is thus often
+    called "synthetic aperture radar," or SAR. The Magellan SAR is a side-looking
+    radar system. Radar pulses are not sent directly downward but rather at a slight
+    angle to the side of the spacecraft. In the case of Left-Look Magellan SAR data,
+    the radar system was sending signals to the left of the spacecraft. The SAR
+    operated in this left-looking mode during cycles 1 and 3 of the mission.
+    (Description from USGS)]],
+  FilePath = asset.localResource("magellan_mosaic_newyork.vrt"),
+  BlendMode = "Color",
+  Settings = {
+    Gamma = 2.0
+  }
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Venus Magellan Mosaic",
+  Version = "1.0",
+  Description = [[Map layer for Venus containting Venus Magellan Mosaic from the USGS.
+    Hosted on the OpenSpace servers in New York]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Venus/Magellan/" ..
+    "Venus_Magellan_LeftLook_mosaic_global_75m",
+  License = "NASA/PDS"
+}

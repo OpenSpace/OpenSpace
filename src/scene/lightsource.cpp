@@ -38,7 +38,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Whether the light source is enabled or not"
+        "Whether the light source is enabled or not",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(LightSource)]] Parameters {
@@ -48,7 +49,7 @@ namespace {
         std::string type [[codegen::annotation("Must name a valid LightSource type")]];
 
         // The identifier of the light source
-        std::string identifier;
+        std::string identifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -76,6 +77,7 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
     LightSource* source = factory->create(p.type, dictionary);
     source->setIdentifier(p.identifier);
 
+    source->_type = p.type;
     return std::unique_ptr<LightSource>(source);
 }
 

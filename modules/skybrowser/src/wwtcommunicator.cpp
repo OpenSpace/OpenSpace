@@ -121,7 +121,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VerticalFovInfo = {
         "VerticalFov",
         "Vertical Field Of View",
-        "The vertical field of view of the target."
+        "The vertical field of view of the target.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(WwtCommunicator)]] Parameters {
@@ -278,13 +279,13 @@ bool WwtCommunicator::isImageCollectionLoaded() const {
 }
 
 SelectedImageDeque::iterator WwtCommunicator::findSelectedImage(
-                                                              const std::string& imageUrl) 
+                                                              const std::string& imageUrl)
 {
     auto it = std::find_if(
         _selectedImages.begin(),
         _selectedImages.end(),
-        [imageUrl](const std::pair<std::string, double>& pair) { 
-            return pair.first == imageUrl; 
+        [imageUrl](const std::pair<std::string, double>& pair) {
+            return pair.first == imageUrl;
         }
     );
     return it;

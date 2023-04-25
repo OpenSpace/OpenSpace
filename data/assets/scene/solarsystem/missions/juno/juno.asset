@@ -198,11 +198,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Juno)
   openspace.addSceneGraphNode(JunoTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JunoTrail)
   openspace.removeSceneGraphNode(Juno)
 end)
-    
+
 asset.export(Juno)
 asset.export(JunoTrail)

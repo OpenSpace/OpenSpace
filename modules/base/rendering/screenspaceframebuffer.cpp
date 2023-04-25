@@ -36,7 +36,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value explicitly specifies the size of the screen space plane"
+        "This value explicitly specifies the size of the screen space plane",
+        // @VISIBILITY(3.75)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -108,7 +110,7 @@ void ScreenSpaceFramebuffer::render() {
     const glm::vec4& size = _size.value();
 
     const float xratio = resolution.x / (size.z - size.x);
-    const float yratio = resolution.y / (size.w - size.y);;
+    const float yratio = resolution.y / (size.w - size.y);
 
     if (!_renderFunctions.empty()) {
         GLint viewport[4];

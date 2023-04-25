@@ -1,9 +1,7 @@
 {
-  "additional_scripts": [
-    ""
-  ],
   "assets": [
     "base",
+    "base_keybindings",
     "scene/solarsystem/missions/juice/fieldlines",
     "scene/solarsystem/missions/juice/fov/janus",
     "scene/solarsystem/missions/juice/fov/navcam",

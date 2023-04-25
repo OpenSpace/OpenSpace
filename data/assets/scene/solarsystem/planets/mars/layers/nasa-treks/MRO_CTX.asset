@@ -321,7 +321,7 @@ local treks_CTX_beta01_uncontrolled_5m_Caltech = {
   Identifier = "CTX_beta01_uncontrolled_5m_Caltech",
   Name = [[MRO CTX, Mosaic Global Uncontrolled (Caltech)]],
   FilePath = asset.localResource("MRO_CTX/Mosaic_Global_Uncontrolled_Caltech.vrt"),
-  Description = [[This is a preliminary uncontrolled Context Camera (CTX) mosaic, called beta01, that the Murray Lab at Caltech has created to (1) generate a list of orbits that will be included in the final mosaic, (2) decipher challenges involved with generating a product of this unprecedented scale, and (3) solicit feedback from the Mars science community for how best to generate the mosaic in a way that helps as diverse a group of scientists as possible. The CTX camera, as managed by Malin Space Science Systems (MSSS), has attained near global coverage of Mars at the scale of ~5 m/pixel. All data used in the construction of this CTX global mosaic have been publicly released and are freely available via the NASA Planetary Data System. The Murray Lab/Caltech grants free use of the beta01 version of the mosaic for all purposes. When used, data credit should be: NASA/JPL/MSSS/The Caltech Murray Lab/Esri. This tiled web service, as hosted by Esri, is made available using lossy Jpeg compression at an 8 bit data range.  
+  Description = [[This is a preliminary uncontrolled Context Camera (CTX) mosaic, called beta01, that the Murray Lab at Caltech has created to (1) generate a list of orbits that will be included in the final mosaic, (2) decipher challenges involved with generating a product of this unprecedented scale, and (3) solicit feedback from the Mars science community for how best to generate the mosaic in a way that helps as diverse a group of scientists as possible. The CTX camera, as managed by Malin Space Science Systems (MSSS), has attained near global coverage of Mars at the scale of ~5 m/pixel. All data used in the construction of this CTX global mosaic have been publicly released and are freely available via the NASA Planetary Data System. The Murray Lab/Caltech grants free use of the beta01 version of the mosaic for all purposes. When used, data credit should be: NASA/JPL/MSSS/The Caltech Murray Lab/Esri. This tiled web service, as hosted by Esri, is made available using lossy Jpeg compression at an 8 bit data range.
 
 To access Esri's Tiled Web Service for this mosaic, go to https://usgs.maps.arcgis.com/home/item.html?id=b164957a19544f55a8d6a001c952a590. To download the data, go to  http://murray-lab.caltech.edu/CTX/.
 
@@ -342,7 +342,7 @@ local treks_olympus_monseq = {
   FilePath = asset.localResource("MRO_CTX/Mosaic_Olympus_Mons.vrt"),
   Description = [[This is a beta section of a CTX global mosaic produced by Jay Dickson. It was created by map projecting CT
 X images with ISIS3, and color balancing/stitching the images with Adobe Photoshop. A footprint layer shows the seams
- of image boundaries.    
+ of image boundaries.
 reference:
 Dickson et al. 2018 LPSC programs with abstracts https://www.hou.usra.edu/meetings/lpsc2018/pdf/2480.pdf]]
 }

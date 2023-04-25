@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "scene/solarsystem/missions/osirisrex/dashboard",
     "scene/solarsystem/missions/osirisrex/model",
     "scene/solarsystem/missions/osirisrex/osirisrex",

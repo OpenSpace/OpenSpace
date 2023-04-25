@@ -1,8 +1,9 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels")
-local kernel375 = kernels.sat375
-local kernel393 = kernels.sat393
+local kernel415 = kernels.sat415
+local kernel441 = kernels.sat441
+local kernel452 = kernels.sat452
 
 
 
@@ -30,11 +31,11 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.80812,
-    Kernels = kernel393
+    Kernels = kernel415
   },
   {
     Identifier = "Methone",
@@ -47,11 +48,11 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.00957,
-    Kernels = kernel393
+    Kernels = kernel415
   },
   {
     Identifier = "Anthe",
@@ -64,11 +65,11 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.05089,
-    Kernels = kernel393
+    Kernels = kernel415
   },
   {
     Identifier = "Pallene",
@@ -81,11 +82,11 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.370218,
-    Kernels = kernel393
+    Kernels = kernel415
   },
   {
     Identifier = "Telesto",
@@ -98,11 +99,11 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.887802,
-    Kernels = kernel375
+    Kernels = kernel441
   },
   {
     Identifier = "Calypso",
@@ -115,11 +116,11 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso"
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.887802,
-    Kernels = kernel375
+    Kernels = kernel441
   },
   {
     Identifier = "Helene",
@@ -132,11 +133,11 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene"
     },
     TrailColor = trailColor,
     OrbitPeriod = 2.736915,
-    Kernels = kernel375
+    Kernels = kernel441
   },
   {
     Identifier = "Polydeuces",
@@ -149,11 +150,29 @@ local otherGroup = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces"
     },
     TrailColor = trailColor,
     OrbitPeriod = 2.736915,
-    Kernels = kernel393
+    Kernels = kernel441
+  },
+  {
+    Identifier = "S2004S24",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "65070",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2004 S 24",
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 1293.85,
+    Kernels = kernel452
   }
 }
 
@@ -182,7 +201,7 @@ for i, moon in ipairs(otherGroup) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Saturn/Moons",
+      Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/" .. moon.Identifier,
       Description = "Label for Saturn's moon " .. moonName .. " (other group)"
     }
   }

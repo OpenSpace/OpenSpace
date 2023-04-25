@@ -1,0 +1,41 @@
+local mars = asset.require('scene/solarsystem/planets/mars/mars')
+local marsIdentifier = mars.Mars.Identifier
+
+local data = asset.syncedResource({
+  Name = "GeoJSON Example Path Perseverance",
+  Type = "UrlSynchronization",
+  Identifier = "geojson_example_path_perseverance",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/path_perseverance.geojson"
+})
+
+local Example_RoverPath = {
+  Identifier = "Mars-Perseverance-Path",
+  File = data .. "path_perseverance.geojson",
+  HeightOffset = 10.0,
+  IgnoreHeights = true, -- Ignores height values from the file itself
+  DefaultProperties = {
+    LineWidth = 2.0
+  },
+  Name = "Perseverance Rover Path"
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(marsIdentifier, Example_RoverPath)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(marsIdentifier, Example_RoverPath)
+end)
+
+asset.export(Example_RoverPath)
+
+
+asset.meta = {
+  Name = "GeoJson Example - Rover path",
+  Version = "1.0",
+  Description = [[GeoJson example asset that renderes a snapshot of the path of the
+    Perseverance Rover on Mars. Data from: https://mars.nasa.gov/mars2020/mission/where-is-the-rover/]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

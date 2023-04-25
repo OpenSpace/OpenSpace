@@ -1,6 +1,6 @@
 local enable_trail_fading = {
   Identifier = "os.enable_trail_fading",
-  Name = "Enable Trail Fading",
+  Name = "Enable trail fading",
   Command = [[
     openspace.setPropertyValue("Scene.*Trail.Renderable.Appearance.EnableFade", true);
     openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", true);
@@ -13,7 +13,7 @@ asset.export("enable_trail_fading", enable_trail_fading.Identifier)
 
 local disable_trail_fading = {
   Identifier = "os.disable_trail_fading",
-  Name = "Disable Trail Fading",
+  Name = "Disable trail fading",
   Command = [[
     openspace.setPropertyValue("Scene.*Trail.Renderable.Appearance.EnableFade", false);
     openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", false);
@@ -26,7 +26,7 @@ asset.export("disable_trail_fading", disable_trail_fading.Identifier)
 
 local toggle_trail_fading = {
   Identifier = "os.toggle_trail_fading",
-  Name = "Toggle Trail Fading",
+  Name = "Toggle trail fading",
   Command = [[
     local capList = openspace.getProperty("*Trail.Renderable.Appearance.EnableFade")
     local list = openspace.getProperty("*trail.Renderable.Appearance.EnableFade")
@@ -69,7 +69,7 @@ local function getHighlightAction(identifierString, value, nameString)
   end
   local action = {
     Identifier = "os." .. actionString .. identifierString .. "_trail",
-    Name = actionString .. " " .. nameString .. " Trail",
+    Name = actionString .. " " .. nameString .. " trail",
     Command = getHightlightCommand(identifierString, value),
     Documentation = "Animates the trail fade of " .. nameString .. "'s Trail",
     GuiPath = "/Trails/Appearance",
@@ -81,7 +81,7 @@ end
 local function getToggleHighlightAction(identifierString, value, nameString)
   local action = {
     Identifier = "os.toggle_" .. identifierString .. "_trail_highlight",
-    Name = "Toggle " .. nameString .. " Trail Highlight",
+    Name = "Toggle " .. nameString .. " trail highlight",
     Command = [[
 local list = openspace.getProperty("]] .. identifierString .. [[.Renderable.Appearance.Fade");
 if #list == 0 then

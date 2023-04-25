@@ -72,6 +72,8 @@ public:
         User = 2, ///< Visible in User mode
         NoviceUser = 1, ///< Visible in Novice User mode
         Always = 0,  ///< Visible for all types, no matter what
+
+        Default = Always ///< The default visibility for properties
     };
 
     /**
@@ -102,7 +104,7 @@ public:
         /// The user facing description of this Property
         const char* description;
         /// Determines the visibility of this Property in the user interface
-        Visibility visibility = Visibility::Always;
+        Visibility visibility = Visibility::Default;
     };
 
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an
@@ -199,10 +201,8 @@ public:
      * no-op.
      *
      * \param state The Lua state from which the value will be decoded
-     * \return `true` if the decoding and setting of the value succeeded, `false`
-     *         otherwise
      */
-    virtual bool setLuaValue(lua_State* state);
+    virtual void setLuaValue(lua_State* state);
 
     /**
      * Returns the Lua type that will be put onto the stack in the Property::getLua method

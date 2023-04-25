@@ -1,0 +1,38 @@
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
+
+local layer = {
+  Identifier = "Kaguya_NewYork",
+  Name = "Kaguya [New York]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("kaguya_newyork.vrt"),
+  Settings = {
+    Gamma = 1.0,
+    Multiplier = 1.23
+  },
+  Description = [[This near-global mosaic was generated using data from the SELenological
+    and Engineering Explorer (SELENE) "Kaguya" Terrain Camera (TC) instrument. TC source
+    data originated as map-projected tiles at ~10 meters per pixel (m) spatial
+    resolution]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Kaguya [New York]",
+  Version = "1.1",
+  Description = [[Moon SELENE Kaguya TC Global Orthomosaic 474m v2 layer for Moon globe.
+    This map is hosted on the OpenSpace server in New York]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Moon/Kaguya/TC/Ortho/v02/Lunar_Kaguya_TC_Ortho_Global_64ppd_v02",
+  License = "NASA/PDS"
+}

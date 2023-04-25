@@ -50,6 +50,7 @@ local stars = {
     },
     DimInAtmosphere = true,
   },
+  Tag = {"daytime_hidden"},
   GUI = {
     Name = "Stars",
     Path = "/Milky Way/Stars",

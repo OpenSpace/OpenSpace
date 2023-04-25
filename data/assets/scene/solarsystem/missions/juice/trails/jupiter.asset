@@ -15,7 +15,7 @@ local JuiceTrailJupiter = {
     },
     Color = { 0.70, 0.370, 0.45 },
     StartTime = "2031 JUL 02 00:00:00.000",
-    EndTime = "2035 OCT 05 00:00:00.000",
+    EndTime = "2035 OCT 05 01:58:58.683",
     SampleInterval = 3600
   },
   GUI = {

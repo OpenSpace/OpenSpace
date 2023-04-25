@@ -48,7 +48,7 @@ Fragment getFragment() {
   }
 
   vec4 fullColor = textureColor;
-    
+
   if (hasColorMap && useColorMap) {
     fullColor *= gs_colorMap;
   }

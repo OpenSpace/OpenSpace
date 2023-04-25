@@ -1,6 +1,6 @@
 local setup_perseverance = {
   Identifier = "os.missions.perseverance.setup",
-  Name = "Setup and Goto Perseverance",
+  Name = "Setup and go to Perseverance",
   Command = [[
     openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', -1685.5);
     openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset', -1686.0);
@@ -21,7 +21,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(setup_perseverance)   
+  openspace.action.removeAction(setup_perseverance)
 end)
 
 asset.meta = {

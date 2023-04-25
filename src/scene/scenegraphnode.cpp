@@ -47,35 +47,37 @@ namespace {
         "ComputeScreenSpaceData",
         "Compute Screen Space Data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
-        "at regular intervals. If these values are set to 'false', they are not updated"
+        "at regular intervals. If these values are set to 'false', they are not updated",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
         "ScreenSpacePosition",
         "ScreenSpacePosition",
         "The x,y position in screen space. Can be used for placing GUI elements",
-        openspace::properties::Property::Visibility::Hidden
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
         "ScreenVisibility",
         "Determines if the node is currently visible on screen",
-        openspace::properties::Property::Visibility::Hidden
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
         "DistanceFromCamToNode",
         "The distance from the camera to the node surface",
-        openspace::properties::Property::Visibility::Hidden
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
         "ScreenSizeRadius",
         "The screen size of the radius of the node",
-        openspace::properties::Property::Visibility::Hidden
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
@@ -83,7 +85,7 @@ namespace {
         "VisibilityDistance",
         "The distace in world coordinates between node and camera at which the "
         "screenspace object will become visible",
-        openspace::properties::Property::Visibility::Hidden
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
@@ -94,7 +96,7 @@ namespace {
         "only used as an override to the bounding sphere calculated by the Renderable, "
         "if present. If this value is -1, the Renderable's computed bounding sphere is "
         "used",
-        openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo InteractionSphereInfo = {
@@ -104,21 +106,25 @@ namespace {
         "node. This value is only used as an override to the bounding sphere calculated "
         "by the Renderable, if present. If this value is -1, the Renderable's computed "
         "interaction sphere is used",
-        openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApproachFactorInfo = {
         "ApproachFactor",
         "Approach Factor",
         "This value is a multiplication factor for the interaction sphere that "
-        "determines when the camera is 'approaching' the scene graph node"
+        "determines when the camera is 'approaching' the scene graph node",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReachFactorInfo = {
         "ReachFactor",
         "Reach Factor",
         "This value is a multiplication factor for the interaction sphere that "
-        "determines when the camera has 'reached' the scene graph node"
+        "determines when the camera has 'reached' the scene graph node",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
@@ -157,7 +163,8 @@ namespace {
         "Show Debug Sphere",
         "If enabled the bounding sphere of this scene graph node is rendered as a debug "
         "method",
-        openspace::properties::Property::Visibility::Developer
+        // @VISIBILITY(3.67)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -179,16 +186,13 @@ namespace {
         // The identifier of this scene graph node. This name must be unique among all
         // scene graph nodes that are loaded in a specific scene. If a duplicate is
         // detected the loading of the node will fail, as will all childing that depend on
-        // the node. The identifier must not contain any whitespaces or '.'
-        std::string identifier;
+        // the node.
+        std::string identifier [[codegen::identifier()]];
 
         // This names the parent of the currently specified scene graph node. The parent
         // must already exist in the scene graph. If not specified, the node will be
         // attached to the root of the scene graph
-        std::optional<std::string> parent
-            [[codegen::annotation(
-                "If specified, this must be a name for another scene graph node"
-            )]];
+        std::optional<std::string> parent [[codegen::identifier()]];
 
         // The renderable that is to be created for this scene graph node. A renderable is
         // a component of a scene graph node that will lead to some visual result on the
@@ -494,6 +498,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
 
     result->_lastScreenSpaceUpdateTime = std::chrono::high_resolution_clock::now();
+    result->_type = "SceneGraphNode";
     return result;
 }
 
@@ -535,7 +540,9 @@ SceneGraphNode::SceneGraphNode()
 {
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
+    _screenVisibility.setReadOnly(true);
     addProperty(_screenVisibility);
+    _distFromCamToNode.setReadOnly(true);
     addProperty(_distFromCamToNode);
     addProperty(_screenSizeRadius);
     addProperty(_visibilityDistance);

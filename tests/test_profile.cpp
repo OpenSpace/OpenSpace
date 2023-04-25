@@ -69,7 +69,7 @@ namespace openspace {
                lhs.name == rhs.name &&
                lhs.value == rhs.value;
     }
-    
+
     bool operator==(const openspace::Profile::Action& lhs,
                     const openspace::Profile::Action& rhs) noexcept
     {
@@ -167,7 +167,7 @@ TEST_CASE("Minimal", "[profile]") {
 
     Profile ref;
     ref.version.major = 1;
-    ref.version.minor = 1;
+    ref.version.minor = 2;
     CHECK(profile == ref);
 }
 
@@ -180,7 +180,7 @@ TEST_CASE("Basic Meta (full)", "[profile]") {
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
-    
+
     Profile::Meta meta;
     meta.name = "name";
     meta.version = "version";

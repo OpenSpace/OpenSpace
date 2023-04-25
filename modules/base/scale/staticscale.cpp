@@ -32,7 +32,8 @@ namespace {
         "Scale",
         "Scale",
         "This value is used as a scaling factor for the scene graph node that this "
-        "transformation is attached to relative to its parent"
+        "transformation is attached to relative to its parent",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(StaticScale)]] Parameters {
@@ -58,11 +59,13 @@ StaticScale::StaticScale() : _scaleValue(ScaleInfo, 1.f, 0.1f, 100.f) {
     _scaleValue.onChange([this]() {
         requireUpdate();
     });
+    _type = "StaticScale";
 }
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary) : StaticScale() {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _scaleValue = p.scale;
+    _type = "StaticScale";
 }
 
 } // namespace openspace

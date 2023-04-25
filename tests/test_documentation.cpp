@@ -58,6 +58,11 @@ TEST_CASE("Documentation: Constructor", "[documentation]") {
         Optional::No
     );
     doc.entries.emplace_back(
+        "IdentifierVerifier",
+        new IdentifierVerifier,
+        Optional::No
+    );
+    doc.entries.emplace_back(
         "FileVerifier",
         new FileVerifier,
         Optional::No
@@ -271,7 +276,7 @@ TEST_CASE("Documentation: Constructor", "[documentation]") {
 
 TEST_CASE("Documentation: Initializer Constructor", "[documentation]") {
     using namespace openspace::documentation;
-    
+
     Documentation doc {
         {
             // Basic Verifiers
@@ -279,6 +284,7 @@ TEST_CASE("Documentation: Initializer Constructor", "[documentation]") {
             {"DoubleVerifier", new DoubleVerifier, Optional::No },
             {"IntVerifier", new IntVerifier, Optional::No },
             {"StringVerifier", new StringVerifier, Optional::No },
+            {"IdentifierVerifier", new IdentifierVerifier, Optional::No },
             {"FileVerifier", new FileVerifier, Optional::No },
             {"DirectoryVerifier", new DirectoryVerifier, Optional::No },
             {"DateTimeVerifier", new DateTimeVerifier, Optional::No },
@@ -463,6 +469,69 @@ TEST_CASE("Documentation: StringVerifier", "[documentation]") {
     REQUIRE(negativeRes.offenses.size() == 1);
     CHECK(negativeRes.offenses[0].offender == "String");
     CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::MissingKey);
+}
+
+TEST_CASE("Documentation: IdentifierVerifier", "[documentation]") {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc{
+        {{ "Identifier", new IdentifierVerifier, Optional::No }}
+    };
+
+    ghoul::Dictionary positive;
+    positive.setValue("Identifier", "abcdef"s);
+    TestResult positiveRes = testSpecification(doc, positive);
+    CHECK(positiveRes.success);
+    CHECK(positiveRes.offenses.empty());
+
+    ghoul::Dictionary negativeSpace;
+    negativeSpace.setValue("Identifier", "abc def"s);
+    TestResult negativeRes = testSpecification(doc, negativeSpace);
+    CHECK(!negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Identifier");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+
+    ghoul::Dictionary negativeTab;
+    negativeTab.setValue("Identifier", "abc\tdef"s);
+    negativeRes = testSpecification(doc, negativeTab);
+    CHECK(!negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Identifier");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+
+    ghoul::Dictionary negativeNewline;
+    negativeNewline.setValue("Identifier", "abc\ndef"s);
+    negativeRes = testSpecification(doc, negativeNewline);
+    CHECK(!negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Identifier");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+
+    ghoul::Dictionary negativeCarriageReturn;
+    negativeCarriageReturn.setValue("Identifier", "abc\rdef"s);
+    negativeRes = testSpecification(doc, negativeCarriageReturn);
+    CHECK(!negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Identifier");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+
+    ghoul::Dictionary negativeDot;
+    negativeDot.setValue("Identifier", "abc.def"s);
+    negativeRes = testSpecification(doc, negativeDot);
+    CHECK(!negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Identifier");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
+
+    ghoul::Dictionary negativeType;
+    negativeType.setValue("Identifier", 0);
+    negativeRes = testSpecification(doc, negativeType);
+    CHECK_FALSE(negativeRes.success);
+    REQUIRE(negativeRes.offenses.size() == 1);
+    CHECK(negativeRes.offenses[0].offender == "Identifier");
+    CHECK(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
 }
 
 TEST_CASE("Documentation: FileVerifier", "[documentation]") {
@@ -968,7 +1037,7 @@ TEST_CASE("Documentation: Optional", "[documentation]") {
     positiveRes = testSpecification(doc, positive);
     CHECK(positiveRes.success);
     CHECK(positiveRes.offenses.empty());
-    
+
     ghoul::Dictionary negative;
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);

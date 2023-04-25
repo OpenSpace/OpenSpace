@@ -54,8 +54,6 @@ namespace {
 
     constexpr uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
 
-    constexpr openspace::Key CommandInputButton = openspace::Key::GraveAccent;
-
     constexpr std::string_view FontName = "Console";
     constexpr float EntryFontSize = 14.0f;
     constexpr float HistoryFontSize = 11.0f;
@@ -74,38 +72,44 @@ namespace {
         "IsVisible",
         "Is Visible",
         "Determines whether the Lua console is shown on the screen or not. Toggling it "
-        "will fade the console in and out"
+        "will fade the console in and out",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RemoveScriptingInfo = {
         "RemoteScripting",
         "Remote scripting",
         "Determines whether the entered commands will only be executed locally (if this "
-        "is disabled), or whether they will be send to connected remove instances"
+        "is disabled), or whether they will be send to connected remove instances",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
         "Background Color",
-        "Sets the background color of the console"
+        "Sets the background color of the console",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
         "EntryTextColor",
         "Entry Text Color",
-        "Sets the text color of the entry area of the console"
+        "Sets the text color of the entry area of the console",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HistoryTextColorInfo = {
         "HistoryTextColor",
         "History Text Color",
-        "Sets the text color of the history area of the console"
+        "Sets the text color of the history area of the console",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HistoryLengthInfo = {
         "HistoryLength",
         "History Length",
-        "Determines the length of the history in number of lines"
+        "Determines the length of the history in number of lines",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     std::string sanitizeInput(std::string str) {
@@ -274,7 +278,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         return false;
     }
 
-    if (key == CommandInputButton) {
+    if (key == _commandInputButton) {
         // Button left of 1 and above TAB
         // How to deal with different keyboard languages? ---abock
         if (_isVisible) {
@@ -580,7 +584,7 @@ void LuaConsole::charCallback(unsigned int codepoint,
         return;
     }
 
-    if (codepoint == static_cast<unsigned int>(CommandInputButton)) {
+    if (codepoint == static_cast<unsigned int>(_commandInputButton)) {
         return;
     }
 
@@ -830,6 +834,10 @@ void LuaConsole::render() {
 
 float LuaConsole::currentHeight() const {
     return _currentHeight;
+}
+
+void LuaConsole::setCommandInputButton(Key key) {
+    _commandInputButton = key;
 }
 
 void LuaConsole::addToCommand(std::string c) {

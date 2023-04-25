@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
 #include <modules/space/speckloader.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -43,7 +44,7 @@ struct RenderData;
 
 namespace documentation { struct Documentation; }
 
-class LabelsComponent : public properties::PropertyOwner {
+class LabelsComponent : public properties::PropertyOwner, public Fadeable {
 public:
     explicit LabelsComponent(const ghoul::Dictionary& dictionary);
     ~LabelsComponent() override = default;
@@ -56,6 +57,7 @@ public:
     void loadLabels();
 
     bool isReady() const;
+    bool enabled() const;
 
     void render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::vec3& orthoRight, const glm::vec3& orthoUp,
@@ -70,8 +72,10 @@ private:
 
     std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
 
+    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+
     // Properties
-    properties::FloatProperty _opacity;
+    properties::BoolProperty _enabled;
     properties::Vec3Property _color;
     properties::FloatProperty _size;
     properties::FloatProperty _fontSize;

@@ -43,45 +43,59 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
-        "The number of segments the shape of the prism should have"
+        "The number of segments the shape of the prism should have",
+        // @VISIBILITY(2.8)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LinesInfo = {
         "NumLines",
         "Number of Lines",
         "The number of lines connecting the two shapes of the prism. They will be evenly "
-        "distributed around the bounding circle that makes up the shape of the prism"
+        "distributed around the bounding circle that makes up the shape of the prism",
+        // @VISIBILITY(2.8)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
-        "The radius of the prism's shape in meters"
+        "The radius of the prism's shape in meters",
+        // @VISIBILITY(2.8)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo BaseRadiusInfo = {
         "BaseRadius",
         "Base Radius",
         "The radius of the base of the prism's shape, in meters. By default it is given "
-        "the same radius as the outer shape"
+        "the same radius as the outer shape",
+        // @VISIBILITY(2.8)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width"
+        "This value specifies the line width",
+        // @VISIBILITY(2.0)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line"
+        "This value determines the RGB color for the line",
+        // @VISIBILITY(1.2)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LengthInfo = {
         "Length",
         "Length",
-        "The length of the prism in meters"
+        "The length of the prism in meters",
+        // @VISIBILITY(2.8)
+        openspace::properties::Property::Visibility::User
     };
 
     // Generate vertices around the unit circle on the XY-plane
@@ -141,21 +155,21 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _nShapeSegments.onChange([&]() { _prismIsDirty = true; });
+    _nShapeSegments.onChange([this]() { _prismIsDirty = true; });
     _nShapeSegments = p.segments;
     addProperty(_nShapeSegments);
 
-    _nLines.onChange([&]() { _prismIsDirty = true; });
+    _nLines.onChange([this]() { _prismIsDirty = true; });
     _nLines = p.lines.value_or(_nShapeSegments);
     addProperty(_nLines);
 
     _radius.setExponent(12.f);
-    _radius.onChange([&]() { _prismIsDirty = true; });
+    _radius.onChange([this]() { _prismIsDirty = true; });
     _radius = p.radius.value_or(_radius);
     addProperty(_radius);
 
     _baseRadius.setExponent(12.f);
-    _baseRadius.onChange([&]() { _prismIsDirty = true; });
+    _baseRadius.onChange([this]() { _prismIsDirty = true; });
     // Use the "regular" radius as default if no value was provided
     _baseRadius = p.baseRadius.value_or(_radius);
     addProperty(_baseRadius);
@@ -168,11 +182,11 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     addProperty(_lineColor);
 
     _length.setExponent(12.f);
-    _length.onChange([&]() { _prismIsDirty = true; });
+    _length.onChange([this]() { _prismIsDirty = true; });
     _length = p.length.value_or(_length);
     addProperty(_length);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 }
 
 bool RenderablePrism::isReady() const {

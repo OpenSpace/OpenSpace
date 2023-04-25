@@ -27,6 +27,7 @@
 
 #include <openspace/documentation/documentationgenerator.h>
 
+#include <openspace/json.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -98,6 +99,13 @@ public:
      * \return The identifier of this PropertyOwner
      */
     const std::string& identifier() const;
+
+    /**
+     * Returns the type of this PropertyOwner.
+     *
+     * \return The type of this PropertyOwner
+     */
+    const std::string& type() const;
 
     /**
      * Sets the user-facing name of this PropertyOwner. This name does not have to be
@@ -291,6 +299,8 @@ public:
     // Generate JSON for documentation
     std::string generateJson() const override;
 
+    nlohmann::json generateJsonJson() const;
+
 protected:
     /// The unique identifier of this PropertyOwner
     std::string _identifier;
@@ -298,6 +308,8 @@ protected:
     std::string _guiName;
     /// The description for this PropertyOwner
     std::string _description;
+    /// The type for this PropertyOwner
+    std::string _type;
 
     /// The owner of this PropertyOwner
     PropertyOwner* _owner = nullptr;

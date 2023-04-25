@@ -10,9 +10,9 @@ local treks_CTX_ClrSlope_8bit_12S182E_24mp_P22_009609_1674_B02_010453_1675 = {
   Identifier = "CTX_ClrSlope_8bit_12S182E_24mp_P22_009609_1674_B02_010453_1675",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope Apollinaris 12S182E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_Apollinaris_12S182E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -24,9 +24,9 @@ local treks_CTX_ClrSlope_8bit_13S182E_24mp_G15_024127_1673_G16_024483_1673 = {
   Identifier = "CTX_ClrSlope_8bit_13S182E_24mp_G15_024127_1673_G16_024483_1673",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope Apollinaris 13S182E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_Apollinaris_13S182E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -38,9 +38,9 @@ local treks_CTX_ClrSlope_8bit_14S184E_24mp_B01_009886_1658_P21_009385_1658 = {
   Identifier = "CTX_ClrSlope_8bit_14S184E_24mp_B01_009886_1658_P21_009385_1658",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope Apollinaris 14S184E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_Apollinaris_14S184E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -52,9 +52,9 @@ local treks_CTX_ClrSlope_8bit_10S291E_24mp_P22_009684_1699_B02_010396_1699 = {
   Identifier = "CTX_ClrSlope_8bit_10S291E_24mp_P22_009684_1699_B02_010396_1699",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope Coprates 10S291E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_Coprates_10S291E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -66,9 +66,9 @@ local treks_CTX_ClrSlope_8bit_11S293E_24mp_B09_013231_1696_B11_013732_1690 = {
   Identifier = "CTX_ClrSlope_8bit_11S293E_24mp_B09_013231_1696_B11_013732_1690",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope Coprates 11S293E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_Coprates_11S293E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -80,9 +80,9 @@ local treks_CTX_ClrSlope_8bit_13S293E_24mp_G07_020879_1669_G09_021657_1665 = {
   Identifier = "CTX_ClrSlope_8bit_13S293E_24mp_G07_020879_1669_G09_021657_1665",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope Coprates 13S293E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_Coprates_13S293E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -94,9 +94,9 @@ local treks_CTX_ClrSlope_8bit_37N024E_24mp_G05_020203_2178_G22_026994_2170 = {
   Identifier = "CTX_ClrSlope_8bit_37N024E_24mp_G05_020203_2178_G22_026994_2170",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope Deuteronius 37N024E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_Deuteronius_37N024E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -108,9 +108,9 @@ local treks_CTX_ClrSlope_8bit_38N024E_24mp_B17_016168_2181_G16_024594_2181 = {
   Identifier = "CTX_ClrSlope_8bit_38N024E_24mp_B17_016168_2181_G16_024594_2181",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope Deuteronius 38N024E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_Deuteronius_38N024E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -122,9 +122,9 @@ local treks_CTX_ClrSlope_8bit_39N024E_24mp_D15_032875_2196_D15_033165_2196 = {
   Identifier = "CTX_ClrSlope_8bit_39N024E_24mp_D15_032875_2196_D15_033165_2196",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope Deuteronius 39N024E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_Deuteronius_39N024E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -136,9 +136,9 @@ local treks_CTX_ClrSlope_8bit_40N022E_24mp_B18_016656_2206_B18_016801_2206 = {
   Identifier = "CTX_ClrSlope_8bit_40N022E_24mp_B18_016656_2206_B18_016801_2206",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope Deuteronius 40N024E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_Deuteronius_40N024E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -150,9 +150,9 @@ local treks_CTX_ClrSlope_8bit_11S289E_24mp_F23_044971_1685_F21_043995_1685 = {
   Identifier = "CTX_ClrSlope_8bit_11S289E_24mp_F23_044971_1685_F21_043995_1685",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope East Melas 11S289E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_East_Melas_11S289E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -164,9 +164,9 @@ local treks_CTX_ClrSlope_8bit_11S291E_24mp_B19_017187_1685_B19_016976_1685 = {
   Identifier = "CTX_ClrSlope_8bit_11S291E_24mp_B19_017187_1685_B19_016976_1685",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope East Melas 11S291E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_East_Melas_11S291E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -178,9 +178,9 @@ local treks_CTX_ClrSlope_8bit_12S289E_24mp_D01_027446_1678_D01_027723_1677 = {
   Identifier = "CTX_ClrSlope_8bit_12S289E_24mp_D01_027446_1678_D01_027723_1677",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope East Melas 12S289E_D01]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_East_Melas_12S289E_D01.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -192,9 +192,9 @@ local treks_CTX_ClrSlope_8bit_12S289E_24mp_F18_042927_1681_J02_045749_1694 = {
   Identifier = "CTX_ClrSlope_8bit_12S289E_24mp_F18_042927_1681_J02_045749_1694",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope East Melas 12S289E_F18]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_East_Melas_12S289E_F18.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -206,9 +206,9 @@ local treks_CTX_ClrSlope_8bit_12S290E_24mp_D18_034250_1676_D21_035450_1674 = {
   Identifier = "CTX_ClrSlope_8bit_12S290E_24mp_D18_034250_1676_D21_035450_1674",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope East Melas 12S290E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_East_Melas_12S290E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -220,9 +220,9 @@ local treks_CTX_ClrSlope_8bit_12S291E_24mp_F14_041292_1682_F16_041938_1682 = {
   Identifier = "CTX_ClrSlope_8bit_12S291E_24mp_F14_041292_1682_F16_041938_1682",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope East Melas 12S291E_F14]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_East_Melas_12S291E_F14.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -234,9 +234,9 @@ local treks_CTX_ClrSlope_8bit_12S291E_24mp_F21_043850_1684_F21_043916_1685 = {
   Identifier = "CTX_ClrSlope_8bit_12S291E_24mp_F21_043850_1684_F21_043916_1685",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope East Melas 12S291E_F21]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_East_Melas_12S291E_F21.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -248,9 +248,9 @@ local treks_CTX_ClrSlope_8bit_12S291E_24mp_J01_045116_1677_J03_046039_1676 = {
   Identifier = "CTX_ClrSlope_8bit_12S291E_24mp_J01_045116_1677_J03_046039_1676",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope East Melas 12S291E_J01]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_East_Melas_12S291E_J01.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -262,9 +262,9 @@ local treks_CTX_ClrSlope_8bit_13S289E_24mp_D10_031125_1673_D12_031903_1669 = {
   Identifier = "CTX_ClrSlope_8bit_13S289E_24mp_D10_031125_1673_D12_031903_1669",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope East Melas 13S289E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_East_Melas_13S289E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -276,9 +276,9 @@ local treks_CTX_ClrSlope_8bit_16S291E_24mp_D22_035951_1644_F01_036307_1644 = {
   Identifier = "CTX_ClrSlope_8bit_16S291E_24mp_D22_035951_1644_F01_036307_1644",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope East Melas 16S291E_D22]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Color_Slope_East_Melas_16S291E_D22.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -290,9 +290,9 @@ local treks_CTX_Shade_12S182E_24mp_P22_009609_1674_B02_010453_1675 = {
   Identifier = "CTX_Shade_12S182E_24mp_P22_009609_1674_B02_010453_1675",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade Apollinaris 12S182E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_Apollinaris_12S182E.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -302,9 +302,9 @@ local treks_CTX_Shade_13S182E_24mp_G15_024127_1673_G16_024483_1673 = {
   Identifier = "CTX_Shade_13S182E_24mp_G15_024127_1673_G16_024483_1673",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade Apollinaris 13S182E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_Apollinaris_13S182E.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -314,9 +314,9 @@ local treks_CTX_Shade_14S184E_24mp_B01_009886_1658_P21_009385_1658 = {
   Identifier = "CTX_Shade_14S184E_24mp_B01_009886_1658_P21_009385_1658",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade Apollinaris 14S184E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_Apollinaris_14S184E.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -326,9 +326,9 @@ local treks_CTX_Shade_10S291E_24mp_P22_009684_1699_B02_010396_1699 = {
   Identifier = "CTX_Shade_10S291E_24mp_P22_009684_1699_B02_010396_1699",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade Coprates 10S291E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_Coprates_10S291E.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -338,9 +338,9 @@ local treks_CTX_Shade_11S293E_24mp_B09_013231_1696_B11_013732_1690 = {
   Identifier = "CTX_Shade_11S293E_24mp_B09_013231_1696_B11_013732_1690",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade Coprates 11S293E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_Coprates_11S293E.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -350,9 +350,9 @@ local treks_CTX_Shade_13S293E_24mp_G07_020879_1669_G09_021657_1665 = {
   Identifier = "CTX_Shade_13S293E_24mp_G07_020879_1669_G09_021657_1665",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade Coprates 13S293E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_Coprates_13S293E.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -362,9 +362,9 @@ local treks_CTX_Shade_37N024E_24mp_G05_020203_2178_G22_026994_2170 = {
   Identifier = "CTX_Shade_37N024E_24mp_G05_020203_2178_G22_026994_2170",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade Deuteronius 37N024E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_Deuteronius_37N024E.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -374,9 +374,9 @@ local treks_CTX_Shade_38N024E_24mp_B17_016168_2181_G16_024594_2181 = {
   Identifier = "CTX_Shade_38N024E_24mp_B17_016168_2181_G16_024594_2181",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade Deuteronius 38N024E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_Deuteronius_38N024E.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -386,9 +386,9 @@ local treks_CTX_Shade_39N024E_24mp_D15_032875_2196_D15_033165_2196 = {
   Identifier = "CTX_Shade_39N024E_24mp_D15_032875_2196_D15_033165_2196",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade Deuteronius 39N024E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_Deuteronius_39N024E.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -398,9 +398,9 @@ local treks_CTX_Shade_40N022E_24mp_B18_016656_2206_B18_016801_2206 = {
   Identifier = "CTX_Shade_40N022E_24mp_B18_016656_2206_B18_016801_2206",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade Deuteronius 40N024E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_Deuteronius_40N024E.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -410,9 +410,9 @@ local treks_CTX_Shade_11S289E_24mp_F23_044971_1685_F21_043995_1685 = {
   Identifier = "CTX_Shade_11S289E_24mp_F23_044971_1685_F21_043995_1685",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade East Melas 11S289E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_East_Melas_11S289E.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -422,9 +422,9 @@ local treks_CTX_Shade_11S291E_24mp_B19_017187_1685_B19_016976_1685 = {
   Identifier = "CTX_Shade_11S291E_24mp_B19_017187_1685_B19_016976_1685",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade East Melas 11S291E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_East_Melas_11S291E.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -434,9 +434,9 @@ local treks_CTX_Shade_12S289E_24mp_D01_027446_1678_D01_027723_1677 = {
   Identifier = "CTX_Shade_12S289E_24mp_D01_027446_1678_D01_027723_1677",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade East Melas 12S289E_D01]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_East_Melas_12S289E_D01.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -446,9 +446,9 @@ local treks_CTX_Shade_12S289E_24mp_F18_042927_1681_J02_045749_1694 = {
   Identifier = "CTX_Shade_12S289E_24mp_F18_042927_1681_J02_045749_1694",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade East Melas 12S289E_F18]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_East_Melas_12S289E_F18.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -458,9 +458,9 @@ local treks_CTX_Shade_12S290E_24mp_D18_034250_1676_D21_035450_1674 = {
   Identifier = "CTX_Shade_12S290E_24mp_D18_034250_1676_D21_035450_1674",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade East Melas 12S290E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_East_Melas_12S290E.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -470,9 +470,9 @@ local treks_CTX_Shade_12S291E_24mp_F14_041292_1682_F16_041938_1682 = {
   Identifier = "CTX_Shade_12S291E_24mp_F14_041292_1682_F16_041938_1682",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade East Melas 12S291E_F14]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_East_Melas_12S291E_F14.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -482,9 +482,9 @@ local treks_CTX_Shade_12S291E_24mp_F21_043850_1684_F21_043916_1685 = {
   Identifier = "CTX_Shade_12S291E_24mp_F21_043850_1684_F21_043916_1685",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade East Melas 12S291E_F21]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_East_Melas_12S291E_F21.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -494,9 +494,9 @@ local treks_CTX_Shade_12S291E_24mp_J01_045116_1677_J03_046039_1676 = {
   Identifier = "CTX_Shade_12S291E_24mp_J01_045116_1677_J03_046039_1676",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade East Melas 12S291E_J01]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_East_Melas_12S291E_J01.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -506,9 +506,9 @@ local treks_CTX_Shade_13S289E_24mp_D10_031125_1673_D12_031903_1669 = {
   Identifier = "CTX_Shade_13S289E_24mp_D10_031125_1673_D12_031903_1669",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade East Melas 13S289E_D10]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_East_Melas_13S289E_D10.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -518,9 +518,9 @@ local treks_CTX_Shade_16S291E_24mp_D22_035951_1644_F01_036307_1644 = {
   Identifier = "CTX_Shade_16S291E_24mp_D22_035951_1644_F01_036307_1644",
   Name = [[Mars Reconnaissance Orbiter CTX, HillShade East Melas 16S291E_D22]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/HillShade_East_Melas_16S291E_D22.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -530,9 +530,9 @@ local treks_Deuteronilus_CTX_Shade_v0_20171112 = {
   Identifier = "Deuteronilus_CTX_Shade_v0_20171112",
   Name = [[Mars Reconnaissance Orbiter CTX, Hilllshade Deuteronilus]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Hilllshade_Deuteronilus.vrt"),
-  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a grayscale shaded relief (hillshade) for the original digital elevation model (DEM/DTM) as produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -542,9 +542,9 @@ local treks_CTX_Ortho_12S182E_24mp_P22_009609_1674 = {
   Identifier = "CTX_Ortho_12S182E_24mp_P22_009609_1674",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic Apollinaris 12S182E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_Apollinaris_12S182E.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -554,9 +554,9 @@ local treks_CTX_Ortho_13S182E_24mp_G15_024127_1673 = {
   Identifier = "CTX_Ortho_13S182E_24mp_G15_024127_1673",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic Apollinaris 13S182E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_Apollinaris_13S182E.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -566,9 +566,9 @@ local treks_CTX_Ortho_14S184E_24mp_B01_009886_1658 = {
   Identifier = "CTX_Ortho_14S184E_24mp_B01_009886_1658",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic Apollinaris 14S184E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_Apollinaris_14S184E.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -578,9 +578,9 @@ local treks_CTX_Ortho_10S291E_24mp_P22_009684_1699 = {
   Identifier = "CTX_Ortho_10S291E_24mp_P22_009684_1699",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic Coprates 10S291E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_Coprates_10S291E.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -590,9 +590,9 @@ local treks_CTX_Ortho_11S293E_24mp_B09_013231_1696 = {
   Identifier = "CTX_Ortho_11S293E_24mp_B09_013231_1696",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic Coprates 11S293E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_Coprates_11S293E.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -602,9 +602,9 @@ local treks_CTX_Ortho_13S293E_24mp_G07_020879_1669 = {
   Identifier = "CTX_Ortho_13S293E_24mp_G07_020879_1669",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic Coprates 13S293E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_Coprates_13S293E.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -614,9 +614,9 @@ local treks_CTX_Ortho_38N024E_6mp_B17_016168_2181 = {
   Identifier = "CTX_Ortho_38N024E_6mp_B17_016168_2181",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic Deuteronius 38N024E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_Deuteronius_38N024E.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -626,9 +626,9 @@ local treks_CTX_Ortho_39N024E_6mp_D15_032875_2196 = {
   Identifier = "CTX_Ortho_39N024E_6mp_D15_032875_2196",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic Deuteronius 39N024E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_Deuteronius_39N024E.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -638,9 +638,9 @@ local treks_CTX_Ortho_40N022E_6mp_B18_016656_2206 = {
   Identifier = "CTX_Ortho_40N022E_6mp_B18_016656_2206",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic Deuteronius 40N024E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_Deuteronius_40N024E.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -650,9 +650,9 @@ local treks_CTX_Ortho_11S289E_6mp_F23_044971_1685 = {
   Identifier = "CTX_Ortho_11S289E_6mp_F23_044971_1685",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic East Melas 11S289E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_East_Melas_11S289E.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -662,9 +662,9 @@ local treks_CTX_Ortho_11S291E_6mp_B19_017187_1685 = {
   Identifier = "CTX_Ortho_11S291E_6mp_B19_017187_1685",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic East Melas 11S291E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_East_Melas_11S291E.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -674,9 +674,9 @@ local treks_CTX_Ortho_12S289E_6mp_D01_027446_1678 = {
   Identifier = "CTX_Ortho_12S289E_6mp_D01_027446_1678",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic East Melas 12S289E_D01]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_East_Melas_12S289E_D01.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -686,9 +686,9 @@ local treks_CTX_Ortho_12S289E_6mp_F18_042927_1681 = {
   Identifier = "CTX_Ortho_12S289E_6mp_F18_042927_1681",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic East Melas 12S289E_F18]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_East_Melas_12S289E_F18.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -698,9 +698,9 @@ local treks_CTX_Ortho_12S290E_6mp_D18_034250_1676 = {
   Identifier = "CTX_Ortho_12S290E_6mp_D18_034250_1676",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic East Melas 12S290E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_East_Melas_12S290E.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -710,9 +710,9 @@ local treks_F14_041292_1682_map_ba_align_6_fill500DRG = {
   Identifier = "F14_041292_1682_map_ba_align_6_fill500DRG",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic East Melas 12S291E_F14]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_East_Melas_12S291E_F14.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -722,9 +722,9 @@ local treks_CTX_Ortho_12S291E_6mp_F21_043850_1684 = {
   Identifier = "CTX_Ortho_12S291E_6mp_F21_043850_1684",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic East Melas 12S291E_F21]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_East_Melas_12S291E_F21.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -734,9 +734,9 @@ local treks_CTX_Ortho_12S291E_6mp_J01_045116_1677 = {
   Identifier = "CTX_Ortho_12S291E_6mp_J01_045116_1677",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic East Melas 12S291E_J01]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_East_Melas_12S291E_J01.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -746,9 +746,9 @@ local treks_CTX_Ortho_13S289E_6mp_D10_031125_1673 = {
   Identifier = "CTX_Ortho_13S289E_6mp_D10_031125_1673",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic East Melas 13S289E_D10]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_East_Melas_13S289E_D10.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -758,9 +758,9 @@ local treks_CTX_Ortho_16S291E_6mp_D22_035951_1644 = {
   Identifier = "CTX_Ortho_16S291E_6mp_D22_035951_1644",
   Name = [[Mars Reconnaissance Orbiter CTX, Mosaic East Melas 16S291E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Mosaic_East_Melas_16S291E.vrt"),
-  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a CTX orthorectified image, geometrically corrected using its own source digital elevation model (DEM/DTM), as produced as part of an effort to characterize candidate Human Exploration Zones for Mars. The original DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). The DEM, and thus orthoimage, has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.]]
@@ -770,9 +770,9 @@ local treks_CTX_Slope_12S182E_24mp_P22_009609_1674_B02_010453_1675 = {
   Identifier = "CTX_Slope_12S182E_24mp_P22_009609_1674_B02_010453_1675",
   Name = [[Mars Reconnaissance Orbiter CTX, Slope Apollinaris 12S182E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Slope_Apollinaris_12S182E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -784,9 +784,9 @@ local treks_CTX_Slope_13S182E_24mp_G15_024127_1673_G16_024483_1673 = {
   Identifier = "CTX_Slope_13S182E_24mp_G15_024127_1673_G16_024483_1673",
   Name = [[Mars Reconnaissance Orbiter CTX, Slope Apollinaris 13S182E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Slope_Apollinaris_13S182E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.
@@ -798,9 +798,9 @@ local treks_CTX_Slope_14S184E_24mp_B01_009886_1658_P21_009385_1658 = {
   Identifier = "CTX_Slope_14S184E_24mp_B01_009886_1658_P21_009385_1658",
   Name = [[Mars Reconnaissance Orbiter CTX, Slope Apollinaris 14S184E]],
   FilePath = asset.localResource("Mars_Reconnaissance_Orbiter_CTX/Slope_Apollinaris_14S184E.vrt"),
-  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings. 
+  Description = [[This is a colorized version of the original 2x2 pixel slope in degrees (also called a 1 baseline slope). This was produced as part of an effort to characterize topography within candidate Human Exploration Zones for Mars. The DEM was constructed from a pair of CTX images using the stereo photogrammetry software AMES Stereo Pipeline (ASP). THe DEM has been tied to MOLA and can be considered resarch- and visualization-ready. Because it has not been manually edited using a full 3D editing environment, ASP DEMs cannot currently be considered true engineering-ready for performing landings.
 
-References: 
+References:
 Shean, D. E., O. Alexandrov, Z. Moratto, B. E. Smith, I. R. Joughin, C. C. Porter, P. J., Morin, 2016, An automated, open-source pipeline for mass production of digital elevation models (DEMs) from very high-resolution commercial stereo satellite imagery, ISPRS Journal of Photogrammetry and Remote Sensing, 116.
 
 Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Terrain Models Of Mars from CTX And HiRISE Stereo Data Using the NASA Ames Stereo Pipeline, 47th Lunar and Planetary Science Conference, Abstract 1261.

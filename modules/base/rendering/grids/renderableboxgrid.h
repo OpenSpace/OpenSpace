@@ -76,7 +76,6 @@ protected:
 
     // Labels
     bool _hasLabels = false;
-    properties::BoolProperty _drawLabels;
     std::unique_ptr<LabelsComponent> _labels;
 };
 

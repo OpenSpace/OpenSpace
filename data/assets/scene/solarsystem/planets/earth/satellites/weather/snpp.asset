@@ -82,7 +82,7 @@ local SNPPLabel = {
 
 asset.onInitialize(function ()
   local s = openspace.space.readKeplerFile(omm .. "SNPP.txt", "OMM")
-  SNPPTrail.Renderable.Period = s[0].Period / (60 * 60 * 24)
+  SNPPTrail.Renderable.Period = s[1].Period / (60 * 60 * 24)
 
   openspace.addSceneGraphNode(SNPP)
   openspace.addSceneGraphNode(SNPPTrail)

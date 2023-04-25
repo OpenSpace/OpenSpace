@@ -1,0 +1,31 @@
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+
+local layer = {
+  Identifier = "Messenger_LOI_NewYork",
+  Name = "Messenger LOI [New York]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("messenger_loi_newyork.wms")
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Messenger LOI [New York]",
+  Version = "1.0",
+  Description = [[Mercury LOI layer for Mercury globe. This map is hosted on the OpenSpace
+    server in New York]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Mercury/Messenger/Global/Mercury_MESSENGER_MDIS_Basemap_LOI_Mosaic_Global_166m",
+  License = "NASA/PDS"
+}
+

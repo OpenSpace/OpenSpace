@@ -80,12 +80,12 @@ float stepSize#{id}(vec3 samplePos, vec3 dir) {
     }
 }
 
-void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor, 
+void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
                  inout vec3 accumulatedAlpha, inout float maxStepSize)
 {
     //vec4 sample#{id}(vec3 samplePos, vec3 dir, vec4 foregroundColor, inout float maxStepSize) {
     //return vec4(1.0, 1.0, 1.0, 1.0);
-    
+
     if (true /*opacity_#{id} >= MULTIRES_OPACITY_THRESHOLD*/) {
         if (gridType_#{id} == 1) {
             samplePos = multires_cartesianToSpherical(samplePos);

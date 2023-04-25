@@ -39,9 +39,7 @@ local Station6Frag1Model = {
       Latitude = 20.2903,
       Altitude = -2562.6,
       UseHeightmap = false
-    }
-  },
-  Transform = {
+    },
     Scale = {
       Type = "StaticScale",
       Scale = 0.1
@@ -60,7 +58,7 @@ local Station6Frag1Model = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Station 6 Fragment 1 Model",
@@ -110,7 +108,7 @@ local Station6Frag2Model = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true,
+    EnableFaceCulling = false,
   },
   GUI = {
     Name = "Station 6 Fragment 2 Model",
@@ -148,7 +146,7 @@ local Station6Frag3Model = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Station 6 Fragment 3 Model",

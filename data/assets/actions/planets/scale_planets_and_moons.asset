@@ -28,7 +28,7 @@ end
 local function getToggleScaleAction(identifier, scale, name, speedup, speedown)
   local action = {
     Identifier = "os.toggle_" .. string.gsub(name, "%s+", "") .. "_scale",
-    Name = "Toggle " .. name .. " Scale",
+    Name = "Toggle " .. name .. " scale",
     Command = [[
 local list = openspace.getProperty("]] .. identifier .. [[.Scale.Scale");
 if #list == 0 then
