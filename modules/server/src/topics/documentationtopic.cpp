@@ -59,7 +59,7 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
         response = global::keybindingManager->generateJson();
     }
     else if (requestedType == "meta") {
-        response = SceneLicenseWriter().generateJson();
+        response = SceneLicenseWriter().generateJsonList();
     }
 
     _connection->sendJson(wrappedPayload(response));

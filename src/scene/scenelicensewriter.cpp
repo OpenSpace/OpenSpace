@@ -120,61 +120,23 @@ nlohmann::json SceneLicenseWriter::generateJsonGroupedByLicense() const {
     return result;
 }
 
-std::string SceneLicenseWriter::generateJson() const {
-    ZoneScoped;
+nlohmann::json SceneLicenseWriter::generateJsonList() const {
+    nlohmann::json json;
 
-    std::stringstream json;
-    json << "[";
+    if (global::profile->meta.has_value()) {
+        nlohmann::json profile;
+        profile["name"] = global::profile->meta->name.value_or("");
+        profile["version"] = global::profile->meta->version.value_or("");
+        profile["description"] = global::profile->meta->description.value_or("");
+        profile["author"] = global::profile->meta->author.value_or("");
+        profile["url"] = global::profile->meta->url.value_or("");
+        profile["license"] = global::profile->meta->license.value_or("");
+        json.push_back(profile);
+    }
 
     std::vector<const Asset*> assets =
         global::openSpaceEngine->assetManager().allAssets();
 
-    int metaTotal = 0;
-    int metaCount = 0;
-    for (const Asset* asset : assets) {
-        std::optional<Asset::MetaInformation> meta = asset->metaInformation();
-        if (!meta.has_value()) {
-            continue;
-        }
-        metaTotal++;
-    }
-
-    if (global::profile->meta.has_value()) {
-        metaTotal++;
-        constexpr std::string_view replStr = R"("{}": "{}", )";
-        constexpr std::string_view replStr2 = R"("{}": "{}")";
-        json << "{";
-        json << fmt::format(
-            replStr,
-            "name", escapedJson(global::profile->meta->name.value_or(""))
-        );
-        json << fmt::format(
-            replStr,
-            "version", escapedJson(global::profile->meta->version.value_or(""))
-        );
-        json << fmt::format(
-            replStr,
-            "description", escapedJson(global::profile->meta->description.value_or(""))
-        );
-        json << fmt::format(
-            replStr,
-            "author", escapedJson(global::profile->meta->author.value_or(""))
-        );
-        json << fmt::format(
-            replStr,
-            "url", escapedJson(global::profile->meta->url.value_or(""))
-        );
-        json << fmt::format(
-            replStr2,
-            "license", escapedJson(global::profile->meta->license.value_or(""))
-        );
-        json << "}";
-
-        if (++metaCount != metaTotal) {
-            json << ",";
-        }
-    }
-
     for (const Asset* asset : assets) {
         std::optional<Asset::MetaInformation> meta = asset->metaInformation();
 
@@ -182,27 +144,18 @@ std::string SceneLicenseWriter::generateJson() const {
             continue;
         }
 
-        constexpr std::string_view replStr = R"("{}": "{}", )";
-        constexpr std::string_view replStr2 = R"("{}": "{}")";
-        json << "{";
-        json << fmt::format(replStr, "name", escapedJson(meta->name));
-        json << fmt::format(replStr, "version", escapedJson(meta->version));
-        json << fmt::format(replStr, "description", escapedJson(meta->description));
-        json << fmt::format(replStr, "author", escapedJson(meta->author));
-        json << fmt::format(replStr, "url", escapedJson(meta->url));
-        json << fmt::format(replStr, "license", escapedJson(meta->license));
-        json << fmt::format(replStr, "identifiers", escapedJson(meta->identifiers));
-        json << fmt::format(replStr2, "path", escapedJson(asset->path().string()));
-        json << "}";
+        nlohmann::json assetJson;
+        assetJson["name"] = meta->name;
+        assetJson["version"] = meta->version;
+        assetJson["description"] = meta->description;
+        assetJson["author"] = meta->author;
+        assetJson["url"] = meta->url;
+        assetJson["license"] = meta->license;
+        assetJson["identifiers"] = meta->identifiers;
+        assetJson["path"] = asset->path().string();
 
-        metaCount++;
-        if (metaCount != metaTotal) {
-            json << ",";
-        }
+        json.push_back(assetJson);
     }
-
-    json << "]";
-    return json.str();
+    return json;
 }
-
 } // namespace openspace

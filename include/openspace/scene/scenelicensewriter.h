@@ -33,7 +33,7 @@ namespace openspace {
 class SceneLicenseWriter {
 public:
     SceneLicenseWriter();
-    std::string generateJson() const;
+    nlohmann::json generateJsonList() const;
     nlohmann::json generateJsonGroupedByLicense() const;
 };
 
