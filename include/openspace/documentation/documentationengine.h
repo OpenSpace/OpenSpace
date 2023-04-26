@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 #define __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 
-#include <openspace/documentation/documentationgenerator.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/json.h>
 #include <ghoul/misc/exception.h>
@@ -38,7 +36,7 @@ namespace openspace::documentation {
  * produced in the application an write them out as a documentation file for human
  * consumption.
  */
-class DocumentationEngine : public DocumentationGenerator {
+class DocumentationEngine {
 public:
     /**
      * This exception is thrown by the addDocumentation method if a provided Documentation
@@ -71,14 +69,6 @@ public:
      */
     void addDocumentation(Documentation documentation);
 
-     /* Adds the \p templates to the list of templates that are written to the
-     * documentation html file.
-     * \param templates Vector of templates to add. Most of the time this list
-     * will just contain one item, but some modules may wish to provide
-     * multiple templates for subtypes, etc
-     */
-    void addHandlebarTemplates(std::vector<HandlebarTemplate> templates);
-
     /**
      * Returns a list of all registered Documentation%s.
      *
@@ -97,18 +87,7 @@ public:
      */
     static DocumentationEngine& ref();
 
-    /**
-    * Generates the documentation html file. Generated file will have embeded
-    * in it: HandlebarJS Templates (from _handlebarTemplates) and json (from
-    * \p data) along with the base template and js/css files from the source
-    * directory ${WEB}/documentation
-    *
-    * \param path The path to add
-    * \param data The JSON data that is written to the documentation
-    */
-    void writeDocumentationHtml(const std::string& path, std::string data);
-
-    std::string generateJson() const override;
+    std::string generateJson() const;
 
     nlohmann::json generateJsonJson() const;
 
@@ -116,12 +95,9 @@ private:
 
     /// The list of all Documentation%s that are stored by the DocumentationEngine
     std::vector<Documentation> _documentations;
-    /// The list of templates to render the documentation with.
-    std::vector<HandlebarTemplate> _handlebarTemplates;
 
     static DocumentationEngine* _instance;
 };
-
 } // namespace openspace::documentation
 
 #define DocEng (openspace::documentation::DocumentationEngine::ref())
