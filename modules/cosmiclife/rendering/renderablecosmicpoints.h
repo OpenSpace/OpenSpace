@@ -40,7 +40,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <filesystem>
-// from billboard cloud
+ // from billboard cloud
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
@@ -58,124 +58,111 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+    namespace documentation { struct Documentation; }
 
-class RenderableCosmicPoints : public Renderable {
-public:
-    explicit RenderableCosmicPoints(const ghoul::Dictionary& dictionary);
-    ~RenderableCosmicPoints() = default;
+    class RenderableCosmicPoints : public Renderable {
+    public:
+        explicit RenderableCosmicPoints(const ghoul::Dictionary& dictionary);
+        ~RenderableCosmicPoints() = default;
 
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
+        void initialize() override;
+        void initializeGL() override;
+        void deinitializeGL() override;
 
-    bool isReady() const override;
+        bool isReady() const override;
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-    
-    static documentation::Documentation Documentation();
+        void render(const RenderData& data, RendererTasks& rendererTask) override;
+        void update(const UpdateData& data) override;
 
-private:
-<<<<<<< HEAD
-    std::vector<float> createDataSlice(const RenderData& data);
-    void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
-        GLuint textureHeight);
-=======
-    std::vector<float> createDataSlice();
->>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
-    void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
-        const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
-    void updateRenderData(const RenderData& data);
-    float fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e, float thresholdDistance);
+        static documentation::Documentation Documentation();
 
-<<<<<<< HEAD
-    glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
+    private:
+        std::vector<float> createDataSlice(const RenderData& data);
+        void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
+            GLuint textureHeight);
+        void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
+            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
+        void updateRenderData(const RenderData& data);
+        float fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e, float thresholdDistance);
 
-=======
->>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
-    // bool variables
-    bool _hasSpeckFile = false;
-    bool _dataIsDirty = true;
-    bool _textColorIsDirty = true;
-    bool _hasSpriteTexture = false;
-    bool _spriteTextureIsDirty = true;
-    bool _hasColorMapFile = false;
-    bool _isColorMapExact = false;
-    bool _hasDatavarSize = false;
-<<<<<<< HEAD
-    bool _hasPolygon = false;
-=======
-    bool _hasLabel = false;
+        glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
 
-   
->>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
-
-    GLuint _pTexture = 0;
-
-    properties::FloatProperty _scaleFactor;
-    properties::Vec3Property _pointColor;
-    properties::Vec3Property _frameColor;
-    properties::StringProperty _spriteTexturePath;
-    properties::BoolProperty _useFade;
-    properties::FloatProperty _fadeThreshold;
-    properties::BoolProperty _drawElements;
-    properties::BoolProperty _pixelSizeControl;
-    properties::OptionProperty _colorOption;
-    properties::Vec2Property _optionColorRangeData;
-    properties::OptionProperty _datavarSizeOption;
-    properties::Vec2Property _billboardMinMaxSize;
-    properties::FloatProperty _correctionSizeEndDistance;
-    properties::FloatProperty _correctionSizeFactor;
-    properties::BoolProperty _useLinearFiltering;
-    properties::TriggerProperty _setRangeFromData;
-    properties::OptionProperty _renderOption;
+        // bool variables
+        bool _hasSpeckFile = false;
+        bool _dataIsDirty = true;
+        bool _textColorIsDirty = true;
+        bool _hasSpriteTexture = false;
+        bool _spriteTextureIsDirty = true;
+        bool _hasColorMapFile = false;
+        bool _isColorMapExact = false;
+        bool _hasDatavarSize = false;
+        bool _hasPolygon = false;
 
 
-    ghoul::opengl::Texture* _spriteTexture = nullptr;
-    ghoul::opengl::ProgramObject* _program = nullptr;
-<<<<<<< HEAD
-=======
 
->>>>>>> c2b3a56f43214f3b342d4fec3c8f704cc48a9b36
+        GLuint _pTexture = 0;
 
-    // variables that are sent to the shaders
-    UniformCache(
-        cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
-        minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
-        correctionSizeFactor, color, alphaValue, scaleFactor, up, right,
-        screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling, frameColor
-    ) _uniformCache;
+        properties::FloatProperty _scaleFactor;
+        properties::Vec3Property _pointColor;
+        properties::Vec3Property _frameColor;
+        properties::StringProperty _spriteTexturePath;
+        properties::BoolProperty _useFade;
+        properties::FloatProperty _fadeThreshold;
+        properties::BoolProperty _drawElements;
+        properties::BoolProperty _pixelSizeControl;
+        properties::OptionProperty _colorOption;
+        properties::Vec2Property _optionColorRangeData;
+        properties::OptionProperty _datavarSizeOption;
+        properties::Vec2Property _billboardMinMaxSize;
+        properties::FloatProperty _correctionSizeEndDistance;
+        properties::FloatProperty _correctionSizeFactor;
+        properties::BoolProperty _useLinearFiltering;
+        properties::TriggerProperty _setRangeFromData;
+        properties::OptionProperty _renderOption;
 
-    // font variable from ghoul library
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
 
-    std::optional<std::string> _uniqueSpecies;
 
-    // String variables
-    std::string _speckFile;
-    std::string _colorMapFile;
-    std::string _colorOptionString;
-    std::string _datavarSizeOptionString;
+        ghoul::opengl::Texture* _spriteTexture = nullptr;
+        ghoul::opengl::ProgramObject* _program = nullptr;
 
-    // distance default unit -- change?
-    DistanceUnit _unit = DistanceUnit::Parsec;
 
-    // speck files
-    speck::Dataset _dataset;
-    speck::Labelset _labelset;
-    speck::ColorMap _colorMap;
+        // variables that are sent to the shaders
+        UniformCache(
+            cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
+            minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
+            correctionSizeFactor, color, alphaValue, scaleFactor, up, right,
+            screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling, frameColor
+        ) _uniformCache;
 
-    // range data, do we need conversion map?
-    std::vector<glm::vec2> _colorRangeData;
-    std::unordered_map<int, std::string> _optionConversionMap;
-    std::unordered_map<int, std::string> _optionConversionSizeMap;
+        // font variable from ghoul library
+        std::shared_ptr<ghoul::fontrendering::Font> _font;
 
-    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+        std::optional<std::string> _uniqueSpecies;
 
-    GLuint _vao = 0;
-    GLuint _vbo = 0;
-};
+        // String variables
+        std::string _speckFile;
+        std::string _colorMapFile;
+        std::string _colorOptionString;
+        std::string _datavarSizeOptionString;
+
+        // distance default unit -- change?
+        DistanceUnit _unit = DistanceUnit::Parsec;
+
+        // speck files
+        speck::Dataset _dataset;
+        speck::Labelset _labelset;
+        speck::ColorMap _colorMap;
+
+        // range data, do we need conversion map?
+        std::vector<glm::vec2> _colorRangeData;
+        std::unordered_map<int, std::string> _optionConversionMap;
+        std::unordered_map<int, std::string> _optionConversionSizeMap;
+
+        glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+
+        GLuint _vao = 0;
+        GLuint _vbo = 0;
+    };
 
 } // namespace openspace
 

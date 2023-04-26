@@ -59,11 +59,11 @@ namespace {
     constexpr const char* ProgramObjectName = "RenderableInterpolation";
 
 
-    constexpr const std::array<const char*, 20> UniformNames = {
+    constexpr const std::array<const char*, 19> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize",
         "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
-        "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
+        "scaleFactor", "up", "right", "screenSize", "spriteTexture",
         "hasColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
 
@@ -501,9 +501,9 @@ namespace openspace {
     speck::Dataset RenderableInterpolation::sort(const speck::Dataset& d1, const speck::Dataset& d2) {
         speck::Dataset result{ d2 };
 
-        if (d1.entries.size() != d2.entries.size()) {
-            return d2;
-        }
+        //if (d1.entries.size() != d2.entries.size()) {
+        //    return d2;
+        //}
 
         for (int i = 0; i < d1.entries.size(); i++) {
             bool found = false;
@@ -594,8 +594,8 @@ namespace openspace {
     void RenderableInterpolation::renderPoints(const RenderData& data,
         const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight,
-        const glm::dvec3& orthoUp,
-        float fadeInVariable)
+        const glm::dvec3& orthoUp
+        )
     {
         //glDepthMask(false);
         glDepthMask(true);
@@ -634,7 +634,6 @@ namespace openspace {
         _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
         _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
         _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
-        _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
         _program->setUniform(
             _uniformCache.correctionSizeEndDistance,
@@ -696,7 +695,7 @@ namespace openspace {
         glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
 
-            renderPoints(data, modelMatrix, orthoRight, orthoUp, 1);
+            renderPoints(data, modelMatrix, orthoRight, orthoUp);
   
     }
 
@@ -754,7 +753,7 @@ namespace openspace {
                     4,
                     GL_FLOAT,
                     GL_FALSE,
-                    9 * sizeof(float),
+                    10 * sizeof(float),
                     nullptr
                 );
 
@@ -765,7 +764,7 @@ namespace openspace {
                     4,
                     GL_FLOAT,
                     GL_FALSE,
-                    9 * sizeof(float),
+                    10 * sizeof(float),
                     reinterpret_cast<void*>(4 * sizeof(float))
                 );
 
@@ -776,8 +775,19 @@ namespace openspace {
                     1,
                     GL_FLOAT,
                     GL_FALSE,
-                    9 * sizeof(float),
+                    10 * sizeof(float),
                     reinterpret_cast<void*>(8 * sizeof(float))
+                );
+
+                GLint opacityAttrib = _program->attributeLocation("in_opacity");
+                glEnableVertexAttribArray(opacityAttrib);
+                glVertexAttribPointer(
+                    opacityAttrib,
+                    1,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    10 * sizeof(float),
+                    reinterpret_cast<void*>(9 * sizeof(float))
                 );
             }
             else if (_hasColorMapFile) {
@@ -787,7 +797,7 @@ namespace openspace {
                     4,
                     GL_FLOAT,
                     GL_FALSE,
-                    8 * sizeof(float),
+                    9 * sizeof(float),
                     nullptr
                 );
 
@@ -798,8 +808,19 @@ namespace openspace {
                     4,
                     GL_FLOAT,
                     GL_FALSE,
-                    8 * sizeof(float),
+                    9 * sizeof(float),
                     reinterpret_cast<void*>(4 * sizeof(float))
+                );
+
+                GLint opacityAttrib = _program->attributeLocation("in_opacity");
+                glEnableVertexAttribArray(opacityAttrib);
+                glVertexAttribPointer(
+                    opacityAttrib,
+                    1,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    9 * sizeof(float),
+                    reinterpret_cast<void*>(8 * sizeof(float))
                 );
             }
             else if (_hasDatavarSize) {
@@ -809,7 +830,7 @@ namespace openspace {
                     4,
                     GL_FLOAT,
                     GL_FALSE,
-                    8 * sizeof(float),
+                    6 * sizeof(float),
                     nullptr
                 );
 
@@ -820,8 +841,19 @@ namespace openspace {
                     1,
                     GL_FLOAT,
                     GL_FALSE,
-                    5 * sizeof(float),
+                    6 * sizeof(float),
                     reinterpret_cast<void*>(4 * sizeof(float))
+                );
+
+                GLint opacityAttrib = _program->attributeLocation("in_opacity");
+                glEnableVertexAttribArray(opacityAttrib);
+                glVertexAttribPointer(
+                    opacityAttrib,
+                    1,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    6 * sizeof(float),
+                    reinterpret_cast<void*>(5 * sizeof(float))
                 );
             }
             else {
@@ -831,8 +863,19 @@ namespace openspace {
                     4,
                     GL_FLOAT,
                     GL_FALSE,
-                    0,
+                    5 * sizeof(float),
                     nullptr
+                );
+
+                GLint opacityAttrib = _program->attributeLocation("in_opacity");
+                glEnableVertexAttribArray(opacityAttrib);
+                glVertexAttribPointer(
+                    opacityAttrib,
+                    1,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    5 * sizeof(float),
+                    reinterpret_cast<void*>(4 * sizeof(float))
                 );
             }
 
@@ -1033,6 +1076,7 @@ namespace openspace {
                     result.push_back(position[j]);
                 }
             }
+            result.push_back(1);
         }
         setBoundingSphere(maxRadius);
         return result;

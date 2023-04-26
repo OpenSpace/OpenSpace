@@ -81,13 +81,12 @@ namespace openspace {
 
         std::vector<float> createDataSlice(speck::Dataset& dataset);
         void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
-            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
+            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
         speck::Dataset interpolationFunc(const speck::Dataset& d1, const speck::Dataset& d2, float iv);
         speck::Dataset::Entry interpol(const speck::Dataset::Entry& e1, const speck::Dataset::Entry& e2, float iv);
         speck::Dataset sort(const speck::Dataset& d1, const speck::Dataset& d2);
 
         // bool variables
-        bool _hasSpeckFile = true;
         bool _dataIsDirty = true;
         bool _textColorIsDirty = true;
         bool _hasSpriteTexture = false;
@@ -135,7 +134,7 @@ namespace openspace {
         UniformCache(
             cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
             minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
-            correctionSizeFactor, color, alphaValue, scaleFactor, up, right, fadeInValue,
+            correctionSizeFactor, color, alphaValue, scaleFactor, up, right,
             screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling
         ) _uniformCache;
 
