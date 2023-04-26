@@ -161,7 +161,7 @@ private:
         void addDistance(const double distance) {
             SonificationBase::addValueToRingBuffer(
                 distances,
-                ringBufferIndex,
+                indexDistances,
                 NumSamples,
                 distance
             );
@@ -169,7 +169,7 @@ private:
         void addHAngle(const double angle) {
             SonificationBase::addValueToRingBuffer(
                 horizontalAngles,
-                ringBufferIndex,
+                indexHAngles,
                 NumSamples,
                 angle
             );
@@ -177,7 +177,7 @@ private:
         void addVAngle(const double angle) {
             SonificationBase::addValueToRingBuffer(
                 verticalAngles,
-                ringBufferIndex,
+                indexVAngles,
                 NumSamples,
                 angle
             );
@@ -193,7 +193,9 @@ private:
         std::vector<double> verticalAngles = std::vector<double>(NumSamples, 0.0);
 
         // The first "empty" slot in the ring buffer order. The "oldest" value
-        int ringBufferIndex = 0;
+        int indexDistances = 0;
+        int indexHAngles = 0;
+        int indexVAngles = 0;
     };
 
     /**

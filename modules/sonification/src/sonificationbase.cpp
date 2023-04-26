@@ -394,8 +394,8 @@ void SonificationBase::addValueToRingBuffer(std::vector<double>& values,
                                             const int ringBufferSize,
                                             const double newValue)
 {
-    if (ringBufferIndex == ringBufferSize) {
-        ringBufferIndex = 0;
+    if (ringBufferIndex >= ringBufferSize) {
+        ringBufferIndex = ringBufferIndex % ringBufferSize;
     }
     values[ringBufferIndex] = newValue;
     ++ringBufferIndex;
