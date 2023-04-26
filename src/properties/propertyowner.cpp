@@ -65,12 +65,14 @@ namespace {
 
             json["properties"].push_back(propertyJson);
         }
+        sortJson(json["properties"], "name"); 
 
         auto propertyOwners = owner->propertySubOwners();
         for (properties::PropertyOwner* o : propertyOwners) {
             nlohmann::json propertyOwner;
             json["propertyOwners"].push_back(createJson(o));
         }
+        sortJson(json["propertyOwners"], "name");
 
         return json;
     }
@@ -403,8 +405,6 @@ nlohmann::json PropertyOwner::generateJsonJson() const {
     for (PropertyOwner* owner : subOwners) {
         if (owner->identifier() != "Scene") {
             nlohmann::json jsonOwner = createJson(owner);
-            sortJson(jsonOwner["properties"], "name");
-            sortJson(jsonOwner["propertyOwners"], "name");
 
             json.push_back(jsonOwner);
         }
