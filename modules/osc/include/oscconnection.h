@@ -26,6 +26,7 @@
 
 #include <modules/osc/ext/osc/ip/UdpSocket.h>
 #include <modules/osc/ext/osc/osc/OscOutboundPacketStream.h>
+#include <mutex>
 #include <string>
 #include <variant>
 #include <vector>
@@ -45,6 +46,7 @@ public:
 private:
     UdpTransmitSocket _socket;
     osc::OutboundPacketStream _stream;
+    std::mutex _streamMutex;
     char* _buffer;
 };
 

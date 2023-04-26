@@ -49,15 +49,16 @@ OscConnection::~OscConnection() {
     delete[] _buffer;
 }
 
-void OscConnection::send(const std::string& label, const std::vector<OscDataType>& data)
-{
+void OscConnection::send(const std::string& label, const std::vector<OscDataType>& data) {
+    std::lock_guard<std::mutex> guard(_streamMutex);
+
     if (label.empty()) {
         LERROR("Cannot send osc message without label");
         return;
     }
 
     if (!_stream.IsReady()) {
-        LWARNING("Cannot send message, stream not ready");
+        LWARNING("Cannot send message, stream is not ready");
         return;
     }
 
