@@ -187,12 +187,23 @@ local previous_delta_step_immediate = {
   Key = "Shift+Left"
 }
 
+local reload_gui = {
+  Identifier = "os_default.reload_gui",
+  Name = "Reload GUI",
+  Command = "openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)",
+  Documentation = "Reloads the GUI",
+  GuiPath = "/System/GUI",
+  IsLocal = true,
+
+  Key = "F5"
+}
+
 local Actions = {
   toggle_native_ui, toggle_shutdown, take_screenshot, toggle_pause_interpolated,
   toggle_pause_immediate, toggle_rotation_friction, toggle_zoom_friction,
   toggle_roll_friction, fade_to_black, toggle_main_gui, toggle_overlays,
   toggle_master_rendering, next_delta_step_interpolate, next_delta_step_immediate,
-  previous_delta_step_interpolate, previous_delta_step_immediate
+  previous_delta_step_interpolate, previous_delta_step_immediate, reload_gui
 }
 
 asset.onInitialize(function()
