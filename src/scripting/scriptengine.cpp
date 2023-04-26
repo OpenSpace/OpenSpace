@@ -83,7 +83,9 @@ namespace {
 
 
 
-    nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f) {
+    nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f, 
+                          bool includeSourceLocation) 
+    {
         using namespace openspace;
         using namespace openspace::scripting;
         nlohmann::json function;
@@ -101,6 +103,13 @@ namespace {
         function["arguments"] = arguments;
         function["returnType"] = f.returnType;
         function["help"] = f.helpText;
+
+        if (includeSourceLocation) {
+            nlohmann::json sourceLocation;
+            sourceLocation["file"] = f.sourceLocation.file;
+            sourceLocation["line"] = f.sourceLocation.line;
+            function["sourceLocation"] = sourceLocation;
+        }
 
         return function;
     }
@@ -554,26 +563,27 @@ nlohmann::json ScriptEngine::generateJsonJson() const {
 
         nlohmann::json library;
         std::string libraryName = l.name;
+        // Keep the library key for backwards compatability
+        library["library"] = libraryName;
         library["name"] = libraryName;
+        std::string os = "openspace";
+        library["fullName"] = libraryName.empty() ? os : os  + "." + libraryName;
 
         for (const LuaLibrary::Function& f : l.functions) {
-            library["functions"].push_back(toJson(f));
+            bool hasSourceLocation = true;
+            library["functions"].push_back(toJson(f, hasSourceLocation));
         }
 
         for (const LuaLibrary::Function& f : l.documentations) {
-            library["functions"].push_back(toJson(f));
+            bool hasSourceLocation = false;
+            library["functions"].push_back(toJson(f, hasSourceLocation));
         }
         sortJson(library["functions"], "name");
         json.push_back(library);
 
-        sortJson(json, "name");
+        sortJson(json, "library");
     }
-
-    nlohmann::json result;
-    result["name"] = "scripting";
-    result["data"] = json;
-
-    return result;
+    return json;
 }
 
 void ScriptEngine::writeLog(const std::string& script) {
