@@ -8,7 +8,7 @@ local kernels = asset.syncedResource({
 -- Kernels downloaded aon 2023-04-18
 -- + GPHIO from Ronan
 local Kernels = {
-  kernels .. "juice_sc_attc_000030_230414_230428_v05.bc",
+  kernels .. "juice_sc_attc_000031_230414_230503_v03.bc",
   kernels .. "juice_lpbooms_s160326_v01.bc",
   kernels .. "juice_magboom_s160326_v01.bc",
   kernels .. "juice_majis_scan_zero_v01.bc",
@@ -44,7 +44,7 @@ local Kernels = {
   kernels .. "juice_step_230414_v01.tsc",
 
   kernels .. "juice_crema_5_1_150lb_23_1_v01.bsp",
-  kernels .. "juice_orbc_000030_230414_310721_v05.bsp",
+  kernels .. "juice_orbc_000031_230414_310721_v03.bsp",
   kernels .. "jup343_19900101_20500101.bsp",
   kernels .. "jup344-s2003_j24_19900101_20500101.bsp",
   kernels .. "jup346_19900101_20500101.bsp",
