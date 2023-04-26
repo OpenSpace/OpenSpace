@@ -146,7 +146,7 @@ nlohmann::json KeybindingManager::generateJsonJson() const {
     sortJson(json, "name");
 
     nlohmann::json result;
-    result["name"] = "keybindings";
+    result["name"] = "Keybindings";
     result["keybindings"] = json;
     return result;
 }

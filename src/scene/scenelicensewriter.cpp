@@ -57,7 +57,7 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
     if (global::profile->meta.has_value()) {
         metaTotal++;
         nlohmann::json metaJson;
-        metaJson["name"] = "profile";
+        metaJson["name"] = "Profile";
         metaJson["profileName"] = global::profile->meta->name.value_or("");
         metaJson["version"] = global::profile->meta->version.value_or("");
         metaJson["description"] = global::profile->meta->description.value_or("");
@@ -101,8 +101,8 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
     }
     
     nlohmann::json assetsJson;
-    assetsJson["name"] = "assets";
-    assetsJson["type"] = "licenses";
+    assetsJson["name"] = "Assets";
+    assetsJson["type"] = "Licenses";
 
     for (const std::pair<std::string, nlohmann::json>& assetLicense : assetLicenses) {
         nlohmann::json entry;
@@ -114,7 +114,7 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
     json.push_back(assetsJson);
 
     nlohmann::json result;
-    result["name"] = "licenses";
+    result["name"] = "Licenses";
     result["data"] = json;
     
     return result;

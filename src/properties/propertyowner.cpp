@@ -46,30 +46,30 @@ namespace {
 
         using namespace openspace;
         nlohmann::json json;
-        json["Name"] = owner->identifier();
+        json["name"] = owner->identifier();
 
-        json["Description"] = owner->description();
-        json["Properties"] = nlohmann::json::array();
-        json["PropertyOwners"] = nlohmann::json::array();
-        json["Type"] = owner->type();
-        json["Tags"] = owner->tags();
+        json["description"] = owner->description();
+        json["properties"] = nlohmann::json::array();
+        json["propertyOwners"] = nlohmann::json::array();
+        json["type"] = owner->type();
+        json["tags"] = owner->tags();
 
         const std::vector<properties::Property*>& properties = owner->properties();
         for (properties::Property* p : properties) {
             nlohmann::json propertyJson;
-            propertyJson["Name"] = p->identifier();
-            propertyJson["Type"] = p->className();
-            propertyJson["URI"] = p->fullyQualifiedIdentifier();
-            propertyJson["Gui Name"] = p->guiName();
-            propertyJson["Description"] = p->description();
+            propertyJson["name"] = p->identifier();
+            propertyJson["type"] = p->className();
+            propertyJson["uri"] = p->fullyQualifiedIdentifier();
+            propertyJson["guiName"] = p->guiName();
+            propertyJson["description"] = p->description();
 
-            json["Properties"].push_back(propertyJson);
+            json["properties"].push_back(propertyJson);
         }
 
         auto propertyOwners = owner->propertySubOwners();
         for (properties::PropertyOwner* o : propertyOwners) {
             nlohmann::json propertyOwner;
-            json["PropertyOwners"].push_back(createJson(o));
+            json["propertyOwners"].push_back(createJson(o));
         }
 
         return json;

@@ -45,16 +45,16 @@ using namespace openspace::documentation;
 nlohmann::json generateJsonDocumentation(const Documentation& d) {
     nlohmann::json json;
 
-    json["Name"] = d.name;
-    json["Identifier"] = d.id;
-    json["Members"] = nlohmann::json::array();
+    json["name"] = d.name;
+    json["identifier"] = d.id;
+    json["members"] = nlohmann::json::array();
 
     for (const DocumentationEntry& p : d.entries) {
         nlohmann::json entry;
-        entry["Name"] = p.key;
-        entry["Optional"] = p.optional.value;
-        entry["Type"] = p.verifier->type();
-        entry["Documentation"] = p.documentation;
+        entry["name"] = p.key;
+        entry["optional"] = p.optional.value;
+        entry["type"] = p.verifier->type();
+        entry["documentation"] = p.documentation;
 
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
@@ -68,27 +68,28 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
             );
 
             if (it == documentations.end()) {
-                entry["Reference"]["Found"] = false;
+                entry["reference"]["found"] = false;
             }
             else {
                 nlohmann::json reference;
-                reference["Found"] = true;
-                reference["Name"] = it->name;
-                reference["Identifier"] = rv->identifier;
+                reference["found"] = true;
+                reference["name"] = it->name;
+                reference["identifier"] = rv->identifier;
 
-                entry["Reference"] = reference;
+                entry["reference"] = reference;
             }
         }
         else if (tv) {
             nlohmann::json json = generateJsonDocumentation(tv->documentations);
             // We have a TableVerifier, so we need to recurse
-            entry["Restrictions"] = json;
+            entry["restrictions"] = json;
         }
         else {
-            entry["Description"] = p.verifier->documentation();
+            entry["description"] = p.verifier->documentation();
         }
-        json["Members"].push_back(entry);
+        json["members"].push_back(entry);
     }
+    sortJson(json["members"], "name");
 
     return json;
 }
@@ -213,18 +214,19 @@ nlohmann::json FactoryManager::generateJsonJson() const {
     }
     // Add all leftover docs
     nlohmann::json leftovers;
-    leftovers["name"] = "other";
+    leftovers["name"] = "Other";
     leftovers["identifier"] = "other";
 
     for (const Documentation& doc : docs) {
         leftovers["classes"].push_back(generateJsonDocumentation(doc));
     }
-    sortJson(json["classes"]["members"], "name");
+    sortJson(leftovers["classes"], "name");
     json.push_back(leftovers);
+    sortJson(json, "name");
 
     // I did not check the output of this for correctness ---abock
     nlohmann::json result;
-    result["name"] = "assetTypes";
+    result["name"] = "Asset Types";
     result["data"] = json;
         
     return result;
