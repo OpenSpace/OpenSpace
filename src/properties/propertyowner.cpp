@@ -46,7 +46,7 @@ namespace {
 
         using namespace openspace;
         nlohmann::json json;
-        json["name"] = owner->identifier();
+        json["name"] = !owner->guiName().empty() ? owner->guiName() : owner->identifier();
 
         json["description"] = owner->description();
         json["properties"] = nlohmann::json::array();
@@ -57,10 +57,11 @@ namespace {
         const std::vector<properties::Property*>& properties = owner->properties();
         for (properties::Property* p : properties) {
             nlohmann::json propertyJson;
-            propertyJson["name"] = p->identifier();
+            std::string name = !p->guiName().empty() ? p->guiName() : p->identifier();
+            propertyJson["name"] = name;
             propertyJson["type"] = p->className();
             propertyJson["uri"] = p->fullyQualifiedIdentifier();
-            propertyJson["guiName"] = p->guiName();
+            propertyJson["identifier"] = p->identifier();
             propertyJson["description"] = p->description();
 
             json["properties"].push_back(propertyJson);
