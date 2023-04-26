@@ -65,6 +65,7 @@ namespace {
 } // namespace
 
 #include "spicemanager_lua.inl"
+#include "spicemanager_spice_lua.inl"
 
 namespace openspace {
 

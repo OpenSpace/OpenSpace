@@ -175,6 +175,7 @@ set(OPENSPACE_SOURCE
   util/screenlog.cpp
   util/sphere.cpp
   util/spicemanager.cpp
+  util/spicemanager_spice_lua.inl
   util/spicemanager_lua.inl
   util/syncbuffer.cpp
   util/tstring.cpp
