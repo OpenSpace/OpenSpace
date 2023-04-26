@@ -745,11 +745,11 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
                         break;
                     }
 
-                    if (list->keys[i] == "w") {
+                    if (std::string_view(list->keys[i]) == "w") {
                         width = list->values[i];
                         foundWidth = true;
                     }
-                    else if (list->keys[i] == "h") {
+                    else if (std::string_view(list->keys[i]) == "h") {
                         height = list->values[i];
                         foundHeight = true;
                     }
@@ -763,10 +763,10 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
                 int w = -1;
                 int h = -1;
                 if (width.format == MPV_FORMAT_INT64) {
-                    w = width.u.int64;
+                    w = static_cast<int>(width.u.int64);
                 }
                 if (height.format == MPV_FORMAT_INT64) {
-                    h = height.u.int64;
+                    h = static_cast<int>(height.u.int64);
                 }
 
                 if (w == -1 || h == -1) {

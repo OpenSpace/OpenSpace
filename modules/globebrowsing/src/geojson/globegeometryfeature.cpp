@@ -575,8 +575,6 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
                 continue;
             }
 
-            float length = static_cast<float>(glm::distance(lastPos, v));
-
             if (_properties.tessellationEnabled()) {
                 // Tessellate.
                 // But first, determine the step size for the tessellation (larger
