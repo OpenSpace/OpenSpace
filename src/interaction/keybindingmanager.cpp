@@ -111,28 +111,7 @@ const std::multimap<KeyWithModifier, std::string>& KeybindingManager::keyBinding
     return _keyLua;
 }
 
-std::string KeybindingManager::generateJson() const {
-    ZoneScoped;
-
-    std::stringstream json;
-    json << "[";
-    bool first = true;
-    for (const std::pair<const KeyWithModifier, std::string>& p : _keyLua) {
-        if (!first) {
-            json << ",";
-        }
-        first = false;
-        json << "{";
-        json << R"("key": ")" << ghoul::to_string(p.first) << "\",";
-        json << R"("action": ")" << p.second << "\"";
-        json << "}";
-    }
-    json << "]";
-
-    return json.str();
-}
-
-nlohmann::json KeybindingManager::generateJsonJson() const {
+nlohmann::json KeybindingManager::generateJson() const {
     ZoneScoped;
 
     nlohmann::json json;

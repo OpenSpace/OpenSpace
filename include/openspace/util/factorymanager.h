@@ -107,8 +107,7 @@ public:
     template <class T>
     ghoul::TemplateFactory<T>* factory() const;
 
-    std::string generateJson() const;
-    nlohmann::json generateJsonJson() const;
+    nlohmann::json generateJson() const;
 
 private:
     /// Singleton member for the Factory Manager

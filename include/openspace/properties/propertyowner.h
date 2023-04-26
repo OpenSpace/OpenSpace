@@ -295,9 +295,7 @@ public:
     void removeTag(const std::string& tag);
 
     // Generate JSON for documentation
-    std::string generateJson() const;
-
-    nlohmann::json generateJsonJson() const;
+    nlohmann::json generateJson() const;
 
 protected:
     /// The unique identifier of this PropertyOwner

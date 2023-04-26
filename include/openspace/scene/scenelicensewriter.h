@@ -34,7 +34,7 @@ class SceneLicenseWriter {
 public:
     SceneLicenseWriter();
     std::string generateJson() const;
-    nlohmann::json generateJsonJson() const;
+    nlohmann::json generateJsonGroupedByLicense() const;
 };
 
 } // namespace openspace

@@ -38,7 +38,7 @@ namespace openspace {
 
 SceneLicenseWriter::SceneLicenseWriter() {}
 
-nlohmann::json SceneLicenseWriter::generateJsonJson() const {
+nlohmann::json SceneLicenseWriter::generateJsonGroupedByLicense() const {
     nlohmann::json json;
 
     std::vector<const Asset*> assets =

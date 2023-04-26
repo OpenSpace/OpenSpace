@@ -386,19 +386,7 @@ void PropertyOwner::removeTag(const std::string& tag) {
     _tags.erase(std::remove(_tags.begin(), _tags.end(), tag), _tags.end());
 }
 
-std::string PropertyOwner::generateJson() const {
-    ZoneScoped;
-
-    nlohmann::json json;
-    std::vector<PropertyOwner*> subOwners = propertySubOwners();
-    for (PropertyOwner* owner : subOwners) {
-        json["data"].push_back(createJson(owner));
-    }
-
-    return json.dump();
-}
-
-nlohmann::json PropertyOwner::generateJsonJson() const {
+nlohmann::json PropertyOwner::generateJson() const {
     ZoneScoped
 
     nlohmann::json json;

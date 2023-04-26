@@ -53,8 +53,7 @@ public:
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
-    std::string generateJson() const;
-    nlohmann::json generateJsonJson() const;
+    nlohmann::json generateJson() const;
 
     const std::multimap<KeyWithModifier, std::string>& keyBindings() const;
 

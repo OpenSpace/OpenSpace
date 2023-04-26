@@ -1039,20 +1039,20 @@ void OpenSpaceEngine::writeDocumentation() {
 
     // Start the async requests as soon as possible so they are finished when we need them
     std::future<nlohmann::json> settings = std::async(
-        &properties::PropertyOwner::generateJsonJson,
+        &properties::PropertyOwner::generateJson,
         global::rootPropertyOwner
     );
 
     std::future<nlohmann::json> scene = std::async(
-        &properties::PropertyOwner::generateJsonJson,
+        &properties::PropertyOwner::generateJson,
         _scene.get()
     );
     SceneLicenseWriter writer;
 
-    nlohmann::json scripting = global::scriptEngine->generateJsonJson();
-    nlohmann::json factory = FactoryManager::ref().generateJsonJson();
-    nlohmann::json keybindings = global::keybindingManager->generateJsonJson();
-    nlohmann::json license = writer.generateJsonJson();
+    nlohmann::json scripting = global::scriptEngine->generateJson();
+    nlohmann::json factory = FactoryManager::ref().generateJson();
+    nlohmann::json keybindings = global::keybindingManager->generateJson();
+    nlohmann::json license = writer.generateJsonGroupedByLicense();
     nlohmann::json sceneProperties = settings.get();
     nlohmann::json sceneGraph = scene.get();
     

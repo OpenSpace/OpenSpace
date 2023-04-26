@@ -81,8 +81,6 @@ namespace {
         return result;
     }
 
-
-
     nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f, 
                           bool includeSourceLocation) 
     {
@@ -112,87 +110,6 @@ namespace {
         }
 
         return function;
-    }
-
-    void toJson(const openspace::scripting::LuaLibrary& library, std::stringstream& json)
-    {
-        constexpr std::string_view replStr = R"("{}": "{}", )";
-        constexpr std::string_view replStr2 = R"("{}": "{}")";
-
-        using namespace openspace;
-        using namespace openspace::scripting;
-
-        json << "{";
-        json << fmt::format(replStr, "library", library.name);
-        json << "\"functions\": [";
-
-        for (const LuaLibrary::Function& f : library.functions) {
-            json << "{";
-            json << fmt::format(replStr, "name", f.name);
-            json << "\"arguments\": [";
-            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
-                json << "{";
-                json << fmt::format(replStr, "name", escapedJson(arg.name));
-                json << fmt::format(replStr, "type", escapedJson(arg.type));
-                json << fmt::format(
-                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
-                );
-                json << "}";
-
-                if (&arg != &f.arguments.back()) {
-                    json << ",";
-                }
-            }
-            json << "],";
-            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
-            json << fmt::format(replStr, "help", escapedJson(f.helpText));
-            json << fmt::format(
-                "\"sourceLocation\": {{ \"file\": \"{}\", \"line\": {} }}",
-                escapedJson(f.sourceLocation.file), f.sourceLocation.line
-            );
-            json << "}";
-            if (&f != &library.functions.back() || !library.documentations.empty()) {
-                json << ",";
-            }
-        }
-
-
-        for (const LuaLibrary::Function& f : library.documentations) {
-            json << "{";
-            json << fmt::format(replStr, "name", f.name);
-            json << "\"arguments\": [";
-            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
-                json << "{";
-                json << fmt::format(replStr, "name", escapedJson(arg.name));
-                json << fmt::format(replStr, "type", escapedJson(arg.type));
-                json << fmt::format(
-                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
-                );
-                json << "}";
-
-                if (&arg != &f.arguments.back()) {
-                    json << ",";
-                }
-            }
-            json << "],";
-            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
-            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
-            json << "}";
-            if (&f != &library.documentations.back()) {
-                json << ",";
-            }
-        }
-
-        json << "],";
-
-        json << "\"subLibraries\": [";
-        for (const LuaLibrary& sl : library.subLibraries) {
-            toJson(sl, json);
-            if (&sl != &library.subLibraries.back()) {
-                json << ",";
-            }
-        }
-        json << "]}";
     }
 
 #include "scriptengine_codegen.cpp"
@@ -531,28 +448,7 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
     return result;
 }
 
-std::string ScriptEngine::generateJson() const {
-    ZoneScoped;
-
-    // Create JSON
-    std::stringstream json;
-    json << "[";
-
-    bool first = true;
-    for (const LuaLibrary& l : _registeredLibraries) {
-        if (!first) {
-            json << ",";
-        }
-        first = false;
-
-        toJson(l, json);
-    }
-    json << "]";
-
-    return json.str();
-}
-
-nlohmann::json ScriptEngine::generateJsonJson() const {
+nlohmann::json ScriptEngine::generateJson() const {
     ZoneScoped
 
     nlohmann::json json;

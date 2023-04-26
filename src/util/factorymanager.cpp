@@ -140,25 +140,7 @@ FactoryManager& FactoryManager::ref() {
     return *_manager;
 }
 
-std::string FactoryManager::generateJson() const {
-    nlohmann::json json;
-
-    for (const FactoryInfo& factoryInfo : _factories) {
-        nlohmann::json factory;
-        factory["Name"] = factoryInfo.name;
-
-        ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
-        const std::vector<std::string>& registeredClasses = f->registeredClasses();
-        for (const std::string& c : registeredClasses) {
-            json["Classes"].push_back(c);
-        }
-        json["Data"].push_back(factory);
-    }
-
-    return json.dump();
-}
-
-nlohmann::json FactoryManager::generateJsonJson() const {
+nlohmann::json FactoryManager::generateJson() const {
     nlohmann::json json;
     std::vector<Documentation> docs = DocEng.documentations(); 
 
