@@ -56,6 +56,11 @@ void OscConnection::send(const std::string& label, const std::vector<OscDataType
         return;
     }
 
+    if (!_stream.IsReady()) {
+        LWARNING("Cannot send message, stream not ready");
+        return;
+    }
+
     _stream.Clear();
     _stream << osc::BeginMessage(label.c_str());
 
