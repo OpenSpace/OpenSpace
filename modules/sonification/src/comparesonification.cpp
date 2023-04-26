@@ -240,33 +240,40 @@ void CompareSonification::planetSelectionChanged(
 }
 
 void CompareSonification::onEnabledChanged() {
-    SonificationModule* module = global::moduleEngine->module<SonificationModule>();
-    if (!module) {
-        LERROR("Could not find the SonificationModule");
-        return;
-    }
-    SonificationBase* solar = module->sonification("SolarSonification");
-    if (!solar) {
-        LERROR("Could not find the SolarSonification");
-        return;
-    }
-    SonificationBase* planeraty = module->sonification("PlanetsSonification");
-    if (!planeraty) {
-        LERROR("Could not find the PlanetsSonification");
-        return;
-    }
+    if (_enabled) {
+        // Check if any other "main" sonification is already on and turn them off
+        SonificationModule* module = global::moduleEngine->module<SonificationModule>();
+        if (!module) {
+            LERROR("Could not find the SonificationModule");
+            return;
+        }
 
-    bool solarEnabled = solar->enabled();
-    bool planeratyEnabled = planeraty->enabled();
+        // Solar
+        SonificationBase* solar = module->sonification("SolarSonification");
+        if (!solar) {
+            LERROR("Could not find the SolarSonification");
+            return;
+        }
+        if (solar->enabled()) {
+            solar->setEnabled(false);
+            LINFO(
+                "Turning off the Solar sonification in favor for the Compare sonification"
+            );
+        }
 
-    if (_enabled && (solarEnabled || planeratyEnabled)) {
-        LINFO(
-            "Turning off the Solar and Planets sonification in favor for the Compare "
-            "sonification"
-        );
-        solar->setEnabled(false);
-        planeraty->setEnabled(false);
-        return;
+        // Planetary
+        SonificationBase* planeraty = module->sonification("PlanetsSonification");
+        if (!planeraty) {
+            LERROR("Could not find the PlanetsSonification");
+            return;
+        }
+        if (planeraty->enabled()) {
+            planeraty->setEnabled(false);
+            LINFO(
+                "Turning off the Planets sonification in favor for the Compare "
+                "sonification"
+            );
+        }
     }
 }
 

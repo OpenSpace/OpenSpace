@@ -167,33 +167,39 @@ void SolarSonification::sendSettings() {
 }
 
 void SolarSonification::onEnabledChanged() {
-    SonificationModule* module = global::moduleEngine->module<SonificationModule>();
-    if (!module) {
-        LERROR("Could not find the SonificationModule");
-        return;
-    }
-    SonificationBase* compare = module->sonification("CompareSonification");
-    if (!compare) {
-        LERROR("Could not find the CompareSonification");
-        return;
-    }
-    SonificationBase* planeraty = module->sonification("PlanetsSonification");
-    if (!planeraty) {
-        LERROR("Could not find the PlanetsSonification");
-        return;
-    }
+    if (_enabled) {
+        // Check if any other "main" sonification is already on and turn them off
+        SonificationModule* module = global::moduleEngine->module<SonificationModule>();
+        if (!module) {
+            LERROR("Could not find the SonificationModule");
+            return;
+        }
 
-    bool compareEnabled = compare->enabled();
-    bool planeratyEnabled = planeraty->enabled();
+        // Planetary
+        SonificationBase* planetary = module->sonification("PlanetsSonification");
+        if (!planetary) {
+            LERROR("Could not find the PlanetsSonification");
+            return;
+        }
+        if (planetary->enabled()) {
+            planetary->setEnabled(false);
+            LINFO(
+                "Turning off the Planets sonification in favor for the Solar sonification"
+            );
+        }
 
-    if (_enabled && (compareEnabled || planeratyEnabled)) {
-        LINFO(
-            "Turning off the Compare and Planets sonification in favor for the Solar "
-            "sonification"
-        );
-        compare->setEnabled(false);
-        planeraty->setEnabled(false);
-        return;
+        // Compare
+        SonificationBase* compare = module->sonification("CompareSonification");
+        if (!compare) {
+            LERROR("Could not find the CompareSonification");
+            return;
+        }
+        if (compare->enabled()) {
+            compare->setEnabled(false);
+            LINFO(
+                "Turning off the Compare sonification in favor for the Solar sonification"
+            );
+        }
     }
 }
 

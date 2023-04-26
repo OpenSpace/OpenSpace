@@ -388,33 +388,40 @@ void PlanetsSonification::sendSettings(int planetIndex) {
 }
 
 void PlanetsSonification::onEnabledChanged() {
-    SonificationModule* module = global::moduleEngine->module<SonificationModule>();
-    if (!module) {
-        LERROR("Could not find the SonificationModule");
-        return;
-    }
-    SonificationBase* solar = module->sonification("SolarSonification");
-    if (!solar) {
-        LERROR("Could not find the SolarSonification");
-        return;
-    }
-    SonificationBase* compare = module->sonification("CompareSonification");
-    if (!compare) {
-        LERROR("Could not find the CompareSonification");
-        return;
-    }
+    if (_enabled) {
+        // Check if any other "main" sonification is already on and turn them off
+        SonificationModule* module = global::moduleEngine->module<SonificationModule>();
+        if (!module) {
+            LERROR("Could not find the SonificationModule");
+            return;
+        }
 
-    bool solarEnabled = solar->enabled();
-    bool compareEnabled = compare->enabled();
+        // Solar
+        SonificationBase* solar = module->sonification("SolarSonification");
+        if (!solar) {
+            LERROR("Could not find the SolarSonification");
+            return;
+        }
+        if (solar->enabled()) {
+            solar->setEnabled(false);
+            LINFO(
+                "Turning off the Solar sonification in favor for the Planets sonification"
+            );
+        }
 
-    if (_enabled && (solarEnabled || compareEnabled)) {
-        LINFO(
-            "Turning off the Solar and Compare sonification in favor for the Planets "
-            "sonification"
-        );
-        solar->setEnabled(false);
-        compare->setEnabled(false);
-        return;
+        // Compare
+        SonificationBase* compare = module->sonification("CompareSonification");
+        if (!compare) {
+            LERROR("Could not find the CompareSonification");
+            return;
+        }
+        if (compare->enabled()) {
+            compare->setEnabled(false);
+            LINFO(
+                "Turning off the Compare sonification in favor for the Planets "
+                "sonification"
+            );
+        }
     }
 }
 
