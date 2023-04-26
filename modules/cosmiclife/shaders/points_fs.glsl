@@ -41,8 +41,6 @@ Fragment getFragment() {
   vec4 textureColor = texture(spriteTexture, texCoord);
  
   vec4 fullColor = textureColor;
-
-  vec4 frame_col = vec4(frameColor, 1);
     
   if (hasColorMap) {
     fullColor *= gs_colorMap;
@@ -52,7 +50,6 @@ Fragment getFragment() {
   }
 
   fullColor.a *= alphaValue * gs_opacity * ta;
-  
   fullColor.a = max(fullColor.a, 0.0f);
   fullColor.a = min(fullColor.a, 1.0f);
 
@@ -60,6 +57,7 @@ Fragment getFragment() {
 
   Fragment frag;
 
+  vec4 frame_col = vec4(frameColor, fullColor.a);
   float borderWidth = 0.05;
   float u = texCoord.x;
   float v = texCoord.y;

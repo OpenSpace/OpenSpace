@@ -90,10 +90,11 @@ namespace {
         "This value gives the color of the frame around each point."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeThresholdInfo = {
-        "FadeThresholdInfo",
-        "Fade Threshold Info",
-        "This value is used to tell if the asset should be faded or not."
+    constexpr openspace::properties::Property::PropertyInfo MaxThresholdInfo = {
+        "MaxThresholdInfo",
+        "Max Threshold Info",
+        "This value is used to tell the max distance when the object should be shown or not." 
+        "When shown it is faded according to distance to camera."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
@@ -202,11 +203,11 @@ namespace {
         // [[codegen::verbatim(FadeInfo.description)]]
         std::optional<bool> useFade;
 
-        // [[codegen::verbatim(FadeInfo.description)]]
+        // [[codegen::verbatim(FrameColorInfo.description)]]
         std::optional<glm::vec3> frameColor;
 
-        // [[codegen::verbatim(FadeThresholdInfo.description)]]
-        std::optional<float> fadeThreshold;
+        // [[codegen::verbatim(MaxThresholdInfo.description)]]
+        std::optional<float> maxThreshold;
 
         // [[codegen::verbatim(DrawElementsInfo.description)]]
         std::optional<bool> drawElements;
@@ -287,7 +288,7 @@ namespace openspace {
         , _frameColor(FrameColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
         , _spriteTexturePath(SpriteTextureInfo)
         , _useFade(FadeInfo, false)
-        , _fadeThreshold(FadeThresholdInfo, 10000.f)
+        , _maxThreshold(MaxThresholdInfo, 100000.f)
         , _drawElements(DrawElementsInfo, true)
         , _pixelSizeControl(PixelSizeControlInfo, false)
         , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -321,7 +322,7 @@ namespace openspace {
 
             _uniqueSpecies = p.uniqueSpecies;
             _useFade = p.useFade.value_or(_useFade);
-            _fadeThreshold = p.fadeThreshold.value_or(_fadeThreshold);
+            _maxThreshold = p.maxThreshold.value_or(_maxThreshold);
             _frameColor = p.frameColor.value_or(_frameColor);
         }
 
@@ -595,15 +596,17 @@ namespace openspace {
         global::renderEngine->openglStateCache().resetDepthState();
     }
 
-    float RenderableCosmicPoints::fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e, float thresholdDistance) {
+    float RenderableCosmicPoints::fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e) {
         // Calculate distance between object and camera
         float distance = sqrt(pow((e.position.x * toMeter(_unit)) - data.camera.positionVec3().x, 2) + pow((e.position.y * toMeter(_unit)) - data.camera.positionVec3().y, 2) + pow((e.position.z * toMeter(_unit)) - data.camera.positionVec3().z, 2));
-        float max_distance = 1000000;
 
         // Set alpha value based on distance
         float alpha = 1.0f;
-        if (distance > thresholdDistance) {
-            alpha = 1.0f - ((distance - thresholdDistance) / (max_distance - thresholdDistance));
+        if (distance > _maxThreshold) {
+            alpha = 0.0f;  // Object is completely transparent when beyond the maximum distance
+        }
+        else if (distance > 0) {
+            alpha = 1.0f - (distance / _maxThreshold);
         }
 
         // Set object alpha value
@@ -1006,7 +1009,7 @@ namespace openspace {
             }
 
             if (_useFade) {
-                float fade = fadeObjectDependingOnDistance(data, e, _fadeThreshold);
+                float fade = fadeObjectDependingOnDistance(data, e);
                 result.push_back(fade);
             }
             else {

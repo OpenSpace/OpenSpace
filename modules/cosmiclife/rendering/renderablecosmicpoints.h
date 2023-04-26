@@ -83,7 +83,7 @@ namespace openspace {
         void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
             const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
         void updateRenderData(const RenderData& data);
-        float fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e, float thresholdDistance);
+        float fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e);
 
         glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
 
@@ -96,7 +96,6 @@ namespace openspace {
         bool _hasColorMapFile = false;
         bool _isColorMapExact = false;
         bool _hasDatavarSize = false;
-        bool _hasPolygon = false;
 
 
 
@@ -107,7 +106,7 @@ namespace openspace {
         properties::Vec3Property _frameColor;
         properties::StringProperty _spriteTexturePath;
         properties::BoolProperty _useFade;
-        properties::FloatProperty _fadeThreshold;
+        properties::FloatProperty _maxThreshold;
         properties::BoolProperty _drawElements;
         properties::BoolProperty _pixelSizeControl;
         properties::OptionProperty _colorOption;
