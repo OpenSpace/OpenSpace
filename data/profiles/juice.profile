@@ -56,7 +56,7 @@
   },
   "properties": [
     {
-      "name": "NavigationHandler.OrbitalNavigator.MinimumAllowedDistance",
+      "name": "NavigationHandler.OrbitalNavigator.LimitZoom.MinimumAllowedDistance",
       "type": "setPropertyValueSingle",
       "value": "0.0"
     },
@@ -112,11 +112,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2031-08-01T03:01:30"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 2
   }
 }
