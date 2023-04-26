@@ -5,6 +5,7 @@
     "scene/solarsystem/missions/juice/fieldlines",
     "scene/solarsystem/missions/juice/fov/janus",
     "scene/solarsystem/missions/juice/fov/navcam",
+    "scene/solarsystem/missions/juice/dashboard",
     "scene/solarsystem/missions/juice/model",
     "scene/solarsystem/missions/juice/plane",
     "scene/solarsystem/missions/juice/trail",
