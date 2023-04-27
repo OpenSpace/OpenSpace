@@ -58,6 +58,8 @@ asset.require("nightsky/nightsky")
 asset.require("customization/globebrowsing")
 asset.require("util/default_actions")
 
+asset.require("modules/exoplanets/exoplanets")
+asset.require("modules/skybrowser/skybrowser")
 
 asset.onInitialize(function ()
   openspace.globebrowsing.loadWMSServersFromFile(
