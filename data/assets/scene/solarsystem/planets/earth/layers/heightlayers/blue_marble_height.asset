@@ -12,7 +12,11 @@ local layer = {
   Identifier = "Earth_Bluemarble_Height",
   Enabled = asset.enabled,
   FilePath = texturesPath .. "earth_bluemarble_height.jpg",
-  Description = "Topographic layer from Blue Marble Next Generation"
+  Description = "Topographic layer from Blue Marble Next Generation",
+  Settings = {
+    Multiplier = 40,
+    Offset = -600
+  }
 }
 
 asset.onInitialize(function()
