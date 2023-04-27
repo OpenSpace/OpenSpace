@@ -96,12 +96,22 @@ namespace {
         "video can be set, or the video can be played as a loop in real time."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo LoopVideoInfo = {
+        "LoopVideo",
+        "Loop Video",
+        "If checked, the video is continues playing from the start when it reaches the "
+        "end of the video."
+    };
+
     struct [[codegen::Dictionary(VideoPlayer)]] Parameters {
         // [[codegen::verbatim(VideoInfo.description)]]
         std::string video;
 
         // [[codegen::verbatim(AudioInfo.description)]]
         std::optional<bool> playAudio;
+
+        // [[codegen::verbatim(LoopVideoInfo.description)]]
+        std::optional<bool> loopVideo;
 
         // [[codegen::verbatim(StartTimeInfo.description)]]
         std::optional<std::string> startTime [[codegen::datetime()]];
@@ -248,12 +258,14 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     , _goToStart(GoToStartInfo)
     , _reset(ResetInfo)
     , _playAudio(AudioInfo, false)
+    , _loopVideo(LoopVideoInfo, true)
 {
     ZoneScoped
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _videoFile = p.video;
+    _loopVideo = p.loopVideo.value_or(_loopVideo);
 
     _reset.onChange([this]() { reset(); });
     addProperty(_reset);
@@ -268,6 +280,11 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         addProperty(_pause);
         _goToStart.onChange([this]() { goToStart(); });
         addProperty(_goToStart);
+        _loopVideo.onChange([this]() { 
+            std::string newValue = _loopVideo ? "inf" : "no";
+            setPropertyAsyncMpv(newValue.c_str(), MpvKey::Loop);
+        });
+        addProperty(_loopVideo);
     }
 
     if (p.playbackMode.has_value()) {
@@ -309,7 +326,8 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         { MpvKey::Fps, "container-fps" },
         { MpvKey::IsSeeking, "seeking" },
         { MpvKey::Mute, "mute" },
-        { MpvKey::Seek, "seek" }
+        { MpvKey::Seek, "seek" },
+        { MpvKey::Loop, "loop-file" }
     };
 
     formats = {
@@ -322,7 +340,8 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         { MpvKey::Meta, MPV_FORMAT_NODE },
         { MpvKey::Fps, MPV_FORMAT_DOUBLE },
         { MpvKey::IsSeeking, MPV_FORMAT_FLAG },
-        { MpvKey::Mute, MPV_FORMAT_STRING }
+        { MpvKey::Mute, MPV_FORMAT_STRING },
+        { MpvKey::Loop, MPV_FORMAT_STRING }
     };
 }
 
@@ -373,12 +392,19 @@ void VideoPlayer::initializeMpv() {
     // Avoiding async calls in uninitialized state
 
     // Loop video
-    // https://mpv.io/manual/master/#options-loop
-    setPropertyStringMpv("loop", "");
+    if (_loopVideo && _playbackMode == PlaybackMode::RealTimeLoop) {
+        // https://mpv.io/manual/master/#options-loop
+        setPropertyStringMpv("loop-file", "inf");
+    }
 
     // Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
     // https://mpv.io/manual/master/#options-gpu-api
     setPropertyStringMpv("gpu-api", "opengl");
+
+    // Keep open the file. Even when we reach EOF we want to keep the video player 
+    // running, in case the user starts the video from the beginning again
+    // https://mpv.io/manual/stable/#options-keep-open
+    setPropertyStringMpv("keep-open", "yes");
 
     // Enable hardware decoding
     // https://mpv.io/manual/master/#options-hwdec
