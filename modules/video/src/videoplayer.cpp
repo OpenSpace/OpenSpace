@@ -269,8 +269,20 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
     _reset.onChange([this]() { reset(); });
     addProperty(_reset);
-    _playAudio.onChange([this]() { toggleMute(); });
-    addProperty(_playAudio);
+   
+    if (p.playbackMode.has_value()) {
+        switch (*p.playbackMode) {
+        case Parameters::PlaybackMode::RealTimeLoop:
+            _playbackMode = PlaybackMode::RealTimeLoop;
+            break;
+        case Parameters::PlaybackMode::MapToSimulationTime:
+            _playbackMode = PlaybackMode::MapToSimulationTime;
+            break;
+        default:
+            LERROR("Missing playback mode in VideoTileProvider");
+            throw ghoul::MissingCaseException();
+        }
+    }
 
     if (_playbackMode == PlaybackMode::RealTimeLoop) {
         // Video interaction. Only valid for real time looping
@@ -285,20 +297,9 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
             setPropertyAsyncMpv(newValue.c_str(), MpvKey::Loop);
         });
         addProperty(_loopVideo);
-    }
-
-    if (p.playbackMode.has_value()) {
-        switch (*p.playbackMode) {
-            case Parameters::PlaybackMode::RealTimeLoop:
-                _playbackMode = PlaybackMode::RealTimeLoop;
-                break;
-            case Parameters::PlaybackMode::MapToSimulationTime:
-                _playbackMode = PlaybackMode::MapToSimulationTime;
-                break;
-            default:
-                LERROR("Missing playback mode in VideoTileProvider");
-                throw ghoul::MissingCaseException();
-        }
+        // Audio only makes sense when the video is playing in real time
+        _playAudio.onChange([this]() { toggleMute(); });
+        addProperty(_playAudio);
     }
 
     if (_playbackMode == PlaybackMode::MapToSimulationTime) {
