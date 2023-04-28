@@ -423,6 +423,9 @@ void PlanetsSonification::onEnabledChanged() {
             );
         }
     }
+    else {
+        stop();
+    }
 }
 
 void PlanetsSonification::onToggleAllChanged() {

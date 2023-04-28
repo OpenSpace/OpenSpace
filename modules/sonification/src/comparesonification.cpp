@@ -275,6 +275,9 @@ void CompareSonification::onEnabledChanged() {
             );
         }
     }
+    else {
+        stop();
+    }
 }
 
 void CompareSonification::onFirstChanged() {

@@ -201,6 +201,9 @@ void SolarSonification::onEnabledChanged() {
             );
         }
     }
+    else {
+        stop();
+    }
 }
 
 void SolarSonification::onToggleAllChanged() {
