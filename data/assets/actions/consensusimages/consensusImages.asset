@@ -1,0 +1,29 @@
+local consensusImages = {
+    Identifier = "os.consensusImages",
+    Name = "Turn on and off Primates Consensus images",
+    Command = [[
+      if (openspace.getPropertyValue("Scene.primates_consensus_species1.Renderable.Enabled") == false) then
+        openspace.setPropertyValue("Scene.primates_consensus_species*.Renderable.Enabled", true)
+      else
+        openspace.setPropertyValue("Scene.primates_consensus_species*.Renderable.Enabled", false)
+      end
+    ]],
+    Documentation = [[Turn on and off Primates Consensus images]],
+    GuiPath = "/ConsensusImages",
+    IsLocal = true
+  }
+  asset.export("consensusImages", consensusImages.Identifier)
+  
+  asset.onInitialize(function()
+      openspace.action.registerAction(consensusImages)
+    end)
+  
+    asset.meta = {
+      Name = "Actions - Toggle current Trails",
+      Version = "1.0",
+      Description = "Asset providing actions to toggle trails",
+      Author = "OpenSpace Team",
+      URL = "http://openspaceproject.com",
+      License = "MIT license"
+    }
+  

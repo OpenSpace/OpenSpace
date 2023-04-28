@@ -63,7 +63,7 @@ Fragment getFragment() {
   float v = texCoord.y;
 
   if (u < borderWidth || u > 1.0 - borderWidth || v < borderWidth || v > 1.0 - borderWidth) {
-    frag.color = frame_col;
+    frag.color = frame_col;  // set the border color
   }
   else {
     frag.color = fullColor; // set the color to the original fullColor
