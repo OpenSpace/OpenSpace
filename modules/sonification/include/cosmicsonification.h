@@ -80,7 +80,7 @@ private:
     const double DistancePrecision = 0.1;
 
     // Number of samples to smooth out the data for the sonification
-    static const int NumSamples = 10;
+    static const int NumSamples = 60;
 
     struct LabelsData {
     public:

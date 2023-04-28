@@ -94,7 +94,7 @@ private:
     static const int RingsIndex = 5;
 
     // Number of samples to smooth out the data for the sonification
-    static const int NumSamples = 10;
+    static const int NumSamples = 60;
 
     // Struct to hold data for all the planets and moons
     struct Moon {
