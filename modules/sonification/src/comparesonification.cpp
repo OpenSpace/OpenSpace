@@ -182,7 +182,7 @@ std::vector<int> CompareSonification::createSettingsVector() const {
 }
 
 void CompareSonification::sendSettings() {
-    if (!_enabled) {
+    if (!_enabled && !_isTurningOff) {
         return;
     }
 
@@ -194,6 +194,10 @@ void CompareSonification::sendSettings() {
     data[2] = createSettingsVector();
 
     _connection->send(label, data);
+
+    if (_isTurningOff) {
+        _isTurningOff = false;
+    }
 }
 
 void CompareSonification::planetSelectionChanged(
@@ -300,6 +304,7 @@ void CompareSonification::onToggleAllChanged() {
 void CompareSonification::update(const Camera* camera) {}
 
 void CompareSonification::stop() {
+    _isTurningOff = true;
     _toggleAll = false;
 
     _firstPlanet = 0;

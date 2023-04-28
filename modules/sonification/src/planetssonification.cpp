@@ -677,7 +677,7 @@ void PlanetsSonification::update(const Camera* camera) {
     bool solarEnabled = solar->enabled();
     bool compareEnabled = compare->enabled();
 
-    if (!_enabled && !solarEnabled && !compareEnabled) {
+    if (!_enabled && !solarEnabled && !compareEnabled && !_isTurningOff) {
         return;
     }
     else if (!_enabled && (solarEnabled || compareEnabled)) {
@@ -713,9 +713,14 @@ void PlanetsSonification::update(const Camera* camera) {
             sendSettings(i);
         }
     }
+
+    if (_isTurningOff) {
+        _isTurningOff = false;
+    }
 }
 
 void PlanetsSonification::stop() {
+    _isTurningOff = true;
     _toggleAll = false;
 }
 

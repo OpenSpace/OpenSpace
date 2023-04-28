@@ -174,6 +174,7 @@ protected:
     std::string _identifier;
     properties::BoolProperty _enabled;
     OscConnection* _connection = nullptr;
+    bool _isTurningOff = false;
 
 private:
     /**

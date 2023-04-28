@@ -154,7 +154,7 @@ std::vector<int> SolarSonification::createSettingsVector() const {
 }
 
 void SolarSonification::sendSettings() {
-    if (!_enabled) {
+    if (!_enabled && !_isTurningOff) {
         return;
     }
 
@@ -164,6 +164,10 @@ void SolarSonification::sendSettings() {
     data[0] = createSettingsVector();
 
     _connection->send(label, data);
+
+    if (_isTurningOff) {
+        _isTurningOff = false;
+    }
 }
 
 void SolarSonification::onEnabledChanged() {
@@ -220,6 +224,7 @@ void SolarSonification::onToggleAllChanged() {
 void SolarSonification::update(const Camera* camera) {}
 
 void SolarSonification::stop() {
+    _isTurningOff = true;
     _toggleAll = false;
 }
 
