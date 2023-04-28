@@ -1,6 +1,6 @@
 {
   "assets": [
-    "base_blank",
+    "base",
     "cosmic_view/birds_UMAP/branches_anas",
     "cosmic_view/birds_UMAP/clades",
     "cosmic_view/birds_UMAP/consensus_species",
@@ -17,7 +17,8 @@
     "cosmic_view/superfamily",
     "events/toggle_image_trail",
     "modules/sonification/actions",
-    "modules/sonification/cosmic"
+    "modules/sonification/cosmic",
+    "modules/sonification/planets"
   ],
   "camera": {
     "aim": "",
@@ -80,6 +81,164 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "properties": [
+    {
+      "name": "Scene.birds_lineage_29.Renderable.ScaleFactor",
+      "type": "setPropertyValueSingle",
+      "value": "66"
+    },
+    {
+      "name": "Scene.birds_consensus_species.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.birds_consensus_species.Renderable.DrawElements",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.birds_consensus_species.Renderable.TextSize",
+      "type": "setPropertyValueSingle",
+      "value": "1.2"
+    },
+    {
+      "name": "Scene.lineage_17.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+
+    {
+      "name": "Scene.Cercopithecoidea_volume.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Hominoidea_volume.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Platyrrhini_volume.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Strepsirrhini_volume.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Platyrrhini_volume.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "{planet_solarSystem}.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "{planetTrail_solarSystem}.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "{moon_solarSystem}.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "{moonTrail_solarSystem}.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Moon.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.MoonTrail.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.VenusAtmosphere.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.MarsAtmosphere.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.EarthAtmosphere.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.TitanAtmosphere.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.SunGlare.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.MilkyWayGalaxyImage.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.MilkyWay.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.MilkyWayVolume.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Stars.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.SunStar.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Planck.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.SloanDigitalSkySurvey.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.TullyGalaxies.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.TullyGalaxiesImages.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Quasars.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    }
+  ],
   "time": {
     "type": "relative",
     "value": "-1d"
