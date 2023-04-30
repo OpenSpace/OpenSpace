@@ -56,17 +56,25 @@ Fragment getFragment() {
   float textureOpacity = dot(fullColor.rgb, vec3(fullColor.a));
 
   Fragment frag;
+  
+  // Define the outline width and color
+  float outlineWidth = 0.03;  // Adjust this value as needed
+  vec4 outlineColor = vec4(frameColor, fullColor.a);  // Color connected to DNA sequences
 
-  vec4 frame_col = vec4(frameColor, fullColor.a);
-  float borderWidth = 0.05;
-  float u = texCoord.x;
-  float v = texCoord.y;
-
-  if (u < borderWidth || u > 1.0 - borderWidth || v < borderWidth || v > 1.0 - borderWidth) {
-    frag.color = frame_col;  // set the border color
+  // Apply the outline effect if any of the neighboring pixels are black
+  if (all(equal(texture(spriteTexture, vec2(texCoord.x - outlineWidth, texCoord.y)), vec4(0.0))) ||
+      all(equal(texture(spriteTexture, vec2(texCoord.x + outlineWidth, texCoord.y)), vec4(0.0))) ||
+      all(equal(texture(spriteTexture, vec2(texCoord.x, texCoord.y - outlineWidth)), vec4(0.0))) ||
+      all(equal(texture(spriteTexture, vec2(texCoord.x, texCoord.y + outlineWidth)), vec4(0.0))) ) {
+    
+    frag.color = outlineColor;
   }
   else {
-    frag.color = fullColor; // set the color to the original fullColor
+    frag.color = fullColor;
+  }
+
+  if (fullColor.a < 0.01) {
+    discard;
   }
 
   frag.depth = vs_screenSpaceDepth;
