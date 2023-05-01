@@ -27,7 +27,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Is Enabled",
+        "Enabled",
         "This setting determines whether this object will be visible or not",
         // @VISIBILITY(3.4)
         openspace::properties::Property::Visibility::AdvancedUser

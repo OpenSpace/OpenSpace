@@ -687,7 +687,7 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
                         return;
                     } 
                 }
-                catch (const std::runtime_error& e) {
+                catch (const std::runtime_error&) {
                     // Ignore an exception here because clicking the edit button will
                     // bring up an explanatory error message
                 }

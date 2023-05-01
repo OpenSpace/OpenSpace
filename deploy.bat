@@ -32,7 +32,7 @@ cmake^
   --parallel^
   -- /p:CL_MPcount=16
 
-
+if %ERRORLEVEL% NEQ 0 EXIT /B
 
 echo ### Save the PDB files
 "C:\Program Files\7-Zip\7z.exe" a pdbs.zip bin/RelWithDebInfo/*.pdb

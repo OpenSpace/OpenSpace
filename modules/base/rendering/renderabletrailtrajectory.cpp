@@ -239,7 +239,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         unsigned int stopIndex = std::min(nextIndex, _numberOfVertices);
 
         // Calculate all vertex positions
-        for (int i = startIndex; i < stopIndex; ++i) {
+        for (unsigned int i = startIndex; i < stopIndex; ++i) {
             const glm::vec3 p = _translation->position({
                 {},
                 Time(_start + i * _totalSampleInterval),

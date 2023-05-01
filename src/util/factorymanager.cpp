@@ -42,43 +42,19 @@ namespace {
 using namespace openspace;
 using namespace openspace::documentation;
 
-void sortJson(nlohmann::json& json) {
-    std::sort(
-        json.begin(),
-        json.end(),
-        [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
-            std::string lhsString = lhs["Name"];
-            std::string rhsString = rhs["Name"];
-            std::transform(
-                lhsString.begin(),
-                lhsString.end(),
-                lhsString.begin(),
-                [](unsigned char c) { return std::tolower(c); }
-            );
-            std::transform(
-                rhsString.begin(),
-                rhsString.end(),
-                rhsString.begin(),
-                [](unsigned char c) { return std::tolower(c); }
-            );
-
-            return rhsString > lhsString;
-        });
-}
-
 nlohmann::json generateJsonDocumentation(const Documentation& d) {
     nlohmann::json json;
 
-    json["Name"] = d.name;
-    json["Identifier"] = d.id;
-    json["Members"] = nlohmann::json::array();
+    json["name"] = d.name;
+    json["identifier"] = d.id;
+    json["members"] = nlohmann::json::array();
 
     for (const DocumentationEntry& p : d.entries) {
         nlohmann::json entry;
-        entry["Name"] = p.key;
-        entry["Optional"] = p.optional.value;
-        entry["Type"] = p.verifier->type();
-        entry["Documentation"] = p.documentation;
+        entry["name"] = p.key;
+        entry["optional"] = p.optional.value;
+        entry["type"] = p.verifier->type();
+        entry["documentation"] = p.documentation;
 
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
@@ -92,28 +68,28 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
             );
 
             if (it == documentations.end()) {
-                entry["Reference"]["Found"] = false;
+                entry["reference"]["found"] = false;
             }
             else {
                 nlohmann::json reference;
-                reference["Found"] = true;
-                reference["Name"] = it->name;
-                reference["Identifier"] = rv->identifier;
+                reference["found"] = true;
+                reference["name"] = it->name;
+                reference["identifier"] = rv->identifier;
 
-                entry["Reference"] = reference;
+                entry["reference"] = reference;
             }
         }
         else if (tv) {
             nlohmann::json json = generateJsonDocumentation(tv->documentations);
             // We have a TableVerifier, so we need to recurse
-            entry["Restrictions"] = json;
+            entry["restrictions"] = json;
         }
         else {
-            entry["Description"] = p.verifier->documentation();
+            entry["description"] = p.verifier->documentation();
         }
-        json["Members"].push_back(entry);
+        json["members"].push_back(entry);
     }
-    sortJson(json["Members"]);
+    sortJson(json["members"], "name");
 
     return json;
 }
@@ -130,15 +106,7 @@ FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
     ghoul_assert(!type.empty(), "Type must not be empty");
 }
 
-FactoryManager::FactoryManager()
-    : DocumentationGenerator(
-        "Factory Documentation",
-        "factory",
-        {
-            { "factoryTemplate", "${WEB}/documentation/factory.hbs" }
-        }
-    )
-{}
+FactoryManager::FactoryManager() {}
 
 void FactoryManager::initialize() {
     ghoul_assert(!_manager, "Factory Manager must not have been initialized");
@@ -172,32 +140,14 @@ FactoryManager& FactoryManager::ref() {
     return *_manager;
 }
 
-std::string FactoryManager::generateJson() const {
-    nlohmann::json json;
-
-    for (const FactoryInfo& factoryInfo : _factories) {
-        nlohmann::json factory;
-        factory["Name"] = factoryInfo.name;
-
-        ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
-        const std::vector<std::string>& registeredClasses = f->registeredClasses();
-        for (const std::string& c : registeredClasses) {
-            json["Classes"].push_back(c);
-        }
-        json["Data"].push_back(factory);
-    }
-
-    return json.dump();
-}
-
-nlohmann::json FactoryManager::generateJsonJson() const {
+nlohmann::json FactoryManager::generateJson() const {
     nlohmann::json json;
     std::vector<Documentation> docs = DocEng.documentations(); 
 
     for (const FactoryInfo& factoryInfo : _factories) {
         nlohmann::json factory;
-        factory["Name"] = factoryInfo.name;
-        factory["Identifier"] = "category" + factoryInfo.name;
+        factory["name"] = factoryInfo.name;
+        factory["identifier"] = "category" + factoryInfo.name;
 
         ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
         // Add documentation about base class
@@ -209,15 +159,15 @@ nlohmann::json FactoryManager::generateJsonJson() const {
             });
         if (factoryDoc != docs.end()) {
             nlohmann::json documentation = generateJsonDocumentation(*factoryDoc);
-            factory["Classes"].push_back(documentation);
+            factory["classes"].push_back(documentation);
             // Remove documentation from list check at the end if all docs got put in
             docs.erase(factoryDoc);          
         }
         else {
             nlohmann::json documentation;
-            documentation["Name"] = factoryInfo.name;
-            documentation["Identifier"] = factoryInfo.name;
-            factory["Classes"].push_back(documentation);
+            documentation["name"] = factoryInfo.name;
+            documentation["identifier"] = factoryInfo.name;
+            factory["classes"].push_back(documentation);
         }
 
         // Add documentation about derived classes
@@ -231,32 +181,37 @@ nlohmann::json FactoryManager::generateJsonJson() const {
                 });
             if (found != docs.end()) {
                 nlohmann::json documentation = generateJsonDocumentation(*found);
-                factory["Classes"].push_back(documentation);
+                factory["classes"].push_back(documentation);
                 docs.erase(found);
             }
             else {
                 nlohmann::json documentation;
-                documentation["Name"] = c;
-                documentation["Identifier"] = c;
-                factory["Classes"].push_back(documentation);
+                documentation["name"] = c;
+                documentation["identifier"] = c;
+                factory["classes"].push_back(documentation);
             }
         }
-        sortJson(factory["Classes"]);
+        sortJson(factory["classes"], "name");
         json.push_back(factory);
     }
     // Add all leftover docs
     nlohmann::json leftovers;
-    leftovers["Name"] = "Other";
-    leftovers["Identifier"] = "other";
+    leftovers["name"] = "Other";
+    leftovers["identifier"] = "other";
 
     for (const Documentation& doc : docs) {
-        leftovers["Classes"].push_back(generateJsonDocumentation(doc));
+        leftovers["classes"].push_back(generateJsonDocumentation(doc));
     }
-    sortJson(leftovers["Classes"]);
+    sortJson(leftovers["classes"], "name");
     json.push_back(leftovers);
-    sortJson(json);
+    sortJson(json, "name");
+
     // I did not check the output of this for correctness ---abock
-    return json;
+    nlohmann::json result;
+    result["name"] = "Asset Types";
+    result["data"] = json;
+        
+    return result;
 }
 
 }  // namespace openspace

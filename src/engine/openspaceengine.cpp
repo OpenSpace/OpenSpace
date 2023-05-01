@@ -1039,47 +1039,34 @@ void OpenSpaceEngine::writeDocumentation() {
 
     // Start the async requests as soon as possible so they are finished when we need them
     std::future<nlohmann::json> settings = std::async(
-        &properties::PropertyOwner::generateJsonJson,
+        &properties::PropertyOwner::generateJson,
         global::rootPropertyOwner
     );
 
     std::future<nlohmann::json> scene = std::async(
-        &properties::PropertyOwner::generateJsonJson,
+        &properties::PropertyOwner::generateJson,
         _scene.get()
     );
-
-
-    DocEng.addHandlebarTemplates(global::scriptEngine->templatesToRegister());
-    DocEng.addHandlebarTemplates(FactoryManager::ref().templatesToRegister());
-    DocEng.addHandlebarTemplates(DocEng.templatesToRegister());
-
-    nlohmann::json scripting;
-    scripting["Name"] = "Scripting API";
-    scripting["Data"] = global::scriptEngine->generateJsonJson();
-
-    nlohmann::json factory;
-    factory["Name"] = "Asset Types";
-    factory["Data"] = FactoryManager::ref().generateJsonJson();
-
-    nlohmann::json keybindings;
-    keybindings["Name"] = "Keybindings";
-    keybindings["Keybindings"] = global::keybindingManager->generateJsonJson();
-
     SceneLicenseWriter writer;
-    nlohmann::json license;
-    license["Name"] = "Licenses";
-    license["Data"] = writer.generateJsonJson();
 
-    nlohmann::json sceneProperties;
-    sceneProperties["Name"] = "Settings";
-    sceneProperties["Data"] = settings.get();
-
-    nlohmann::json sceneGraph;
-    sceneGraph["Name"] = "Scene";
-    sceneGraph["Data"] = scene.get();
+    nlohmann::json scripting = global::scriptEngine->generateJson();
+    nlohmann::json factory = FactoryManager::ref().generateJson();
+    nlohmann::json keybindings = global::keybindingManager->generateJson();
+    nlohmann::json license = writer.generateJsonGroupedByLicense();
+    nlohmann::json sceneProperties = settings.get();
+    nlohmann::json sceneGraph = scene.get();
+    
+    sceneProperties["name"] = "Settings";
+    sceneGraph["name"] = "Scene";
+    
+    // Add this here so that the generateJson function is the same as before to ensure
+    // backwards compatibility
+    nlohmann::json scriptingResult;
+    scriptingResult["name"] = "Scripting API";
+    scriptingResult["data"] = scripting;
 
     nlohmann::json documentation = { 
-        sceneGraph, sceneProperties, keybindings, license, scripting, factory 
+        sceneGraph, sceneProperties, keybindings, license, scriptingResult, factory
     };
 
     nlohmann::json result;

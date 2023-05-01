@@ -13,7 +13,7 @@ local Mission = {
       },
       {
         Name = "Drive Test",
-        TimeRange = { Start = "2021 MAR 07" }
+        TimeRange = { Start = "2021 MAR 07" },
         Image = "http://data.openspaceproject.com/missions/perseverance/PIA23729-MarsPerseveranceRover-DriveTest-20210307.jpg" 
       },
       {

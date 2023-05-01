@@ -84,4 +84,29 @@ std::string formatJsonNumber(double d) {
     return std::to_string(d);
 }
 
+void sortJson(nlohmann::json& json, const std::string& key) {
+    std::sort(
+        json.begin(),
+        json.end(),
+        [&key](const nlohmann::json& lhs, const nlohmann::json& rhs) {
+            std::string lhsString = lhs[key];
+            std::string rhsString = rhs[key];
+            std::transform(
+                lhsString.begin(),
+                lhsString.end(),
+                lhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+            std::transform(
+                rhsString.begin(),
+                rhsString.end(),
+                rhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+
+            return rhsString > lhsString;
+        }
+    );
+}
+
 }  // namespace openspace
