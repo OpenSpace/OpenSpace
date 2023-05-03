@@ -39,18 +39,24 @@ namespace openspace {
     class FieldlinesState;
 
     namespace fls {
-
         bool convertCdfToMatchingFieldlinesState(
-            FieldlinesState& state, 
+            FieldlinesState& state,
             ccmc::Kameleon* kameleon,
             const std::vector<glm::vec3>& seedPoints,
             const std::vector<double>& birthTimes,
-            double manualTimeOffset, 
+            double manualTimeOffset,
             const std::string& tracingVar,
-            std::vector<std::string>& extraVars, 
+            std::vector<std::string>& extraVars,
             std::vector<std::string>& extraMagVars,
-            const size_t nPointsOnPathLine, 
+            const size_t nPointsOnPathLine,
             const size_t nPointsOnFieldLines);
+
+        std::vector<glm::vec3> getPositonsOfSeedPointFieldline(
+            const glm::vec3& seedPoint,
+            const std::string& tracingVar,
+            ccmc::Kameleon* kameleon,
+            const size_t nPointsOnPathLine
+        );
 
     } // namespace fls
 } // namespace openspace

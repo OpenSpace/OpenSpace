@@ -307,15 +307,19 @@ namespace openspace {
             absPath(_colorTablePaths[0]).string()
             );
 
+        // Create filePath where seedPoint file should be saved if API is used
         std::filesystem::path pathToDownloadTo = initializeSyncDirectory
         (
             "seed_points",
             "dayside_seedpoints.csv"
         );
+
         // Get CSV file from API
         if (_useSeedPointProvider) {
             getSeedPointsFromAPI("http://localhost:5000/get_csv_file", pathToDownloadTo);
         }
+
+        // Use provided file with seedpoints
         else if (
             !_useSeedPointProvider &&
             _providedSeedFilePath.empty() //&&
@@ -758,14 +762,14 @@ namespace openspace {
             glm::vec3 seedPointVector;
             seedPointVector.x = temp.x;
             seedPointVector.y = temp.y;
-            seedPointVector.z = temp.z + 2.5;
+            seedPointVector.z = temp.z;
             seedPoints.push_back(seedPointVector);
         }
         else if(temp.fieldLineStatus == "OPEN_SOUTH"){
             glm::vec3 seedPointVector;
             seedPointVector.x = temp.x;
             seedPointVector.y = temp.y;
-            seedPointVector.z = temp.z - 2.5;
+            seedPointVector.z = temp.z;
             seedPoints.push_back(seedPointVector);
         }
         else{
@@ -825,9 +829,8 @@ namespace openspace {
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data =
             extractSeedPointsFromCSVFile(filePath);
 
-
         // testfactor
-        double factor = 0.1;
+        double factor = 0.6;
 
         int numberOfFieldlines = int(data.size() * factor);
 
@@ -843,6 +846,7 @@ namespace openspace {
         int bestSetOfSeedPointsIndex = 0;
 
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSeedpoints;
+
 
         // Iterate through vector with seedpoints
         for (int i = 0; i < numberOfFieldlinesOnSide; i++)
@@ -907,75 +911,51 @@ namespace openspace {
             }
         }
 
-
-        // TODO function that removes seedpoints from created vector data
-        // How many points do we want to try and visualize?
-        //
-        // if AMOUNT_OF_FIELDLINES == many
-        //      const factor = 0.5
-        //
-        // numberOfFieldlines = int(data.size() * factor)
-        //
-        // numberOfFieldlinesOnSide = numberOfFieldlines / 2
-        //
-        // howFarToTheSideLeft = vector[vector.size()-1].y
-        // howFarToTheSideRight = vector[0].y
-        //
-        // stepLengthRight = howFarToTheSideRight / numberOfFieldlinesOnSide
-        // stepLengthLeft = howFarToTheSideLeft / numberOfFieldlinesOnSide
-        //
-        // y  = 0
-        // TODO modify
-        //for (int i = 0; i < numberOfFieldlinesOnSide; i++) {
-        //    double find = stepLengthRight * i;
-        //    auto& seedPoints = data[i].SetOfSeedPoints.IMF.SeedPointInformation.y;
-        //    int left = 0, right = seedPoints.size() - 1;
-        //    int closestIndex = -1;
-        //    while (left <= right) {
-        //        int mid = (left + right) / 2;
-        //        if (seedPoints[mid] == find) {
-        //            closestIndex = mid;
-        //            break;
-        //        }
-        //        else if (seedPoints[mid] < find) {
-        //            closestIndex = mid;
-        //            left = mid + 1;
-        //        }
-        //        else {
-        //            right = mid - 1;
-        //        }
-        //    }
-        //    // save data.y closest to find
-        //    if (closestIndex == -1) {
-        //        // find is outside the range of seed points
-        //        // do something to handle this case
-        //    }
-        //    else if (closestIndex == 0) {
-        //        // closest value is the first value in the array
-        //        // do something to handle this case
-        //    }
-        //    else if (closestIndex == seedPoints.size() - 1) {
-        //        // closest value is the last value in the array
-        //        // do something to handle this case
-        //    }
-        //    else {
-        //        double dist1 = std::abs(seedPoints[closestIndex] - find);
-        //        double dist2 = std::abs(seedPoints[closestIndex + 1] - find);
-        //        if (dist1 <= dist2) {
-        //            // closest value is seedPoints[closestIndex]
-        //            // do something with data[i].SetOfSeedPoints.IMF.SeedPointInformation.y[closestIndex]
-        //        }
-        //        else {
-        //            // closest value is seedPoints[closestIndex + 1]
-        //            // do something with data[i].SetOfSeedPoints.IMF.SeedPointInformation.y[closestIndex + 1]
-        //        }
-        //    }
-        //}
-
-
-        // Iterate through vector data and pushback seedpoints of intrest
-        // to seedPoints and birthTimes for rendering
         addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSeedpoints);
+
+        // TEMP!!!! Keep only one set of the chosen seed points since it doesnt work having several
+        //seedPoints.erase(seedPoints.begin(), seedPoints.end() - 24);
+        //seedPoints.erase(seedPoints.begin() + 4, seedPoints.end());
+
+        // Test to pick a point
+        const glm::vec3& testPoint = seedPoints[0];
+
+        // hard coded path to cdf file
+        std::string cdfPathTemp = "C:/Dev/OpenSpaceLocalData/simonmans/3d__var_1_e20000101-020000-000.out.cdf";
+
+        size_t _nPointsOnPathLine = 200;
+        std::string _tracingVariable = "u_perp_b";
+        // create kameleon
+        std::unique_ptr<ccmc::Kameleon> kameleon =
+            kameleonHelper::createKameleonObject(cdfPathTemp);
+
+        std::unique_ptr<ccmc::Interpolator> interpolator =
+            std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
+
+        std::vector<glm::vec3> testFieldlinePositions =
+            fls::getPositonsOfSeedPointFieldline(
+                testPoint,
+                _tracingVariable,
+                kameleon.get(),
+                _nPointsOnPathLine
+            );
+
+        for (size_t i = 0; i < testFieldlinePositions.size(); i++)
+        {
+            std::cout << "First postion on line: " << testFieldlinePositions[0] << std::endl;
+            std::cout << "Last position on line: " << testFieldlinePositions[testFieldlinePositions.size() - 1] << std::endl;
+        }
+
+
+        // Look at the first and last element of the vector
+        //std::cout << " ------------------------------------------------- " << std::endl;
+        //std::cout << "First point of the fieldline: " << testFieldlinePositions[0] << std::endl;
+        //std::cout << "Last point of the fieldline: " << testFieldlinePositions[testFieldlinePositions.size()] << std::endl;
+        //std::cout << "The actual point that the fieldline was created from " << seedPoints[0] << std::endl;
+        //std::cout << " ------------------------------------------------- " << std::endl;
+
+
+        // ALGORITHM
 
         for (int i = 0; i < seedPoints.size(); i++)
         {
@@ -987,7 +967,6 @@ namespace openspace {
             std::cout << "birthtime " << i << ": " << birthTimes[i] << std::endl;
         }
     }
-
 
     /**
     * Extracts seed points from .txt file. Each matching fieldline pair is created

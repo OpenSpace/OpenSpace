@@ -8,6 +8,8 @@
 #include <modules/fieldlinessequence/util/commons.h>
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
+#include <iostream>
+
 
 namespace openspace::fls {
 
@@ -27,11 +29,14 @@ namespace openspace::fls {
         const std::vector<ccmc::Point3f>& firstPart,
         const std::vector<ccmc::Point3f>& secondPart);
 
+    std::vector<glm::vec3> convertPoint3fToVec3(
+        const std::vector<ccmc::Point3f>& point3f);
+
     bool traceAndAddMatchingLinesToState(ccmc::Kameleon* kameleon,
         const std::vector<seedPointPair>& matchingSeedPoints,
         const std::vector<double>& birthTimes,
         const std::string& tracingVar,
-        FieldlinesState& state, 
+        FieldlinesState& state,
         const size_t nPointsOnPathLine,
         const size_t nPointsOnFieldlines
     );
@@ -56,7 +61,7 @@ namespace openspace::fls {
         std::vector<std::string>& extraVars,
         std::vector<std::string>& extraMagVars,
         const size_t nPointsOnPathLine,
-        const size_t nPointsOnFieldLines) 
+        const size_t nPointsOnFieldLines)
     {
 
         // TODO: Check if an even amount of seed points
@@ -67,34 +72,93 @@ namespace openspace::fls {
 
         bool isSuccessful = openspace::fls::traceAndAddMatchingLinesToState(
             kameleon,
-            matchingSeedPoints, 
+            matchingSeedPoints,
             birthTimes,
-            tracingVar, 
+            tracingVar,
             state,
-            nPointsOnPathLine, 
+            nPointsOnPathLine,
             nPointsOnFieldLines
         );
 
         return isSuccessful;
     }
 
+    // E and A modifications
+    // // TODO: Move or create relevant cpp file for this functionality
+    // Begin --------
+
+    /*
+    * Traces the field line of a given seedpoint and returns the
+    * points postions of that fieldline
+    */
+    std::vector<glm::vec3> getPositonsOfSeedPointFieldline(
+        const glm::vec3& seedPoint,
+        const std::string& tracingVar,
+        ccmc::Kameleon* kameleon,
+        const size_t nPointsOnPathLine)
+    {
+        // For each seedpoint, one line gets created, tracked with u perpendicular b.
+        // then for each, and at each, vertex on that pathline, fieldlines are tracked
+        if (tracingVar != "u_perp_b") {
+            std::cout << "aint working " << std::endl;
+        }
+        if (!kameleon->loadVariable("b")) {
+            LERROR("Failed to load tracing variable: b");
+            std::cout << "aint working " << std::endl;
+        }
+        if (!kameleon->loadVariable("u")) {
+            LERROR("Failed to load tracing variable: u");
+            std::cout << "aint working " << std::endl;
+        }
+
+        std::unique_ptr<ccmc::Interpolator> interpolator =
+            std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
+
+        ccmc::Tracer tracer(kameleon, interpolator.get());
+
+        //float innerBoundaryLimit = 0.5f;
+        //tracer.setInnerBoundary(innerBoundaryLimit);
+
+        // Trace the seedpoints fieldline and return it
+        ccmc::Fieldline seedPointFieldline = traceAndCreateMappedPathLine(
+            tracingVar,
+            tracer,
+            seedPoint,
+            nPointsOnPathLine,
+            ccmc::Tracer::Direction::FOWARD); // Change back to foward
+
+        // Get vector with positions of the fieldline with GetPositions
+        std::vector<ccmc::Point3f> seedPointFieldlinePositions
+            = seedPointFieldline.getPositions();
+
+
+        std::vector<glm::vec3> seedPointFieldlinePositionsVec3
+            = convertPoint3fToVec3(seedPointFieldlinePositions);
+
+        return seedPointFieldlinePositionsVec3;
+    }
+
+    // E and A modifications
+    // End --------
+
     /**
     * Uses the tracer to trace and create a ccmc::Fieldline and returns.
     * Default direction is forward tracing
-    */ 
+    */
     ccmc::Fieldline traceAndCreateMappedPathLine(const std::string& tracingVar,
-        ccmc::Tracer &tracer, 
+        ccmc::Tracer &tracer,
         const glm::vec3& seedPoint,
         const size_t nPointsOnPathLine,
         ccmc::Tracer::Direction direction) {
-        
+
+
         ccmc::Fieldline uPerpBPathLine;
         uPerpBPathLine = tracer.unidirectionalTrace(
             tracingVar,
             seedPoint.x,
             seedPoint.y,
             seedPoint.z,
-            direction
+            ccmc::Tracer::Direction::FOWARD
         );
 
         if (direction == ccmc::Tracer::Direction::REVERSE) {
@@ -109,7 +173,7 @@ namespace openspace::fls {
 
         return mappedPath;
     }
-    
+
     /**
     * Concatenates the two vectors of pathline vertices into a new vector.
     * Converts from point3f to glm::vec3.
@@ -127,6 +191,21 @@ namespace openspace::fls {
         }
 
         return concatenated;
+    }
+
+    /**
+    * Concatenates the two vectors of pathline vertices into a new vector.
+    * Converts from point3f to glm::vec3.
+    */
+    std::vector<glm::vec3> convertPoint3fToVec3(
+        const std::vector<ccmc::Point3f>& point3f) {
+
+        std::vector<glm::vec3> vec3;
+        for (const ccmc::Point3f& p : point3f) {
+            vec3.emplace_back(p.component1, p.component2, p.component3);
+        }
+
+        return vec3;
     }
 
     bool traceAndAddMatchingLinesToState(ccmc::Kameleon* kameleon,
@@ -197,11 +276,11 @@ namespace openspace::fls {
             // compute time
             size_t lengthToConcatenation1 = pathPositions11.size();
             size_t lengthToConcatenation2 = pathPositions21.size();
-            
+
             // Here we concatenate the pathline pairs 11 + 12 and 21 + 22
             std::vector<glm::vec3> pathLine1 = concatenatePathLines(pathPositions11, pathPositions12);
             std::vector<glm::vec3> pathLine2 = concatenatePathLines(pathPositions21, pathPositions22);
-            
+
             std::vector<glm::vec3>::const_iterator concatenationPointPathLine1 =
                 pathLine1.begin() + lengthToConcatenation1;
 
@@ -210,12 +289,12 @@ namespace openspace::fls {
 
             double birthTime = birthTimes[i];
 
-            // Here all points on the pathLine will be used at seedpoints for 
+            // Here all points on the pathLine will be used at seedpoints for
             // the actual fieldlines (traced with "b" by default)
             // - 1 because arrays start at 0
             state.addMatchingPathLines(std::move(pathLine1), lengthToConcatenation1 - 1,
                 std::move(pathLine2), lengthToConcatenation2 - 1, birthTime);
-            
+
             double timeToDaysideReconnection1 = 0.0;
             double timeToDaysideReconnection2 = 0.0;
             for (size_t j = 0; j < pathLine1.size(); ++j) {
@@ -253,7 +332,7 @@ namespace openspace::fls {
             double deathTime = 0;
             double lifeTimeAfterReconnection = 10;
             double lifeTime = timeToDaysideReconnection1 < timeToDaysideReconnection2 ?
-                timeToDaysideReconnection1 + lifeTimeAfterReconnection : 
+                timeToDaysideReconnection1 + lifeTimeAfterReconnection :
                 timeToDaysideReconnection2 + lifeTimeAfterReconnection;
 
             // for the sake of the smurfsaft
