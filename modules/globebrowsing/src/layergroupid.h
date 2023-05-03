@@ -88,14 +88,16 @@ struct Layer {
         TileProviderByLevel,
         SolidColor,
         SpoutImageProvider,
-        VideoTileProvider
+        VideoTileProvider,
+        AsdfTileLayer,
+        Unknown
     };
 
     ID id;
     std::string_view identifier;
 };
 
-constexpr std::array<Layer, 11> Layers = {
+constexpr std::array<Layer, 12> Layers = {
     Layer {
         .id = Layer::ID::DefaultTileProvider,
         .identifier = "DefaultTileProvider"
@@ -139,6 +141,10 @@ constexpr std::array<Layer, 11> Layers = {
     Layer {
         .id = Layer::ID::VideoTileProvider,
         .identifier = "VideoTileProvider"
+    },
+    Layer {
+        .id = Layer::ID::AsdfTileLayer,
+        .identifier = "AsdfTileLayer"
     }
 };
 

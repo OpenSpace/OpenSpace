@@ -67,6 +67,11 @@ public:
      */
     bool contains(const Geodetic2& p) const;
 
+    /**
+     * Returns `true` if there is an overlap between this patch and specified patch
+     */
+    bool overlaps(const GeodeticPatch& p) const;
+
 
     /**
      * Clamps a point to the patch region.

@@ -68,7 +68,8 @@ enum class Type {
     ByIndexTileProvider,
     ByLevelTileProvider,
     InterpolateTileProvider,
-    FfmpegTileProvider
+    FfmpegTileProvider,
+    AsdfTileProvider
 };
 
 struct TileProvider : public properties::PropertyOwner {
