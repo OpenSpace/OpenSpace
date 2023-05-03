@@ -89,7 +89,9 @@ struct Layer {
         TileProviderByLevel,
         SolidColor,
         SpoutImageProvider,
-        VideoTileProvider
+        VideoTileProvider,
+        AsdfTileLayer,
+        Unknown
     };
 
     ID id;
@@ -144,6 +146,10 @@ constexpr std::array<Layer, 12> Layers = {
     Layer {
         .id = Layer::ID::VideoTileProvider,
         .identifier = "VideoTileProvider"
+    },
+    Layer {
+        .id = Layer::ID::AsdfTileLayer,
+        .identifier = "AsdfTileLayer"
     }
 };
 

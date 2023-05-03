@@ -163,6 +163,8 @@ vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
 #elif (#{#{layerGroup}#{i}LayerType} == 11) // VideoTileProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
+#elif (#{#{layerGroup}#{i}LayerType} == 11) // AsdfTileProvider
+  c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
 #endif
 
   return c;

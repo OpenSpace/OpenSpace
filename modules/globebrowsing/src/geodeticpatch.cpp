@@ -138,6 +138,20 @@ bool GeodeticPatch::contains(const Geodetic2& p) const {
     return glm::abs(diff.lat) <= _halfSize.lat && glm::abs(diff.lon) <= _halfSize.lon;
 }
 
+bool GeodeticPatch::overlaps(const GeodeticPatch& p) const {
+    const auto lhsX1 = minLon();
+    const auto lhsX2 = maxLon();
+    const auto lhsY1 = minLat();
+    const auto lhsY2 = maxLat();
+
+    const auto rhsX1 = p.minLon();
+    const auto rhsX2 = p.maxLon();
+    const auto rhsY1 = p.minLat();
+    const auto rhsY2 = p.maxLat();
+
+    return (lhsX1 < rhsX2 && rhsX1 < lhsX2) && (lhsY1 < rhsY2 && rhsY1 < lhsY2);
+}
+
 double GeodeticPatch::edgeLatitudeNearestEquator() const {
     return _center.lat + _halfSize.lat * (isNorthern() ? -1.0 : 1.0);
 }
