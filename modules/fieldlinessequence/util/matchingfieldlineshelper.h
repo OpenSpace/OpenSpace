@@ -51,11 +51,18 @@ namespace openspace {
             const size_t nPointsOnPathLine,
             const size_t nPointsOnFieldLines);
 
-        std::vector<glm::vec3> getPositonsOfSeedPointFieldline(
+        std::vector<glm::vec3> getPositonsOfSeedPointFlowline(
             const glm::vec3& seedPoint,
             const std::string& tracingVar,
             ccmc::Kameleon* kameleon,
             const size_t nPointsOnPathLine
+        );
+
+        std::vector<glm::vec3> getPositonsOfSeedPointFieldline(
+            const glm::vec3& seedPoint,
+            ccmc::Kameleon* kameleon,
+            float innerBoundaryLimit,
+            size_t nPointsOnFieldlines
         );
 
     } // namespace fls

@@ -91,7 +91,7 @@ namespace openspace::fls {
     * Traces the field line of a given seedpoint and returns the
     * points postions of that fieldline
     */
-    std::vector<glm::vec3> getPositonsOfSeedPointFieldline(
+    std::vector<glm::vec3> getPositonsOfSeedPointFlowline(
         const glm::vec3& seedPoint,
         const std::string& tracingVar,
         ccmc::Kameleon* kameleon,
@@ -158,7 +158,7 @@ namespace openspace::fls {
             seedPoint.x,
             seedPoint.y,
             seedPoint.z,
-            ccmc::Tracer::Direction::FOWARD
+            direction
         );
 
         if (direction == ccmc::Tracer::Direction::REVERSE) {
@@ -394,5 +394,52 @@ namespace openspace::fls {
         for (const ccmc::Point3f& pt : fieldlinePositions) {
             keyFrame.emplace_back(pt.component1, pt.component2, pt.component3);
         }
+    }
+
+    std::vector<glm::vec3> getPositonsOfSeedPointFieldline(
+        const glm::vec3& seedPoint,
+        ccmc::Kameleon* kameleon,
+        float innerBoundaryLimit,
+        size_t nPointsOnFieldlines) {
+
+        std::vector<glm::vec3> keyFrame;
+
+        if (!kameleon->loadVariable("b")) {
+            LERROR("Failed to load tracing variable: b");
+            std::cout << "aint working " << std::endl;
+        }
+
+
+        std::unique_ptr<ccmc::Interpolator> newInterpolator =
+            std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
+
+        ccmc::Tracer tracer(kameleon, newInterpolator.get());
+        tracer.setInnerBoundary(innerBoundaryLimit);
+
+        //Elon: replace "secondary trace var"
+        std::string tracingVar = "b";
+
+        ccmc::Fieldline fieldline = tracer.bidirectionalTrace(
+            tracingVar,
+            seedPoint.x,
+            seedPoint.y,
+            seedPoint.z
+        );
+
+        fieldline.getDs();
+        fieldline.measure();
+        fieldline.integrate();
+
+        ccmc::Fieldline mappedFieldline =
+            fieldline.interpolate(1, nPointsOnFieldlines);
+        const std::vector<ccmc::Point3f>& fieldlinePositions =
+            mappedFieldline.getPositions();
+
+
+        for (const ccmc::Point3f& pt : fieldlinePositions) {
+            keyFrame.emplace_back(pt.component1, pt.component2, pt.component3);
+        }
+
+        return keyFrame;
     }
 } // openspace::fls
