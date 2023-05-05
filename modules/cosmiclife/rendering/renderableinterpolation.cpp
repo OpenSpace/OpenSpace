@@ -340,16 +340,18 @@ namespace openspace {
             _dataSetOne =_datasets[_dataSetOneOption.getDescriptionByValue(_dataSetOneOption.value())];
             _dataSetTwo =_datasets[_dataSetTwoOption.getDescriptionByValue(_dataSetTwoOption.value())];
 
-            _dataSetTwo = sort(_dataSetOne, _dataSetTwo);
+             sort(_dataSetOne, _dataSetTwo);
 
             _dataIsDirty = true;
         };
 
+        addProperty(_dataSetOneOption);
+        addProperty(_dataSetTwoOption);
+
         _dataSetOneOption.onChange(func);
         _dataSetTwoOption.onChange(func);
 
-        addProperty(_dataSetOneOption);
-        addProperty(_dataSetTwoOption);
+
 
 
 
@@ -498,37 +500,43 @@ namespace openspace {
         return (_program && hasAllDataSetData);
     }
 
-    speck::Dataset RenderableInterpolation::sort(const speck::Dataset& d1, const speck::Dataset& d2) {
-        speck::Dataset result{ d2 };
-
-        //if (d1.entries.size() != d2.entries.size()) {
-        //    return d2;
-        //}
+    void RenderableInterpolation::sort(const speck::Dataset& d1, const speck::Dataset& d2) {
+        speck::Dataset d1_copy;
+        speck::Dataset d2_copy;
+        bool found;
+        bool add_item;
 
         for (int i = 0; i < d1.entries.size(); i++) {
-            bool found = false;
-            int j = 0;
-
-            while (j < d2.entries.size()) {
-                //replace if statement with a function call that 
-                //TO DO replace if statement with a function call that 
-                //finds the id in the comment.
+            found = false;
+            for (int j = 0; j < d2.entries.size(); j++) {
                 if (d1.entries[i].comment == d2.entries[j].comment) {
+                    d1_copy.entries.push_back(d1.entries[i]);
+                    d2_copy.entries.push_back( d2.entries[j]);
                     found = true;
                     break;
                 }
-                ++j;
             }
-            if (found) {
-                result.entries[i] = d2.entries[j];
-            }
-            else {
-                //Remove from d1?
-                result.entries[i] = d1.entries[i];
+            if (!found) {
+                d1_copy.entries.push_back( d1.entries[i]);
+                d2_copy.entries.push_back(d1.entries[i]);
             }
         }
-        return result;
 
+        for (int i = 0; i < d2.entries.size(); i++) {
+            add_item = true;
+            for (int j = 0; j < d1.entries.size(); j++) {
+                if (d1.entries[j].comment == d2.entries[i].comment) {
+                    add_item = false;
+                    break;
+                }
+            }
+            if (add_item) {
+                d1_copy.entries.push_back(d2.entries[i]);
+                d2_copy.entries.push_back(d2.entries[i]);
+            }
+        }
+        _dataSetOne = d1_copy;
+        _dataSetTwo = d2_copy;
     }
 
     void RenderableInterpolation::initialize() {

@@ -84,7 +84,7 @@ namespace openspace {
             const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
         speck::Dataset interpolationFunc(const speck::Dataset& d1, const speck::Dataset& d2, float iv);
         speck::Dataset::Entry interpol(const speck::Dataset::Entry& e1, const speck::Dataset::Entry& e2, float iv);
-        speck::Dataset sort(const speck::Dataset& d1, const speck::Dataset& d2);
+        void sort(const speck::Dataset& d1, const speck::Dataset& d2);
 
         // bool variables
         bool _dataIsDirty = true;
