@@ -24,6 +24,8 @@
 
 #include <openspace/util/spicemanager.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/fmt.h>
