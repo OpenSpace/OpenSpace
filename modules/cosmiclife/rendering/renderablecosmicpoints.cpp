@@ -59,12 +59,12 @@ namespace {
     constexpr const char* ProgramObjectName = "RenderableCosmicPoints";
 
 
-    constexpr const std::array<const char*, 20> UniformNames = {
+    constexpr const std::array<const char*, 21> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize",
         "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
         "scaleFactor", "up", "right", "screenSize", "spriteTexture",
-        "hasColorMap", "enabledRectSizeControl", "hasDvarScaling", "frameColor"
+        "hasColorMap", "enabledRectSizeControl", "hasDvarScaling", "frameColor", "useGamma"
     };
 
     enum RenderOption {
@@ -574,6 +574,7 @@ namespace openspace {
         _program->setUniform(_uniformCache.hasDvarScaling, _hasDatavarSize);
 
         _program->setUniform(_uniformCache.frameColor, _frameColor);
+        _program->setUniform(_uniformCache.useGamma, _useFade);
 
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
@@ -679,7 +680,7 @@ namespace openspace {
                     4,
                     GL_FLOAT,
                     GL_FALSE,
-                    10 * sizeof(float),
+                    11 * sizeof(float),
                     nullptr
                 );
 
@@ -690,7 +691,7 @@ namespace openspace {
                     4,
                     GL_FLOAT,
                     GL_FALSE,
-                    10 * sizeof(float),
+                    11 * sizeof(float),
                     reinterpret_cast<void*>(4 * sizeof(float))
                 );
 
@@ -701,7 +702,7 @@ namespace openspace {
                     1,
                     GL_FLOAT,
                     GL_FALSE,
-                    10 * sizeof(float),
+                    11 * sizeof(float),
                     reinterpret_cast<void*>(8 * sizeof(float))
                 );
 
@@ -712,7 +713,7 @@ namespace openspace {
                     1,
                     GL_FLOAT,
                     GL_FALSE,
-                    10 * sizeof(float),
+                    11 * sizeof(float),
                     reinterpret_cast<void*>(9 * sizeof(float))
                 );
             }
@@ -724,7 +725,7 @@ namespace openspace {
                     4,
                     GL_FLOAT,
                     GL_FALSE,
-                    9 * sizeof(float),
+                    10 * sizeof(float),
                     nullptr
                 );
 
@@ -735,7 +736,7 @@ namespace openspace {
                     4,
                     GL_FLOAT,
                     GL_FALSE,
-                    9 * sizeof(float),
+                    10 * sizeof(float),
                     reinterpret_cast<void*>(4 * sizeof(float))
                 );
 
@@ -746,7 +747,7 @@ namespace openspace {
                     1,
                     GL_FLOAT,
                     GL_FALSE,
-                    9 * sizeof(float),
+                    10 * sizeof(float),
                     reinterpret_cast<void*>(8 * sizeof(float))
                 );
             }
@@ -758,7 +759,7 @@ namespace openspace {
                     4,
                     GL_FLOAT,
                     GL_FALSE,
-                    6 * sizeof(float),
+                    7 * sizeof(float),
                     nullptr
                 );
 
@@ -769,7 +770,7 @@ namespace openspace {
                     1,
                     GL_FLOAT,
                     GL_FALSE,
-                    6 * sizeof(float),
+                    7 * sizeof(float),
                     reinterpret_cast<void*>(4 * sizeof(float))
                 );
 
@@ -781,7 +782,7 @@ namespace openspace {
                     1,
                     GL_FLOAT,
                     GL_FALSE,
-                    6 * sizeof(float),
+                    7 * sizeof(float),
                     reinterpret_cast<void*>(5 * sizeof(float))
                 );
             }
@@ -792,7 +793,7 @@ namespace openspace {
                     4,
                     GL_FLOAT,
                     GL_FALSE,
-                    5 * sizeof(float),
+                    6 * sizeof(float),
                     nullptr
                 );
 
@@ -803,7 +804,7 @@ namespace openspace {
                     1,
                     GL_FLOAT,
                     GL_FALSE,
-                    5 * sizeof(float),
+                    6 * sizeof(float),
                     reinterpret_cast<void*>(4 * sizeof(float))
                 );
             }

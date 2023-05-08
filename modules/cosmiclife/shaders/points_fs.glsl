@@ -35,6 +35,7 @@ uniform vec3 color;
 uniform vec3 frameColor;
 uniform sampler2D spriteTexture;
 uniform bool hasColorMap;
+uniform bool useGamma;
 
 Fragment getFragment() {
   
@@ -57,20 +58,29 @@ Fragment getFragment() {
 
   Fragment frag;
   
-  // Define the outline width and color
-  float outlineWidth = 0.03;  // Adjust this value as needed
-  vec4 outlineColor = vec4(frameColor, fullColor.a);  // Color connected to DNA sequences
+  if(useGamma) {
+      // Define a gamma value for brightning the pictures
+      float gamma = 1.5;
 
-  // Apply the outline effect if any of the neighboring pixels are black
-  if (all(equal(texture(spriteTexture, vec2(texCoord.x - outlineWidth, texCoord.y)), vec4(0.0))) ||
-      all(equal(texture(spriteTexture, vec2(texCoord.x + outlineWidth, texCoord.y)), vec4(0.0))) ||
-      all(equal(texture(spriteTexture, vec2(texCoord.x, texCoord.y - outlineWidth)), vec4(0.0))) ||
-      all(equal(texture(spriteTexture, vec2(texCoord.x, texCoord.y + outlineWidth)), vec4(0.0))) ) {
+      // Define the outline width and color
+      float outlineWidth = 0.03;  // Adjust this value as needed
+      vec4 outlineColor = vec4(frameColor, fullColor.a);  // Color connected to DNA sequences
+
+      // Apply the outline effect if any of the neighboring pixels are black
+      if (all(equal(texture(spriteTexture, vec2(texCoord.x - outlineWidth, texCoord.y)), vec4(0.0))) ||
+          all(equal(texture(spriteTexture, vec2(texCoord.x + outlineWidth, texCoord.y)), vec4(0.0))) ||
+          all(equal(texture(spriteTexture, vec2(texCoord.x, texCoord.y - outlineWidth)), vec4(0.0))) ||
+          all(equal(texture(spriteTexture, vec2(texCoord.x, texCoord.y + outlineWidth)), vec4(0.0))) ) {
     
-    frag.color = outlineColor;
+        frag.color = outlineColor;
+      }
+      else {
+        frag.color = fullColor;
+        frag.color.rgb = pow(frag.color.rgb, vec3(1.0/(gamma)));
+      }
   }
   else {
-    frag.color = fullColor;
+      frag.color = fullColor;
   }
 
   if (fullColor.a < 0.01) {

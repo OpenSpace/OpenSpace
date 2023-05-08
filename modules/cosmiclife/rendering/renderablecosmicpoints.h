@@ -130,7 +130,7 @@ namespace openspace {
             cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
             minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
             correctionSizeFactor, color, alphaValue, scaleFactor, up, right,
-            screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling, frameColor
+            screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling, frameColor, useGamma
         ) _uniformCache;
 
         // font variable from ghoul library
