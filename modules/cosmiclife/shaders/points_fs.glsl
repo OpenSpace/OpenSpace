@@ -63,15 +63,11 @@ Fragment getFragment() {
       float gamma = 1.5;
 
       // Define the outline width and color
-      float outlineWidth = 0.03;  // Adjust this value as needed
-      vec4 outlineColor = vec4(frameColor, fullColor.a);  // Color connected to DNA sequences
+      float outlineWidth = 0.07;  // Adjust this value as needed
+      vec4 outlineColor = vec4(frameColor, alphaValue * gs_opacity * ta);  // Color connected to DNA sequences
 
       // Apply the outline effect if any of the neighboring pixels are black
-      if (all(equal(texture(spriteTexture, vec2(texCoord.x - outlineWidth, texCoord.y)), vec4(0.0))) ||
-          all(equal(texture(spriteTexture, vec2(texCoord.x + outlineWidth, texCoord.y)), vec4(0.0))) ||
-          all(equal(texture(spriteTexture, vec2(texCoord.x, texCoord.y - outlineWidth)), vec4(0.0))) ||
-          all(equal(texture(spriteTexture, vec2(texCoord.x, texCoord.y + outlineWidth)), vec4(0.0))) ) {
-    
+      if (texCoord.y < outlineWidth) {
         frag.color = outlineColor;
       }
       else {
@@ -83,7 +79,7 @@ Fragment getFragment() {
       frag.color = fullColor;
   }
 
-  if (fullColor.a < 0.01) {
+  if (frag.color.a < 0.01) {
     discard;
   }
 
