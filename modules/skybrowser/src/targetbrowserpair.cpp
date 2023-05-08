@@ -164,7 +164,7 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     std::vector<std::string> selectedImagesIndices;
-    
+
     for (const std::string& imageUrl : selectedImages()) {
         bool imageExists = module->wwtDataHandler().image(imageUrl).has_value();
         ghoul_assert(imageExists, "Image doesn't exist in the wwt catalog!");
@@ -303,7 +303,7 @@ void TargetBrowserPair::incrementallyAnimateToCoordinate() {
         _targetIsAnimating = false;
         _fovIsAnimating = true;
     }
-    // After the target has animated to its position, animate the field of view 
+    // After the target has animated to its position, animate the field of view
     if (_fovAnimation.isAnimating()) {
         _browser->setVerticalFov(_fovAnimation.newValue());
         _targetRenderable->setVerticalFov(_browser->verticalFov());

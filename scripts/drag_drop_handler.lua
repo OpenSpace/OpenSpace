@@ -46,4 +46,6 @@ elseif extension == ".asset" then
     openspace.asset.add("]] .. filename .. '");' .. ReloadUIScript
 elseif extension == ".osrec" or extension == ".osrectxt" then
   return 'openspace.sessionRecording.startPlayback("' .. filename .. '")'
+elseif extension == ".geojson" then
+  return 'openspace.globebrowsing.addGeoJsonFromFile("' .. filename .. '")'  .. ReloadUIScript
 end

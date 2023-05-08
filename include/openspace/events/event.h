@@ -79,6 +79,7 @@ struct Event {
         RenderableDisabled,
         CameraPathStarted,
         CameraPathFinished,
+        CameraMovedPosition,
         Custom
     };
     constexpr explicit Event(Type type_) : type(type_) {}
@@ -558,6 +559,18 @@ struct EventCameraPathFinished : public Event {
 
     const tstring origin;
     const tstring destination;
+};
+
+/**
+ * This event is created when the a camera moves location
+ */
+struct EventCameraMovedPosition : public Event {
+    static constexpr Type Type = Event::Type::CameraMovedPosition;
+
+    /**
+     * Creates an instance of an EventCameraMovedPosition event.
+     */
+    EventCameraMovedPosition();
 };
 
 /**

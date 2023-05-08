@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/layeradjustment.h>
@@ -42,7 +43,7 @@ struct LayerGroup;
 struct TileIndex;
 struct TileProvider;
 
-class Layer : public properties::PropertyOwner {
+class Layer : public properties::PropertyOwner, public Fadeable {
 public:
     Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGroup& parent);
 

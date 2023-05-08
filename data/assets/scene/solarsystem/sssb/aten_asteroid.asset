@@ -4,7 +4,7 @@ local sssb = asset.syncedResource({
   Name = "Small SolarSystem Body Data (Aten Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_aten_asteroid",
-  Version = 1
+  Version = 2
 })
 
 local object = {

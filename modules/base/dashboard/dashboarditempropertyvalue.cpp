@@ -38,7 +38,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PropertyUriInfo = {
         "URI",
         "Property URI",
-        "The URI of the property that is displayed in this dashboarditem"
+        "The URI of the property that is displayed in this dashboarditem",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisplayStringInfo = {
@@ -46,7 +48,9 @@ namespace {
         "Display String",
         "The String that is being displayed. It must either be empty (in which case only "
         "the value itself will be displayed), or it must contain extact one instance of "
-        "{}, which will be replaced with the value of the property during rendering"
+        "{}, which will be replaced with the value of the property during rendering",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {

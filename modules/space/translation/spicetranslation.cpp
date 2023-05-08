@@ -43,7 +43,9 @@ namespace {
         "Target",
         "This is the SPICE NAIF name for the body whose translation is to be computed by "
         "the SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') "
-        "or a NAIF integer id code (such as '399')"
+        "or a NAIF integer id code (such as '399')",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
@@ -51,21 +53,27 @@ namespace {
         "Observer",
         "This is the SPICE NAIF name for the parent of the body whose translation is to "
         "be computed by the SpiceTranslation. It can either be a fully qualified name "
-        "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0')"
+        "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0')",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
         "Frame",
         "Reference Frame",
         "This is the SPICE NAIF name for the reference frame in which the position "
-        "should be retrieved. The default value is GALACTIC"
+        "should be retrieved. The default value is GALACTIC",
+        // @VISIBILITY(3.33)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
         "Fixed Date",
         "A time to lock the position to. Setting this to an empty string will "
-        "unlock the time and return to position based on current simulation time"
+        "unlock the time and return to position based on current simulation time",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(SpiceTranslation)]] Parameters {

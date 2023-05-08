@@ -53,81 +53,96 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Decides if the GUI for this module should be enabled"
+        "Decides if the GUI for this module should be enabled",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataFolderInfo = {
         "DataFolder",
         "Data Folder",
-        "The path to the folder containing the exoplanets data and lookup table"
+        "The path to the folder containing the exoplanets data and lookup table",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BvColorMapInfo = {
         "BvColormap",
         "B-V Colormap",
-        "The path to a cmap file that maps a B-V color index to an RGB color"
+        "The path to a cmap file that maps a B-V color index to an RGB color",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StarTextureInfo = {
         "StarTexture",
         "Star Texture",
-        "The path to a grayscale image that is used for the host star surfaces"
+        "The path to a grayscale image that is used for the host star surfaces",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StarGlareTextureInfo = {
         "StarGlareTexture",
         "Star Glare Texture",
         "The path to a grayscale image that is used for the glare effect of the "
-        "host stars"
+        "host stars",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NoDataTextureInfo = {
         "NoDataTexture",
         "No Data Star Texture",
         "A path to a texture that is used to represent that there is missing data about "
-        "the star. For example no color information"
+        "the star. For example no color information",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrbitDiscTextureInfo = {
         "OrbitDiscTexture",
         "Orbit Disc Texture",
         "A path to a 1-dimensional image used as a transfer function for the "
-        "exoplanets' orbit uncertainty disc"
+        "exoplanets' orbit uncertainty disc",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HabitableZoneTextureInfo = {
         "HabitableZoneTexture",
         "Habitable Zone Texture",
         "A path to a 1-dimensional image used as a transfer function for the "
-        "habitable zone disc"
+        "habitable zone disc",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowComparisonCircleInfo = {
         "ShowComparisonCircle",
         "Show Comparison Circle",
         "If true, the 1 AU size comparison circle is enabled per default when an "
-        "exoplanet system is created"
+        "exoplanet system is created",
+        // @VISIBILITY(1.8)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHabitableZoneInfo = {
         "ShowHabitableZone",
         "Show Habitable Zone",
         "If true, the habitable zone disc is enabled per default when an exoplanet "
-        "system is created"
+        "system is created",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseOptimisticZoneInfo = {
         "UseOptimisticZone",
         "Use Optimistic Zone Boundaries",
         "If true, the habitable zone is computed with optimistic boundaries per default "
-        "when an exoplanet system is created"
+        "when an exoplanet system is created",
+        // @VISIBILITY(2.8)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HabitableZoneOpacityInfo = {
         "HabitableZoneOpacity",
         "Habitable Zone Opacity",
         "The opacity value used for the habitable zone renderable for a created "
-        "exoplanet system"
+        "exoplanet system",
+        // @VISIBILITY(1.5)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr std::string_view ExoplanetsDataFileName = "exoplanets_data.bin";

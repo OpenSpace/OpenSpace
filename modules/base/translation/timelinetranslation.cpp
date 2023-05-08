@@ -35,7 +35,8 @@ namespace {
         "ShouldInterpolate",
         "Should Interpolate",
         "If this value is set to 'true', an interpolation is applied between the given "
-        "keyframes. If this value is set to 'false', the interpolation is not applied"
+        "keyframes. If this value is set to 'false', the interpolation is not applied",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(TimelineTranslation)]] Parameters {

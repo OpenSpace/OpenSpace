@@ -41,14 +41,18 @@ namespace {
         "Time Simplification",
         "If this value is enabled, the time is displayed in nuanced units, such as "
         "minutes, hours, days, years, etc. If this value is disabled, it is always "
-        "displayed in seconds"
+        "displayed in seconds",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this time unit is used as a destination to "
-        "convert the seconds into"
+        "convert the seconds into",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransitionFormatInfo = {
@@ -59,7 +63,8 @@ namespace {
         "delta time. This format gets five parameters in this order:  The target delta "
         "time value, the target delta time unit, the string 'Paused' if the delta time "
         "is paused or the empty string otherwise, the current delta time value, and the "
-        "current delta time unit"
+        "current delta time unit",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RegularFormatInfo = {
@@ -68,7 +73,8 @@ namespace {
         "The format string used to format the text if the target delta time is the same "
         "as the current delta time. This format gets three parameters in this order:  "
         "The target delta value, the target delta unit, and the string 'Paused' if the "
-        "delta time is paused or the empty string otherwise"
+        "delta time is paused or the empty string otherwise",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     std::vector<std::string> unitList() {

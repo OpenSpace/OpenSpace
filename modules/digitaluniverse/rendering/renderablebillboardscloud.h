@@ -98,7 +98,6 @@ private:
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;
     properties::BoolProperty _drawElements;
-    properties::BoolProperty _drawLabels;
     properties::BoolProperty _pixelSizeControl;
     properties::OptionProperty _colorOption;
     properties::Vec2Property _optionColorRangeData;

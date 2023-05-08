@@ -90,16 +90,19 @@ void TextureComponent::loadFromFile(const std::filesystem::path& path) {
     if (!path.empty()) {
         using namespace ghoul::io;
         using namespace ghoul::opengl;
+
+        std::filesystem::path absolutePath = absPath(path);
+
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(path.string()).string(),
+            absolutePath.string(),
             _nDimensions
         );
 
         if (texture) {
-            LDEBUG(fmt::format("Loaded texture from {}", absPath(path.string())));
+            LDEBUG(fmt::format("Loaded texture from {}", absolutePath));
             _texture = std::move(texture);
 
-            _textureFile = std::make_unique<ghoul::filesystem::File>(path);
+            _textureFile = std::make_unique<ghoul::filesystem::File>(absolutePath);
             if (_shouldWatchFile) {
                 _textureFile->setCallback([this]() { _fileIsDirty = true; });
             }

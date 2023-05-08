@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "scene/solarsystem/missions/apollo/8/apollo8",
     "scene/solarsystem/missions/apollo/11/apollo11",
     "scene/solarsystem/missions/apollo/11/lem_flipbook",
@@ -92,7 +93,7 @@
   },
   "properties": [
     {
-      "name": "NavigationHandler.OrbitalNavigator.MinimumAllowedDistance",
+      "name": "NavigationHandler.OrbitalNavigator.LimitZoom.MinimumAllowedDistance",
       "type": "setPropertyValue",
       "value": "0"
     },

@@ -40,10 +40,9 @@ function create_label(number)
   return {
     Identifier = Identifier .. "-" .. number,
     Name = Name .. " (" .. number .. ")",
-  Enabled = asset.enabled,
-  Type = "ScreenSpaceImageLocal",
+    Enabled = asset.enabled,
+    Type = "ScreenSpaceImageLocal",
     TexturePath = labelsDestination .. "lcc_" .. number .. ".jpg",
-    Enabled = false,
     FaceCamera = false,
     CartesianPosition = { 0.75, 0.0, -2.0 }
   }

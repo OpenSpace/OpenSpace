@@ -1,0 +1,109 @@
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+
+local gridPosition = {
+  Identifier = "AltAzGridPosition",
+  Parent = earthAsset.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 0.0,
+      Longitude = 0.0,
+      Altitude = 0.0,
+      UseHeightmap = false,
+      UseCamera = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 0.0,
+      Longitude = 0.0,
+      UseHeightmap = false,
+      UseCamera = true
+    }
+  },
+  GUI = {
+    Name = "Altitude/Azimuth Grid Position",
+    Path = "/Other/Grids",
+    Hidden = true
+  }
+}
+
+local grid = {
+  Identifier = "AltAzGrid",
+  Parent = gridPosition.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 50000
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi / 2.0, 0.0, 0.0 }
+    },
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Enabled = asset.enabled,
+    Opacity = 0.8,
+    Color = { 0.4, 0.8, 0.4 },
+    LineWidth = 2.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Name = "Altitude/Azimuth Grid",
+    Path = "/Other/Grids"
+  }
+}
+
+local showAction = {
+  Identifier = "os.nightsky.show_altaz",
+  Name = "Show Alt/Az grid",
+  Command = [[
+    local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
+    local camera = openspace.navigation.getNavigationState();
+    openspace.setParent('AltAzGridPosition', camera.Anchor)
+    openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Translation.Globe', camera.Anchor);
+    openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Translation.Latitude', lat);
+    openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Translation.Longitude', lon);
+    openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Rotation.Globe', camera.Anchor);
+    openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Rotation.Latitude', lat);
+    openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Rotation.Longitude', lon);
+    openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Enabled', true);
+    openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 0.0);
+    openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 1.0, 1.0);
+  ]],
+  Documentation = "Shows a local Altitude/Azimuth grid centered around your position",
+  GuiPath = "/Night Sky/Lines and Grids",
+  IsLocal = false
+}
+
+local hideAction = {
+  Identifier = "os.nightsky.hide_altaz",
+  Name = "Hide Alt/Az grid",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 0, 1);
+  ]],
+  Documentation = "Hides the Alt/Az grid",
+  GuiPath = "/Night Sky/Lines and Grids",
+  IsLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(gridPosition)
+  openspace.addSceneGraphNode(grid)
+  openspace.action.registerAction(hideAction)
+  openspace.action.registerAction(showAction)
+
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(showAction)
+  openspace.action.removeAction(hideAction)
+  openspace.removeSceneGraphNode(grid)
+  openspace.removeSceneGraphNode(gridPosition)
+end)
+
+asset.export(showAction)
+asset.export(hideAction)
+asset.export(grid)

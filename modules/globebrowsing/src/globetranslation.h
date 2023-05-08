@@ -53,6 +53,8 @@ private:
     properties::DoubleProperty _longitude;
     properties::DoubleProperty _altitude;
     properties::BoolProperty _useHeightmap;
+    properties::BoolProperty _useCamera;
+    properties::BoolProperty _useCameraAltitude;
 
     RenderableGlobe* _attachedNode = nullptr;
 

@@ -22,14 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// Load mission phases from file.
-[[codegen::luawrap]] std::string loadMission(std::string missionFileName) {
-    if (missionFileName.empty()) {
-        throw ghoul::lua::LuaError("Filepath is empty");
-    }
+#include <openspace/engine/globals.h>
 
-    std::string name = openspace::global::missionManager->loadMission(missionFileName);
-    return name;
+// Load mission phases from file.
+[[codegen::luawrap]] void loadMission(ghoul::Dictionary mission) {
+    // TODO: Check if mission table is valid
+    openspace::global::missionManager->loadMission(mission);
 }
 
 // Unloads a previously loaded mission.
@@ -64,5 +62,5 @@
     }
     openspace::global::missionManager->setCurrentMission(missionName);
 }
-
 #include "missionmanager_lua_codegen.cpp"
+

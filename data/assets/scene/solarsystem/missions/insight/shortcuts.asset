@@ -16,7 +16,7 @@ local insightNavigationState = [[
 local Shortcuts = {
   {
     Command = [[
-      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset", -469.300000); 
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset", -469.300000);
       openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset", -470.800006);
     ]],
     Documentation = "Enable Insight landing height layer offset",
@@ -26,7 +26,7 @@ local Shortcuts = {
   },
   {
     Command = [[
-      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset", 0); 
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset", 0);
       openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset", 0);
     ]],
     Documentation = "Disable Insight landing height layer offset",

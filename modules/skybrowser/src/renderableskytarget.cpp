@@ -52,33 +52,41 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo crossHairSizeInfo = {
         "CrosshairSize",
         "Crosshair Size",
-        "Determines the size of the crosshair. The size is determined in fov (degrees)"
+        "Determines the size of the crosshair. The size is determined in fov (degrees)",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RectangleThresholdInfo = {
         "RectangleThreshold",
         "Rectangle Threshold",
         "When the field of view is larger than the rectangle threshold, a rectangle will "
-        "be rendered in the target"
+        "be rendered in the target",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The thickness of the line of the target. The larger number, the thicker line"
+        "The thickness of the line of the target. The larger number, the thicker line",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo VerticalFovInfo = {
         "VerticalFov",
         "Vertical Field Of View",
-        "The vertical field of view of the target."
+        "The vertical field of view of the target.",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyRollInfo = {
        "ApplyRoll",
        "Apply Roll",
        "Always rotate the target to have it's up direction aligned with the up direction "
-       "of the camera"
+       "of the camera",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableSkyTarget)]] Parameters {
@@ -117,6 +125,8 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     , _applyRoll(ApplyRollInfo, true)
 {
     // Handle target dimension property
+    _autoScale = false;
+    _autoScale.setReadOnly(true);
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _crossHairSize = p.crossHairSize.value_or(_crossHairSize);
@@ -146,7 +156,7 @@ void RenderableSkyTarget::initializeGL() {
 
     _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
-        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [&ProgramName]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_SKYBROWSER}/shaders/target_vs.glsl"),
@@ -165,12 +175,12 @@ glm::ivec3 RenderableSkyTarget::borderColor() const {
 }
 
 glm::dvec3 RenderableSkyTarget::rightVector() const {
-    double scaling = (_verticalFov / 70)* static_cast<double>(_size.value());
+    double scaling = (_verticalFov / 70)* static_cast<double>(glm::compMax(_size.value()));
     return scaling * _rightVector;
 }
 
 glm::dvec3 RenderableSkyTarget::upVector() const {
-    double scaling = (_verticalFov / 70) * static_cast<double>(_size.value());
+    double scaling = (_verticalFov / 70) * static_cast<double>(glm::compMax(_size.value()));
     return scaling * _upVector;
 }
 

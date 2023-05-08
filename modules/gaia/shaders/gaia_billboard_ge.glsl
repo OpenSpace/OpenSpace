@@ -34,7 +34,7 @@ in float vs_cameraDistFromSun[];
 
 layout(triangle_strip, max_vertices = 4) out;
 out vec2 ge_brightness;
-out vec4 ge_gPosition;               
+out vec4 ge_gPosition;
 out vec2 texCoord;
 out float ge_starDistFromSun;
 out float ge_cameraDistFromSun;
@@ -54,15 +54,15 @@ uniform float magnitudeBoost;
 // Keep in sync with gaiaoptions.h:RenderOption enum
 const int RENDEROPTION_STATIC = 0;
 const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2; 
+const int RENDEROPTION_MOTION = 2;
 const float EPS = 1e-5;
 
 
 const vec2 corners[4] = vec2[4](
-  vec2(0.0, 1.0), 
-  vec2(0.0, 0.0), 
-  vec2(1.0, 1.0), 
-  vec2(1.0, 0.0) 
+  vec2(0.0, 1.0),
+  vec2(0.0, 0.0),
+  vec2(1.0, 1.0),
+  vec2(1.0, 0.0)
 );
 
 
@@ -86,7 +86,7 @@ void main() {
     // Big positive magnitude => Dwarfs
     float absoluteMagnitude = vs_brightness[0].x;
     float normalizedMagnitude = (absoluteMagnitude - 20) / -1; // (-15 - 20);
-    
+
     // TODO: A linear scale is prabably not the best!
     initStarSize += normalizedMagnitude * (magnitudeBoost / 50);
   }
@@ -102,9 +102,9 @@ void main() {
   if (length(position) < EPS || distThreshold <= 0) {
     return;
   }
-  
+
   vec4 centerWorldPos = vs_gPosition[0];
-  
+
   dvec3 cameraNormal = normalize(cameraPos - dvec3(centerWorldPos.xyz));
   dvec3 newRight = normalize(cross(cameraLookUp, cameraNormal));
   dvec3 newUp = cross(cameraNormal, newRight);
@@ -122,7 +122,7 @@ void main() {
     gl_Position.z = 0.0;
     texCoord = corners[i];
     ge_gPosition  = viewPosition;
-    
+
     EmitVertex();
   }
 

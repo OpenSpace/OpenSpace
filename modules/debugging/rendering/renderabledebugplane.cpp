@@ -51,7 +51,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "The OpenGL name of the texture that is displayed on this plane"
+        "The OpenGL name of the texture that is displayed on this plane",
+        // @VISIBILITY(3.75)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BillboardInfo = {
@@ -59,19 +61,25 @@ namespace {
         "Billboard mode",
         "This value specifies whether the plane is a billboard, which means that it is "
         "always facing the camera. If this is false, it can be oriented using other "
-        "transformations"
+        "transformations",
+        // @VISIBILITY(3.75)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
-        "This value specifies the size of the plane in meters"
+        "This value specifies the size of the plane in meters",
+        // @VISIBILITY(3.75)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OriginInfo = {
         "Origin",
         "Texture Coordinate Origin",
-        "The origin of the texture coorinate system"
+        "The origin of the texture coorinate system",
+        // @VISIBILITY(3.75)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableDebugPlane)]] Parameters {

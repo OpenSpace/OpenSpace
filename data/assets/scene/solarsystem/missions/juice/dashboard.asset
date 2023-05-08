@@ -1,0 +1,31 @@
+local distance_juice_jupiter = {
+  Type = "DashboardItemDistance",
+  Identifier = "JuiceJupiterDistance",
+  GuiName = "Juice - Jupiter Distance",
+  SourceType = "Node",
+  SourceNodeName = "Juice",
+  DestinationType = "Node",
+  DestinationNodeName = "Jupiter",
+  Enabled = asset.enabled
+}
+
+local distance_juice_ganymede = {
+  Type = "DashboardItemDistance",
+  Identifier = "JuiceGanymedeDistance",
+  GuiName = "Juice - Ganymede Distance",
+  SourceType = "Node",
+  SourceNodeName = "Juice",
+  DestinationType = "Node",
+  DestinationNodeName = "Ganymede",
+  Enabled = asset.enabled
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(distance_juice_jupiter)
+  openspace.dashboard.addDashboardItem(distance_juice_ganymede)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(distance_juice_ganymede)
+  openspace.dashboard.removeDashboardItem(distance_juice_jupiter)
+end)

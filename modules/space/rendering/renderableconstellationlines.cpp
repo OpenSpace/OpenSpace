@@ -50,26 +50,30 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeckInfo = {
         "File",
         "Constellation Data File Path",
-        "The file that contains the data for the constellation lines"
+        "The file that contains the data for the constellation lines",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the constellations"
+        "Enables/Disables the drawing of the constellations",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UnitInfo = {
         "Unit",
         "Unit",
-        "The distance unit used for the constellation lines data"
+        "The distance unit used for the constellation lines data",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorsInfo = {
         "Colors",
         "Constellation Colors",
         "The defined colors for the constellations to be rendered. There can be several "
-        "groups of constellaitons that can have distinct colors."
+        "groups of constellaitons that can have distinct colors.",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableConstellationLines)]] Parameters {
@@ -110,7 +114,7 @@ RenderableConstellationLines::RenderableConstellationLines(
 
     // Avoid reading files here, instead do it in multithreaded initialize()
     _speckFile = absPath(p.file.string()).string();
-    _speckFile.onChange([&]() { loadData(); });
+    _speckFile.onChange([this]() { loadData(); });
     addProperty(_speckFile);
 
     addProperty(_drawElements);
@@ -135,8 +139,7 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
 
     // If no values are selected (the default), we want to show all constellations
     if (!_selection.hasSelected()) {
-        for (ConstellationKeyValuePair& pair : _renderingConstellationsMap)
-        {
+        for (ConstellationKeyValuePair& pair : _renderingConstellationsMap) {
             pair.second.isEnabled = true;
         }
 
@@ -148,8 +151,7 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
     }
     else {
         // Enable all constellations that are selected
-        for (ConstellationKeyValuePair& pair : _renderingConstellationsMap)
-        {
+        for (ConstellationKeyValuePair& pair : _renderingConstellationsMap) {
             bool isSelected = _selection.isSelected(pair.second.name);
             pair.second.isEnabled = isSelected;
 
@@ -185,13 +187,24 @@ void RenderableConstellationLines::initialize() {
         std::set<std::string> selectedConstellations;
 
         for (const std::string& s : _assetSelection) {
-            const auto it = std::find(options.begin(), options.end(), s);
+            auto it = std::find(options.begin(), options.end(), s);
             if (it == options.end()) {
-                // The user has specified a constellation name that doesn't exist
-                LWARNINGC(
-                    "RenderableConstellationsBase",
-                    fmt::format("Option '{}' not found in list of constellations", s)
+                // Test if the provided name was an identifier instead of the full name
+                it = std::find(
+                    options.begin(),
+                    options.end(),
+                    constellationFullName(s)
                 );
+
+                if (it == options.end()) {
+                    // The user has specified a constellation name that doesn't exist
+                    LWARNING(fmt::format(
+                        "Option '{}' not found in list of constellations", s
+                    ));
+                }
+                else {
+                    selectedConstellations.insert(constellationFullName(s));
+                }
             }
             else {
                 selectedConstellations.insert(s);

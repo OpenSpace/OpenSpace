@@ -1,6 +1,6 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup341
+local kernel = asset.require("../kernels").jup365
 
 
 
@@ -28,7 +28,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Inner Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Metis"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.117912037,
@@ -45,7 +45,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Inner Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Adrastea"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.2982638889,
@@ -62,7 +62,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Inner Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Amalthea"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.4981828704,
@@ -79,7 +79,7 @@ local innerMoons = {
     Tags = tags,
     TrailTags = trailTags,
     GUI = {
-      Path = "/Solar System/Planets/Jupiter/Moons/Inner Group"
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Thebe"
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.6745023148,
@@ -112,7 +112,7 @@ for i, moon in ipairs(innerMoons) do
     Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
     GUI = {
       Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Jupiter/Moons",
+      Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/" .. moon.Identifier,
       Description = "Label for Jupiter's moon " .. moonName .. " (inner group)"
     }
   }
@@ -137,7 +137,7 @@ asset.onDeinitialize(function()
   for i = #moon_labels, 1, -1 do
     openspace.removeSceneGraphNode(moon_labels[i])
   end
-  
+
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end

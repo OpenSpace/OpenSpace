@@ -1,0 +1,41 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local translation = asset.require("./transforms").Translation
+
+local Trail = {
+  Identifier = "QuaoarTrail",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Color = { 0.2, 0.8, 0.3 },
+    Period = 104691.8599963541,
+    Resolution = 10000,
+    Enabled = asset.enabled,
+    Fade = 1.24,
+    Translation = translation
+  },
+  Tag = { "planetTrail_dwarf" },
+  GUI = {
+    Name = "Quaoar Trail",
+    Path = "/Solar System/Dwarf Planets/Quaoar",
+    Description = "Trail of Quaoar"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Trail)
+end)
+
+asset.export("Trail", Trail)
+
+asset.meta = {
+  Name = "Quaoar Trail",
+  Version = "1.0",
+  Description = [[Trail of Quaoar]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

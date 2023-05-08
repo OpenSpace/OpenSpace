@@ -8,6 +8,7 @@ asset.require("./layers/colorlayers/aqua_modis_temporal", false)
 asset.require("./layers/colorlayers/terra_modis_temporal", false)
 asset.require("./layers/colorlayers/bmng_utah", false)
 asset.require("./layers/colorlayers/bmng_sweden", false)
+asset.require("./layers/colorlayers/bmng_newyork", false)
 asset.require("./layers/colorlayers/amsr2_gcom_w1_sea_ice_concentration_temporal", false)
 asset.require("./layers/colorlayers/modis_terra_chlorophyll_a_temporal", false)
 asset.require("./layers/colorlayers/ghrsst_l4_mur_sea_surface_temperature_temporal", false)
@@ -31,6 +32,7 @@ asset.require("./layers/overlays/size_reference", false)
 -- Watermasks
 asset.require("./layers/watermasks/gebco_sweden", false)
 asset.require("./layers/watermasks/gebco_utah", false)
+asset.require("./layers/watermasks/gebco_newyork", false)
 asset.require("./layers/watermasks/modis_water_mask", true)
 
 

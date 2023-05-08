@@ -39,61 +39,75 @@ namespace {
     constexpr int RenderOptionFaceCamera = 0;
     constexpr int RenderOptionPositionNormal = 1;
 
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "This setting determines whether the labels will be visible or not. They are "
+        "disabled per default",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "File",
-        "The speck label file with the data for the labels"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
-        "Opacity",
-        "Opacity",
-        "Determines the transparency of the labels, where 1 is completely opaque "
-        "and 0 fully transparent"
+        "The speck label file with the data for the labels",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The color of the labels"
+        "The color of the labels",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "The size of the labels in pixels"
+        "The size of the labels in pixels",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "Font size for the labels. This is different from the text size"
+        "Font size for the labels. This is different from the text size",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxInfo = {
         "MinMaxSize",
         "Min/Max Size",
-        "The minimum and maximum size (in pixels) of the labels"
+        "The minimum and maximum size (in pixels) of the labels",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
         "FaceCamera",
         "Face Camera",
         "If enabled, the labels will be rotated to face the camera. For non-linear "
-        "display rendering (for example fisheye) this should be set to false."
+        "display rendering (for example fisheye) this should be set to false.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
-        "Transformation matrix to be applied to the labels"
+        "Transformation matrix to be applied to the labels",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
+
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
 
-        // [[codegen::verbatim(OpacityInfo.description)]]
+        // The opacity of the labels
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
         // [[codegen::verbatim(ColorInfo.description)]]
@@ -136,7 +150,7 @@ documentation::Documentation LabelsComponent::Documentation() {
 
 LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Labels" })
-    , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
+    , _enabled(EnabledInfo, false)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _size(SizeInfo, 8.f, 0.5f, 24.f)
     , _fontSize(FontSizeInfo, 50.f, 1.f, 300.f)
@@ -159,8 +173,13 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
         _unit = DistanceUnit::Meter;
     }
 
+    _enabled = p.enabled.value_or(_enabled);
+    addProperty(_enabled);
+
     _opacity = p.opacity.value_or(_opacity);
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
+
+    addProperty(Fadeable::_fade);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
@@ -223,11 +242,18 @@ bool LabelsComponent::isReady() const {
     return !(_labelset.entries.empty());
 }
 
+bool LabelsComponent::enabled() const {
+    return _enabled;
+}
+
 void LabelsComponent::render(const RenderData& data,
                              const glm::dmat4& modelViewProjectionMatrix,
                              const glm::vec3& orthoRight, const glm::vec3& orthoUp,
                              float fadeInVariable)
 {
+    if (!_enabled) {
+        return;
+    }
     float scale = static_cast<float>(toMeter(_unit));
 
     int renderOption = _faceCamera ? RenderOptionFaceCamera : RenderOptionPositionNormal;
@@ -245,7 +271,7 @@ void LabelsComponent::render(const RenderData& data,
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
 
-    glm::vec4 textColor = glm::vec4(glm::vec3(_color), _opacity * fadeInVariable);
+    glm::vec4 textColor = glm::vec4(glm::vec3(_color), opacity() * fadeInVariable);
 
     for (const speck::Labelset::Entry& e : _labelset.entries) {
         if (!e.isEnabled) {

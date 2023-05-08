@@ -17,8 +17,6 @@ asset.require("util/dpiscaling")
 asset.require("util/launcher_images")
 
 -- Modules and component settings
-asset.require("modules/exoplanets/exoplanets")
-asset.require("modules/skybrowser/skybrowser")
 asset.require("modules/touch/default_settings")
 
 
