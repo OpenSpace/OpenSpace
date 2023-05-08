@@ -918,12 +918,12 @@ namespace openspace {
         //seedPoints.erase(seedPoints.begin() + 4, seedPoints.end());
 
         // Test to pick a point
-        const glm::vec3& testPointIMF = seedPoints[0];
+        const glm::vec3& testPointON = seedPoints[2];
 
         // hard coded path to cdf file
         std::string cdfPathTemp = "C:/Dev/OpenSpaceLocalData/simonmans/3d__var_1_e20000101-020000-000.out.cdf";
 
-        size_t _nPointsOnPathLine = 200;
+        size_t _nPointsOnPathLine = 50;
         std::string _tracingVariable = "u_perp_b";
         // create kameleon
         std::unique_ptr<ccmc::Kameleon> kameleon =
@@ -932,49 +932,31 @@ namespace openspace {
         std::unique_ptr<ccmc::Interpolator> interpolator =
             std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
 
-        /*std::vector<glm::vec3> testFieldlinePositionsIMF =
+
+        std::vector<std::vector<glm::vec3>> testFieldlinePositions =
             fls::getPositonsOfSeedPointFlowline(
-                testPointIMF,
+                seedPoints,
                 _tracingVariable,
                 kameleon.get(),
                 _nPointsOnPathLine
-            );*/
-        /*std::cout << "IMF" << std::endl;
-        std::cout << " " << std::endl;
-        for (size_t i = 0; i < testFieldlinePositionsIMF.size(); i++)
-        {
-            std::cout << testFieldlinePositionsIMF[i][0] << " " << testFieldlinePositionsIMF[i][1] << " " << testFieldlinePositionsIMF[i][2] << std::endl;
-        }*/
-
-
-        //std::cout << "First postion on line: " << testFieldlinePositions[0] << std::endl;
-        //std::cout << "Last position on line: " << testFieldlinePositions[testFieldlinePositions.size() - 1] << std::endl;
-
-        const glm::vec3 testFieldLinePosition(-2.45553f, -2.05777f, 7.31278f);
-        size_t _nPointsOnFieldLine = 100;
-        float innerBoundaryLimit = 0.5f;
-
-        std::vector<glm::vec3> FieldlinePositionsIMF =
-            fls::getPositonsOfSeedPointFieldline(
-                testFieldLinePosition,
-                kameleon.get(),
-                innerBoundaryLimit,
-                _nPointsOnFieldLine
             );
 
-        for (size_t i = 0; i < FieldlinePositionsIMF.size(); i++)
-        {
-            std::cout << FieldlinePositionsIMF[i][0] << " " << FieldlinePositionsIMF[i][1] << " " << FieldlinePositionsIMF[i][2] << std::endl;
+        std::ofstream output_file("C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/example.txt");
+
+        if (output_file.is_open()){
+            for (const auto& subvec : testFieldlinePositions) {
+                for (const auto& vec : subvec) {
+                    output_file << vec.x << " " << vec.y << " " << vec.z << " " << std::endl;
+                }
+                //output_file << std::endl << std::endl << "NEW FLOW POINT: " << std::endl;
+            }
+
+            // close the output file
+            output_file.close();
         }
-
-
-        // Look at the first and last element of the vector
-        //std::cout << " ------------------------------------------------- " << std::endl;
-        //std::cout << "First point of the fieldline: " << testFieldlinePositions[0] << std::endl;
-        //std::cout << "Last point of the fieldline: " << testFieldlinePositions[testFieldlinePositions.size()] << std::endl;
-        //std::cout << "The actual point that the fieldline was created from " << seedPoints[0] << std::endl;
-        //std::cout << " ------------------------------------------------- " << std::endl;
-
+        else {
+            std::cerr << "Unable to open file" << std::endl;
+        }
 
         // ALGORITHM
 

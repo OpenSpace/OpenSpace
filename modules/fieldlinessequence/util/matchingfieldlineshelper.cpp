@@ -91,8 +91,8 @@ namespace openspace::fls {
     * Traces the field line of a given seedpoint and returns the
     * points postions of that fieldline
     */
-    std::vector<glm::vec3> getPositonsOfSeedPointFlowline(
-        const glm::vec3& seedPoint,
+    std::vector<std::vector<glm::vec3>> getPositonsOfSeedPointFlowline(
+        const std::vector<glm::vec3>& seedPoint,
         const std::string& tracingVar,
         ccmc::Kameleon* kameleon,
         const size_t nPointsOnPathLine)
@@ -116,26 +116,52 @@ namespace openspace::fls {
 
         ccmc::Tracer tracer(kameleon, interpolator.get());
 
+        std::vector<std::vector<glm::vec3>> seedPointFieldlinePositions;
+
+        size_t _nPointsOnFieldLine = 100;
+        float innerBoundaryLimit = 0.5f;
         //float innerBoundaryLimit = 0.5f;
         //tracer.setInnerBoundary(innerBoundaryLimit);
 
-        // Trace the seedpoints fieldline and return it
-        ccmc::Fieldline seedPointFieldline = traceAndCreateMappedPathLine(
-            tracingVar,
-            tracer,
-            seedPoint,
-            nPointsOnPathLine,
-            ccmc::Tracer::Direction::FOWARD); // Change back to foward
+        for (int i = 2; i < seedPoint.size(); i++) {
+            // Trace the seedpoints fieldline and return it
+            ccmc::Fieldline seedPointFieldline = traceAndCreateMappedPathLine(
+                tracingVar,
+                tracer,
+                seedPoint[i],
+                nPointsOnPathLine,
+                ccmc::Tracer::Direction::FOWARD); // Change back to foward
 
-        // Get vector with positions of the fieldline with GetPositions
-        std::vector<ccmc::Point3f> seedPointFieldlinePositions
-            = seedPointFieldline.getPositions();
+            // Get vector with positions of the fieldline with GetPositions
+            std::vector<ccmc::Point3f> seedPointFlowlinePositions
+                = seedPointFieldline.getPositions();
+
+            std::vector<glm::vec3> seedPointFlowlinePositionsVec3
+                = convertPoint3fToVec3(seedPointFlowlinePositions);
+
+            for (int i = 0; i < seedPointFlowlinePositionsVec3.size(); i++) {
+
+                std::vector<glm::vec3> fieldlinePositions = fls::getPositonsOfSeedPointFieldline(
+                    seedPointFlowlinePositionsVec3[i],
+                    kameleon,
+                    innerBoundaryLimit,
+                    _nPointsOnFieldLine
+                );
+
+                //seedPointFieldlinePositionsVec32.push_back(fieldlinePositions);
+
+                if (fieldlinePositions[0].z > 25 || fieldlinePositions[0].z < -25 &&
+                    fieldlinePositions[fieldlinePositions.size()-1].z > 0 &&
+                    fieldlinePositions[fieldlinePositions.size() - 1].z < 0.6
+                    ){
+                    seedPointFieldlinePositions.push_back(fieldlinePositions);
+                }
+            }
+        }
 
 
-        std::vector<glm::vec3> seedPointFieldlinePositionsVec3
-            = convertPoint3fToVec3(seedPointFieldlinePositions);
 
-        return seedPointFieldlinePositionsVec3;
+        return seedPointFieldlinePositions;
     }
 
     // E and A modifications
@@ -404,10 +430,10 @@ namespace openspace::fls {
 
         std::vector<glm::vec3> keyFrame;
 
-        if (!kameleon->loadVariable("b")) {
-            LERROR("Failed to load tracing variable: b");
-            std::cout << "aint working " << std::endl;
-        }
+        //if (!kameleon->loadVariable("b")) {
+        //    LERROR("Failed to load tracing variable: b");
+        //    std::cout << "aint working " << std::endl;
+        //}
 
 
         std::unique_ptr<ccmc::Interpolator> newInterpolator =
