@@ -158,6 +158,7 @@ namespace {
             Decimeter,
             Meter,
             Kilometer,
+            Parsec,
 
             // Weird units
             Thou,
