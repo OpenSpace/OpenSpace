@@ -117,6 +117,15 @@ private:
     */
     int readCSVFile(const std::filesystem::path& filepath);
 
+    int internalReadCSVFile(std::vector<std::string>const& headers, std::vector < std::vector<std::string>> const& dataTable);
+
+    /*
+    * Read multiple CSV files and construct an octree, currently (2023-04-19) assumes that all data fits in memory
+    */
+    int readMultipleCSVFiles(const std::filesystem::path& folderPath);
+
+
+
     /**
      * Checks for any OpenGL errors and reports these to the log if _reportGlErrors is
      * set to true.
@@ -182,6 +191,15 @@ private:
     //should be treated as const after reading data.
     std::vector<std::string> _requiredValues;
 
+    properties::OptionProperty _otherDataRenderOption;
+    properties::Vec2Property _otherDataRenderRange;
+
+    properties::BoolProperty _staticLuminosity;
+
+    properties::OptionProperty _blendingOption;
+    properties::Vec2Property _lumZoomDistance;
+    properties::Vec2Property _lumZoomMultiplier;
+
     size_t _OptionalDataSize;
     /*End of thesis 2023*/
 
@@ -237,6 +255,8 @@ private:
     properties::BoolProperty _reportGlErrors;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    //TODO add uniform cache of new added uniform in shaders
+
     UniformCache(model, view, cameraPos, cameraLookUp, viewScaling, projection,
         renderOption, luminosityMultiplier, magnitudeBoost, cutOffThreshold,
         sharpness, billboardSize, closeUpBoostDist, screenSize, psfTexture,

@@ -33,6 +33,7 @@
 #include <queue>
 #include <stack>
 #include <vector>
+#include <algorithm>
 
 namespace openspace {
 
@@ -45,7 +46,7 @@ public:
         std::vector<float> posData;
         std::vector<float> colData;
         std::vector<float> velData;
-        std::vector<float> optData;
+        std::map<size_t, std::vector<float>> optionalBinData;
         std::vector<std::pair<float, size_t>> magOrder;
         float originX;
         float originY;
@@ -208,8 +209,8 @@ private:
     // DR2_rv [7.2M] - A MAX_DIST of 15 kPc works fine with down to 10 kSPN.
     // DR2_subset [42.9M] - A MAX_DIST of 100 kPc works fine with 20 kSPN.
     // DR2_full [1.7B] - A MAX_DIST of 250 kPc works fine with 150 kSPN.
-    size_t MAX_DIST = 2; // [kPc]
-    size_t MAX_STARS_PER_NODE = 2000;
+    size_t MAX_DIST = 15; // [kPc]
+    size_t MAX_STARS_PER_NODE = 20000;
 
     const int DEFAULT_INDEX = -1;
     const std::string BINARY_SUFFIX = ".bin";

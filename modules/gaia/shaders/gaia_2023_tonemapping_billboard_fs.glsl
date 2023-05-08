@@ -22,44 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__
-#define __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__
+#include "fragment.glsl"
 
-namespace openspace::gaia {
+in vec2 uv;
 
-enum RenderMode {
-    //Static = 0,
-    //Color = 1,
-    Motion = 2
-};
+uniform sampler2D renderedTexture;
 
-enum FileReaderOption {
-    Fits = 0,
-    Speck = 1,
-    BinaryRaw = 2,
-    BinaryOctree = 3,
-    StreamOctree = 4,
-    Csv = 5,
-    MultipleCsv = 6
-};
+const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
 
-enum ShaderOption {
-    PointSSBO = 0,
-    PointVBO = 1,
-    BillboardSSBO = 2,
-    BillboardVBO = 3,
-    BillboardSSBONoFBO = 4
-};
 
-enum BlendingOption {
-    SRC_ALPHA__ONE,
-    SRC_ALPHA__ZERO,
-    SRC_ALPHA__SRC_1_MINUS_ALPHA,
-    ONE__ZERO,
-    SRC_COLOR__ONE,
-    SRC_COLOR__ZERO,
-};
+Fragment getFragment() {
+  vec4 color = vec4(0.0);
+    
+  // BILLBOARDS
+  // Sample color. Tonemapping done in first shader pass.  
+  vec4 textureColor = texture(renderedTexture, uv);
 
-} // namespace openspace::gaiamission
+  // Use the following to check for any intensity at all.
+  //color = (length(intensity.rgb) > 0.001) ? vec4(1.0) : vec4(0.0);
 
-#endif // __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__
+  Fragment frag;
+  frag.color = textureColor;
+  // Place stars at back to begin with. 
+  frag.depth = DEFAULT_DEPTH;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+  frag.blend = BLEND_MODE_NORMAL;
+  frag.disableLDR2HDR = true;
+
+  return frag;
+}

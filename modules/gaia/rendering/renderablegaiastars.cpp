@@ -34,6 +34,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconversion.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -54,6 +55,46 @@ namespace {
     constexpr size_t ColorSize = 2;
     constexpr size_t VelocitySize = 3;
     //TODO: add other dataSize variable. --- complete, stored in Renderable classs
+
+    constexpr openspace::properties::Property::PropertyInfo LuminosityZoomScalarInfo = {
+        "LuminosityZoomScalar",
+        "Luminosity zoom multiplier",
+        "Sets the minimum and maximum luminosity multiplier, luminosity will linearly"
+        "interpolate between these values."
+    };    
+    constexpr openspace::properties::Property::PropertyInfo LuminosityZoomDistancesInfo = {
+        "LuminosityZoomDistances",
+        "Luminosity zoom distance threshold",
+        "Sets the min and max distances between camera and stars where linear interpolation happens."
+        "Distances are measured in kilo parsecs."
+        "Star distances outside this range are clamped to min/max."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BlendOptionInfo = {
+        "BlendOption",
+        "Blend Option",
+        "Change the way stars blend together."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderChemistryInfo = {
+        "RenderChemistry",
+        "Static luminosity",
+        "Render stars with fixed luminosity, this mode is usefull to highlight"
+        "chemistry of all stars, regardless of their distance."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OtherDataValueRangeInfo = {
+        "OtherDataValueRange",
+        "Range of the other data values",
+        "This value is the min/max value range that is used to normalize the other data "
+        "values so they can be used by the specified color map"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OtherDataOptionInfo = {
+        "OtherData",
+        "Other Data Column",
+        "The index of the file data column that is used as the color input"
+    };
 
     constexpr openspace::properties::Property::PropertyInfo MappingPxInfo = {
         "MappingPx",
@@ -367,7 +408,8 @@ namespace {
             BinaryRaw,
             BinaryOctree,
             StreamOctree,
-            Csv
+            Csv,
+            MultipleCsv
         };
         // [[codegen::verbatim(FileReaderOptionInfo.description)]]
         FileReader fileReaderOption;
@@ -503,7 +545,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
     , _colorTexturePath(ColorTextureInfo)
     , _luminosityMultiplier(LuminosityMultiplierInfo, 35.f, 1.f, 1000.f)
-    , _magnitudeBoost(MagnitudeBoostInfo, 25.f, 0.f, 100.f)
+    , _magnitudeBoost(MagnitudeBoostInfo, 7.f, -5.f, 30.f)
     , _cutOffThreshold(CutOffThresholdInfo, 38.f, 0.f, 50.f)
     , _sharpness(SharpnessInfo, 1.45f, 0.f, 5.f)
     , _billboardSize(BillboardSizeInfo, 10.f, 1.f, 100.f)
@@ -538,7 +580,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _OptionalDataSize{ 0 }
     , _fileHeaders{}
     , _dataMappingContainer({ "DataMapping", "Data Mapping" })
-    , _dataMapping{ 
+    , _dataMapping{
         properties::StringProperty(MappingPxInfo),
         properties::StringProperty(MappingPyInfo),
         properties::StringProperty(MappingPzInfo),
@@ -547,12 +589,46 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         properties::StringProperty(MappingVxInfo),
         properties::StringProperty(MappingVyInfo),
         properties::StringProperty(MappingVzInfo),
-        properties::StringProperty(MappingSpeedInfo) 
+        properties::StringProperty(MappingSpeedInfo)
     }
+    , _otherDataRenderRange(OtherDataValueRangeInfo,
+        glm::vec2(0.0f, 1.0f),
+        glm::vec2(-20.0f, -20.0f),
+        glm::vec2(20.0f, 20.0f))
+    , _otherDataRenderOption(
+        OtherDataOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown)
+    , _staticLuminosity(RenderChemistryInfo)
+    , _blendingOption(BlendOptionInfo)
+    , _lumZoomMultiplier(LuminosityZoomScalarInfo,
+        glm::vec2(30.f, 70.f),
+        glm::vec2(1.0f, 1.0f),
+        glm::vec2(200.0f, 200.0f))
+    , _lumZoomDistance(LuminosityZoomDistancesInfo,
+        glm::vec2(0.f, 15.0f),
+        glm::vec2(0.0f, 0.0f),
+        glm::vec2(30.f, 30.f))
+
 {
     using File = ghoul::filesystem::File;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _filePath = absPath(p.file).string();
+    _dataFile = std::make_unique<File>(_filePath.value());
+    _dataFile->setCallback([this]() { _dataIsDirty = true; });
+
+    _filePath.onChange([this]() {
+        if (std::filesystem::exists(_filePath.value())) {
+            _dataIsDirty = true;
+        }
+        else {
+            LWARNING(fmt::format("File not found: {}", _filePath));
+        }
+        });
+    addProperty(_filePath);
+
+
     _dataMapping.px = p.dataMapping.px.value_or("px");
     _dataMapping.py = p.dataMapping.py.value_or("py");
     _dataMapping.pz = p.dataMapping.pz.value_or("pz");
@@ -583,8 +659,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _dataMappingContainer.addProperty(_dataMapping.vz);
     _dataMappingContainer.addProperty(_dataMapping.speed);
 
-    //The order should follow position - absmag - color - velocity - speed so that the rendering works properly. 
-    // Because it assumes a certain order on the required parameters to work properly. 
+    //OBS ORDER SENSITIVE - The order should follow position - absmag - color - velocity - speed so that the rendering works properly. 
+    // Because the octree assumes a certain order on the required parameters to render stars properly. 
     _requiredValues.push_back(_dataMapping.px.value());
     _requiredValues.push_back(_dataMapping.py.value());
     _requiredValues.push_back(_dataMapping.pz.value());
@@ -597,19 +673,61 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
     addPropertySubOwner(_dataMappingContainer);
 
-    _filePath = absPath(p.file).string();
-    _dataFile = std::make_unique<File>(_filePath.value());
-    _dataFile->setCallback([this]() { _dataIsDirty = true; });
+    //TODO update fragment shader uniforms here.
+    _otherDataRenderOption.onChange([this]() {
+        //Update column index in shader file.
+        std::string columnNameSelected{ _otherDataRenderOption.getDescriptionByValue(_otherDataRenderOption.value()) };
+        size_t columnIndex{ _fileHeaders[columnNameSelected] }; //TODO: should not be necessary but perhaps use map.find (should not create any new columns here though.)
+        _program->setUniform(_program->uniformLocation("columnIndex"), static_cast<GLint>(columnIndex));
 
-    _filePath.onChange([this]() {
-        if (std::filesystem::exists(_filePath.value())) {
-            _dataIsDirty = true;
-        }
-        else {
-            LWARNING(fmt::format("File not found: {}", _filePath));
+        LDEBUG("Changed to index: " + std::to_string(columnIndex));
+        for (const auto& h : _fileHeaders) {
+            LDEBUG(h.first + "- index: " + std::to_string(h.second));
         }
     });
-    addProperty(_filePath);
+    addProperty(_otherDataRenderOption);
+
+    _otherDataRenderRange.onChange([this]() {
+        _program->setUniform(_program->uniformLocation("colorRange"), _otherDataRenderRange);
+        //LDEBUG("Changed range to : " + std::to_string(_otherDataRenderRange.value().x) + "," + std::to_string(_otherDataRenderRange.value().y));
+    }); 
+    _otherDataRenderRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    addProperty(_otherDataRenderRange);
+
+    _staticLuminosity.onChange([this]() {
+        _program->setUniform(_program->uniformLocation("staticLuminosity"), _staticLuminosity);
+    });
+    addProperty(_staticLuminosity);
+
+    _blendingOption.addOptions({
+        { gaia::BlendingOption::SRC_ALPHA__ONE, "Src alpha - one" },
+        { gaia::BlendingOption::SRC_ALPHA__ZERO, "srch alpa - zero" },      
+        { gaia::BlendingOption::SRC_ALPHA__SRC_1_MINUS_ALPHA, "srch alpa - one minus alpha" },
+        { gaia::BlendingOption::ONE__ZERO, "one - zero" },
+        { gaia::BlendingOption::SRC_COLOR__ONE, "src color - one" },
+        { gaia::BlendingOption::SRC_COLOR__ZERO, "src color - zero" },
+    });
+    addProperty(_blendingOption);
+
+    //_luminosityMultiplier.onChange([this]() 
+    //{
+    //    _program->setUniform(_program->uniformLocation("zoomMultiplier"), _luminosityMultiplier);
+
+    //});
+
+    _lumZoomDistance.onChange([this]() {
+        _program->setUniform(_program->uniformLocation("zoomLuminosityDistance"), _lumZoomDistance);
+        //LDEBUG("Changed zoom range  to : " + std::to_string(_lumZoomDistance.value().x) + "," + std::to_string(_lumZoomDistance.value().y));
+
+    });
+
+    _lumZoomMultiplier.onChange([this]() {
+        _program->setUniform(_program->uniformLocation("zoomMultiplier"), _lumZoomMultiplier);
+        //LDEBUG("Changed zoom multiplier to : " + std::to_string(_lumZoomMultiplier.value().x) + "," + std::to_string(_lumZoomMultiplier.value().y));
+    });
+
+    addProperty(_lumZoomMultiplier);
+    addProperty(_lumZoomDistance);
 
     _fileReaderOption.addOptions({
         { gaia::FileReaderOption::Fits, "Fits" },
@@ -617,10 +735,12 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         { gaia::FileReaderOption::BinaryRaw, "BinaryRaw" },
         { gaia::FileReaderOption::BinaryOctree, "BinaryOctree" },
         { gaia::FileReaderOption::StreamOctree, "StreamOctree" },
-        { gaia::FileReaderOption::Csv, "Csv"} 
+        { gaia::FileReaderOption::Csv, "Csv"},
+        { gaia::FileReaderOption::MultipleCsv, "MultipleCsv"}
     });
     _fileReaderOption = codegen::map<gaia::FileReaderOption>(p.fileReaderOption);
 
+    //TODO remove rendermode
     _renderMode.addOptions({
         //{ gaia::RenderMode::Static, "Static" },
         //{ gaia::RenderMode::Color, "Color" },
@@ -630,7 +750,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         _renderMode = codegen::map<gaia::RenderMode>(*p.renderMode);
     }
     _renderMode.onChange([&]() { _buffersAreDirty = true; });
-    addProperty(_renderMode);
+    //addProperty(_renderMode);
 
     _shaderOption.addOptions({
         { gaia::ShaderOption::PointSSBO, "Point_SSBO" },
@@ -715,23 +835,24 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     });
 
     _maxCpuMemoryPercent = p.maxCpuMemoryPercent.value_or(_maxCpuMemoryPercent);
-    _posXThreshold = p.filterPosX.value_or(_posXThreshold);
-    addProperty(_posXThreshold);
 
-    _posYThreshold = p.filterPosY.value_or(_posYThreshold);
-    addProperty(_posYThreshold);
+    //_posXThreshold = p.filterPosX.value_or(_posXThreshold);
+    //addProperty(_posXThreshold);
 
-    _posZThreshold = p.filterPosZ.value_or(_posZThreshold);
-    addProperty(_posZThreshold);
+    //_posYThreshold = p.filterPosY.value_or(_posYThreshold);
+    //addProperty(_posYThreshold);
 
-    _gMagThreshold = p.filterGMag.value_or(_gMagThreshold);
-    addProperty(_gMagThreshold);
+    //_posZThreshold = p.filterPosZ.value_or(_posZThreshold);
+    //addProperty(_posZThreshold);
 
-    _bpRpThreshold = p.filterBpRp.value_or(_bpRpThreshold);
-    addProperty(_bpRpThreshold);
+    //_gMagThreshold = p.filterGMag.value_or(_gMagThreshold);
+    //addProperty(_gMagThreshold);
 
-    _distThreshold = p.filterDist.value_or(_distThreshold);
-    addProperty(_distThreshold);
+    //_bpRpThreshold = p.filterBpRp.value_or(_bpRpThreshold);
+    //addProperty(_bpRpThreshold);
+
+    //_distThreshold = p.filterDist.value_or(_distThreshold);
+    //addProperty(_distThreshold);
 
     // Only add properties correlated to fits files if we're reading from a fits file.
     if (_fileReaderOption == gaia::FileReaderOption::Fits) {
@@ -968,11 +1089,40 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     checkGlErrors("After buffer updates");
 
-    // Activate shader program and send uniforms.
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    glDepthMask(false);
-    _program->activate();
+    // Activate shader program and send uniforms. //TODO investigate other blend functions?
+    const int blendOption = _blendingOption;
+    switch (blendOption)
+    {
+    case gaia::BlendingOption::SRC_ALPHA__ONE:
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        break;
+    case gaia::BlendingOption::SRC_ALPHA__ZERO:
+        glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
+        break;
+    case gaia::BlendingOption::SRC_ALPHA__SRC_1_MINUS_ALPHA:
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        break;
+    case gaia::BlendingOption::ONE__ZERO:
+        glBlendFunc(GL_ONE, GL_ZERO);
+        break;
+    case gaia::BlendingOption::SRC_COLOR__ONE:
+        glBlendFunc(GL_SRC_COLOR, GL_ONE);
+        break;
+    case gaia::BlendingOption::SRC_COLOR__ZERO:
+        glBlendFunc(GL_SRC_COLOR, GL_ZERO);
+        break;
 
+    default:
+        break;
+    }
+    //glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
+    glDepthMask(true);
+    //glEnable(GL_DEPTH_TEST);
+    _program->activate();
+    //Send camera position in kiloParsec to shader
+    glm::vec3 cameraPos = static_cast<glm::vec3>(data.camera.positionVec3());
+
+    _program->setUniform(_program->uniformLocation("cameraPos"), cameraPos);
     _program->setUniform(_uniformCache.model, model);
     _program->setUniform(_uniformCache.view, view);
     _program->setUniform(_uniformCache.projection, projection);
@@ -980,18 +1130,18 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         _uniformCache.time,
         static_cast<float>(data.time.j2000Seconds())
     );
-    _program->setUniform(_uniformCache.renderOption, _renderMode);
+    //_program->setUniform(_uniformCache.renderOption, _renderMode);
     _program->setUniform(_uniformCache.viewScaling, viewScaling);
-    _program->setUniform(_uniformCache.cutOffThreshold, _cutOffThreshold);
+    _program->setUniform(_uniformCache.cutOffThreshold, _cutOffThreshold); //TODO
     _program->setUniform(_uniformCache.luminosityMultiplier, _luminosityMultiplier);
 
     // Send filterValues.
-    _program->setUniform(_uniformFilterCache.posXThreshold, _posXThreshold);
-    _program->setUniform(_uniformFilterCache.posYThreshold, _posYThreshold);
-    _program->setUniform(_uniformFilterCache.posZThreshold, _posZThreshold);
-    _program->setUniform(_uniformFilterCache.gMagThreshold, _gMagThreshold);
-    _program->setUniform(_uniformFilterCache.bpRpThreshold, _bpRpThreshold);
-    _program->setUniform(_uniformFilterCache.distThreshold, _distThreshold);
+    //_program->setUniform(_uniformFilterCache.posXThreshold, _posXThreshold);
+    //_program->setUniform(_uniformFilterCache.posYThreshold, _posYThreshold);
+    //_program->setUniform(_uniformFilterCache.posZThreshold, _posZThreshold);
+    //_program->setUniform(_uniformFilterCache.gMagThreshold, _gMagThreshold);
+    //_program->setUniform(_uniformFilterCache.bpRpThreshold, _bpRpThreshold);
+    //_program->setUniform(_uniformFilterCache.distThreshold, _distThreshold);
 
     ghoul::opengl::TextureUnit colorUnit;
     if (_colorTexture) {
@@ -1002,7 +1152,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     // Specify how many stars we will render. Will be overwritten if rendering billboards
     GLsizei nShaderCalls = _nStarsToRender;
-
+    glm::dvec3 eyePosition;
     ghoul::opengl::TextureUnit psfUnit;
     switch (shaderOption) {
         case gaia::ShaderOption::PointSSBO:
@@ -1016,10 +1166,14 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             break;
         case gaia::ShaderOption::BillboardSSBO:
         case gaia::ShaderOption::BillboardSSBONoFBO:
-            _program->setUniform(
-                _uniformCache.cameraPos,
-                data.camera.positionVec3()
+            eyePosition = glm::dvec3(
+                glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
             );
+            //_program->setUniform(
+            //    _uniformCache.cameraPos,
+            //    data.camera.positionVec3()
+            //);
+            _program->setUniform(_uniformCache.cameraPos,eyePosition);
             _program->setUniform(
                 _uniformCache.cameraLookUp,
                 data.camera.lookUpVectorWorldSpace()
@@ -1028,10 +1182,10 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
             _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
 
-            _program->setUniform(_uniformCache.closeUpBoostDist,
-                _closeUpBoostDist * static_cast<float>(distanceconstants::Parsec)
-            );
-            _program->setUniform(_uniformCache.billboardSize, _billboardSize);
+            //_program->setUniform(_uniformCache.closeUpBoostDist,
+            //    _closeUpBoostDist * static_cast<float>(distanceconstants::Parsec)
+            //);
+            //_program->setUniform(_uniformCache.billboardSize, _billboardSize);
             _program->setUniform(_uniformCache.magnitudeBoost, _magnitudeBoost);
             _program->setUniform(_uniformCache.sharpness, _sharpness);
 
@@ -1116,7 +1270,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
         _programTM->deactivate();
     }
-
+    glEnable(GL_BLEND);
     glDepthMask(true);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -1510,6 +1664,12 @@ void RenderableGaiaStars::update(const UpdateData&) {
                     GL_STREAM_DRAW
                 );
             }
+            //TODO deallocate optional buffer data
+            if (_vboOpt != 0) {
+                glBindBuffer(GL_ARRAY_BUFFER, _vboOpt);
+                glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STREAM_DRAW);
+
+            }
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 #endif // !__APPLE__
         }
@@ -1822,6 +1982,7 @@ void RenderableGaiaStars::updateGUIProperties(int shaderoption) {
             if (hasProperty(&_tmPointPixelWeightThreshold)) {
                 removeProperty(_tmPointPixelWeightThreshold);
             }
+            break;
         }
         default:
             LERROR("Did not update GUI properties, shader option missing.");
@@ -1837,9 +1998,9 @@ void RenderableGaiaStars::initializeShaders(int shaderOption, bool firstcall) {
         std::unique_ptr<ghoul::opengl::ProgramObject> program =
             ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
-                absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
-                absPath("${MODULE_GAIA}/shaders/gaia_point_fs.glsl"),
-                absPath("${MODULE_GAIA}/shaders/gaia_point_ge.glsl")
+                absPath("${MODULE_GAIA}/shaders/gaia_2023_ssbo_vs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_2023_point_fs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_2023_point_ge.glsl")
             );
         if (_program) {
             global::renderEngine->removeRenderProgram(_program.get());
@@ -1891,9 +2052,9 @@ void RenderableGaiaStars::initializeShaders(int shaderOption, bool firstcall) {
         if (shaderOption == gaia::ShaderOption::BillboardSSBO) {
             program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
-                absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
-                absPath("${MODULE_GAIA}/shaders/gaia_billboard_fs.glsl"),
-                absPath("${MODULE_GAIA}/shaders/gaia_billboard_ge.glsl")
+                absPath("${MODULE_GAIA}/shaders/gaia_2023_ssbo_vs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_2023_billboard_fs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_2023_billboard_ge.glsl")
             );
         }
         else {
@@ -1913,8 +2074,8 @@ void RenderableGaiaStars::initializeShaders(int shaderOption, bool firstcall) {
         _uniformCache.cameraLookUp = _program->uniformLocation("cameraLookUp");
         _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
         _uniformCache.sharpness = _program->uniformLocation("sharpness");
-        _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
-        _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
+        //_uniformCache.billboardSize = _program->uniformLocation("billboardSize");
+        //_uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
         _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
 
         _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
@@ -1967,20 +2128,24 @@ void RenderableGaiaStars::initializeShaders(int shaderOption, bool firstcall) {
     _uniformCache.view = _program->uniformLocation("view");
     _uniformCache.projection = _program->uniformLocation("projection");
     _uniformCache.time = _program->uniformLocation("time");
-    _uniformCache.renderOption = _program->uniformLocation("renderOption");
+    //_uniformCache.renderOption = _program->uniformLocation("renderOption");
     _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
     _uniformCache.cutOffThreshold = _program->uniformLocation("cutOffThreshold");
     _uniformCache.luminosityMultiplier = _program->uniformLocation(
         "luminosityMultiplier"
     );
     _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+
+    _program->setUniform(_program->uniformLocation("zoomLuminosityDistance"), _lumZoomDistance);
+    _program->setUniform(_program->uniformLocation("zoomMultiplier"), _lumZoomMultiplier);
+
     // Filter uniforms:
-    _uniformFilterCache.posXThreshold = _program->uniformLocation("posXThreshold");
-    _uniformFilterCache.posYThreshold = _program->uniformLocation("posYThreshold");
-    _uniformFilterCache.posZThreshold = _program->uniformLocation("posZThreshold");
-    _uniformFilterCache.gMagThreshold = _program->uniformLocation("gMagThreshold");
-    _uniformFilterCache.bpRpThreshold = _program->uniformLocation("bpRpThreshold");
-    _uniformFilterCache.distThreshold = _program->uniformLocation("distThreshold");
+    //_uniformFilterCache.posXThreshold = _program->uniformLocation("posXThreshold");
+    //_uniformFilterCache.posYThreshold = _program->uniformLocation("posYThreshold");
+    //_uniformFilterCache.posZThreshold = _program->uniformLocation("posZThreshold");
+    //_uniformFilterCache.gMagThreshold = _program->uniformLocation("gMagThreshold");
+    //_uniformFilterCache.bpRpThreshold = _program->uniformLocation("bpRpThreshold");
+    //_uniformFilterCache.distThreshold = _program->uniformLocation("distThreshold");
 
     updateGUIProperties(shaderOption);
 }
@@ -1993,7 +2158,7 @@ void RenderableGaiaStars::initializeTmShaders(int shaderOption) {
                 global::renderEngine->buildRenderProgram(
                     "ToneMapping",
                     absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
-                    absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_point_fs.glsl")
+                    absPath("${MODULE_GAIA}/shaders/gaia_2023_tonemapping_point_fs.glsl")
                 );
             if (_programTM) {
                 global::renderEngine->removeRenderProgram(_programTM.get());
@@ -2011,16 +2176,16 @@ void RenderableGaiaStars::initializeTmShaders(int shaderOption) {
         }
         case gaia::ShaderOption::BillboardSSBO:
         case gaia::ShaderOption::BillboardVBO: {
-            //std::filesystem::path vs = 
-            //    absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl");
-            //std::filesystem::path fs = 
-            //    absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_billboard_fs.glsl");
+            std::filesystem::path vs = 
+                absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl");
+            std::filesystem::path fs = 
+                absPath("${MODULE_GAIA}/shaders/gaia_2023_tonemapping_billboard_fs.glsl");
 
             std::unique_ptr<ghoul::opengl::ProgramObject> programTM =
                 global::renderEngine->buildRenderProgram(
                     "ToneMapping",
-                    "${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl",
-                    "${MODULE_GAIA}/shaders/gaia_tonemapping_billboard_fs.glsl"
+                    vs,
+                    fs
             );
             if (_programTM) {
                 global::renderEngine->removeRenderProgram(_programTM.get());
@@ -2091,14 +2256,24 @@ bool RenderableGaiaStars::readDataFile() {
         case gaia::FileReaderOption::Csv:
             nReadStars = readCSVFile(file);
             break;
+        case gaia::FileReaderOption::MultipleCsv:
+            nReadStars = readMultipleCSVFiles(file);
+            break;
         default:
             LERROR("Wrong FileReaderOption - no data file loaded");
             break;
     }
 
-    if (fileReaderOption == gaia::FileReaderOption::Csv)
+    if (fileReaderOption == gaia::FileReaderOption::Csv || fileReaderOption == gaia::FileReaderOption::MultipleCsv)
     {
         _OptionalDataSize = _fileHeaders.size() - PositionSize - ColorSize - VelocitySize;
+        _program->activate();
+        _program->setUniform(_program->uniformLocation("columnIndex"), static_cast<GLint>(_fileHeaders[_dataMapping.color]));
+        _program->setUniform(_program->uniformLocation("colorRange"), glm::vec2(-0.4, 2.0));
+        _program->deactivate();
+        _otherDataRenderOption.setValue(_fileHeaders[_dataMapping.color]);
+        _otherDataRenderRange.setValue(glm::vec2(-0.4, 2.0));
+        //_otherDataRenderOption.//(_fileHeaders[_dataMapping.color]);
     }
 
     //_octreeManager->printStarsPerNode();
@@ -2118,7 +2293,7 @@ std::vector<float> RenderableGaiaStars::constructCSVData(std::vector<float>& rea
     // RenderableGaiaStars expects kiloParsec (because fits file from Vienna had
     // in kPc).
     // Thus we need to convert positions twice atm.
-
+   
     //OBS order matters unless changes are made to the internal rendering system!
     size_t speedidx{ _fileHeaders[_dataMapping.speed.value()] };
     int index{ 0 };
@@ -2142,17 +2317,58 @@ std::vector<float> RenderableGaiaStars::constructCSVData(std::vector<float>& rea
 
     return renderValues;
 }
+//TODO add CSVMultipleFiles reader option
+int RenderableGaiaStars::readMultipleCSVFiles(const std::filesystem::path& folderPath) {
+    LDEBUG("Started reading files");
+    bool firstRead = true;
+    std::vector<std::string> firstFileHeaders{};
+    std::vector<std::vector<std::string>> result;
 
-int RenderableGaiaStars::readCSVFile(const std::filesystem::path& filePath)
-{
-    //Read data from csv file and convert it to float values
-    std::vector<std::vector<std::string>> dataTable = ghoul::loadCSVFile(filePath.string(), true);
+    for (const auto& filePath : std::filesystem::directory_iterator(folderPath)) {
+        std::vector<std::vector<std::string>> dataTable = ghoul::loadCSVFile(filePath.path().string(), true);
+        //Check if we successfully read the file, otherwise we just ignore it.
+        if (dataTable.empty())
+        {
+            LERROR(fmt::format(
+                "Error loading CSV data in file '{}', dataset empty", filePath.path()
+            ));
+            continue;
+        }
 
-    //Read the fileheaders from table to local variable. 
-    std::vector<std::string> headers = std::move(dataTable[0]);
+        std::vector<std::string> headers = std::move(dataTable[0]);
+
+        if (firstRead) {
+            firstFileHeaders = headers;
+            firstRead = false;
+        }
+        //Check that all files have the same columns and in the same order. Otherwise we exit without loading any data.
+        bool headersMatching = firstFileHeaders == headers;
+        if (!headersMatching) {
+            LERROR(fmt::format("Error headers does not match the same order in subfile '{}' check data ordering. File skipped.", filePath.path() ));
+            continue;
+        }
+        //Concatenate all header files to result
+        result.insert(result.end(), dataTable.begin(), dataTable.end());
+    }
+
+    return internalReadCSVFile(firstFileHeaders, result);
+}
+
+int RenderableGaiaStars::internalReadCSVFile(std::vector<std::string>const& headers, std::vector<std::vector<std::string>> const &dataTable) {
+    LDEBUG("Adding data to octree.");
     int idx{ 0 };
     for (const auto& s : headers) {
         _fileHeaders[s] = idx++;
+    }
+
+    bool hasAllRequiredHeaders = std::all_of(_requiredValues.begin(), _requiredValues.end(), [this](const std::string& header) {
+        auto ptr = _fileHeaders.find(header);
+        return(ptr != _fileHeaders.end());
+    });
+
+    if (!hasAllRequiredHeaders) {
+        LERROR("Gaia stars file does not contain all required header columns!");
+        return -1;
     }
 
     _octreeManager.setValuesPerStar(_fileHeaders.size() - (PositionSize + ColorSize + VelocitySize));
@@ -2164,14 +2380,26 @@ int RenderableGaiaStars::readCSVFile(const std::filesystem::path& filePath)
         std::vector<float> starValues{};
         std::transform(row.begin(), row.end(), std::back_inserter(starValues),
             [](const std::string& s) {
+                if (s.size() == 0)
+                    return 0.0f;
+
                 return std::stof(s); //string to float
+                
             });
+
         //Do not include any stars with NaN values, TODO: NaN valued stars should be colored differently in the shader, e.g., blender pink?
-        bool hasNaN = std::any_of(starValues.begin(), starValues.end(), [](float f) {return std::isnan(f); });
-        if(!hasNaN && starValues.size() > 0) //Do not include any rows without values, e.g., after std::move header file from table.
+        //bool hasNaN = std::any_of(starValues.begin(), starValues.end(), [](float f) {return std::isnan(f); });
+        if (starValues.size() > 0) { //Do not include any rows without values, e.g., after std::move header file from table.
+            if (headers.size() != starValues.size())
+            {
+                LERROR("The number of data values read does not match the number of column names provided.");
+                return -1;
+            }
+
             _octreeManager.insert(constructCSVData(starValues));
+        }
     }
-    
+
     //Update header-index pairs as the stored renderValues has changed the order to: pos, col, vel, optionals
     //(optionals are also changed as they are read in alphabetical order from the map)
     std::map<std::string, size_t> tmp;
@@ -2188,11 +2416,35 @@ int RenderableGaiaStars::readCSVFile(const std::filesystem::path& filePath)
         }
     }
 
+    //Add column names as selectable column to render by. //TODO create a list of headers that are required - followed by optional to remove 
+    //warnings when loading.
+    _otherDataRenderOption.addOptions(_requiredValues);
+    _otherDataRenderOption.addOptions(headers);
+
     _fileHeaders = std::move(tmp);
     _octreeManager._fileHeaders = _fileHeaders;
     _octreeManager.sliceLodData();
 
     return static_cast<int>(dataTable.size());
+}
+
+int RenderableGaiaStars::readCSVFile(const std::filesystem::path& filePath)
+{
+    //Read data from csv file and convert it to float values
+    std::vector<std::vector<std::string>> dataTable = ghoul::loadCSVFile(filePath.string(), true);
+
+    if (dataTable.empty())
+    {
+        LERROR(fmt::format(
+            "Error loading CSV data in file '{}'", filePath
+        ));
+        return -1;
+    }
+
+    //Read the fileheaders from table to local variable. 
+    std::vector<std::string> headers = std::move(dataTable[0]);
+
+    return internalReadCSVFile(headers, dataTable);
 }
 
 int RenderableGaiaStars::readFitsFile(const std::filesystem::path& filePath) {

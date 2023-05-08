@@ -30,14 +30,14 @@ local GaiaStars = {
   Identifier = "GaiaStars",
   Renderable = {
     Type = "RenderableGaiaStars",
-    File = "C:/Users/addee/Desktop/testdata/datasmall4.csv",
+    File = "C:/Users/addee/Desktop/testdata/GALAH_AMNH.csv",
     FileReaderOption = "Csv",
     RenderMode = "Motion",
     ShaderOption = "Point_SSBO",
     Texture = textures .. "halo.png",
-    ColorMap = colormaps .. "colorbv.cmap",
+    ColorMap = "C:/Users/addee/Desktop/testdata/rainbowgradient.cmap", --colormaps .. "colorbv.cmap",
     LuminosityMultiplier = 35,
-    MagnitudeBoost = 25,
+    MagnitudeBoost = 8.0,
     CutOffThreshold = 38,
     BillboardSize = 1,
     CloseUpBoostDist = 250,
@@ -58,12 +58,12 @@ local GaiaStars = {
       Px = "px",
       Py = "py",
       Pz = "pz",
-      AbsoluteMagnitude = "Gmag",
+      AbsoluteMagnitude = "lum",
       Color = "color",
       Vx = "vx",
-      -- Vy = "vy",
-      -- Vz = "vz",
-      -- Speed = "speed"
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed"
     }
 
   },
@@ -74,12 +74,39 @@ local GaiaStars = {
   }
 }
 
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+local starVolumes = {
+  Identifier = "GaiaStarsVolumes",
+  -- Parent = "GaiaStars",
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "GAIASTARS",
+    GeometryFile = "C:/Users/addee/Desktop/testdata/starvolume.obj",
+    ModelScale = 'Parsec',
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.4
+      }
+    }
+  },
+  GUI = {
+    Name = "Gaia Volume",
+    Path = "/Volumes"
+  }
+}
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GaiaStars)
+  openspace.addSceneGraphNode(starVolumes)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GaiaStars)
+  openspace.removeSceneGraphNode(starVolumes)
 end)
 
 asset.export(GaiaStars)
