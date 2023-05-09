@@ -241,8 +241,8 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         }
         else {
             // Recompute relative values to meters
-            _startOffset = _startOffset * startNode->boundingSphere();
-            _endOffset = _endOffset * endNode->boundingSphere();
+            _startOffset = static_cast<float>(_startOffset * startNode->boundingSphere());
+            _endOffset = static_cast<float>(_endOffset * endNode->boundingSphere());
         }
     });
 }

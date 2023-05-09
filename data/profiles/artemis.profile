@@ -96,16 +96,6 @@
       "name": "Scene.ISS_trail.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
-    },
-    {
-      "name": "Scene.ArtemisEarthTrail.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.ArtemisMoonTrail.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
     }
   ],
   "time": {

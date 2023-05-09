@@ -15,7 +15,7 @@ local JuiceTrailGanymede = {
     },
     Color = { 0.70, 0.770, 0.35 },
     StartTime = "2034 DEC 01 00:00:00.000",
-    EndTime = "2035 OCT 05 00:00:00.000",
+    EndTime = "2035 OCT 05 01:58:58.683",
     SampleInterval = 600
   },
   GUI = {

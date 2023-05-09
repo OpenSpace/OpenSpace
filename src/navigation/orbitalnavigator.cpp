@@ -435,9 +435,9 @@ OrbitalNavigator::LimitZoom::LimitZoom()
     , enableZoomOutLimit(EnabledMaximumDistanceInfo, false)
     , maximumAllowedDistance(
         MaximumDistanceInfo,
-        4e+27,
+        4e+27f,
         50.f,
-        4e+27
+        4e+27f
     )
 {
     // Min
@@ -724,7 +724,7 @@ void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputSt
         _movementTimer = _idleBehavior.idleWaitTime;
     }
     else if (!cameraLocationChanged) {
-        tickMovementTimer(deltaTime);
+        tickMovementTimer(static_cast<float>(deltaTime));
     }
 }
 

@@ -422,8 +422,12 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
     // Distances are computed based on a certain lat/long angle size
     constexpr float DefaultAngle = glm::radians(1.f);
     constexpr float MaxAngle = glm::radians(45.f);
-    float defaultDistance = globe.ellipsoid().longitudalDistance(0.f, 0.f, DefaultAngle);
-    float maxDistance = globe.ellipsoid().longitudalDistance(0.f, 0.f, MaxAngle);
+    float defaultDistance = static_cast<float>(
+        globe.ellipsoid().longitudalDistance(0.f, 0.f, DefaultAngle)
+    );
+    float maxDistance = static_cast<float>(
+        globe.ellipsoid().longitudalDistance(0.f, 0.f, MaxAngle)
+    );
     tessellation.distance = defaultDistance;
     tessellation.distance.setMaxValue(maxDistance);
 

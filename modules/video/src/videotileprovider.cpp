@@ -112,8 +112,8 @@ void VideoTileProvider::reset() {
 globebrowsing::ChunkTile VideoTileProvider::chunkTile(globebrowsing::TileIndex tileIndex, 
                                                             int parents, int maxParents) {
     using namespace globebrowsing;
-    std::function<void(TileIndex&, TileUvTransform&)> ascendToParent = []
-        (TileIndex& ti, TileUvTransform& uv) {
+    std::function<void(TileIndex&, TileUvTransform&)> ascendToParent =
+        [](TileIndex& ti, TileUvTransform&) {
             ti.level--;
         };
 

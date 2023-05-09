@@ -91,7 +91,8 @@ private:
         IsSeeking,
         Mute,
         Command,
-        Seek
+        Seek,
+        Loop
     };
     // Framebuffer
     void createFBO(int width, int height);
@@ -125,6 +126,7 @@ private:
     properties::TriggerProperty _goToStart;
     properties::TriggerProperty _reset;
     properties::BoolProperty _playAudio;
+    properties::BoolProperty _loopVideo;
 
     // Video properties. Try to read all these values from the video
     std::string _videoFile;

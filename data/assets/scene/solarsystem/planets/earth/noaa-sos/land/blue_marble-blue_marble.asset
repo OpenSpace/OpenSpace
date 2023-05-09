@@ -1,7 +1,7 @@
 local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
-local Name = "NOAA Science on a Sphere. Blue Marble: without Clouds"
+local Name = "NOAA Science on a Sphere. Blue Marble"
 local Identifier = "noaa-sos-land-blue_marble-blue_marble"
 local Description = [[The Blue Marble is an incredibly detailed, true-color depiction of
 the Earth. NASA is responsible for this dataset made from a compilation of satellite
@@ -9,8 +9,11 @@ images throughout 2001. Most of the information came from NASA's MODIS, the Mode
 Resolution Imaging Spectroradiometer, which is attached to the Terra satellite 435 miles
 above Earth. The background image of the land and oceans was created using data from June
 through September of 2001. This could not be done in a single day or even a week because
-on any given day clouds are blocking a significant portion of the surface]]
-local URL = "https://sos.noaa.gov/catalog/datasets/blue-marble-without-clouds/"
+on any given day clouds are blocking a significant portion of the surface. The cloud image
+is a composite of three days worth of data. The first two days of data were collected in
+the visible wavelength and the third day was needed to get a view of the clouds over the
+poles using thermal infrared imagery.]]
+local URL = "https://sos.noaa.gov/catalog/datasets/blue-marble/"
 
 
 local syncedDirectory = asset.syncedResource({

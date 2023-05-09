@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_CORE___PROPERTYOWNER___H__
 #define __OPENSPACE_CORE___PROPERTYOWNER___H__
 
-#include <openspace/documentation/documentationgenerator.h>
-
 #include <openspace/json.h>
 #include <map>
 #include <string>
@@ -49,7 +47,7 @@ class Property;
  * (`.`), the first name before the separator will be used as a subOwner's name and the
  * search will proceed recursively.
  */
-class PropertyOwner : public DocumentationGenerator {
+class PropertyOwner {
 public:
     /// The separator that is used while accessing the properties and/or sub-owners
     static constexpr char URISeparator = '.';
@@ -76,7 +74,7 @@ public:
      * The destructor will remove all Propertys and PropertyOwners it owns along with
      * itself.
      */
-    virtual ~PropertyOwner() override;
+    virtual ~PropertyOwner();
 
     /**
      * Sets the identifier for this PropertyOwner. If the PropertyOwner does not have an
@@ -297,9 +295,7 @@ public:
     void removeTag(const std::string& tag);
 
     // Generate JSON for documentation
-    std::string generateJson() const override;
-
-    nlohmann::json generateJsonJson() const;
+    nlohmann::json generateJson() const;
 
 protected:
     /// The unique identifier of this PropertyOwner

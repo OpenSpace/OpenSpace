@@ -25,18 +25,16 @@
 #ifndef __OPENSPACE_CORE___SCENELICENSEWRITER___H__
 #define __OPENSPACE_CORE___SCENELICENSEWRITER___H__
 
-#include <openspace/documentation/documentationgenerator.h>
-
 #include <openspace/json.h>
 #include <vector>
 
 namespace openspace {
 
-class SceneLicenseWriter : public DocumentationGenerator {
+class SceneLicenseWriter {
 public:
     SceneLicenseWriter();
-    std::string generateJson() const override;
-    nlohmann::json generateJsonJson() const;
+    nlohmann::json generateJsonList() const;
+    nlohmann::json generateJsonGroupedByLicense() const;
 };
 
 } // namespace openspace

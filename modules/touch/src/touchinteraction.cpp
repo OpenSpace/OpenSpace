@@ -328,7 +328,7 @@ TouchInteraction::TouchInteraction()
         glm::vec4(0.2f)
     )
     , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.f)
-    , _pinchInputs({ TouchInput(0, 0, 0.0, 0.0, 0.0), TouchInput(0, 0, 0.0, 0.0, 0.0) })
+    , _pinchInputs({ TouchInput(0, 0, 0.f, 0.f, 0.0), TouchInput(0, 0, 0.f, 0.f, 0.0) })
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0, 2.75, glm::dvec2(0.08, 0.045) }
     // Calculated with two vectors with known diff in length, then

@@ -5,6 +5,7 @@
     "scene/solarsystem/missions/juice/fieldlines",
     "scene/solarsystem/missions/juice/fov/janus",
     "scene/solarsystem/missions/juice/fov/navcam",
+    "scene/solarsystem/missions/juice/dashboard",
     "scene/solarsystem/missions/juice/model",
     "scene/solarsystem/missions/juice/plane",
     "scene/solarsystem/missions/juice/trail",
@@ -55,7 +56,7 @@
   },
   "properties": [
     {
-      "name": "NavigationHandler.OrbitalNavigator.MinimumAllowedDistance",
+      "name": "NavigationHandler.OrbitalNavigator.LimitZoom.MinimumAllowedDistance",
       "type": "setPropertyValueSingle",
       "value": "0.0"
     },
@@ -111,11 +112,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2031-08-01T03:01:30"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 2
   }
 }

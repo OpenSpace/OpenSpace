@@ -5,6 +5,11 @@ local kernels = asset.require('./kernels')
 local Juice = {
   Identifier = "Juice",
   Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 APR 14 12:43:25.842",
+    End = "2035 OCT 05 00:00:00.000"
+  },
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
