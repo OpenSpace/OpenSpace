@@ -574,6 +574,10 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
     ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
 
     for (const Profile::Property& prop : p.properties) {
+        if (prop.name.empty()) {
+            LWARNING("Property name in profile was empty");
+            continue;
+        }
         std::string uriOrRegex = prop.name;
         std::string groupName;
         if (doesUriContainGroupTag(uriOrRegex, groupName)) {

@@ -6,6 +6,7 @@
     "base",
     "base_keybindings",
     "scene/solarsystem/planets/earth/earth",
+    "scene/solarsystem/planets/earth/layers/colorlayers/viirs_noaa20_temporal.asset",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/planets/earth/satellites/misc/hubble_trail",
     "scene/solarsystem/planets/earth/lagrange_points/lagrange_points",
@@ -247,11 +248,6 @@
       "name": "Scene.ISS_trail.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
-    },
-    {
-      "name": "",
-      "type": "setPropertyValueSingle",
-      "value": ""
     },
     {
       "name": "Scene.Earth.Renderable.Layers.ColorLayers.VIIRS_NOAA20_Temporal.Enabled",
