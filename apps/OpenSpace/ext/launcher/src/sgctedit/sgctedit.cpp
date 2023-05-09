@@ -142,6 +142,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
         setupProjectionTypeInGui(w.viewports.back(), wCtrl);
     }
     _settingsWidget->setShowUiOnFirstWindow(firstWindowGuiIsEnabled);
+    _settingsWidget->setEnableShowUiOnFirstWindow(nWindows > 1);
     _settingsWidget->setVsync(
         _cluster.settings &&
         _cluster.settings.value().display &&

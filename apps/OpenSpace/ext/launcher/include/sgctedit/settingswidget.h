@@ -73,6 +73,13 @@ public:
     void setShowUiOnFirstWindow(bool setUiOnFirstWindow);
 
     /**
+     * Sets value for whether or not the checkbox for having the UI only on the first
+     * window is enabled. This checkbox should only be clickable if the number of
+     * windows is 2 or more. 
+     */
+    void setEnableShowUiOnFirstWindowCheckbox(bool enable);
+
+    /**
      * Sets the value of the checkbox for enabling VSync.
      * 
      * \param enableVsync boolean value, if set true then VSync is enabled

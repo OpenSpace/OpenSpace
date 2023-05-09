@@ -38,6 +38,7 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     
     _showUiOnFirstWindow = new QCheckBox("Show only user interface on the first window");
     _showUiOnFirstWindow->setChecked(false);
+    _showUiOnFirstWindow->setEnabled(false);
     _showUiOnFirstWindow->setToolTip(
         "If enabled the first window is marked as a GUI window resulting in the user "
         "interface only being shown on that window and the rendering is suppressed on "
@@ -83,6 +84,10 @@ bool SettingsWidget::showUiOnFirstWindow() const {
 
 void SettingsWidget::setShowUiOnFirstWindow(bool setUiOnFirstWindow) {
     _showUiOnFirstWindow->setChecked(setUiOnFirstWindow);
+}
+
+void SettingsWidget::setEnableShowUiOnFirstWindowCheckbox(bool enable) {
+    _showUiOnFirstWindow->setEnabled(enable);
 }
 
 void SettingsWidget::setVsync(bool enableVsync) {
