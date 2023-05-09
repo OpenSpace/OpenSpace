@@ -12,6 +12,13 @@ local speck = asset.syncedResource({
   Version = 2
 })
 
+local transformMatrix = {
+  -0.7357425748,    0.67726129641,  0.0,           0.0,
+  -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
+  0.67314530211,    0.73127116582,  0.11008126223, 0.0,
+  0.0,              0.0,            0.0,           1.0
+}
+
 local tullyPoints = {
   Identifier = "TullyGalaxies",
   Renderable = {
@@ -22,7 +29,8 @@ local tullyPoints = {
       Color = { 0.7, 0.7, 0.7 },
       Size = 19.36,
       MinMaxSize = { 8, 20 },
-      Unit = "Mpc"
+      Unit = "Mpc",
+      TransformationMatrix = transformMatrix
     },
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.99,
@@ -35,12 +43,7 @@ local tullyPoints = {
     ColorOption = { "prox5Mpc" },
     ColorRange = { { 1.0, 30.0 } },
     Unit = "Mpc",
-    TransformationMatrix = {
-      -0.7357425748,    0.67726129641,  0.0,           0.0,
-      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-      0.0,              0.0,            0.0,           1.0
-    },
+    TransformationMatrix = transformMatrix,
     FadeInDistances = { 0.001, 1.0 }, -- Fade in value in the same unit as "Unit"
     BillboardMinMaxSize = { 0.0, 7.0 }, -- in pixels
     --CorrectionSizeEndDistance = 22.0,
@@ -81,12 +84,7 @@ local tullyImages = {
     TexturePath = textures,
     Luminosity = "diamkpc",
     ScaleLuminosity = 0.001,
-    TransformationMatrix = {
-      -0.7357425748,    0.67726129641,  0.0,           0.0,
-      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-      0.0,              0.0,            0.0,           1.0
-    },
+    TransformationMatrix = transformMatrix,
     Unit = "Mpc",
     -- Fade in value in the same unit as "Unit"
     FadeInDistances = {0.0005, 0.003},
