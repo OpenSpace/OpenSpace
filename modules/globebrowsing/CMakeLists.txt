@@ -182,8 +182,4 @@ endif () # WIN32
 begin_dependency("GEOS")
 add_subdirectory(ext/geos SYSTEM)
 target_link_libraries(openspace-module-globebrowsing PRIVATE geos)
-
-set_property(TARGET geos PROPERTY FOLDER "External")
-set_property(TARGET geos_c PROPERTY FOLDER "External")
-set_property(TARGET ryu PROPERTY FOLDER "External")
 end_dependency("GEOS")

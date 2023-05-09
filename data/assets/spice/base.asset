@@ -1,18 +1,4 @@
-local lsk = asset.syncedResource({
-  Name = "General LSK Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "general_lsk",
-  Version = 1
-})
-
-local pck = asset.syncedResource({
-  Name = "General PCK Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "general_pck",
-  Version = 1
-})
-
-local spk = asset.syncedResource({
+local syncedDirectory = asset.syncedResource({
   Name = "General SPK Kernels",
   Type = "HttpSynchronization",
   Identifier = "general_spk",
@@ -20,9 +6,10 @@ local spk = asset.syncedResource({
 })
 
 local kernels = {
-  lsk .. "naif0012.tls",
-  pck .. "pck00011.tpc",
-  spk .. "de430.bsp"
+  asset.localResource("naif0012.tls"),
+  -- Leapseconds:
+  asset.localResource("pck00010.tpc"),
+  syncedDirectory .. "de430.bsp"
 }
 
 asset.onInitialize(function()
@@ -40,9 +27,9 @@ end)
 
 asset.meta = {
   Name = "SPICE Base",
-  Version = "1.1",
-  Description = [[This asset contains the spice base kernels necessary for any space
-    application. Includes positions for Solar System bodies from 1850 to 2150]],
+  Version = "1.0",
+  Description = [[This asset contains the spice base kernels. With positions for Solar
+    System bodies from 1850 to 2150]],
   Author = "OpenSpace Team",
   URL = "https://naif.jpl.nasa.gov/naif/data_generic.html",
   License = "NASA"

@@ -112,7 +112,7 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
     return phaseJson;
 }
 
-void MissionTopic::handleJson(const nlohmann::json&) {
+void MissionTopic::handleJson(const nlohmann::json& input) {
     nlohmann::json data = { {"missions", missionJson()} };
     _connection->sendJson(wrappedPayload(data));
 }

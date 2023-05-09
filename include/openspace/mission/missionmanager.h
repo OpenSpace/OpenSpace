@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___MISSIONMANAGER___H__
 #define __OPENSPACE_CORE___MISSIONMANAGER___H__
 
+#include <openspace/documentation/documentationgenerator.h>
 #include <openspace/mission/mission.h>
 
 #include <ghoul/misc/assert.h>

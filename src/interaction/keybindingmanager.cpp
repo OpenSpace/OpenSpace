@@ -38,7 +38,39 @@
 
 namespace openspace::interaction {
 
-KeybindingManager::KeybindingManager() {}
+void sortJson(nlohmann::json& json) {
+    std::sort(
+        json.begin(),
+        json.end(), 
+        [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
+            std::string lhsString = lhs["Name"];
+            std::string rhsString = rhs["Name"];
+            std::transform(
+                lhsString.begin(), 
+                lhsString.end(), 
+                lhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+            std::transform(
+                rhsString.begin(), 
+                rhsString.end(), 
+                rhsString.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+
+            return rhsString > lhsString;
+        });
+}
+
+KeybindingManager::KeybindingManager()
+    : DocumentationGenerator(
+        "Keybindings",
+        "keybinding",
+        {
+            { "keybindingTemplate", "${WEB}/documentation/keybinding.hbs" }
+        }
+    )
+{}
 
 void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
@@ -111,23 +143,41 @@ const std::multimap<KeyWithModifier, std::string>& KeybindingManager::keyBinding
     return _keyLua;
 }
 
-nlohmann::json KeybindingManager::generateJson() const {
+std::string KeybindingManager::generateJson() const {
+    ZoneScoped;
+
+    std::stringstream json;
+    json << "[";
+    bool first = true;
+    for (const std::pair<const KeyWithModifier, std::string>& p : _keyLua) {
+        if (!first) {
+            json << ",";
+        }
+        first = false;
+        json << "{";
+        json << R"("key": ")" << ghoul::to_string(p.first) << "\",";
+        json << R"("action": ")" << p.second << "\"";
+        json << "}";
+    }
+    json << "]";
+
+    return json.str();
+}
+
+nlohmann::json KeybindingManager::generateJsonJson() const {
     ZoneScoped;
 
     nlohmann::json json;
 
     for (const std::pair<const KeyWithModifier, std::string>& p : _keyLua) {
         nlohmann::json keybind;
-        keybind["name"] = ghoul::to_string(p.first);
-        keybind["action"] = p.second;
+        keybind["Name"] = ghoul::to_string(p.first);
+        keybind["Action"] = p.second;
         json.push_back(std::move(keybind));
     }
-    sortJson(json, "name");
+    sortJson(json);
 
-    nlohmann::json result;
-    result["name"] = "Keybindings";
-    result["keybindings"] = json;
-    return result;
+    return json;
 }
 
 scripting::LuaLibrary KeybindingManager::luaLibrary() {

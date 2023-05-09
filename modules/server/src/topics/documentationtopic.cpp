@@ -47,19 +47,21 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
     // Do not parse generated json. Instead implement ability to get
     // ghoul::Dictionary objects from ScriptEngine, FactoryManager, and KeybindingManager.
     if (requestedType == "lua") {
-        response = global::scriptEngine->generateJson();
+        response = json::parse(global::scriptEngine->generateJson());
     }
     else if (requestedType == "factories") {
-        response = FactoryManager::ref().generateJson();
+        response = json::parse(FactoryManager::ref().generateJson());
     }
     else if (requestedType == "keyboard") {
-        response = global::keybindingManager->generateJson();
+        response = json::parse(global::keybindingManager->generateJson());
     }
     else if (requestedType == "asset") {
-        response = global::keybindingManager->generateJson();
+        response = json::parse(global::keybindingManager->generateJson());
     }
     else if (requestedType == "meta") {
-        response = SceneLicenseWriter().generateJsonList();
+        std::string docs = SceneLicenseWriter().generateJson();
+        nlohmann::json parsedDocs = json::parse(docs);
+        response = parsedDocs;
     }
 
     _connection->sendJson(wrappedPayload(response));

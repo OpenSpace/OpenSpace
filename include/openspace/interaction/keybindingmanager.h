@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
 #define __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
 
+#include <openspace/documentation/documentationgenerator.h>
+
 #include <openspace/util/keys.h>
 
 namespace openspace {
@@ -36,7 +38,7 @@ namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 
-class KeybindingManager {
+class KeybindingManager : public DocumentationGenerator {
 public:
     KeybindingManager();
 
@@ -53,7 +55,8 @@ public:
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
-    nlohmann::json generateJson() const;
+    std::string generateJson() const override;
+    nlohmann::json generateJsonJson() const;
 
     const std::multimap<KeyWithModifier, std::string>& keyBindings() const;
 

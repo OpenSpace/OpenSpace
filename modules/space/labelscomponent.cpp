@@ -41,11 +41,11 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Enabled",
+        "Is Enabled",
         "This setting determines whether the labels will be visible or not. They are "
         "disabled per default",
         // @VISIBILITY(?)
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {

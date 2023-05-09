@@ -117,11 +117,7 @@ struct [[codegen::Dictionary(Action)]] Action {
     a.documentation = action.documentation.value_or(a.documentation);
     a.guiPath = action.guiPath.value_or(a.guiPath);
     if (!a.guiPath.starts_with('/')) {
-        throw ghoul::RuntimeError(
-            fmt::format(
-                "Tried to register action: '{}'. The field 'GuiPath' is set to '{}' but " 
-                "should be '/{}' ", a.name, a.guiPath, a.guiPath)
-        );
+        throw ghoul::RuntimeError("Action's GuiPath must start with /");
     }
     if (action.isLocal.has_value()) {
         a.isLocal = interaction::Action::IsLocal(*action.isLocal);
