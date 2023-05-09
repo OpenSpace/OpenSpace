@@ -84,7 +84,6 @@ private:
         Height,
         Width,
         Meta,
-        Params,
         Time,
         Fps,
         Pause,
@@ -95,13 +94,14 @@ private:
         Loop
     };
     // Framebuffer
-    void createFBO(int width, int height);
-    void resizeFBO(int width, int height);
+    void createTexture(glm::ivec2 size);
+    void resizeTexture(glm::ivec2 size);
 
     // Libmpv
     static void onMpvRenderUpdate(void*); // Has to be static because of C api
     void initializeMpv(); // Called first time in update
     void renderMpv(); // Called in update
+    void renderFrame(); // Renders a frame; called in renderMpv
     void commandAsyncMpv(const char* cmd[], MpvKey key = MpvKey::Command);
     void handleMpvEvents();
     // Libmpv properties
@@ -117,8 +117,6 @@ private:
     double correctVideoPlaybackTime() const;
     bool isWithingStartEndTime() const;
     void updateFrameDuration();
-    void stepFrameForward();
-    void stepFrameBackward();
 
     // Properties for user interaction
     properties::TriggerProperty _play;
