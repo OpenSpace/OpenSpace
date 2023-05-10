@@ -1,5 +1,6 @@
 asset.require("spice/base")
 asset.require("./actions")
+asset.require("./mission")
 asset.require("scene/solarsystem/planets/earth/layers/colorlayers/terra_modis_temporal")
 asset.require("scene/solarsystem/planets/earth/layers/colorlayers/esri_viirs_combo")
 
