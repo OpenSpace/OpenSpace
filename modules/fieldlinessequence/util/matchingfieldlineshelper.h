@@ -42,7 +42,7 @@ namespace openspace {
         bool convertCdfToMatchingFieldlinesState(
             FieldlinesState& state,
             ccmc::Kameleon* kameleon,
-            const std::vector<glm::vec3>& seedPoints,
+            std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
             const std::vector<double>& birthTimes,
             double manualTimeOffset,
             const std::string& tracingVar,
@@ -51,15 +51,16 @@ namespace openspace {
             const size_t nPointsOnPathLine,
             const size_t nPointsOnFieldLines);
 
-        std::vector<std::vector<glm::vec3>> getPositonsOfSeedPointFlowline(
-            const std::vector<glm::vec3>& seedPoint,
+        std::vector<std::vector<glm::vec3>> getAllFieldlinesPositionsOfSeedPoints(
+            std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
             const std::string& tracingVar,
             ccmc::Kameleon* kameleon,
-            const size_t nPointsOnPathLine
+            const size_t nPointsOnPathLine/*,
+            std::vector<std::string>& seedPointsTopology*/
         );
 
-        std::vector<glm::vec3> getPositonsOfSeedPointFieldline(
-            const glm::vec3& seedPoint,
+        std::vector<glm::vec3> getFieldlinePositions(
+            glm::vec3& seedPoint,
             ccmc::Kameleon* kameleon,
             float innerBoundaryLimit,
             size_t nPointsOnFieldlines
