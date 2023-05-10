@@ -15,23 +15,37 @@ local legend = {
   CartesianPosition = { 0.677970, 0.0, -1.049180 }
 }
 
-local show_legend = {
-  Identifier = "os.events.bastilleday.fluxnodelegend.showlegend",
-  Name = "Show the legend image",
+local toggle_legend = {
+  Identifier = "os.events.bastilleday.fluxnodelegend.togglelegend",
+  Name = "Toggle the legend image",
   Command = [[
-    openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Opacity", 0.0);
-    openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", true);
-    openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Opacity", 1.0, 4);
+    if openspace.getPropertyValue("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled") then
+      openspace.setPropertyValueSingle(
+        "ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade",
+        0.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade",
+        1.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
   ]],
-  Documentation = "Show the legend image",
+  Documentation = "Toggle the legend image",
   GuiPath = "/Bastille-Day 2000",
-  IsLocal =  false
+  IsLocal = false
 }
 
 local hide_legend = {
   Identifier = "os.events.bastilleday.fluxnodelegend.hidelegend",
   Name = "Hides the legend image",
-  Command = [[openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Opacity", 0.0, 2)]],
+  Command = [[openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade", 0.0, openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"), "Linear", 'openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", false)')]],
   Documentation = "Hides the legend image",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
@@ -41,14 +55,12 @@ asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(legend)
   -- These numbers are there to put the legend on the side of the screen.
   openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Rotation", { 0.0, 0.0, 0.56652 });
-  openspace.action.registerAction(show_legend)
-  openspace.action.registerAction(hide_legend)
+  openspace.action.registerAction(toggle_legend)
 end)
 
 asset.onDeinitialize(function ()
   openspace.removeScreenSpaceRenderable(legend)
-  openspace.action.removeAction(show_legend)
-  openspace.action.removeAction(hide_legend)
+  openspace.action.removeAction(toggle_legend)
 end)
 
 asset.meta = {

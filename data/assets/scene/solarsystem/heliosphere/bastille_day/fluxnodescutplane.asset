@@ -72,7 +72,25 @@ local MeridialCutplane = {
 local toggle_equatorial = {
   Identifier = "os.events.bastilleday.fluxnodescutplane.toggleequatorial",
   Name = "Toggle equatorial cutplane",
-  Command = propertyHelper.invert("Scene.EquatorialCutplane-bastille-day-2000.Renderable.Enabled"),
+  Command = [[
+    if openspace.getPropertyValue("Scene.EquatorialCutplane-bastille-day-2000.Renderable.Enabled") then
+      openspace.setPropertyValueSingle(
+        "Scene.EquatorialCutplane-bastille-day-2000.Renderable.Fade",
+        0.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("Scene.EquatorialCutplane-bastille-day-2000.Renderable.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("Scene.EquatorialCutplane-bastille-day-2000.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "Scene.EquatorialCutplane-bastille-day-2000.Renderable.Fade",
+        1.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
   Documentation = "Toggle equatorial cutplane of CME",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
@@ -80,7 +98,25 @@ local toggle_equatorial = {
 local toggle_meridial = {
   Identifier = "os.events.bastilleday.fluxnodescutplane.togglemeridial",
   Name = "Toggle meridial cutplane",
-  Command = propertyHelper.invert("Scene.MeridialCutplane-bastille-day-2000.Renderable.Enabled"),
+  Command = [[
+    if openspace.getPropertyValue("Scene.MeridialCutplane-bastille-day-2000.Renderable.Enabled") then
+      openspace.setPropertyValueSingle(
+        "Scene.MeridialCutplane-bastille-day-2000.Renderable.Fade",
+        0.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("Scene.MeridialCutplane-bastille-day-2000.Renderable.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("Scene.MeridialCutplane-bastille-day-2000.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "Scene.MeridialCutplane-bastille-day-2000.Renderable.Fade",
+        1.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
   Documentation = "Toggle meridial cutplane of CME",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false

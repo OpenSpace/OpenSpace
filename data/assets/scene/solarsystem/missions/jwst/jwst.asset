@@ -1,9 +1,6 @@
 asset.require("spice/base")
 asset.require("./actions")
 asset.require("./mission")
-asset.require("scene/solarsystem/planets/earth/layers/colorlayers/terra_modis_temporal")
-asset.require("scene/solarsystem/planets/earth/layers/colorlayers/esri_viirs_combo")
-
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
@@ -151,52 +148,6 @@ local JWSTLabel = {
 }
 
 asset.onInitialize(function()
-  -- Start of data outage, use Terra instead as replacement
-  openspace.scriptScheduler.loadScheduledScript(
-    "2021 DEC 19 00:00:00",
-    [[openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
-      true
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
-      false
-    )]],
-    [[openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
-      false
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
-      true
-    )]],
-    "",
-    2 -- Not default group, never clear this script
-  )
-
-  -- End of data outage, Go back to VIIRS ESRI combo
-  openspace.scriptScheduler.loadScheduledScript(
-    "2021 DEC 30 00:00:00",
-    [[openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
-      false
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
-      true
-    )]],
-    [[openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
-      true
-    )
-    openspace.setPropertyValueSingle(
-      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
-      false
-    )]],
-    "",
-    2 -- Not default group, never clear this script
-  )
-
   openspace.addSceneGraphNode(JWSTBand)
   openspace.addSceneGraphNode(JWSTModel)
   openspace.addSceneGraphNode(JWSTFov)
