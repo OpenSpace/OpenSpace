@@ -136,25 +136,25 @@ namespace {
 namespace openspace {
     std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFile(
         std::filesystem::path filePath,
-        std::vector<glm::vec3>& seedPoints,
+        std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
         std::vector<double>& birthTimes,
         double startTime
     );
 
     void selectAndModifySeedpoints(
         std::filesystem::path filePath,
-        std::vector<glm::vec3>& seedPoints,
+        std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
         std::vector<double>& birthTimes,
         double startTime
     );
 
     void addCoordinatesToSeedPoints(
         RenderableMovingFieldlines::SeedPointInformation temp,
-        std::vector<glm::vec3>& seedPoints
+        std::vector<std::pair<glm::vec3, std::string>>& seedPoints
     );
 
     void addCoordinatesOfTopologies(
-        std::vector<glm::vec3>& seedPoints,
+        std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
         std::vector<double>& birthTimes,
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data
     );
@@ -477,7 +477,7 @@ namespace openspace {
 
         std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
 
-        std::vector<glm::vec3> seedPoints;
+        std::vector<std::pair<glm::vec3, std::string>> seedPoints;
         std::vector<double> birthTimes;
 
         bool isSuccessful = false;
@@ -755,31 +755,14 @@ namespace openspace {
     */
     void addCoordinatesToSeedPoints(
         RenderableMovingFieldlines::SeedPointInformation temp,
-        std::vector<glm::vec3>& seedPoints
+        std::vector<std::pair<glm::vec3, std::string>>& seedPoints
+        //, std::vector<std::string>& seedPointsTopology
     )
     {
-        if(temp.fieldLineStatus == "OPEN_NORTH"){
-            glm::vec3 seedPointVector;
-            seedPointVector.x = temp.x;
-            seedPointVector.y = temp.y;
-            seedPointVector.z = temp.z;
-            seedPoints.push_back(seedPointVector);
-        }
-        else if(temp.fieldLineStatus == "OPEN_SOUTH"){
-            glm::vec3 seedPointVector;
-            seedPointVector.x = temp.x;
-            seedPointVector.y = temp.y;
-            seedPointVector.z = temp.z;
-            seedPoints.push_back(seedPointVector);
-        }
-        else{
-            glm::vec3 seedPointVector;
-            seedPointVector.x = temp.x;
-            seedPointVector.y = temp.y;
-            seedPointVector.z = temp.z;
-            seedPoints.push_back(seedPointVector);
-        }
-
+            glm::vec3 seedPointVector(temp.x, temp.y, temp.z);
+            std::string topology = temp.fieldLineStatus;
+            seedPoints.push_back({ seedPointVector, topology });
+            // seedPointsTopology.push_back(topology);
     }
 
     /**
@@ -788,20 +771,22 @@ namespace openspace {
     * (push back seedpoints we want to render)
     */
     void addCoordinatesOfTopologies(
-        std::vector<glm::vec3>& seedPoints,
+        std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
         std::vector<double>& birthTimes,
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data/*,
+        std::vector<std::string>& seedPointsTopology*/
     )
     {
         // Iterate through data vector
         for (size_t i = 0; i < data.size(); i++)
         {
-            addCoordinatesToSeedPoints(data[i].IMF, seedPoints);
-            addCoordinatesToSeedPoints(data[i].Closed, seedPoints);
-            addCoordinatesToSeedPoints(data[i].OpenNorth, seedPoints);
-            addCoordinatesToSeedPoints(data[i].OpenSouth, seedPoints);
+            addCoordinatesToSeedPoints(data[i].IMF, seedPoints); //, seedPointsTopology);
+            addCoordinatesToSeedPoints(data[i].Closed, seedPoints); //, seedPointsTopology);
+            addCoordinatesToSeedPoints(data[i].OpenNorth, seedPoints); //, seedPointsTopology);
+            addCoordinatesToSeedPoints(data[i].OpenSouth, seedPoints); //, seedPointsTopology);
 
             // TODO make understandable - make function - temp code until better solution
+            // t = the time format as a number, looks really confusing...
             double t = -28695.816082351092;
             birthTimes.push_back(t);
         }
@@ -812,7 +797,7 @@ namespace openspace {
     */
     void selectAndModifySeedpoints(
         std::filesystem::path filePath,
-        std::vector<glm::vec3>& seedPoints,
+        std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
         std::vector<double>& birthTimes,
         double startTime
     )
@@ -911,14 +896,15 @@ namespace openspace {
             }
         }
 
-        addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSeedpoints);
+        std::vector<std::string> seedPointsTopology;
+        addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSeedpoints/*, seedPointsTopology*/);
 
         // TEMP!!!! Keep only one set of the chosen seed points since it doesnt work having several
         //seedPoints.erase(seedPoints.begin(), seedPoints.end() - 24);
         //seedPoints.erase(seedPoints.begin() + 4, seedPoints.end());
 
         // Test to pick a point
-        const glm::vec3& testPointON = seedPoints[2];
+        const glm::vec3& testPointON = seedPoints[2].first;
 
         // hard coded path to cdf file
         std::string cdfPathTemp = "C:/Dev/OpenSpaceLocalData/simonmans/3d__var_1_e20000101-020000-000.out.cdf";
@@ -934,24 +920,21 @@ namespace openspace {
 
 
         std::vector<std::vector<glm::vec3>> testFieldlinePositions =
-            fls::getPositonsOfSeedPointFlowline(
+            fls::getAllFieldlinesPositionsOfSeedPoints(
                 seedPoints,
                 _tracingVariable,
                 kameleon.get(),
                 _nPointsOnPathLine
             );
 
-        std::ofstream output_file("C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/example.txt");
+        std::ofstream output_file("C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/ON_MODIFIERAD.txt");
 
         if (output_file.is_open()){
             for (const auto& subvec : testFieldlinePositions) {
                 for (const auto& vec : subvec) {
                     output_file << vec.x << " " << vec.y << " " << vec.z << " " << std::endl;
                 }
-                //output_file << std::endl << std::endl << "NEW FLOW POINT: " << std::endl;
             }
-
-            // close the output file
             output_file.close();
         }
         else {
@@ -959,10 +942,10 @@ namespace openspace {
         }
 
         // ALGORITHM
-
+        // TODO: remove just for testing
         for (int i = 0; i < seedPoints.size(); i++)
         {
-            std::cout << "seedpoint " << i << ": " << seedPoints[i] << std::endl;
+            std::cout << "seedpoint " << i << ": " << seedPoints[i].first << std::endl;
 
         }
         for (int i = 0; i < birthTimes.size(); i++)
@@ -979,7 +962,7 @@ namespace openspace {
     */
     std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFile(
         std::filesystem::path filePath,
-        std::vector<glm::vec3>& seedPoints,
+        std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
         std::vector<double>& birthTimes,
         double startTime
     ) {
@@ -1012,7 +995,7 @@ namespace openspace {
                     ss >> point.x;
                     ss >> point.y;
                     ss >> point.z;
-                    seedPoints.push_back(point);
+                    seedPoints.push_back({ point, "null" });
 
                     bool isEmpty = ss.eof();
                     if (!isEmpty) {
@@ -1074,18 +1057,15 @@ namespace openspace {
                 filePath
             ));
         }
-
-        for (int i = 0; i < seedPoints.size(); i++)
+        std::vector<glm::vec3> seedPointsVec3;
+        /*for (int i = 0; i < seedPoints.size(); i++)
         {
-            std::cout << "seedpoint " << i << ": " << seedPoints[i] << std::endl;
+            std::cout << "seedpoint " << i << ": " << seedPoints[i].first << std::endl;
+            seedPointsVec3[i] = seedPoints[i].first;
 
-        }
-        for (int i = 0; i < birthTimes.size(); i++)
-        {
-            std::cout << "birthtime " << i << ": " << birthTimes[i] << std::endl;
-        }
+        }*/
 
-        return std::make_tuple(seedPoints, birthTimes);
+        return std::make_tuple(seedPointsVec3, birthTimes);
     }
 
     bool RenderableMovingFieldlines::isReady() const {
