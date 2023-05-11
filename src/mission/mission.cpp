@@ -70,6 +70,7 @@ namespace {
             std::optional<std::string> description;
             std::optional<std::string> image;
             std::optional<std::string> link;
+            std::optional<std::vector<std::string>> actions;
         };
         std::optional<std::vector<Milestone>> milestones;
     };
@@ -171,6 +172,9 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
             }
             if (milestone.link.has_value()) {
                 newDate.link = milestone.link.value();
+            } 
+            if (milestone.actions.has_value()) {
+                newDate.actions = milestone.actions.value();
             }
             _milestones.emplace_back(newDate);
         }

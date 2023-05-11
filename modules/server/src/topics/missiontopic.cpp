@@ -89,6 +89,9 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
         if (date.link.has_value()) {
             jsonDate["link"] = *date.link;
         }
+        if (date.actions.has_value()) {
+            jsonDate["actions"] = *date.actions;
+        }
         milestones.push_back(std::move(jsonDate));
     }
 

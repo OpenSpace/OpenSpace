@@ -43,6 +43,7 @@ struct Milestone {
     std::optional<std::string> description;
     std::optional<std::string> image;
     std::optional<std::string> link;
+    std::optional<std::vector<std::string>> actions;
 };
 
 /**
