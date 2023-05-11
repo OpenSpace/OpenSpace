@@ -142,7 +142,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
         setupProjectionTypeInGui(w.viewports.back(), wCtrl);
     }
     _settingsWidget->setShowUiOnFirstWindow(firstWindowGuiIsEnabled);
-    _settingsWidget->setEnableShowUiOnFirstWindow(nWindows > 1);
+    _settingsWidget->setEnableShowUiOnFirstWindowCheckbox(nWindows > 1);
     _settingsWidget->setVsync(
         _cluster.settings &&
         _cluster.settings.value().display &&
@@ -286,6 +286,10 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
     
     _settingsWidget = new SettingsWidget(orientation, this);
     layout->addWidget(_settingsWidget);
+    connect(
+        _displayWidget, &DisplayWindowUnion::nWindowsChanged,
+        _settingsWidget, &SettingsWidget::nWindowsDisplayedChanged
+    );
     
     {
         QHBoxLayout* layoutButtonBox = new QHBoxLayout;

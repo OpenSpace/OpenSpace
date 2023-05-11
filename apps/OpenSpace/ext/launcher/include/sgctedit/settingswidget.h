@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__
 #define __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__
 
+#include <QComboBox>
+#include <QVBoxLayout>
 #include <QWidget>
 
 #include <sgct/math.h>
@@ -86,10 +88,20 @@ public:
      */
     void setVsync(bool enableVsync);
 
+    /**
+     * Called when the number of windows that should be displayed changes.
+     * 
+     * \param newCount The new number of windows included
+     */
+    void nWindowsDisplayedChanged(int newCount);
+
 private:
     sgct::quat _orientationValue = sgct::quat(0.f, 0.f, 0.f, 0.f);
     QCheckBox* _checkBoxVsync = nullptr;
     QCheckBox* _showUiOnFirstWindow = nullptr;
+    QComboBox* _firstWindowGraphicsSelection = nullptr;
+    QBoxLayout* _firstWindowSelectionLayout = nullptr;
+    bool _stateOfUiOnFirstWindowWhenDisabled = false;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__
