@@ -78,13 +78,11 @@ SgctEdit::SgctEdit(QWidget* parent, std::string userConfigPath)
 }
 
 SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
-                   std::string& configBasePath,
-                   const std::vector<std::string>& configsReadOnly, QWidget* parent)
+                   std::string& configBasePath, QWidget* parent)
     : QDialog(parent)
     , _cluster(cluster)
     , _userConfigPath(configBasePath)
     , _configurationFilename(configName)
-    , _readOnlyConfigs(configsReadOnly)
     , _didImportValues(true)
 {
     setWindowTitle("Window Configuration Editor");
