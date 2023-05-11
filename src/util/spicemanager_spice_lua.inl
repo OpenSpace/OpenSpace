@@ -1002,11 +1002,467 @@ dashfs(int handle)
     return static_cast<int>(handle);
 }
 
+[[codegen::luawrap]] int dasopr(std::string fname) {
+    SpiceInt handle;
+    dasopr_c(fname.c_str(), &handle);
+    return handle;
+}
 
+[[codegen::luawrap]] int dasops() {
+    SpiceInt handle;
+    dasops_c(&handle);
+    return handle;
+}
 
+[[codegen::luawrap]] int dasopw(std::string fname) {
+    SpiceInt handle;
+    dasopw_c(fname.c_str(), &handle);
+    return handle;
+}
 
+[[codegen::luawrap]] void* dasrdc(int handle, int first, int last, int bpos, int epos,
+                                  int datlen)
+{
+    void* data;
+    dasrdc_c(handle, first, last, bpos, epos, datlen, data);
+    return data;
+}
 
+[[codegen::luawrap]] std::vector<double> dasrdd(int handle, int first, int last) {
+    std::vector<double> data;
+    data.resize(last - first);
+    dasrdd_c(handle, first, last, data.data());
+    return data;
+}
 
+[[codegen::luawrap]] std::vector<int> dasrdi(int handle, int first, int last) {
+    std::vector<SpiceInt> data;
+    data.resize(last - first);
+    dasrdi_c(handle, first, last, data.data());
+
+    std::vector<int> ret;
+    ret.reserve(last - first);
+    for (SpiceInt i : data) {
+        ret.push_back(static_cast<int>(i));
+    }
+    return ret;
+}
+
+[[codegen::luawrap]] std::tuple<std::string, std::string, int, int, int, int> dasrfr(
+                                                                               int handle)
+{
+    std::array<char, 256> idword = {};
+    std::array<char, 256> ifname = {};
+    SpiceInt nresvr;
+    SpiceInt nresvc;
+    SpiceInt ncomr;
+    SpiceInt ncomc;
+    dasrfr_c(
+        handle,
+        256,
+        256,
+        idword.data(),
+        ifname.data(),
+        &nresvr,
+        &nresvc,
+        &ncomr,
+        &ncomc
+    );
+    return {
+        std::string(idword.begin(), idword.end()),
+        std::string(ifname.begin(), ifname.end()),
+        nresvr,
+        nresvc,
+        ncomr,
+        ncomc
+    };
+}
+
+[[codegen::luawrap]] void dasudc(int handle, int first, int last, int bpos, int epos,
+                                 int datlen, void* data)
+{
+    dasudc_c(handle, first, last, bpos, epos, datlen, data);
+}
+
+[[codegen::luawrap]] void dasudd(int handle, int first, int last,
+                                 std::vector<double> data)
+{
+    dasudd_c(handle, first, last, data.data());
+}
+
+[[codegen::luawrap]] void dasudi(int handle, int first, int last, std::vector<int> data) {
+    std::vector<SpiceInt> d;
+    d.reserve(data.size());
+    for (int i : data) {
+        d.push_back(i);
+    }
+    dasudi_c(handle, first, last, d.data());
+}
+
+[[codegen::luawrap]] void daswbr(int handle) {
+    daswbr_c(handle);
+}
+
+[[codegen::luawrap]] glm::dmat3 dazldr(double x, double y, double z, bool azccw,
+                                       bool elplsz)
+{
+    SpiceDouble jacobi[3][3];
+    dazldr_c(x, y, z, azccw, elplsz, jacobi);
+    return glm::dmat3(
+        jacobi[0][0], jacobi[0][1], jacobi[0][2],
+        jacobi[1][0], jacobi[1][1], jacobi[1][2],
+        jacobi[2][0], jacobi[2][1], jacobi[2][2]
+    );
+}
+
+[[codegen::luawrap]] glm::dmat3 dcyldr(double x, double y, double z) {
+    SpiceDouble jacobi[3][3];
+    dcyldr_c(x, y, z, jacobi);
+    return glm::dmat3(
+        jacobi[0][0], jacobi[0][1], jacobi[0][2],
+        jacobi[1][0], jacobi[1][1], jacobi[1][2],
+        jacobi[2][0], jacobi[2][1], jacobi[2][2]
+    );
+}
+
+[[codegen::luawrap]] double deltet(double epoch, std::string eptype) {
+    SpiceDouble delta;
+    deltet_c(epoch, eptype.c_str(), &delta);
+    return delta;
+}
+
+[[codegen::luawrap]] double det(glm::dmat3 m1) {
+    return det_c(glm::value_ptr(m1));
+}
+
+[[codegen::luawrap]] std::tuple<glm::dmat2, glm::dmat2> diags2(glm::dmat2 symmat) {
+    SpiceDouble diag[2][2];
+    SpiceDouble rotate[2][2];
+    diags2_c(glm::value_ptr(symmat), diag, rotate);
+    return {
+        glm::dmat2(diag[0][0], diag[0][1], diag[1][0], diag[1][1]),
+        glm::dmat2(rotate[0][0], rotate[0][1], rotate[1][0], rotate[1][1])
+    };
+}
+
+[[codegen::luawrap]] void diff(SpiceCell* a, SpiceCell* b, SpiceCell* c) {
+    diff_c(a, b, c);
+}
+
+[[codegen::luawrap]] glm::dmat3 dgeodr(double x, double y, double z, double re, double f)
+{
+    SpiceDouble jacobi[3][3];
+    dgeodr_c(x, y, z, re, f, jacobi);
+    return glm::dmat3(
+        jacobi[0][0], jacobi[0][1], jacobi[0][2],
+        jacobi[1][0], jacobi[1][1], jacobi[1][2],
+        jacobi[2][0], jacobi[2][1], jacobi[2][2]
+    );
+}
+
+[[codegen::luawrap]] std::optional<SpiceDLADescr*> dlabbs(int handle) {
+    SpiceDLADescr* dladsc = new SpiceDLADescr;
+    SpiceBoolean found;
+    dlabbs_c(handle, dladsc, &found);
+    if (found) {
+        return dladsc;
+    }
+    else {
+        return std::nullopt;
+    }
+}
+
+[[codegen::luawrap]] std::optional<SpiceDLADescr*> dlabfs(int handle) {
+    SpiceDLADescr* dladsc = new SpiceDLADescr;
+    SpiceBoolean found;
+    dlabfs_c(handle, dladsc, &found);
+    if (found) {
+        return dladsc;
+    }
+    else {
+        return std::nullopt;
+    }
+}
+
+[[codegen::luawrap]] void dlabns(int handle) {
+    dlabns_c(handle);
+}
+
+[[codegen::luawrap]] void dlaens(int handle) {
+    dlaens_c(handle);
+}
+
+[[codegen::luawrap]] std::optional<SpiceDLADescr*> dlafns(int handle,
+                                                          SpiceDLADescr* dladsc)
+{
+    SpiceDLADescr* nxtdsc = new SpiceDLADescr;
+    SpiceBoolean found;
+    dlafns_c(handle, dladsc, nxtdsc, &found);
+    if (found) {
+        return nxtdsc;
+    }
+    else {
+        return std::nullopt;
+    }
+}
+
+[[codegen::luawrap]] std::optional<SpiceDLADescr*>dlafps(int handle,
+                                                         SpiceDLADescr* dladsc)
+{
+    SpiceDLADescr* prvdsc = new SpiceDLADescr;
+    SpiceBoolean found;
+    dlafps_c(handle, dladsc, prvdsc, &found);
+    if (found) {
+        return prvdsc;
+    }
+    else {
+        return std::nullopt;
+    }
+}
+
+[[codegen::luawrap]] int dlaopn(std::string fname, std::string ftype, std::string ifname,
+                                int ncomch)
+{
+    SpiceInt handle;
+    dlaopn_c(fname.c_str(), ftype.c_str(), ifname.c_str(), ncomch, &handle);
+    return static_cast<int>(handle);
+}
+
+[[codegen::luawrap]] glm::dmat3 dlatdr(double x, double y, double z) {
+    SpiceDouble jacobi[3][3];
+    dlatdr_c(x, y, z, jacobi);
+    return glm::dmat3(
+        jacobi[0][0], jacobi[0][1], jacobi[0][2],
+        jacobi[1][0], jacobi[1][1], jacobi[1][2],
+        jacobi[2][0], jacobi[2][1], jacobi[2][2]
+    );
+}
+
+[[codegen::luawrap]]
+std::optional<std::tuple<std::array<double, 6>, std::array<double, 2>>>
+dnearp(std::array<double, 6> state, double a, double b, double c) {
+    std::array<double, 6> dnear;
+    std::array<double, 2> dalt;
+    SpiceBoolean found;
+    dnearp_c(state.data(), a, b, c, dnear.data(), dalt.data(), &found);
+    if (found) {
+        std::tuple t = { dnear, dalt };
+        return t;
+    }
+    else {
+        return std::nullopt;
+    }
+}
+
+[[codegen::luawrap]] std::string dp2hx(double number) {
+    std::string hxstr;
+    hxstr.resize(256);
+    SpiceInt hxssiz;
+    dp2hx_c(number, 256, hxstr.data(), &hxssiz);
+    hxstr.resize(hxssiz);
+    return hxstr;
+}
+
+[[codegen::luawrap]] glm::dmat3 dpgrdr(std::string body, double x, double y, double z,
+                                       double re, double f)
+{
+    SpiceDouble jacobi[3][3];
+    dpgrdr_c(body.c_str(), x, y, z, re, f, jacobi);
+    return glm::dmat3(
+        jacobi[0][0], jacobi[0][1], jacobi[0][2],
+        jacobi[1][0], jacobi[1][1], jacobi[1][2],
+        jacobi[2][0], jacobi[2][1], jacobi[2][2]
+    );
+}
+
+[[codegen::luawrap]] glm::dmat4 drdazl(double range, double az, double el, bool azccw,
+                                       bool elplsz)
+{
+    SpiceDouble jacobi[3][3];
+    drdazl_c(range, az, el, azccw, elplsz, jacobi);
+    return glm::dmat3(
+        jacobi[0][0], jacobi[0][1], jacobi[0][2],
+        jacobi[1][0], jacobi[1][1], jacobi[1][2],
+        jacobi[2][0], jacobi[2][1], jacobi[2][2]
+    );
+}
+
+[[codegen::luawrap]] double dpmax() {
+    return dpmax_c();
+}
+
+[[codegen::luawrap]] double dpmin() {
+    return dpmin_c();
+}
+
+[[codegen::luawrap]] double dpr() {
+    return dpr_c();
+}
+
+[[codegen::luawrap]] glm::dmat3 drdcyl(double r, double clon, double z) {
+    SpiceDouble jacobi[3][3];
+    drdcyl_c(r, clon, z, jacobi);
+    return glm::dmat3(
+        jacobi[0][0], jacobi[0][1], jacobi[0][2],
+        jacobi[1][0], jacobi[1][1], jacobi[1][2],
+        jacobi[2][0], jacobi[2][1], jacobi[2][2]
+    );
+}
+
+[[codegen::luawrap]] glm::dmat3 drdgeo(double lon, double lat, double alt, double re,
+                                       double f)
+{
+    SpiceDouble jacobi[3][3];
+    drdgeo_c(lon, lat, alt, re, f, jacobi);
+    return glm::dmat3(
+        jacobi[0][0], jacobi[0][1], jacobi[0][2],
+        jacobi[1][0], jacobi[1][1], jacobi[1][2],
+        jacobi[2][0], jacobi[2][1], jacobi[2][2]
+    );
+}
+
+[[codegen::luawrap]] glm::dmat3 drdlat(double r, double lon, double lat) {
+    SpiceDouble jacobi[3][3];
+    drdlat_c(r, lon, lat, jacobi);
+    return glm::dmat3(
+        jacobi[0][0], jacobi[0][1], jacobi[0][2],
+        jacobi[1][0], jacobi[1][1], jacobi[1][2],
+        jacobi[2][0], jacobi[2][1], jacobi[2][2]
+    );
+}
+
+[[codegen::luawrap]] glm::dmat3 drdpgr(std::string body, double lon, double lat,
+                                       double alt, double re, double f)
+{
+    SpiceDouble jacobi[3][3];
+    drdpgr_c(body.c_str(), lon, lat, alt, re, f, jacobi);
+    return glm::dmat3(
+        jacobi[0][0], jacobi[0][1], jacobi[0][2],
+        jacobi[1][0], jacobi[1][1], jacobi[1][2],
+        jacobi[2][0], jacobi[2][1], jacobi[2][2]
+    );
+}
+
+[[codegen::luawrap]] glm::dmat3 drdsph(double r, double colat, double slon) {
+    SpiceDouble jacobi[3][3];
+    drdsph_c(r, colat, slon, jacobi);
+    return glm::dmat3(
+        jacobi[0][0], jacobi[0][1], jacobi[0][2],
+        jacobi[1][0], jacobi[1][1], jacobi[1][2],
+        jacobi[2][0], jacobi[2][1], jacobi[2][2]
+    );
+}
+
+[[codegen::luawrap]]
+std::tuple<
+    int, int, int, std::array<double, 6>, double, glm::dvec3, glm::ivec3, int, int, int,
+    int
+>
+dskb02(int handle, SpiceDLADescr* dladsc) {
+    SpiceInt nv;
+    SpiceInt np;
+    SpiceInt nvxtot;
+    SpiceDouble vtxbds[3][2];
+    double voxsiz;
+    glm::dvec3 voxori;
+    SpiceInt vgrext[3];
+    SpiceInt cgscal;
+    SpiceInt vtxnpl;
+    SpiceInt voxnpt;
+    SpiceInt voxnpl;
+    dskb02_c(
+        handle,
+        dladsc,
+        &nv,
+        &np,
+        &nvxtot,
+        vtxbds,
+        &voxsiz,
+        glm::value_ptr(voxori),
+        vgrext,
+        &cgscal,
+        &vtxnpl,
+        &voxnpt,
+        &voxnpl
+    );
+
+    std::tuple t = {
+        static_cast<int>(nv),
+        static_cast<int>(np),
+        static_cast<int>(nvxtot),
+        std::array<double, 6> {
+            vtxbds[0][0], vtxbds[0][1],
+            vtxbds[1][0], vtxbds[1][1],
+            vtxbds[2][0], vtxbds[2][1]
+        },
+        voxsiz,
+        voxori,
+        glm::ivec3(vgrext[0], vgrext[1], vgrext[2]),
+        static_cast<int>(cgscal),
+        static_cast<int>(vtxnpl),
+        static_cast<int>(voxnpt),
+        static_cast<int>(voxnpl)
+    };
+    return t;
+}
+
+[[codegen::luawrap]] void dskcls(int handle, bool optmiz) {
+    dskcls_c(handle, optmiz);
+}
+
+[[codegen::luawrap]] std::vector<double> dskd02(int handle, SpiceDLADescr* dladsc,
+                                                int item, int start, int room)
+{
+    std::vector<double> values;
+    values.resize(room);
+    SpiceInt n;
+    dskd02_c(handle, dladsc, item, start, room, &n, values.data());
+    values.resize(n);
+    return values;
+}
+
+[[codegen::luawrap]] SpiceDSKDescr* dskgd(int handle, SpiceDLADescr* dladsc) {
+    SpiceDSKDescr* dskdsc = new SpiceDSKDescr;
+    dskgd_c(handle, dladsc, dskdsc);
+    return dskdsc;
+}
+
+[[codegen::luawrap]] double dskgtl(int keywrd) {
+    SpiceDouble dpval;
+    dskgtl_c(keywrd, &dpval);
+    return dpval;
+}
+
+[[codegen::luawrap]] std::vector<int> dski02(int handle, SpiceDLADescr* dladsc,
+                                             int item, int start, int room)
+{
+    std::vector<SpiceInt> values;
+    values.resize(room);
+    SpiceInt n;
+    dski02_c(handle, dladsc, item, start, room, &n, values.data());
+    std::vector<int> val;
+    val.resize(n);
+    for (SpiceInt i : values) {
+        val.push_back(static_cast<int>(i));
+    }
+    return val;
+}
+
+[[codegen::luawrap]] void dskobj(std::string dskfnm, SpiceCell* bodids) {
+    dskobj_c(dskfnm.c_str(), bodids);
+}
+
+[[codegen::luawrap]] int dskopn(std::string fname, std::string ifname, int ncomch) {
+    SpiceInt handle;
+    dskopn_c(fname.c_str(), ifname.c_str(), ncomch, &handle);
+    return static_cast<int>(handle);
+}
+
+[[codegen::luawrap]] glm::dvec3 dskn02(int handle, SpiceDLADescr* dladsc, int plid) {
+    glm::dvec3 normal;
+    dskn02_c(handle, dladsc, plid, glm::value_ptr(normal));
+    return normal;
+}
 
 
 #include "spicemanager_spice_lua_codegen.cpp"
