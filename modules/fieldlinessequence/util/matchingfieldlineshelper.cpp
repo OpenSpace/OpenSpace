@@ -84,7 +84,10 @@ namespace openspace::fls {
         std::vector <std::vector<glm::vec3>>& seedPointFieldlinePositions,
         ccmc::Kameleon* kameleon,
         float innerBoundaryLimit,
-        size_t _nPointsOnFieldLine);
+        size_t _nPointsOnFieldLine,
+        int& amountOfPreviousFieldlines,
+        float& prevZ,
+        float& headZ);
 
     // DEFINITIONS
 
@@ -211,7 +214,7 @@ namespace openspace::fls {
 
             std::vector<glm::vec3> flowlinePositions
                 = getPositionsFromLine(flowline);
-            /*std::vector<std::vector<glm::vec3>> testFieldlinePositions;
+            std::vector<std::vector<glm::vec3>> testFieldlinePositions;
 
             for (int i = 0; i < flowlinePositions.size(); i++)
             {
@@ -224,19 +227,20 @@ namespace openspace::fls {
                 testFieldlinePositions.push_back(fieldlinePositions2);
             }
 
-            std::ofstream output_file("C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/example_omodifieradOS.txt");
+            std::ofstream output_file("C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/NotWorking.txt");
 
             if (output_file.is_open()) {
                 for (const auto& subvec : testFieldlinePositions) {
                     for (const auto& vec : subvec) {
                         output_file << vec.x << " " << vec.y << " " << vec.z << " " << std::endl;
                     }
+                    output_file << std::endl << std::endl << "NEW FLOW LINE " << std::endl;
                 }
                 output_file.close();
             }
             else {
                 std::cerr << "Unable to open file" << std::endl;
-            }*/
+            }
 
             while(keepCheckingFlowlinesFieldline(flowlinePositions, counter))
             {
@@ -249,6 +253,9 @@ namespace openspace::fls {
 
                 if (!checkIfFieldlineIsOpen(fieldlinePositions, seedPoints[i].second))
                 {
+                    int amountOfPreviousFieldlines = 0;
+                    float prevZ = 0;
+                    float headZ = 0;
                     glm::vec3 modifiedSeedpoint = modifySeedpoint(
                         seedPoints[i],
                         tracingVar,
@@ -257,7 +264,10 @@ namespace openspace::fls {
                         seedPointFieldlinePositions,
                         kameleon,
                         innerBoundaryLimit,
-                        _nPointsOnFieldLine
+                        _nPointsOnFieldLine,
+                        amountOfPreviousFieldlines,
+                        prevZ,
+                        headZ
                     );
                     seedPoints[i].first = modifiedSeedpoint;
                 }
@@ -313,18 +323,23 @@ namespace openspace::fls {
     * Modifies/finds a seed point that, when traced, only has open north/south fieldlines
     */
     std::pair<glm::vec3, std::string> moveSeedpoint(
-        std::pair<glm::vec3, std::string>& seedPoint)
+        std::pair<glm::vec3, std::string>& seedPoint, float& prevZ, float& headZ)
     {
         try {
             if (seedPoint.second == "OPEN_NORTH")
             {
-                seedPoint.first.z += 0.5;
+                prevZ = seedPoint.first.z;
+                headZ = seedPoint.first.z += 1;
+                seedPoint.first.z = headZ;
+
                 std::cout << "Modifying.... " << std::endl;
                 std::cout << "Top " << seedPoint.second << ", z value: " << seedPoint.first.z << std::endl;
             }
             else if (seedPoint.second == "OPEN_SOUTH")
             {
-                seedPoint.first.z += -0.5;
+                prevZ = seedPoint.first.z;
+                headZ = seedPoint.first.z += -1;
+                seedPoint.first.z = headZ;
                 std::cout << "Modifying.... " << std::endl;
                 std::cout << "Top " << seedPoint.second << ", z value: " << seedPoint.first.z << std::endl;
             }
@@ -335,6 +350,64 @@ namespace openspace::fls {
 
         return seedPoint;
     }
+    std::pair<glm::vec3, std::string> moveSeedpointHalfDown(
+        std::pair<glm::vec3, std::string>& seedPoint, float& prevZ, float& headZ)
+    {
+        try {
+            if (seedPoint.second == "OPEN_NORTH")
+            {
+                headZ = seedPoint.first.z - (headZ - prevZ) / 2;
+                prevZ = seedPoint.first.z;
+                seedPoint.first.z = headZ;
+
+                std::cout << "Modifying.... " << std::endl;
+                std::cout << "Top " << seedPoint.second << ", z value: " << seedPoint.first.z << std::endl;
+            }
+            else if (seedPoint.second == "OPEN_SOUTH")
+            {
+                headZ = seedPoint.first.z + (headZ - prevZ) / 2;
+                prevZ = seedPoint.first.z;
+                seedPoint.first.z = headZ;
+                std::cout << "Modifying.... " << std::endl;
+                std::cout << "Top " << seedPoint.second << ", z value: " << seedPoint.first.z << std::endl;
+            }
+        }
+        catch (const ghoul::RuntimeError& e) {
+            std::cerr << "Error: " << e.message << std::endl;
+        }
+
+        return seedPoint;
+    }
+    std::pair<glm::vec3, std::string> moveSeedpointHalfUp(
+        std::pair<glm::vec3, std::string>& seedPoint, float& prevZ, float& headZ)
+    {
+        try {
+            if (seedPoint.second == "OPEN_NORTH")
+            {
+                headZ = seedPoint.first.z + (prevZ - headZ) / 2;
+                prevZ = seedPoint.first.z;
+                seedPoint.first.z = headZ;
+
+                std::cout << "Modifying.... " << std::endl;
+                std::cout << "Top " << seedPoint.second << ", z value: " << seedPoint.first.z << std::endl;
+            }
+            else if (seedPoint.second == "OPEN_SOUTH")
+            {
+                headZ = seedPoint.first.z - (prevZ - headZ) / 2;
+                prevZ = seedPoint.first.z;
+                seedPoint.first.z = headZ;
+
+                std::cout << "Modifying.... " << std::endl;
+                std::cout << "Top " << seedPoint.second << ", z value: " << seedPoint.first.z << std::endl;
+            }
+        }
+        catch (const ghoul::RuntimeError& e) {
+            std::cerr << "Error: " << e.message << std::endl;
+        }
+
+        return seedPoint;
+    }
+
     /*
     * Checks if the position of the flowLine has gone past set criteria
     */
@@ -392,10 +465,13 @@ namespace openspace::fls {
         std::vector <std::vector<glm::vec3>>& seedPointFieldlinePositions,
         ccmc::Kameleon* kameleon,
         float innerBoundaryLimit,
-        size_t _nPointsOnFieldLine)
+        size_t _nPointsOnFieldLine,
+        int& amountOfPreviousFieldlines,
+        float& prevZ,
+        float& headZ)
     {
         std::vector<glm::vec3> fieldlinePositions;
-        // first traced fieldline is an IMF... therefor we skip it
+        // TODO: FIX: First traced fieldline is an IMF... therefor we skip it
         int counter = 1;
 
         seedPoint = moveSeedpoint(seedPoint);
@@ -422,6 +498,8 @@ namespace openspace::fls {
 
             if (!checkIfFieldlineIsOpen(fieldlinePositions, seedPoint.second))
             {
+                amountOfPreviousFieldlines = counter;
+
                 glm::vec3 modifiedSeedpoint = modifySeedpoint(
                     seedPoint,
                     tracingVar,
@@ -430,10 +508,12 @@ namespace openspace::fls {
                     seedPointFieldlinePositions,
                     kameleon,
                     innerBoundaryLimit,
-                    _nPointsOnFieldLine
+                    _nPointsOnFieldLine,
+                    amountOfPreviousFieldlines,
+                    prevZ,
+                    headZ
                 );
             }
-
             counter++;
         }
 
