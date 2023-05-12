@@ -213,8 +213,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
     , _userProfilePath(
         absPath(globalConfig.pathTokens.at("USER_PROFILES")).string() + '/'
     )
-    , _readOnlyWindowConfigs(globalConfig.readOnlyWindowConfigs)
-    , _readOnlyProfiles(globalConfig.readOnlyProfiles)
     , _sgctConfigName(sgctConfigName)
 {
     Q_INIT_RESOURCE(resources);
@@ -724,7 +722,6 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
         _assetPath,
         _userAssetPath,
         saveProfilePath,
-        _readOnlyProfiles,
         this
     );
     editor.exec();
@@ -806,7 +803,6 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                     preview,
                     winCfg,
                     saveWindowCfgPath,
-                    _readOnlyWindowConfigs,
                     this
                 );
                 ret = editor.exec();
