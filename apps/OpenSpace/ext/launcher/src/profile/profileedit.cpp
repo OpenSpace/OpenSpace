@@ -99,14 +99,12 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName,
                          std::string assetBasePath,
                          std::string userAssetBasePath,
                          std::string profileBasePath,
-                         const std::vector<std::string>& readOnlyProfiles,
                          QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
     , _assetBasePath(std::move(assetBasePath))
     , _userAssetBasePath(std::move(userAssetBasePath))
     , _profileBasePath(std::move(profileBasePath))
-    , _readOnlyProfiles(readOnlyProfiles)
 {
     setWindowTitle("Profile Editor");
     createWidgets(profileName);
@@ -489,16 +487,18 @@ void ProfileEdit::approved() {
         return;
     }
 
-    auto it = std::find(_readOnlyProfiles.begin(), _readOnlyProfiles.end(), profileName);
-    if (it == _readOnlyProfiles.end()) {
-        _saveSelected = true;
-        _errorMsg->setText("");
-        accept();
-    }
-    else {
+    std::filesystem::path p = fmt::format("{}/{}.profile", _profileBasePath, profileName);
+    if (std::filesystem::exists(p)) {
+        // The filename exists in the OpenSpace-provided folder, so we don't want to allow
+        // a user to overwrite it
         _errorMsg->setText(
             "This is a read-only profile. Click 'Duplicate' or rename & save"
         );
+    }
+    else {
+        _saveSelected = true;
+        _errorMsg->setText("");
+        accept();
     }
 }
 

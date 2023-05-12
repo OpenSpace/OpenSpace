@@ -60,6 +60,7 @@ private:
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    glm::vec2 _textureDimensions = glm::vec2(0.f);
     bool _textureIsDirty = false;
 };
 

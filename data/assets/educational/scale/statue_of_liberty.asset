@@ -1,0 +1,80 @@
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local sunAsset = asset.require('scene/solarsystem/sun/sun')
+
+local modelFolder = asset.syncedResource({
+  Name = "Scale Model Statue of Liberty",
+  Type = "HttpSynchronization",
+  Identifier = "scale_model_statue_of_liberty",
+  Version = 1
+})
+
+local scaleModel = {
+  Identifier = "Scale_StatueOfLiberty",
+  Parent = earthAsset.Earth.Identifier,
+  --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 40.689206,
+      Longitude = -74.044487,
+      Altitude = -3,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 40.689206,
+      Longitude = -74.044487,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. "STATUE_OF_LIBERTY.osmodel",
+    RotationVector = { 0.0, 235.0, 0.0 },
+    LightSources = { sunAsset.LightSource }
+  },
+  GUI = {
+    Name = "Statue of Liberty",
+    Path = "/Scale Objects"
+  }
+}
+
+local updatePositionAction = {
+  Identifier = "os.scale_models.drop_statue_of_libery",
+  Name = "Drop Statue of Liberty under camera",
+  Command = [[
+    openspace.globebrowsing.setNodePositionFromCamera('Scale_StatueOfLiberty')
+  ]],
+  Documentation = "Updates the Statue of Liberty position based on the globe location of the camera",
+  GuiPath = "/Scale Objects",
+  IsLocal = false
+}
+
+local resetPositionAction = {
+  Identifier = "os.scale_models.reset_statue_of_libery",
+  Name = "Reset Statue of Liberty position",
+  Command = [[
+    openspace.globebrowsing.setNodePosition('Scale_StatueOfLiberty', ']] .. earthAsset.Earth.Identifier .. [[', 40.689206, -74.044487)
+  ]],
+  Documentation = "Resets the Statue of Liberty back to it's actual location",
+  GuiPath = "/Scale Objects",
+  IsLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(scaleModel)
+  openspace.action.registerAction(updatePositionAction)
+  openspace.action.registerAction(resetPositionAction)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(resetPositionAction)
+  openspace.action.removeAction(updatePositionAction)
+  openspace.removeSceneGraphNode(scaleModel)
+end)
+
+asset.export(scaleModel)
+asset.export(updatePositionAction)
+asset.export(resetPositionAction)

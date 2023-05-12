@@ -1,0 +1,41 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local translation = asset.require("./transforms").Translation
+
+local Trail = {
+  Identifier = "OrcusTrail",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Color = { 0.2, 0.8, 0.3 },
+    Period = 89359.12208173508,
+    Resolution = 10000,
+    Enabled = asset.enabled,
+    Fade = 1.24,
+    Translation = translation
+  },
+  Tag = { "planetTrail_dwarf" },
+  GUI = {
+    Name = "Orcus Trail",
+    Path = "/Solar System/Dwarf Planets/Orcus",
+    Description = "Trail of Orcus"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Trail)
+end)
+
+asset.export("Trail", Trail)
+
+asset.meta = {
+  Name = "Orcus Trail",
+  Version = "1.0",
+  Description = [[Trail of Orcus]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

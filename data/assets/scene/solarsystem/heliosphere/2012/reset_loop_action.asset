@@ -1,6 +1,6 @@
 local resetLoopAction = {
   Documentation = "Reset button. Sets time to start of dataset. No loop",
-  GuiPath = "2012July",
+  GuiPath = "/2012July",
   Identifier = "2012july.reset_loop",
   IsLocal = false,
   Name = "Reset button",

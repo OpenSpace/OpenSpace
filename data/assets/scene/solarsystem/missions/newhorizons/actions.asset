@@ -13,7 +13,7 @@ local focus_newhorizons = {
 
 local anchor_nh_aim_pluto = {
   Identifier = "os.missions.newhorizons.aimpluto",
-  Name = "Anchor NH, Aim  Pluto",
+  Name = "Anchor NH, Aim Pluto",
   Command = [[
     openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'NewHorizons');
     openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', 'Pluto');
@@ -29,7 +29,7 @@ local focus_pluto = {
   Name = "Focus on Pluto",
   Command = [[
     openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'PlutoProjection');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); 
+    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');
     openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
   ]],
   Documentation = "Sets the focus of the camera on 'Pluto'",
@@ -52,7 +52,7 @@ local focus_charon = {
 
 local toggle_nh_imageprojection = {
   Identifier = "os.missions.newhorizons.toggleimageprojection",
-  Name = "Toggle NH Image Projection",
+  Name = "Toggle NH image projection",
   Command = [[
     local enabled = openspace.getPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection');
     openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection', not enabled);
@@ -90,7 +90,7 @@ local approach_time_and_projections = {
 
 local increase_hightmap_pluto = {
   Identifier = "os.missions.newhorizons.pluto.increasehightmap",
-  Name = "Pluto HeightExaggeration +",
+  Name = "Pluto height exaggeration +",
   Command = [[
     openspace.setPropertyValueSingle("Scene.PlutoProjection.Renderable.HeightExaggeration", openspace.getPropertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") + 5000);
   ]],
@@ -101,7 +101,7 @@ local increase_hightmap_pluto = {
 
 local decrease_hightmap_pluto = {
   Identifier = "os.missions.newhorizons.pluto.decreasehightmap",
-  Name = "Pluto HeightExaggeration -",
+  Name = "Pluto height exaggeration -",
   Command = [[
     openspace.setPropertyValueSingle("Scene.PlutoProjection.Renderable.HeightExaggeration", openspace.getPropertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") - 5000);
   ]],
@@ -112,7 +112,7 @@ local decrease_hightmap_pluto = {
 
 local increase_hightmap_charon = {
   Identifier = "os.missions.newhorizons.charon.increasehightmap",
-  Name = "Charon HeightExaggeration +",
+  Name = "Charon height exaggeration +",
   Command = [[
     openspace.setPropertyValueSingle("Scene.CharonProjection.Renderable.HeightExaggeration", openspace.getPropertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") + 5000);
   ]],
@@ -123,7 +123,7 @@ local increase_hightmap_charon = {
 
 local decrease_hightmap_charon = {
   Identifier = "os.missions.newhorizons.charon.decreasehightmap",
-  Name = "Charon HeightExaggeration -",
+  Name = "Charon height exaggeration -",
   Command = [[
     openspace.setPropertyValueSingle("Scene.CharonProjection.Renderable.HeightExaggeration", openspace.getPropertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") - 5000);
   ]],
@@ -134,7 +134,7 @@ local decrease_hightmap_charon = {
 
 local toggle_pluto_trail = {
   Identifier = "os.missions.newhorizons.pluto.toggletrail",
-  Name = "Toggle Pluto Trail",
+  Name = "Toggle Pluto trail",
   Command = [[
     openspace.setPropertyValueSingle('Scene.PlutoBarycentricTrail.Renderable.Enabled', not openspace.getPropertyValue('Scene.PlutoBarycentricTrail.Renderable.Enabled'));
   ]],
@@ -145,11 +145,11 @@ local toggle_pluto_trail = {
 
 local toggle_pluto_labels = {
   Identifier = "os.missions.newhorizons.pluto.togglelabels",
-  Name = "Toggle Pluto Labels",
+  Name = "Toggle Pluto labels",
   Command = [[
-    local list = {"Scene.PlutoText.Renderable.Enabled", "Scene.CharonText.Renderable.Enabled", "Scene.HydraText.Renderable.Enabled", "Scene.NixText.Renderable.Enabled", "Scene.KerberosText.Renderable.Enabled", "Scene.StyxText.Renderable.Enabled"}; 
-    for _,v in pairs(list) do 
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+    local list = {"Scene.PlutoText.Renderable.Enabled", "Scene.CharonText.Renderable.Enabled", "Scene.HydraText.Renderable.Enabled", "Scene.NixText.Renderable.Enabled", "Scene.KerberosText.Renderable.Enabled", "Scene.StyxText.Renderable.Enabled"};
+    for _,v in pairs(list) do
+      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
     end
   ]],
   Documentation = "Toggles the visibility of the text labels of Pluto, Charon, Hydra, Nix, Kerberos, and Styx",
@@ -159,13 +159,13 @@ local toggle_pluto_labels = {
 
 local toggle_nh_labels = {
   Identifier = "os.missions.newhorizons.togglelabels",
-  Name = "Toggle New Horizons Labels",
+  Name = "Toggle New Horizons labels",
   Command = [[
-    local v = openspace.getPropertyValue("Scene.Labels.Renderable.Opacity"); 
-    if v <= 0.5 then 
-      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity",1.0,2.0) 
-    else 
-      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity",0.0,2.0) 
+    local v = openspace.getPropertyValue("Scene.Labels.Renderable.Opacity");
+    if v <= 0.5 then
+      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity",1.0,2.0)
+    else
+      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity",0.0,2.0)
     end
   ]],
   Documentation = "Toggles the visibility of the labels for the New Horizons instruments",
@@ -175,7 +175,7 @@ local toggle_nh_labels = {
 
 local toggle_shadows = {
   Identifier = "os.missions.newhorizons.toggleshadows",
-  Name = "Toggle Shadows",
+  Name = "Toggle shadows",
   Command = [[
     openspace.setPropertyValueSingle('Scene.PlutoShadow.Renderable.Enabled', not openspace.getPropertyValue('Scene.PlutoShadow.Renderable.Enabled'));
     openspace.setPropertyValueSingle('Scene.CharonShadow.Renderable.Enabled', not openspace.getPropertyValue('Scene.CharonShadow.Renderable.Enabled'));
@@ -187,7 +187,7 @@ local toggle_shadows = {
 
 local toggle_nh_trail = {
   Identifier = "os.missions.newhorizons.toggletrail",
-  Name = "Toggle NH Trail",
+  Name = "Toggle New Horizons trail",
   Command = [[
     openspace.setPropertyValueSingle('Scene.NewHorizonsTrailPluto.Renderable.Enabled', not openspace.getPropertyValue('Scene.NewHorizonsTrailPluto.Renderable.Enabled'));
   ]],

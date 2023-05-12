@@ -45,7 +45,8 @@ namespace {
         "EnableTouchInteraction",
         "Enable Touch Interaction",
         "Use this property to turn on/off touch input navigation in the 3D scene. "
-        "Disabling will reset all current touch inputs to the navigation."
+        "Disabling will reset all current touch inputs to the navigation.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
@@ -66,7 +67,8 @@ namespace {
         "relatively spherical objects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
-}
+} // namespace openspace
+
 namespace openspace {
 
 TouchModule::TouchModule()
@@ -78,7 +80,7 @@ TouchModule::TouchModule()
     addPropertySubOwner(_touch);
     addPropertySubOwner(_markers);
     addProperty(_touchIsEnabled);
-    _touchIsEnabled.onChange([&]() {
+    _touchIsEnabled.onChange([this]() {
         _touch.resetAfterInput();
         _lastTouchInputs.clear();
     });
@@ -86,7 +88,7 @@ TouchModule::TouchModule()
     _hasActiveTouchEvent.setReadOnly(true);
     addProperty(_hasActiveTouchEvent);
 
-    _defaultDirectTouchRenderableTypes.onChange([&]() {
+    _defaultDirectTouchRenderableTypes.onChange([this]() {
         _sortedDefaultRenderableTypes.clear();
         for (const std::string& s : _defaultDirectTouchRenderableTypes.value()) {
             ghoul::TemplateFactory<Renderable>* fRenderable =
@@ -118,7 +120,7 @@ bool TouchModule::isDefaultDirectTouchType(std::string_view renderableType) cons
 void TouchModule::internalInitialize(const ghoul::Dictionary&){
     _ear.reset(new TuioEar());
 
-    global::callback::initializeGL->push_back([&]() {
+    global::callback::initializeGL->push_back([this]() {
         LDEBUG("Initializing TouchMarker OpenGL");
         _markers.initialize();
 #ifdef WIN32
@@ -131,7 +133,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&){
 #endif
     });
 
-    global::callback::deinitializeGL->push_back([&]() {
+    global::callback::deinitializeGL->push_back([this]() {
         LDEBUG("Deinitialize TouchMarker OpenGL");
         _markers.deinitialize();
     });
@@ -157,7 +159,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&){
     );
 
 
-    global::callback::preSync->push_back([&]() {
+    global::callback::preSync->push_back([this]() {
         if (!_touchIsEnabled) {
             return;
         }
@@ -193,7 +195,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&){
         clearInputs();
     });
 
-    global::callback::render->push_back([&]() {
+    global::callback::render->push_back([this]() {
         _markers.render(_touchPoints);
     });
 }

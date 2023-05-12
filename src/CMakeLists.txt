@@ -30,7 +30,6 @@ set(OPENSPACE_SOURCE
   documentation/core_registration.cpp
   documentation/documentation.cpp
   documentation/documentationengine.cpp
-  documentation/documentationgenerator.cpp
   documentation/verifier.cpp
   engine/configuration.cpp
   engine/downloadmanager.cpp
@@ -73,6 +72,7 @@ set(OPENSPACE_SOURCE
   navigation/navigationhandler_lua.inl
   navigation/navigationstate.cpp
   navigation/orbitalnavigator.cpp
+  navigation/orbitalnavigator_lua.inl
   navigation/path.cpp
   navigation/pathcurve.cpp
   navigation/pathnavigator.cpp
@@ -125,6 +125,7 @@ set(OPENSPACE_SOURCE
   rendering/dashboardtextitem.cpp
   rendering/framebufferrenderer.cpp
   rendering/deferredcastermanager.cpp
+  rendering/fadeable.cpp
   rendering/helper.cpp
   rendering/loadingscreen.cpp
   rendering/luaconsole.cpp
@@ -210,7 +211,6 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/core_registration.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentation.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentationengine.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentationgenerator.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/verifier.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/verifier.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/engine/configuration.h
@@ -313,6 +313,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/deferredcaster.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/deferredcasterlistener.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/deferredcastermanager.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/rendering/fadeable.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/loadingscreen.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/luaconsole.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/helper.h

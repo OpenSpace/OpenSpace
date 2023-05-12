@@ -87,6 +87,53 @@ namespace {
 
 namespace openspace {
 
+//============================//
+//=====  Reuse textures  =====//
+//============================//
+GLuint FramebufferRenderer::additionalColorTexture1() const {
+    // Gives access to the currently NOT used pingPongTexture
+    int unusedPingPongIndex = _pingPongIndex == 0 ? 1 : 0;
+    return _pingPongBuffers.colorTexture[unusedPingPongIndex];
+}
+
+GLuint FramebufferRenderer::additionalColorTexture2() const {
+    // Gives access to the exitColorTexture
+    return _exitColorTexture;
+}
+
+GLuint FramebufferRenderer::additionalColorTexture3() const {
+    // Gives access to the fxaaTexture
+    return _fxaaBuffers.fxaaTexture;
+}
+
+GLuint FramebufferRenderer::additionalDepthTexture() const {
+    // Gives access to the exitDepthTexture
+    return _exitDepthTexture;
+}
+
+//=============================//
+//=====  Access G-buffer  =====//
+//=============================//
+GLuint FramebufferRenderer::gBufferColorTexture() const {
+    // Gives access to the color texture of the G-buffer
+    return _gBuffers.colorTexture;
+}
+
+GLuint FramebufferRenderer::gBufferPositionTexture() const {
+    // Gives access to the position texture of the G-buffer
+    return _gBuffers.positionTexture;
+}
+
+GLuint FramebufferRenderer::gBufferNormalTexture() const {
+    // Gives access to the normal texture of the G-buffer
+    return _gBuffers.normalTexture;
+}
+
+GLuint FramebufferRenderer::gBufferDepthTexture() const {
+    // Gives access to the depth texture of the G-buffer
+    return _gBuffers.depthTexture;
+}
+
 void FramebufferRenderer::initialize() {
     ZoneScoped;
     TracyGpuZone("Rendering initialize");
@@ -133,10 +180,6 @@ void FramebufferRenderer::initialize() {
     glGenTextures(1, &_exitColorTexture);
     glGenTextures(1, &_exitDepthTexture);
     glGenFramebuffers(1, &_exitFramebuffer);
-
-    // HDR / Filtering Buffers
-    glGenFramebuffers(1, &_hdrBuffers.hdrFilteringFramebuffer);
-    glGenTextures(1, &_hdrBuffers.hdrFilteringTexture);
 
     // FXAA Buffers
     glGenFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
@@ -253,30 +296,6 @@ void FramebufferRenderer::initialize() {
     }
 
     //===================================//
-    //=====  HDR/Filtering Buffers  =====//
-    //===================================//
-    glBindFramebuffer(GL_FRAMEBUFFER, _hdrBuffers.hdrFilteringFramebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        _hdrBuffers.hdrFilteringTexture,
-        0
-    );
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_FRAMEBUFFER,
-            _hdrBuffers.hdrFilteringFramebuffer,
-            -1,
-            "HDR filtering"
-        );
-    }
-
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("HDR/Filtering framebuffer is not complete");
-    }
-
-    //===================================//
     //==========  FXAA Buffers  =========//
     //===================================//
     glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer);
@@ -384,7 +403,6 @@ void FramebufferRenderer::deinitialize() {
 
     glDeleteFramebuffers(1, &_gBuffers.framebuffer);
     glDeleteFramebuffers(1, &_exitFramebuffer);
-    glDeleteFramebuffers(1, &_hdrBuffers.hdrFilteringFramebuffer);
     glDeleteFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
     glDeleteFramebuffers(1, &_pingPongBuffers.framebuffer);
     glDeleteFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
@@ -392,7 +410,6 @@ void FramebufferRenderer::deinitialize() {
     glDeleteTextures(1, &_gBuffers.colorTexture);
     glDeleteTextures(1, &_gBuffers.depthTexture);
 
-    glDeleteTextures(1, &_hdrBuffers.hdrFilteringTexture);
     glDeleteTextures(1, &_fxaaBuffers.fxaaTexture);
     glDeleteTextures(1, &_gBuffers.positionTexture);
     glDeleteTextures(1, &_gBuffers.normalTexture);
@@ -801,27 +818,6 @@ void FramebufferRenderer::updateResolution() {
         );
     }
 
-    // HDR / Filtering
-    glBindTexture(GL_TEXTURE_2D, _hdrBuffers.hdrFilteringTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        _resolution.x,
-        _resolution.y,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _hdrBuffers.hdrFilteringTexture, -1, "HDR filtering");
-    }
-
     // FXAA
     glBindTexture(GL_TEXTURE_2D, _fxaaBuffers.fxaaTexture);
     glTexImage2D(
@@ -943,7 +939,7 @@ void FramebufferRenderer::updateResolution() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _exitColorTexture, -1, "Exit depth");
+        glObjectLabel(GL_TEXTURE, _exitDepthTexture, -1, "Exit depth");
     }
 
     _dirtyResolution = false;
@@ -1186,7 +1182,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glEnablei(GL_BLEND, 0);
 
     {
-        TracyGpuZone("PostDeferredTransparent");
+        TracyGpuZone("Overlay")
+        ghoul::GLDebugGroup group("Overlay");
+        data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
+        scene->render(data, tasks);
+    }
+
+    {
+        TracyGpuZone("PostDeferredTransparent")
         ghoul::GLDebugGroup group("PostDeferredTransparent");
         data.renderBinMask = static_cast<int>(
             Renderable::RenderBin::PostDeferredTransparent
@@ -1195,9 +1198,11 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }
 
     {
-        TracyGpuZone("Overlay");
-        ghoul::GLDebugGroup group("Overlay");
-        data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
+        TracyGpuZone("Sticker")
+        ghoul::GLDebugGroup group("Sticker");
+        data.renderBinMask = static_cast<int>(
+            Renderable::RenderBin::Sticker
+        );
         scene->render(data, tasks);
     }
 

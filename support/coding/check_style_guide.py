@@ -201,7 +201,7 @@ def check_naming_convention_component(lines, component):
   component_part = ifndef_symbol[2:2 + len(component)]
 
   if component_part != component.upper():
-    return '#ifndef naming convention broken: ' + ifndef_symbol + ' || ' + component.upper() 
+    return '#ifndef naming convention broken: ' + ifndef_symbol + ' || ' + component.upper()
   else:
     return ''
 
@@ -246,7 +246,7 @@ def check_glm_header(lines, file):
       return ''
 
   index = [i for i,s in enumerate(lines)
-              if '#include <glm/glm.hpp>' in s or 
+              if '#include <glm/glm.hpp>' in s or
               '#include "glm/glm.hpp>"' in s]
 
   if len(index) > 0:

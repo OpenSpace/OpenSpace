@@ -4,7 +4,9 @@
   ],
   "assets": [
     "base",
+    "base_keybindings",
     "scene/solarsystem/planets/earth/earth",
+    "scene/solarsystem/planets/earth/layers/colorlayers/viirs_noaa20_temporal.asset",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/planets/earth/satellites/misc/hubble_trail",
     "scene/solarsystem/planets/earth/lagrange_points/lagrange_points",
@@ -20,19 +22,19 @@
     "aim": "",
     "anchor": "JWSTModel",
     "frame": "Root",
-    "yaw": -0.005731,
     "pitch": -0.001656,
-    "type": "setNavigationState",
     "position": {
       "x": 30.188156,
       "y": -9.477188,
       "z": -9.203491
     },
+    "type": "setNavigationState",
     "up": {
       "x": 0.361587,
       "y": 0.893643,
       "z": 0.265813
-    }
+    },
+    "yaw": -0.005731
   },
   "delta_times": [
     1.0,
@@ -238,11 +240,6 @@
       "value": "900"
     },
     {
-      "name": "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "true"
-    },
-    {
       "name": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
@@ -251,14 +248,20 @@
       "name": "Scene.ISS_trail.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.ColorLayers.VIIRS_NOAA20_Temporal.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2021-12-25T12:50:01"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 2
   }
 }

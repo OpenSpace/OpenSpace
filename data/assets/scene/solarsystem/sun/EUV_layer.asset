@@ -32,8 +32,26 @@ local EUVLayer = {
 
 local toggle_EUV_layer = {
   Identifier = "os.solarsystem.sun.toggleeuv",
-  Name = "Toggle EUV Layer",
-  Command = propertyHelper.invert("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled"),
+  Name = "Toggle EUV layer",
+  Command = [[
+    if openspace.getPropertyValue("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled") then
+      openspace.setPropertyValueSingle(
+        "Scene.EUV-Layer-bastille-day-2000.Renderable.Fade",
+        0.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "Scene.EUV-Layer-bastille-day-2000.Renderable.Fade",
+        1.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
   Documentation = "Toggle EUV layer of sun",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
@@ -55,8 +73,7 @@ asset.export(EUVLayer)
 asset.meta = {
   Name = "Predictive Science Inc. EUV texture sequence Bastille Days",
   Version = "1.2",
-  Description = [[Texture sequence of an extreme ultraviolet (EUV) simulation during, 
-    the CME]],
+  Description = [[Texture sequence of an extreme ultraviolet (EUV) simulation during the CME]],
   Author = "CCMC, OpenSpace team",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
   License = "CC-BY"

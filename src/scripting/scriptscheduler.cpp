@@ -39,7 +39,9 @@ namespace {
         "Enabled",
         "This enables or disables the ScriptScheduler. If disabled, no scheduled scripts "
         "will be executed. If enabled, scheduled scripts will be executed at their given "
-        "time as normal"
+        "time as normal",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
@@ -47,7 +49,8 @@ namespace {
         "Should Run All Time Jump",
         "If 'true': In a time jump, all scheduled scripts between the old time and the "
         "new time is executed. If 'false': In a time jump, no scripts scheduled between "
-        "the new time and the old time is executed"
+        "the new time and the old time is executed",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ScheduledScript)]] Parameters {
@@ -224,7 +227,8 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
         _currentTime = newTime;
 
         // Construct result
-        auto start = _scripts.begin() + prevIndex - 1;
+        const size_t startOffset = prevIndex == 0 ? prevIndex : prevIndex - 1;
+        auto start = _scripts.begin() + startOffset;
         auto end = it;
         for (auto iter = start; iter != _scripts.end() && iter >= end; --iter) {
             std::string script = iter->universalScript.empty() ?

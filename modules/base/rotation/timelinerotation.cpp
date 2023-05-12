@@ -35,7 +35,9 @@ namespace {
         "ShouldInterpolate",
         "Should Interpolate",
         "If this value is set to 'true', an interpolation is applied between the given "
-        "keyframes. If this value is set to 'false', the interpolation is not applied"
+        "keyframes. If this value is set to 'false', the interpolation is not applied",
+        // @VISIBILITY(3.2)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(TimelineRotation)]] Parameters {

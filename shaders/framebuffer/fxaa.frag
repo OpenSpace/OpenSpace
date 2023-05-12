@@ -24,14 +24,14 @@
 
 #version __CONTEXT__
 
-#define EDGE_THRESHOLD_MIN 0.0312f 
+#define EDGE_THRESHOLD_MIN 0.0312f
 #define EDGE_THRESHOLD_MAX 0.125f
 #define ITERATIONS 12
 #define SUBPIXEL_QUALITY 0.75f
 
 const float[12] QUALITY = float[](1.f, 1.f, 1.f, 1.f, 1.f, 1.5f, 2.f, 2.f, 2.f, 2.f, 4.f, 8.f);
 // const float[24] QUALITY = {2.f, 4.f, 6.f, 8.f, 10.f, 12.f, 12.f, 12.f, 12.f, 12.f, 14.f, 18.f,
-//                             18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 
+//                             18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f,
 //                             18.f, 18.f};
 
 in vec2 texCoord;
@@ -67,7 +67,7 @@ void main() {
   float pixelLumUp     = getLum(textureOffset(renderedTexture, st, ivec2(0,1)).rgb);
   float pixelLumLeft   = getLum(textureOffset(renderedTexture, st, ivec2(-1,0)).rgb);
   float pixelLumRight  = getLum(textureOffset(renderedTexture, st, ivec2(1,0)).rgb);
-    
+
   float pixelLumMin = min(pixelLumCenter, min(min(pixelLumDown, pixelLumUp), min(pixelLumLeft, pixelLumRight)));
   float pixelLumMax = max(pixelLumCenter, max(max(pixelLumDown, pixelLumUp), max(pixelLumLeft, pixelLumRight)));
 
@@ -95,16 +95,16 @@ void main() {
   float pixelLumUpCorners = pixelLumUpRight + pixelLumUpLeft;
 
   // Compute an estimation of the gradient
-  float edgeHorizontal = abs(-2.0 * pixelLumLeft + pixelLumLeftCorners) + 
+  float edgeHorizontal = abs(-2.0 * pixelLumLeft + pixelLumLeftCorners) +
     abs(-2.0 * pixelLumCenter + pixelLumDownUp) * 2.0 + abs(-2.0 * pixelLumRight + pixelLumRightCorners);
-  float edgeVertical = abs(-2.0 * pixelLumUp + pixelLumUpCorners) + 
+  float edgeVertical = abs(-2.0 * pixelLumUp + pixelLumUpCorners) +
     abs(-2.0 * pixelLumCenter + pixelLumLeftRight) * 2.0  + abs(-2.0 * pixelLumDown + pixelLumDownCorners);
 
   // Choosing Edge Orientation
   bool isHorizontal = (edgeHorizontal >= edgeVertical);
   float pixelLum1  = isHorizontal ? pixelLumDown : pixelLumLeft;
   float pixelLum2  = isHorizontal ? pixelLumUp : pixelLumRight;
-    
+
   // Gradients
   float gradient1 = pixelLum1 - pixelLumCenter;
   float gradient2 = pixelLum2 - pixelLumCenter;
@@ -137,11 +137,11 @@ void main() {
   vec2 offset = isHorizontal ?
     vec2(inverseScreenSize.x, 0.0) :
     vec2(0.0, inverseScreenSize.y);
-    
+
   vec2 uv1 = currentUv - offset;
   vec2 uv2 = currentUv + offset;
 
-  // Read the pixelLums at both current extremities of the exploration segment, 
+  // Read the pixelLums at both current extremities of the exploration segment,
   // and compute the delta wrt to the local average pixelLum.
   float pixelLumEnd1 = getLum(texture(renderedTexture, uv1).rgb);
   float pixelLumEnd2 = getLum(texture(renderedTexture, uv2).rgb);
@@ -158,7 +158,7 @@ void main() {
 
   if (!reached2) {
     uv2 += offset;
-  }   
+  }
 
   // Still exploring
   if (!reachedBoth) {
@@ -187,7 +187,7 @@ void main() {
       }
 
       // If both sides have been reached
-      if (reachedBoth) { 
+      if (reachedBoth) {
         break;
       }
     }
@@ -207,7 +207,7 @@ void main() {
 
   bool ispixelLumCenterSmaller = pixelLumCenter < pixelLumLocalAverage;
 
-  // If the pixelLum at center is smaller than at its neighbour, the delta pixelLum at 
+  // If the pixelLum at center is smaller than at its neighbour, the delta pixelLum at
   // each end should be positive (same variation).
   bool correctVariation = ((isDirection1 ? pixelLumEnd1 : pixelLumEnd2) < 0.0) != ispixelLumCenterSmaller;
 
@@ -215,9 +215,9 @@ void main() {
   float finalOffset = correctVariation ? pixelOffset : 0.0;
 
   // Subpixel antialiasing
-  float pixelLumAverage = (1.0/12.0) * (2.0 * (pixelLumDownUp + pixelLumLeftRight) + 
+  float pixelLumAverage = (1.0/12.0) * (2.0 * (pixelLumDownUp + pixelLumLeftRight) +
     pixelLumLeftCorners + pixelLumRightCorners);
-    
+
   float subPixelOffset1 = clamp(abs(pixelLumAverage - pixelLumCenter) / pixelLumRange, 0.0, 1.0);
   float subPixelOffset2 = (-2.0 * subPixelOffset1 + 3.0) * subPixelOffset1 * subPixelOffset1;
   float subPixelOffsetFinal = subPixelOffset2 * subPixelOffset2 * SUBPIXEL_QUALITY;

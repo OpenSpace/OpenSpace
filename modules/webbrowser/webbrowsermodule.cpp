@@ -46,7 +46,7 @@ namespace {
         constexpr std::string_view SubprocessPath = "OpenSpace_Helper.exe";
     #elif defined(__APPLE__)
         constexpr std::string_view SubprocessPath =
-            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace_Helper";
+            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
     #else
         constexpr std::string_view SubprocessPath = "OpenSpace_Helper";
     #endif
@@ -58,14 +58,16 @@ namespace {
         "Update Browser Between Renderables",
         "Run the message loop of the browser between calls to render individual "
         "renderables. When disabled, the browser message loop only runs "
-        "once per frame"
+        "once per frame",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
         "Browser Update Interval",
         "The time in microseconds between running the message loop of the browser. "
-        "Only used if UpdateBrowserBetweenRenderables is true"
+        "Only used if UpdateBrowserBetweenRenderables is true",
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 

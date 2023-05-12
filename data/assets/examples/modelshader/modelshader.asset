@@ -25,9 +25,12 @@ local model = {
       sun.LightSource
     },
     PerformShading = true,
-    DisableFaceCulling = true,
     VertexShader = asset.localResource("model_vs.glsl"),
     FragmentShader = asset.localResource("model_fs.glsl"),
+    EnableAnimation = true,
+    AnimationStartTime = "2023 05 11 00:00:00",
+    AnimationTimeScale = "Second",
+    AnimationMode = "LoopInfinitely",
   },
   GUI = {
     Name = "Model Shader",

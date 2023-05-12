@@ -75,10 +75,13 @@ namespace {
             return "PreDeferredTransparent";
         }
         else if (renderBin == 8) {
-            return "PostDeferredTransparent";
+            return "Overlay";
         }
         else if (renderBin == 16) {
-            return "Overlay";
+            return "PostDeferredTransparent";
+        }
+        else if (renderBin == 32) {
+            return "Sticker";
         }
         else {
             throw ghoul::MissingCaseException();
@@ -571,6 +574,10 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
     ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
 
     for (const Profile::Property& prop : p.properties) {
+        if (prop.name.empty()) {
+            LWARNING("Property name in profile was empty");
+            continue;
+        }
         std::string uriOrRegex = prop.name;
         std::string groupName;
         if (doesUriContainGroupTag(uriOrRegex, groupName)) {
@@ -844,9 +851,25 @@ scripting::LuaLibrary Scene::luaLibrary() {
             codegen::lua::WorldRotation,
             codegen::lua::SetParent,
             codegen::lua::BoundingSphere,
-            codegen::lua::InteractionSphere
+            codegen::lua::InteractionSphere,
+            codegen::lua::MakeIdentifier
         }
     };
+}
+
+std::string makeIdentifier(std::string s) {
+    // Note that we want to preserve '-' and '_', but replace any other punctuation
+    // marks. Hence, we first convert '_' to whitespaces to avoid them being replaced
+    // in the puncutation check
+    std::replace(s.begin(), s.end(), '_', ' ');
+    std::replace_if(
+        s.begin(),
+        s.end(),
+        [](char c) { return std::ispunct(c) == 0; },
+        '-'
+    );
+    std::replace(s.begin(), s.end(), ' ', '_');
+    return s;
 }
 
 }  // namespace openspace

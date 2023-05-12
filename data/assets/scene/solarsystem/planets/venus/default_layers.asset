@@ -1,10 +1,13 @@
 -- Color layers
 asset.require("./layers/colorlayers/magellan_mosaic_utah", false)
+asset.require("./layers/colorlayers/magellan_mosaic_newyork", false)
 asset.require("./layers/colorlayers/venus_texture", false)
 asset.require("./layers/colorlayers/clouds_magellan_combo", true)
+asset.require("./layers/colorlayers/clouds_magellan_combo_newyork", false)
 
 -- Height layers
 asset.require("./layers/heightlayers/magellan_utah", true)
+asset.require("./layers/heightlayers/magellan_newyork", false)
 
 
 asset.meta = {

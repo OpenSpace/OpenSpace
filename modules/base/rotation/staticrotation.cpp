@@ -32,7 +32,9 @@ namespace {
         "Rotation",
         "Rotation",
         "This value is the used as a 3x3 rotation matrix that is applied to the scene "
-        "graph node that this transformation is attached to relative to its parent"
+        "graph node that this transformation is attached to relative to its parent",
+        // @VISIBILITY(3.0)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     // Conversion from rotation matrix to euler angles, given that the rotation is a pure
@@ -83,6 +85,7 @@ StaticRotation::StaticRotation()
         _matrixIsDirty = true;
         requireUpdate();
     });
+    _type = "StaticRotation";
 }
 
 StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRotation() {
@@ -101,6 +104,7 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRota
         _eulerRotation = rotationMatrixToEulerAngles(std::get<glm::dmat3>(p.rotation));
     }
     _matrixIsDirty = true;
+    _type = "StaticRotation";
 }
 
 glm::dmat3 StaticRotation::matrix(const UpdateData&) const {

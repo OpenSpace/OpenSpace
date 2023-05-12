@@ -6,8 +6,7 @@ local data = asset.syncedResource({
 })
 
 local zodiacs = {
-  "Cancer", "Taurus", "Pisces", "Aries", "Libra", "Aquarius", "Capricornus", "Scorpius",
-  "Virgo", "Sagittarius", "Gemini", "Leo"
+  "CNC", "TAU", "PSC", "ARI", "LIB", "AQR", "CAP", "SCO", "VIR", "SGR", "GEM", "LEO"
 }
 
 local object = {

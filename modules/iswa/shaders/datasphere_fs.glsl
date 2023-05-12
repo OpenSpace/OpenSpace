@@ -47,14 +47,14 @@ Fragment getFragment() {
 
   float x = backgroundValues.x;
   float y = backgroundValues.y;
-  
+
   if ((numTransferFunctions == 1) || (numTextures > numTransferFunctions)) {
     float v = 0;
     for (int i = 0; i < numTextures; i++) {
       v += texture(textures[i], vec2(vs_st.t, vs_st.s)).r;
     }
     v /= numTextures;
-    
+
     vec4 color = texture(transferFunctions[0], vec2(v, 0.0));
     if ((v < (x + y)) && v > (x - y)) {
       color = mix(Transparent, color, clamp(1.0, 0.0, abs(v - x)));

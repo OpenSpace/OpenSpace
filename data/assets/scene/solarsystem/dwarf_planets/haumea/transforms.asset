@@ -1,0 +1,49 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local OneAU = 1.496e+8
+
+local Translation = {
+  Type = "KeplerTranslation",
+  Eccentricity = 0.200029230460531,
+  SemiMajorAxis = 42.90830758797247 * OneAU,
+  Inclination = 28.21036755623824,
+  AscendingNode = 122.031014162472,
+  ArgumentOfPeriapsis = 240.4219275047551,
+  MeanAnomaly = 219.4933206849489,
+  Epoch = "2023 02 25 00:00",
+  Period = 102662.1853273871*60*60*24
+}
+
+local Position = {
+  Identifier = "HaumeaPosition",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Transform = {
+    Translation = Translation
+  },
+  GUI = {
+    Name = "Haumea Position",
+    Path = "/Solar System/Dwarf Planets/Haumea",
+    Hidden = true
+  }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(Position)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(Position)
+end)
+
+asset.export("Translation", Translation)
+asset.export("Position", Position)
+
+asset.meta = {
+    Name = "Haumea Position (Keplerian)",
+    Version = "1.0",
+    Description = [[Position of Haumea. KeplerTranslation Version Data from
+      JPL Horizons]],
+    Author = "OpenSpace Team",
+    URL = "https://ssd.jpl.nasa.gov/sbdb.cgi?sstr=Haumea",
+    License = "JPL/NASA"
+}
+  

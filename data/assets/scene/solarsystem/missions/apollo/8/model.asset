@@ -42,7 +42,7 @@ local Apollo8 = {
   },
   GUI = {
     Name = "Apollo 8",
-    Path = "/Solar System/Missions/Apollo"
+    Path = "/Solar System/Missions/Apollo/8"
   }
 }
 
@@ -67,13 +67,12 @@ local Apollo8Model = {
     LightSources = {
       sun.LightSource
     },
-    PerformShading = true,
-    DisableFaceCulling = true
+    PerformShading = true
   },
   GUI = {
     Hidden = true,
     Name = "Apollo 8 Model",
-    Path = "/Solar System/Missions/Apollo"
+    Path = "/Solar System/Missions/Apollo/8"
   }
 }
 
@@ -89,7 +88,7 @@ local Apollo8Pivot = {
   },
   GUI = {
     Name = "Apollo 8 Pivot",
-    Path = "/Solar System/Missions/Apollo"
+    Path = "/Solar System/Missions/Apollo/8"
   }
 }
 

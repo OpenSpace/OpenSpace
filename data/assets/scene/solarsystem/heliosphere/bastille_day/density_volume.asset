@@ -51,7 +51,25 @@ local densityVolume = {
 local toggle_volume = {
   Identifier = "os.events.bastilleday.densityvolume.togglevolume",
   Name = "Toggle volume",
-  Command = propertyHelper.invert("Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Enabled"),
+  Command = [[
+    if openspace.getPropertyValue("Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Enabled") then
+      openspace.setPropertyValueSingle(
+        "Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Fade",
+        0.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Fade",
+        1.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
   Documentation = "Toggle volume rendering of CME",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false

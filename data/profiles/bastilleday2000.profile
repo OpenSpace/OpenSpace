@@ -1,6 +1,7 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "dashboard/default_dashboard",
     "scene/solarsystem/heliosphere/bastille_day/actions",
     "scene/solarsystem/heliosphere/bastille_day/density_volume",
@@ -71,12 +72,8 @@
       "key": "D"
     },
     {
-      "action": "os.events.bastilleday.fluxnodelegend.showlegend",
+      "action": "os.events.bastilleday.fluxnodelegend.togglelegend",
       "key": "N"
-    },
-    {
-      "action": "os.events.bastilleday.fluxnodelegend.hidelegend",
-      "key": "M"
     },
     {
       "action": "os.events.bastilleday.magnetogramtexture.switchcolorlayer",

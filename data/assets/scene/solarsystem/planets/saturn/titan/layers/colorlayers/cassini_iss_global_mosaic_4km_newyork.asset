@@ -1,0 +1,39 @@
+local globeIdentifier = asset.require("../../titan").Titan.Identifier
+
+local layer = {
+  Identifier = "Cassini_ISS_Global_Mosaic_4km_NewYork",
+  Name = "Cassini ISS Global Mosaic [New York]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("cassini_iss_global_mosaic_4km_newyork.wms"),
+  Description = [[This global digital map of Saturn's moon Titan was created using
+    images taken by the Cassini spacecraft's Imaging Science Subsystem (ISS). The map
+    was produced in June 2015 using data collected through Cassini's flyby on April 7,
+    2014, known as "T100". The mean radius of Titan used for projection of this map is
+    1,600 miles (2,575 kilometers). Pixel resolution is 4005 meters per pixel (m).
+    Titan is assumed to be spherical until a control network -- a model of the moon's
+    shape based on multiple images tied together at defined points on the surface --
+    is created at some point in the future. (Description from URL)]],
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Cassini ISS Global Mosaic [New York]",
+  Version = "1.1",
+  Description = [[Cassini global image layer for Titan. This layer is hosted on the
+    OpenSpace server in New York]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Titan/Cassini/Global-Mosaic/" ..
+    "Titan_ISS_P19658_Mosaic_Global_4km",
+  License = "NASA/PDS"
+}

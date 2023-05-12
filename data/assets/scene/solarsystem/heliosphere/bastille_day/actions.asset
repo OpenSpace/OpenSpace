@@ -3,6 +3,7 @@ local bastilleday_setup_startofcme = {
   Name = "Reset to start of CME, no loop",
   Command = [[
     openspace.time.setTime('2000-JUL-14 10:03:00.00');
+    openspace.time.setDeltaTime(1);
     openspace.scriptScheduler.clear();
   ]],
   Documentation = "Button to reset to the the start of the CME",

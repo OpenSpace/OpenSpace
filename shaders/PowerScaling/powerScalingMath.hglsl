@@ -29,8 +29,8 @@
 const float k = 10.0;
 const float FLT_MAX = 1e38; // Not max but large enough for the purpose
 
-float log10(float x) {  
-  return log(x) / log(10.0);   
+float log10(float x) {
+  return log(x) / log(10.0);
 }
 
 vec4 psc_normalization(vec4 v) {

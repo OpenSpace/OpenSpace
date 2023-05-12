@@ -92,12 +92,7 @@ local MessengerProbeBlack = {
     GeometryFile = models .. "MessengerProbe_black.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
+      sun.LightSource
     }
   },
   GUI = {
@@ -114,12 +109,7 @@ local MessengerProbeFoil = {
     GeometryFile = models .. "MessengerProbe_foil.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
+      sun.LightSource
     }
   },
   GUI = {
@@ -136,12 +126,7 @@ local MessengerProbeHeatShield = {
     GeometryFile = models .. "MessengerProbe_heatShield.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
+      sun.LightSource
     }
   },
   GUI = {
@@ -158,12 +143,7 @@ local MessengerProbeMetal = {
     GeometryFile = models .. "MessengerProbe_metal.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
+      sun.LightSource
     }
   },
   GUI = {
@@ -180,12 +160,7 @@ local MessengerProbePanels = {
     GeometryFile = models .. "MessengerProbe_panels.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
+      sun.LightSource
     }
   },
   GUI = {
@@ -198,7 +173,7 @@ local MessengerTrail = {
   Identifier = "MessengerTrail",
   Parent = mercuryTransforms.MercuryBarycenter.Identifier,
   Renderable = {
-    Type = "RenderableTrailOrbit",
+    Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
       Target = "MESSENGER",
@@ -209,8 +184,7 @@ local MessengerTrail = {
     EnableFade = false,
     StartTime = "2011 MARCH 01 12:00:00",
     EndTime = "2011 MAY 30 12:00:00",
-    Period = 12,
-    Resolution = 10000
+    SampleInterval = 360
   },
   GUI = {
     Name = "Messenger Trail",

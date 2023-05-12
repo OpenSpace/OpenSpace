@@ -88,7 +88,7 @@ openspace.globebrowsing.documentation = {
     }
 }
 
-openspace.globebrowsing.addGibsLayer = function(layer, resolution, format, startDate, endDate)
+openspace.globebrowsing.addGibsLayer = function(layerName, resolution, format, startDate, endDate)
     if endDate == 'Present' then
         endDate = ''
     end
@@ -245,7 +245,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
             Name = name,
             Description = Description or "",
             FilePath = dir .. '/' .. HeightFile,
-            TilePixelSize = 90
+            TilePixelSize = 512
         }
     end
 

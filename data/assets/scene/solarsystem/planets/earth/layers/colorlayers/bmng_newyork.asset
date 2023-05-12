@@ -1,0 +1,31 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+local layer = {
+  Identifier = "BMNG_NewYork",
+  Name = "BMNG [New York]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("bmng_newyork.wms"),
+  Description = [[Web loaded full resolution map of Blue Marble Next Generation. This map
+    is hosted on the OpenSpace servers in New York]],
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+asset.meta = {
+  Name = "Blue Marble Next Generation (New York)",
+  Version = "1.1",
+  Description = [[Web loaded full resolution map of Blue Marble Next Generation. This map
+    is hosted on the OpenSpace servers in New York]],
+  Author = "OpenSpace Team",
+  URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
+  License = "NASA"
+}
