@@ -65,7 +65,14 @@ namespace openspace::fls {
 
     bool keepCheckingFlowlinesFieldline(std::vector<glm::vec3> flowlinePos, int counter);
 
-    std::pair<glm::vec3, std::string> moveSeedpoint(std::pair<glm::vec3, std::string>& seedPoint);
+    std::pair<glm::vec3, std::string> moveSeedpoint(std::pair<glm::vec3, std::string>& seedPoint
+        , float& prevZ, float& headZ);
+
+    std::pair<glm::vec3, std::string> moveSeedpointHalfDown(
+        std::pair<glm::vec3, std::string>& seedPoint, float& prevZ, float& headZ);
+
+        std::pair<glm::vec3, std::string> moveSeedpointHalfDown(
+            std::pair<glm::vec3, std::string>& seedPoint, float& prevZ, float& headZ);
 
     std::vector<glm::vec3> getPositionsFromLine(ccmc::Fieldline seedPointFlowline);
 
@@ -474,7 +481,7 @@ namespace openspace::fls {
         // TODO: FIX: First traced fieldline is an IMF... therefor we skip it
         int counter = 1;
 
-        seedPoint = moveSeedpoint(seedPoint);
+        seedPoint = moveSeedpoint(seedPoint, prevZ, headZ);
 
         ccmc::Fieldline seedPointFlowline = traceAndCreateMappedPathLine(
             tracingVar,
