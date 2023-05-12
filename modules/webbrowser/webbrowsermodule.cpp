@@ -46,7 +46,7 @@ namespace {
         constexpr std::string_view SubprocessPath = "OpenSpace_Helper.exe";
     #elif defined(__APPLE__)
         constexpr std::string_view SubprocessPath =
-            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace_Helper";
+            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
     #else
         constexpr std::string_view SubprocessPath = "OpenSpace_Helper";
     #endif

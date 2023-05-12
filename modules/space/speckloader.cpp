@@ -152,15 +152,15 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
     while (std::getline(file, line)) {
         currentLineNumber++;
 
-        // Ignore empty line or commented-out lines
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
-
         // Guard against wrong line endings (copying files from Windows to Mac) causes
         // lines to have a final \r
         if (line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
+        }
+
+        // Ignore empty line or commented-out lines
+        if (line.empty() || line[0] == '#') {
+            continue;
         }
 
         strip(line);

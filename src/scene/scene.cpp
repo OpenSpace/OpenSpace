@@ -862,7 +862,12 @@ std::string makeIdentifier(std::string s) {
     // marks. Hence, we first convert '_' to whitespaces to avoid them being replaced
     // in the puncutation check
     std::replace(s.begin(), s.end(), '_', ' ');
-    std::replace_if(s.begin(), s.end(), std::ptr_fun<int, int>(&std::ispunct), '-');
+    std::replace_if(
+        s.begin(),
+        s.end(),
+        [](char c) { return std::ispunct(c) == 0; },
+        '-'
+    );
     std::replace(s.begin(), s.end(), ' ', '_');
     return s;
 }
