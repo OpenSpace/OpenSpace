@@ -56,6 +56,12 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     _firstWindowGraphicsSelection->setToolTip(
         "Select the contents of the first window to match one of the other windows"
     );
+    _firstWindowGraphicsSelection->setFixedWidth(150);
+    connect(
+        _showUiOnFirstWindow, &QCheckBox::clicked,
+        this, &SettingsWidget::showUiOnFirstWindowClicked
+    );
+
     _firstWindowSelectionLayout->addWidget(_showUiOnFirstWindow);
     _firstWindowSelectionLayout->addWidget(_firstWindowGraphicsSelection);
     _firstWindowSelectionLayout->addStretch();
@@ -108,23 +114,40 @@ void SettingsWidget::setVsync(bool enableVsync) {
 }
 
 void SettingsWidget::nWindowsDisplayedChanged(int newCount) {
+    QList<QString> graphicsOptions = {"None (GUI only)"};
+    for (int i = 1; i <= newCount; ++i) {
+        graphicsOptions.append("Window " + QString::number(i));
+    }
+    _firstWindowGraphicsSelection->clear();
+    _firstWindowGraphicsSelection->addItems(graphicsOptions);
+    setEnableShowUiOnFirstWindowCheckbox(newCount > 1);
+    _firstWindowGraphicsSelection->setCurrentIndex(
+        _stateOfUiOnFirstWindowGraphicsSelectionPrevious
+    );
+    if (_firstWindowGraphicsSelection->currentIndex() > newCount) {
+        _firstWindowGraphicsSelection->setCurrentIndex(newCount);
+        _stateOfUiOnFirstWindowGraphicsSelectionPrevious =
+            _firstWindowGraphicsSelection->currentIndex();
+    }
+
     if (newCount == 1) {
         _stateOfUiOnFirstWindowWhenDisabled = _showUiOnFirstWindow->isChecked();
         if (_stateOfUiOnFirstWindowWhenDisabled) {
             _showUiOnFirstWindow->setChecked(false);
         }
-        //_firstWindowSelectionLayout->setVisible(false);
+        _firstWindowGraphicsSelection->setEnabled(false);
     }
-    else if (_stateOfUiOnFirstWindowWhenDisabled) {
+    else if (newCount == 2 && _stateOfUiOnFirstWindowPreviousCount == 1) {
         _showUiOnFirstWindow->setChecked(true);
-        //_firstWindowSelectionLayout->setVisible(true);
-        QList<QString> graphicsOptions = {"None (GUI only)"};
-        for (int i = 1; i <= newCount; ++i) {
-            graphicsOptions.append("Window " + QString::number(i));
-        }
-        _firstWindowGraphicsSelection->clear();
-        _firstWindowGraphicsSelection->addItems(graphicsOptions);
+        _firstWindowGraphicsSelection->setEnabled(true);
+        _firstWindowGraphicsSelection->setCurrentIndex(
+            _stateOfUiOnFirstWindowGraphicsSelectionPrevious
+        );
     }
-    setEnableShowUiOnFirstWindowCheckbox(newCount > 1);
-    
+    _stateOfUiOnFirstWindowGraphicsSelectionPrevious =
+        _firstWindowGraphicsSelection->currentIndex();
+}
+
+void SettingsWidget::showUiOnFirstWindowClicked(bool checked) {
+    _firstWindowGraphicsSelection->setEnabled(checked);
 }

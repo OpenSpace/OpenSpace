@@ -101,7 +101,11 @@ private:
     QCheckBox* _showUiOnFirstWindow = nullptr;
     QComboBox* _firstWindowGraphicsSelection = nullptr;
     QBoxLayout* _firstWindowSelectionLayout = nullptr;
+    int _stateOfUiOnFirstWindowPreviousCount = 1;
     bool _stateOfUiOnFirstWindowWhenDisabled = false;
+    int _stateOfUiOnFirstWindowGraphicsSelectionPrevious = 0;
+
+    void showUiOnFirstWindowClicked(bool checked);
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__
