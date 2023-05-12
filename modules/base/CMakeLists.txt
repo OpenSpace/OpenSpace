@@ -50,6 +50,7 @@ set(HEADER_FILES
   rendering/renderablemodel.h
   rendering/renderablenodeline.h
   rendering/renderableplane.h
+  rendering/renderablecutplane.h
   rendering/renderableplaneimagelocal.h
   rendering/renderableplaneimageonline.h
   rendering/renderableplanetimevaryingimage.h
@@ -106,6 +107,7 @@ set(SOURCE_FILES
   rendering/renderablemodel.cpp
   rendering/renderablenodeline.cpp
   rendering/renderableplane.cpp
+  rendering/renderablecutplane.cpp
   rendering/renderableplaneimagelocal.cpp
   rendering/renderableplaneimageonline.cpp
   rendering/renderableplanetimevaryingimage.cpp

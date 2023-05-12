@@ -1,0 +1,28 @@
+local transforms = asset.require("./transforms_magnetosphere")
+local transferFunction = asset.localResource("./CMR-illuminance2.txt")
+
+local cutplane = {
+  Identifier = "Cutplane",
+  Parent = transforms.GSMReferenceFrame.Identifier,
+  InteractionSphere = 6380000,  -- A value slightly bigger than earth radius
+  Renderable = {
+    Type = "RenderableCutPlane",
+    Size = 3.0E11,
+    Origin = "Center",
+    Billboard = true,
+  },
+  GUI = {
+    Path = "/Solar System/Planets/Earth",
+    Name = "Cutplane"
+  },
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(cutplane)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(cutplane)
+end)
+
+asset.export(cutplane)
