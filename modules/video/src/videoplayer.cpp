@@ -89,13 +89,6 @@ namespace {
         "'YYYY MM DD hh:mm:ss'."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PlaybackModeInfo = {
-        "PlaybackMode",
-        "Playback Mode",
-        "Determines the way the video should be played. The start and end time of the "
-        "video can be set, or the video can be played as a loop in real time."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo LoopVideoInfo = {
         "LoopVideo",
         "Loop Video",
@@ -484,7 +477,7 @@ void VideoPlayer::initializeMpv() {
 }
 
 void VideoPlayer::seekToTime(double time, PauseAfterSeek pauseAfter) {
-    if (_isSeeking || abs(_currentVideoTime - time) < glm::epsilon<double>()) {
+    if (_isSeeking || std::abs(_currentVideoTime - time) < glm::epsilon<double>()) {
         return;
     }
     pause();
@@ -623,7 +616,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
     }
     // Cast event to node or property depending on its format
     mpv_event_property* prop = nullptr;
-    mpv_node node;
+    mpv_node node = {};
     if (formats[key] == MPV_FORMAT_NODE) {
         int result = mpv_event_to_node(&node, event);
         if (!checkMpvError(result)) {

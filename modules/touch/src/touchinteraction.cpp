@@ -302,12 +302,17 @@ TouchInteraction::TouchInteraction()
         0.01f,
         0.25f
     )
-    , _zoomInBoundarySphereMultiplier(ZoomInBoundarySphereMultiplierInfo, 1.001f, 0.01f, 4e+27)
+    , _zoomInBoundarySphereMultiplier(
+        ZoomInBoundarySphereMultiplierInfo,
+        1.001f,
+        0.01f,
+        4e+27f
+    )
     , _zoomOutBoundarySphereMultiplier(
         ZoomOutBoundarySphereMultiplierInfo,
-        4e+27,
+        4e+27f,
         1.f,
-        4e+27
+        4e+27f
     )
     , _zoomInLimit(ZoomInLimitInfo, -1.0, 0.0, 4e+27)
     , _zoomOutLimit(

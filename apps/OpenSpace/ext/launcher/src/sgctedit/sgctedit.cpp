@@ -89,7 +89,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
     size_t nWindows = _cluster.nodes.front().windows.size();
     bool firstWindowGuiIsEnabled = (nWindows > 1);
     std::vector<QRect> monitorSizes = createMonitorInfoSet();
-    createWidgets(monitorSizes, nWindows, false);
+    createWidgets(monitorSizes, static_cast<unsigned int>(nWindows), false);
     size_t existingWindowsControlSize = _displayWidget->windowControls().size();
     for (size_t i = 0; i < nWindows; ++i) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
@@ -459,7 +459,7 @@ void SgctEdit::generateConfigResizeWindowsAccordingToSelected(sgct::config::Node
 void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) {
     for (size_t i = 0; i < node.windows.size(); ++i) {
         // First apply default settings to each window...
-        node.windows[i].id = i;
+        node.windows[i].id = static_cast<int>(i);
         node.windows[i].draw2D = true;
         node.windows[i].draw3D = true;
         node.windows[i].viewports.back().isTracked = true;

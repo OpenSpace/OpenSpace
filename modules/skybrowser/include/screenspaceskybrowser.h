@@ -52,7 +52,6 @@ public:
     bool isPointingSpacecraft() const;
 
     double setVerticalFovWithScroll(float scroll);
-    void setOpacity(float opacity);
     void setIdInBrowser() const;
     void setIsInitialized(bool isInitialized);
     void setPointSpaceCraft(bool shouldPoint);

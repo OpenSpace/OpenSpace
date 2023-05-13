@@ -158,7 +158,11 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
             return gi.id == id;
         }
     );
-    auto layerGroup = it != layers::Groups.end() ? it->name : std::to_string(static_cast<int>(_layerGroupID));
+
+    std::string layerGroup =
+        it != layers::Groups.end() ?
+        std::string(it->name) :
+        std::to_string(static_cast<int>(_layerGroupID));
 
     std::string identifier = p.identifier.value_or("unspecified");
     std::string enclosing = p.globeName.value_or("unspecified");

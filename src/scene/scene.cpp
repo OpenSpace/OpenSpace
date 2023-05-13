@@ -803,7 +803,8 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "The URI is interpreted using a wildcard in which '*' is expanded to "
                 "'(.*)' and bracketed components '{ }' are interpreted as group tag "
                 "names. Then, the passed value will be set on all properties that fit "
-                "the regex + group name combination."
+                "the regex + group name combination.",
+                {}
             },
             {
                 "setPropertyValueSingle",
@@ -829,17 +830,20 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "QuinticEaseInOut, SineEaseIn, SineEaseOut, SineEaseInOut, CircularEaseIn, "
                 "CircularEaseOut, CircularEaseInOut, ExponentialEaseIn, ExponentialEaseOut, "
                 "ExponentialEaseInOut, ElasticEaseIn, ElasticEaseOut, ElasticEaseInOut, "
-                "BounceEaseIn, BounceEaseOut, BounceEaseInOut"
+                "BounceEaseIn, BounceEaseOut, BounceEaseInOut",
+                {}
             },
             {
                 "getPropertyValue",
                 &luascriptfunctions::propertyGetValue,
                 {},
                 "",
-                "Returns the value the property, identified by the provided URI"
+                "Returns the value the property, identified by the provided URI",
+                {}
             },
             codegen::lua::HasProperty,
             codegen::lua::GetProperty,
+            codegen::lua::AddCustomProperty,
             codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,
             codegen::lua::AddSceneGraphNode,

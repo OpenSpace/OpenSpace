@@ -42,8 +42,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "RenderableSkyTarget";
-
     enum BlendMode {
         Normal = 0,
         Additive
@@ -121,8 +119,8 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     , _showRectangleThreshold(RectangleThresholdInfo, 5.f, 0.1f, 70.f)
     , _lineWidth(LineWidthInfo, 13.f, 1.f, 100.f)
     , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
-    , _borderColor(220, 220, 220)
     , _applyRoll(ApplyRollInfo, true)
+    , _borderColor(220, 220, 220)
 {
     // Handle target dimension property
     _autoScale = false;

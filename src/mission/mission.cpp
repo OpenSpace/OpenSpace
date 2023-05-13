@@ -163,7 +163,10 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         for (const Parameters::Milestone& milestone : *p.milestones) {
             std::string name = milestone.name;
             Time newTime = Time(milestone.date);
-            Milestone newDate = { name, newTime };
+            Milestone newDate = {
+                .name = name,
+                .date = newTime
+            };
             if (milestone.description.has_value()) {
                 newDate.description = milestone.description.value();
             }

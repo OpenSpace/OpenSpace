@@ -259,7 +259,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
         _typeOption.addOption(static_cast<int>(li.id), std::string(li.identifier));
     }
     _typeOption.setValue(static_cast<int>(typeID));
-    _type = static_cast<layers::Layer::ID>(_typeOption.value());
+    _typeId = static_cast<layers::Layer::ID>(_typeOption.value());
 
     for (const layers::Blend& bi : layers::Blends) {
         _blendModeOption.addOption(static_cast<int>(bi.id), std::string(bi.identifier));
@@ -341,7 +341,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
                 throw ghoul::MissingCaseException();
         }
 
-        _type = static_cast<layers::Layer::ID>(_typeOption.value());
+        _typeId = static_cast<layers::Layer::ID>(_typeOption.value());
         initializeBasedOnType(type(), {});
         addVisibleProperties();
         if (_onChangeCallback) {
@@ -417,7 +417,7 @@ Tile::Status Layer::tileStatus(const TileIndex& index) const {
 }
 
 layers::Layer::ID Layer::type() const {
-    return _type;
+    return _typeId;
 }
 
 layers::Blend::ID Layer::blendMode() const {

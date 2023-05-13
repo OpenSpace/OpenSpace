@@ -277,7 +277,6 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         dictionary.hasKey(KeyDesc) ? dictionary.value<std::string>(KeyDesc) : ""
     })
     , _enabled(EnabledInfo, true)
-    , _globeNode(globe)
     , _geoJsonFile(FileInfo)
     , _heightOffset(HeightOffsetInfo, 10.f, -1e12f, 1e12f)
     , _latLongOffset(
@@ -288,15 +287,14 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     )
     , _pointSizeScale(PointSizeScaleInfo, 1.f, 0.01f, 100.f)
     , _lineWidthScale(LineWidthScaleInfo, 1.f, 0.01f, 10.f)
-    , _drawWireframe(DrawWireframeInfo, false)
-    , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
-    , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
-    , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
-    , _featuresPropertyOwner({ "Features", "Features" })
     , _pointRenderModeOption(
         PointRenderModeInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , _drawWireframe(DrawWireframeInfo, false)
+    , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
+    , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
+    , _globeNode(globe)
     , _centerLatLong(
         CentroidCoordinateInfo,
         glm::vec2(0.f),
@@ -304,6 +302,8 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         glm::vec2(90.f, 180.f)
     )
     , _flyToFeature(FlyToFeatureInfo)
+    , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
+    , _featuresPropertyOwner({ "Features", "Features" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

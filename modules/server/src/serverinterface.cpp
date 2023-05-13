@@ -108,7 +108,7 @@ std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
 
 ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     : properties::PropertyOwner({ "", "", "" })
-    , _type(TypeInfo)
+    , _socketType(TypeInfo)
     , _port(PortInfo, 0)
     , _enabled(EnabledInfo)
     , _allowAddresses(AllowAddressesInfo)
@@ -118,11 +118,11 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     , _password(PasswordInfo)
 {
 
-    _type.addOption(
+    _socketType.addOption(
         static_cast<int>(InterfaceType::TcpSocket),
         std::string(TcpSocketType)
     );
-    _type.addOption(
+    _socketType.addOption(
         static_cast<int>(InterfaceType::WebSocket),
         std::string(WebSocketType)
     );
@@ -195,7 +195,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
         initialize();
     };
 
-    _type.onChange(reinitialize);
+    _socketType.onChange(reinitialize);
     _port.onChange(reinitialize);
     _enabled.onChange(reinitialize);
     _defaultAccess.onChange(reinitialize);
@@ -203,7 +203,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     _requirePasswordAddresses.onChange(reinitialize);
     _denyAddresses.onChange(reinitialize);
 
-    addProperty(_type);
+    addProperty(_socketType);
     addProperty(_port);
     addProperty(_enabled);
     addProperty(_defaultAccess);
@@ -219,7 +219,7 @@ void ServerInterface::initialize() {
     if (!_enabled) {
         return;
     }
-    switch (static_cast<InterfaceType>(_type.value())) {
+    switch (static_cast<InterfaceType>(_socketType.value())) {
     case InterfaceType::TcpSocket:
         _socketServer = std::make_unique<ghoul::io::TcpSocketServer>();
         break;
