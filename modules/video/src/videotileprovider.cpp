@@ -41,13 +41,6 @@ namespace {
 
 namespace openspace {
 
-namespace {
-
-bool isDifferent(double first, double second) {
-    return abs(first - second) > glm::epsilon<double>();
-}
-}
-
 VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     : _videoPlayer(dictionary)
 {

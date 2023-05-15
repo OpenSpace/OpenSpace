@@ -240,7 +240,6 @@ GeoJsonComponent::SubFeatureProps::SubFeatureProps(
                                        properties::PropertyOwner::PropertyOwnerInfo info)
     : properties::PropertyOwner(info)
     , enabled(EnabledInfo, true)
-    , flyToFeature(FlyToFeatureInfo)
     , centroidLatLong(
         CentroidCoordinateInfo,
         glm::vec2(0.f),
@@ -253,6 +252,7 @@ GeoJsonComponent::SubFeatureProps::SubFeatureProps(
         glm::vec4(-90.f, -180.f, -90.f, -180.f),
         glm::vec4(90.f, 180.f, 90.f, 180.f)
     )
+    , flyToFeature(FlyToFeatureInfo)
 {
     _opacity.setVisibility(openspace::properties::Property::Visibility::AdvancedUser);
     addProperty(Fadeable::_opacity);

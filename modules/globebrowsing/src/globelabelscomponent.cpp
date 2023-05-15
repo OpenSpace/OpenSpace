@@ -416,7 +416,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             if (token.empty()) {
                 std::getline(issFeature, token, '=');
             }
-            strncpy(lEntry.feature, token.c_str(), 256);
+            strncpy(lEntry.feature, token.c_str(), 255);
 
             GlobeBrowsingModule* _globeBrowsingModule =
                 global::moduleEngine->module<openspace::GlobeBrowsingModule>();
