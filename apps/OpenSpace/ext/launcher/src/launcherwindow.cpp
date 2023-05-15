@@ -721,6 +721,7 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
         profile,
         _assetPath,
         _userAssetPath,
+        _profilePath,
         saveProfilePath,
         this
     );
