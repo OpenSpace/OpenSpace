@@ -79,12 +79,19 @@ namespace openspace {
             float z;
         };
 
+        struct Vertex {
+            float location[3];
+        };
+
         std::vector<float> createDataSlice(speck::Dataset& dataset);
         void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
             const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
         speck::Dataset interpolationFunc(const speck::Dataset& d1, const speck::Dataset& d2, float iv);
         speck::Dataset::Entry interpol(const speck::Dataset::Entry& e1, const speck::Dataset::Entry& e2, float iv);
         void sort(const speck::Dataset& d1, const speck::Dataset& d2);
+
+        void compareDist(const speck::Dataset& d1, const speck::Dataset& d2);
+        float averageDistance(const speck::Dataset& d);
 
         // bool variables
         bool _dataIsDirty = true;
@@ -124,7 +131,8 @@ namespace openspace {
         std::vector<Point> _MDS_points;
         std::vector<Point> _Umap_points;
 
-
+        std::vector<Vertex> _vertices1;
+        std::vector<Vertex> _vertices2;
 
         ghoul::opengl::Texture* _spriteTexture = nullptr;
         ghoul::opengl::ProgramObject* _program = nullptr;
@@ -167,6 +175,9 @@ namespace openspace {
 
         GLuint _vao = 0;
         GLuint _vbo = 0;
+
+        GLuint _vaoLines = 0;
+        GLuint _vboLines = 0;
     };
 
 } // namespace openspace

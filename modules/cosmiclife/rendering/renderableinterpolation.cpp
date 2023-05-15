@@ -342,6 +342,8 @@ namespace openspace {
 
              sort(_dataSetOne, _dataSetTwo);
 
+             compareDist(_dataSetOne, _dataSetTwo);
+
             _dataIsDirty = true;
         };
 
@@ -350,10 +352,6 @@ namespace openspace {
 
         _dataSetOneOption.onChange(func);
         _dataSetTwoOption.onChange(func);
-
-
-
-
 
         _interpolationValue = p.interpolationValue.value_or(_interpolationValue);
         _interpolationValue.onChange([this]() {
@@ -500,6 +498,48 @@ namespace openspace {
         return (_program && hasAllDataSetData);
     }
 
+    float RenderableInterpolation::averageDistance(const speck::Dataset& d) {
+        float sumDistances = 0.0;
+        int numPairs = 0;
+
+        for (int i = 0; i < d.entries.size() - 1; i++) {
+            for (int j = i + 1; j < d.entries.size(); j++) {
+                float dx = d.entries[i].position.x - d.entries[j].position.x;
+                float dy = d.entries[i].position.y - d.entries[j].position.y;
+                float dz = d.entries[i].position.z - d.entries[j].position.z;
+                float distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+                sumDistances += distance;
+                numPairs++;
+            }
+        }
+        return sumDistances / numPairs;
+    }
+
+    void RenderableInterpolation::compareDist(const speck::Dataset& d1, const speck::Dataset& d2) {
+
+        float averageDistance1 = averageDistance(d1);
+        float averageDistance2 = averageDistance(d2);
+
+        float averageDistanceDiff = (averageDistance1 + averageDistance2) / 2;
+
+        _vertices1.clear();
+        _vertices2.clear();
+
+        for (int i = 0; i < d1.entries.size(); i++) {
+            for (int j = 0; j < d1.entries.size(); j++) {
+                if (i == j) continue;
+                double distance1 = sqrt(pow(d1.entries[i].position.x - d1.entries[j].position.x, 2) + pow(d1.entries[i].position.y - d1.entries[j].position.y, 2) + pow(d1.entries[i].position.z - d1.entries[j].position.z, 2));
+                double distance2 = sqrt(pow(d2.entries[i].position.x - d2.entries[j].position.x, 2) + pow(d2.entries[i].position.y - d2.entries[j].position.y, 2) + pow(d2.entries[i].position.z - d2.entries[j].position.z, 2));
+                if (abs(distance1 - distance2) > averageDistanceDiff) {
+                    _vertices1.push_back(Vertex{ d1.entries[i].position.x, d1.entries[i].position.y, d1.entries[i].position.z });
+                    _vertices1.push_back(Vertex{ d1.entries[j].position.x, d1.entries[j].position.y, d1.entries[j].position.z });
+                    _vertices2.push_back(Vertex{ d2.entries[i].position.x, d2.entries[i].position.y, d2.entries[i].position.z });
+                    _vertices2.push_back(Vertex{ d2.entries[j].position.x, d2.entries[j].position.y, d2.entries[j].position.z });
+                }
+            }
+        }
+    }
+
     void RenderableInterpolation::sort(const speck::Dataset& d1, const speck::Dataset& d2) {
         speck::Dataset d1_copy;
         speck::Dataset d2_copy;
@@ -543,8 +583,6 @@ namespace openspace {
         for (const auto& [name, path] : _filePaths) {
             _datasets[name] = speck::data::loadFileWithCache(path);
         }
-
-
         
         if (_hasColorMapFile) {
             _colorMap = speck::color::loadFileWithCache(_colorMapFile);
@@ -566,12 +604,38 @@ namespace openspace {
             []() {
                 return global::renderEngine->buildRenderProgram(
                     ProgramObjectName,
-                    absPath("${MODULE_COSMICLIFE}/shaders/points_vs.glsl"),
-                    absPath("${MODULE_COSMICLIFE}/shaders/points_fs.glsl"),
-                    absPath("${MODULE_COSMICLIFE}/shaders/points_gs.glsl")
+                    absPath("${MODULE_COSMICLIFE}/shaders/points_interpolation_vs.glsl"),
+                    absPath("${MODULE_COSMICLIFE}/shaders/points_interpolation_fs.glsl"),
+                    absPath("${MODULE_COSMICLIFE}/shaders/points_interpolation_gs.glsl")
                 );
             }
         );
+
+        _dataSetOne = _datasets.begin()->second;
+        _dataSetTwo = _datasets.rbegin()->second;
+
+        sort(_dataSetOne, _dataSetTwo);
+
+        compareDist(_dataSetOne, _dataSetTwo);
+
+        _dataIsDirty = true;
+
+        glGenVertexArrays(1, &_vaoLines);  // Generate VAO
+        glBindVertexArray(_vaoLines);  // Bind VAO
+
+        // Generate and bind VBO
+        glGenBuffers(1, &_vboLines);
+        glBindBuffer(GL_ARRAY_BUFFER, _vboLines);
+
+        // Set VBO data
+        glBufferData(GL_ARRAY_BUFFER, _vertices1.size() * sizeof(Vertex), _vertices1.data(), GL_STATIC_DRAW);
+
+        // Enable vertex attribute array and specify layout
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+
+        // Unbind VAO
+        glBindVertexArray(0);
 
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
@@ -666,7 +730,7 @@ namespace openspace {
         _program->setUniform(_uniformCache.hasColormap, _hasColorMapFile);
 
         glBindVertexArray(_vao);
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_interpolationDataset.entries.size())); //TODO: this is where data is uploaded to GPU 
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_interpolationDataset.entries.size()));
         glBindVertexArray(0);
         _program->deactivate();
 
@@ -702,8 +766,16 @@ namespace openspace {
         }
         glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
+        renderPoints(data, modelMatrix, orthoRight, orthoUp);
 
-            renderPoints(data, modelMatrix, orthoRight, orthoUp);
+        // Bind VAO
+        glBindVertexArray(_vaoLines);
+
+        // Render lines
+        glDrawArrays(GL_LINES, 0, 6);
+
+        // Unbind VAO
+        glBindVertexArray(0);
   
     }
 

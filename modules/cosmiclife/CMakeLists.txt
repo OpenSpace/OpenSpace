@@ -40,6 +40,9 @@ set(SHADER_FILES
   shaders/points_fs.glsl
   shaders/points_gs.glsl
   shaders/points_vs.glsl
+  shaders/points_interpolation_fs.glsl
+  shaders/points_interpolation_gs.glsl
+  shaders/points_interpolation_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
