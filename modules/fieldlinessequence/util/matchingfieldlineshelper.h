@@ -55,7 +55,8 @@ namespace openspace {
             std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
             const std::string& tracingVar,
             ccmc::Kameleon* kameleon,
-            const size_t nPointsOnPathLine/*,
+            const size_t nPointsOnPathLine,
+            float& accuracy/*,
             std::vector<std::string>& seedPointsTopology*/
         );
 

@@ -802,7 +802,6 @@ namespace openspace {
         double startTime
     )
     {
-        // Check if provided file has extension csv
         if (!std::filesystem::is_regular_file(filePath) ||
             filePath.extension() != ".csv")
         {
@@ -810,15 +809,14 @@ namespace openspace {
                 fmt::format("SeedPointFile needs to be a .csv file"));
         }
 
-        // Create vector data containing all set of seedpoints from csv file
+        // TODO: make function
+        // input parameters:
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> data =
             extractSeedPointsFromCSVFile(filePath);
-
-        // testfactor
         double factor = 1;
 
+        // functionality
         int numberOfFieldlines = int(data.size() * factor);
-
         int numberOfFieldlinesOnSide = numberOfFieldlines / 2;
 
         float howFarToTheSideLeft = data[data.size() - 1].IMF.y;
@@ -827,17 +825,11 @@ namespace openspace {
         int stepLengthRight = howFarToTheSideRight / numberOfFieldlinesOnSide;
         int stepLengthLeft = howFarToTheSideLeft / numberOfFieldlinesOnSide;
 
-        // Save best index
         int bestSetOfSeedPointsIndex = 0;
-
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSeedpoints;
 
-
-        // Iterate through vector with seedpoints
         for (int i = 0; i < numberOfFieldlinesOnSide; i++)
         {
-
-            // Get which value we want to find closest seedpoint to
             double find = stepLengthRight * i;
 
             auto& seedPoints = data[i].IMF.y;
@@ -863,46 +855,33 @@ namespace openspace {
 
             // save data.y closest to find
             if (closestIndex == -1) {
-                // find is outside the range of seed points
-                // do something to handle this case
                 throw ghoul::RuntimeError(
                     "Out of range when trying to select points"
                 );
             }
             else if (closestIndex == 0) {
-                // closest value is the first value in the array
-                // do something to handle this case
-                // save closestIndex
                 selectedSeedpoints.push_back(data[closestIndex]);
             }
             else if (closestIndex == data.size() - 1) {
-                // closest value is the last value in the array
-                // do something to handle this case
                 selectedSeedpoints.push_back(data[closestIndex]);
             }
             else {
                 double dist1 = std::abs(data[closestIndex].IMF.y - find);
                 double dist2 = std::abs(data[closestIndex + 1].IMF.y - find);
                 if (dist1 <= dist2) {
-                    // closest value is data[closestIndex]
-                    // do something with data[i].SetOfSeedPoints.IMF.SeedPointInformation.y[closestIndex]
                     selectedSeedpoints.push_back(data[closestIndex]);
                 }
                 else {
-                    // closest value is data[closestIndex + 1]
-                    // do something with data[i].SetOfSeedPoints.IMF.SeedPointInformation.y[closestIndex + 1]
                     selectedSeedpoints.push_back(data[closestIndex + 1]);
                 }
             }
         }
+        // End make function
 
         std::vector<std::string> seedPointsTopology;
-        addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSeedpoints/*, seedPointsTopology*/);
+        addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSeedpoints);
 
         // TEMP!!!! Keep only one set of the chosen seed points since it doesnt work having several
-        //seedPoints.erase(seedPoints.begin(), seedPoints.end() - 24);
-        //seedPoints.erase(seedPoints.begin() + 4, seedPoints.end());
-
         // Test to pick a point
         const glm::vec3& testPointON = seedPoints[2].first;
 
@@ -918,13 +897,15 @@ namespace openspace {
         std::unique_ptr<ccmc::Interpolator> interpolator =
             std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
 
+        float accuracy = 0.1;
 
         std::vector<std::vector<glm::vec3>> testFieldlinePositions =
             fls::getAllFieldlinesPositionsOfSeedPoints(
                 seedPoints,
                 _tracingVariable,
                 kameleon.get(),
-                _nPointsOnPathLine
+                _nPointsOnPathLine,
+                accuracy
             );
 
         std::ofstream output_file("C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/ON_MODIFIERAD.txt");
