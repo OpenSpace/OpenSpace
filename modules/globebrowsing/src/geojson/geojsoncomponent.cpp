@@ -205,7 +205,10 @@ namespace {
         // [[codegen::verbatim(CoordinateOffsetInfo.description)]]
         std::optional<glm::vec2> coordinateOffset;
 
-        enum class [[codegen::map(openspace::globebrowsing::GlobeGeometryFeature::PointRenderMode)]] PointRenderMode {
+        enum class
+        [[codegen::map(openspace::globebrowsing::GlobeGeometryFeature::PointRenderMode)]]
+        PointRenderMode
+        {
             AlignToCameraDir [[codegen::key("Camera Direction")]],
             AlignToCameraPos [[codegen::key("Camera Position")]],
             AlignToGlobeNormal [[codegen::key("Globe Normal")]],
@@ -680,7 +683,8 @@ void GeoJsonComponent::addMetaPropertiesToFeature(SubFeatureProps& feature, int 
     feature.centroidLatLong = centroidLatLong;
 
     std::unique_ptr<geos::geom::Geometry> boundingbox = geometry->getEnvelope();
-    std::unique_ptr<geos::geom::CoordinateSequence> coords = boundingbox->getCoordinates();
+    std::unique_ptr<geos::geom::CoordinateSequence> coords =
+        boundingbox->getCoordinates();
     glm::vec4 boundingboxLatLong;
     if (boundingbox->isRectangle()) {
         // A rectangle has 5 coordinates, where the first and third are two corners

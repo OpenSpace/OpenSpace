@@ -479,7 +479,12 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     std::vector<double> par(6, 0.0);
     par[0] = _lastVel.orbit.x; // use _lastVel for orbit
     par[1] = _lastVel.orbit.y;
-    bool lmSuccess = _directInputSolver.solve(list, _selectedNodeSurfacePoints, &par, *_camera);
+    bool lmSuccess = _directInputSolver.solve(
+        list,
+        _selectedNodeSurfacePoints,
+        &par,
+        *_camera
+    );
     int nDof = _directInputSolver.nDof();
 
     if (lmSuccess && !_unitTest) {
@@ -510,7 +515,8 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     }
 }
 
-void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolder>& list) {
+void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolder>& list)
+{
     _selectedNodeSurfacePoints.clear();
 
     const SceneGraphNode* anchor =

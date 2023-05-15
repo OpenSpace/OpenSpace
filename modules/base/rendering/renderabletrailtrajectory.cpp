@@ -224,7 +224,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
             // We need to recalcuate the _totalSampleInterval if _numberOfVertices eqals
             // maxNumberOfVertices. If we don't do this the position for each vertex
-            // will not be correct for the number of vertices we are doing along the trail.
+            // will not be correct for the number of vertices we are doing along the trail
             _totalSampleInterval = (_numberOfVertices == maxNumberOfVertices) ?
                 (timespan / _numberOfVertices) : _totalSampleInterval;
 

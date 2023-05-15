@@ -485,7 +485,8 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
             // Already existing directories causes a 'failure' but no error
             if (ec) {
                 LWARNING(fmt::format(
-                    "Failed to create directories for cache at: {}. Error Code: {}, message: {}",
+                    "Failed to create directories for cache at: {}. "
+                    "Error Code: {}, message: {}",
                     root, std::to_string(ec.value()), ec.message()
                 ));
                 return std::nullopt;
@@ -494,7 +495,9 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
 
         GDALDriver* driver = GetGDALDriverManager()->GetDriverByName("MRF");
         if (driver != nullptr) {
-            GDALDataset* src = static_cast<GDALDataset*>(GDALOpen(_datasetFilePath.c_str(), GA_ReadOnly));
+            GDALDataset* src = static_cast<GDALDataset*>(
+                GDALOpen(_datasetFilePath.c_str(), GA_ReadOnly)
+            );
             if (!src) {
                 LWARNING(fmt::format(
                     "Failed to load dataset: {}. GDAL Error: {}",
@@ -506,16 +509,34 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
             defer{ GDALClose(src); };
 
             char** createOpts = nullptr;
-            createOpts = CSLSetNameValue(createOpts, "CACHEDSOURCE", _datasetFilePath.c_str());
+            createOpts = CSLSetNameValue(
+                createOpts,
+                "CACHEDSOURCE",
+                _datasetFilePath.c_str()
+            );
             createOpts = CSLSetNameValue(createOpts, "NOCOPY", "true");
             createOpts = CSLSetNameValue(createOpts, "uniform_scale", "2");
-            createOpts = CSLSetNameValue(createOpts, "compress", _cacheProperties.compression.c_str());
-            createOpts = CSLSetNameValue(createOpts, "quality", std::to_string(_cacheProperties.quality).c_str());
-            createOpts = CSLSetNameValue(createOpts, "blocksize", std::to_string(_cacheProperties.blockSize).c_str());
+            createOpts = CSLSetNameValue(
+                createOpts,
+                "compress",
+                _cacheProperties.compression.c_str()
+            );
+            createOpts = CSLSetNameValue(
+                createOpts,
+                "quality",
+                std::to_string(_cacheProperties.quality).c_str()
+            );
+            createOpts = CSLSetNameValue(
+                createOpts,
+                "blocksize",
+                std::to_string(_cacheProperties.blockSize).c_str()
+            );
             createOpts = CSLSetNameValue(createOpts, "indexname", cache.c_str());
             createOpts = CSLSetNameValue(createOpts, "DATANAME", cache.c_str());
 
-            GDALDataset* dst = static_cast<GDALDataset*>(driver->CreateCopy(mrf.c_str(), src, false, createOpts, nullptr, nullptr));
+            GDALDataset* dst = static_cast<GDALDataset*>(
+                driver->CreateCopy(mrf.c_str(), src, false, createOpts, nullptr, nullptr)
+            );
             if (!dst) {
                 LWARNING(fmt::format(
                     "Failed to create MRF Caching dataset dataset: {}. GDAL Error: {}",

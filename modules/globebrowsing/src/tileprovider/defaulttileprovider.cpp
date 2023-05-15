@@ -172,7 +172,9 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
     bool enabled = module.isMRFCachingEnabled();
     Compression compression =
-        _layerGroupID == layers::Group::ID::HeightLayers ? Compression::LERC : Compression::JPEG;
+        _layerGroupID == layers::Group::ID::HeightLayers ?
+        Compression::LERC :
+        Compression::JPEG;
     int quality = 75;
     int blockSize = 1024;
     if (p.cacheSettings.has_value()) {
@@ -200,7 +202,9 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     addProperty(_tilePixelSize);
 }
 
-void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData, TileCacheProperties cacheProperties) {
+void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData,
+                                                  TileCacheProperties cacheProperties)
+{
     ZoneScoped;
 
     _asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(

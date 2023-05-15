@@ -66,7 +66,7 @@ namespace {
 
             json["properties"].push_back(propertyJson);
         }
-        sortJson(json["properties"], "name"); 
+        sortJson(json["properties"], "name");
 
         auto propertyOwners = owner->propertySubOwners();
         for (properties::PropertyOwner* o : propertyOwners) {

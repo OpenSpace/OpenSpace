@@ -447,7 +447,9 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
     performShading = p.performShading.value_or(performShading);
 
     if (p.altitudeMode.has_value()) {
-        altitudeModeOption = static_cast<int>(codegen::map<AltitudeMode>(*p.altitudeMode));
+        altitudeModeOption = static_cast<int>(
+            codegen::map<AltitudeMode>(*p.altitudeMode)
+        );
     }
 
     // Set up default value and max value for tessellation distance based on globe size.
@@ -556,7 +558,8 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
         else if (keyMatches(key, propertykeys::Tessellate, TessellationEnabledInfo)) {
             result.tessellationEnabled = value.getBoolean();
         }
-        else if (keyMatches(key, propertykeys::TessellationLevel, TessellationLevelInfo)) {
+        else if (keyMatches(key, propertykeys::TessellationLevel, TessellationLevelInfo))
+        {
             result.useTessellationLevel = true;
             result.tessellationLevel = static_cast<int>(value.getNumber());
         }
@@ -570,7 +573,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
             parseProperty(key, value);
         }
         catch (const geos::io::GeoJSONValue::GeoJSONTypeError&) {
-            // @TODO: Should add some more information on which file the reading failed for
+            // @TODO: Should add some more information on which file the reading failed
             LERRORC("GeoJson", fmt::format(
                 "Error reading GeoJson property '{}'. Value has wrong type", key
             ));

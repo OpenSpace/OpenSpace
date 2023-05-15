@@ -300,7 +300,8 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     // @TODO (emmbr, 2023-04-18): This is a bit of a temporary workaround to make the
     // createMultiPoint call compile on Mac. It should work with just passing in the
     // pointCoords variable directly, but for some reason it didn't. We should come up
-    // with a solution that does not iterate over the (quite big) std::vector an extra time
+    // with a solution that does not iterate over the (quite big) std::vector an extra
+    // time
     std::vector<std::unique_ptr<Point>> geosPoints;
     geosPoints.reserve(pointCoords.size());
     for (const Coordinate& c : pointCoords) {

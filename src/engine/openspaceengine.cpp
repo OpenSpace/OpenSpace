@@ -1055,17 +1055,17 @@ void OpenSpaceEngine::writeDocumentation() {
     nlohmann::json license = writer.generateJsonGroupedByLicense();
     nlohmann::json sceneProperties = settings.get();
     nlohmann::json sceneGraph = scene.get();
-    
+
     sceneProperties["name"] = "Settings";
     sceneGraph["name"] = "Scene";
-    
+
     // Add this here so that the generateJson function is the same as before to ensure
     // backwards compatibility
     nlohmann::json scriptingResult;
     scriptingResult["name"] = "Scripting API";
     scriptingResult["data"] = scripting;
 
-    nlohmann::json documentation = { 
+    nlohmann::json documentation = {
         sceneGraph, sceneProperties, keybindings, license, scriptingResult, factory
     };
 

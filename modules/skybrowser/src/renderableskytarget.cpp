@@ -173,12 +173,14 @@ glm::ivec3 RenderableSkyTarget::borderColor() const {
 }
 
 glm::dvec3 RenderableSkyTarget::rightVector() const {
-    double scaling = (_verticalFov / 70)* static_cast<double>(glm::compMax(_size.value()));
+    double scaling =
+        (_verticalFov / 70) * static_cast<double>(glm::compMax(_size.value()));
     return scaling * _rightVector;
 }
 
 glm::dvec3 RenderableSkyTarget::upVector() const {
-    double scaling = (_verticalFov / 70) * static_cast<double>(glm::compMax(_size.value()));
+    double scaling =
+        (_verticalFov / 70) * static_cast<double>(glm::compMax(_size.value()));
     return scaling * _upVector;
 }
 

@@ -81,8 +81,8 @@ namespace {
         return result;
     }
 
-    nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f, 
-                          bool includeSourceLocation) 
+    nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f,
+                          bool includeSourceLocation)
     {
         using namespace openspace;
         using namespace openspace::scripting;

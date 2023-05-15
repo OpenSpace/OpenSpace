@@ -262,7 +262,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
     _reset.onChange([this]() { reset(); });
     addProperty(_reset);
-   
+
     if (p.playbackMode.has_value()) {
         switch (*p.playbackMode) {
         case Parameters::PlaybackMode::RealTimeLoop:
@@ -285,7 +285,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         addProperty(_pause);
         _goToStart.onChange([this]() { goToStart(); });
         addProperty(_goToStart);
-        _loopVideo.onChange([this]() { 
+        _loopVideo.onChange([this]() {
             std::string newValue = _loopVideo ? "inf" : "no";
             setPropertyAsyncMpv(newValue.c_str(), MpvKey::Loop);
         });
@@ -380,7 +380,7 @@ void VideoPlayer::initializeMpv() {
     // https://mpv.io/manual/master/#options-gpu-api
     setPropertyStringMpv("gpu-api", "opengl");
 
-    // Keep open the file. Even when we reach EOF we want to keep the video player 
+    // Keep open the file. Even when we reach EOF we want to keep the video player
     // running, in case the user starts the video from the beginning again
     // https://mpv.io/manual/stable/#options-keep-open
     setPropertyStringMpv("keep-open", "yes");

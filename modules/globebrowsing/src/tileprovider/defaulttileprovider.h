@@ -48,7 +48,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void initAsyncTileDataReader(TileTextureInitData initData, TileCacheProperties cacheProperties);
+    void initAsyncTileDataReader(TileTextureInitData initData,
+        TileCacheProperties cacheProperties);
 
     properties::StringProperty _filePath;
     properties::IntProperty _tilePixelSize;

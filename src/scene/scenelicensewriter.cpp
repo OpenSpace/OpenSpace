@@ -98,7 +98,7 @@ nlohmann::json SceneLicenseWriter::generateJsonGroupedByLicense() const {
             assetLicenses[license].push_back(assetJson);
         }
     }
-    
+
     nlohmann::json assetsJson;
     assetsJson["name"] = "Assets";
     assetsJson["type"] = "Licenses";
@@ -117,7 +117,7 @@ nlohmann::json SceneLicenseWriter::generateJsonGroupedByLicense() const {
     nlohmann::json result;
     result["name"] = "Licenses";
     result["data"] = json;
-    
+
     return result;
 }
 

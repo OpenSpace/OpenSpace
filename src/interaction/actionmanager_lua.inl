@@ -119,7 +119,7 @@ struct [[codegen::Dictionary(Action)]] Action {
     if (!a.guiPath.starts_with('/')) {
         throw ghoul::RuntimeError(
             fmt::format(
-                "Tried to register action: '{}'. The field 'GuiPath' is set to '{}' but " 
+                "Tried to register action: '{}'. The field 'GuiPath' is set to '{}' but "
                 "should be '/{}' ", a.name, a.guiPath, a.guiPath)
         );
     }
