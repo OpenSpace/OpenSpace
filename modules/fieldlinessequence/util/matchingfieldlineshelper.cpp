@@ -94,7 +94,8 @@ namespace openspace::fls {
         size_t _nPointsOnFieldLine,
         int& amountOfPreviousFieldlines,
         float& prevZ,
-        float& headZ);
+        float& headZ,
+        bool up);
 
     // DEFINITIONS
 
@@ -262,7 +263,8 @@ namespace openspace::fls {
                 {
                     int amountOfPreviousFieldlines = 0;
                     float prevZ = 0;
-                    float headZ = 0;
+                    float headZ = 4;
+
                     glm::vec3 modifiedSeedpoint = modifySeedpoint(
                         seedPoints[i],
                         tracingVar,
@@ -274,10 +276,16 @@ namespace openspace::fls {
                         _nPointsOnFieldLine,
                         amountOfPreviousFieldlines,
                         prevZ,
-                        headZ
+                        headZ,
+                        true
                     );
+
                     seedPoints[i].first = modifiedSeedpoint;
+
+                    break;
                 }
+
+                std::cout << "----- --- --- -Switching flowpoint- - -- --- -- -- " << std::endl;
                 counter++;
             }
 
@@ -357,25 +365,22 @@ namespace openspace::fls {
 
         return seedPoint;
     }
+
     std::pair<glm::vec3, std::string> moveSeedpointHalfDown(
         std::pair<glm::vec3, std::string>& seedPoint, float& prevZ, float& headZ)
     {
         try {
             if (seedPoint.second == "OPEN_NORTH")
             {
-                headZ = seedPoint.first.z - (headZ - prevZ) / 2;
-                prevZ = seedPoint.first.z;
-                seedPoint.first.z = headZ;
+                seedPoint.first.z = seedPoint.first.z - headZ;
 
-                std::cout << "Modifying.... " << std::endl;
+                std::cout << "Modifying.... Down" << headZ << std::endl;
                 std::cout << "Top " << seedPoint.second << ", z value: " << seedPoint.first.z << std::endl;
             }
             else if (seedPoint.second == "OPEN_SOUTH")
             {
-                headZ = seedPoint.first.z + (headZ - prevZ) / 2;
-                prevZ = seedPoint.first.z;
-                seedPoint.first.z = headZ;
-                std::cout << "Modifying.... " << std::endl;
+                seedPoint.first.z = seedPoint.first.z + headZ;
+                std::cout << "Modifying.... Down " << headZ << std::endl;
                 std::cout << "Top " << seedPoint.second << ", z value: " << seedPoint.first.z << std::endl;
             }
         }
@@ -391,20 +396,16 @@ namespace openspace::fls {
         try {
             if (seedPoint.second == "OPEN_NORTH")
             {
-                headZ = seedPoint.first.z + (prevZ - headZ) / 2;
-                prevZ = seedPoint.first.z;
-                seedPoint.first.z = headZ;
+                seedPoint.first.z = seedPoint.first.z + headZ;
 
-                std::cout << "Modifying.... " << std::endl;
+                std::cout << "Modifying.... UP " << headZ << std::endl;
                 std::cout << "Top " << seedPoint.second << ", z value: " << seedPoint.first.z << std::endl;
             }
             else if (seedPoint.second == "OPEN_SOUTH")
             {
-                headZ = seedPoint.first.z - (prevZ - headZ) / 2;
-                prevZ = seedPoint.first.z;
-                seedPoint.first.z = headZ;
+                seedPoint.first.z = seedPoint.first.z - headZ;
 
-                std::cout << "Modifying.... " << std::endl;
+                std::cout << "Modifying.... UP" << headZ << std::endl;
                 std::cout << "Top " << seedPoint.second << ", z value: " << seedPoint.first.z << std::endl;
             }
         }
@@ -475,13 +476,24 @@ namespace openspace::fls {
         size_t _nPointsOnFieldLine,
         int& amountOfPreviousFieldlines,
         float& prevZ,
-        float& headZ)
+        float& headZ,
+        bool up)
     {
         std::vector<glm::vec3> fieldlinePositions;
         // TODO: FIX: First traced fieldline is an IMF... therefor we skip it
         int counter = 1;
 
-        seedPoint = moveSeedpoint(seedPoint, prevZ, headZ);
+        if (up)
+        {
+            seedPoint = moveSeedpointHalfUp(seedPoint, prevZ, headZ);
+        }
+        else if (!up)
+        {
+            seedPoint = moveSeedpointHalfDown(seedPoint, prevZ, headZ);
+        }
+
+        //update head_z
+        headZ = headZ / 2;
 
         ccmc::Fieldline seedPointFlowline = traceAndCreateMappedPathLine(
             tracingVar,
@@ -506,7 +518,7 @@ namespace openspace::fls {
             if (!checkIfFieldlineIsOpen(fieldlinePositions, seedPoint.second))
             {
                 amountOfPreviousFieldlines = counter;
-
+                std::cout << "Bad fieldline! - Move seed point" << std::endl;
                 glm::vec3 modifiedSeedpoint = modifySeedpoint(
                     seedPoint,
                     tracingVar,
@@ -518,12 +530,31 @@ namespace openspace::fls {
                     _nPointsOnFieldLine,
                     amountOfPreviousFieldlines,
                     prevZ,
-                    headZ
+                    headZ,
+                    true
                 );
             }
             counter++;
         }
 
+        if (headZ > 0.1)
+        {
+            std::cout << "Good fieldline - Not enough accuracy - Move seed point" << std::endl;
+            glm::vec3 modifiedSeedpoint = modifySeedpoint(
+                seedPoint,
+                tracingVar,
+                tracer,
+                nPointsOnPathLine,
+                seedPointFieldlinePositions,
+                kameleon,
+                innerBoundaryLimit,
+                _nPointsOnFieldLine,
+                amountOfPreviousFieldlines,
+                prevZ,
+                headZ,
+                false
+            );
+        }
 
         seedPointFieldlinePositions = addFieldLinePositionsToVector(seedPointFieldlinePositions,
             seedPointFlowlinePositionsVec3,
