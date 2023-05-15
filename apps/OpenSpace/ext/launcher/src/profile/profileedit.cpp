@@ -98,6 +98,7 @@ namespace {
 ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName, 
                          std::string assetBasePath,
                          std::string userAssetBasePath,
+                         std::string builtInProfileBasePath,
                          std::string profileBasePath,
                          QWidget* parent)
     : QDialog(parent)
@@ -105,6 +106,7 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName,
     , _assetBasePath(std::move(assetBasePath))
     , _userAssetBasePath(std::move(userAssetBasePath))
     , _profileBasePath(std::move(profileBasePath))
+    , _builtInProfilesPath(std::move(builtInProfileBasePath))
 {
     setWindowTitle("Profile Editor");
     createWidgets(profileName);
@@ -487,7 +489,9 @@ void ProfileEdit::approved() {
         return;
     }
 
-    std::filesystem::path p = fmt::format("{}/{}.profile", _profileBasePath, profileName);
+    std::filesystem::path p = fmt::format(
+        "{}/{}.profile", _builtInProfilesPath, profileName
+    );
     if (std::filesystem::exists(p)) {
         // The filename exists in the OpenSpace-provided folder, so we don't want to allow
         // a user to overwrite it
