@@ -180,7 +180,7 @@ QWidget* CameraDialog::createNodeWidget() {
     QLabel* description = new QLabel;
     description->setWordWrap(true);
     description->setAlignment(Qt::AlignCenter);
-    description->setObjectName("description");
+    description->setObjectName("camera-description");
     description->setText(
         "Set the camera position based on a given scene graph node. \n \n "
         "Automatically computes a position that frames the object, and if possible, "
@@ -188,7 +188,6 @@ QWidget* CameraDialog::createNodeWidget() {
     );
 
     mainLayout->addWidget(description);
-    mainLayout->addSpacerItem(new QSpacerItem(0, 10));
 
     {
         QWidget* box = new QWidget;
@@ -217,14 +216,13 @@ QWidget* CameraDialog::createNavStateWidget() {
     QLabel* description = new QLabel;
     description->setWordWrap(true);
     description->setAlignment(Qt::AlignCenter);
-    description->setObjectName("camerdescription");
+    description->setObjectName("camera-description");
     description->setText(
         "Set the camera position from a navigation state. \n"
         "Allows for setting an exact view or camera position at start-up."
     );
 
     mainLayout->addWidget(description);
-    mainLayout->addSpacerItem(new QSpacerItem(0, 10));
 
     {
         QWidget* box = new QWidget;
@@ -330,13 +328,12 @@ QWidget* CameraDialog::createGeoWidget() {
     QLabel* description = new QLabel;
     description->setWordWrap(true);
     description->setAlignment(Qt::AlignCenter);
-    description->setObjectName("camerdescription");
+    description->setObjectName("camera-description");
     description->setText(
         "Sets the camera position from a geodetic position of a globe (e.g a planet/moon)."
     );
 
     mainLayout->addWidget(description);
-    mainLayout->addSpacerItem(new QSpacerItem(0, 10));
 
     {
 
