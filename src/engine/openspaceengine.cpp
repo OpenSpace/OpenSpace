@@ -44,6 +44,7 @@
 #include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/helper.h>
@@ -1751,14 +1752,17 @@ void setCameraFromProfile(const Profile& p) {
                 );
             },
             [](const Profile::CameraGoToNode& node) {
-                // @TODO set from core code directly instead
-                std::string goToScript = fmt::format(
-                    "openspace.pathnavigation.flyTo([[{}]], {})", node.anchor, 0.f
-                );
-                global::scriptEngine->queueScript(
-                    goToScript,
-                    scripting::ScriptEngine::RemoteScripting::Yes
-                );
+                using namespace interaction;
+                NodeInfo info;
+                info.identifier = node.anchor;
+                info.useTargetUpDirection = true;
+                Waypoint wp = computeWaypointFromNodeInfo(info);
+
+                // @TODO do this after one frame
+                global::navigationHandler->orbitalNavigator().setAnchorNode(node.anchor);
+                global::navigationHandler->orbitalNavigator().setAimNode("");
+                global::navigationHandler->camera()->setPose(wp.pose());
+                global::navigationHandler->resetNavigationUpdateVariables();
             }
         },
         p.camera.value()
