@@ -174,11 +174,13 @@ private:
 
     struct PendingPoseInfo {
         std::string anchor;
-        std::string aim;
         CameraPose pose;
     };
 
-    std::optional<PendingPoseInfo> _pendingPose;
+    // The camera pose for navigation states can't be immediately evaluated on startup,
+    // as the required scene graph nodes are not initialized. So, we need to handle
+    // camera poses and navigation states differently...
+    std::optional<std::variant<PendingPoseInfo, NavigationState>> _pendingPose;
 
     properties::BoolProperty _disableKeybindings;
     properties::BoolProperty _disableMouseInputs;

@@ -141,19 +141,14 @@ void NavigationHandler::setCamera(Camera* camera) {
 }
 
 void NavigationHandler::setNavigationStateNextFrame(const NavigationState& state) {
-    _pendingPose = {
-        state.anchor,
-        state.aim,
-        state.cameraPose()
-    };
+    _pendingPose = state;
 }
 
 void NavigationHandler::setCameraPoseNextFrame(CameraPose pose, std::string anchor) {
-    _pendingPose = {
+    _pendingPose = PendingPoseInfo(
         std::move(anchor),
-        "",
         std::move(pose)
-    };
+    );
 }
 
 OrbitalNavigator& NavigationHandler::orbitalNavigator() {
@@ -228,9 +223,20 @@ void NavigationHandler::updateCamera(double deltaTime) {
 
 void NavigationHandler::applyPendingPose() {
     ghoul_assert(_pendingPose.has_value(), "Pending pose must have a value");
-    _orbitalNavigator.setAnchorNode((*_pendingPose).anchor);
-    _orbitalNavigator.setAimNode((*_pendingPose).aim);
-    _camera->setPose((*_pendingPose).pose);
+
+    std::variant<PendingPoseInfo, NavigationState> pending = *_pendingPose;
+    if (std::holds_alternative<NavigationState>(pending)) {
+        NavigationState ns = std::get<NavigationState>(pending);
+        _orbitalNavigator.setAnchorNode(ns.anchor);
+        _orbitalNavigator.setAimNode(ns.aim);
+        _camera->setPose(ns.cameraPose());
+    }
+    else if (std::holds_alternative<PendingPoseInfo>(pending)) {
+        PendingPoseInfo p = std::get<PendingPoseInfo>(pending);
+        _orbitalNavigator.setAnchorNode(p.anchor);
+        _orbitalNavigator.setAimNode("");
+        _camera->setPose(p.pose);
+    }
 
     resetNavigationUpdateVariables();
     _pendingPose.reset();
