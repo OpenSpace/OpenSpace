@@ -844,7 +844,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
             codegen::lua::HasProperty,
             codegen::lua::GetProperty,
             codegen::lua::AddCustomProperty,
-            codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,
             codegen::lua::AddSceneGraphNode,
             codegen::lua::RemoveSceneGraphNode,
