@@ -93,6 +93,12 @@ namespace openspace {
         return lhs.type == rhs.type && lhs.value == rhs.value;
     }
 
+    bool operator==(const openspace::Profile::CameraGoToNode& lhs,
+        const openspace::Profile::CameraGoToNode& rhs) noexcept
+    {
+        return lhs.anchor == rhs.anchor;
+    }
+
     bool operator==(const openspace::Profile::CameraNavState& lhs,
                     const openspace::Profile::CameraNavState& rhs) noexcept
     {
