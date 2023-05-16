@@ -127,7 +127,13 @@ public:
         std::optional<double> altitude;
     };
 
-    using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
+    struct CameraGoToNode {
+        static constexpr std::string_view Type = "goToNode";
+
+        std::string anchor;
+    };
+
+    using CameraType = std::variant<CameraNavState, CameraGoToGeo, CameraGoToNode>;
 
     Profile() = default;
     explicit Profile(const std::string& content);

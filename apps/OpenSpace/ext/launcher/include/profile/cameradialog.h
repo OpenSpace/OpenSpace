@@ -54,6 +54,7 @@ private:
     void createWidgets();
     QWidget* createNavStateWidget();
     QWidget* createGeoWidget();
+    QWidget* createNodeWidget();
 
     void addErrorMsg(QString errorDescription);
     bool areRequiredFormsFilledAndValid();
@@ -80,6 +81,10 @@ private:
         QLineEdit* longitude = nullptr;
         QLineEdit* altitude = nullptr;
     } _geoState;
+
+    struct {
+        QLineEdit* anchor = nullptr;
+    } _nodeState;
 
     QLabel* _errorMsg = nullptr;
 };

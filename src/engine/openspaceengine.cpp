@@ -1055,17 +1055,17 @@ void OpenSpaceEngine::writeDocumentation() {
     nlohmann::json license = writer.generateJsonGroupedByLicense();
     nlohmann::json sceneProperties = settings.get();
     nlohmann::json sceneGraph = scene.get();
-    
+
     sceneProperties["name"] = "Settings";
     sceneGraph["name"] = "Scene";
-    
+
     // Add this here so that the generateJson function is the same as before to ensure
     // backwards compatibility
     nlohmann::json scriptingResult;
     scriptingResult["name"] = "Scripting API";
     scriptingResult["data"] = scripting;
 
-    nlohmann::json documentation = { 
+    nlohmann::json documentation = {
         sceneGraph, sceneProperties, keybindings, license, scriptingResult, factory
     };
 
@@ -1747,6 +1747,16 @@ void setCameraFromProfile(const Profile& p) {
                 geoScript += ")";
                 global::scriptEngine->queueScript(
                     geoScript,
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+            },
+            [](const Profile::CameraGoToNode& node) {
+                // @TODO set from core code directly instead
+                std::string goToScript = fmt::format(
+                    "openspace.pathnavigation.flyTo([[{}]], {})", node.anchor, 0.f
+                );
+                global::scriptEngine->queueScript(
+                    goToScript,
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
             }
