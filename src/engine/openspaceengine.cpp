@@ -1753,15 +1753,11 @@ void setCameraFromProfile(const Profile& p) {
             },
             [](const Profile::CameraGoToNode& node) {
                 using namespace interaction;
-                NodeInfo info;
-                info.identifier = node.anchor;
-                info.useTargetUpDirection = true;
-                Waypoint wp = computeWaypointFromNodeInfo(info);
+                NodeCameraStateSpec spec;
+                spec.identifier = node.anchor;
+                spec.useTargetUpDirection = true;
 
-                global::navigationHandler->setCameraPoseNextFrame(
-                    wp.pose(),
-                    node.anchor
-                );
+                global::navigationHandler->setCameraFromNodeSpecNextFrame(spec);
             }
         },
         p.camera.value()

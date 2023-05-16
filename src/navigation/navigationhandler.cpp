@@ -33,6 +33,7 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/scriptcamerastates.h>
 #include <openspace/navigation/navigationstate.h>
+#include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
@@ -141,14 +142,11 @@ void NavigationHandler::setCamera(Camera* camera) {
 }
 
 void NavigationHandler::setNavigationStateNextFrame(const NavigationState& state) {
-    _pendingPose = state;
+    _pendingState = state;
 }
 
-void NavigationHandler::setCameraPoseNextFrame(CameraPose pose, std::string anchor) {
-    _pendingPose = PendingPoseInfo(
-        std::move(anchor),
-        std::move(pose)
-    );
+void NavigationHandler::setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec) {
+    _pendingState = std::move(spec);
 }
 
 OrbitalNavigator& NavigationHandler::orbitalNavigator() {
@@ -182,8 +180,8 @@ void NavigationHandler::setInterpolationTime(float durationInSeconds) {
 void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 
-    // If there is a pose to set, do so immediately and then return
-    if (_pendingPose.has_value()) {
+    // If there is a state to set, do so immediately and then return
+    if (_pendingState.has_value()) {
         applyPendingPose();
         return;
     }
@@ -224,22 +222,24 @@ void NavigationHandler::updateCamera(double deltaTime) {
 void NavigationHandler::applyPendingPose() {
     ghoul_assert(_pendingPose.has_value(), "Pending pose must have a value");
 
-    std::variant<PendingPoseInfo, NavigationState> pending = *_pendingPose;
+    std::variant<NodeCameraStateSpec, NavigationState> pending = *_pendingState;
     if (std::holds_alternative<NavigationState>(pending)) {
         NavigationState ns = std::get<NavigationState>(pending);
         _orbitalNavigator.setAnchorNode(ns.anchor);
         _orbitalNavigator.setAimNode(ns.aim);
         _camera->setPose(ns.cameraPose());
     }
-    else if (std::holds_alternative<PendingPoseInfo>(pending)) {
-        PendingPoseInfo p = std::get<PendingPoseInfo>(pending);
-        _orbitalNavigator.setAnchorNode(p.anchor);
+    else if (std::holds_alternative<NodeCameraStateSpec>(pending)) {
+        NodeCameraStateSpec spec = std::get<NodeCameraStateSpec>(pending);
+        Waypoint wp = computeWaypointFromNodeInfo(spec);
+
+        _orbitalNavigator.setAnchorNode(wp.nodeIdentifier());
         _orbitalNavigator.setAimNode("");
-        _camera->setPose(p.pose);
+        _camera->setPose(wp.pose());
     }
 
     resetNavigationUpdateVariables();
-    _pendingPose.reset();
+    _pendingState.reset();
 }
 
 void NavigationHandler::updateCameraTransitions() {

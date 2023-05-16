@@ -534,7 +534,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
                 ));
             }
 
-            interaction::NodeInfo info {
+            interaction::NodeCameraStateSpec info {
                 nodeIdentifier,
                 p.position,
                 p.height,

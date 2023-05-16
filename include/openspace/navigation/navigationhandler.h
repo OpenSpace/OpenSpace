@@ -53,6 +53,7 @@ namespace openspace::interaction {
 
 struct JoystickInputStates;
 struct NavigationState;
+struct NodeCameraStateSpec;
 struct WebsocketInputStates;
 class KeyframeNavigator;
 class OrbitalNavigator;
@@ -145,8 +146,23 @@ public:
 
     void loadNavigationState(const std::string& filepath);
 
+    /**
+     * Set camera state from a provided navigation state next frame. The actual position
+     * will computed from the scene in the same frame as it is set.
+     *
+     * \param state the navigation state to compute a camera positon from
+     */
     void setNavigationStateNextFrame(const NavigationState& state);
-    void setCameraPoseNextFrame(CameraPose pose, std::string anchor);
+
+    /**
+     * Set camera state from a provided node based camera specification structure, next
+     * frame. The camera position will be computed to look at the node provided in the
+     * node info. The actual position will computed from the scene in the same frame as
+     * it is set.
+     *
+     * \param spec the node specification from which to compute the resulting camera pose
+     */
+    void setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec);
 
     /**
     * \return The Lua library that contains all Lua functions available to affect the
@@ -172,15 +188,7 @@ private:
     KeyframeNavigator _keyframeNavigator;
     PathNavigator _pathNavigator;
 
-    struct PendingPoseInfo {
-        std::string anchor;
-        CameraPose pose;
-    };
-
-    // The camera pose for navigation states can't be immediately evaluated on startup,
-    // as the required scene graph nodes are not initialized. So, we need to handle
-    // camera poses and navigation states differently...
-    std::optional<std::variant<PendingPoseInfo, NavigationState>> _pendingPose;
+    std::optional<std::variant<NodeCameraStateSpec, NavigationState>> _pendingState;
 
     properties::BoolProperty _disableKeybindings;
     properties::BoolProperty _disableMouseInputs;

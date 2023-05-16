@@ -157,13 +157,13 @@ glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
     }
 }
 
-Waypoint computeWaypointFromNodeInfo(const NodeInfo& info,
+Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
                                      std::optional<const Waypoint> startPoint,
                                      bool useLinear)
 {
-    const SceneGraphNode* targetNode = sceneGraphNode(info.identifier);
+    const SceneGraphNode* targetNode = sceneGraphNode(spec.identifier);
     if (!targetNode) {
-        LERROR(fmt::format("Could not find target node '{}'", info.identifier));
+        LERROR(fmt::format("Could not find target node '{}'", spec.identifier));
         return Waypoint();
     }
 
@@ -172,11 +172,11 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info,
 
     glm::dvec3 stepDir;
     glm::dvec3 targetPos;
-    if (info.position.has_value()) {
+    if (spec.position.has_value()) {
         // The position in instruction is given in the targetNode's local coordinates.
         // Convert to world coordinates
         targetPos = glm::dvec3(
-            targetNode->modelTransform() * glm::dvec4(*info.position, 1.0)
+            targetNode->modelTransform() * glm::dvec4(*spec.position, 1.0)
         );
     }
     else {
@@ -184,7 +184,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info,
 
         const double radius = navigator.findValidBoundingSphere(targetNode);
         const double defaultHeight = radius * navigator.arrivalDistanceFactor();
-        const double height = info.height.value_or(defaultHeight);
+        const double height = spec.height.value_or(defaultHeight);
         const double distanceFromNodeCenter = radius + height;
 
         if (useLinear) {
@@ -200,7 +200,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info,
     }
 
     glm::dvec3 up = global::navigationHandler->camera()->lookUpVectorWorldSpace();
-    if (info.useTargetUpDirection) {
+    if (spec.useTargetUpDirection) {
         // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth,
         // which is where it matters the most. A better solution would be to make each
         // sgn aware of its own 'up' and query
@@ -222,7 +222,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info,
 
     const glm::dquat targetRot = ghoul::lookAtQuaternion(targetPos, lookAtPos, up);
 
-    return Waypoint(targetPos, targetRot, info.identifier);
+    return Waypoint(targetPos, targetRot, spec.identifier);
 }
 
 } // namespace openspace::interaction
