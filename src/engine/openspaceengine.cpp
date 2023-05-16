@@ -1758,11 +1758,10 @@ void setCameraFromProfile(const Profile& p) {
                 info.useTargetUpDirection = true;
                 Waypoint wp = computeWaypointFromNodeInfo(info);
 
-                // @TODO do this after one frame
-                global::navigationHandler->orbitalNavigator().setAnchorNode(node.anchor);
-                global::navigationHandler->orbitalNavigator().setAimNode("");
-                global::navigationHandler->camera()->setPose(wp.pose());
-                global::navigationHandler->resetNavigationUpdateVariables();
+                global::navigationHandler->setCameraPoseNextFrame(
+                    wp.pose(),
+                    node.anchor
+                );
             }
         },
         p.camera.value()

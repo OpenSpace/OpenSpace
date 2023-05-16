@@ -140,8 +140,20 @@ void NavigationHandler::setCamera(Camera* camera) {
     _orbitalNavigator.setCamera(camera);
 }
 
-void NavigationHandler::setNavigationStateNextFrame(NavigationState state) {
-    _pendingNavigationState = std::move(state);
+void NavigationHandler::setNavigationStateNextFrame(const NavigationState& state) {
+    _pendingPose = {
+        state.anchor,
+        state.aim,
+        state.cameraPose()
+    };
+}
+
+void NavigationHandler::setCameraPoseNextFrame(CameraPose pose, std::string anchor) {
+    _pendingPose = {
+        std::move(anchor),
+        "",
+        std::move(pose)
+    };
 }
 
 OrbitalNavigator& NavigationHandler::orbitalNavigator() {
@@ -175,9 +187,9 @@ void NavigationHandler::setInterpolationTime(float durationInSeconds) {
 void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 
-    // If there is a navigation state to set, do so immediately and then return
-    if (_pendingNavigationState.has_value()) {
-        applyNavigationState(*_pendingNavigationState);
+    // If there is a pose to set, do so immediately and then return
+    if (_pendingPose.has_value()) {
+        applyPendingPose();
         return;
     }
 
@@ -214,13 +226,14 @@ void NavigationHandler::updateCamera(double deltaTime) {
     _orbitalNavigator.updateCameraScalingFromAnchor(deltaTime);
 }
 
-void NavigationHandler::applyNavigationState(const NavigationState& ns) {
-    _orbitalNavigator.setAnchorNode(ns.anchor);
-    _orbitalNavigator.setAimNode(ns.aim);
-    _camera->setPose(ns.cameraPose());
+void NavigationHandler::applyPendingPose() {
+    ghoul_assert(_pendingPose.has_value(), "Pending pose must have a value");
+    _orbitalNavigator.setAnchorNode((*_pendingPose).anchor);
+    _orbitalNavigator.setAimNode((*_pendingPose).aim);
+    _camera->setPose((*_pendingPose).pose);
 
     resetNavigationUpdateVariables();
-    _pendingNavigationState.reset();
+    _pendingPose.reset();
 }
 
 void NavigationHandler::updateCameraTransitions() {

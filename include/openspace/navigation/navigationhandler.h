@@ -145,7 +145,8 @@ public:
 
     void loadNavigationState(const std::string& filepath);
 
-    void setNavigationStateNextFrame(NavigationState state);
+    void setNavigationStateNextFrame(const NavigationState& state);
+    void setCameraPoseNextFrame(CameraPose pose, std::string anchor);
 
     /**
     * \return The Lua library that contains all Lua functions available to affect the
@@ -154,7 +155,7 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    void applyNavigationState(const NavigationState& ns);
+    void applyPendingPose();
     void updateCameraTransitions();
     void clearGlobalJoystickStates();
 
@@ -171,7 +172,13 @@ private:
     KeyframeNavigator _keyframeNavigator;
     PathNavigator _pathNavigator;
 
-    std::optional<NavigationState> _pendingNavigationState;
+    struct PendingPoseInfo {
+        std::string anchor;
+        std::string aim;
+        CameraPose pose;
+    };
+
+    std::optional<PendingPoseInfo> _pendingPose;
 
     properties::BoolProperty _disableKeybindings;
     properties::BoolProperty _disableMouseInputs;
