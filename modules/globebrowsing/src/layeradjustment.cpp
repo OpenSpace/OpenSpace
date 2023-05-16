@@ -87,7 +87,7 @@ LayerAdjustment::LayerAdjustment()
         _typeOption.addOption(static_cast<int>(ai.id), std::string(ai.identifier));
     }
     _typeOption.setValue(static_cast<int>(layers::Adjustment::ID::None));
-    _type = static_cast<layers::Adjustment::ID>(_typeOption.value());
+    _typeId = static_cast<layers::Adjustment::ID>(_typeOption.value());
 
     _typeOption.onChange([this]() {
         switch (type()) {
@@ -100,7 +100,7 @@ LayerAdjustment::LayerAdjustment()
             case layers::Adjustment::ID::TransferFunction:
                 break;
         }
-        _type = static_cast<layers::Adjustment::ID>(_typeOption.value());
+        _typeId = static_cast<layers::Adjustment::ID>(_typeOption.value());
         addVisibleProperties();
         if (_onChangeCallback) {
             _onChangeCallback();
@@ -136,7 +136,7 @@ void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmen
 }
 
 layers::Adjustment::ID LayerAdjustment::type() const {
-    return _type;
+    return _typeId;
 }
 
 void LayerAdjustment::addVisibleProperties() {

@@ -105,7 +105,7 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
     // Extrude polygon
     for (size_t nBound = 0; nBound < edgeVertices.size(); ++nBound) {
         const std::vector<glm::vec3>& boundary = edgeVertices[nBound];
-        for (int i = 1; i < boundary.size(); ++i) {
+        for (size_t i = 1; i < boundary.size(); ++i) {
             glm::vec3 v0 = boundary[i - 1];
             glm::vec3 v1 = boundary[i ];
 
@@ -115,7 +115,9 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
 
             // Outer boundary is the first one
             if (nBound == 0) {
-                glm::vec3 n = glm::vec3(glm::normalize(glm::cross(v1 - vOrigin, v0 - vOrigin)));
+                glm::vec3 n = glm::vec3(
+                    glm::normalize(glm::cross(v1 - vOrigin, v0 - vOrigin))
+                );
                 vertices.push_back({ vOrigin.x, vOrigin.y, vOrigin.z, n.x, n.y, n.z });
                 vertices.push_back({ v1.x, v1.y, v1.z, n.x, n.y, n.z });
                 vertices.push_back({ v0.x, v0.y, v0.z, n.x, n.y, n.z });
@@ -129,8 +131,8 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
                 vertices.push_back({ v1.x, v1.y, v1.z, n.x, n.y, n.z });
             }
 
-            // TODO: Fix faulty triangle directions and draw triangles with correct shading on
-            // both sides of the mesh
+            // TODO: Fix faulty triangle directions and draw triangles with correct
+            // shading on both sides of the mesh
         }
     }
 
@@ -298,13 +300,16 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     // @TODO (emmbr, 2023-04-18): This is a bit of a temporary workaround to make the
     // createMultiPoint call compile on Mac. It should work with just passing in the
     // pointCoords variable directly, but for some reason it didn't. We should come up
-    // with a solution that does not iterate over the (quite big) std::vector an extra time
+    // with a solution that does not iterate over the (quite big) std::vector an extra
+    // time
     std::vector<std::unique_ptr<Point>> geosPoints;
     geosPoints.reserve(pointCoords.size());
     for (const Coordinate& c : pointCoords) {
         geosPoints.emplace_back(geometryFactory->createPoint(c));
     }
-    std::unique_ptr<MultiPoint> points = geometryFactory->createMultiPoint(std::move(geosPoints));
+    std::unique_ptr<MultiPoint> points = geometryFactory->createMultiPoint(
+        std::move(geosPoints)
+    );
     // Create triangulation of points
     geos::triangulate::DelaunayTriangulationBuilder builder;
     builder.setSites(*points->getCoordinates());

@@ -33,7 +33,7 @@ namespace openspace {
 class CameraTopic : public Topic {
 public:
     CameraTopic();
-    virtual ~CameraTopic();
+    ~CameraTopic() override;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;

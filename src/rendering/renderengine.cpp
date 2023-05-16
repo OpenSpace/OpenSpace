@@ -1269,7 +1269,7 @@ void RenderEngine::renderVersionInformation() {
         );
     }
 
-    float debugOffset = 0.f;
+    [[maybe_unused]] float debugOffset = 0.f;
 #ifdef _DEBUG
     {
         const glm::vec2 debugBox = _fontVersionInfo->boundingBox("Debug build");

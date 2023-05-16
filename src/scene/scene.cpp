@@ -803,7 +803,8 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "The URI is interpreted using a wildcard in which '*' is expanded to "
                 "'(.*)' and bracketed components '{ }' are interpreted as group tag "
                 "names. Then, the passed value will be set on all properties that fit "
-                "the regex + group name combination."
+                "the regex + group name combination.",
+                {}
             },
             {
                 "setPropertyValueSingle",
@@ -817,29 +818,32 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the value is interpolated at each step in between. The fourth "
                 "parameter is an optional easing function if a 'duration' has been "
                 "specified. If 'duration' is 0, this parameter value is ignored. "
-                "Otherwise, it has to be one of the easing functions defined in the list below. "
-                "This is the same as calling the setValue method and passing 'single' as "
-                "the fourth argument to setPropertyValue. The fifth argument is another "
-                "Lua script that will be executed when the interpolation provided in "
-                "parameter 3 finishes. "
-                "\n Avaiable easing functions: "
+                "Otherwise, it has to be one of the easing functions defined in the list "
+                "below. This is the same as calling the setValue method and passing "
+                "'single' as the fourth argument to setPropertyValue. The fifth argument "
+                "is another Lua script that will be executed when the interpolation "
+                "provided in parameter 3 finishes.\n Avaiable easing functions: "
                 "Linear, QuadraticEaseIn, QuadraticEaseOut, QuadraticEaseInOut, "
                 "CubicEaseIn, CubicEaseOut, CubicEaseInOut, QuarticEaseIn, "
                 "QuarticEaseOut, QuarticEaseInOut, QuinticEaseIn, QuinticEaseOut, "
-                "QuinticEaseInOut, SineEaseIn, SineEaseOut, SineEaseInOut, CircularEaseIn, "
-                "CircularEaseOut, CircularEaseInOut, ExponentialEaseIn, ExponentialEaseOut, "
-                "ExponentialEaseInOut, ElasticEaseIn, ElasticEaseOut, ElasticEaseInOut, "
-                "BounceEaseIn, BounceEaseOut, BounceEaseInOut"
+                "QuinticEaseInOut, SineEaseIn, SineEaseOut, SineEaseInOut, "
+                "CircularEaseIn, CircularEaseOut, CircularEaseInOut, ExponentialEaseIn, "
+                "ExponentialEaseOut, ExponentialEaseInOut, ElasticEaseIn, "
+                "ElasticEaseOut, ElasticEaseInOut, BounceEaseIn, BounceEaseOut, "
+                "BounceEaseInOut",
+                {}
             },
             {
                 "getPropertyValue",
                 &luascriptfunctions::propertyGetValue,
                 {},
                 "",
-                "Returns the value the property, identified by the provided URI"
+                "Returns the value the property, identified by the provided URI",
+                {}
             },
             codegen::lua::HasProperty,
             codegen::lua::GetProperty,
+            codegen::lua::AddCustomProperty,
             codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,
             codegen::lua::AddSceneGraphNode,

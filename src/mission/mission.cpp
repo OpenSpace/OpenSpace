@@ -43,7 +43,8 @@ namespace {
         std::optional<std::string> description;
 
         struct TimeRange {
-            std::string start [[codegen::annotation("A string representing a valid date")]];
+            std::string start
+                [[codegen::annotation("A string representing a valid date")]];
             std::optional<std::string> end
                 [[codegen::annotation("A string representing a valid date")]];
         };
@@ -163,7 +164,10 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         for (const Parameters::Milestone& milestone : *p.milestones) {
             std::string name = milestone.name;
             Time newTime = Time(milestone.date);
-            Milestone newDate = { name, newTime };
+            Milestone newDate = {
+                .name = name,
+                .date = newTime
+            };
             if (milestone.description.has_value()) {
                 newDate.description = milestone.description.value();
             }
@@ -172,7 +176,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
             }
             if (milestone.link.has_value()) {
                 newDate.link = milestone.link.value();
-            } 
+            }
             if (milestone.actions.has_value()) {
                 newDate.actions = milestone.actions.value();
             }

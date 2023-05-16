@@ -52,7 +52,7 @@ BooleanType(PauseAfterSeek);
 
 public:
     VideoPlayer(const ghoul::Dictionary& dictionary);
-    ~VideoPlayer();
+    ~VideoPlayer() override;
 
     void initialize();
 
@@ -141,12 +141,10 @@ private:
 
     // Syncing with multiple nodes
     double _correctPlaybackTime = 0.0;
-    double _deltaTime = 0.0;
 
     // Video stretching: map to simulation time animation mode
     double _startJ200Time = 0.0;
     double _endJ200Time = 0.0;
-    double _timeAtLastRender = 0.0;
     double _frameDuration = 0.0;
 
     // Libmpv

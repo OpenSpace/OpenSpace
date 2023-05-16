@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOPLANE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOPLANE___H__
+#ifndef __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOPLANE___H__
+#define __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOPLANE___H__
 
 #include <modules/base/rendering/renderableplane.h>
 
@@ -55,4 +55,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOPLANE___H__
+#endif // __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOPLANE___H__

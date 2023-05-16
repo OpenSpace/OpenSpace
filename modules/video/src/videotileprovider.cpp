@@ -39,14 +39,7 @@ namespace {
     constexpr std::string_view _loggerCat = "VideoTileProvider";
 } // namespace
 
-namespace openspace {
-
-namespace {
-
-bool isDifferent(double first, double second) {
-    return abs(first - second) > glm::epsilon<double>();
-}
-}
+namespace openspace::globebrowsing {
 
 VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     : _videoPlayer(dictionary)
@@ -61,7 +54,7 @@ globebrowsing::Tile VideoTileProvider::tile(const globebrowsing::TileIndex& tile
     ZoneScoped;
 
     if (!_videoPlayer.isInitialized()) {
-        return globebrowsing::Tile();
+        return Tile();
     }
 
     // Always check that our framebuffer is ok
@@ -76,28 +69,28 @@ globebrowsing::Tile VideoTileProvider::tile(const globebrowsing::TileIndex& tile
         foundTile->second.texture != _videoPlayer.frameTexture().get();
 
     if (foundTile == _tileCache.end() || textureChanged) {
-        _tileCache[hash] = globebrowsing::Tile{
+        _tileCache[hash] = Tile {
             _videoPlayer.frameTexture().get(),
             std::nullopt,
-            globebrowsing::Tile::Status::OK
+            Tile::Status::OK
         };
     }
     return _tileCache[hash];
 }
 
-globebrowsing::Tile::Status VideoTileProvider::tileStatus(const globebrowsing::TileIndex& tileIndex) {
+Tile::Status VideoTileProvider::tileStatus(const TileIndex& tileIndex) {
     if (tileIndex.level > maxLevel()) {
-        return globebrowsing::Tile::Status::OutOfRange;
+        return Tile::Status::OutOfRange;
     }
     else if (_tileIsReady) {
-        return globebrowsing::Tile::Status::OK;
+        return Tile::Status::OK;
     }
     else {
-        return globebrowsing::Tile::Status::Unavailable;
+        return Tile::Status::Unavailable;
     }
 }
 
-globebrowsing::TileDepthTransform VideoTileProvider::depthTransform() {
+TileDepthTransform VideoTileProvider::depthTransform() {
     return { 0.f, 1.f };
 }
 
@@ -109,17 +102,15 @@ void VideoTileProvider::reset() {
     _videoPlayer.reset();
 }
 
-globebrowsing::ChunkTile VideoTileProvider::chunkTile(globebrowsing::TileIndex tileIndex, 
-                                                            int parents, int maxParents) {
-    using namespace globebrowsing;
+ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
     std::function<void(TileIndex&, TileUvTransform&)> ascendToParent =
         [](TileIndex& ti, TileUvTransform&) {
             ti.level--;
         };
 
-    glm::vec2 noOfTiles = { 
-        std::pow(2, tileIndex.level), 
-        std::pow(2, tileIndex.level - 1) 
+    glm::vec2 noOfTiles = {
+        std::pow(2, tileIndex.level),
+        std::pow(2, tileIndex.level - 1)
     };
     glm::vec2 ratios = { 1.f / noOfTiles.x, 1.f / noOfTiles.y };
     float offsetX = ratios.x * static_cast<float>(tileIndex.x);
@@ -153,4 +144,4 @@ void VideoTileProvider::internalDeinitialize() {
     _videoPlayer.destroy();
 }
 
-} // namespace openspace
+} // namespace openspace::globebrowsing

@@ -562,7 +562,11 @@ void RenderableModel::initializeGL() {
             std::filesystem::path fs =
                 absPath("${MODULE_BASE}/shaders/modelOpacity_fs.glsl");
 
-            return global::renderEngine->buildRenderProgram("ModelOpacityProgram", vs, fs);
+            return global::renderEngine->buildRenderProgram(
+                "ModelOpacityProgram",
+                vs,
+                fs
+            );
         }
     );
     ghoul::opengl::updateUniformLocations(
