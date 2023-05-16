@@ -182,7 +182,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
 
     // If there is a state to set, do so immediately and then return
     if (_pendingState.has_value()) {
-        applyPendingPose();
+        applyPendingState();
         return;
     }
 
@@ -219,8 +219,8 @@ void NavigationHandler::updateCamera(double deltaTime) {
     _orbitalNavigator.updateCameraScalingFromAnchor(deltaTime);
 }
 
-void NavigationHandler::applyPendingPose() {
-    ghoul_assert(_pendingPose.has_value(), "Pending pose must have a value");
+void NavigationHandler::applyPendingState() {
+    ghoul_assert(_pendingState.has_value(), "Pending pose must have a value");
 
     std::variant<NodeCameraStateSpec, NavigationState> pending = *_pendingState;
     if (std::holds_alternative<NavigationState>(pending)) {

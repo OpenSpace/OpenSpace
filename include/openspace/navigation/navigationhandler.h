@@ -171,7 +171,7 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    void applyPendingPose();
+    void applyPendingState();
     void updateCameraTransitions();
     void clearGlobalJoystickStates();
 
