@@ -153,6 +153,7 @@ CameraDialog  QLabel#camera-description {
   color:rgb(96, 96, 96);
   margin: 1em;
   margin-top: 0.2em;
+  margin-bottom: 0.4em;
 }
 
 /*
