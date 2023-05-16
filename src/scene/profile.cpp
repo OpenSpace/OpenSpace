@@ -346,6 +346,27 @@ void from_json(const nlohmann::json& j, Profile::Time& v) {
     j["is_paused"].get_to(v.startPaused);
 }
 
+void to_json(nlohmann::json& j, const Profile::CameraGoToNode& v) {
+    j["type"] = Profile::CameraGoToNode::Type;
+    j["anchor"] = v.anchor;
+}
+
+void from_json(const nlohmann::json& j, Profile::CameraGoToNode& v) {
+    ghoul_assert(
+        j.at("type").get<std::string>() == Profile::CameraGoToNode::Type,
+        "Wrong type for Camera"
+    );
+
+    checkValue(j, "anchor", &nlohmann::json::is_string, "camera", false);
+    checkExtraKeys(
+        j,
+        "camera",
+        { "type", "anchor" }
+    );
+
+    j["anchor"].get_to(v.anchor);
+}
+
 void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
     j["type"] = Profile::CameraNavState::Type;
     j["anchor"] = v.anchor;
@@ -465,27 +486,6 @@ void from_json(const nlohmann::json& j, Profile::CameraGoToGeo& v) {
     if (j.find("altitude") != j.end()) {
         v.altitude = j["altitude"].get<double>();
     }
-}
-
-void to_json(nlohmann::json& j, const Profile::CameraGoToNode& v) {
-    j["type"] = Profile::CameraGoToNode::Type;
-    j["anchor"] = v.anchor;
-}
-
-void from_json(const nlohmann::json& j, Profile::CameraGoToNode& v) {
-    ghoul_assert(
-        j.at("type").get<std::string>() == Profile::CameraGoToNode::Type,
-        "Wrong type for Camera"
-    );
-
-    checkValue(j, "anchor", &nlohmann::json::is_string, "camera", false);
-    checkExtraKeys(
-        j,
-        "camera",
-        { "type", "anchor" }
-    );
-
-    j["anchor"].get_to(v.anchor);
 }
 
 // In these namespaces we defined the structs as they used to be defined in the older
@@ -708,9 +708,9 @@ std::string Profile::serialize() const {
     if (camera.has_value()) {
         r["camera"] = std::visit(
             overloaded {
+                [](const CameraGoToNode& c) { return nlohmann::json(c); },
                 [](const CameraNavState& c) { return nlohmann::json(c); },
-                [](const Profile::CameraGoToGeo& c) { return nlohmann::json(c); },
-                [](const Profile::CameraGoToNode& c) { return nlohmann::json(c); }
+                [](const CameraGoToGeo& c) { return nlohmann::json(c); }
             },
             *camera
         );
@@ -771,14 +771,14 @@ Profile::Profile(const std::string& content) {
         }
         if (profile.find("camera") != profile.end()) {
             nlohmann::json c = profile.at("camera");
-            if (c["type"].get<std::string>() == CameraNavState::Type) {
+            if (c["type"].get<std::string>() == CameraGoToNode::Type) {
+                camera = c.get<CameraGoToNode>();
+            }
+            else if (c["type"].get<std::string>() == CameraNavState::Type) {
                 camera = c.get<CameraNavState>();
             }
             else if (c["type"].get<std::string>() == CameraGoToGeo::Type) {
                 camera = c.get<CameraGoToGeo>();
-            }
-            else if (c["type"].get<std::string>() == CameraGoToNode::Type) {
-                camera = c.get<CameraGoToNode>();
             }
             else {
                 throw ParsingError(ParsingError::Severity::Error, "Unknown camera type");

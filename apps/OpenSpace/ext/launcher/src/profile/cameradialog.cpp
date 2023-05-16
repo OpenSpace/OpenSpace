@@ -35,9 +35,9 @@
 #include <QTabWidget>
 
 namespace {
-    constexpr int CameraTypeNav = 0;
-    constexpr int CameraTypeGeo = 1;
-    constexpr int CameraTypeNode = 2;
+    constexpr int CameraTypeNode = 0;
+    constexpr int CameraTypeNav = 1;
+    constexpr int CameraTypeGeo = 2;
 
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
@@ -67,6 +67,11 @@ CameraDialog::CameraDialog(QWidget* parent,
     if (_camera->has_value()) {
         const openspace::Profile::CameraType& type = **_camera;
         std::visit(overloaded {
+            [this](const openspace::Profile::CameraGoToNode& node) {
+                _tabWidget->setCurrentIndex(CameraTypeNode);
+                _nodeState.anchor->setText(QString::fromStdString(node.anchor));
+                tabSelect(CameraTypeNode);
+            },
             [this](const openspace::Profile::CameraNavState& nav) {
                 _tabWidget->setCurrentIndex(CameraTypeNav);
                 _navState.anchor->setText(QString::fromStdString(nav.anchor));
@@ -111,16 +116,14 @@ CameraDialog::CameraDialog(QWidget* parent,
                     _geoState.altitude->clear();
                 }
                 tabSelect(CameraTypeGeo);
-            },
-            [this](const openspace::Profile::CameraGoToNode& node) {
-                _tabWidget->setCurrentIndex(CameraTypeNode);
-                _nodeState.anchor->setText(QString::fromStdString(node.anchor));
-                tabSelect(CameraTypeNode);
             }
         }, type);
     }
     else {
-        _tabWidget->setCurrentIndex(CameraTypeNav);
+        _tabWidget->setCurrentIndex(CameraTypeNode);
+
+        _nodeState.anchor->clear();
+
         _navState.anchor->clear();
         _navState.aim->clear();
         _navState.refFrame->clear();
@@ -137,8 +140,6 @@ CameraDialog::CameraDialog(QWidget* parent,
         _geoState.latitude->clear();
         _geoState.longitude->clear();
         _geoState.altitude->clear();
-
-        _nodeState.anchor->clear();
     }
 }
 
@@ -146,9 +147,9 @@ void CameraDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     _tabWidget = new QTabWidget;
     connect(_tabWidget, &QTabWidget::tabBarClicked, this, &CameraDialog::tabSelect);
+    _tabWidget->addTab(createNodeWidget(), "Scene Graph Node");
     _tabWidget->addTab(createNavStateWidget(), "Navigation State");
     _tabWidget->addTab(createGeoWidget(), "Geo State");
-    _tabWidget->addTab(createNodeWidget(), "Scene Graph Node");
     layout->addWidget(_tabWidget);
 
     layout->addWidget(new Line);
@@ -169,6 +170,18 @@ void CameraDialog::createWidgets() {
 
         layout->addLayout(footerLayout);
     }
+}
+
+QWidget* CameraDialog::createNodeWidget() {
+    QWidget* box = new QWidget;
+    QGridLayout* layout = new QGridLayout(box);
+
+    layout->addWidget(new QLabel("Anchor Node:"), 0, 0);
+    _nodeState.anchor = new QLineEdit;
+    _nodeState.anchor->setToolTip("Anchor camera to this scene graph node");
+    layout->addWidget(_nodeState.anchor, 0, 1);
+
+    return box;
 }
 
 QWidget* CameraDialog::createNavStateWidget() {
@@ -296,21 +309,16 @@ QWidget* CameraDialog::createGeoWidget() {
     return box;
 }
 
-QWidget* CameraDialog::createNodeWidget() {
-    QWidget* box = new QWidget;
-    QGridLayout* layout = new QGridLayout(box);
-
-    layout->addWidget(new QLabel("Anchor:"), 0, 0);
-    _nodeState.anchor = new QLineEdit;
-    _nodeState.anchor->setToolTip("Anchor camera to this scene graph node");
-    layout->addWidget(_nodeState.anchor, 0, 1);
-
-    return box;
-}
-
 bool CameraDialog::areRequiredFormsFilledAndValid() {
     bool allFormsOk = true;
     _errorMsg->clear();
+
+    if (_tabWidget->currentIndex() == CameraTypeNode) {
+        if (_nodeState.anchor->text().isEmpty()) {
+            allFormsOk = false;
+            addErrorMsg("Anchor is empty");
+        }
+    }
 
     if (_tabWidget->currentIndex() == CameraTypeNav) {
         if (_navState.anchor->text().isEmpty()) {
@@ -377,13 +385,6 @@ bool CameraDialog::areRequiredFormsFilledAndValid() {
         }
     }
 
-    if (_tabWidget->currentIndex() == CameraTypeNode) {
-        if (_nodeState.anchor->text().isEmpty()) {
-            allFormsOk = false;
-            addErrorMsg("Anchor is empty");
-        }
-    }
-
     return allFormsOk;
 }
 
@@ -401,7 +402,12 @@ void CameraDialog::approved() {
         return;
     }
 
-    if (_tabWidget->currentIndex() == CameraTypeNav) {
+    if (_tabWidget->currentIndex() == CameraTypeNode) {
+        openspace::Profile::CameraGoToNode node;
+        node.anchor = _nodeState.anchor->text().toStdString();
+        *_camera = std::move(node);
+    }
+    else if (_tabWidget->currentIndex() == CameraTypeNav) {
         openspace::Profile::CameraNavState nav;
         nav.anchor = _navState.anchor->text().toStdString();
         nav.aim = _navState.aim->text().toStdString();
@@ -447,11 +453,6 @@ void CameraDialog::approved() {
         }
         *_camera = std::move(geo);
     }
-    else if (_tabWidget->currentIndex() == CameraTypeNode) {
-        openspace::Profile::CameraGoToNode node;
-        node.anchor = _nodeState.anchor->text().toStdString();
-        *_camera = std::move(node);
-    }
 
     accept();
 }
@@ -459,14 +460,14 @@ void CameraDialog::approved() {
 void CameraDialog::tabSelect(int tabIndex) {
     _errorMsg->clear();
 
-    if (tabIndex == CameraTypeNav) {
+    if (tabIndex == CameraTypeNode) {
+        _nodeState.anchor->setFocus(Qt::OtherFocusReason);
+    }
+    else if (tabIndex == CameraTypeNav) {
         _navState.anchor->setFocus(Qt::OtherFocusReason);
     }
     else if (tabIndex == CameraTypeGeo) {
         _geoState.anchor->setFocus(Qt::OtherFocusReason);
-    }
-    else if (tabIndex == CameraTypeNode) {
-        _nodeState.anchor->setFocus(Qt::OtherFocusReason);
     }
     else {
         throw std::logic_error("Unknown tab index");

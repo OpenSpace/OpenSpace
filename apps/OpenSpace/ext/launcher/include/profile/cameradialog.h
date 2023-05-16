@@ -52,15 +52,20 @@ private slots:
 
 private:
     void createWidgets();
+    QWidget* createNodeWidget();
     QWidget* createNavStateWidget();
     QWidget* createGeoWidget();
-    QWidget* createNodeWidget();
 
     void addErrorMsg(QString errorDescription);
     bool areRequiredFormsFilledAndValid();
 
     std::optional<openspace::Profile::CameraType>* _camera = nullptr;
     QTabWidget* _tabWidget = nullptr;
+
+    struct {
+        QLineEdit* anchor = nullptr;
+    } _nodeState;
+
     struct {
         QLineEdit* anchor = nullptr;
         QLineEdit* aim = nullptr;
@@ -81,10 +86,6 @@ private:
         QLineEdit* longitude = nullptr;
         QLineEdit* altitude = nullptr;
     } _geoState;
-
-    struct {
-        QLineEdit* anchor = nullptr;
-    } _nodeState;
 
     QLabel* _errorMsg = nullptr;
 };

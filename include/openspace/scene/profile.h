@@ -106,6 +106,12 @@ public:
         bool startPaused = false;
     };
 
+    struct CameraGoToNode {
+        static constexpr std::string_view Type = "goToNode";
+
+        std::string anchor;
+    };
+
     struct CameraNavState {
         static constexpr std::string_view Type = "setNavigationState";
 
@@ -127,13 +133,7 @@ public:
         std::optional<double> altitude;
     };
 
-    struct CameraGoToNode {
-        static constexpr std::string_view Type = "goToNode";
-
-        std::string anchor;
-    };
-
-    using CameraType = std::variant<CameraNavState, CameraGoToGeo, CameraGoToNode>;
+    using CameraType = std::variant<CameraGoToNode, CameraNavState, CameraGoToGeo>;
 
     Profile() = default;
     explicit Profile(const std::string& content);
