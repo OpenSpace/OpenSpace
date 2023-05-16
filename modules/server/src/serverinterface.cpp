@@ -177,10 +177,10 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
 
     const std::string type = config.value<std::string>(TypeInfo.identifier);
     if (type == TcpSocketType) {
-        _type = static_cast<int>(InterfaceType::TcpSocket);
+        _socketType = static_cast<int>(InterfaceType::TcpSocket);
     }
     else if (type == WebSocketType) {
-        _type = static_cast<int>(InterfaceType::WebSocket);
+        _socketType = static_cast<int>(InterfaceType::WebSocket);
     }
 
     if (config.hasValue<std::string>(PasswordInfo.identifier)) {
@@ -220,12 +220,12 @@ void ServerInterface::initialize() {
         return;
     }
     switch (static_cast<InterfaceType>(_socketType.value())) {
-    case InterfaceType::TcpSocket:
-        _socketServer = std::make_unique<ghoul::io::TcpSocketServer>();
-        break;
-    case InterfaceType::WebSocket:
-        _socketServer = std::make_unique<ghoul::io::WebSocketServer>();
-        break;
+        case InterfaceType::TcpSocket:
+            _socketServer = std::make_unique<ghoul::io::TcpSocketServer>();
+            break;
+        case InterfaceType::WebSocket:
+            _socketServer = std::make_unique<ghoul::io::WebSocketServer>();
+            break;
     }
     _socketServer->listen(_port);
 }
