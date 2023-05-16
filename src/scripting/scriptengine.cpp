@@ -449,7 +449,7 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
 }
 
 nlohmann::json ScriptEngine::generateJson() const {
-    ZoneScoped
+    ZoneScoped;
 
     nlohmann::json json;
 

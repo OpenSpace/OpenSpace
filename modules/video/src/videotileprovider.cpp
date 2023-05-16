@@ -51,14 +51,14 @@ bool isDifferent(double first, double second) {
 VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     : _videoPlayer(dictionary)
 {
-    ZoneScoped
+    ZoneScoped;
     addPropertySubOwner(_videoPlayer);
 }
 
 VideoTileProvider::~VideoTileProvider() {}
 
 globebrowsing::Tile VideoTileProvider::tile(const globebrowsing::TileIndex& tileIndex) {
-    ZoneScoped
+    ZoneScoped;
 
     if (!_videoPlayer.isInitialized()) {
         return globebrowsing::Tile();

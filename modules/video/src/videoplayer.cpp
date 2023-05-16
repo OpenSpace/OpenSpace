@@ -260,7 +260,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     , _playAudio(AudioInfo, false)
     , _loopVideo(LoopVideoInfo, true)
 {
-    ZoneScoped
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
