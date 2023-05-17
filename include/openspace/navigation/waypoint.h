@@ -86,7 +86,7 @@ struct NodeCameraStateSpec {
  * \return the computed WayPoint
  */
 Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
-    std::optional<const Waypoint> startPoint = std::nullopt, bool useLinear = false);
+    std::optional<Waypoint> startPoint = std::nullopt, bool useLinear = false);
 
 } // namespace openspace::interaction
 

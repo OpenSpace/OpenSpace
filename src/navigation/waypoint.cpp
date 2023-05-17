@@ -158,7 +158,7 @@ glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
 }
 
 Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
-                                     std::optional<const Waypoint> startPoint,
+                                     std::optional<Waypoint> startPoint,
                                      bool useLinear)
 {
     const SceneGraphNode* targetNode = sceneGraphNode(spec.identifier);
