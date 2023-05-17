@@ -607,6 +607,14 @@ void convertVersion11to12(nlohmann::json& profile) {
 
 } // namespace version11
 
+namespace version12 {
+
+void convertVersion12to13(nlohmann::json& profile) {
+    // Version 1.3 introduced to GoToNode camera initial position
+    profile["version"] = Profile::Version{ 1, 3 };
+}
+
+} // namespace version12
 
 Profile::ParsingError::ParsingError(Severity severity_, std::string msg)
     : ghoul::RuntimeError(std::move(msg), "profile")
@@ -739,6 +747,11 @@ Profile::Profile(const std::string& content) {
 
         if (version.major == 1 && version.minor == 1) {
             version11::convertVersion11to12(profile);
+            profile["version"].get_to(version);
+        }
+
+        if (version.major == 1 && version.minor == 2) {
+            version12::convertVersion12to13(profile);
             profile["version"].get_to(version);
         }
 
