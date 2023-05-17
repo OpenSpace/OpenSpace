@@ -167,6 +167,7 @@ namespace {
  * 'isInverted' is 'true', the axis value is inverted. 'joystickType' is if the joystick
  * behaves more like a joystick or a trigger, where the first is the default. If
  * 'isSticky' is 'true', the value is calculated relative to the previous value. If
+ * 'shouldFlip' is true, then the camera movement for the axis is reversed. If
  * 'sensitivity' is given then that value will affect the sensitivity of the axis together
  * with the global sensitivity.
  *

@@ -69,7 +69,7 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickButton(
     name,
     controller.DPad.Up,
-    joystickHelper.bindGlobalRoll(name, controller.RightThumbStick[1]) ..
+    joystickHelper.bindLocalRoll(name, controller.RightThumbStick[1]) ..
     "openspace.navigation.bindJoystickAxis('" .. name .. "', " .. controller.RightThumbStick[2] .. ", 'None');",
     "Switch to roll mode"
   )
