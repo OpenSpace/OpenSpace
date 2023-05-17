@@ -863,11 +863,11 @@ namespace openspace {
 
         if (numberOfFieldlinesOnSide > leftSideSize)
         {
-            numberOfFieldlinesOnSide = leftSideSize-1;
+            numberOfFieldlinesOnSide = leftSideSize;
         }
         if (numberOfFieldlinesOnSide > rightSideSize)
         {
-            numberOfFieldlinesOnSide = rightSideSize-1;
+            numberOfFieldlinesOnSide = rightSideSize;
         }
         if (numberOfFieldlinesOnSide == 0)
         {
@@ -915,7 +915,7 @@ namespace openspace {
             }
         }
 
-        double factor = 1;
+        double factor = 0.02;
 
         // functionality
         int numberOfFieldlines = int(setOfSeedpoints.size() * factor);
@@ -930,24 +930,47 @@ namespace openspace {
         int stepLengthRight = furthestRelativeAngle / numberOfFieldlinesOnSide;
         int stepLengthLeft = furthestRelativeAngleLeft / numberOfFieldlinesOnSide;
 
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSeedpointsRightSide
-            = selectSeedpoints(
-                rightSideSeedpoints,
-                stepLengthRight,
-                numberOfFieldlinesOnSide
-            );
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSeedpointsRightSide;
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSeedpointsLeftSide;
 
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSeedpointsLeftSide
-            = selectSeedpoints(
-                leftSideSeedpoints,
-                stepLengthLeft,
-                numberOfFieldlinesOnSide
-            );
-
-
-
-        int bestSetOfSeedPointsIndex = 0;
+        if (numberOfFieldlinesOnSide == rightSideSeedpoints.size())
+        {
+            selectedSeedpointsRightSide = rightSideSeedpoints;
+        }
+        else
+        {
+            selectedSeedpointsRightSide = selectSeedpoints(
+                    rightSideSeedpoints,
+                    stepLengthRight,
+                    numberOfFieldlinesOnSide
+                );
+        }
+        if (numberOfFieldlinesOnSide == leftSideSeedpoints.size())
+        {
+            selectedSeedpointsLeftSide = leftSideSeedpoints;
+        }
+        else
+        {
+            selectedSeedpointsLeftSide = selectSeedpoints(
+                    leftSideSeedpoints,
+                    stepLengthLeft,
+                    numberOfFieldlinesOnSide
+                );
+        }
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSeedpoints;
+        if (numberOfFieldlines == 1)
+        {
+            int closestToMiddleSteplength = 0;
+            selectedSeedpoints = selectSeedpoints(
+                setOfSeedpoints,
+                closestToMiddleSteplength,
+                numberOfFieldlinesOnSide
+            );
+        }
+        else
+        {
+
+        }
 
         std::vector<std::string> seedPointsTopology;
         addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSeedpoints);
@@ -968,7 +991,7 @@ namespace openspace {
         std::unique_ptr<ccmc::Interpolator> interpolator =
             std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
 
-        float accuracy = 0.1;
+        float accuracy = 0.3;
 
         std::vector<std::vector<glm::vec3>> testFieldlinePositions =
             fls::getAllFieldlinesPositionsOfSeedPoints(
