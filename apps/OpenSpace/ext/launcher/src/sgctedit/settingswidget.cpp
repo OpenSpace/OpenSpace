@@ -51,7 +51,6 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
 
     _firstWindowSelectionLayout = new QHBoxLayout;
 
-    QPushButton* setFullscreen = new QPushButton("Set Window\nto Fullscreen");
     _firstWindowGraphicsSelection = new QComboBox();
     _firstWindowGraphicsSelection->setToolTip(
         "Select the contents of the first window to match one of the other windows"
@@ -109,43 +108,49 @@ void SettingsWidget::setEnableShowUiOnFirstWindowCheckbox(bool enable) {
     _showUiOnFirstWindow->setEnabled(enable);
 }
 
+int SettingsWidget::graphicsSelectionForShowUiOnFirstWindow() const {
+    return _firstWindowGraphicsSelection->currentIndex();
+}
+
 void SettingsWidget::setVsync(bool enableVsync) {
     _checkBoxVsync->setChecked(enableVsync);
 }
 
 void SettingsWidget::nWindowsDisplayedChanged(int newCount) {
+    constexpr int countOneWindow = 1;
+    constexpr int countTwoWindows = 2;
+    int graphicsSelect = _firstWindowGraphicsSelection->currentIndex();
+    graphicsSelect = std::max(0, graphicsSelect);
+
     QList<QString> graphicsOptions = {"None (GUI only)"};
-    for (int i = 1; i <= newCount; ++i) {
+    for (int i = countOneWindow; i <= newCount; ++i) {
         graphicsOptions.append("Window " + QString::number(i));
     }
     _firstWindowGraphicsSelection->clear();
     _firstWindowGraphicsSelection->addItems(graphicsOptions);
-    setEnableShowUiOnFirstWindowCheckbox(newCount > 1);
-    _firstWindowGraphicsSelection->setCurrentIndex(
-        _stateOfUiOnFirstWindowGraphicsSelectionPrevious
-    );
-    if (_firstWindowGraphicsSelection->currentIndex() > newCount) {
-        _firstWindowGraphicsSelection->setCurrentIndex(newCount);
-        _stateOfUiOnFirstWindowGraphicsSelectionPrevious =
-            _firstWindowGraphicsSelection->currentIndex();
+    setEnableShowUiOnFirstWindowCheckbox(newCount > countOneWindow);
+    if (graphicsSelect > newCount) {
+        graphicsSelect = newCount;
     }
+    _firstWindowGraphicsSelection->setCurrentIndex(graphicsSelect);
 
-    if (newCount == 1) {
+    if (newCount == countOneWindow) {
         _stateOfUiOnFirstWindowWhenDisabled = _showUiOnFirstWindow->isChecked();
-        if (_stateOfUiOnFirstWindowWhenDisabled) {
-            _showUiOnFirstWindow->setChecked(false);
-        }
+        _showUiOnFirstWindow->setChecked(false);
         _firstWindowGraphicsSelection->setEnabled(false);
     }
-    else if (newCount == 2 && _stateOfUiOnFirstWindowPreviousCount == 1) {
-        _showUiOnFirstWindow->setChecked(true);
-        _firstWindowGraphicsSelection->setEnabled(true);
-        _firstWindowGraphicsSelection->setCurrentIndex(
-            _stateOfUiOnFirstWindowGraphicsSelectionPrevious
-        );
+    else if (newCount == countTwoWindows &&
+             _stateOfUiOnFirstWindowPreviousCount == countOneWindow)
+    {
+        if (_stateOfUiOnFirstWindowWhenDisabled) {
+            _showUiOnFirstWindow->setChecked(true);
+        }
+        _firstWindowGraphicsSelection->setEnabled(_showUiOnFirstWindow->isChecked());
     }
-    _stateOfUiOnFirstWindowGraphicsSelectionPrevious =
-        _firstWindowGraphicsSelection->currentIndex();
+    else {
+        _firstWindowGraphicsSelection->setEnabled(_showUiOnFirstWindow->isChecked());
+    }
+    _stateOfUiOnFirstWindowPreviousCount = newCount;
 }
 
 void SettingsWidget::showUiOnFirstWindowClicked(bool checked) {

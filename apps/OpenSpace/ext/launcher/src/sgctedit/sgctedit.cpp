@@ -482,11 +482,26 @@ void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) 
         // depending on if this is the first window or not
         if (_settingsWidget->showUiOnFirstWindow()) {
             if (i == 0) {
-                node.windows[i].viewports.back().isTracked = false;
                 node.windows[i].tags.push_back("GUI");
+                int selectedGraphics =
+                    _settingsWidget->graphicsSelectionForShowUiOnFirstWindow();
+                if (selectedGraphics == 0) {
+                    node.windows[i].viewports.back().isTracked = false;
+                }
+                else if (selectedGraphics > 0 &&
+                         selectedGraphics <= static_cast<int>(node.windows.size()))
+                {
+                    //Set first window viewport to mirror the selected window's viewport
+                    node.windows[i].viewports =
+                        node.windows[(selectedGraphics - 1)].viewports;
+                }
+                node.windows[i].draw2D = true;
+                node.windows[i].draw3D = (selectedGraphics > 0);
             }
-            node.windows[i].draw2D = (i == 0);
-            node.windows[i].draw3D = (i != 0);
+            else {
+                node.windows[i].draw2D = false;
+                node.windows[i].draw3D = true;
+            }
         }
     }
 }

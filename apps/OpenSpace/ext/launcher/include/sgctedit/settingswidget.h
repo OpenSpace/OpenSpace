@@ -82,6 +82,20 @@ public:
     void setEnableShowUiOnFirstWindowCheckbox(bool enable);
 
     /**
+     * Gets the value of the selection for which display first window should mirror if
+     * the option to show the Ui in the first window is enabled. Note that this will
+     * return a value even if the checkbox is not enabled.
+     * 
+     * \return -1 if in a disabled state (e.g. when showUiOnFirstWindow() returns false)
+     *          0 if no window is being mirrored (only the UI will appear in first
+     *            window, with no 3D rendering)
+     *          1 if the second window's viewport is mirrored in the first window
+     *          2 if the third window's viewport is mirrored in the first window
+     *          3 if the fourth window's viewport is mirrored in the first window
+     */
+    int graphicsSelectionForShowUiOnFirstWindow() const;
+
+    /**
      * Sets the value of the checkbox for enabling VSync.
      * 
      * \param enableVsync boolean value, if set true then VSync is enabled
@@ -103,7 +117,6 @@ private:
     QBoxLayout* _firstWindowSelectionLayout = nullptr;
     int _stateOfUiOnFirstWindowPreviousCount = 1;
     bool _stateOfUiOnFirstWindowWhenDisabled = false;
-    int _stateOfUiOnFirstWindowGraphicsSelectionPrevious = 0;
 
     void showUiOnFirstWindowClicked(bool checked);
 };
