@@ -111,7 +111,7 @@ void CefWebGuiModule::startOrStopGui() {
             );
             _instance->initialize();
             _instance->reshape(static_cast<glm::ivec2>(
-                static_cast<glm::vec2>(global::windowDelegate->currentSubwindowSize()) *
+                static_cast<glm::vec2>(global::windowDelegate->guiWindowResolution()) *
                 global::windowDelegate->dpiScaling()
             ));
             if (!_url.value().empty()) {
@@ -226,12 +226,13 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         const bool isGuiWindow =
             global::windowDelegate->hasGuiWindow() ?
             global::windowDelegate->isGuiWindow() :
-            true;
+            global::windowDelegate->currentWindowId()
+                == global::windowDelegate->firstWindowId();
         const bool isMaster = global::windowDelegate->isMaster();
 
         if (isGuiWindow && isMaster && _instance) {
             if (global::windowDelegate->windowHasResized() || _instance->_shouldReshape) {
-                glm::ivec2 csws = global::windowDelegate->currentSubwindowSize();
+                glm::ivec2 csws = global::windowDelegate->guiWindowResolution();
                 _instance->reshape(static_cast<glm::ivec2>(
                     static_cast<glm::vec2>(csws) * global::windowDelegate->dpiScaling()
                 ));
