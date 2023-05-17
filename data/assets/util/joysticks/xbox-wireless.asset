@@ -21,7 +21,8 @@ local joystickHelper = asset.require("./joystick_helper")
 --       The axis values can either go back to 0 when the joystick is released or it can
 --       stay at the value it was before the joystick was released.
 --       The latter is called a sticky axis, when the values don't go back to 0.
--- Seventh parameter is the sensitivity for the axis
+-- Seventh parameter can be used to reverse the camera movement for the axis
+-- Eighth parameter is the sensitivity for the axis
 
 local XBoxController = {
   LeftThumbStick = { 0 , 1 },

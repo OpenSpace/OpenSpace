@@ -169,12 +169,24 @@ namespace {
  * 'isSticky' is 'true', the value is calculated relative to the previous value. If
  * 'sensitivity' is given then that value will affect the sensitivity of the axis together
  * with the global sensitivity.
+ *
+ * \param joystickName the name for the joystick or game controller that should be bound
+ * \param axis the axis of the joystick that should be bound
+ * \param axisType the type of movement that the axis should be mapped to
+ * \param shouldInvert if the joystick movement should be inverted or not
+ * \param joystickType what type of joystick or axis this is. Either
+ *                     <code>"JoystickLike"</code> or <code>"TriggerLike"</code>.
+ * \param isSticky if true, the value is calculated relative to the previous value,
+ *                 if false the the value is used as is.
+ * \param shouldFlip reverses the movement of the camera that the joystick produces
+ * \param sensitivity sensitivity for this axis
  */
 [[codegen::luawrap]] void bindJoystickAxis(std::string joystickName, int axis,
                                            std::string axisType,
                                            bool shouldInvert = false,
                                            std::string joystickType = "JoystickLike",
                                            bool isSticky = false,
+                                           bool shouldFlip = false,
                                            double sensitivity = 0.0)
 {
     using namespace openspace;
@@ -186,6 +198,7 @@ namespace {
         JoystickCameraStates::AxisInvert(shouldInvert),
         ghoul::from_string<JoystickCameraStates::JoystickType>(joystickType),
         isSticky,
+        JoystickCameraStates::AxisFlip(shouldFlip),
         sensitivity
     );
 }
@@ -197,21 +210,34 @@ namespace {
  * value is rescaled from [-1, 1] to [min, max], default is [0, 1]. If 'isInverted' is
  * 'true', the axis value is inverted. The last argument determines whether the property
  * change is going to be executed locally or remotely, where the latter is the default.
+ *
+ * \param joystickName the name for the joystick or game controller that should be bound
+ * \param axis the axis of the joystick that should be bound
+ * \param propertyUri the property that this joystick axis should modify
+ * \param min the minimum value that this axis can set for the property
+ * \param max the maximum value that this axis can set for the property
+ * \param shouldInvert if the joystick movement should be inverted or not
+ * \param shouldFlip reverses the movement of the camera that the joystick produces
+ * \param isRemote if true, the property change will also be executed on connected nodes
+ *                 if false, the property change will only affect the master node
  */
 [[codegen::luawrap]] void bindJoystickAxisProperty(std::string joystickName, int axis,
                                                    std::string propertyUri,
                                                    float min = 0.f, float max = 1.f,
                                                    bool shouldInvert = false,
+                                                   bool shouldFlip = false,
                                                    bool isRemote = true)
 {
     using namespace openspace;
+    using JoystickCameraStates = interaction::JoystickCameraStates;
     global::navigationHandler->setJoystickAxisMappingProperty(
         std::move(joystickName),
         axis,
         std::move(propertyUri),
         min,
         max,
-        interaction::JoystickCameraStates::AxisInvert(shouldInvert),
+        JoystickCameraStates::AxisInvert(shouldInvert),
+        JoystickCameraStates::AxisFlip(shouldFlip),
         isRemote
     );
 }
@@ -226,7 +252,7 @@ namespace {
  * bool.
  */
 [[codegen::luawrap]]
-std::tuple<std::string, bool, std::string, bool, double, std::string, float, float, bool>
+std::tuple<std::string, bool, std::string, bool, bool, double, std::string, float, float, bool>
 joystickAxis(std::string joystickName, int axis)
 {
     using namespace openspace;
@@ -239,6 +265,7 @@ joystickAxis(std::string joystickName, int axis)
         info.invert,
         ghoul::to_string(info.joystickType),
         info.isSticky,
+        info.flip,
         info.sensitivity,
         info.propertyUri,
         info.minValue,

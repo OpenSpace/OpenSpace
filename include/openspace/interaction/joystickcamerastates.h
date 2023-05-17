@@ -60,11 +60,13 @@ public:
 
     BooleanType(AxisInvert);
     BooleanType(ButtonCommandRemote);
+    BooleanType(AxisFlip);
 
     struct AxisInformation {
         AxisType type = AxisType::None;
         AxisInvert invert = AxisInvert::No;
         JoystickType joystickType = JoystickType::JoystickLike;
+        AxisFlip flip = AxisFlip::No;
 
         // The axis values can either go back to 0 when the joystick is released or it can
         // stay at the value it was before the joystick was released.
@@ -91,12 +93,14 @@ public:
     void setAxisMapping(std::string joystickName, int axis, AxisType mapping,
         AxisInvert shouldInvert = AxisInvert::No,
         JoystickType joystickType = JoystickType::JoystickLike,
-        bool isSticky = false, double sensitivity = 0.0
+        bool isSticky = false, AxisFlip shouldFlip = AxisFlip::No,
+        double sensitivity = 0.0
     );
 
     void setAxisMappingProperty(std::string joystickName, int axis,
         std::string propertyUri, float min = 0.f, float max = 1.f,
-        AxisInvert shouldInvert = AxisInvert::No, bool isRemote = true
+        AxisInvert shouldInvert = AxisInvert::No, AxisFlip shouldFlip = AxisFlip::No,
+        bool isRemote = true
     );
 
     AxisInformation axisMapping(const std::string& joystickName, int axis) const;

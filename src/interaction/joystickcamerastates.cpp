@@ -121,6 +121,10 @@ void JoystickCameraStates::updateStateFromInput(
                 }
             }
 
+            if (t.flip) {
+                value = -value;
+            }
+
             switch (t.type) {
                 case AxisType::None:
                     break;
@@ -242,6 +246,7 @@ void JoystickCameraStates::setAxisMapping(std::string joystickName,
                                           AxisInvert shouldInvert,
                                           JoystickType joystickType,
                                           bool isSticky,
+                                          AxisFlip shouldFlip,
                                           double sensitivity)
 {
     JoystickCameraState* joystickCameraState = findOrAddJoystickCameraState(joystickName);
@@ -259,6 +264,7 @@ void JoystickCameraStates::setAxisMapping(std::string joystickName,
     joystickCameraState->axisMapping[axis].invert = shouldInvert;
     joystickCameraState->axisMapping[axis].joystickType = joystickType;
     joystickCameraState->axisMapping[axis].isSticky = isSticky;
+    joystickCameraState->axisMapping[axis].flip = shouldFlip;
     joystickCameraState->axisMapping[axis].sensitivity = sensitivity;
 
     joystickCameraState->prevAxisValues[axis] =
@@ -270,6 +276,7 @@ void JoystickCameraStates::setAxisMappingProperty(std::string joystickName,
                                                   std::string propertyUri,
                                                   float min, float max,
                                                   AxisInvert shouldInvert,
+                                                  AxisFlip shouldFlip,
                                                   bool isRemote)
 {
     JoystickCameraState* joystickCameraState = findOrAddJoystickCameraState(joystickName);
@@ -285,6 +292,7 @@ void JoystickCameraStates::setAxisMappingProperty(std::string joystickName,
 
     joystickCameraState->axisMapping[axis].type = AxisType::Property;
     joystickCameraState->axisMapping[axis].invert = shouldInvert;
+    joystickCameraState->axisMapping[axis].flip = shouldFlip;
     joystickCameraState->axisMapping[axis].propertyUri = propertyUri;
     joystickCameraState->axisMapping[axis].minValue = min;
     joystickCameraState->axisMapping[axis].maxValue = max;
