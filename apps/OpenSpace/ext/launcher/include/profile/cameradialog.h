@@ -64,6 +64,7 @@ private:
 
     struct {
         QLineEdit* anchor = nullptr;
+        QLineEdit* height = nullptr;
     } _nodeState;
 
     struct {

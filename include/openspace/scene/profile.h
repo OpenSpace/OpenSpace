@@ -110,6 +110,7 @@ public:
         static constexpr std::string_view Type = "goToNode";
 
         std::string anchor;
+        std::optional<double> height;
     };
 
     struct CameraNavState {

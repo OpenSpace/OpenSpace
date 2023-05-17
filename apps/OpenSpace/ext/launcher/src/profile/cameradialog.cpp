@@ -71,6 +71,9 @@ CameraDialog::CameraDialog(QWidget* parent,
             [this](const openspace::Profile::CameraGoToNode& node) {
                 _tabWidget->setCurrentIndex(CameraTypeNode);
                 _nodeState.anchor->setText(QString::fromStdString(node.anchor));
+                if (node.height.has_value()) {
+                    _nodeState.height->setText(QString::number(*node.height, 'g', 17));
+                }
                 tabSelect(CameraTypeNode);
             },
             [this](const openspace::Profile::CameraNavState& nav) {
@@ -124,6 +127,7 @@ CameraDialog::CameraDialog(QWidget* parent,
         _tabWidget->setCurrentIndex(CameraTypeNode);
 
         _nodeState.anchor->clear();
+        _nodeState.height->clear();
 
         _navState.anchor->clear();
         _navState.aim->clear();
@@ -193,10 +197,20 @@ QWidget* CameraDialog::createNodeWidget() {
         QWidget* box = new QWidget;
         QGridLayout* layout = new QGridLayout(box);
 
-        layout->addWidget(new QLabel("Anchor Node:"), 1, 0);
+        layout->addWidget(new QLabel("Anchor Node:"), 0, 0);
         _nodeState.anchor = new QLineEdit;
         _nodeState.anchor->setToolTip("Anchor camera to this scene graph node");
-        layout->addWidget(_nodeState.anchor, 1, 1);
+        layout->addWidget(_nodeState.anchor, 0, 1);
+
+        layout->addWidget(new QLabel("Height [m]:"), 1, 0);
+        _nodeState.height = new QLineEdit;
+        _nodeState.height->setValidator(new QDoubleValidator);
+        _nodeState.height->setToolTip(
+            "If specified, the camera will placed at the given height away from object. "
+            "The height is computed from the bounding sphere of the anchor node"
+        );
+        _nodeState.height->setPlaceholderText("optional");
+        layout->addWidget(_nodeState.height, 1, 1);
 
         mainLayout->addWidget(box);
     }
@@ -471,6 +485,9 @@ void CameraDialog::approved() {
     if (_tabWidget->currentIndex() == CameraTypeNode) {
         openspace::Profile::CameraGoToNode node;
         node.anchor = _nodeState.anchor->text().toStdString();
+        if (!_nodeState.height->text().isEmpty()) {
+            node.height = _nodeState.height->text().toDouble();
+        }
         *_camera = std::move(node);
     }
     else if (_tabWidget->currentIndex() == CameraTypeNav) {

@@ -1755,6 +1755,7 @@ void setCameraFromProfile(const Profile& p) {
                 using namespace interaction;
                 NodeCameraStateSpec spec;
                 spec.identifier = node.anchor;
+                spec.height = node.height;
                 spec.useTargetUpDirection = true;
 
                 global::navigationHandler->setCameraFromNodeSpecNextFrame(spec);

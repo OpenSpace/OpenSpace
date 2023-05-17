@@ -349,6 +349,9 @@ void from_json(const nlohmann::json& j, Profile::Time& v) {
 void to_json(nlohmann::json& j, const Profile::CameraGoToNode& v) {
     j["type"] = Profile::CameraGoToNode::Type;
     j["anchor"] = v.anchor;
+    if (v.height.has_value()) {
+        j["height"] = *v.height;
+    }
 }
 
 void from_json(const nlohmann::json& j, Profile::CameraGoToNode& v) {
@@ -358,13 +361,17 @@ void from_json(const nlohmann::json& j, Profile::CameraGoToNode& v) {
     );
 
     checkValue(j, "anchor", &nlohmann::json::is_string, "camera", false);
+    checkValue(j, "height", &nlohmann::json::is_number, "camera", true);
     checkExtraKeys(
         j,
         "camera",
-        { "type", "anchor" }
+        { "type", "anchor", "height"}
     );
 
     j["anchor"].get_to(v.anchor);
+    if (j.find("height") != j.end()) {
+        v.height = j["height"].get<double>();
+    }
 }
 
 void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
