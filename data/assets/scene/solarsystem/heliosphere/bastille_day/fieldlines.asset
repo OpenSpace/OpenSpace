@@ -50,7 +50,25 @@ local fieldlines = {
 local toggle_fieldlines = {
   Identifier = "os.events.bastilleday.fieldlines.togglefieldlines",
   Name = "Toggle fieldlines",
-  Command = propertyHelper.invert("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled"),
+  Command = [[
+    if openspace.getPropertyValue("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled") then
+      openspace.setPropertyValueSingle(
+        "Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Fade",
+        0.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Fade",
+        1.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
   Documentation = "Toggle fieldline rendering of CME",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false

@@ -72,12 +72,8 @@
       "key": "D"
     },
     {
-      "action": "os.events.bastilleday.fluxnodelegend.showlegend",
+      "action": "os.events.bastilleday.fluxnodelegend.togglelegend",
       "key": "N"
-    },
-    {
-      "action": "os.events.bastilleday.fluxnodelegend.hidelegend",
-      "key": "M"
     },
     {
       "action": "os.events.bastilleday.magnetogramtexture.switchcolorlayer",

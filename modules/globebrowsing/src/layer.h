@@ -87,7 +87,7 @@ private:
     properties::TriggerProperty _remove;
     properties::StringProperty _guiDescription;
 
-    layers::Layer::ID _type;
+    layers::Layer::ID _typeId;
     std::unique_ptr<TileProvider> _tileProvider;
     properties::Vec3Property _solidColor;
     LayerRenderSettings _renderSettings;

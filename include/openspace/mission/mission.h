@@ -43,6 +43,7 @@ struct Milestone {
     std::optional<std::string> description;
     std::optional<std::string> image;
     std::optional<std::string> link;
+    std::optional<std::vector<std::string>> actions;
 };
 
 /**
@@ -101,7 +102,7 @@ public:
     /**
      * Returns the associated link of this MissionPhase. If no link is associated, this
      * string will be empty.
-     * 
+     *
      * \return The associated link of the MissionPhase or the empty string
      */
     const std::string& link() const;
@@ -178,7 +179,7 @@ protected:
     std::string _link;
     /// Actions associated with the phase
     std::vector<std::string> _actions;
-    /// Important dates 
+    /// Important dates
     std::vector<Milestone> _milestones;
 };
 

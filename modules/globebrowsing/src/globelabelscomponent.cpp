@@ -213,11 +213,11 @@ documentation::Documentation GlobeLabelsComponent::Documentation() {
 GlobeLabelsComponent::GlobeLabelsComponent()
     : properties::PropertyOwner({ "Labels" })
     , _enabled(EnabledInfo, false)
+    , _color(ColorInfo, glm::vec3(1.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _fontSize(FontSizeInfo, 30.f, 1.f, 300.f)
     , _size(SizeInfo, 2.5, 0, 30)
     , _minMaxSize(MinMaxSizeInfo, glm::ivec2(1, 1000), glm::ivec2(1), glm::ivec2(1000))
     , _heightOffset(HeightOffsetInfo, 100.f, 0.f, 10000.f)
-    , _color(ColorInfo, glm::vec3(1.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _fadeDistances(
         FadeDistancesInfo,
         glm::vec2(1e4f, 1e6f),
@@ -416,7 +416,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             if (token.empty()) {
                 std::getline(issFeature, token, '=');
             }
-            strncpy(lEntry.feature, token.c_str(), 256);
+            strncpy(lEntry.feature, token.c_str(), 255);
 
             GlobeBrowsingModule* _globeBrowsingModule =
                 global::moduleEngine->module<openspace::GlobeBrowsingModule>();

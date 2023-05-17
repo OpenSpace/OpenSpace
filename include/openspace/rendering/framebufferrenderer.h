@@ -116,9 +116,10 @@ public:
     GLuint gBufferColorTexture() const;
 
     /**
-     * Gives access to the position texture of the G-buffer. NOTE: This texture is used for
-     * the majority of rendering the scene and might be already in use. Use CAUTION when
-     * using this function. The size of the texture is the resolution of the viewport.
+     * Gives access to the position texture of the G-buffer. NOTE: This texture is used
+     * for the majority of rendering the scene and might be already in use. Use CAUTION
+     * when using this function. The size of the texture is the resolution of the
+     * viewport.
      *
      * \return identifier of the position texture of the G-buffer
      */

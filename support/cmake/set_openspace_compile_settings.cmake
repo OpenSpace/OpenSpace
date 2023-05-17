@@ -138,6 +138,7 @@ function (set_openspace_compile_settings target)
     "-Wzero-as-null-pointer-constant"
 
     "-Wno-attributes"
+    "-Wno-deprecated-enum-enum-conversion"
     "-Wno-missing-braces"
     "-Wno-unknown-attributes"
   )
@@ -172,6 +173,7 @@ function (set_openspace_compile_settings target)
 
     "-Wno-attributes"
     "-Wno-deprecated-copy"
+    "-Wno-deprecated-enum-enum-conversion"
     "-Wno-float-equal"
     "-Wno-long-long"
     "-Wno-missing-field-initializers"

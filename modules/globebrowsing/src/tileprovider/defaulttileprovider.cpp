@@ -158,7 +158,11 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
             return gi.id == id;
         }
     );
-    auto layerGroup = it != layers::Groups.end() ? it->name : std::to_string(static_cast<int>(_layerGroupID));
+
+    std::string layerGroup =
+        it != layers::Groups.end() ?
+        std::string(it->name) :
+        std::to_string(static_cast<int>(_layerGroupID));
 
     std::string identifier = p.identifier.value_or("unspecified");
     std::string enclosing = p.globeName.value_or("unspecified");
@@ -168,7 +172,9 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
     bool enabled = module.isMRFCachingEnabled();
     Compression compression =
-        _layerGroupID == layers::Group::ID::HeightLayers ? Compression::LERC : Compression::JPEG;
+        _layerGroupID == layers::Group::ID::HeightLayers ?
+        Compression::LERC :
+        Compression::JPEG;
     int quality = 75;
     int blockSize = 1024;
     if (p.cacheSettings.has_value()) {
@@ -196,7 +202,9 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     addProperty(_tilePixelSize);
 }
 
-void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData, TileCacheProperties cacheProperties) {
+void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData,
+                                                  TileCacheProperties cacheProperties)
+{
     ZoneScoped;
 
     _asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(

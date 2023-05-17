@@ -67,8 +67,8 @@ template <typename T>
 std::string formatJson(T value);
 
 /**
- * Sort a json object that is an array of objects with the structure 
- * [ key = {}, key = {} ...]. Sorts it by the provided key 
+ * Sort a json object that is an array of objects with the structure
+ * [ key = {}, key = {} ...]. Sorts it by the provided key
  *
  * \param json The json to sort
  * \param key The key the json should be sorted by

@@ -535,8 +535,8 @@ SceneGraphNode::SceneGraphNode()
     , _distFromCamToNode(DistanceFromCamToNodeInfo, -1.0)
     , _screenSizeRadius(ScreenSizeRadiusInfo, 0)
     , _visibilityDistance(VisibilityDistanceInfo, 6e10f)
-    , _showDebugSphere(ShowDebugSphereInfo, false)
     , _supportsDirectInteraction(SupportsDirectInteractionInfo, false)
+    , _showDebugSphere(ShowDebugSphereInfo, false)
 {
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);

@@ -46,13 +46,12 @@ public:
     void render() override;
     void update() override;
 
-    float opacity() const noexcept;
+    float opacity() const noexcept override;
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     bool isInitialized() const;
     bool isPointingSpacecraft() const;
 
     double setVerticalFovWithScroll(float scroll);
-    void setOpacity(float opacity);
     void setIdInBrowser() const;
     void setIsInitialized(bool isInitialized);
     void setPointSpaceCraft(bool shouldPoint);

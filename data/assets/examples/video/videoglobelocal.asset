@@ -1,0 +1,28 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local layer = {
+  Identifier = "ExampleVideoLocal",
+  Video = <Edit this field: insert a path to a video here>,
+  Name = "Example Video Local",
+  Enabled = true,
+  Type = "VideoTileLayer"
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(earth.Earth.Identifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(earth.Earth.Identifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+asset.meta = {
+  Name = "Video Player Test",
+  Version = "1.0",
+  Description = "An example asset that shows how to include a video on Earth",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT"
+}

@@ -64,13 +64,10 @@ public:
      *                imported window cluster configuration.
      * \param configName The name of the window configuration filename
      * \param configBasePath The path to the folder where default config files reside
-     * \param configsReadOnly vector list of window config names that are read-only and
-     *                         must not be overwritten
      * \param parent Pointer to parent Qt widget
      */
     SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
-        std::string& configBasePath, const std::vector<std::string>& configsReadOnly,
-        QWidget* parent);
+        std::string& configBasePath, QWidget* parent);
 
     /**
      * Returns the saved filename
@@ -112,7 +109,6 @@ private:
         QColor(0xF8, 0x33, 0x3C)
     };
     std::string _configurationFilename;
-    const std::vector<std::string> _readOnlyConfigs;
 
     QBoxLayout* _layoutButtonBox = nullptr;
     QPushButton* _saveButton = nullptr;

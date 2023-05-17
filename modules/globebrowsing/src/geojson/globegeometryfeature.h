@@ -97,8 +97,8 @@ public:
         size_t nVertices = 0;
         bool isExtrusionFeature = false;
 
-        // Store the geodetic lat long coordinates of each vertex, so we can quickly recompute
-        // the height values for these points
+        // Store the geodetic lat long coordinates of each vertex, so we can quickly
+        // recompute the height values for these points
         std::vector<Geodetic2> vertices;
 
         // Keep the heights around
@@ -194,12 +194,14 @@ private:
     // and any following are the inner rings (holes)
     std::vector<std::vector<Geodetic3>> _geoCoordinates;
 
-    // Coordinates for any triangles representing the geometry (only relevant for polygons)
+    // Coordinates for any triangles representing the geometry (only relevant for
+    // polygons)
     std::vector<Geodetic3> _triangleCoordinates;
 
     std::vector<RenderFeature> _renderFeatures;
 
-    glm::vec3 _offsets = glm::vec3(0.f); // lat, long, distance (meters). Passed from parent on property change
+    // lat, long, distance (meters). Passed from parent on property change
+    glm::vec3 _offsets = glm::vec3(0.f);
 
     std::string _key;
     const PropertySet _properties;
