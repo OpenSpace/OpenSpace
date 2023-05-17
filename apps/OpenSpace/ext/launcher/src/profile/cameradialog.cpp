@@ -55,6 +55,19 @@ namespace {
         }
         return true;
     }
+
+    bool isNumericalLargerThan(QLineEdit* le, float limit) {
+        QString s = le->text();
+        bool validConversion = false;
+        float value = s.toFloat(&validConversion);
+        if (!validConversion) {
+            return false;
+        }
+        if (value > limit) {
+            return true;
+        }
+        return false;
+    }
 } // namespace
 
 CameraDialog::CameraDialog(QWidget* parent,
@@ -397,6 +410,12 @@ bool CameraDialog::areRequiredFormsFilledAndValid() {
         if (_nodeState.anchor->text().isEmpty()) {
             allFormsOk = false;
             addErrorMsg("Anchor is empty");
+        }
+        if (!_nodeState.height->text().isEmpty()) {
+            if (!isNumericalLargerThan(_nodeState.height, 0.f)) {
+                allFormsOk = false;
+                addErrorMsg("Height must be larger than zero");
+            }
         }
     }
 
