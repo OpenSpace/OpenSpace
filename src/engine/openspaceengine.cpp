@@ -1459,7 +1459,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         _shutdown.inShutdown = false;
         global::eventEngine->publishEvent<events::EventApplicationShutdown>(
             events::EventApplicationShutdown::State::Aborted
-            );
+        );
     }
 }
 
