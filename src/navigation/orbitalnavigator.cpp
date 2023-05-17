@@ -1925,12 +1925,12 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double deltaTime,
     ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");
 
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
-    const glm::dvec3 axisInWorldCoords =
-        glm::dmat3(modelTransform) * glm::normalize(axis);
+    const glm::dvec3 axisInWorldSpace =
+        glm::normalize(glm::dmat3(modelTransform) * glm::normalize(axis));
 
     // Compute rotation to be applied around the axis
     double angle = deltaTime * speedScale;
-    const glm::dquat spinRotation = glm::angleAxis(angle, axisInWorldCoords);
+    const glm::dquat spinRotation = glm::angleAxis(angle, axisInWorldSpace);
 
     // Rotate the position vector from the center to camera and update position
     const glm::dvec3 anchorCenterToCamera = position - _anchorNode->worldPosition();
