@@ -5,10 +5,8 @@
 -- "Zoom" -- both in and out
 -- "Zoom In"
 -- "Zoom Out"
--- "LocalRoll X"
--- "LocalRoll Y"
--- "GlobalRoll X"
--- "GlobalRoll Y"
+-- "LocalRoll"
+-- "GlobalRoll"
 -- "Pan X"
 -- "Pan Y"
 -- Fourth parameter determines whether the axis should be inverted

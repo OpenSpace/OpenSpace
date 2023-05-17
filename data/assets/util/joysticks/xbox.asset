@@ -8,10 +8,8 @@ local joystickHelper = asset.require("./joystick_helper")
 -- "Zoom" -- both in and out
 -- "Zoom In"
 -- "Zoom Out"
--- "LocalRoll X"
--- "LocalRoll Y"
--- "GlobalRoll X"
--- "GlobalRoll Y"
+-- "LocalRoll"
+-- "GlobalRoll"
 -- "Pan X"
 -- "Pan Y"
 -- Fourth parameter determines whether the axis should be inverted
@@ -71,7 +69,7 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickButton(
     name,
     controller.DPad.Up,
-    joystickHelper.bindLocalRoll(name, controller.RightThumbStick[1]) ..
+    joystickHelper.bindGlobalRoll(name, controller.RightThumbStick[1]) ..
     "openspace.navigation.bindJoystickAxis('" .. name .. "', " .. controller.RightThumbStick[2] .. ", 'None');",
     "Switch to roll mode"
   )

@@ -8,10 +8,8 @@ local joystickHelper = asset.require("./joystick_helper")
 -- "Zoom" -- both in and out
 -- "Zoom In"
 -- "Zoom Out"
--- "LocalRoll X"
--- "LocalRoll Y"
--- "GlobalRoll X"
--- "GlobalRoll Y"
+-- "LocalRoll"
+-- "GlobalRoll"
 -- "Pan X"
 -- "Pan Y"
 -- Fourth parameter determines whether the axis should be inverted
@@ -43,7 +41,7 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "Pan X", true, "JoystickLike", true, false, 40.0);
   openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y", false, "JoystickLike", true, false, 35.0);
   openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom", false, "JoystickLike", true, false, 40.0);
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll X", false, "JoystickLike", true, false, 35.0);
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll", false, "JoystickLike", true, false, 35.0);
 
   openspace.navigation.bindJoystickButton(
     name,

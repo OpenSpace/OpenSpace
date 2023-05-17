@@ -56,8 +56,8 @@ void JoystickCameraStates::updateStateFromInput(
 
     std::pair<bool, glm::dvec2> globalRotation = std::pair(false, glm::dvec2(0.0));
     std::pair<bool, double> zoom = std::pair(false, 0.0);
-    std::pair<bool, glm::dvec2> localRoll = std::pair(false, glm::dvec2(0.0));
-    std::pair<bool, glm::dvec2> globalRoll = std::pair(false, glm::dvec2(0.0));
+    std::pair<bool, double> localRoll = std::pair(false, 0.0);
+    std::pair<bool, double> globalRoll = std::pair(false, 0.0);
     std::pair<bool, glm::dvec2> localRotation = std::pair(false, glm::dvec2(0.0));
 
     for (const JoystickInputState& joystickInputState : joystickInputStates) {
@@ -145,21 +145,13 @@ void JoystickCameraStates::updateStateFromInput(
                     zoom.first = true;
                     zoom.second -= value;
                     break;
-                case AxisType::LocalRollX:
+                case AxisType::LocalRoll:
                     localRoll.first = true;
-                    localRoll.second.x += value;
+                    localRoll.second+= value;
                     break;
-                case AxisType::LocalRollY:
-                    localRoll.first = true;
-                    localRoll.second.y += value;
-                    break;
-                case AxisType::GlobalRollX:
+                case AxisType::GlobalRoll:
                     globalRoll.first = true;
-                    globalRoll.second.x += value;
-                    break;
-                case AxisType::GlobalRollY:
-                    globalRoll.first = true;
-                    globalRoll.second.y += value;
+                    globalRoll.second += value;
                     break;
                 case AxisType::PanX:
                     localRotation.first = true;
@@ -220,14 +212,14 @@ void JoystickCameraStates::updateStateFromInput(
     }
 
     if (localRoll.first) {
-        _localRollState.velocity.set(localRoll.second, deltaTime);
+        _localRollState.velocity.set(glm::dvec2(localRoll.second), deltaTime);
     }
     else {
         _localRollState.velocity.decelerate(deltaTime);
     }
 
     if (globalRoll.first) {
-        _globalRollState.velocity.set(globalRoll.second, deltaTime);
+        _globalRollState.velocity.set(glm::dvec2(globalRoll.second), deltaTime);
     }
     else {
         _globalRollState.velocity.decelerate(deltaTime);

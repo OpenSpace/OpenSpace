@@ -44,10 +44,8 @@ public:
         ZoomIn,
         ZoomOut,
         Zoom,
-        LocalRollX,
-        LocalRollY,
-        GlobalRollX,
-        GlobalRollY,
+        LocalRoll,
+        GlobalRoll,
         PanX,
         PanY,
         Property
@@ -171,10 +169,8 @@ inline std::string to_string(
         case T::ZoomIn:      return "Zoom In";
         case T::ZoomOut:     return "Zoom Out";
         case T::Zoom:        return "Zoom In and Out";
-        case T::LocalRollX:  return "LocalRoll X";
-        case T::LocalRollY:  return "LocalRoll Y";
-        case T::GlobalRollX: return "GlobalRoll X";
-        case T::GlobalRollY: return "GlobalRoll Y";
+        case T::LocalRoll:  return "LocalRoll";
+        case T::GlobalRoll: return "GlobalRoll";
         case T::PanX:        return "Pan X";
         case T::PanY:        return "Pan Y";
         case T::Property:    return "Property";
@@ -194,10 +190,8 @@ from_string(std::string_view string)
     if (string == "Zoom In") { return T::ZoomIn; }
     if (string == "Zoom Out") { return T::ZoomOut; }
     if (string == "Zoom") { return T::Zoom; }
-    if (string == "LocalRoll X") { return T::LocalRollX; }
-    if (string == "LocalRoll Y") { return T::LocalRollY; }
-    if (string == "GlobalRoll X") { return T::GlobalRollX; }
-    if (string == "GlobalRoll Y") { return T::GlobalRollY; }
+    if (string == "LocalRoll") { return T::LocalRoll; }
+    if (string == "GlobalRoll") { return T::GlobalRoll; }
     if (string == "Pan X") { return T::PanX; }
     if (string == "Pan Y") { return T::PanY; }
     if (string == "Property") { return T::Property; }
