@@ -172,8 +172,8 @@ TEST_CASE("Minimal", "[profile]") {
     Profile profile = loadProfile(absPath(File));
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 2;
+    ref.version = Profile::CurrentVersion;
+
     CHECK(profile == ref);
 }
 

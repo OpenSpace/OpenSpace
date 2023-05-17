@@ -154,7 +154,7 @@ public:
     /// Removes an asset unless the `ignoreUpdates` member is set to `true`
     void removeAsset(const std::string& path);
 
-    static constexpr Version CurrentVersion = Version{ 1, 2 };
+    static constexpr Version CurrentVersion = Version{ 1, 3 };
 
     Version version = CurrentVersion;
     std::vector<Module> modules;
