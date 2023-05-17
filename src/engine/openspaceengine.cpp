@@ -1224,8 +1224,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(end)");
 }
 
-void OpenSpaceEngine::viewportChanged()
-{
+void OpenSpaceEngine::viewportChanged() {
     // Needs to be updated since each render call potentially targets a different
     // window and/or viewport
     using FR = ghoul::fontrendering::FontRenderer;
