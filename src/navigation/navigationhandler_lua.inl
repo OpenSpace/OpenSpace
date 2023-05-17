@@ -217,7 +217,6 @@ namespace {
  * \param min the minimum value that this axis can set for the property
  * \param max the maximum value that this axis can set for the property
  * \param shouldInvert if the joystick movement should be inverted or not
- * \param shouldFlip reverses the movement of the camera that the joystick produces
  * \param isRemote if true, the property change will also be executed on connected nodes
  *                 if false, the property change will only affect the master node
  */
@@ -225,7 +224,6 @@ namespace {
                                                    std::string propertyUri,
                                                    float min = 0.f, float max = 1.f,
                                                    bool shouldInvert = false,
-                                                   bool shouldFlip = false,
                                                    bool isRemote = true)
 {
     using namespace openspace;
@@ -237,7 +235,6 @@ namespace {
         min,
         max,
         JoystickCameraStates::AxisInvert(shouldInvert),
-        JoystickCameraStates::AxisFlip(shouldFlip),
         isRemote
     );
 }

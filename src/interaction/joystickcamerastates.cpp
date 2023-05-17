@@ -276,7 +276,6 @@ void JoystickCameraStates::setAxisMappingProperty(std::string joystickName,
                                                   std::string propertyUri,
                                                   float min, float max,
                                                   AxisInvert shouldInvert,
-                                                  AxisFlip shouldFlip,
                                                   bool isRemote)
 {
     JoystickCameraState* joystickCameraState = findOrAddJoystickCameraState(joystickName);
@@ -292,7 +291,6 @@ void JoystickCameraStates::setAxisMappingProperty(std::string joystickName,
 
     joystickCameraState->axisMapping[axis].type = AxisType::Property;
     joystickCameraState->axisMapping[axis].invert = shouldInvert;
-    joystickCameraState->axisMapping[axis].flip = shouldFlip;
     joystickCameraState->axisMapping[axis].propertyUri = propertyUri;
     joystickCameraState->axisMapping[axis].minValue = min;
     joystickCameraState->axisMapping[axis].maxValue = max;

@@ -544,7 +544,6 @@ void NavigationHandler::setJoystickAxisMappingProperty(std::string joystickName,
                                                        std::string propertyUri,
                                                        float min, float max,
                                             JoystickCameraStates::AxisInvert shouldInvert,
-                                                JoystickCameraStates::AxisFlip shouldFlip,
                                                        bool isRemote)
 {
     _orbitalNavigator.joystickStates().setAxisMappingProperty(
@@ -554,7 +553,6 @@ void NavigationHandler::setJoystickAxisMappingProperty(std::string joystickName,
         min,
         max,
         shouldInvert,
-        shouldFlip,
         isRemote
     );
 }

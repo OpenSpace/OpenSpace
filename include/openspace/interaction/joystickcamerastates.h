@@ -99,8 +99,7 @@ public:
 
     void setAxisMappingProperty(std::string joystickName, int axis,
         std::string propertyUri, float min = 0.f, float max = 1.f,
-        AxisInvert shouldInvert = AxisInvert::No, AxisFlip shouldFlip = AxisFlip::No,
-        bool isRemote = true
+        AxisInvert shouldInvert = AxisInvert::No, bool isRemote = true
     );
 
     AxisInformation axisMapping(const std::string& joystickName, int axis) const;

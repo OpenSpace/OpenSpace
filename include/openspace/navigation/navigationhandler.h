@@ -114,7 +114,6 @@ public:
         float min = 0.f, float max = 1.f,
         JoystickCameraStates::AxisInvert shouldInvert =
             JoystickCameraStates::AxisInvert::No,
-        JoystickCameraStates::AxisFlip shouldFlip = JoystickCameraStates::AxisFlip::No,
         bool isRemote = true);
 
     JoystickCameraStates::AxisInformation joystickAxisMapping(
