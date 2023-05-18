@@ -1,4 +1,4 @@
-local spec = {
+local Browser = {
   Type = "ScreenSpaceBrowser",
   Identifier = "ScreenSpaceBrowserExample",
   Name = "Screen Space Browser Example",
@@ -6,11 +6,11 @@ local spec = {
 };
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(spec)
+  openspace.addScreenSpaceRenderable(Browser)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(spec)
+  openspace.removeScreenSpaceRenderable(Browser)
 end)
 
-asset.export(spec)
+asset.export(Browser)

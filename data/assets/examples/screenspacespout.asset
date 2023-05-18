@@ -19,7 +19,6 @@ local Spout = {
 }
 
 
-
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Spout)
 end)

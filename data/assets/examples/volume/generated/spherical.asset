@@ -6,15 +6,17 @@
 
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local astronomicalUnit = 149597870700
 
-local volume = {
+
+local AstronomicalUnit = 149597870700
+
+local Volume = {
   Identifier = "GeneratedVolume",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = astronomicalUnit
+      Scale = AstronomicalUnit
     }
   },
   Renderable = {
@@ -34,11 +36,11 @@ local volume = {
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(volume)
+  openspace.addSceneGraphNode(Volume)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(volume)
+  openspace.removeSceneGraphNode(Volume)
 end)
 
-asset.export(volume)
+asset.export(Volume)

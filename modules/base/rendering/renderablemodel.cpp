@@ -745,10 +745,12 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _uniformCache.lightIntensities,
         _lightIntensitiesBuffer
     );
+
     _program->setUniform(
         _uniformCache.lightDirectionsViewSpace,
         _lightDirectionsViewSpaceBuffer
     );
+
     _program->setUniform(
         _uniformCache.modelViewTransform,
         glm::mat4(modelViewTransform)
