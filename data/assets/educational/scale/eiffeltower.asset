@@ -29,8 +29,7 @@ local ScaleModel = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
       Latitude = Location[1],
-      Longitude = Location[2],
-      UseHeightmap = false
+      Longitude = Location[2]
     },
     Scale = {
       Type = "StaticScale",

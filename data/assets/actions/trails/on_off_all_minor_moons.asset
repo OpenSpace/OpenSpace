@@ -56,8 +56,8 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(minormoons_on)
 end)
 
-asset.export("minormoons_on")
-asset.export("minormoons_off")
+asset.export(minormoons_on)
+asset.export(minormoons_off)
 
 
 
