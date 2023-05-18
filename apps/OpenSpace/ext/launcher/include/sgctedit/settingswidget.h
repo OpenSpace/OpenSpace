@@ -96,6 +96,18 @@ public:
     int graphicsSelectionForShowUiOnFirstWindow() const;
 
     /**
+     * Sets value of the graphics selection combo box for which other window that the
+     * first window will mirror.
+     * 
+     * \param selection int value for the combo box selection.
+     *                  0 if no window is being mirrored (only the UI will appear)
+     *                  1 if the second window's viewport is mirrored in the first window
+     *                  2 if the third window's viewport is mirrored in the first window
+     *                  3 if the fourth window's viewport is mirrored in the first window
+     */
+    void setGraphicsSelectionForShowUiOnFirstWindow(int selection);
+
+    /**
      * Sets the value of the checkbox for enabling VSync.
      * 
      * \param enableVsync boolean value, if set true then VSync is enabled

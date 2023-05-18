@@ -130,23 +130,55 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
             }
             wCtrl->setDecorationState(w.isDecorated.value());
         }
-        // If first window only renders 2D, and all subsequent windows render 3D, then
-        // will enable the checkbox option for showing GUI only on first window
-        if (w.draw2D.has_value() && w.draw3D.has_value()) {
-            firstWindowGuiIsEnabled &= (i == 0) ?  w.draw2D.value() : !w.draw2D.value();
-            firstWindowGuiIsEnabled &= (i == 0) ? !w.draw3D.value() :  w.draw3D.value();
-        }
-        else {
-            firstWindowGuiIsEnabled = false;
-        }
         setupProjectionTypeInGui(w.viewports.back(), wCtrl);
     }
-    _settingsWidget->setShowUiOnFirstWindow(firstWindowGuiIsEnabled);
-    _settingsWidget->setEnableShowUiOnFirstWindowCheckbox(nWindows > 1);
+    setupStateOfUiOnFirstWindow(nWindows);
     _settingsWidget->setVsync(
         _cluster.settings &&
         _cluster.settings.value().display &&
         _cluster.settings.value().display.value().swapInterval
+    );
+}
+
+void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
+    bool firstWindowGuiIsEnabled = (nWindows > 1);
+    for (size_t i = 0; i < nWindows; ++i) {
+        sgct::config::Window& w = _cluster.nodes.front().windows[i];
+        //First window needs to have "GUI" tag if this mode is set
+        if (i == 0) {
+            if (std::find(w.tags.begin(), w.tags.end(), "GUI") != w.tags.end()) {
+                firstWindowGuiIsEnabled = true;
+            }
+            else {
+                firstWindowGuiIsEnabled = false;
+            }
+        }
+        // If first window only renders 2D, and all subsequent windows do not, then
+        // will enable the checkbox option for showing GUI only on first window
+        if (w.draw2D.has_value()) {
+            firstWindowGuiIsEnabled &= (i == 0) ?  w.draw2D.value() : !w.draw2D.value();
+        }
+        else {
+            firstWindowGuiIsEnabled = false;
+        }
+    }
+    _settingsWidget->setShowUiOnFirstWindow(firstWindowGuiIsEnabled);
+    _settingsWidget->setEnableShowUiOnFirstWindowCheckbox(nWindows > 1);
+
+    int graphicsSelectionForFirstWindow = 0;
+    if (firstWindowGuiIsEnabled) {
+        sgct::config::Viewport firstWindowViewport =
+            _cluster.nodes.front().windows[0].viewports.back();
+        for (size_t i = 1; i < nWindows; ++i) {
+            sgct::config::Window& w = _cluster.nodes.front().windows[i];
+            if (w.viewports.back() == firstWindowViewport) {
+                graphicsSelectionForFirstWindow = static_cast<int>(i);
+                break;
+            }
+        }
+    }
+    _settingsWidget->setGraphicsSelectionForShowUiOnFirstWindow(
+        graphicsSelectionForFirstWindow
     );
 }
 

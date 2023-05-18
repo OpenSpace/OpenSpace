@@ -106,11 +106,17 @@ void SettingsWidget::setShowUiOnFirstWindow(bool setUiOnFirstWindow) {
 
 void SettingsWidget::setEnableShowUiOnFirstWindowCheckbox(bool enable) {
     _showUiOnFirstWindow->setEnabled(enable);
+    _firstWindowGraphicsSelection->setEnabled(enable);
 }
 
 int SettingsWidget::graphicsSelectionForShowUiOnFirstWindow() const {
     return _firstWindowGraphicsSelection->currentIndex();
 }
+
+void SettingsWidget::setGraphicsSelectionForShowUiOnFirstWindow(int selection) {
+    _firstWindowGraphicsSelection->setCurrentIndex(selection);
+}
+
 
 void SettingsWidget::setVsync(bool enableVsync) {
     _checkBoxVsync->setChecked(enableVsync);
