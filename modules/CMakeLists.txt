@@ -163,7 +163,6 @@ endfunction ()
 
 
 option(OPENSPACE_ENABLE_ALL_MODULES "If this is ON, all modules will be enabled by default")
-set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")
 set(internal_module_path "${PROJECT_SOURCE_DIR}/modules")
 set(all_enabled_modules "")
 
@@ -173,21 +172,6 @@ set(all_enabled_modules "")
 #
 # First get all the internal module
 get_individual_modules(${internal_module_path} all_module_names all_module_paths)
-
-# Then get all external modules
-foreach (path ${OPENSPACE_EXTERNAL_MODULES_PATHS})
-  get_individual_modules(${path} names paths)
-
-  foreach (n ${names})
-    if (${n} IN_LIST all_module_names)
-      message(FATAL_ERROR "Module name ${n} is not unique among the external directories")
-    endif ()
-  endforeach ()
-
-  set(all_module_names ${all_module_names} ${names})
-  set(all_module_paths ${all_module_paths} ${paths})
-endforeach ()
-
 list(LENGTH all_module_names all_module_names_count)
 math(EXPR all_module_names_count "${all_module_names_count} - 1")
 
@@ -336,7 +320,6 @@ list(REMOVE_DUPLICATES topologically_sorted)
 
 set(MODULE_HEADERS "")
 set(MODULE_CLASSES "")
-set(MODULE_PATHS "")
 
 foreach (key RANGE ${enabled_module_count})
   list(GET topologically_sorted ${key} name)
@@ -376,19 +359,9 @@ if (NOT "${MODULE_CLASSES}" STREQUAL "")
   string(REPLACE ";" "" MODULE_CLASSES ${MODULE_CLASSES})
 endif ()
 
-if (NOT "${MODULE_PATHS}" STREQUAL "")
-  string(REPLACE ";" "" MODULE_PATHS ${MODULE_PATHS})
-  string(REPLACE "\\" "/" MODULE_PATHS ${MODULE_PATHS})
-endif ()
-
 configure_file(
   ${PROJECT_SOURCE_DIR}/support/cmake/module_registration.template
   ${CMAKE_BINARY_DIR}/_generated/include/openspace/moduleregistration.h
-)
-
-configure_file(
-  ${PROJECT_SOURCE_DIR}/support/cmake/module_path.template
-  ${CMAKE_BINARY_DIR}/_generated/include/openspace/modulepath.h
 )
 
 # Return the list of enabled modules to the caller
