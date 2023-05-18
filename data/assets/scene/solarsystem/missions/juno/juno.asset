@@ -1,5 +1,6 @@
 
 asset.require("scene/solarsystem/missions/juno/mission")
+asset.require("scene/solarsystem/planets/jupiter/layers/colorlayers/jupiter_video")
 local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
