@@ -44,7 +44,6 @@ local toggle_trail = {
   GuiPath = "/Trails",
   IsLocal = true
 }
-asset.export("toggle_trail", toggle_trail.Identifier)
 
 local hide_trail = {
   Identifier = "os.hide_trail",
@@ -69,7 +68,6 @@ local hide_trail = {
   GuiPath = "/Trails",
   IsLocal = true
 }
-asset.export("hide_trail", hide_trail.Identifier)
 
 local show_trail = {
   Identifier = "os.show_trail",
@@ -94,19 +92,23 @@ local show_trail = {
   GuiPath = "/Trails",
   IsLocal = true
 }
-asset.export("show_trail", show_trail.Identifier)
 
 asset.onInitialize(function()
   openspace.action.registerAction(toggle_trail)
-  openspace.action.registerAction(show_trail)
   openspace.action.registerAction(hide_trail)
+  openspace.action.registerAction(show_trail)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(toggle_trail)
   openspace.action.removeAction(show_trail)
   openspace.action.removeAction(hide_trail)
+  openspace.action.removeAction(toggle_trail)
 end)
+
+asset.export("toggle_trail", toggle_trail.Identifier)
+asset.export("hide_trail", hide_trail.Identifier)
+asset.export("show_trail", show_trail.Identifier)
+
 
 
 asset.meta = {

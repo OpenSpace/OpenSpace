@@ -1,5 +1,5 @@
-local function getIlluminationCommand(node, global)
-  local commandString = "local node = \"" .. node .. "\"\n"
+local function illuminationCommand(node, global)
+  local commandString = "local node = '" .. node .. "'\n"
   if (node == "Current Focus") then
     commandString = "local node = openspace.navigation.getNavigationState().Anchor\n"
   end
@@ -43,14 +43,14 @@ end]]
   return commandString
 end
 
-local function getIlluminationAction(node, node_lower, global)
+local function illuminationAction(node, node_lower, global)
   local actionString = "_standard_illumination"
   local actionName = "standard illumination"
-  local actionCommand = getIlluminationCommand(node, global)
+  local actionCommand = illuminationCommand(node, global)
   if (global) then
     actionString = "_global_illumination"
     actionName = "global illumination"
-    actionCommand = getIlluminationCommand(node, global)
+    actionCommand = illuminationCommand(node, global)
   end
 
   local action = {
@@ -64,35 +64,23 @@ local function getIlluminationAction(node, node_lower, global)
   return action
 end
 
-local current_focus_global = getIlluminationAction("Current Focus", "current_focus", true)
-asset.export("current_focus_global", current_focus_global.Identifier)
-local current_focus_standard = getIlluminationAction("Current Focus", "current_focus", false)
-asset.export("current_focus_standard", current_focus_standard.Identifier)
+local current_focus_global = illuminationAction("Current Focus", "current_focus", true)
+local current_focus_standard = illuminationAction("Current Focus", "current_focus", false)
 
-local earth_global = getIlluminationAction("Earth", "earth", true)
-asset.export("earth_global", earth_global.Identifier)
-local earth_standard = getIlluminationAction("Earth", "earth", false)
-asset.export("earth_standard", earth_standard.Identifier)
+local earth_global = illuminationAction("Earth", "earth", true)
+local earth_standard = illuminationAction("Earth", "earth", false)
 
-local mars_global = getIlluminationAction("Mars", "mars", true)
-asset.export("mars_global", mars_global.Identifier)
-local mars_standard = getIlluminationAction("Mars", "mars", false)
-asset.export("mars_standard", mars_standard.Identifier)
+local mars_global = illuminationAction("Mars", "mars", true)
+local mars_standard = illuminationAction("Mars", "mars", false)
 
-local venus_global = getIlluminationAction("Venus", "venus", true)
-asset.export("venus_global", venus_global.Identifier)
-local venus_standard = getIlluminationAction("Venus", "venus", false)
-asset.export("venus_standard", venus_standard.Identifier)
+local venus_global = illuminationAction("Venus", "venus", true)
+local venus_standard = illuminationAction("Venus", "venus", false)
 
-local titan_global = getIlluminationAction("Titan", "titan", true)
-asset.export("titan_global", titan_global.Identifier)
-local titan_standard = getIlluminationAction("Titan", "titan", false)
-asset.export("titan_standard", titan_standard.Identifier)
+local titan_global = illuminationAction("Titan", "titan", true)
+local titan_standard = illuminationAction("Titan", "titan", false)
 
-local saturn_global = getIlluminationAction("Saturn", "saturn", true)
-asset.export("saturn_global", saturn_global.Identifier)
-local saturn_standard = getIlluminationAction("Saturn", "saturn", false)
-asset.export("titan_standard", saturn_standard.Identifier)
+local saturn_global = illuminationAction("Saturn", "saturn", true)
+local saturn_standard = illuminationAction("Saturn", "saturn", false)
 
 
 -- handling Earth special
@@ -112,7 +100,6 @@ local all_globes_global_illumination = {
   GuiPath = "/Solar System",
   IsLocal = true
 }
-asset.export("all_globes_global_illumination", all_globes_global_illumination.Identifier)
 
 local all_globes_standard_illumination = {
   Identifier = "os.all_globes_standard_illumination",
@@ -129,7 +116,6 @@ local all_globes_standard_illumination = {
   GuiPath = "/Solar System",
   IsLocal = true
 }
-asset.export("all_globes_standard_illumination", all_globes_standard_illumination.Identifier)
 
 
 asset.onInitialize(function()
@@ -165,3 +151,18 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(current_focus_standard)
   openspace.action.removeAction(current_focus_global)
 end)
+
+asset.export("current_focus_global", current_focus_global.Identifier)
+asset.export("current_focus_standard", current_focus_standard.Identifier)
+asset.export("earth_global", earth_global.Identifier)
+asset.export("earth_standard", earth_standard.Identifier)
+asset.export("mars_global", mars_global.Identifier)
+asset.export("mars_standard", mars_standard.Identifier)
+asset.export("venus_global", venus_global.Identifier)
+asset.export("venus_standard", venus_standard.Identifier)
+asset.export("titan_global", titan_global.Identifier)
+asset.export("titan_standard", titan_standard.Identifier)
+asset.export("saturn_global", saturn_global.Identifier)
+asset.export("titan_standard", saturn_standard.Identifier)
+asset.export("all_globes_global_illumination", all_globes_global_illumination.Identifier)
+asset.export("all_globes_standard_illumination", all_globes_standard_illumination.Identifier)

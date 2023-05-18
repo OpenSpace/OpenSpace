@@ -1,4 +1,4 @@
-local item = {
+local Item = {
   Type = "DashboardItemVelocity",
   Identifier = "CameraVelocity",
   Simplification = true,
@@ -6,14 +6,15 @@ local item = {
 }
 
 asset.onInitialize(function()
-  openspace.dashboard.addDashboardItem(item)
+  openspace.dashboard.addDashboardItem(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.dashboard.removeDashboardItem(item)
+  openspace.dashboard.removeDashboardItem(Item)
 end)
 
-asset.export(item)
+asset.export(Item)
+
 
 
 asset.meta = {

@@ -9,8 +9,6 @@ local undo_event_fade = {
   GuiPath = "/System/Rendering",
   IsLocal = true
 }
-asset.export("undo_event_fade", undo_event_fade.Identifier)
-
 
 asset.onInitialize(function()
   openspace.action.registerAction(undo_event_fade)
@@ -19,6 +17,10 @@ end)
 asset.onDeinitialize(function()
   openspace.action.removeAction(undo_event_fade)
 end)
+
+asset.export("undo_event_fade", undo_event_fade.Identifier)
+
+
 
 asset.meta = {
   Name = "Actions - Undo All Event Fading",

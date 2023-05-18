@@ -1,6 +1,8 @@
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
+
+
 local modelFolder = asset.syncedResource({
   Name = "Scale Model Scientist",
   Type = "HttpSynchronization",
@@ -8,24 +10,25 @@ local modelFolder = asset.syncedResource({
   Version = 1
 })
 
-local scaleModel = {
+local Location = { 34.201639, -118.171319, 0.78 }
+
+local ScaleModel = {
   Identifier = "Scale_Scientist",
   Parent = earthAsset.Earth.Identifier,
-  --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 34.201639,
-      Longitude = -118.171319,
-      Altitude = 0.78,
+      Latitude = Location[1],
+      Longitude = Location[2],
+      Altitude = Location[3],
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 34.201639,
-      Longitude = -118.171319,
+      Latitude = Location[1],
+      Longitude = Location[2],
       UseHeightmap = false
     }
   },
@@ -41,7 +44,7 @@ local scaleModel = {
   }
 }
 
-local updatePositionAction = {
+local UpdatePositionAction = {
   Identifier = "os.scale_models.drop_scientist",
   Name = "Drop Scientist under camera",
   Command = [[
@@ -52,29 +55,30 @@ local updatePositionAction = {
   IsLocal = false
 }
 
-local resetPositionAction = {
-  Identifier = "os.os.scale_models.reset_scientist",
+local ResetPositionAction = {
+  Identifier = "os.scale_models.reset_scientist",
   Name = "Reset Scientist position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_Scientist', ']] .. earthAsset.Earth.Identifier .. [[', 34.201639, -118.171319)
-  ]],
-  Documentation = "Resets the Scientist back to it's actual location",
+    openspace.globebrowsing.setNodePosition('Scale_Scientist', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",
+  Documentation = "Resets the Scientist back to its actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(scaleModel)
-  openspace.action.registerAction(updatePositionAction)
-  openspace.action.registerAction(resetPositionAction)
+  openspace.addSceneGraphNode(ScaleModel)
+
+  openspace.action.registerAction(UpdatePositionAction)
+  openspace.action.registerAction(ResetPositionAction)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(resetPositionAction)
-  openspace.action.removeAction(updatePositionAction)
-  openspace.removeSceneGraphNode(scaleModel)
+  openspace.action.removeAction(ResetPositionAction)
+  openspace.action.removeAction(UpdatePositionAction)
+
+  openspace.removeSceneGraphNode(ScaleModel)
 end)
 
-asset.export(scaleModel)
-asset.export(updatePositionAction)
-asset.export(resetPositionAction)
+asset.export(ScaleModel)
+asset.export(UpdatePositionAction)
+asset.export(ResetPositionAction)

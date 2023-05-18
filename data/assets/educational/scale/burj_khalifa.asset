@@ -1,6 +1,8 @@
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
+
+
 local modelFolder = asset.syncedResource({
   Name = "Scale Burj Khalifa",
   Type = "UrlSynchronization",
@@ -10,24 +12,26 @@ local modelFolder = asset.syncedResource({
   Override = false
 })
 
-local scaleModel = {
+local Location = { 25.196715, 55.273972, -3.0 }
+
+local ScaleModel = {
   Identifier = "Scale_BurjKhalifa",
   Parent = earthAsset.Earth.Identifier,
-  --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  -- Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 25.196715,
-      Longitude = 55.273972,
-      Altitude = -3.0,
+      Latitude = Location[1],
+      Longitude = Location[2],
+      Altitude = Location[3],
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 25.196715,
-      Longitude = 55.273972,
+      Latitude = Location[1],
+      Longitude = Location[2],
       UseHeightmap = false
     }
   },
@@ -43,7 +47,7 @@ local scaleModel = {
   }
 }
 
-local updatePositionAction = {
+local UpdatePositionAction = {
   Identifier = "os.scale_models.drop_burj_khalifa",
   Name = "Drop Burj Khalifa under camera",
   Command = [[
@@ -54,29 +58,29 @@ local updatePositionAction = {
   IsLocal = false
 }
 
-local resetPositionAction = {
+local ResetPositionAction = {
   Identifier = "os.os.scale_models.reset_burj_khalifa",
   Name = "Reset Burj Khalifa position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_BurjKhalifa', ']] .. earthAsset.Earth.Identifier .. [[', 25.196715, 55.273972)
-  ]],
-  Documentation = "Resets the Burj Khalifa back to it's actual location",
+    openspace.globebrowsing.setNodePosition('Scale_BurjKhalifa', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",
+  Documentation = "Resets the Burj Khalifa back to its actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(scaleModel)
-  openspace.action.registerAction(updatePositionAction)
-  openspace.action.registerAction(resetPositionAction)
+  openspace.addSceneGraphNode(ScaleModel)
+
+  openspace.action.registerAction(UpdatePositionAction)
+  openspace.action.registerAction(ResetPositionAction)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(resetPositionAction)
-  openspace.action.removeAction(updatePositionAction)
-  openspace.removeSceneGraphNode(scaleModel)
+  openspace.action.removeAction(ResetPositionAction)
+  openspace.action.removeAction(UpdatePositionAction)
+  openspace.removeSceneGraphNode(ScaleModel)
 end)
 
-asset.export(scaleModel)
-asset.export(updatePositionAction)
-asset.export(resetPositionAction)
+asset.export(ScaleModel)
+asset.export(UpdatePositionAction)
+asset.export(ResetPositionAction)

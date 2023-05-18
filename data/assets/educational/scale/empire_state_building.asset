@@ -1,6 +1,8 @@
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
+
+
 local modelFolder = asset.syncedResource({
   Name = "Scale Empire State Building",
   Type = "HttpSynchronization",
@@ -8,24 +10,26 @@ local modelFolder = asset.syncedResource({
   Version = 1
 })
 
-local scaleModel = {
+local Location = { 40.748441, -73.985664 }
+
+local ScaleModel = {
   Identifier = "Scale_EmpireStateBuilding",
   Parent = earthAsset.Earth.Identifier,
-  --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  -- Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 40.748441,
-      Longitude = -73.985664,
+      Latitude = Location[1],
+      Longitude = Location[2],
       Altitude = 0.0,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 40.748441,
-      Longitude = -73.985664,
+      Latitude = Location[1],
+      Longitude = Location[2],
       UseHeightmap = false
     },
     Scale = {
@@ -45,7 +49,7 @@ local scaleModel = {
   }
 }
 
-local updatePositionAction = {
+local UpdatePositionAction = {
   Identifier = "os.scale_models.drop_empire_state_building",
   Name = "Drop Empire State Building under camera",
   Command = [[
@@ -56,29 +60,30 @@ local updatePositionAction = {
   IsLocal = false
 }
 
-local resetPositionAction = {
+local ResetPositionAction = {
   Identifier = "os.os.scale_models.reset_empire_state_building",
   Name = "Reset Empire State Building position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_EmpireStateBuilding', ']] .. earthAsset.Earth.Identifier .. [[', 40.748441, -73.985664)
-  ]],
-  Documentation = "Resets the Empire State Building back to it's actual location",
+    openspace.globebrowsing.setNodePosition('Scale_EmpireStateBuilding', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",
+  Documentation = "Resets the Empire State Building back to its actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(scaleModel)
-  openspace.action.registerAction(updatePositionAction)
-  openspace.action.registerAction(resetPositionAction)
+  openspace.addSceneGraphNode(ScaleModel)
+
+  openspace.action.registerAction(UpdatePositionAction)
+  openspace.action.registerAction(ResetPositionAction)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(resetPositionAction)
-  openspace.action.removeAction(updatePositionAction)
-  openspace.removeSceneGraphNode(scaleModel)
+  openspace.action.removeAction(ResetPositionAction)
+  openspace.action.removeAction(UpdatePositionAction)
+
+  openspace.removeSceneGraphNode(ScaleModel)
 end)
 
-asset.export(scaleModel)
-asset.export(updatePositionAction)
-asset.export(resetPositionAction)
+asset.export(ScaleModel)
+asset.export(UpdatePositionAction)
+asset.export(ResetPositionAction)

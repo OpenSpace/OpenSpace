@@ -9,7 +9,6 @@ local fade_up_trails = {
   GuiPath = "/Trails",
   IsLocal = true
 }
-asset.export("fade_up_trails", fade_up_trails.Identifier)
 
 local fade_down_trails = {
   Identifier = "os.fade_down_trails_planets_moon",
@@ -22,7 +21,6 @@ local fade_down_trails = {
   GuiPath = "/Trails",
   IsLocal = true
 }
-asset.export("fade_down_trails", fade_down_trails.Identifier)
 
 local toggle_trails = {
   Identifier = "os.toggle_trails_planets_moon",
@@ -52,7 +50,6 @@ local toggle_trails = {
   GuiPath = "/Trails",
   IsLocal = true
 }
-asset.export("toggle_trails", toggle_trails)
 
 asset.onInitialize(function()
   openspace.action.registerAction(fade_up_trails)
@@ -65,3 +62,7 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(fade_down_trails)
   openspace.action.removeAction(fade_up_trails)
 end)
+
+asset.export("fade_up_trails", fade_up_trails.Identifier)
+asset.export("fade_down_trails", fade_down_trails.Identifier)
+asset.export("toggle_trails", toggle_trails)
