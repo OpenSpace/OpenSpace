@@ -1,7 +1,7 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
 
-local GSMKernel = asset.localResource("../kernels/GSM.ti")
+local GSMKernel = asset.localResource("../kernels/GSM.tf")
 
 local GSMReferenceFrame = {
   Identifier = "GSMReferenceFrame",
@@ -20,22 +20,47 @@ local GSMReferenceFrame = {
     Hidden = true
   }
 }
+local SMReferenceFrame = {
+  Identifier = "SMReferenceFrame",
+  Parent = GSMReferenceFrame.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      --http://jsoc.stanford.edu/~jsoc/keywords/Chris_Russel/Geophysical%20Coordinate%20Transformations.htm
+      --((cos u, 0, -sin u)(0, 1, 0)(sin u, 0, cos u))
+      --u being dipole tilt 9.6deg https://en.wikipedia.org/wiki/Geomagnetic_pole
+      -- Rotation = {
+      --   0.985996037, 0.0, -0.166768747,
+      --   0.0,         1.0, 0.0,
+      --   0.166768747, 0.0, 0.985996037
+      -- }
+    }
+  },
+  GUI = {
+    Name = "SM Reference Frame",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GSMReferenceFrame)
+  openspace.addSceneGraphNode(SMReferenceFrame)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SMReferenceFrame)
   openspace.removeSceneGraphNode(GSMReferenceFrame)
 end)
 
 asset.export(GSMReferenceFrame)
+asset.export(SMReferenceFrame)
 
 
 asset.meta = {
   Name = "Earth magnetosphere transforms",
   Version = "1.1",
-  Description = "Earth transforms: GSMReferenceFrame. Geocentric Solar Magnetospheric",
+  Description = "Earth transforms: GSMReferenceFrame. Geocentric Solar Magnetospheric, SMReferenceFrame, Solar Magnetic",
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"
