@@ -2,7 +2,7 @@ local textures = asset.syncedResource({
   Name = "Deep Sky Objects Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_deepsky_textures",
-  Version = 1
+  Version = 2
 })
 
 local speck = asset.syncedResource({
