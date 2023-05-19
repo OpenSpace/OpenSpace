@@ -98,6 +98,8 @@ private:
     void generateConfigIndividualWindowSettings(sgct::config::Node& node);
     void setupProjectionTypeInGui(sgct::config::Viewport& vPort, WindowControl* wCtrl);
     void setupStateOfUiOnFirstWindow(size_t nWindows);
+    bool doesViewportSubsetMatch(sgct::config::Viewport& first,
+        sgct::config::Viewport& compare);
 
     void save();
     void apply();

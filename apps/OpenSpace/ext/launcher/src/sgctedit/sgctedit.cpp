@@ -89,7 +89,6 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
 {
     setWindowTitle("Window Configuration Editor");
     size_t nWindows = _cluster.nodes.front().windows.size();
-    bool firstWindowGuiIsEnabled = (nWindows > 1);
     std::vector<QRect> monitorSizes = createMonitorInfoSet();
     createWidgets(monitorSizes, nWindows, false);
     size_t existingWindowsControlSize = _displayWidget->windowControls().size();
@@ -171,7 +170,7 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
             _cluster.nodes.front().windows[0].viewports.back();
         for (size_t i = 1; i < nWindows; ++i) {
             sgct::config::Window& w = _cluster.nodes.front().windows[i];
-            if (w.viewports.back() == firstWindowViewport) {
+            if (doesViewportSubsetMatch(firstWindowViewport, w.viewports.back())) {
                 graphicsSelectionForFirstWindow = static_cast<int>(i);
                 break;
             }
@@ -182,43 +181,73 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
     );
 }
 
-void SgctEdit::doesViewportSubsetMatch(sgct::config::Viewport& first,
+bool SgctEdit::doesViewportSubsetMatch(sgct::config::Viewport& first,
                                        sgct::config::Viewport& compare)
 {
     bool matches = true;
-    compareOptionalElementOfConfig(first.quality, compare.quality, matches);
-    compareOptionalElementOfConfig(first.position, compare.position, matches);
-    compareOptionalElementOfConfig(first.size, compare.size, matches);
-    compareOptionalElementOfConfig(first.projection, compare.projection, matches);
-    switch (first.projection) {
-        case sgct::config::CylindricalProjection:
-            break;
-        case sgct::config::EquirectangularProjection:
-            break;
-        case sgct::config::FisheyeProjection:
-            break;
-        case sgct::config::PlanarProjection:
-            break;
-        case sgct::config::SphericalMirrorProjection:
-            break;
-        case sgct::config::SpoutOutputProjection:
-            break;
-        default:
-            matches = false;
-            break;
-    }
-}
+    matches &= compareOptionalCfgElement(first.isTracked, compare.isTracked);
+    matches &= compareOptionalCfgElement(first.position, compare.position);
+    matches &= compareOptionalCfgElement(first.size, compare.size);
 
-template <typename T>
-void SgctEdit::compareOptionalElementOfConfig(std::optional<T>& first,
-                                              std::optional<T>& compare,
-                                              bool& matches)
-{
-    if (first.has_value() && compare.has_value()) {
-        if (*first != *compare) {
-            matches = false;
-        }
+    bool projectionMatchFound = false;
+    sgct::config::Projections& firstP = first.projection;
+    sgct::config::Projections& compareP = compare.projection;
+    if (typeid(firstP) != typeid(compareP)) {
+        return false;
     }
+    std::visit(overloaded{
+        [&](sgct::config::CylindricalProjection p) {
+            matches &= compareOptionalCfgElement(
+                p.quality,
+                std::get<sgct::config::CylindricalProjection>(compareP).quality
+            );
+            matches &= compareOptionalCfgElement(
+                p.heightOffset,
+                std::get<sgct::config::CylindricalProjection>(compareP).heightOffset
+            );
+            projectionMatchFound = true;
+        },
+        [&](sgct::config::EquirectangularProjection p) {
+            matches &= compareOptionalCfgElement(
+                p.quality,
+                std::get<sgct::config::EquirectangularProjection>(compareP).quality
+            );
+            projectionMatchFound = true;
+        },
+        [&](sgct::config::FisheyeProjection p) {
+            matches &= compareOptionalCfgElement(
+                p.quality,
+                std::get<sgct::config::FisheyeProjection>(compareP).quality
+            );
+            projectionMatchFound = true;
+        },
+        [&](sgct::config::PlanarProjection p) {
+            matches &= compareCfgElement(
+                p.fov,
+                std::get<sgct::config::PlanarProjection>(compareP).fov
+            );
+            projectionMatchFound = true;
+        },
+        [&](sgct::config::SphericalMirrorProjection p) {
+            matches &= compareOptionalCfgElement(
+                p.quality,
+                std::get<sgct::config::SphericalMirrorProjection>(compareP).quality
+            );
+            projectionMatchFound = true;
+        },
+        [&](sgct::config::SpoutOutputProjection p) {
+            matches &= compareOptionalCfgElement(
+                p.quality,
+                std::get<sgct::config::SpoutOutputProjection>(compareP).quality
+            );
+            projectionMatchFound = true;
+        },
+        [&](sgct::config::NoProjection) {},
+        [&](sgct::config::ProjectionPlane) {},
+        [&](sgct::config::SpoutFlatProjection) {}
+    }, first.projection);
+    matches &= projectionMatchFound;
+    return matches;
 }
 
 void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
