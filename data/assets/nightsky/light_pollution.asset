@@ -1,5 +1,7 @@
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
+
+
 local textures = asset.syncedResource({
   Name = "Light Pollution Textures",
   Type = "HttpSynchronization",
@@ -7,7 +9,8 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-local sphere = {
+
+local LightPollutionSphere = {
   Identifier = "LightPollutionSphere",
   Parent = earthAsset.Earth.Identifier,
   Transform = {
@@ -50,8 +53,8 @@ local sphere = {
   }
 }
 
-local pollution_1 = {
-  Identifier = "os.nightsky.set_light_pollution_level_1",
+local SetLightPollutionLevel1 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel1",
   Name = "Set light pollution level 1",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
@@ -66,8 +69,8 @@ local pollution_1 = {
   IsLocal = false
 }
 
-local pollution_2 = {
-  Identifier = "os.nightsky.set_light_pollution_level_2",
+local SetLightPollutionLevel2 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel2",
   Name = "Set light pollution level 2",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
@@ -82,8 +85,8 @@ local pollution_2 = {
   IsLocal = false
 }
 
-local pollution_3 = {
-  Identifier = "os.nightsky.set_light_pollution_level_3",
+local SetLightPollutionLevel3 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel3",
   Name = "Set light pollution level 3",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
@@ -98,8 +101,8 @@ local pollution_3 = {
   IsLocal = false
 }
 
-local pollution_4 = {
-  Identifier = "os.nightsky.set_light_pollution_level_4",
+local SetLightPollutionLevel4 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel4",
   Name = "Set light pollution level 4",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
@@ -114,8 +117,8 @@ local pollution_4 = {
   IsLocal = false
 }
 
-local pollution_5 = {
-  Identifier = "os.nightsky.set_light_pollution_level_5",
+local SetLightPollutionLevel5 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel5",
   Name = "Set light pollution level 5",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
@@ -130,8 +133,8 @@ local pollution_5 = {
   IsLocal = false
 }
 
-local pollution_6 = {
-  Identifier = "os.nightsky.set_light_pollution_level_6",
+local SetLightPollutionLevel6 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel6",
   Name = "Set light pollution level 6",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
@@ -146,8 +149,8 @@ local pollution_6 = {
   IsLocal = false
 }
 
-local pollution_7 = {
-  Identifier = "os.nightsky.set_light_pollution_level_7",
+local SetLightPollutionLevel7 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel7",
   Name = "Set light pollution level 7",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
@@ -162,8 +165,8 @@ local pollution_7 = {
   IsLocal = false
 }
 
-local pollution_8 = {
-  Identifier = "os.nightsky.set_light_pollution_level_8",
+local SetLightPollutionLevel8 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel8",
   Name = "Set light pollution level 8",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
@@ -178,8 +181,8 @@ local pollution_8 = {
   IsLocal = false
 }
 
-local pollution_9 = {
-  Identifier = "os.nightsky.set_light_pollution_level_9",
+local SetLightPollutionLevel9 = {
+  Identifier = "os.nightsky.SetLightPollutionLevel9",
   Name = "Set light pollution level 9",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera("LightPollutionSphere", true)
@@ -194,8 +197,8 @@ local pollution_9 = {
   IsLocal = false
 }
 
-local hideAction = {
-  Identifier = "os.nightsky.undo_light_pollution",
+local UndoLightPollution = {
+  Identifier = "os.nightsky.UndoLightPollution",
   Name = "Undo light pollution",
   Command = [[
     openspace.setPropertyValueSingle('Scene.LightPollutionSphere.Renderable.Fade', 0.0, 0.3)
@@ -208,41 +211,41 @@ local hideAction = {
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(sphere)
-  openspace.action.registerAction(hideAction)
-  openspace.action.registerAction(pollution_1)
-  openspace.action.registerAction(pollution_2)
-  openspace.action.registerAction(pollution_3)
-  openspace.action.registerAction(pollution_4)
-  openspace.action.registerAction(pollution_5)
-  openspace.action.registerAction(pollution_6)
-  openspace.action.registerAction(pollution_7)
-  openspace.action.registerAction(pollution_8)
-  openspace.action.registerAction(pollution_9)
+  openspace.addSceneGraphNode(LightPollutionSphere)
+  openspace.action.registerAction(SetLightPollutionLevel1)
+  openspace.action.registerAction(SetLightPollutionLevel2)
+  openspace.action.registerAction(SetLightPollutionLevel3)
+  openspace.action.registerAction(SetLightPollutionLevel4)
+  openspace.action.registerAction(SetLightPollutionLevel5)
+  openspace.action.registerAction(SetLightPollutionLevel6)
+  openspace.action.registerAction(SetLightPollutionLevel7)
+  openspace.action.registerAction(SetLightPollutionLevel8)
+  openspace.action.registerAction(SetLightPollutionLevel9)
+  openspace.action.registerAction(UndoLightPollution)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(pollution_9)
-  openspace.action.removeAction(pollution_8)
-  openspace.action.removeAction(pollution_7)
-  openspace.action.removeAction(pollution_6)
-  openspace.action.removeAction(pollution_5)
-  openspace.action.removeAction(pollution_4)
-  openspace.action.removeAction(pollution_3)
-  openspace.action.removeAction(pollution_2)
-  openspace.action.removeAction(pollution_1)
-  openspace.action.removeAction(hideAction)
-  openspace.removeSceneGraphNode(sphere)
+  openspace.action.removeAction(UndoLightPollution)
+  openspace.action.removeAction(SetLightPollutionLevel9)
+  openspace.action.removeAction(SetLightPollutionLevel8)
+  openspace.action.removeAction(SetLightPollutionLevel7)
+  openspace.action.removeAction(SetLightPollutionLevel6)
+  openspace.action.removeAction(SetLightPollutionLevel5)
+  openspace.action.removeAction(SetLightPollutionLevel4)
+  openspace.action.removeAction(SetLightPollutionLevel3)
+  openspace.action.removeAction(SetLightPollutionLevel2)
+  openspace.action.removeAction(SetLightPollutionLevel1)
+  openspace.removeSceneGraphNode(LightPollutionSphere)
 end)
 
-asset.export(sphere)
-asset.export(hideAction)
-asset.export(pollution_1)
-asset.export(pollution_2)
-asset.export(pollution_3)
-asset.export(pollution_4)
-asset.export(pollution_5)
-asset.export(pollution_6)
-asset.export(pollution_7)
-asset.export(pollution_8)
-asset.export(pollution_9)
+asset.export(LightPollutionSphere)
+asset.export(SetLightPollutionLevel1)
+asset.export(SetLightPollutionLevel2)
+asset.export(SetLightPollutionLevel3)
+asset.export(SetLightPollutionLevel4)
+asset.export(SetLightPollutionLevel5)
+asset.export(SetLightPollutionLevel6)
+asset.export(SetLightPollutionLevel7)
+asset.export(SetLightPollutionLevel8)
+asset.export(SetLightPollutionLevel9)
+asset.export(UndoLightPollution)

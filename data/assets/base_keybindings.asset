@@ -1,9 +1,10 @@
 asset.require("./base")
-
 local trailAction = asset.require("actions/trails/toggle_trails_planets_moons").toggle_trails
 
-local toggle_planet_labels = {
-  Identifier = "os_default.toggle_planet_labels",
+
+
+local TogglePlanetLabels = {
+  Identifier = "os_default.TogglePlanetLabels",
   Name = "Toggle planet labels",
   Command = [[
     local list = openspace.getProperty("{solarsystem_labels}.Renderable.Enabled");
@@ -16,8 +17,8 @@ local toggle_planet_labels = {
 }
 
 asset.onInitialize(function ()
-  openspace.action.registerAction(toggle_planet_labels)
-  openspace.bindKey(toggle_planet_labels.Key, toggle_planet_labels.Identifier)
+  openspace.action.registerAction(TogglePlanetLabels)
+  openspace.bindKey(TogglePlanetLabels.Key, TogglePlanetLabels.Identifier)
 
   openspace.bindKey("h", trailAction.Identifier)
 end)
@@ -25,6 +26,6 @@ end)
 asset.onDeinitialize(function ()
   openspace.clearKey("h")
 
-  openspace.action.removeAction(toggle_planet_labels)
-  openspace.clearKey(toggle_planet_labels.Key)
+  openspace.action.removeAction(TogglePlanetLabels)
+  openspace.clearKey(TogglePlanetLabels.Key)
 end)

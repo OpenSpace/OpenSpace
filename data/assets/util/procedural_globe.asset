@@ -1,7 +1,10 @@
 asset.require("spice/base")
 
-local createGlobeWithoutName = function(identifier, parent, parentSpiceName, spiceName,
-    radii, tags, trailTags, guiPath, trailColor, orbitPeriod, kernels)
+
+
+function createGlobeWithoutName(identifier, parent, parentSpiceName, spiceName,
+                                radii, tags, trailTags, guiPath, trailColor,
+                                orbitPeriod, kernels)
   return {
       Identifier = identifier,
       Parent = parent,
@@ -46,20 +49,30 @@ local createGlobeWithoutName = function(identifier, parent, parentSpiceName, spi
   }
 end
 
-local createGlobeWithName = function(identifier, name, parent, parentSpiceName, spiceName,
-    radii, tags, trailTags, guiPath, trailColor, orbitPeriod, kernels, layers)
-  local g, t = createGlobeWithoutName(identifier, parent, parentSpiceName, spiceName, radii,
-    tags, trailTags, guiPath, trailColor, orbitPeriod, kernels, layers)
+function createGlobeWithName(identifier, name, parent, parentSpiceName, spiceName,
+                             radii, tags, trailTags, guiPath, trailColor,
+                             orbitPeriod, kernels, layers)
+  local g, t = createGlobeWithoutName(
+    identifier,
+    parent,
+    parentSpiceName,
+    spiceName,
+    radii,
+    tags,
+    trailTags,
+    guiPath,
+    trailColor,
+    orbitPeriod,
+    kernels,
+    layers
+  )
   g.GUI.Name = name
   t.GUI.Name = name .. " Trail"
 
   return g, t
 end
-asset.export("createGlobeWithoutName", createGlobeWithoutName)
-asset.export("createGlobeWithName", createGlobeWithName)
 
-
-local createGlobes = function(t)
+function createGlobes(t)
   for _,v in pairs(t) do
     if type(v) ~= "table" then
       local warning = "The table passed to 'createGlobes' was not a table of tables"
@@ -118,4 +131,7 @@ local createGlobes = function(t)
   end
   return result
 end
+
+asset.export("createGlobeWithoutName", createGlobeWithoutName)
+asset.export("createGlobeWithName", createGlobeWithName)
 asset.export("createGlobes", createGlobes)

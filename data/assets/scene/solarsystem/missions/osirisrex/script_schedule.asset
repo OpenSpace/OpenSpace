@@ -1,17 +1,53 @@
-local scriptSchedulerHelper = asset.require("util/script_scheduler_helper")
+local renderableHelper = asset.require("./renderable_helper")
+
+
 
 asset.onInitialize(function ()
-  scriptSchedulerHelper.scheduleRenderableEnabled("2016 SEP 08 23:05:00", "Scene.OsirisRexTrailSolarSystem", false)
-  scriptSchedulerHelper.scheduleRenderableEnabled("2016 SEP 08 23:05:00", "Scene.OsirisRexTrailBennu", false)
-  scriptSchedulerHelper.scheduleRenderableEnabledReversable("2016 SEP 08 23:05:01", "Scene.OsirisRexTrailEarth", true)
-  scriptSchedulerHelper.scheduleRenderableEnabledReversable("2016 SEP 09 00:00:00", "Scene.OsirisRexTrailSolarSystem", true)
-  scriptSchedulerHelper.scheduleRenderableEnabledReversable("2016 SEP 09 02:00:00", "Scene.OsirisRexTrailEarth", false)
-  scriptSchedulerHelper.scheduleRenderableEnabledReversable("2018 OCT 11 00:00:00", "Scene.OsirisRexTrailBennu", true)
-  scriptSchedulerHelper.scheduleRenderableEnabledReversable("2018 OCT 15 00:00:00", "Scene.OsirisRexTrailSolarSystem", false)
-  scriptSchedulerHelper.scheduleRenderableEnabledReversable("2019 AUG 01 00:00:00", "Scene.OsirisRexTrailSolarSystem", true)
-  scriptSchedulerHelper.scheduleRenderableEnabledReversable("2019 AUG 01 00:00:00", "Scene.OsirisRexTrailBennu", false)
-end)
+  openspace.scriptScheduler.loadScheduledScript(
+    "2016 SEP 08 23:05:00",
+    renderableHelper.setEnabled("Scene.OsirisRexTrailSolarSystem", false)
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    "2016 SEP 08 23:05:00",
+    renderableHelper.setEnabled("Scene.OsirisRexTrailBennu", false)
+  )
 
+  openspace.scriptScheduler.loadScheduledScript(
+    "2016 SEP 08 23:05:01",
+    renderableHelper.setEnabled("Scene.OsirisRexTrailEarth", true),
+    renderableHelper.setEnabled("Scene.OsirisRexTrailEarth", false)
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    "2016 SEP 09 00:00:00",
+    renderableHelper.setEnabled("Scene.OsirisRexTrailSolarSystem", true),
+    renderableHelper.setEnabled("Scene.OsirisRexTrailSolarSystem", false)
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    "2016 SEP 09 02:00:00",
+    renderableHelper.setEnabled("Scene.OsirisRexTrailEarth", false),
+    renderableHelper.setEnabled("Scene.OsirisRexTrailEarth", true)
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    "2018 OCT 11 00:00:00",
+    renderableHelper.setEnabled("Scene.OsirisRexTrailBennu", true),
+    renderableHelper.setEnabled("Scene.OsirisRexTrailBennu", false)
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    "2018 OCT 15 00:00:00",
+    renderableHelper.setEnabled("Scene.OsirisRexTrailSolarSystem", false),
+    renderableHelper.setEnabled("Scene.OsirisRexTrailSolarSystem", true)
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    "2019 AUG 01 00:00:00",
+    renderableHelper.setEnabled("Scene.OsirisRexTrailSolarSystem", true),
+    renderableHelper.setEnabled("Scene.OsirisRexTrailSolarSystem", false)
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    "2019 AUG 01 00:00:00",
+    renderableHelper.setEnabled("Scene.OsirisRexTrailBennu", false),
+    renderableHelper.setEnabled("Scene.OsirisRexTrailBennu", true)
+  )
+end)
 
 asset.onDeinitialize(function()
   openspace.scriptScheduler.clear()

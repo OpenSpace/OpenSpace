@@ -4,6 +4,8 @@ asset.onInitialize(function ()
   -- More settings are available, but for now using the default values
 end)
 
+
+
 asset.meta = {
   Name = "SkyBrowser Module Default Settings",
   Version = "1.0",

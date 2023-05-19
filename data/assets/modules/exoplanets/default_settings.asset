@@ -6,6 +6,8 @@ asset.onInitialize(function ()
   openspace.setPropertyValueSingle("Modules.Exoplanets.HabitableZoneOpacity", 0.1)
 end)
 
+
+
 asset.meta = {
   Name = "Exoplanet Default Settings",
   Version = "1.0",

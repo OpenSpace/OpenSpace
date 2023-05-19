@@ -1,17 +1,18 @@
 asset.require("./static_server")
-
 local guiCustomization = asset.require("customization/gui")
+
+
 
 -- Select which commit hashes to use for the frontend and backend
 local frontendHash = "6fd7541151b65b97433a06ac71a3b72b33857518"
-local dataProvider = "data.openspaceproject.com/files/webgui"
 
 local frontend = asset.syncedResource({
   Identifier = "WebGuiFrontend",
   Name = "Web Gui Frontend",
   Type = "UrlSynchronization",
-  Url = dataProvider .. "/frontend/" ..  frontendHash .. "/frontend.zip"
+  Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/frontend.zip"
 })
+
 
 asset.onInitialize(function ()
   -- Unzip the frontend bundle
@@ -87,9 +88,11 @@ end
 
 asset.export("setCefRoute", setCefRoute)
 
+
+
 asset.meta = {
   Name = "WebGUI",
-  Version = "0.1",
+  Version = "1.0",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -1,4 +1,4 @@
-local getBookmarks = function (guiPath, bookmarkfile)
+local function loadBookmarks(guiPath, bookmarkfile)
   local genBookmarks = {};
   local PARSEC_CONSTANT = 3.0856776E16;
 
@@ -47,7 +47,7 @@ local getBookmarks = function (guiPath, bookmarkfile)
         Type = "RenderableSphericalGrid",
         Enabled = false,
         Opacity = 0.3,
-        Color = { 0.3, 0.84, 1.0},
+        Color = { 0.3, 0.84, 1.0 },
         LineWidth = linewidth
       },
       GUI = {
@@ -89,4 +89,4 @@ local getBookmarks = function (guiPath, bookmarkfile)
   return genBookmarks
 end
 
-asset.export("getBookmarks", getBookmarks)
+asset.export("loadBookmarks", loadBookmarks)

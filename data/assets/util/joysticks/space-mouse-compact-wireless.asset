@@ -1,6 +1,8 @@
 local propertyHelper = asset.require("../property_helper")
 local joystickHelper = asset.require("./joystick_helper")
 
+
+
 -- Allowed values for the third parameter of bindJoystickAxis:
 -- "None"
 -- "Orbit X"
@@ -25,9 +27,9 @@ local joystickHelper = asset.require("./joystick_helper")
 -- Seventh parameter is the sensitivity for the axis
 
 local SpaceMouse = {
-  Push = {0, 1, 2}, -- left/right, back/forth, up/down
-  Twist = {5}, -- left/right
-  Tilt = {4, 3}, -- left/right, back/forth
+  Push = { 0, 1, 2 }, -- left/right, back/forth, up/down
+  Twist = { 5 }, -- left/right
+  Tilt = { 4, 3 }, -- left/right, back/forth
 
   LeftButton = 0,
   RightButton = 1

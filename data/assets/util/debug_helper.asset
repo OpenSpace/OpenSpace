@@ -1,4 +1,4 @@
-local identifierGeneratorFunction = function (suffix)
+local function identifierGeneratorFunction(suffix)
   local nextIndex = 0
   return function (specification)
     nextIndex = nextIndex + 1
@@ -9,7 +9,7 @@ end
 
 local generateGridIdentifier = identifierGeneratorFunction("Grid")
 
-local addGrid = function (specification)
+local function addGrid(specification)
   local identifier = specification.Identifier or generateGridIdentifier(specification)
 
   local name = specification.Name
@@ -53,7 +53,7 @@ end
 
 local generateAxesIdentifier = identifierGeneratorFunction("Axes")
 
-local addCartesianAxes = function (specification)
+local function addCartesianAxes(specification)
   local identifier = specification.Identifier or generateAxesIdentifier(specification)
 
   local name = specification.Name or specification.Identifier
@@ -101,7 +101,8 @@ local addCartesianAxes = function (specification)
 end
 
 
-local registerNode = function(containerAsset, nodeCreationFunction, identifierGeneratorFunction, specification)
+local function registerNode(containerAsset, nodeCreationFunction,
+                            identifierGeneratorFunction, specification)
   local identifier = specification.Identifier or identifierGeneratorFunction(specification)
 
   specification.Identifier = identifier
@@ -114,11 +115,11 @@ local registerNode = function(containerAsset, nodeCreationFunction, identifierGe
   end)
 end
 
-local registerGrid = function(gridAsset, specification)
+local function registerGrid(gridAsset, specification)
   registerNode(gridAsset, addGrid, generateGridIdentifier, specification)
 end
 
-local registerCartesianAxes = function(axesAsset, specification)
+local function registerCartesianAxes(axesAsset, specification)
   registerNode(axesAsset, addCartesianAxes, generateAxesIdentifier, specification)
 end
 

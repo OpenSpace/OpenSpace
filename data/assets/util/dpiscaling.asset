@@ -4,7 +4,7 @@ asset.onInitialize(function ()
 
 
   if openspace.modules.isLoaded("CefWebGui") then
-  openspace.setPropertyValueSingle(
+    openspace.setPropertyValueSingle(
       "Modules.CefWebGui.GuiScale",
       openspace.getPropertyValue("Modules.CefWebGui.GuiScale") * scale
     )
@@ -24,6 +24,8 @@ asset.onInitialize(function ()
     { offset[1] * scale, offset[2] * scale }
   )
 end)
+
+
 
 asset.meta = {
   Name = "DPI Scaling",

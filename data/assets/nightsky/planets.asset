@@ -4,12 +4,15 @@ local mars = asset.require('scene/solarsystem/planets/mars/transforms')
 local jupiter = asset.require('scene/solarsystem/planets/jupiter/transforms')
 local saturn = asset.require('scene/solarsystem/planets/saturn/transforms')
 
+
+
 local textures = asset.syncedResource({
   Name = "Night Sky Planet Textures",
   Type = "HttpSynchronization",
   Identifier = "night_sky_planet_textures",
   Version = 1
 })
+
 
 local Mercury = {
   Identifier = "NightSkyMercury",
@@ -111,8 +114,8 @@ local Saturn = {
   }
 }
 
-local showAction = {
-  Identifier = "os.nightsky.show_night_sky_planets",
+local ShowNightSkyPlanets = {
+  Identifier = "os.nightsky.ShowNightSkyPlanets",
   Name = "Show night sky planets",
   Command = [[
     openspace.setPropertyValueSingle('Scene.NightSkyMercury.Renderable.Enabled', true);
@@ -136,8 +139,8 @@ local showAction = {
   IsLocal = false
 }
 
-local hideAction = {
-  Identifier = "os.nightsky.hide_night_sky_planets",
+local HideNightSkyPlanets = {
+  Identifier = "os.nightsky.HideNightSkyPlanets",
   Name = "Hide night sky planets",
   Command = [[
     openspace.setPropertyValueSingle('Scene.NightSkyMercury.Renderable.Fade', 0.0, 1.0);
@@ -158,16 +161,24 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Mars)
   openspace.addSceneGraphNode(Jupiter)
   openspace.addSceneGraphNode(Saturn)
-  openspace.action.registerAction(showAction)
-  openspace.action.registerAction(hideAction)
+  openspace.action.registerAction(ShowNightSkyPlanets)
+  openspace.action.registerAction(HideNightSkyPlanets)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(hideAction)
-  openspace.action.removeAction(showAction)
+  openspace.action.removeAction(HideNightSkyPlanets)
+  openspace.action.removeAction(ShowNightSkyPlanets)
   openspace.removeSceneGraphNode(Saturn)
   openspace.removeSceneGraphNode(Jupiter)
   openspace.removeSceneGraphNode(Mars)
   openspace.removeSceneGraphNode(Venus)
   openspace.removeSceneGraphNode(Mercury)
 end)
+
+asset.export(Mercury)
+asset.export(Venus)
+asset.export(Mars)
+asset.export(Jupiter)
+asset.export(Saturn)
+asset.export(ShowNightSkyPlanets)
+asset.export(HideNightSkyPlanets)

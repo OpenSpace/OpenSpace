@@ -1,5 +1,7 @@
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
+
+
 local textures = asset.syncedResource({
   Name = "Cardinal Direction Textures",
   Type = "UrlSynchronization",
@@ -14,7 +16,8 @@ local textures = asset.syncedResource({
   Override = false
 })
 
-local Position = {
+
+local CardinalDirectionsPosition = {
   Identifier = "CardinalDirectionsPosition",
   Parent = earthAsset.Earth.Identifier,
   Transform = {
@@ -42,9 +45,9 @@ local Position = {
   }
 }
 
-local sphere = {
+local CardinalDirectionSphere = {
   Identifier = "CardinalDirectionSphere",
-  Parent = Position.Identifier,
+  Parent = CardinalDirectionsPosition.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
@@ -83,8 +86,8 @@ local showCommand = [[
   openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 1.0, 1.0);
 ]]
 
-local showBandAction = {
-Identifier = "os.nightsky.show_nesw_band",
+local ShowNeswBand = {
+Identifier = "os.nightsky.ShowNeswBand",
   Name = "Show cardinal directions (with ticks)",
   Command = "openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Texture','"
   .. textures:gsub("\\","/") .. "sphere5.png')"
@@ -94,8 +97,8 @@ Identifier = "os.nightsky.show_nesw_band",
   IsLocal = false
 }
 
-local showLettersAction = {
-  Identifier = "os.nightsky.show_nesw_letters",
+local ShowNeswLetters = {
+  Identifier = "os.nightsky.ShowNeswLetters",
   Name = "Show cardinal directions (letters only)",
   Command = "openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Texture','"
   .. textures:gsub("\\","/") .. "sphere.png')"
@@ -105,8 +108,8 @@ local showLettersAction = {
   IsLocal = false
 }
 
-local hideAction = {
-  Identifier = "os.nightsky.hide_nesw",
+local HideNesw = {
+  Identifier = "os.nightsky.HideNesw",
   Name = "Hide cardinal directions",
   Command = [[
     openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0.0, 1.0);
@@ -117,23 +120,23 @@ local hideAction = {
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Position)
-  openspace.addSceneGraphNode(sphere)
-  openspace.action.registerAction(hideAction)
-  openspace.action.registerAction(showBandAction)
-  openspace.action.registerAction(showLettersAction)
+  openspace.addSceneGraphNode(CardinalDirectionsPosition)
+  openspace.addSceneGraphNode(CardinalDirectionSphere)
+  openspace.action.registerAction(ShowNeswBand)
+  openspace.action.registerAction(ShowNeswLetters)
+  openspace.action.registerAction(HideNesw)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(showLettersAction)
-  openspace.action.removeAction(showBandAction)
-  openspace.action.removeAction(hideAction)
-  openspace.removeSceneGraphNode(sphere)
-  openspace.removeSceneGraphNode(Position)
+  openspace.action.removeAction(HideNesw)
+  openspace.action.removeAction(ShowNeswLetters)
+  openspace.action.removeAction(ShowNeswBand)
+  openspace.removeSceneGraphNode(Sphere)
+  openspace.removeSceneGraphNode(CardinalDirectionsPosition)
 end)
 
-asset.export(showBandAction)
-asset.export(showLettersAction)
-asset.export(hideAction)
-asset.export(sphere)
-asset.export(Position)
+asset.export(CardinalDirectionsPosition)
+asset.export(CardinalDirectionSphere)
+asset.export(ShowNeswBand)
+asset.export(ShowNeswLetters)
+asset.export(HideNesw)
