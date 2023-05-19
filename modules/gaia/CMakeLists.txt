@@ -29,11 +29,13 @@ set(HEADER_FILES
   rendering/renderablegaiastars.h
   rendering/octreemanager.h
   rendering/octreeculler.h
+  rendering/renderablegaiavolume.h
   tasks/readfilejob.h
   tasks/readfitstask.h
   tasks/readspecktask.h
   tasks/constructoctreetask.h
   rendering/gaiaoptions.h
+  tasks/generateGaiaVolumeTask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -42,10 +44,12 @@ set(SOURCE_FILES
   rendering/renderablegaiastars.cpp
   rendering/octreemanager.cpp
   rendering/octreeculler.cpp
+  rendering/renderablegaiavolume.cpp
   tasks/readfilejob.cpp
   tasks/readfitstask.cpp
   tasks/readspecktask.cpp
   tasks/constructoctreetask.cpp
+  tasks/generateGaiaVolumeTask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
@@ -60,6 +64,7 @@ set(SHADER_FILES
   shaders/gaia_tonemapping_vs.glsl
   shaders/gaia_tonemapping_point_fs.glsl
   shaders/gaia_tonemapping_billboard_fs.glsl
+  shaders/gaiaraycast.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

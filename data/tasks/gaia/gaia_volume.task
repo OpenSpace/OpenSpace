@@ -1,0 +1,8 @@
+return {{
+    Type = "GenerateGaiaVolumeTask",
+    Dimensions = {64, 64, 64},
+    Time = "2018-05-04T00:00:00",
+    DataInputPath = "C:/Users/addee/Desktop/testdata/GALAH_AMNH.csv",
+    RawVolumeOutput = "${DATA}/assets/scene/milkyway/gaia/gaiavolume.rawvolume",
+    DictionaryOutput = "${DATA}/assets/scene/milkyway/gaia/gaiavolume.dictionary"
+  }}

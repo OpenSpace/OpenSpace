@@ -52,7 +52,8 @@ public:
     BasicVolumeRaycaster(
         std::shared_ptr<ghoul::opengl::Texture> texture,
         std::shared_ptr<openspace::TransferFunction> transferFunction,
-        std::shared_ptr<VolumeClipPlanes> clipPlanes);
+        std::shared_ptr<VolumeClipPlanes> clipPlanes,
+        const char* fragmentShaderRaycastPath = nullptr);
     ~BasicVolumeRaycaster() override;
 
     void initialize();
@@ -106,6 +107,7 @@ private:
     std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
     float _stepSize = 0.f;
+    std::string _GlslRaycast; // = "${MODULE_VOLUME}/shaders/raycast.glsl";
 };
 
 } // namespace openspace::volume

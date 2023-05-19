@@ -49,12 +49,15 @@ namespace openspace::volume {
 BasicVolumeRaycaster::BasicVolumeRaycaster(
                                     std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
                             std::shared_ptr<openspace::TransferFunction> transferFunction,
-                                             std::shared_ptr<VolumeClipPlanes> clipPlanes)
+                                             std::shared_ptr<VolumeClipPlanes> clipPlanes,
+                            const char* fragmentShaderPath)
     : _clipPlanes(clipPlanes)
     , _volumeTexture(volumeTexture)
     , _transferFunction(transferFunction)
     , _boundingBox(glm::vec3(1.0))
-{}
+{
+    _GlslRaycast = fragmentShaderPath ? fragmentShaderPath : GlslRaycast;
+}
 
 BasicVolumeRaycaster::~BasicVolumeRaycaster() {}
 
@@ -170,7 +173,7 @@ std::string BasicVolumeRaycaster::boundsFragmentShaderPath() const {
 }
 
 std::string BasicVolumeRaycaster::raycasterPath() const {
-    return absPath(GlslRaycast).string();
+    return absPath(_GlslRaycast).string();
 }
 
 std::string BasicVolumeRaycaster::helperPath() const {

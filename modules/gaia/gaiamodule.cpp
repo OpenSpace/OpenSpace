@@ -24,8 +24,10 @@
 
 #include <modules/gaia/gaiamodule.h>
 
+#include <modules/gaia/tasks/generateGaiaVolumeTask.h>
 #include <modules/gaia/tasks/constructoctreetask.h>
 #include <modules/gaia/rendering/renderablegaiastars.h>
+#include <modules/gaia/rendering/renderablegaiavolume.h>
 #include <modules/gaia/tasks/readfitstask.h>
 #include <modules/gaia/tasks/readspecktask.h>
 #include <openspace/documentation/documentation.h>
@@ -44,12 +46,14 @@ void GaiaModule::internalInitialize(const ghoul::Dictionary&) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
+    fRenderable->registerClass<volume::RenderableGaiaVolume>("RenderableGaiaVolume");
 
     ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<ReadFitsTask>("ReadFitsTask");
     fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
     fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
+    fTask->registerClass<gaiavolume::GenerateGaiaVolumeTask>("GenerateGaiaVolumeTask");
 }
 
 std::vector<documentation::Documentation> GaiaModule::documentations() const {
@@ -58,6 +62,7 @@ std::vector<documentation::Documentation> GaiaModule::documentations() const {
         ReadFitsTask::Documentation(),
         ReadSpeckTask::Documentation(),
         ConstructOctreeTask::Documentation(),
+        gaiavolume::GenerateGaiaVolumeTask::Documentation(),
     };
 }
 

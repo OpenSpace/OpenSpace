@@ -43,8 +43,9 @@ namespace {
 namespace openspace {
 
 TransferFunction::TransferFunction(const std::string& filepath,
-                                   TfChangedCallback tfChangedCallback)
-    : _filepath(filepath)
+                                   TfChangedCallback tfChangedCallback,
+                                   unsigned int textureDimension)
+    : _filepath(filepath), _textureDimension{ textureDimension }
 {
     setPath(filepath);
     setCallback(std::move(tfChangedCallback));
@@ -205,7 +206,7 @@ void TransferFunction::setTextureFromTxt() {
 }
 
 void TransferFunction::setTextureFromImage() {
-    _texture = ghoul::io::TextureReader::ref().loadTexture(_filepath.string(), 1);
+    _texture = ghoul::io::TextureReader::ref().loadTexture(_filepath.string(), _textureDimension);
     _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
 }
 

@@ -41,7 +41,7 @@ public:
     using TfChangedCallback = std::function<void (const TransferFunction&)>;
 
     TransferFunction(const std::string& filepath,
-        TfChangedCallback tfChangedCallback = TfChangedCallback());
+        TfChangedCallback tfChangedCallback = TfChangedCallback(), unsigned int textureDimension = 1);
     ~TransferFunction();
 
     TransferFunction(TransferFunction&& rhs) = default;
@@ -64,6 +64,7 @@ private:
     std::shared_ptr<ghoul::opengl::Texture> _texture;
     bool _needsUpdate = false;
     TfChangedCallback _tfChangedCallback;
+    unsigned int _textureDimension;
 };
 
 struct MappingKey {
