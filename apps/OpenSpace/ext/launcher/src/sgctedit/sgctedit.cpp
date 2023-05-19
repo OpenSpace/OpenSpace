@@ -182,6 +182,45 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
     );
 }
 
+void SgctEdit::doesViewportSubsetMatch(sgct::config::Viewport& first,
+                                       sgct::config::Viewport& compare)
+{
+    bool matches = true;
+    compareOptionalElementOfConfig(first.quality, compare.quality, matches);
+    compareOptionalElementOfConfig(first.position, compare.position, matches);
+    compareOptionalElementOfConfig(first.size, compare.size, matches);
+    compareOptionalElementOfConfig(first.projection, compare.projection, matches);
+    switch (first.projection) {
+        case sgct::config::CylindricalProjection:
+            break;
+        case sgct::config::EquirectangularProjection:
+            break;
+        case sgct::config::FisheyeProjection:
+            break;
+        case sgct::config::PlanarProjection:
+            break;
+        case sgct::config::SphericalMirrorProjection:
+            break;
+        case sgct::config::SpoutOutputProjection:
+            break;
+        default:
+            matches = false;
+            break;
+    }
+}
+
+template <typename T>
+void SgctEdit::compareOptionalElementOfConfig(std::optional<T>& first,
+                                              std::optional<T>& compare,
+                                              bool& matches)
+{
+    if (first.has_value() && compare.has_value()) {
+        if (*first != *compare) {
+            matches = false;
+        }
+    }
+}
+
 void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
                                         WindowControl* wCtrl)
 {
