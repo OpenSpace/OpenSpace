@@ -1,7 +1,9 @@
 asset.require("./jwst")
 
-local point_jwst = {
-  Identifier = "event.jwst.point",
+
+
+local PointJwst = {
+  Identifier = "os.jwst.PointJwst",
   Name = "Point JWST",
   Command = [[
     local ra
@@ -139,21 +141,21 @@ local point_jwst = {
 }
 
 asset.onInitialize(function()
-  openspace.action.registerAction(point_jwst)
+  openspace.action.registerAction(PointJwst)
 
   openspace.event.registerEventAction(
     "PointSpacecraft",
-    point_jwst.Identifier
+    PointJwst.Identifier
   )
 end)
 
 asset.onDeinitialize(function()
   openspace.event.unregisterEventAction(
     "PointSpacecraft",
-    point_jwst.Identifier
+    PointJwst.Identifier
   )
 
-  openspace.action.removeAction(point_jwst)
+  openspace.action.removeAction(PointJwst)
 end)
 
-asset.export("jwst.point", point_jwst.Identifier)
+asset.export("jwst.point", PointJwst.Identifier)

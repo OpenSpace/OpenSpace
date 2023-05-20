@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local kernels = asset.require("../kernels").PlutoKernels
 
 
 local Styx = {
@@ -89,6 +88,7 @@ end)
 
 asset.export(Styx)
 asset.export(StyxTrail)
+asset.export(StyxLabel)
 
 
 

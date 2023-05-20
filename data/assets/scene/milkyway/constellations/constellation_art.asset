@@ -2,6 +2,8 @@ local constellationsCSV = asset.localResource("constellation_data.csv")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local constellations_helper = asset.require("util/constellations_helper")
 
+
+
 local images = asset.syncedResource({
   Name = "Constellation Images",
   Type = "HttpSynchronization",
@@ -16,8 +18,9 @@ local data = asset.syncedResource({
   Version = 1
 })
 
+
 --function that reads the file
-local createConstellations = function (baseIdentifier, guiPath, constellationfile)
+local function createConstellations(baseIdentifier, guiPath, constellationfile)
   local genConstellations = {};
   --skip the first line
   local notFirstLine = false;
@@ -34,9 +37,9 @@ local createConstellations = function (baseIdentifier, guiPath, constellationfil
       local matchstring = "(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$"
       local group, abbreviation, name, x, y, z, scale, imageName, rotX, rotY, rotZ, centerStar = line:match(matchstring)
       local magVec = math.sqrt(x*x + y*y + z*z)
-      local normx = x/magVec
-      local normy = y/magVec
-      local normz = z/magVec
+      local normx = x / magVec
+      local normy = y / magVec
+      local normz = z / magVec
 
       -- Use the full name in the data constellations.dat if possible
       -- Otherwise, use the given name in the constellation_data.csv file
@@ -95,8 +98,8 @@ local createConstellations = function (baseIdentifier, guiPath, constellationfil
 end
 
 
-local show_art = {
-  Identifier = "constellation_art.show_art",
+local ShowArt = {
+  Identifier = "os.constellation_art.ShowArt",
   Name = "Show all",
   Command = [[
     openspace.fadeIn("Scene.ImageConstellation*.Renderable")
@@ -105,10 +108,9 @@ local show_art = {
   GuiPath = "/Constellations/Art",
   IsLocal = false
 }
-asset.export("ShowArtAction", show_art)
 
-local hide_art = {
-  Identifier = "constellation_art.hide_art",
+local HideArt = {
+  Identifier = "os.constellation_art.HideArt",
   Name = "Hide all",
   Command = [[
     openspace.fadeOut("Scene.ImageConstellation*.Renderable")
@@ -117,10 +119,9 @@ local hide_art = {
   GuiPath = "/Constellations/Art",
   IsLocal = false
 }
-asset.export("HideArtAction", hide_art)
 
-local disable_art = {
-  Identifier = "constellation_art.disable_art",
+local DisableArt = {
+  Identifier = "os.constellation_art.DisableArt",
   Name = "Disable all",
   Command = [[
     openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)
@@ -129,10 +130,9 @@ local disable_art = {
   GuiPath = "/Constellations/Art",
   IsLocal = false
 }
-asset.export("DisableArtAction", disable_art)
 
-local show_zodiac_art = {
-  Identifier = "constellation_art.show_zodiac_art",
+local ShowZodiacArt = {
+  Identifier = "os.constellation_art.ShowZodiacArt",
   Name = "Show zodiac",
   Command = [[
     openspace.fadeIn("{zodiac}")
@@ -141,10 +141,9 @@ local show_zodiac_art = {
   GuiPath = "/Constellations/Art",
   IsLocal = false
 }
-asset.export("ShowZodiacArt", show_zodiac_art)
 
-local hide_zodiac_art = {
-  Identifier = "constellation_art.hide_zodiac_art",
+local HideZodiacArt = {
+  Identifier = "os.constellation_art.HideZodiacArt",
   Name = "Hide zodiac",
   Command =  [[
     openspace.fadeOut("{zodiac}")
@@ -153,7 +152,6 @@ local hide_zodiac_art = {
   GuiPath = "/Constellations/Art",
   IsLocal = false
 }
-asset.export("HideZodiacArt", hide_zodiac_art)
 
 local nodes = {}
 
@@ -187,6 +185,11 @@ end)
 for _, n in ipairs(nodes) do
   asset.export(n)
 end
+asset.export("ShowArtAction", ShowArt)
+asset.export("HideArtAction", HideArt)
+asset.export("DisableArtAction", DisableArt)
+asset.export("ShowZodiacArt", ShowZodiacArt)
+asset.export("HideZodiacArt", HideZodiacArt)
 
 asset.meta = {
   Name = "Constellation Images",

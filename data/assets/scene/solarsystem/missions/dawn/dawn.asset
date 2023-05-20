@@ -1,6 +1,8 @@
-asset.require("scene/solarsystem/missions/dawn/mission")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
+asset.require("scene/solarsystem/missions/dawn/mission")
+
+
 
 local kernels = asset.syncedResource({
   Name = "Dawn Kernels",
@@ -22,6 +24,7 @@ local models = asset.syncedResource({
   Identifier = "dawn_model",
   Version = 2
 })
+
 
 local KernelFiles = {
   kernels .. "dawn_ref_070926-150201_070829.bsp",
@@ -88,7 +91,7 @@ local DawnPosition = {
     -- Rotation for model version 2
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { math.pi/2.0, 0.0, math.pi/2.0 }
+      Rotation = { math.pi / 2.0, 0.0, math.pi / 2.0 }
     }
   },
   GUI = {
@@ -197,22 +200,30 @@ local nodes = {
   DawnFramingCamera2
 }
 
+
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.addSceneGraphNode(DawnPosition)
+  openspace.addSceneGraphNode(Dawn)
+  openspace.addSceneGraphNode(DawnTrail)
+  openspace.addSceneGraphNode(DawnFramingCamera1)
+  openspace.addSceneGraphNode(DawnFramingCamera2)
 end)
 
 asset.onDeinitialize(function()
-  for i = #nodes, 1, -1 do
-    local node = nodes[i]
-    openspace.removeSceneGraphNode(node)
-  end
+  openspace.removeSceneGraphNode(DawnFramingCamera2)
+  openspace.removeSceneGraphNode(DawnFramingCamera1)
+  openspace.removeSceneGraphNode(DawnTrail)
+  openspace.removeSceneGraphNode(Dawn)
+  openspace.removeSceneGraphNode(DawnPosition)
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(DawnPosition)
+asset.export(Dawn)
+asset.export(DawnTrail)
+asset.export(DawnFramingCamera1)
+asset.export(DawnFramingCamera2)
+
+
 
 asset.meta = {
   Name = "Dawn",

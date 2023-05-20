@@ -1,16 +1,19 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local OneAU = 1.496e+8
+
+
+
+local AU = 1.496e+8
 
 local Translation = {
   Type = "KeplerTranslation",
   Eccentricity = 0.04098702510897952,
-  SemiMajorAxis = 43.47200381956696 * OneAU,
+  SemiMajorAxis = 43.47200381956696 * AU,
   Inclination = 7.991232171849933,
   AscendingNode = 189.0902949942479,
   ArgumentOfPeriapsis = 155.214428533145,
   MeanAnomaly = 296.22300217209,
   Epoch = "2022 08 09 03:34:28",
-  Period = 104691.8599963541*60*60*24
+  Period = 104691.8599963541 * 60 * 60 * 24
 }
 
 local Position = {
@@ -26,6 +29,7 @@ local Position = {
   }
 }
 
+
 asset.onInitialize(function()
     openspace.addSceneGraphNode(Position)
 end)
@@ -37,13 +41,14 @@ end)
 asset.export("Translation", Translation)
 asset.export("Position", Position)
 
+
+
 asset.meta = {
-    Name = "Quaoar Position (Keplerian)",
-    Version = "1.0",
-    Description = [[Position of Quaoar. KeplerTranslation Version Data from
-      JPL Horizons]],
-    Author = "OpenSpace Team",
-    URL = "https://ssd.jpl.nasa.gov/sbdb.cgi?sstr=Quaoar",
-    License = "JPL/NASA"
+  Name = "Quaoar Position (Keplerian)",
+  Version = "1.0",
+  Description = [[Position of Quaoar. KeplerTranslation Version Data from
+    JPL Horizons]],
+  Author = "OpenSpace Team",
+  URL = "https://ssd.jpl.nasa.gov/sbdb.cgi?sstr=Quaoar",
+  License = "JPL/NASA"
 }
-  

@@ -2,6 +2,7 @@ local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
 
+
 local Janus = {
   Identifier = "JuiceJanus",
   Parent = transforms.Juice.Identifier,
@@ -38,6 +39,7 @@ local Janus = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Janus)
 end)
@@ -47,6 +49,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Janus)
+
 
 
 asset.meta = {

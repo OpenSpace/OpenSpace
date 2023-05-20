@@ -1,6 +1,8 @@
 local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 local propertyHelper = asset.require("util/property_helper")
-local rot = asset.require("./carringtonToHEEQRotation.asset")
+local rot = asset.require("./carrington_to_heeq_rotation.asset")
+
+
 
 local fieldlinesDirectory = asset.syncedResource({
   Name = "Bastille Day MAS Fieldlines",
@@ -9,21 +11,22 @@ local fieldlinesDirectory = asset.syncedResource({
   Version = 1
 })
 
-local sunRadius = 6.957E8
+
+local SunRadius = 6.957E8
 
 -- Fieldlies from binaries
-local fieldlines = {
+local Fieldlines = {
   Identifier = "MAS-MHD-Fieldlines-bastille-day-2000",
   Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
-  InteractionSphere = 1/695700000,
+  InteractionSphere = 1 / 695700000,
   Transform = {
+    Rotation = rot.CarringtonLongitudeToHEEQ180Rotation,
     Scale = {
       Type = "StaticScale",
-      Scale = sunRadius
-    },
-    Rotation = rot.CarringtonLongitudeToHEEQ180Rotation
+      Scale = SunRadius
+    }
   },
   Renderable = {
     Type = "RenderableFieldlinesSequence",
@@ -47,8 +50,8 @@ local fieldlines = {
   }
 }
 
-local toggle_fieldlines = {
-  Identifier = "os.events.bastilleday.fieldlines.togglefieldlines",
+local ToggleFieldlines = {
+  Identifier = "os.bastilleday.fieldlines.ToggleFieldlines",
   Name = "Toggle fieldlines",
   Command = [[
     if openspace.getPropertyValue("Scene.MAS-MHD-Fieldlines-bastille-day-2000.Renderable.Enabled") then
@@ -74,17 +77,20 @@ local toggle_fieldlines = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function ()
-  openspace.action.registerAction(toggle_fieldlines)
-  openspace.addSceneGraphNode(fieldlines)
+  openspace.action.registerAction(ToggleFieldlines)
+  openspace.addSceneGraphNode(Fieldlines)
 end)
 
 asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(fieldlines)
-  openspace.action.removeAction(toggle_fieldlines)
+  openspace.removeSceneGraphNode(Fieldlines)
+  openspace.action.removeAction(ToggleFieldlines)
 end)
 
-asset.export(fieldlines)
+asset.export(Fieldlines)
+
+
 
 asset.meta = {
   Name = "Predictive Science Inc. Fieldlines Bastille Day",

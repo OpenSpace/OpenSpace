@@ -12,7 +12,8 @@ local planeSpeck = asset.syncedResource({
   Version = 1
 })
 
-local plane = {
+
+local Object = {
   Identifier = "MilkyWayGalaxyArmLabelsImage",
   Parent = "Root",
   Renderable = {
@@ -40,15 +41,16 @@ local plane = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(plane)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(plane)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(plane)
+asset.export(Object)
 
 
 

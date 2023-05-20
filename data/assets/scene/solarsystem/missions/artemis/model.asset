@@ -1,12 +1,15 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("./transforms")
 
+
+
 local models = asset.syncedResource({
   Name = "Artemis Models",
   Type = "HttpSynchronization",
   Identifier = "artemis_1_models",
   Version = 1
 })
+
 
 local ArtemisModel = {
   Identifier = "ArtemisModel",
@@ -37,6 +40,7 @@ local ArtemisModel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ArtemisModel)
 end)
@@ -46,6 +50,8 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(ArtemisModel)
+
+
 
 asset.meta = {
   Name = "Artemis-1 Model",

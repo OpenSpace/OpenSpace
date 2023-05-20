@@ -1,6 +1,6 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
 asset.require("spice/base")
-local kernels = asset.require("./kernels").PlutoKernels
 
 
 
@@ -13,7 +13,7 @@ local PlutoBarycenterTrail = {
       Type = "SpiceTranslation",
       Target = "PLUTO BARYCENTER",
       Observer = "SSB",
-      Kernels = kernels
+      Kernels = kernels.PlutoKernels
     },
     Color = { 0.3, 0.7, 0.3 },
     Period = 365.25,
@@ -27,6 +27,7 @@ local PlutoBarycenterTrail = {
       orbit]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(PlutoBarycenterTrail)

@@ -75,6 +75,7 @@ local CharonLabel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Charon)
   openspace.addSceneGraphNode(CharonLabel)
@@ -86,6 +87,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Charon)
+asset.export(CharonLabel)
 
 
 

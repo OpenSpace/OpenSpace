@@ -2,6 +2,7 @@ local earthTransforms = asset.require('scene/solarsystem/planets/earth/transform
 local kernels = asset.require('../kernels')
 
 
+
 local JuiceTrailEarth = {
   Identifier = "JuiceTrailEarth",
   Parent = earthTransforms.EarthBarycenter.Identifier,
@@ -35,6 +36,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(JuiceTrailEarth)
+
 
 
 asset.meta = {

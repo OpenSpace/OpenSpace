@@ -1,11 +1,14 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+
 local trajectory = asset.syncedResource({
   Name = "C-2019 Q4 Borisov Trajectory",
   Type = "HttpSynchronization",
   Identifier = "borisov_horizons",
   Version = 3
 })
+
 
 local C2019Q4BorisovTrail = {
   Identifier = "C2019Q4BorisovTrail",
@@ -50,6 +53,7 @@ local C2019Q4BorisovPosition = {
     to 2050 JAN 01 00:00:00. Data from JPL Horizons]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(C2019Q4BorisovPosition)

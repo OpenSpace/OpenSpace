@@ -1,6 +1,8 @@
 local transforms = asset.require('scene/solarsystem/sun/transforms_heliosphere.asset')
 asset.require('scene/solarsystem/heliosphere/2012/reset_loop_action.asset')
 
+
+
 local transferFunctions = asset.syncedResource({
   Name = "Fieldlines Transfer Functions",
   Type = "HttpSynchronization",
@@ -16,13 +18,14 @@ local fieldlineData = asset.syncedResource({
   UnzipFiles = true
 })
 
-local loop = {
+
+local LoopEnlil = {
+  Identifier = "2012july.LoopEnlil",
+  Name = "Loop ENLIL",
+  Command = "openspace.scriptScheduler.clear();\nopenspace.time.setDeltaTime(43200);\nopenspace.time.setTime('2012-JUL-01 07:00:00.00');\nlocal StarttimescriptENLILLoop = \"openspace.time.setTime('2012 JUL 01 07:00:00')\";\nopenspace.scriptScheduler.loadScheduledScript('2012 AUG 01 06:58:00', StarttimescriptENLILLoop);",
   Documentation = "Sets time to start of data, sets high delta time and loops back from start when at end of data",
   GuiPath = "/2012July",
-  Identifier = "2012july.loop_enlil",
-  IsLocal = false,
-  Name = "Loop ENLIL",
-  Command = "openspace.scriptScheduler.clear();\nopenspace.time.setDeltaTime(43200);\nopenspace.time.setTime('2012-JUL-01 07:00:00.00');\nlocal StarttimescriptENLILLoop = \"openspace.time.setTime('2012 JUL 01 07:00:00')\";\nopenspace.scriptScheduler.loadScheduledScript('2012 AUG 01 06:58:00', StarttimescriptENLILLoop);"
+  IsLocal = false
 }
 
 local enlilDensityColorTable = transferFunctions .. "enlil_density.txt"
@@ -42,12 +45,12 @@ local colorRanges = {
   { 100, 2000 }
 }
 
-local interactionSphere = 695700000
+local InteractionSphere = 695700000
 
 local ENLILSliceEqPlane11AU1 = {
   Identifier = "FL_ENLIL_slice_eqPlane_011AU_1",
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.EqPlane011AU1,
@@ -70,7 +73,7 @@ local ENLILSliceEqPlane11AU1 = {
 local ENLILSliceEqPlane11AU2 = {
   Identifier = "FL_ENLIL_slice_eqPlane_011AU_2",
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.EqPlane011AU2,
@@ -93,7 +96,7 @@ local ENLILSliceEqPlane11AU2 = {
 local ENLILSliceLat411AU1 = {
   Identifier = "FL_ENLIL_slice_lat4_011AU_1",
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.Lat4011AU1,
@@ -117,7 +120,7 @@ local ENLILSliceLat411AU1 = {
 local ENLILSliceLat411AU2 = {
   Identifier = "FL_ENLIL_slice_lat4_011AU_2",
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.Lat4011AU2,
@@ -141,7 +144,7 @@ local ENLILSliceLat411AU2 = {
 local ENLILEarth = {
   Identifier = "FL_ENLIL_earth",
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.Earth,
@@ -162,7 +165,7 @@ local ENLILEarth = {
 local ENLILStereoA = {
   Identifier = "FL_ENLIL_stereoa",
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = interactionSphere,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.StereoA,
@@ -185,8 +188,9 @@ local ENLILStereoA = {
   }
 }
 
+
 asset.onInitialize(function ()
-  openspace.action.registerAction(loop)
+  openspace.action.registerAction(LoopEnlil)
 
   openspace.addSceneGraphNode(ENLILSliceEqPlane11AU1)
   openspace.addSceneGraphNode(ENLILSliceEqPlane11AU2)
@@ -205,8 +209,10 @@ asset.onDeinitialize(function ()
   openspace.removeSceneGraphNode(ENLILSliceEqPlane11AU2)
   openspace.removeSceneGraphNode(ENLILSliceEqPlane11AU1)
 
-  openspace.action.removeAction(loop)
+  openspace.action.removeAction(LoopEnlil)
 end)
+
+
 
 asset.meta = {
   Name = "Fieldlines from ENLIL model of 2012 event",

@@ -1,9 +1,10 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local kernels = asset.require("./kernels").kernels
+local kernels = asset.require("./kernels")
 
-local apolloSpiceId = -908
 
+
+local ApolloSpiceId = -908
 
 local LaunchTrail = {
   Identifier = "Apollo8LaunchTrail",
@@ -12,10 +13,10 @@ local LaunchTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
+      Target = ApolloSpiceId,
       Observer = "EARTH",
       Frame = "IAU_EARTH",
-      Kernels = kernels
+      Kernels = kernels.kernels
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1968 DEC 21 12:51:00",
@@ -36,10 +37,10 @@ local MoonTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
+      Target = ApolloSpiceId,
       Observer = "MOON",
       Frame = "IAU_MOON",
-      Kernels = kernels
+      Kernels = kernels.kernels
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1968 DEC 23",
@@ -60,10 +61,10 @@ local EarthBarycenterTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
+      Target = ApolloSpiceId,
       Observer = "EARTH",
       Frame = "GALACTIC",
-      Kernels = kernels
+      Kernels = kernels.kernels
     },
     Color = { 0.8, 0.2, 0.2 },
     StartTime = "1968 DEC 21",
@@ -76,6 +77,7 @@ local EarthBarycenterTrail = {
     Path = "/Solar System/Missions/Apollo/8"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(LaunchTrail)

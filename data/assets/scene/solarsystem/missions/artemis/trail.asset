@@ -1,7 +1,10 @@
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 asset.require("spice/base")
-local artemisSpiceId = "-1023"
+
+
+
+local ArtemisSpiceId = "-1023"
 
 local kernels = asset.syncedResource({
   Name = "Artemis Kernels",
@@ -17,7 +20,7 @@ local ArtemisEarthTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = artemisSpiceId,
+      Target = ArtemisSpiceId,
       Observer = "EARTH",
       Frame = "GALACTIC",
       Kernels = kernels .. "artemis.bsp"
@@ -42,7 +45,7 @@ local ArtemisMoonTrail= {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = artemisSpiceId,
+      Target = ArtemisSpiceId,
       Observer = "MOON",
       Frame = "IAU_MOON",
       Kernels = kernels .. "artemis.bsp"
@@ -60,6 +63,7 @@ local ArtemisMoonTrail= {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ArtemisEarthTrail)
   openspace.addSceneGraphNode(ArtemisMoonTrail)
@@ -72,6 +76,8 @@ end)
 
 asset.export(ArtemisEarthTrail)
 asset.export(ArtemisMoonTrail)
+
+
 
 asset.meta = {
   Name = "Artemis-1 Trails",

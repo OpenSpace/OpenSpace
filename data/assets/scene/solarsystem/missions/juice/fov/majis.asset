@@ -2,6 +2,7 @@ local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
 
+
 local MajisVisnir = {
   Identifier = "JuiceMajisVisnir",
   Parent = transforms.Juice.Identifier,
@@ -239,6 +240,7 @@ end)
 -- asset.export(MajisIrB2)
 -- asset.export(MajisIrB4)
 asset.export(Majis)
+
 
 
 asset.meta = {

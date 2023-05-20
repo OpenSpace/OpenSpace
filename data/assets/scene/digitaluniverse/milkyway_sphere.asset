@@ -6,7 +6,7 @@ local sphereTextures = asset.syncedResource({
 })
 
 
-local sphere = {
+local Sphere = {
   Identifier = "MilkyWay",
   Transform = {
     Rotation = {
@@ -24,7 +24,7 @@ local sphere = {
     MirrorTexture = true,
     FadeOutThreshold = 0.0015,
     Background = true,
-    DimInAtmosphere = true,
+    DimInAtmosphere = true
   },
   Tag = {"daytime_hidden"},
   GUI = {
@@ -35,15 +35,16 @@ local sphere = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(sphere)
+  openspace.addSceneGraphNode(Sphere)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(sphere)
+  openspace.removeSceneGraphNode(Sphere)
 end)
 
-asset.export(sphere)
+asset.export(Sphere)
 
 
 

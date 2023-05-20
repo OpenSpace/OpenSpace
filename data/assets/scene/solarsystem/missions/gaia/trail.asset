@@ -1,12 +1,15 @@
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+
 local trail = asset.syncedResource({
   Name = "Gaia Trail",
   Type = "HttpSynchronization",
   Identifier = "gaia_trail",
   Version = 3
 })
+
 
 local GaiaTrail = {
   Identifier = "GaiaTrail",
@@ -62,6 +65,7 @@ local GaiaTrailEclip = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GaiaTrail)
   openspace.addSceneGraphNode(GaiaTrailEclip)
@@ -74,6 +78,7 @@ end)
 
 asset.export(GaiaTrail)
 asset.export(GaiaTrailEclip)
+
 
 
 asset.meta = {

@@ -1,5 +1,5 @@
-local bastilleday_setup_startofcme = {
-  Identifier = "os.events.bastilleday.setup.startofcme",
+local StartOfCme = {
+  Identifier = "os.bastilleday.setup.StartOfCme",
   Name = "Reset to start of CME, no loop",
   Command = [[
     openspace.time.setTime('2000-JUL-14 10:03:00.00');
@@ -11,8 +11,8 @@ local bastilleday_setup_startofcme = {
   IsLocal = false
 }
 
-local bastilleday_setup_shortloop = {
-  Identifier = "os.events.bastilleday.setup.shortloop",
+local ShortLoop = {
+  Identifier = "os.bastilleday.setup.ShortLoop",
   Name = "Loop 10:03 - 10:16, at 2 min/second",
   Command = [[
     local EndtimeShortLoop = "2000 JUL 14 10:16:00";
@@ -27,8 +27,8 @@ local bastilleday_setup_shortloop = {
   IsLocal = false
 }
 
-local bastilleday_setup_standardloop = {
-  Identifier = "os.events.bastilleday.setup.standardloop",
+local StandardLoop = {
+  Identifier = "os.bastilleday.setup.StandardLoop",
   Name = "Loop 10:03 - 11:00, at 4 min/second",
   Command = [[
     local starttimescriptslowloop = "openspace.time.setTime('2000 JUL 14 10:03:00')";
@@ -42,8 +42,8 @@ local bastilleday_setup_standardloop = {
   IsLocal = false
 }
 
-local bastilleday_setup_fastloop = {
-  Identifier = "os.events.bastilleday.setup.fastloop",
+local FastLoop = {
+  Identifier = "os.bastilleday.setup.FastLoop",
   Name = "Loop 10:03 - 11.48, at 15 min/second",
   Command = [[
     local starttimescriptfastloop = "openspace.time.setTime('2000 JUL 14 10:03:00')";
@@ -57,8 +57,8 @@ local bastilleday_setup_fastloop = {
   IsLocal = false
 }
 
-local bastilleday_setup_longloop = {
-  Identifier = "os.events.bastilleday.setup.longloop",
+local LongLoop = {
+  Identifier = "os.bastilleday.setup.LongLoop",
   Name = "Loop 09:30 - 13:00, at 4 min/second",
   Command = [[
     local starttimescriptlongloop = "openspace.time.setTime('2000 JUL 14 09:30:00')";
@@ -72,21 +72,24 @@ local bastilleday_setup_longloop = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(bastilleday_setup_startofcme)
-  openspace.action.registerAction(bastilleday_setup_shortloop)
-  openspace.action.registerAction(bastilleday_setup_standardloop)
-  openspace.action.registerAction(bastilleday_setup_fastloop)
-  openspace.action.registerAction(bastilleday_setup_longloop)
+  openspace.action.registerAction(StartOfCme)
+  openspace.action.registerAction(ShortLoop)
+  openspace.action.registerAction(StandardLoop)
+  openspace.action.registerAction(FastLoop)
+  openspace.action.registerAction(LongLoop)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(bastilleday_setup_longloop)
-  openspace.action.removeAction(bastilleday_setup_fastloop)
-  openspace.action.removeAction(bastilleday_setup_standardloop)
-  openspace.action.removeAction(bastilleday_setup_shortloop)
-  openspace.action.removeAction(bastilleday_setup_startofcme)
+  openspace.action.removeAction(LongLoop)
+  openspace.action.removeAction(FastLoop)
+  openspace.action.removeAction(StandardLoop)
+  openspace.action.removeAction(ShortLoop)
+  openspace.action.removeAction(StartOfCme)
 end)
+
+
 
 asset.meta = {
   Name = "Bastille day actions",

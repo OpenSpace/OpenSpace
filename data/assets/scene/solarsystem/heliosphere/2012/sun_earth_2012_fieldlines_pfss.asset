@@ -1,5 +1,7 @@
 local transforms = asset.require('scene/solarsystem/sun/transforms_heliosphere.asset')
 
+
+
 local transferFunctions = asset.syncedResource({
   Name = "Fieldlines Transfer Functions",
   Type = "HttpSynchronization",
@@ -15,13 +17,14 @@ local fieldlineData  = asset.syncedResource({
   UnzipFiles = true
 })
 
-local darkenSun = {
+
+local DarkSun = {
+  Identifier = "2012july.DarkSun",
+  Name = "Dark sun",
+  Command = "local textureMultiplier = openspace.getPropertyValue(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\");\nif(textureMultiplier < 0.01) then\nopenspace.setPropertyValueSingle(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\", 1.0, 1);\nelse\nopenspace.setPropertyValueSingle(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\", 0.0, 1)\nend",
   Documentation = "Makes the Sun turn black",
   GuiPath = "/2012July",
-  Identifier = "2012july.dark_sun",
-  IsLocal = false,
-  Name = "Dark sun",
-  Command = "local textureMultiplier = openspace.getPropertyValue(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\");\nif(textureMultiplier < 0.01) then\nopenspace.setPropertyValueSingle(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\", 1.0, 1);\nelse\nopenspace.setPropertyValueSingle(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\", 0.0, 1)\nend"
+  IsLocal = false
 }
 
 local pfssTransitionColorTable = transferFunctions .. "pfss_transition.txt"
@@ -32,10 +35,12 @@ local PFSSPaths = {
   SolarSoft = fieldlineData .. "leilas_solar_soft/"
 }
 
+local InteractionSphere = 695700000
+
 local PFSS = {
   Identifier = "FL_PFSS",
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
-  InteractionSphere = 695700000,
+  InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = PFSSPaths.SolarSoft,
@@ -62,8 +67,9 @@ local PFSS = {
   }
 }
 
+
 asset.onInitialize(function ()
-  openspace.action.registerAction(darkenSun)
+  openspace.action.registerAction(DarkSun)
 
   openspace.addSceneGraphNode(PFSS)
 
@@ -76,9 +82,11 @@ end)
 
 asset.onDeinitialize(function ()
   openspace.removeSceneGraphNode(PFSS)
-  openspace.action.removeAction(darkenSun)
+  openspace.action.removeAction(DarkSun)
 
 end)
+
+
 
 asset.meta = {
   Name = "Fieldlines from PFSS model of 2012 event",

@@ -2,6 +2,7 @@ local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
 
+
 local Gala = {
   Identifier = "JuiceGala",
   Parent = transforms.Juice.Identifier,
@@ -32,6 +33,7 @@ local Gala = {
 }
 
 
+
 asset.onInitialize(function()
   -- Circle shapes are currently not supported
   openspace.addSceneGraphNode(Gala)
@@ -42,6 +44,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Gala)
+
 
 
 asset.meta = {

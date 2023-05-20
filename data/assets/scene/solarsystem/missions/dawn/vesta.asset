@@ -1,6 +1,7 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
+
 local kernels = asset.syncedResource({
   Name = "Vesta Kernels",
   Type = "HttpSynchronization",
@@ -29,6 +30,7 @@ local models = asset.syncedResource({
   Version = 1
 })
 
+
 local Vesta = {
   Identifier = "Vesta",
   Parent = transforms.SolarSystemBarycenter.Identifier,
@@ -38,7 +40,6 @@ local Vesta = {
       Target = "VESTA",
       Observer = "SSB",
       Kernels = {
-        --kernels .. "vesta_v06.tpc",
         kernels .. "sb_vesta_071107.bsp"
       }
     },
@@ -138,18 +139,21 @@ local VestaTrail = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Vesta)
   openspace.addSceneGraphNode(VestaTrail)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(VestaTrail.Identifier)
-  openspace.removeSceneGraphNode(Vesta.Identifier)
+  openspace.removeSceneGraphNode(VestaTrail)
+  openspace.removeSceneGraphNode(Vesta)
 end)
 
 asset.export(Vesta)
 asset.export(VestaTrail)
+
+
 
 asset.meta = {
   Name = "Vesta",

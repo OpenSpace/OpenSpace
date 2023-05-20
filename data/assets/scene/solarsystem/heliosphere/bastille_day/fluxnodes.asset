@@ -1,6 +1,8 @@
 local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 local propertyHelper = asset.require("util/property_helper")
-local rot = asset.require("./carringtonToHEEQRotation.asset")
+local rot = asset.require("./carrington_to_heeq_rotation.asset")
+
+
 
 local fluxNodesBinaries = asset.syncedResource({
   Name = "Bastille day Flux nodes binaries",
@@ -9,8 +11,9 @@ local fluxNodesBinaries = asset.syncedResource({
   Version = 1
 })
 
+
 -- FluxNodes from binaries
-local fluxNodes = {
+local FluxNodes = {
   Identifier = "MAS-MHD-FluxNodes-bastille-day-2000",
   Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
@@ -32,8 +35,8 @@ local fluxNodes = {
   }
 }
 
-local toggle_fluxnodes = {
-  Identifier = "os.events.bastilleday.fluxnodes.togglefluxnodes",
+local ToggleFluxnodes = {
+  Identifier = "os.bastilleday.fluxnodes.ToggleFluxnodes",
   Name = "Toggle flux nodes",
   Command = [[
     if openspace.getPropertyValue("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled") then
@@ -59,17 +62,19 @@ local toggle_fluxnodes = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function ()
-  openspace.action.registerAction(toggle_fluxnodes)
-  openspace.addSceneGraphNode(fluxNodes)
+  openspace.action.registerAction(ToggleFluxnodes)
+  openspace.addSceneGraphNode(FluxNodes)
 end)
 
 asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(fluxNodes)
-  openspace.action.removeAction(toggle_fluxnodes)
+  openspace.removeSceneGraphNode(FluxNodes)
+  openspace.action.removeAction(ToggleFluxnodes)
 end)
 
-asset.export(fluxNodes)
+asset.export(FluxNodes)
+
 
 
 asset.meta = {

@@ -1,21 +1,23 @@
 local globeIdentifier = asset.require("../../ceres").Ceres.Identifier
 
-local layer = {
-  Identifier = "LAMO_",
+
+
+local Layer = {
+  Identifier = "LAMO_Sweden",
   Name = "LAMO [Sweden]",
   Enabled = asset.enabled,
   FilePath = asset.localResource('LAMO.wms'),
 }
 
 asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 asset.meta = {

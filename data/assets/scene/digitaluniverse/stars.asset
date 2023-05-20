@@ -26,7 +26,8 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-local stars = {
+
+local Stars = {
   Identifier = "Stars",
   Renderable = {
     Type = "RenderableStars",
@@ -50,7 +51,7 @@ local stars = {
     },
     DimInAtmosphere = true,
   },
-  Tag = {"daytime_hidden"},
+  Tag = { "daytime_hidden" },
   GUI = {
     Name = "Stars",
     Path = "/Milky Way/Stars",
@@ -64,7 +65,7 @@ local stars = {
   }
 }
 
-local sunstar = {
+local SunStar = {
   Identifier = "SunStar",
   Renderable = {
     Type = "RenderableStars",
@@ -85,7 +86,7 @@ local sunstar = {
       Vx = "vx",
       Vy = "vy",
       Vz = "vz",
-      Speed = "speed",
+      Speed = "speed"
     },
     DimInAtmosphere = true,
   },
@@ -97,18 +98,19 @@ local sunstar = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(stars)
-  openspace.addSceneGraphNode(sunstar)
+  openspace.addSceneGraphNode(Stars)
+  openspace.addSceneGraphNode(SunStar)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(sunstar)
-  openspace.removeSceneGraphNode(stars)
+  openspace.removeSceneGraphNode(SunStar)
+  openspace.removeSceneGraphNode(Stars)
 end)
 
-asset.export(stars)
-asset.export(sunstar)
+asset.export(Stars)
+asset.export(SunStar)
 
 
 

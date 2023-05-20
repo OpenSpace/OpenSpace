@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernels = asset.require("../kernels").PlutoKernels
+local kernels = asset.require("../kernels")
 
 
 
@@ -11,7 +11,7 @@ local Hydra = {
       Type = "SpiceTranslation",
       Target = "HYDRA",
       Observer = "PLUTO BARYCENTER",
-      Kernels = kernels
+      Kernels = kernels.PlutoKernels
     }
   },
   Renderable = {
@@ -76,6 +76,7 @@ local HydraLabel = {
     Description = "Label for Pluto's moon Hydra"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Hydra)

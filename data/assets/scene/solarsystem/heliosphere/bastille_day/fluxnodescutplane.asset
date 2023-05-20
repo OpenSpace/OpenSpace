@@ -1,6 +1,8 @@
 local propertyHelper = asset.require("util/property_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
-local rot = asset.require("./carringtonToHEEQRotation.asset")
+local rot = asset.require("./carrington_to_heeq_rotation.asset")
+
+
 
 local TexturesPathEquatorial = asset.syncedResource({
 Type = "HttpSynchronization",
@@ -15,6 +17,7 @@ local TexturesPathMeridial = asset.syncedResource({
   Identifier = "cutplane_meridial_textures",
   Version = 1
 })
+
 
 local EquatorialCutplane = {
   Identifier = "EquatorialCutplane-bastille-day-2000",
@@ -69,8 +72,8 @@ local MeridialCutplane = {
   }
 }
 
-local toggle_equatorial = {
-  Identifier = "os.events.bastilleday.fluxnodescutplane.toggleequatorial",
+local ToggleEquatorial = {
+  Identifier = "os.bastilleday.fluxnodescutplane.ToggleEquatorial",
   Name = "Toggle equatorial cutplane",
   Command = [[
     if openspace.getPropertyValue("Scene.EquatorialCutplane-bastille-day-2000.Renderable.Enabled") then
@@ -95,8 +98,8 @@ local toggle_equatorial = {
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
-local toggle_meridial = {
-  Identifier = "os.events.bastilleday.fluxnodescutplane.togglemeridial",
+local ToggleMeridial = {
+  Identifier = "os.bastilleday.fluxnodescutplane.ToggleMeridial",
   Name = "Toggle meridial cutplane",
   Command = [[
     if openspace.getPropertyValue("Scene.MeridialCutplane-bastille-day-2000.Renderable.Enabled") then
@@ -122,9 +125,10 @@ local toggle_meridial = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function ()
-  openspace.action.registerAction(toggle_equatorial)
-  openspace.action.registerAction(toggle_meridial)
+  openspace.action.registerAction(ToggleEquatorial)
+  openspace.action.registerAction(ToggleMeridial)
   openspace.addSceneGraphNode(EquatorialCutplane)
   openspace.addSceneGraphNode(MeridialCutplane)
 end)
@@ -132,12 +136,13 @@ end)
 asset.onDeinitialize(function ()
   openspace.removeSceneGraphNode(MeridialCutplane)
   openspace.removeSceneGraphNode(EquatorialCutplane)
-  openspace.action.removeAction(toggle_equatorial)
-  openspace.action.removeAction(toggle_meridial)
+  openspace.action.removeAction(ToggleEquatorial)
+  openspace.action.removeAction(ToggleMeridial)
 end)
 
 asset.export(EquatorialCutplane)
 asset.export(MeridialCutplane)
+
 
 
 asset.meta = {

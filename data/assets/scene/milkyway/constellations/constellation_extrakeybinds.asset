@@ -1,14 +1,18 @@
 local mainAsset = asset.require("./constellation_art")
 
+
+
 asset.onInitialize(function ()
-  openspace.bindKey("v", mainAsset.ShowZodiacArt.Identifier)
-  openspace.bindKey("Shift+v", mainAsset.HideZodiacArt.Identifier)
+  openspace.bindKey("V", mainAsset.ShowZodiacArt.Identifier)
+  openspace.bindKey("Shift+V", mainAsset.HideZodiacArt.Identifier)
 end)
 
 asset.onDeinitialize(function ()
-  openspace.clearKey("v")
-  openspace.clearKey("Shift+v")
+  openspace.clearKey("V")
+  openspace.clearKey("Shift+V")
 end)
+
+
 
 asset.meta = {
   Name = "Constellation Image Extra Keybinds",

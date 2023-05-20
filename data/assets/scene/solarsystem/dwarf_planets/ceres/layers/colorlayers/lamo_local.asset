@@ -1,5 +1,7 @@
 local globeIdentifier = asset.require("../../ceres").Ceres.Identifier
 
+
+
 local textures = asset.syncedResource({
   Name = "Ceres Textures",
   Type = "HttpSynchronization",
@@ -7,7 +9,8 @@ local textures = asset.syncedResource({
   Version = 2
 })
 
-local layer = {
+
+local Layer = {
   Identifier = "LAMO_Local",
   Name = "LAMO [Local]",
   Enabled = asset.enabled,
@@ -15,14 +18,14 @@ local layer = {
 }
 
 asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 asset.meta = {

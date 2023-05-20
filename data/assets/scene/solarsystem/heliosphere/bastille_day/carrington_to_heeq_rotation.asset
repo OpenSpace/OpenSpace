@@ -16,6 +16,7 @@ local CarringtonLongitudeToHEEQ180Rotation = {
 asset.export("CarringtonLongitudeToHEEQ180Rotation", CarringtonLongitudeToHEEQ180Rotation)
 
 
+
 asset.meta = {
   Name = "Carrington Longitude To HEEQ180 Rotation",
   Version = "1.0",

@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local kernels = asset.require("../kernels").PlutoKernels
 
 
 
@@ -76,6 +75,7 @@ local NixLabel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Nix)
   openspace.addSceneGraphNode(NixTrail)
@@ -90,6 +90,7 @@ end)
 
 asset.export(Nix)
 asset.export(NixTrail)
+asset.export(NixLabel)
 
 
 

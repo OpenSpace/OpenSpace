@@ -1,6 +1,7 @@
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
-local artemisSpiceId = "-1023"
+
+
 
 local kernels = asset.syncedResource({
   Name = "Artemis Kernels",
@@ -9,13 +10,16 @@ local kernels = asset.syncedResource({
   Version = 1
 })
 
+
+local ArtemisSpiceId = "-1023"
+
 local ArtemisPosition = {
   Identifier = "ArtemisPosition",
   Parent = earthTransforms.EarthCenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = artemisSpiceId,
+      Target = ArtemisSpiceId,
       Observer = "EARTH",
       Frame = "GALACTIC",
       Kernels = kernels .. "artemis.bsp"
@@ -29,6 +33,7 @@ local ArtemisPosition = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ArtemisPosition)
 end)
@@ -38,6 +43,8 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(ArtemisPosition)
+
+
 
 asset.meta = {
   Name = "Artemis-1 Transforms",

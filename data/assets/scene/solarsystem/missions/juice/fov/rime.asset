@@ -2,6 +2,7 @@ local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
 
+
 -- Circle shapes are not support
 local RimeBase = {
   Identifier = "JuiceRimeBase",
@@ -75,6 +76,7 @@ end)
 
 asset.export(Rime)
 asset.export(RimeBase)
+
 
 
 asset.meta = {

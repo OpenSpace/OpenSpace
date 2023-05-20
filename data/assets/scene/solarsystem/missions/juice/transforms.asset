@@ -2,6 +2,7 @@ local jupiterTransforms = asset.require('scene/solarsystem/planets/jupiter/trans
 local kernels = asset.require('./kernels')
 
 
+
 local Juice = {
   Identifier = "Juice",
   Parent = jupiterTransforms.JupiterBarycenter.Identifier,
@@ -86,6 +87,7 @@ end)
 asset.export(Juice)
 asset.export(GanymedePosition)
 asset.export(GPHIO)
+
 
 
 asset.meta = {
