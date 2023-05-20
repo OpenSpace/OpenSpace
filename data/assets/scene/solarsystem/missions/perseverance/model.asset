@@ -3,12 +3,15 @@ local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms"
 local sun = asset.require("scene/solarsystem/sun/sun")
 local spice = asset.require("./spice")
 
+
+
 local models = asset.syncedResource({
   Name = "Perseverance Model",
   Type = "HttpSynchronization",
   Identifier = "perseverance_models",
   Version = 2
 })
+
 
 local TranslationKeyframes = {
   ["1850 JAN 01 00:00:00"] = {
@@ -55,7 +58,7 @@ local TranslationKeyframes = {
     Frame = "IAU_MARS",
     Kernels = spice.Kernels,
     FixedDate = "2021 FEB 18 20:43:48"
-  },
+  }
 }
 
 local PerseveranceNode = {
@@ -123,12 +126,11 @@ local Body = {
         Intensity = 0.5
       }
     },
-    RotationVector = {19.19,0.0,348.08}
+    RotationVector = { 19.19, 0.0, 348.08 }
   },
   GUI = {
     Name = "Perseverance Model Body",
-    Path = "/Solar System/Missions/Perseverance/Model",
-    -- Hidden = true
+    Path = "/Solar System/Missions/Perseverance/Model"
   }
 }
 
@@ -147,6 +149,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PerseveranceNode)
 end)
 
+asset.export(PerseveranceNode)
 asset.export(Perseverance)
 asset.export(PerseveranceModel)
 asset.export(Body)

@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
 
 local Name = "Roads (black)"
@@ -26,7 +26,7 @@ local layer = {
 }
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", layer)
 end)
 
 asset.onDeinitialize(function()

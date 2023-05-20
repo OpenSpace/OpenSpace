@@ -61,7 +61,7 @@ local Mission = {
     {
       Name = "Voyager 1 enters interstellar space",
       Date = "2012 AUG 01 00:00:00",
-    },               
+    }
   },
   Phases = {
     {
@@ -78,7 +78,7 @@ local Mission = {
         {
           Name = "Voyager 1 Launch",
           TimeRange = { Start = "1977 SEP 05 00:00:00", End = "1977 SEP 05 00:00:00" }
-        },
+        }
       }
     },
     {
@@ -88,10 +88,11 @@ local Mission = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.loadMission(Mission)
- end)
- 
- asset.onDeinitialize(function()
+end)
+
+asset.onDeinitialize(function()
   openspace.unloadMission(Mission.Name)
- end)
+end)

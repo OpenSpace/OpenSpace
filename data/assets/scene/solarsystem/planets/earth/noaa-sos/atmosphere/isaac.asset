@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Hurricane Isaac - 2012"
@@ -22,10 +23,11 @@ local syncedDirectory = asset.syncedResource({
   UnzipFiles = true
 })
 
+
 local radarDestination = syncedDirectory .. "radar"
 local satDestination = syncedDirectory .. "sat"
 
-local layer_radar = {
+local LayerRadar = {
   Identifier = Identifier .. "-radar",
   Name = Name .. " (Radar)",
   Type = "TemporalTileLayer",
@@ -39,7 +41,7 @@ local layer_radar = {
   Description = Description
 }
 
-local layer_sat = {
+local LayerSat = {
   Identifier = Identifier .. "-sat",
   Name = Name .. " (Sat)",
   Type = "TemporalTileLayer",
@@ -53,18 +55,20 @@ local layer_sat = {
   Description = Description
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_radar)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_sat)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerRadar)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerSat)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_radar)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_sat)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerSat)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerRadar)
 end)
 
-asset.export(layer_radar)
-asset.export(layer_sat)
+asset.export(LayerRadar)
+asset.export(LayerSat)
+
 
 
 asset.meta = {

@@ -28,6 +28,7 @@ local TrailAtPluto = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(TrailAtPluto)
 end)

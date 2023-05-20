@@ -1,6 +1,8 @@
 local transforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local NewHorizonsKernels = asset.require("./kernels").NewHorizonsKernels
+local kernels = asset.require("./kernels")
+
+
 
 local assets = asset.syncedResource({
   Name = "Pluto Assets",
@@ -30,7 +32,8 @@ local images = asset.syncedResource({
   Version = 2
 })
 
-local plutoRadius = 1.173E6
+
+local PlutoRadius = 1.173E6
 
 local PlutoProjection = {
   Identifier = "PlutoProjection",
@@ -40,7 +43,7 @@ local PlutoProjection = {
       Type = "SpiceTranslation",
       Target = "PLUTO",
       Observer = "PLUTO BARYCENTER",
-      Kernels = NewHorizonsKernels
+      Kernels = kernels.NewHorizonsKernels
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -50,7 +53,7 @@ local PlutoProjection = {
   },
   Renderable = {
     Type = "RenderablePlanetProjection",
-    Radius = plutoRadius,
+    Radius = PlutoRadius,
     Segments = 400,
     ColorTexturePaths = {
       textures .. "pluto.png",
@@ -65,23 +68,22 @@ local PlutoProjection = {
     },
     MeridianShift = false,
     Projection = {
-      Sequence       = images,
-      EventFile      = assets .. "core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
+      Sequence = images,
+      EventFile = assets .. "core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
       -- SequenceType   = "hybrid",
-      SequenceType   = "image-sequence",
-      Observer       = "NEW HORIZONS",
-      Target         = "PLUTO",
-      Aberration     = "NONE",
+      SequenceType = "image-sequence",
+      Observer = "NEW HORIZONS",
+      Target = "PLUTO",
+      Aberration = "NONE",
       AspectRatio = 2,
-
       DataInputTranslation = {
         Instrument = {
           LORRI = {
-            DetectorType  = "Camera",
+            DetectorType = "Camera",
             Spice = { "NH_LORRI" }
           },
           RALPH_MVIC_PAN_FRAME = {
-            DetectorType  = "Scanner",
+            DetectorType = "Scanner",
             StopCommand = "RALPH_ABORT",
             Spice = { "NH_RALPH_MVIC_FT" }
           },
@@ -94,7 +96,7 @@ local PlutoProjection = {
               "NH_RALPH_MVIC_RED",
               "NH_RALPH_MVIC_BLUE"
             }
-        },
+          },
           RALPH_LEISA = {
             DetectorType = "Scanner",
             StopCommand = "END_NOM",
@@ -136,8 +138,8 @@ local PlutoProjection = {
             Spice = { "NH_REX" }
           }
         },
-        Target ={
-          Read  = {
+        Target = {
+          Read = {
             "TARGET_NAME",
             "INSTRUMENT_HOST_NAME",
             "INSTRUMENT_ID",
@@ -146,21 +148,21 @@ local PlutoProjection = {
             "DETECTOR_TYPE"
           },
           Convert = {
-            PLUTO       = { "PLUTO" },
+            PLUTO = { "PLUTO" },
             NEWHORIZONS = { "NEW HORIZONS" },
-            CCD         = { "CAMERA" },
-            FRAMECCD    = { "SCANNER" }
+            CCD = { "CAMERA" },
+            FRAMECCD = { "SCANNER" }
           }
         }
       },
       Instrument = {
-        Name       = "NH_LORRI",
-        Method     = "ELLIPSOID",
+        Name = "NH_LORRI",
+        Method = "ELLIPSOID",
         Aberration = "NONE",
-        Fovy       = 0.2907,
-        Aspect     = 1,
-        Near       = 0.2,
-        Far        = 10000
+        Fovy = 0.2907,
+        Aspect = 1,
+        Near = 0.2,
+        Far = 10000
       },
       PotentialTargets = {
         "PLUTO",
@@ -184,7 +186,7 @@ local PlutoBarycenterLabel = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Billboard = true,
-    Size = 5E4,
+    Size = 50000,
     Texture = encounterTextures .. "barycenter.png",
     BlendMode = "Additive"
   },
@@ -235,6 +237,7 @@ local PlutoShadow = {
     Path = "/Solar System/Dwarf Planets/Pluto"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(PlutoProjection)

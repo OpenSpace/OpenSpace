@@ -122,10 +122,8 @@ local Mission = {
 
 asset.onInitialize(function()
   openspace.loadMission(Mission)
- end)
- 
- asset.onDeinitialize(function()
+end)
+
+asset.onDeinitialize(function()
   openspace.unloadMission(Mission.Name)
- end)
- 
- 
+end)

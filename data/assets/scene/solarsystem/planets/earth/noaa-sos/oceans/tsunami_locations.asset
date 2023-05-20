@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
 
 local Name = "Tsunami Locations - 2000 BCE - 2014"
@@ -67,10 +67,10 @@ local legend = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_gray)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_neutral)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_events)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", layer_base)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", layer_gray)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", layer_neutral)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", layer_events)
   openspace.addScreenSpaceRenderable(legend)
 end)
 

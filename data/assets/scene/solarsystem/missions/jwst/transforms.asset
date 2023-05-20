@@ -3,6 +3,8 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 asset.require("scene/solarsystem/planets/earth/lagrange_points/L2")
 
+
+
 local kernels = asset.syncedResource({
   Name = "JWST Kernel",
   Type = "HttpSynchronization",
@@ -10,8 +12,9 @@ local kernels = asset.syncedResource({
   Version = 2
 })
 
-local launchTime = "2021 DEC 25 12:20:00"
-local detachTime = "2021 DEC 25 12:50:00"
+
+local LaunchTime = "2021 DEC 25 12:20:00"
+local DetachTime = "2021 DEC 25 12:50:00"
 local L2orbitInsertionTime = "2022 JAN 25 00:00:00"
 
 local JWSTPosition = {
@@ -22,25 +25,25 @@ local JWSTPosition = {
       Type = "TimelineTranslation",
       ShouldInterpolate = false,
       Keyframes = {
-        [launchTime] = {
-          Type = 'SpiceTranslation',
+        [LaunchTime] = {
+          Type = "SpiceTranslation",
           Target = 170, -- JWST
-          Observer = 'EARTH',
-          Frame = 'IAU_EARTH',
+          Observer = "EARTH",
+          Frame = "IAU_EARTH",
           Kernels = { kernels .. "webb.bsp" }
         },
-        [detachTime] = {
-          Type = 'SpiceTranslation',
+        [DetachTime] = {
+          Type = "SpiceTranslation",
           Target = 170, -- JWST
-          Observer = 'EARTH',
-          Frame = 'GALACTIC',
+          Observer = "EARTH",
+          Frame = "GALACTIC",
           Kernels = { kernels .. "webb.bsp" }
         },
         [L2orbitInsertionTime] = {
-          Type = 'SpiceTranslation',
+          Type = "SpiceTranslation",
           Target = 170, -- JWST
           Observer = 392, -- L2
-          Frame = 'GALACTIC',
+          Frame = "GALACTIC",
           Kernels = { kernels .. "webb.bsp" }
         }
       }
@@ -52,7 +55,7 @@ local JWSTPosition = {
     Hidden = true,
     Description = [[
       James Webb Space Telescope Position relative to Earth.
-    ]],
+    ]]
   }
 }
 
@@ -75,9 +78,10 @@ local JWSTRotation = {
     Hidden = true,
     Description = [[
       James Webb Space Telescope Rotation so the sunshield always faces the Sun.
-    ]],
+    ]]
   }
 }
+
 
 -- Reparent the JWSTPosition node when the data changes
 asset.onInitialize(function()
@@ -87,15 +91,15 @@ asset.onInitialize(function()
   -- Set correct parent during run-time
   openspace.scriptScheduler.loadScheduledScript(
     detachTime,
-    [[openspace.setParent("JWSTPosition", "EarthCenter")]],
-    [[openspace.setParent("JWSTPosition", "EarthIAU")]],
+    "openspace.setParent('JWSTPosition', 'EarthCenter')",
+    "openspace.setParent('JWSTPosition', 'EarthIAU')",
     "",
     1 -- Not default group, never clear this script
   )
   openspace.scriptScheduler.loadScheduledScript(
     L2orbitInsertionTime,
-    [[openspace.setParent("JWSTPosition", "L2")]],
-    [[openspace.setParent("JWSTPosition", "EarthCenter")]],
+    "openspace.setParent('JWSTPosition', 'L2')",
+    "openspace.setParent('JWSTPosition', 'EarthCenter')",
     "",
     1 -- Not default group, never clear this script
   )
@@ -119,6 +123,7 @@ end)
 
 asset.export(JWSTPosition)
 asset.export(JWSTRotation)
+
 
 
 asset.meta = {

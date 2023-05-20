@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
 
 local Name = "Deep-Sea Vent Discoveries"
@@ -36,7 +36,7 @@ local layer = {
 }
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", layer)
 end)
 
 asset.onDeinitialize(function()

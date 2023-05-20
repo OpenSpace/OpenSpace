@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
 
 local Name = "Tsunami Historical Series: Lisbon - 1755"
@@ -52,10 +52,10 @@ local layer_null = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_coastal)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy_coastal)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_null)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", layer_coastal)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", layer_energy_coastal)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", layer_energy)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", layer_null)
 end)
 
 asset.onDeinitialize(function()

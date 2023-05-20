@@ -1,5 +1,5 @@
-local transforms = asset.require("../transforms")
 asset.require("spice/base")
+local transforms = asset.require("../transforms")
 
 
 
@@ -23,6 +23,7 @@ local MoonTrail = {
     Path = "/Solar System/Planets/Earth/Moon"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MoonTrail)

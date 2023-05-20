@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
 
 local Name = "Wave Heights 2012"
@@ -38,7 +38,7 @@ local colorbar = {
 }
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", layer)
   openspace.addScreenSpaceRenderable(colorbar)
 end)
 

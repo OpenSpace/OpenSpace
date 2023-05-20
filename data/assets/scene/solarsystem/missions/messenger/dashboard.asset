@@ -1,4 +1,4 @@
-local distance = {
+local Distance = {
   Type = "DashboardItemDistance",
   Identifier = "MessengerDistance",
   GuiName = "Messenger - Mercury Distance",
@@ -9,9 +9,9 @@ local distance = {
 }
 
 asset.onInitialize(function()
-  openspace.dashboard.addDashboardItem(distance)
+  openspace.dashboard.addDashboardItem(Distance)
 end)
 
 asset.onDeinitialize(function()
-  openspace.dashboard.removeDashboardItem(distance)
+  openspace.dashboard.removeDashboardItem(Distance)
 end)

@@ -1,5 +1,7 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local circle = asset.syncedResource({
   Name = "Circle",
@@ -15,13 +17,16 @@ local kernels = asset.syncedResource({
   Version = 1
 })
 
+
+local L5 = 395
+
 local L5Position = {
   Identifier = "L5Position",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = 395, -- L5
+      Target = L5,
       Observer = "SSB",
       Kernels = kernels .. "L5_de431.bsp"
     }
@@ -40,7 +45,7 @@ local L5 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Billboard = true,
-    Size = 800E6,
+    Size = 800000000,
     Texture = circle .. "circle.png",
     BlendMode = "Additive"
   },
@@ -72,6 +77,7 @@ local L5Label = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(L5Position)
   openspace.addSceneGraphNode(L5)
@@ -87,6 +93,7 @@ end)
 asset.export(L5Position)
 asset.export(L5)
 asset.export(L5Label)
+
 
 
 asset.meta = {

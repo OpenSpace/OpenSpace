@@ -1,4 +1,6 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
+
 
 local texturesPath = asset.syncedResource({
   Name = "Earth Textures",
@@ -7,7 +9,8 @@ local texturesPath = asset.syncedResource({
   Version = 2
 })
 
-local layer = {
+
+local Layer = {
   Name = "Earth Bluemarble Height",
   Identifier = "Earth_Bluemarble_Height",
   Enabled = asset.enabled,
@@ -15,15 +18,17 @@ local layer = {
   Description = "Topographic layer from Blue Marble Next Generation"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "HeightLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "HeightLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
+
 
 
 asset.meta = {

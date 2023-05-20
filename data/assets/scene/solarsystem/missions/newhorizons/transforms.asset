@@ -1,6 +1,8 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 
+
+
 local PlutoBarycenterAccurate = {
   Identifier = "PlutoBarycenterAccurate",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
@@ -44,6 +46,7 @@ local NewHorizonsPosition = {
     Path = "/Solar System/Missions/New Horizons"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(PlutoBarycenterAccurate)

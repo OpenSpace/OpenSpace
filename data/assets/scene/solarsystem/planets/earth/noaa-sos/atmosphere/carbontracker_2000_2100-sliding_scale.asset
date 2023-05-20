@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "CarbonTracker: Sliding Scale"
@@ -24,11 +25,12 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
+
 local fieldDestination = syncedDirectory .. "field"
 local obsDestination = syncedDirectory .. "obs"
 local colorbarDestination = syncedDirectory .. "colorbar"
 
-local layer_field = {
+local LayerField = {
   Identifier = Identifier .. "-field",
   Name = Name .. " (Field)",
   Type = "TemporalTileLayer",
@@ -42,7 +44,7 @@ local layer_field = {
   Description = Description
 }
 
-local layer_obs = {
+local LayerObs = {
   Identifier = Identifier .. "-obs",
   Name = Name .. " (Observed)",
   Type = "TemporalTileLayer",
@@ -56,7 +58,7 @@ local layer_obs = {
   Description = Description
 }
 
-local colorbar = {
+local Colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
@@ -66,6 +68,7 @@ local colorbar = {
   BackgroundColor = { 1.0, 1.0, 1.0, 1.0 },
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
+
 
 asset.onInitialize(function()
   if not openspace.directoryExists(fieldDestination) then
@@ -87,20 +90,21 @@ asset.onInitialize(function()
     openspace.unzipFile(syncedDirectory .. "colorbar.zip", colorbarDestination, true)
   end
 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_field)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_obs)
-  openspace.addScreenSpaceRenderable(colorbar)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerField)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerObs)
+  openspace.addScreenSpaceRenderable(Colorbar)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_field)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_obs)
-  openspace.removeScreenSpaceRenderable(colorbar)
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerObs)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerField)
 end)
 
-asset.export(layer_field)
-asset.export(layer_obs)
-asset.export(colorbar)
+asset.export(LayerField)
+asset.export(LayerObs)
+asset.export(Colorbar)
+
 
 
 asset.meta = {

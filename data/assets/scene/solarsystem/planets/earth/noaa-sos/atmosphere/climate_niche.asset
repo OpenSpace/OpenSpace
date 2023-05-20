@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Human Climate Niche - 2020 and 2070"
@@ -27,35 +28,36 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_precip_2020 = {
+
+local LayerPrecip2020 = {
   Identifier = Identifier .. "-2020",
   Name = Name .. " (2020)",
   FilePath = syncedDirectory .. "temp-precip-2020-current-4096.png",
   Description = Description
 }
 
-local layer_precip_2070 = {
+local LayerPrecip2070 = {
   Identifier = Identifier .. "-2070",
   Name = Name .. " (2070)",
   FilePath = syncedDirectory .. "temp-precip-2070-rcp85-4096.png",
   Description = Description
 }
 
-local layer_mat_2020 = {
+local LayerMat2020 = {
   Identifier = Identifier .. "-mat2020",
   Name = Name .. " (MAT 2020)",
   FilePath = syncedDirectory .. "MAT-29-2020-4096.png",
   Description = Description
 }
 
-local layer_mat_2070 = {
+local LayerMat2070 = {
   Identifier = Identifier .. "-mat2070",
   Name = Name .. " (MAT 2070)",
   FilePath = syncedDirectory .. "MAT-29-2070-4096.png",
   Description = Description
 }
 
-local colorbar = {
+local Colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
@@ -66,26 +68,27 @@ local colorbar = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_precip_2020)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_precip_2070)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_mat_2020)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_mat_2070)
-  openspace.addScreenSpaceRenderable(colorbar)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerPrecip2020)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerPrecip2070)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerMat2020)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerMat2070)
+  openspace.addScreenSpaceRenderable(Colorbar)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_precip_2020)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_precip_2070)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_mat_2020)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_mat_2070)
-  openspace.removeScreenSpaceRenderable(colorbar)
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerMat2070)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerMat2020)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerPrecip2070)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerPrecip2020)
 end)
 
-asset.export(layer_precip_2020)
-asset.export(layer_precip_2070)
-asset.export(layer_mat_2020)
-asset.export(layer_mat_2070)
-asset.export(colorbar)
+asset.export(LayerPrecip2020)
+asset.export(LayerPrecip2070)
+asset.export(LayerMat2020)
+asset.export(LayerMat2070)
+asset.export(Colorbar)
+
 
 
 asset.meta = {
