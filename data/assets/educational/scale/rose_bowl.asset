@@ -45,7 +45,7 @@ local ScaleModel = {
 }
 
 local UpdatePositionAction = {
-  Identifier = "os.scale_models.drop_rose_bowl",
+  Identifier = "os.scalemodels.DropRoseBowl",
   Name = "Drop Rose Bowl under camera",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera('Scale_RoseBowl')
@@ -56,7 +56,7 @@ local UpdatePositionAction = {
 }
 
 local ResetPositionAction = {
-  Identifier = "os.scale_models.reset_rose_bowl",
+  Identifier = "os.scalemodels.ResetRoseBowl",
   Name = "Reset Rose Bowl position",
   Command = [[
     openspace.globebrowsing.setNodePosition('Scale_RoseBowl', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",

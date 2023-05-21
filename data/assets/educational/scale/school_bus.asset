@@ -45,7 +45,7 @@ local ScaleModel = {
 }
 
 local UpdatePositionAction = {
-  Identifier = "os.scale_models.drop_school_bus",
+  Identifier = "os.scalemodels.DropSchoolBus",
   Name = "Drop school bus under camera",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera('Scale_SchoolBus')
@@ -56,7 +56,7 @@ local UpdatePositionAction = {
 }
 
 local ResetPositionAction = {
-  Identifier = "os.scale_models.reset_school_bus",
+  Identifier = "os.scalemodels.ResetSchoolBus",
   Name = "Reset School bus position",
   Command = [[
     openspace.globebrowsing.setNodePosition('Scale_SchoolBus', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",

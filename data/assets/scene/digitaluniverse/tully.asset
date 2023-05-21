@@ -85,7 +85,7 @@ local TullyGalaxiesImages = {
     TexturePath = textures,
     Luminosity = "diamkpc",
     ScaleLuminosity = 0.001,
-    TransformationMatrix = transformMatrix,
+    TransformationMatrix = TransformMatrix,
     Unit = "Mpc",
     -- Fade in value in the same unit as "Unit"
     FadeInDistances = {0.0005, 0.003},

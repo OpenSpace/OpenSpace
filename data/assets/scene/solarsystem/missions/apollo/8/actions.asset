@@ -1,5 +1,5 @@
 local EarthRise = {
-  Identifier = "os.apollo8.setup.EarthRise",
+  Identifier = "os.apollo8.SetupEarthrise",
   Name = "Set Earthrise time",
   Command = [[
     openspace.time.setPause(true)
@@ -14,7 +14,7 @@ local EarthRise = {
 }
 
 local Launch = {
-  Identifier = "os.apollo8.setup.Launch",
+  Identifier = "os.apollo8.SetupLaunch",
   Name = "Set Apollo 8 launch time",
   Command = [[
     openspace.time.setTime('1968-12-21T12:51:37.00');

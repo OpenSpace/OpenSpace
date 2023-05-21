@@ -51,7 +51,7 @@ local ScaleModel = {
 }
 
 local UpdatePositionAction = {
-  Identifier = "os.scale_models.drop_gateway_arch",
+  Identifier = "os.scalemodels.DropGatewayArch",
   Name = "Drop Gateway Arch under camera",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera('Scale_GatewayArch')
@@ -62,7 +62,7 @@ local UpdatePositionAction = {
 }
 
 local ResetPositionAction = {
-  Identifier = "os.os.scale_models.reset_gateway_arch",
+  Identifier = "os.scalemodels.ResetGatewayArch",
   Name = "Reset Gateway Arch position",
   Command = [[
     openspace.globebrowsing.setNodePosition('Scale_GatewayArch', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",

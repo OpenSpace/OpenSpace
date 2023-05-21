@@ -14,7 +14,7 @@ local Layer = {
 
 
 asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globe,.Mercury.Identifier, "HeightLayers", Layer)
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "HeightLayers", Layer)
 end)
 
 asset.onDeinitialize(function()

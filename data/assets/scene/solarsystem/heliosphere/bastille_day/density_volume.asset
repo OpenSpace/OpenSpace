@@ -89,7 +89,7 @@ asset.onDeinitialize(function ()
   openspace.action.removeAction(ToggleVolume)
 end)
 
-asset.export(densityVolume)
+asset.export(DensityVolume)
 
 
 

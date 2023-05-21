@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("../../ceres").Ceres.Identifier
+local globe = asset.require("../../ceres")
 
 
 
@@ -17,15 +17,17 @@ local Layer = {
   FilePath = textures .. "ceres_lamo_4096x2048.png",
 }
 
+
 asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(globe.Ceres.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(globe.Ceres.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)
+
 
 
 asset.meta = {

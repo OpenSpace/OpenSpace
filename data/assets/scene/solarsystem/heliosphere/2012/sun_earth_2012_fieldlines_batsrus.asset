@@ -26,7 +26,7 @@ local unzippedDataDestination = {
 }
 
 local LoopBatsrus = {
-  Identifier = "2012july.LoopBatsrus",
+  Identifier = "os.2012july.LoopBatsrus",
   Name = "Loop BATSRUS",
   Command = "openspace.scriptScheduler.clear();\nopenspace.time.setDeltaTime(1400);\nopenspace.time.setTime('2012-JUL-14 06:00:00.00');\nlocal StarttimescriptBatsrusLoop = \"openspace.time.setTime('2012 JUL 14 06:00:00')\";\nopenspace.scriptScheduler.loadScheduledScript('2012 JUL 16 07:30:00', StarttimescriptBatsrusLoop);",
   Documentation = "Sets time to start of data, sets higher delta time and loops back from start, when at end of data",

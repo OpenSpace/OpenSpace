@@ -33,7 +33,7 @@ local Mission = {
   Name = "OSIRIS-REx",
   Description = "Launched on Sept. 8, 2016, the Origins, Spectral Interpretation, Resource Identification, Security-Regolith Explorer (OSIRIS-REx) spacecraft traveled to a near-Earth asteroid called Bennu (formerly 1999 RQ36), and collected a sample of the of rocks and material from the surface that it will return to Earth in 2023. The mission will help scientists investigate how planets formed and how life began, as well as improve our understanding of asteroids that could impact Earth.",
   Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/osiris-rex-mission-logo12_copy.png",
-  Actions = { "os.missions.osirisrex.aimAtBennu", "os.missions.osirisrex.launchTime", "os.missions.osirisrex.imageCapture" },
+  Actions = { "os.osirisrex.AimAtBennu", "os.osirisrex.SetLaunchTime", "os.osirisrex.LookImageCapture" },
   Phases = {
     -- All 1-level phases based on [1]
     {

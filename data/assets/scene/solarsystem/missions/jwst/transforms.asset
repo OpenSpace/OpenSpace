@@ -90,7 +90,7 @@ asset.onInitialize(function()
 
   -- Set correct parent during run-time
   openspace.scriptScheduler.loadScheduledScript(
-    detachTime,
+    DetachTime,
     "openspace.setParent('JWSTPosition', 'EarthCenter')",
     "openspace.setParent('JWSTPosition', 'EarthIAU')",
     "",
@@ -106,7 +106,7 @@ asset.onInitialize(function()
 
   -- Set correct parent at the start
   local now = openspace.time.currentTime();
-  if now < openspace.time.convertTime(detachTime) then
+  if now < openspace.time.convertTime(DetachTime) then
     openspace.setParent("JWSTPosition", "EarthIAU")
   elseif now > openspace.time.convertTime(L2orbitInsertionTime) then
     openspace.setParent("JWSTPosition", "L2")

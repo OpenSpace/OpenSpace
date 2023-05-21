@@ -47,7 +47,7 @@ local ScaleModel = {
 }
 
 local UpdatePositionAction = {
-  Identifier = "os.scale_models.drop_burj_khalifa",
+  Identifier = "os.scalemodels.DropBurjKhalifa",
   Name = "Drop Burj Khalifa under camera",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera('Scale_BurjKhalifa')
@@ -58,7 +58,7 @@ local UpdatePositionAction = {
 }
 
 local ResetPositionAction = {
-  Identifier = "os.os.scale_models.reset_burj_khalifa",
+  Identifier = "os.scalemodels.ResetBurjKhalifa",
   Name = "Reset Burj Khalifa position",
   Command = [[
     openspace.globebrowsing.setNodePosition('Scale_BurjKhalifa', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",

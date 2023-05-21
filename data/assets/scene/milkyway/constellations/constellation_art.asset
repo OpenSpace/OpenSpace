@@ -163,11 +163,11 @@ asset.onInitialize(function ()
     openspace.addSceneGraphNode(n);
   end
 
-  openspace.action.registerAction(show_art)
-  openspace.action.registerAction(hide_art)
-  openspace.action.registerAction(disable_art)
-  openspace.action.registerAction(show_zodiac_art)
-  openspace.action.registerAction(hide_zodiac_art)
+  openspace.action.registerAction(ShowArt)
+  openspace.action.registerAction(HideArt)
+  openspace.action.registerAction(DisableArt)
+  openspace.action.registerAction(ShowZodiacArt)
+  openspace.action.registerAction(HideZodiacArt)
 end)
 
 asset.onDeinitialize(function ()
@@ -175,11 +175,11 @@ asset.onDeinitialize(function ()
     openspace.removeSceneGraphNode(n.Identifier);
   end
 
-  openspace.action.removeAction(hide_zodiac_art)
-  openspace.action.removeAction(show_zodiac_art)
-  openspace.action.removeAction(disable_art)
-  openspace.action.removeAction(hide_art)
-  openspace.action.removeAction(show_art)
+  openspace.action.removeAction(HideZodiacArt)
+  openspace.action.removeAction(ShowZodiacArt)
+  openspace.action.removeAction(DisableArt)
+  openspace.action.removeAction(HideArt)
+  openspace.action.removeAction(ShowArt)
 end)
 
 for _, n in ipairs(nodes) do

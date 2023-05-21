@@ -1,4 +1,4 @@
-local globe = asset.require("../../rhea").Rhea.Identifier
+local globe = asset.require("../../rhea")
 
 
 

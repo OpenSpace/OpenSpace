@@ -1,4 +1,4 @@
-local globe = asset.require("../../venus").Venus.Identifier
+local globe = asset.require("../../venus")
 
 
 

@@ -1,7 +1,7 @@
-asset.require("/./layers/colorlayerseuropa_texture", false)
-asset.require("/./layers/colorlayersvoyager_global_mosaic_local", false)
-asset.require("/./layers/colorlayersvoyager_global_mosaic_sweden", false)
-asset.require("/./layers/colorlayersvoyager_global_mosaic_newyork", true)
+asset.require("./layers/colorlayers/europa_texture", false)
+asset.require("./layers/colorlayers/voyager_global_mosaic_local", false)
+asset.require("./layers/colorlayers/voyager_global_mosaic_sweden", false)
+asset.require("./layers/colorlayers/voyager_global_mosaic_newyork", true)
 
 
 

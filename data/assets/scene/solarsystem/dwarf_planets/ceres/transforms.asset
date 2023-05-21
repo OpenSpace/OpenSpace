@@ -5,7 +5,7 @@ asset.require("spice/base")
 local CeresPosition = {
   Identifier = "CeresPosition",
   Parent = transforms.SolarSystemBarycenter.Identifier,
-  Transform = {,
+  Transform = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "CERES",

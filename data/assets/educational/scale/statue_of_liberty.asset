@@ -45,7 +45,7 @@ local ScaleModel = {
 }
 
 local UpdatePositionAction = {
-  Identifier = "os.scale_models.drop_statue_of_libery",
+  Identifier = "os.scalemodels.DropStatueOfLiberty",
   Name = "Drop Statue of Liberty under camera",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera('Scale_StatueOfLiberty')
@@ -56,7 +56,7 @@ local UpdatePositionAction = {
 }
 
 local ResetPositionAction = {
-  Identifier = "os.scale_models.reset_statue_of_libery",
+  Identifier = "os.scalemodels.ResetStatueOfLiberty",
   Name = "Reset Statue of Liberty position",
   Command = [[
     openspace.globebrowsing.setNodePosition('Scale_StatueOfLiberty', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",

@@ -54,7 +54,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

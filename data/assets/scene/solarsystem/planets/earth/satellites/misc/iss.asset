@@ -47,7 +47,7 @@ local IssPosition = {
 
 local IssModel = {
   Identifier = "ISS",
-  Parent = issPosition.Identifier,
+  Parent = IssPosition.Identifier,
   Transform = {
     Rotation = {
       Type = "FixedRotation",
@@ -99,7 +99,7 @@ local IssTrail = {
 -- @TODO (emmbr, 2021-05-27) add to scene when label rendering issues have been fixed
 local IssLabel = {
   Identifier = "IssLabel",
-  Parent = issPosition.Identifier,
+  Parent = IssPosition.Identifier,
   Renderable = {
     Enabled = false,
     Type = "RenderableLabel",
@@ -121,7 +121,7 @@ local IssLabel = {
 }
 
 local FocusIss = {
-  Identifier = "os.earth.FocusIss",
+  Identifier = "os.solarsystem.FocusIss",
   Name = "Focus on ISS",
   Command = [[
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
@@ -136,7 +136,7 @@ local FocusIss = {
 
 asset.onInitialize(function ()
   local i = openspace.space.readKeplerFile(omm .. "ISS.txt", "OMM")
-  issTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
+  IssTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
 
   openspace.addSceneGraphNode(IssPosition)
   openspace.addSceneGraphNode(IssModel)

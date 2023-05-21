@@ -49,7 +49,7 @@ local ScaleModel = {
 }
 
 local UpdatePositionAction = {
-  Identifier = "os.scale_models.drop_empire_state_building",
+  Identifier = "os.scalemodels.DropEmpireStateBuilding",
   Name = "Drop Empire State Building under camera",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera('Scale_EmpireStateBuilding')
@@ -60,7 +60,7 @@ local UpdatePositionAction = {
 }
 
 local ResetPositionAction = {
-  Identifier = "os.os.scale_models.reset_empire_state_building",
+  Identifier = "os.scalemodels.ResetEmpireStateBuilding",
   Name = "Reset Empire State Building position",
   Command = [[
     openspace.globebrowsing.setNodePosition('Scale_EmpireStateBuilding', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",

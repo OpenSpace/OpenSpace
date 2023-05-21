@@ -50,7 +50,7 @@ local ScaleModel = {
 }
 
 local UpdatePositionAction = {
-  Identifier = "os.scale_models.drop_eiffel_tower",
+  Identifier = "os.scalemodels.DropEiffelTower",
   Name = "Drop Eiffel Tower under camera",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera('Scale_EiffelTower')
@@ -61,7 +61,7 @@ local UpdatePositionAction = {
 }
 
 local ResetPositionAction = {
-  Identifier = "os.scale_models.reset_eiffel_tower",
+  Identifier = "os.scalemodels.ResetEiffelTower",
   Name = "Reset Eiffel Tower position",
   Command = [[
     openspace.globebrowsing.setNodePosition('Scale_EiffelTower', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",

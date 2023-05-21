@@ -1,4 +1,4 @@
-local globe = asset.require("../../sun").Sun.Identifier
+local globe = asset.require("../../sun")
 
 
 

@@ -44,7 +44,7 @@ local ScaleModel = {
 }
 
 local UpdatePositionAction = {
-  Identifier = "os.scale_models.drop_arc_de_triomphe",
+  Identifier = "os.scalemodels.DropArcDeTriomphe",
   Name = "Drop Arc de Triomphe under camera",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera('Scale_ArcDeTriomphe')
@@ -55,7 +55,7 @@ local UpdatePositionAction = {
 }
 
 local ResetPositionAction = {
-  Identifier = "os.scale_models.reset_arc_de_triomphe",
+  Identifier = "os.scalemodels.ResetArcDeTriomphe",
   Name = "Reset Arc de Triomphe position",
   Command = [[ openspace.globebrowsing.setNodePosition('Scale_ArcDeTriomphe', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",
   Documentation = "Resets the Arc de Triomphe back to its actual location",

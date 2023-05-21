@@ -44,7 +44,7 @@ local ScaleModel = {
 }
 
 local UpdatePositionAction = {
-  Identifier = "os.scale_models.drop_kuala_lumpur_tower",
+  Identifier = "os.scalemodels.DropKualaLumpurTower",
   Name = "Drop Kuala Lumpur Tower under camera",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera('Scale_KualaLumpurTower')
@@ -55,7 +55,7 @@ local UpdatePositionAction = {
 }
 
 local ResetPositionAction = {
-  Identifier = "os.os.scale_models.reset_kuala_lumpur_tower",
+  Identifier = "os.scalemodels.ResetKualaLumpurTower",
   Name = "Reset Kuala Lumpur Tower position",
   Command = [[
     openspace.globebrowsing.setNodePosition('Scale_KualaLumpurTower', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",

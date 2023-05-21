@@ -29,7 +29,7 @@ local NeptuneMinorMoonsOn = {
 }
 
 local NeptuneMinorMoonsOff = {
-  Identifier = "os.solarsystem.neptune.minormoonsoff",
+  Identifier = "os.solarsystem.NeptuneMinorMoonsOff",
   Name = "Turn off minors moon and trails",
   Command = [[
     local trails = openspace.getProperty('{moonTrail_minor_neptune}.Renderable.Enabled')

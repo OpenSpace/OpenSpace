@@ -41,9 +41,6 @@ asset.onInitialize(function ()
     GuiPath = "/Missions/Apollo/11",
     IsLocal = false
   })
-
-  openspace.bindKey("P", "os.lemFlipbook.NextFlip")
-  openspace.bindKey("O", "os.lemFlipbook.PrevFlip")
 end)
 
 
@@ -52,6 +49,4 @@ asset.onDeinitialize(function ()
 
   openspace.action.removeAction("os.lemFlipbook.NextFlip")
   openspace.action.removeAction("os.lemFlipbook.PrevFlip")
-  openspace.clearKey("O")
-  openspace.clearKey("P")
 end)

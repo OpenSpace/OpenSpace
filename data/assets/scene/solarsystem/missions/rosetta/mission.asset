@@ -15,7 +15,7 @@ local Mission = {
       Date = "2005 MAR 04 00:00:00",
       Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2005/03/moonrise_above_the_pacific_22_06_utc_4_march_2005/9520996-4-eng-GB/Moonrise_above_the_Pacific_22_06_UTC_4_March_2005_pillars.jpg",
       Description = "The Moon rising above the Pacific, three minutes before the point of closest approach during Rosettas first Earth fly-by.",
-      Link = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif" 
+      Link = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif"
     },
     {
       Name = "Mars gravity assist",

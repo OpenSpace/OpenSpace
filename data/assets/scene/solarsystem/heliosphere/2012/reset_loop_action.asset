@@ -1,5 +1,5 @@
 local ResetLoop = {
-  Identifier = "2012july.reset_loop",
+  Identifier = "os.2012july.ResetLoop",
   Name = "Reset button",
   Command = "openspace.time.setTime('2012-JUL-01 07:00:00.00');\nopenspace.time.setDeltaTime(1400);\nopenspace.scriptScheduler.clear();",
   Documentation = "Reset button. Sets time to start of dataset. No loop",

@@ -46,7 +46,7 @@ local ScaleModel = {
 }
 
 local UpdatePositionAction = {
-  Identifier = "os.scale_models.drop_big_ben",
+  Identifier = "os.scalemodels.DropBigBen",
   Name = "Drop Big Ben under camera",
   Command = [[
     openspace.globebrowsing.setNodePositionFromCamera('Scale_BigBen')
@@ -57,7 +57,7 @@ local UpdatePositionAction = {
 }
 
 local ResetPositionAction = {
-  Identifier = "os.scale_models.reset_big_ben",
+  Identifier = "os.scalemodels.ResetBigBen",
   Name = "Reset Big Ben position",
   Command = [[
     openspace.globebrowsing.setNodePosition('Scale_BigBen', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",

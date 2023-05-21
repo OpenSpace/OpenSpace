@@ -19,7 +19,7 @@ local fieldlineData  = asset.syncedResource({
 
 
 local DarkSun = {
-  Identifier = "2012july.DarkSun",
+  Identifier = "os.2012july.DarkSun",
   Name = "Dark sun",
   Command = "local textureMultiplier = openspace.getPropertyValue(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\");\nif(textureMultiplier < 0.01) then\nopenspace.setPropertyValueSingle(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\", 1.0, 1);\nelse\nopenspace.setPropertyValueSingle(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\", 0.0, 1)\nend",
   Documentation = "Makes the Sun turn black",
