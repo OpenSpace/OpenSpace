@@ -4,7 +4,6 @@ local function loadBookmarks(guiPath, bookmarkfile)
 
   local extract_first_line = false
   local contents = openspace.readCSVFile(openspace.absPath(bookmarkfile), extract_first_line);
-  openspace.printWarning(contents)
 
   for _,v in ipairs(contents) do
     local group = v[1]

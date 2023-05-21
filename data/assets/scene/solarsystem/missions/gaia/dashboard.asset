@@ -1,3 +1,7 @@
+asset.require("./gaia")
+
+
+
 local distance = {
   Type = "DashboardItemDistance",
   Identifier = "GaiaEarthDistance",

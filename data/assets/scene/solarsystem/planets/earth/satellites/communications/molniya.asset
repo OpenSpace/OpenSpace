@@ -40,7 +40,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MolniyaSatellites)
 end)
 
-asset.export(satellites)
+asset.export(MolniyaSatellites)
 
 
 

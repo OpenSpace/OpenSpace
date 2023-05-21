@@ -1,3 +1,7 @@
+asset.require("./rosetta")
+
+
+
 local Spacing = {
   Type = "DashboardItemSpacing",
   Identifier = "RosettaSpacing",

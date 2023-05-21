@@ -12,7 +12,7 @@ local omm = asset.syncedResource({
 })
 
 
-local satellites = {
+local MussonSatellites = {
   Identifier = "MussonSatellites",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {

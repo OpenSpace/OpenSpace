@@ -48,7 +48,7 @@ asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
+asset.export(Layer)
 
 
 

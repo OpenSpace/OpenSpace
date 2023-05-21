@@ -54,7 +54,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Layer)
-asset.export(legend)
+asset.export(Legend)
 
 
 

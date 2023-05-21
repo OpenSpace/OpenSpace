@@ -24,9 +24,9 @@ local function scaleAction(identifier, scale, name, speed)
   }
 end
 
-local function toggleScaleAction(identifier, scale, name, speedup, speedown)
+local function toggleScaleAction(identifier, scale, name, speedup, speeddown)
   return {
-    Identifier = "os.toggle_" .. name::gsub("%s+", "") .. "_scale",
+    Identifier = "os.toggle_" .. string.gsub(name, "%s+", "") .. "_scale",
     Name = "Toggle " .. name .. " scale",
     Command = [[
 local list = openspace.getProperty("]] .. identifier .. [[.Scale.Scale");
@@ -39,7 +39,7 @@ else
   if (currentScale == 1) then
     ]] .. scaleCommand(identifier, scale, speedup) .. [[
   else
-    ]] .. scaleCommand(identifier, 1, speedown) .. [[
+    ]] .. scaleCommand(identifier, 1, speeddown) .. [[
   end
 end
 ]],

@@ -40,7 +40,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SatelliteBasedAugmentationSatellites)
 end)
 
-asset.export(satellites)
+asset.export(SatelliteBasedAugmentationSatellites)
 
 
 

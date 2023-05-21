@@ -21,7 +21,7 @@ local syncedDirectory = asset.syncedResource({
 })
 
 
-local layer = {
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
