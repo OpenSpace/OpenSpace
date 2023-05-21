@@ -1,13 +1,20 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup344
-local kernel346 = asset.require("../kernels").jup346
+local kernel = asset.require("../kernels")
+local kernel346 = asset.require("../kernels")
 
 
 
 local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_pasiphae", "moon_minor", "moon_minor_jupiter" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_jupiter",
+  "moon_pasiphae",
+  "moon_minor",
+  "moon_minor_jupiter"
+}
 local trailColor = { 0.4, 0.3, 0.01 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -32,7 +39,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 538.78,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2003J18",
@@ -50,7 +57,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 587.38,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Helike",
@@ -67,7 +74,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 601.40,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Orthosie",
@@ -84,7 +91,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 602.62,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2016J1",
@@ -102,7 +109,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 603.83,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2003J15",
@@ -120,7 +127,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 699.68,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Aoede",
@@ -137,7 +144,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 714.66,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Callirrhoe",
@@ -154,7 +161,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 727.11,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Eurydome",
@@ -171,7 +178,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 723.36,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Kore",
@@ -188,7 +195,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 776.02,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Cyllene",
@@ -205,7 +212,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 731.10,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2011J2",
@@ -223,7 +230,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 731.32,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2017J1",
@@ -241,7 +248,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 734.15,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2003J4",
@@ -259,7 +266,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 739.29,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Pasiphae",
@@ -276,7 +283,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 739.80,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Hegemone",
@@ -293,7 +300,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 745.50,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Sinope",
@@ -310,7 +317,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 739.33,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Sponde",
@@ -327,7 +334,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 771.60,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Autonoe",
@@ -344,7 +351,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 772.17,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Megaclite",
@@ -361,7 +368,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 792.44,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2016J4",
@@ -379,7 +386,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 743.69,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2017J6",
@@ -397,7 +404,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 683.0,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2003J23",
@@ -415,7 +422,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 792.00,
-    Kernels = kernel
+    Kernels = kernel.jup344
   }
 }
 
@@ -453,6 +460,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(pasiphaeGroup)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -476,6 +484,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

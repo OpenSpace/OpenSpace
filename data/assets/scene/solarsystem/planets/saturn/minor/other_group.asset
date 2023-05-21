@@ -1,15 +1,19 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels")
-local kernel415 = kernels.sat415
-local kernel441 = kernels.sat441
-local kernel452 = kernels.sat452
 
 
 
 local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_other", "moon_minor", "moon_minor_saturn" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_saturn",
+  "moon_other",
+  "moon_minor",
+  "moon_minor_saturn"
+}
 local trailColor = { 0.5, 0.3, 0.3 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -35,7 +39,7 @@ local otherGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.80812,
-    Kernels = kernel415
+    Kernels = kernels.sat415
   },
   {
     Identifier = "Methone",
@@ -52,7 +56,7 @@ local otherGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.00957,
-    Kernels = kernel415
+    Kernels = kernels.sat415
   },
   {
     Identifier = "Anthe",
@@ -69,7 +73,7 @@ local otherGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.05089,
-    Kernels = kernel415
+    Kernels = kernels.sat415
   },
   {
     Identifier = "Pallene",
@@ -86,7 +90,7 @@ local otherGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.370218,
-    Kernels = kernel415
+    Kernels = kernels.sat415
   },
   {
     Identifier = "Telesto",
@@ -103,7 +107,7 @@ local otherGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.887802,
-    Kernels = kernel441
+    Kernels = kernels.sat441
   },
   {
     Identifier = "Calypso",
@@ -120,7 +124,7 @@ local otherGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.887802,
-    Kernels = kernel441
+    Kernels = kernels.sat441
   },
   {
     Identifier = "Helene",
@@ -137,7 +141,7 @@ local otherGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 2.736915,
-    Kernels = kernel441
+    Kernels = kernels.sat441
   },
   {
     Identifier = "Polydeuces",
@@ -154,7 +158,7 @@ local otherGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 2.736915,
-    Kernels = kernel441
+    Kernels = kernels.sat441
   },
   {
     Identifier = "S2004S24",
@@ -172,7 +176,7 @@ local otherGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1293.85,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   }
 }
 
@@ -209,6 +213,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(otherGroup)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -232,6 +237,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

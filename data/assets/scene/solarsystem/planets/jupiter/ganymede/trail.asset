@@ -1,5 +1,5 @@
-local transforms = asset.require("../transforms")
 asset.require("spice/base")
+local transforms = asset.require("../transforms")
 local kernel = asset.require("../kernels").jup365
 
 
@@ -25,6 +25,7 @@ local GanymedeTrail = {
     Path = "/Solar System/Planets/Jupiter/Major Moons/Ganymede"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GanymedeTrail)

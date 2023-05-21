@@ -1,12 +1,19 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat452
+local kernel = asset.require("../kernels")
 
 
 
 local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_gallic", "moon_minor", "moon_minor_saturn" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_saturn",
+  "moon_gallic",
+  "moon_minor",
+  "moon_minor_saturn"
+}
 local trailColor = { 0.5, 0.3, 0.3 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -32,7 +39,7 @@ local gallicGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 774.58,
-    Kernels = kernel
+    Kernels = kernel.sat452
   },
   {
     Identifier = "Bebhionn",
@@ -49,7 +56,7 @@ local gallicGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 838.77,
-    Kernels = kernel
+    Kernels = kernel.sat452
   },
   {
     Identifier = "Erriapus",
@@ -66,7 +73,7 @@ local gallicGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 844.89,
-    Kernels = kernel
+    Kernels = kernel.sat452
   },
   {
     Identifier = "Tarvos",
@@ -83,7 +90,7 @@ local gallicGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 944.23,
-    Kernels = kernel
+    Kernels = kernel.sat452
   }
 }
 
@@ -120,6 +127,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(gallicGroup)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -143,6 +151,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

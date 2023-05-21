@@ -1,5 +1,5 @@
-local sun_transforms_asset = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local sun_transforms_asset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -19,6 +19,7 @@ local JupiterBarycenter = {
     Hidden = true
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JupiterBarycenter)

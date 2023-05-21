@@ -1,4 +1,6 @@
-local globeIdentifier = asset.require("../../mars").Mars.Identifier
+local globe = asset.require("../../mars")
+
+
 
 local texturesPath = asset.syncedResource({
   Name = "Mars Textures",
@@ -7,7 +9,8 @@ local texturesPath = asset.syncedResource({
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = "Mars_Texture",
   Name = "Mars Texture",
   Enabled = asset.enabled,
@@ -15,15 +18,16 @@ local layer = {
   Description = "Default jpg texture for Mars"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

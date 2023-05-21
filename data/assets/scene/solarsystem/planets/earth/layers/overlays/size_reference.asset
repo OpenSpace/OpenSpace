@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth").Earth
+local globe = asset.require("../../earth")
 
 
 

@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
+local kernel = asset.require("../kernels")
 
 
 
@@ -12,7 +12,7 @@ local DioneTrail = {
       Type = "SpiceTranslation",
       Target = "DIONE",
       Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Kernels = kernel.sat441
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 66.0 / 24.0,
@@ -22,9 +22,10 @@ local DioneTrail = {
   GUI = {
     Name = "Dione Trail",
     Path = "/Solar System/Planets/Saturn/Major Moons/Dione",
-    Description = "Trail of Saturn's moon Dione as observed by Saturn",
+    Description = "Trail of Saturn's moon Dione as observed by Saturn"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(DioneTrail)

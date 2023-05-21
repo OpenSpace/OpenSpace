@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
+local kernel = asset.require("../kernels")
 
 
 
@@ -12,7 +12,7 @@ local IapetusTrail = {
       Type = "SpiceTranslation",
       Target = "IAPETUS",
       Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Kernels = kernel.sat441
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 79.0,
@@ -22,9 +22,10 @@ local IapetusTrail = {
   GUI = {
     Name = "Iapetus Trail",
     Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus",
-    Description = "Trail of Saturn's moon Iapetus as observed by Saturn",
+    Description = "Trail of Saturn's moon Iapetus as observed by Saturn"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(IapetusTrail)

@@ -1,12 +1,15 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 
+
+
 local syncedKernels = asset.syncedResource({
   Name = "Saturn Shepherd Moons Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "saturn_shepherd_kernels",
   Version = 1
 })
+
 
 local kernels = {
   syncedKernels .. "sat415.bsp",
@@ -16,7 +19,14 @@ local kernels = {
 local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
 local guiPath = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_shepherd", "moon_minor", "moon_minor_saturn" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_saturn",
+  "moon_shepherd",
+  "moon_minor",
+  "moon_minor_saturn"
+}
 local trailColor = { 0.5, 0.3, 0.3 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -181,6 +191,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(shepherdGroup)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -204,6 +215,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

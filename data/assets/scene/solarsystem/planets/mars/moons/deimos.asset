@@ -2,6 +2,8 @@ local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local sun = asset.require("scene/solarsystem/sun/sun")
 
+
+
 local model = asset.syncedResource({
   Name = "Deimos Model",
   Type = "HttpSynchronization",
@@ -15,6 +17,7 @@ local kernels = asset.syncedResource({
   Identifier = "mars_kernels",
   Version = 1
 })
+
 
 local Deimos = {
   Identifier = "Deimos",
@@ -36,8 +39,8 @@ local Deimos = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/Deimos_1_1000.glb",
-    ModelScale = 'Kilometer',
+    GeometryFile = model .. "Deimos_1_1000.glb",
+    ModelScale = "Kilometer",
     RotationVector = { 180, 0, 180 },
     AmbientIntensity = 0.02,
     SpecularIntensity = 0.0,
@@ -75,7 +78,6 @@ local DeimosTrail = {
     Description = "Trail for Deimos"
   }
 }
-
 
 local DeimosLabel = {
   Identifier = "DeimosLabel",
@@ -117,6 +119,7 @@ end)
 
 asset.export(Deimos)
 asset.export(DeimosTrail)
+
 
 
 asset.meta = {

@@ -1,7 +1,7 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup344
-local kernel346 = asset.require("../kernels").jup346
+local kernel = asset.require("../kernels")
+local kernel346 = asset.require("../kernels")
 
 
 
@@ -34,7 +34,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 588.36,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Thelxinoe",
@@ -51,7 +51,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 597.61,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Euanthe",
@@ -68,7 +68,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 598.09,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Iocaste",
@@ -85,7 +85,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 609.43,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2003J16",
@@ -103,7 +103,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 610.36,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Praxidike",
@@ -120,7 +120,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 613.90,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Harpalyke",
@@ -137,7 +137,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 624.54,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Mneme",
@@ -154,7 +154,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 627.48,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Hermippe",
@@ -171,7 +171,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 629.81,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Thyone",
@@ -188,7 +188,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 639.80,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Ananke",
@@ -205,7 +205,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 640.38,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2021J1",
@@ -223,7 +223,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 606.99,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2021J2",
@@ -241,7 +241,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 627.96,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2021J3",
@@ -259,7 +259,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 643.85,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2022J3",
@@ -277,7 +277,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 617.82,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2017J3",
@@ -295,7 +295,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 606.3,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2017J7",
@@ -313,7 +313,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 602.6,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2017J9",
@@ -331,7 +331,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 639.2,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2003J2",
@@ -349,7 +349,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 602.02,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2003J12",
@@ -367,7 +367,7 @@ local anankeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 646.64,
-    Kernels = kernel
+    Kernels = kernel.jup344
   }
 }
 
@@ -404,6 +404,7 @@ end
 
 
 local nodes = proceduralGlobes.createGlobes(anankeGroup)
+
 
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do

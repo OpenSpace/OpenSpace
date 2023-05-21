@@ -1,7 +1,9 @@
-local transforms = asset.require("../transforms")
 asset.require("spice/base")
 asset.require("./trail")
-local kernel = asset.require("../kernels").jup365
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Jupiter Labels",
@@ -10,21 +12,22 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
+
 local Io = {
   Identifier = "Io",
   Parent = transforms.JupiterBarycenter.Identifier,
   Transform = {
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "IAU_IO",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernel
-    },
     Translation = {
       Type = "SpiceTranslation",
       Target = "IO",
       Observer = "JUPITER BARYCENTER",
-      Kernels = kernel
+      Kernels = kernel.jup365
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_IO",
+      DestinationFrame = "GALACTIC",
+      Kernels = kernel.jup365
     }
   },
   Renderable = {
@@ -50,7 +53,6 @@ local Io = {
     Path = "/Solar System/Planets/Jupiter/Major Moons/Io"
   }
 }
-
 
 local IoLabel = {
   Identifier = "IoLabel",

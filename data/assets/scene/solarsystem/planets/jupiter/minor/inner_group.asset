@@ -1,12 +1,19 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup365
+local kernel = asset.require("../kernels")
 
 
 
 local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_inner", "moon_minor", "moon_minor_jupiter" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_jupiter",
+  "moon_inner",
+  "moon_minor",
+  "moon_minor_jupiter"
+}
 local trailColor = { 0.4, 0.3, 0.01 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -32,7 +39,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.117912037,
-    Kernels = kernel
+    Kernels = kernel.jup365
   },
   {
     Identifier = "Adrastea",
@@ -49,7 +56,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.2982638889,
-    Kernels = kernel
+    Kernels = kernel.jup365
   },
   {
     Identifier = "Amalthea",
@@ -66,7 +73,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.4981828704,
-    Kernels = kernel
+    Kernels = kernel.jup365
   },
   {
     Identifier = "Thebe",
@@ -83,7 +90,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.6745023148,
-    Kernels = kernel
+    Kernels = kernel.jup365
   }
 }
 
@@ -147,6 +154,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

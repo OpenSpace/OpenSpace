@@ -1,12 +1,19 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup344
+local kernel = asset.require("../kernels")
 
 
 
 local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_other", "moon_minor", "moon_minor_jupiter" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_jupiter",
+  "moon_other",
+  "moon_minor",
+  "moon_minor_jupiter"
+}
 local trailColor = { 0.4, 0.3, 0.01 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -33,7 +40,7 @@ local otherGroups = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 628.06,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2003J19",
@@ -51,7 +58,7 @@ local otherGroups = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 699.12,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Valetudo",
@@ -69,7 +76,7 @@ local otherGroups = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 527.41,
-    Kernels = kernel
+    Kernels = kernel.jup344
   }
 }
 
@@ -107,6 +114,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(otherGroups)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -130,6 +138,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

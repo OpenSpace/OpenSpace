@@ -1,6 +1,8 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Saturn Labels",
@@ -8,6 +10,7 @@ local labelsPath = asset.syncedResource({
   Identifier = "saturn_labels",
   Version = 1
 })
+
 
 local Enceladus = {
   Identifier = "Enceladus",
@@ -17,7 +20,7 @@ local Enceladus = {
       Type = "SpiceTranslation",
       Target = "ENCELADUS",
       Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Kernels = kernel.sat441
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -50,7 +53,6 @@ local Enceladus = {
     Description = "Enceladus globe with labels"
   }
 }
-
 
 local EnceladusLabel = {
   Identifier = "EnceladusLabel",
@@ -89,6 +91,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Enceladus)
+asset.export(EnceladusLabel)
 
 
 

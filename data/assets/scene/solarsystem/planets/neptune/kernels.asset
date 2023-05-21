@@ -1,14 +1,16 @@
-local Kernels = asset.syncedResource({
+local kernels = asset.syncedResource({
   Name = "Neptune Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "neptune_kernels",
   Version = 2
 })
 
-asset.export("nep095", Kernels .. "nep095.bsp")
-asset.export("nep097", Kernels .. "nep097.bsp")
-asset.export("nep101xl_802", Kernels .. "nep101xl-802.bsp")
-asset.export("nep102", Kernels .. "nep102.bsp")
+
+asset.export("nep095", kernels .. "nep095.bsp")
+asset.export("nep097", kernels .. "nep097.bsp")
+asset.export("nep101xl_802", kernels .. "nep101xl-802.bsp")
+asset.export("nep102", kernels .. "nep102.bsp")
+
 
 
 asset.meta = {

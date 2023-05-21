@@ -113,7 +113,6 @@ local OrionNebulaShocksModel = {
   GUI = {
     Name = "Orion Nebula Shocks",
     Path = "/Milky Way/Orion",
-    Hidden = false,
     Description = "Orion Nebula Shocks 3D model. See Orion Nebula for description"
   }
 }
@@ -148,7 +147,6 @@ local OrionNebulaProplydsModel = {
   GUI = {
     Name = "Orion Nebula Proplyds",
     Path = "/Milky Way/Orion",
-    Hidden = false,
     Description = "Orion Nebula Proplyds 3D model. See Orion Nebula for description"
   }
 }

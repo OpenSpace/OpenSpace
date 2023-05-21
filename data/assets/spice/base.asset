@@ -20,12 +20,12 @@ local spk = asset.syncedResource({
 })
 
 
-
 local kernels = {
   lsk .. "naif0012.tls",
   pck .. "pck00011.tpc",
   spk .. "de430.bsp"
 }
+
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(lsk .. "naif0012.tls")

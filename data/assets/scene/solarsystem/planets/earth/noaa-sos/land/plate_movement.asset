@@ -58,7 +58,7 @@ end)
 
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(AgeScale)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export(Layer)

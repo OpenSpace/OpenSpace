@@ -1,6 +1,8 @@
-local transforms = asset.require("../transforms")
 asset.require("spice/base")
+local transforms = asset.require("../transforms")
 local kernel = asset.require("../kernels").jup365
+
+
 
 local EuropaTrail = {
   Identifier = "EuropaTrail",
@@ -23,6 +25,7 @@ local EuropaTrail = {
     Path = "/Solar System/Planets/Jupiter/Major Moons/Europa"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EuropaTrail)

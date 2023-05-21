@@ -1,36 +1,38 @@
-local globeIdentifier = asset.require("../../venus").Venus.Identifier
+local globe = asset.require("../../venus")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "MagellanElevation_Utah",
   Name = "Magellan Elevation [Utah]",
   Enabled = asset.enabled,
-  Description = [[Elevation layer for Venus. The represents the version 2
-    (1997 release) of the Global Topographic Data Record (GTDR-SINUS.3;2).
-    The range to surface is derived by fitting altimeter echoes from the fan-beam
-    altimetry antenna as a function of time to Hagfors' radar backscatter model
-    templates. The ranges are subtracted from the spacecraft radial
-    coordinate (derived from Doppler tracking), yielding measurements of
-    planetary radius. The data are filtered to remove low-frequency errors in
-    the in-plane elements of each spacecraft orbit, and then originally re-sampled
-    into sinusoidal, Mercator, and north and south polar stereographic projections
-    at a resolution of 5 kilometers per pixel (4641 meters per pixel [m])]],
   FilePath = asset.localResource("magellan_utah.wms"),
   TilePixelSize = 256,
   Settings = {
     Gamma = 1.72,
     Multiplier = 1.1
-  }
+  },
+  Description = [[Elevation layer for Venus. The represents the version 2 (1997 release)
+    of the Global Topographic Data Record (GTDR-SINUS.3;2). The range to surface is
+    derived by fitting altimeter echoes from the fan-beam altimetry antenna as a function
+    of time to Hagfors' radar backscatter model templates. The ranges are subtracted from
+    the spacecraft radial coordinate (derived from Doppler tracking), yielding
+    measurements of planetary radius. The data are filtered to remove low-frequency errors
+    in the in-plane elements of each spacecraft orbit, and then originally re-sampled into
+    sinusoidal, Mercator, and north and south polar stereographic projections at a
+    resolution of 5 kilometers per pixel (4641 meters per pixel [m])]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Venus.Identifier, "HeightLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Venus.Identifier, "HeightLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

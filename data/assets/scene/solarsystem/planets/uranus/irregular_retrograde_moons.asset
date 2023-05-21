@@ -1,12 +1,19 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels").ura116
+local kernel = asset.require("./kernels")
 
 
 
 local parentIdentifier = transforms.UranusBarycenter.Identifier
 local parentSpice = "URANUS BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_irregular_retrograde", "moon_minor", "moon_minor_uranus" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_uranus",
+  "moon_irregular_retrograde",
+  "moon_minor",
+  "moon_minor_uranus"
+}
 local trailColor = { 0.60, 0.65, 0.84 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -32,7 +39,7 @@ local irregularMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 266.56,
-    Kernels = kernel
+    Kernels = kernel.ura116
   },
   {
     Identifier = "Caliban",
@@ -49,7 +56,7 @@ local irregularMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 579.50,
-    Kernels = kernel
+    Kernels = kernel.ura116
   },
   {
     Identifier = "Stephano",
@@ -66,7 +73,7 @@ local irregularMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 676.50,
-    Kernels = kernel
+    Kernels = kernel.ura116
   },
   {
     Identifier = "Trinculo",
@@ -83,7 +90,7 @@ local irregularMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 758.10,
-    Kernels = kernel
+    Kernels = kernel.ura116
   },
   {
     Identifier = "Sycorax",
@@ -100,7 +107,7 @@ local irregularMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1283.4,
-    Kernels = kernel
+    Kernels = kernel.ura116
   },
   {
     Identifier = "Prospero",
@@ -117,7 +124,7 @@ local irregularMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1992.8,
-    Kernels = kernel
+    Kernels = kernel.ura116
   },
   {
     Identifier = "Setebos",
@@ -134,7 +141,7 @@ local irregularMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 2202.3,
-    Kernels = kernel
+    Kernels = kernel.ura116
   },
   {
     Identifier = "Ferdinand",
@@ -151,7 +158,7 @@ local irregularMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 2823.4,
-    Kernels = kernel
+    Kernels = kernel.ura116
   }
 }
 
@@ -188,6 +195,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(irregularMoons)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -211,6 +219,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

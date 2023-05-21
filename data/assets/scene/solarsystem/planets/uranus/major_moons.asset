@@ -1,6 +1,6 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels").ura111
+local kernel = asset.require("./kernels")
 
 
 
@@ -27,7 +27,7 @@ local majorMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1.413479,
-    Kernels = kernel
+    Kernels = kernel.ura111
   },
   {
     Identifier = "Ariel",
@@ -44,7 +44,7 @@ local majorMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 2.520379,
-    Kernels = kernel
+    Kernels = kernel.ura111
   },
   {
     Identifier = "Umbriel",
@@ -61,7 +61,7 @@ local majorMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 4.144177,
-    Kernels = kernel
+    Kernels = kernel.ura111
   },
   {
     Identifier = "Titania",
@@ -78,7 +78,7 @@ local majorMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 8.705872,
-    Kernels = kernel
+    Kernels = kernel.ura111
   },
   {
     Identifier = "Oberon",
@@ -95,7 +95,7 @@ local majorMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 13.463239,
-    Kernels = kernel
+    Kernels = kernel.ura111
   }
 }
 
@@ -132,6 +132,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(majorMoons)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -155,6 +156,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

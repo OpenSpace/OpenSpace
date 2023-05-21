@@ -63,7 +63,7 @@ end)
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(ColorbarHumanImpact)
   openspace.removeScreenSpaceRenderable(Colorbar)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export(Layer)

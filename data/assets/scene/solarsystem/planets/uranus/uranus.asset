@@ -1,6 +1,8 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
+
+
 
 local Uranus = {
   Identifier = "Uranus",
@@ -52,9 +54,10 @@ local UranusLabel = {
   GUI = {
     Name = "Uranus Label",
     Path = "/Solar System/Planets/Uranus",
-    Description = "Main planet label for Uranus",
+    Description = "Main planet label for Uranus"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Uranus)

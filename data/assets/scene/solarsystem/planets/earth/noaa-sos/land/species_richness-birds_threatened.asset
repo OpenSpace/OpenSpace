@@ -55,8 +55,8 @@ end)
 
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(Labels)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", LayerWithBackground)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", Layer4096)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerWithBackground)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer4096)
 end)
 
 asset.export(Layer4096)

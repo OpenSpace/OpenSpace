@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("../../mars").Mars.Identifier
+local globe = asset.require("../../mars")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Mola_Europe",
   Name = "Mola Elevation [Sweden]",
   Enabled = asset.enabled,
@@ -22,15 +24,16 @@ local layer = {
     URL). Data Reference: (See URL)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "HeightLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "HeightLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

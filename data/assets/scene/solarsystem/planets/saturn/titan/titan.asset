@@ -1,6 +1,8 @@
+asset.require("./trail")
 local transforms = asset.require("../transforms")
 local kernel = asset.require("../kernels").sat441
-asset.require("./trail")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Saturn Labels",
@@ -8,6 +10,7 @@ local labelsPath = asset.syncedResource({
   Identifier = "saturn_labels",
   Version = 1
 })
+
 
 local Titan = {
   Identifier = "Titan",
@@ -51,7 +54,6 @@ local Titan = {
   }
 }
 
-
 local TitanLabel = {
   Identifier = "TitanLabel",
   Parent = Titan.Identifier,
@@ -89,6 +91,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Titan)
+asset.export(TitanLabel)
 
 
 

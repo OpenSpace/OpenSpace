@@ -1,14 +1,19 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels")
-local kernel441 = kernels.sat441
-local kernel452 = kernels.sat452
 
 
 
 local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_norse", "moon_minor", "moon_minor_saturn" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_saturn",
+  "moon_norse",
+  "moon_minor",
+  "moon_minor_saturn"
+}
 local trailColor = { 0.5, 0.3, 0.3 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -34,7 +39,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 545.09,
-    Kernels = kernel441
+    Kernels = kernels.sat441
   },
   {
     Identifier = "Skathi",
@@ -51,7 +56,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 732.52,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2007S2",
@@ -69,7 +74,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 792.96,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Skoll",
@@ -86,7 +91,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 862.37,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2004S13",
@@ -104,7 +109,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 905.85,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Greip",
@@ -121,7 +126,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 906.56,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Hyrrokkin",
@@ -138,7 +143,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 914.29,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Jarnsaxa",
@@ -155,7 +160,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 943.78,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Mundilfari",
@@ -172,7 +177,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 956.70,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2006S1",
@@ -190,7 +195,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 972.41,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2004S17",
@@ -208,7 +213,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 985.45,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Bergelmir",
@@ -225,7 +230,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 985.83,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Narvi",
@@ -242,7 +247,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1008.45,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Suttungr",
@@ -259,7 +264,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1022.82,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Hati",
@@ -276,7 +281,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1033.05,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2004S12",
@@ -294,7 +299,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1048.54,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Farbauti",
@@ -311,7 +316,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1054.78,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Thrymr",
@@ -328,7 +333,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1078.09,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Aegir",
@@ -345,7 +350,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1094.46,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2007S3",
@@ -363,7 +368,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1100,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Bestla",
@@ -380,7 +385,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1101.45,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2004S7",
@@ -398,7 +403,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1101.99,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2006S3",
@@ -416,7 +421,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1142.37,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Fenrir",
@@ -433,7 +438,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1212.53,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Surtur", -- Rising
@@ -449,7 +454,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1297.7,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Kari",
@@ -466,7 +471,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1245.06,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Ymir",
@@ -483,7 +488,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1254.15,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Loge",
@@ -500,7 +505,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1300.95,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Fornjot",
@@ -517,7 +522,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1432.16,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Skadi",
@@ -534,7 +539,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 728.2,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Gridr",
@@ -551,7 +556,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 990.23,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Angrboda",
@@ -568,7 +573,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1080.4,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Skrymir",
@@ -585,7 +590,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1164.3,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Gerd",
@@ -602,7 +607,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1095.0,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2004S26",
@@ -620,7 +625,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1624.2,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Eggther",
@@ -637,7 +642,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1033.0,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Beli",
@@ -654,7 +659,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1084.1,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Gunnlod",
@@ -671,7 +676,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1175.3,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Thiazzi",
@@ -688,7 +693,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1361.5,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2004S34",
@@ -706,7 +711,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1412.5,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Alvaldi",
@@ -723,7 +728,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1208.1,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "Geirrod",
@@ -740,7 +745,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1295.8,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2004S28",
@@ -758,7 +763,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1197.2,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2004S21",
@@ -776,7 +781,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1365.1,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2004S36",
@@ -794,7 +799,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1354.2,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2004S37",
@@ -812,7 +817,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 752.88,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   },
   {
     Identifier = "S2004S39",
@@ -830,7 +835,7 @@ local norseGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1277.5,
-    Kernels = kernel452
+    Kernels = kernels.sat452
   }
 }
 
@@ -867,6 +872,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(norseGroup)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -890,6 +896,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

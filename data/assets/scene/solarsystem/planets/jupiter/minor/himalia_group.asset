@@ -1,13 +1,20 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup344
-local kernel346 = asset.require("../kernels").jup346
+local kernel = asset.require("../kernels")
+local kernel346 = asset.require("../kernels")
 
 
 
 local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_himalia", "moon_minor", "moon_minor_jupiter" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_jupiter",
+  "moon_himalia",
+  "moon_minor",
+  "moon_minor_jupiter"
+}
 local trailColor = { 0.4, 0.3, 0.01 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -33,7 +40,7 @@ local himaliaGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 240.82,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Himalia",
@@ -50,7 +57,7 @@ local himaliaGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 250.23,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Lysithea",
@@ -67,7 +74,7 @@ local himaliaGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 259.89,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Elara",
@@ -84,7 +91,7 @@ local himaliaGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 257.62,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Dia",
@@ -101,7 +108,7 @@ local himaliaGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 287.93,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2011J3",
@@ -119,7 +126,7 @@ local himaliaGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 261.77,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2018J2",
@@ -137,7 +144,7 @@ local himaliaGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 250.88,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "Pandia",
@@ -154,7 +161,7 @@ local himaliaGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 251.911,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Ersa",
@@ -171,7 +178,7 @@ local himaliaGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 249.229,
-    Kernels = kernel
+    Kernels = kernel.jup344
   }
 }
 
@@ -208,6 +215,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(himaliaGroup)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -231,6 +239,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

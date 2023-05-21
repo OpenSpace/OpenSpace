@@ -1,12 +1,19 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat452
+local kernel = asset.require("../kernels")
 
 
 
 local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_inuit", "moon_minor", "moon_minor_saturn" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_saturn",
+  "moon_inuit",
+  "moon_minor",
+  "moon_minor_saturn"
+}
 local trailColor = { 0.5, 0.3, 0.3 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -32,7 +39,7 @@ local inuitGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 448.16,
-    Kernels = kernel
+    Kernels = kernel.sat452
   },
   {
     Identifier = "Ijiraq",
@@ -49,7 +56,7 @@ local inuitGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 451.77,
-    Kernels = kernel
+    Kernels = kernel.sat452
   },
   {
     Identifier = "Paaliaq",
@@ -66,7 +73,7 @@ local inuitGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 692.98,
-    Kernels = kernel
+    Kernels = kernel.sat452
   },
   {
     Identifier = "Siarnaq",
@@ -83,7 +90,7 @@ local inuitGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 884.88,
-    Kernels = kernel
+    Kernels = kernel.sat452
   },
   {
     Identifier = "Tarqeq",
@@ -100,7 +107,7 @@ local inuitGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 894.86,
-    Kernels = kernel
+    Kernels = kernel.sat452
   },
   {
     Identifier = "S2004S29",
@@ -118,7 +125,7 @@ local inuitGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 858.77,
-    Kernels = kernel
+    Kernels = kernel.sat452
   },
   {
     Identifier = "S2004S31",
@@ -136,7 +143,7 @@ local inuitGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 853.80,
-    Kernels = kernel
+    Kernels = kernel.sat452
   },
   {
     Identifier = "S2019S01",
@@ -154,7 +161,7 @@ local inuitGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 443.78,
-    Kernels = kernel
+    Kernels = kernel.sat452
   }
 }
 
@@ -191,6 +198,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(inuitGroup)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -214,6 +222,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

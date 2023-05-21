@@ -1,6 +1,8 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Saturn Labels",
@@ -8,6 +10,7 @@ local labelsPath = asset.syncedResource({
   Identifier = "saturn_labels",
   Version = 1
 })
+
 
 local Tethys = {
   Identifier = "Tethys",
@@ -17,7 +20,7 @@ local Tethys = {
       Type = "SpiceTranslation",
       Target = "TETHYS",
       Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Kernels = kernel.sat441
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -48,7 +51,6 @@ local Tethys = {
     Path = "/Solar System/Planets/Saturn/Major Moons/Tethys"
   }
 }
-
 
 local TethysLabel = {
   Identifier = "TethysLabel",
@@ -87,6 +89,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Tethys)
+asset.export(TethysLabel)
 
 
 

@@ -1,12 +1,19 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels").nep102
+local kernel = asset.require("./kernels")
 
 
 
 local parentIdentifier = transforms.NeptuneBarycenter.Identifier
 local parentSpice = "NEPTUNE BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_irregular_prograde", "moon_minor", "moon_minor_neptune" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_neptune",
+  "moon_irregular_prograde",
+  "moon_minor",
+  "moon_minor_neptune"
+}
 local trailColor = { 0.2, 0.5, 0.75 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -32,7 +39,7 @@ local irregularProgradeMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1879.08,
-    Kernels = kernel
+    Kernels = kernel.nep102
   },
   {
     Identifier = "Psamathe",
@@ -49,7 +56,7 @@ local irregularProgradeMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 9074.3,
-    Kernels = kernel
+    Kernels = kernel.nep102
   },
   {
     Identifier = "Sao",
@@ -66,7 +73,7 @@ local irregularProgradeMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 2912.72,
-    Kernels = kernel
+    Kernels = kernel.nep102
   },
   {
     Identifier = "Laomedeia",
@@ -83,7 +90,7 @@ local irregularProgradeMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 3171.33,
-    Kernels = kernel
+    Kernels = kernel.nep102
   },
   {
     Identifier = "Neso",
@@ -100,7 +107,7 @@ local irregularProgradeMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 9740.73,
-    Kernels = kernel
+    Kernels = kernel.nep102
   }
 }
 
@@ -139,6 +146,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(irregularProgradeMoons)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -162,6 +170,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

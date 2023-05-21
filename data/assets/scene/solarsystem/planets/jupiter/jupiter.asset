@@ -1,6 +1,8 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
+
+
 
 local Jupiter = {
   Identifier = "Jupiter",
@@ -24,7 +26,7 @@ local Jupiter = {
     Layers = {},
     ShadowGroup = {
       Sources = {
-        { Name = "Sun", Radius = 696.3E6 },
+        { Name = "Sun", Radius = 696300000 },
       },
       Casters = {
         { Name = "Ganymede", Radius = 2631000 },
@@ -63,6 +65,7 @@ local JupiterLabel = {
     Path = "/Solar System/Planets/Jupiter"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Jupiter)

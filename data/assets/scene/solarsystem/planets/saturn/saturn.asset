@@ -1,6 +1,8 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
+
+
 
 local texturesPath = asset.syncedResource({
   Type = "HttpSynchronization",
@@ -8,6 +10,7 @@ local texturesPath = asset.syncedResource({
   Identifier = "saturn_textures",
   Version = 4
 })
+
 
 local Saturn = {
   Identifier = "Saturn",
@@ -83,6 +86,7 @@ local SaturnLabel = {
     Description = "Main planet label for Saturn",
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Saturn)

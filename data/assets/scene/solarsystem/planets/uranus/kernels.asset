@@ -1,13 +1,15 @@
-local Kernels = asset.syncedResource({
+local kernels = asset.syncedResource({
   Name = "Uranus Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "uranus_kernels",
   Version = 2
 })
 
-asset.export("ura111", Kernels .. "ura111.bsp")
-asset.export("ura115", Kernels .. "ura115.bsp")
-asset.export("ura116", Kernels .. "ura116.bsp")
+
+asset.export("ura111", kernels .. "ura111.bsp")
+asset.export("ura115", kernels .. "ura115.bsp")
+asset.export("ura116", kernels .. "ura116.bsp")
+
 
 
 asset.meta = {

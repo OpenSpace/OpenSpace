@@ -1,6 +1,8 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Saturn Labels",
@@ -8,6 +10,7 @@ local labelsPath = asset.syncedResource({
   Identifier = "saturn_labels",
   Version = 1
 })
+
 
 local Iapetus = {
   Identifier = "Iapetus",
@@ -17,7 +20,7 @@ local Iapetus = {
       Type = "SpiceTranslation",
       Target = "IAPETUS",
       Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Kernels = kernel.sat441
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -88,6 +91,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Iapetus)
+asset.export(IapetusLabel)
 
 
 

@@ -42,8 +42,8 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", LayerSolar)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", LayerFraction)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerSolar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerFraction)
 end)
 
 asset.export(LayerFraction)

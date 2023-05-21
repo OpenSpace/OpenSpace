@@ -1,5 +1,7 @@
 local transforms = asset.require('../transforms')
 
+
+
 local kernels = asset.syncedResource({
   Name = "Mars Spice Kernels",
   Type = "HttpSynchronization",
@@ -41,6 +43,7 @@ local DeimosGlobe = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(DeimosGlobe)
 end)
@@ -50,6 +53,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(DeimosGlobe)
+
 
 
 asset.meta = {

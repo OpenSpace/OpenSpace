@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
+local kernel = asset.require("../kernels")
 
 
 
@@ -12,7 +12,7 @@ local HyperionTrail = {
       Type = "SpiceTranslation",
       Target = "HYPERION",
       Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Kernels = kernel.sat441
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 21.276,
@@ -24,6 +24,7 @@ local HyperionTrail = {
     Path = "/Solar System/Planets/Saturn/Major Moons/Hyperion"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(HyperionTrail)

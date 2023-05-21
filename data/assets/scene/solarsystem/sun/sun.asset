@@ -1,5 +1,7 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
+local transforms = asset.require("./transforms")
+
+
 
 local Sun = {
   Identifier = "Sun",
@@ -51,6 +53,7 @@ local LightSource = {
   Node = Sun.Identifier,
   Intensity = 1.0
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Sun)

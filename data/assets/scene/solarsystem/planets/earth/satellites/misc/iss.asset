@@ -1,6 +1,8 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
+
+
 local models = asset.syncedResource({
   Name = "ISS Models",
   Type = "HttpSynchronization",
@@ -17,7 +19,8 @@ local omm = asset.syncedResource({
   Override = true
 })
 
-local issPosition = {
+
+local IssPosition = {
   Identifier = "ISSPosition",
   Parent = transforms.EarthInertial.Identifier,
   BoundingSphere = 54.5, -- half the width
@@ -42,7 +45,7 @@ local issPosition = {
   }
 }
 
-local issModel = {
+local IssModel = {
   Identifier = "ISS",
   Parent = issPosition.Identifier,
   Transform = {
@@ -70,7 +73,7 @@ local issModel = {
   }
 }
 
-local issTrail = {
+local IssTrail = {
   Identifier = "ISS_trail",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
@@ -117,8 +120,8 @@ local IssLabel = {
   }
 }
 
-local focus_iss = {
-  Identifier = "os.solarsystem.earth.iss.focus",
+local FocusIss = {
+  Identifier = "os.earth.FocusIss",
   Name = "Focus on ISS",
   Command = [[
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
@@ -130,29 +133,32 @@ local focus_iss = {
   isLocal = false
 }
 
+
 asset.onInitialize(function ()
   local i = openspace.space.readKeplerFile(omm .. "ISS.txt", "OMM")
   issTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
 
-  openspace.addSceneGraphNode(issPosition)
-  openspace.addSceneGraphNode(issModel)
-  openspace.addSceneGraphNode(issTrail)
+  openspace.addSceneGraphNode(IssPosition)
+  openspace.addSceneGraphNode(IssModel)
+  openspace.addSceneGraphNode(IssTrail)
 
   openspace.setPropertyValueSingle("Scene.ISS.Rotation.yAxisInvertObject", true)
-  openspace.action.registerAction(focus_iss)
+  openspace.action.registerAction(FocusIss)
 end)
 
 asset.onDeinitialize(function ()
-  openspace.action.removeAction(focus_iss)
+  openspace.action.removeAction(FocusIss)
 
-  openspace.removeSceneGraphNode(issTrail)
-  openspace.removeSceneGraphNode(issModel)
-  openspace.removeSceneGraphNode(issPosition)
+  openspace.removeSceneGraphNode(IssTrail)
+  openspace.removeSceneGraphNode(IssModel)
+  openspace.removeSceneGraphNode(IssPosition)
 end)
 
-asset.export(issTrail)
-asset.export(issModel)
-asset.export(issPosition)
+asset.export(IssTrail)
+asset.export(IssModel)
+asset.export(IssPosition)
+
+
 
 asset.meta = {
   Name = "ISS",

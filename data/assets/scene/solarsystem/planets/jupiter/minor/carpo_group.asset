@@ -1,13 +1,20 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup344
-local kernel346 = asset.require("../kernels").jup346
+local kernel = asset.require("../kernels")
+local kernel346 = asset.require("../kernels")
 
 
 
 local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_carpo", "moon_minor", "moon_minor_jupiter" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_jupiter",
+  "moon_carpo",
+  "moon_minor",
+  "moon_minor_jupiter"
+}
 local trailColor = { 0.4, 0.3, 0.01 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -33,7 +40,7 @@ local carpoGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 458.62,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2018J4",
@@ -51,7 +58,7 @@ local carpoGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 427.631,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   }
 }
 
@@ -85,8 +92,9 @@ for i, moon in ipairs(carpoGroup) do
     }
   }
 
-  -- 'Hacky' solution to case where the main label gets culled on approach due to its onscreen size.
-  -- We need the size of the original label to be big as it needs to be legible from long distances when focusing on Jupiter.
+  -- 'Hacky' solution to case where the main label gets culled on approach due to its
+  -- onscreen size. We need the size of the original label to be big as it needs to be
+  -- legible from long distances when focusing on Jupiter.
   moon_labels[i+1] = {
     Identifier = moon.Identifier .. "LabelNear",
     Parent = moon.Identifier,
@@ -115,6 +123,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(carpoGroup)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -138,6 +147,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

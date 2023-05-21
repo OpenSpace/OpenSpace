@@ -1,5 +1,7 @@
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
+
+
 local omm = asset.syncedResource({
   Name = "Satellite OMM Data (Hubble)",
   Type = "UrlSynchronization",
@@ -57,6 +59,7 @@ local HubbleTrail = {
   }
 }
 
+
 asset.onInitialize(function ()
   local hubble = openspace.space.readKeplerFile(omm .. "hst.txt", "OMM")
   HubbleTrail.Renderable.Period = hubble[1].Period / (60 * 60 * 24)
@@ -72,6 +75,8 @@ end)
 
 asset.export(HubblePosition)
 asset.export(HubbleTrail)
+
+
 
 asset.meta = {
   Name = "Hubble Space Telescope Trail",

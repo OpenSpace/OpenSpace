@@ -1,5 +1,7 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local MercuryBarycenter = {
   Identifier = "MercuryBarycenter",
@@ -15,9 +17,10 @@ local MercuryBarycenter = {
     Name = "Mercury Barycenter",
     Path = "/Solar System/Planets/Mercury",
     Hidden = true,
-    Description = "Mercury Barycenter position",
+    Description = "Mercury Barycenter position"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MercuryBarycenter)

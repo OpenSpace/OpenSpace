@@ -78,7 +78,7 @@ asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(Colorbar2009IceConcentration)
   openspace.removeScreenSpaceRenderable(Colorbar2008Minimum)
   openspace.removeScreenSpaceRenderable(Colorbar2007to2009)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export(Layer)

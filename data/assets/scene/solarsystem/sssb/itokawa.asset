@@ -1,6 +1,8 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
+
+
 local orbit = asset.syncedResource({
   Name = "Itokawa Orbit",
   Type = "HttpSynchronization",
@@ -14,6 +16,7 @@ local model = asset.syncedResource({
   Identifier = "itokawa_model",
   Version = 1
 })
+
 
 local ItokawaTrail = {
   Identifier = "ItokawaTrail",
@@ -78,6 +81,7 @@ local ItokawaModel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ItokawaPosition)
   openspace.addSceneGraphNode(ItokawaTrail)
@@ -93,6 +97,7 @@ end)
 asset.export(ItokawaPosition)
 asset.export(ItokawaTrail)
 asset.export(ItokawaModel)
+
 
 
 asset.meta = {

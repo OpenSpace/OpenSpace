@@ -1,6 +1,6 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").nep097
+local kernel = asset.require("../kernels")
 
 
 
@@ -19,7 +19,7 @@ local Triton = {
   },
   TrailColor = { 0.2, 0.5, 0.75 },
   OrbitPeriod = 5.877,
-  Kernels = kernel
+  Kernels = kernel.nep097
 }
 
 
@@ -56,6 +56,7 @@ end
 
 
 local nodes = proceduralGlobes.createGlobes({ Triton })
+
 
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do

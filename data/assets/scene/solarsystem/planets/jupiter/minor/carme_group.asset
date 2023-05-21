@@ -1,13 +1,20 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup344
-local kernel346 = asset.require("../kernels").jup346
+local kernel = asset.require("../kernels")
+local kernel346 = asset.require("../kernels")
 
 
 
 local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_carme", "moon_minor", "moon_minor_jupiter" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_jupiter",
+  "moon_carme",
+  "moon_minor",
+  "moon_minor_jupiter"
+}
 local trailColor = { 0.4, 0.3, 0.01 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -33,7 +40,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 672.75,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Aitne",
@@ -50,7 +57,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 679.64,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Kale",
@@ -67,7 +74,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 685.32,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Taygete",
@@ -84,7 +91,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 686.67,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Chaldene",
@@ -101,7 +108,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 699.33,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Erinome",
@@ -118,7 +125,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 711.96,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Kallichore",
@@ -135,7 +142,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 717.81,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Kalyke",
@@ -152,7 +159,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 721.02,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Pasithee",
@@ -169,7 +176,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 726.93,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2010J1",
@@ -187,7 +194,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 722.83,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Eukelade",
@@ -204,7 +211,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 735.20,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Arche",
@@ -221,7 +228,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 746.19,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Isonoe",
@@ -238,7 +245,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 750.13,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "Carme",
@@ -255,7 +262,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 763.95,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2003J5",
@@ -273,7 +280,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 758.34,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2018J3",
@@ -291,7 +298,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 704.56,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2021J4",
@@ -309,7 +316,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 710.13,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2021J5",
@@ -327,7 +334,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 704.80,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2021J6",
@@ -345,7 +352,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 732.55,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2016J3",
@@ -363,7 +370,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 676.37,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2022J1",
@@ -381,7 +388,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 667.34,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2022J2",
@@ -399,7 +406,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 685.51,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2017J2",
@@ -417,7 +424,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 723.1,
-    Kernels = kernel346
+    Kernels = kernel346.jup346
   },
   {
     Identifier = "S2017J5",
@@ -435,7 +442,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 719.5,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2017J8",
@@ -453,7 +460,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 719.6,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2011J1",
@@ -471,7 +478,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 686.6,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2003J9",
@@ -489,7 +496,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 767.6,
-    Kernels = kernel
+    Kernels = kernel.jup344
   },
   {
     Identifier = "S2003J10",
@@ -507,7 +514,7 @@ local carmeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 705.96,
-    Kernels = kernel
+    Kernels = kernel.jup344
   }
 }
 
@@ -547,6 +554,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(carmeGroup)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -570,6 +578,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

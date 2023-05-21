@@ -69,10 +69,10 @@ end)
 
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", LayerNull)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", LayerEnergy)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", LayerEnergyCoastal)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", LayerCoastal)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNull)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergy)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerEnergyCoastal)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerCoastal)
 end)
 
 asset.export(LayerCoastal)

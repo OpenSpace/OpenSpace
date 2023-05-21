@@ -7,8 +7,10 @@ asset.require("./minor/other_groups")
 asset.require("./minor/pasiphae_group")
 asset.require("./minor/themisto_group")
 
-local minormoons_on = {
-  Identifier = "os.solarsystem.jupiter.minormoonson",
+
+
+local JupiterMinorMoonsOn = {
+  Identifier = "os.solarsystem.JupiterMinorMoonsOn",
   Name = "Turn on minor moons and trails",
   Command = [[
     local trails = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Enabled');
@@ -32,8 +34,8 @@ local minormoons_on = {
   IsLocal = true
 }
 
-local minormoons_off = {
-  Identifier = "os.solarsystem.jupiter.minormoonsoff",
+local JupiterMinorMoonsOff = {
+  Identifier = "os.solarsystem.JupiterMinorMoonsOff",
   Name = "Turn off minors moon and trails",
   Command = [[
     local trails = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Enabled');
@@ -55,15 +57,17 @@ local minormoons_off = {
   IsLocal = true
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(minormoons_on)
-  openspace.action.registerAction(minormoons_off)
+  openspace.action.registerAction(JupiterMinorMoonsOn)
+  openspace.action.registerAction(JupiterMinorMoonsOff)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(minormoons_off)
-  openspace.action.removeAction(minormoons_on)
+  openspace.action.removeAction(JupiterMinorMoonsOff)
+  openspace.action.removeAction(JupiterMinorMoonsOn)
 end)
+
 
 
 asset.meta = {

@@ -1,12 +1,19 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels").ura115
+local kernel = asset.require("./kernels")
 
 
 
 local parentIdentifier = transforms.UranusBarycenter.Identifier
 local parentSpice = "URANUS BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_inner", "moon_minor", "moon_minor_uranus" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_uranus",
+  "moon_inner",
+  "moon_minor",
+  "moon_minor_uranus"
+}
 
 local trailColor = { 0.60, 0.65, 0.84 }
 local trailTags = {
@@ -34,7 +41,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.335034,
-    Kernels = kernel
+    Kernels = kernel.ura115
   },
   {
     Identifier = "Ophelia",
@@ -51,7 +58,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.376400,
-    Kernels = kernel
+    Kernels = kernel.ura115
   },
   {
     Identifier = "Bianca",
@@ -68,7 +75,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.434579,
-    Kernels = kernel
+    Kernels = kernel.ura115
   },
   {
     Identifier = "Cressida",
@@ -85,7 +92,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.463570,
-    Kernels = kernel
+    Kernels = kernel.ura115
   },
   {
     Identifier = "Desdemona",
@@ -102,7 +109,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.473650,
-    Kernels = kernel
+    Kernels = kernel.ura115
   },
   {
     Identifier = "Juliet",
@@ -119,7 +126,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.493065,
-    Kernels = kernel
+    Kernels = kernel.ura115
   },
   {
     Identifier = "Portia",
@@ -136,7 +143,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.513196,
-    Kernels = kernel
+    Kernels = kernel.ura115
   },
   {
     Identifier = "Rosalind",
@@ -153,7 +160,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.558460,
-    Kernels = kernel
+    Kernels = kernel.ura115
   },
   {
     Identifier = "Cupid",
@@ -170,7 +177,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.618,
-    Kernels = kernel
+    Kernels = kernel.ura115
   },
   {
     Identifier = "Belinda",
@@ -187,7 +194,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.623527,
-    Kernels = kernel
+    Kernels = kernel.ura115
   },
   {
     Identifier = "Perdita",
@@ -204,7 +211,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.638,
-    Kernels = kernel
+    Kernels = kernel.ura115
   },
   {
     Identifier = "Puck",
@@ -221,7 +228,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.761833,
-    Kernels = kernel
+    Kernels = kernel.ura115
   },
   {
     Identifier = "Mab",
@@ -238,7 +245,7 @@ local innerMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 0.923,
-    Kernels = kernel
+    Kernels = kernel.ura115
   }
 }
 
@@ -275,6 +282,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(innerMoons)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -298,6 +306,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

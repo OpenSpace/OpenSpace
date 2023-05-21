@@ -1,12 +1,19 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels").ura116
+local kernel = asset.require("./kernels")
 
 
 
 local parentIdentifier = transforms.UranusBarycenter.Identifier
 local parentSpice = "URANUS BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_irregular_prograde", "moon_minor", "moon_minor_uranus" }
+local tags = {
+  "moon_solarSystem",
+  "moon_giants",
+  "moon_uranus",
+  "moon_irregular_prograde",
+  "moon_minor",
+  "moon_minor_uranus"
+}
 local trailColor = { 0.60, 0.65, 0.84 }
 local trailTags = {
   "moonTrail_solarSystem",
@@ -32,7 +39,7 @@ local irregularMoons = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 1694.8,
-    Kernels = kernel
+    Kernels = kernel.ura116
   }
 }
 
@@ -70,6 +77,7 @@ end
 
 local nodes = proceduralGlobes.createGlobes(irregularMoons)
 
+
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
@@ -93,6 +101,7 @@ end)
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
+
 
 
 asset.meta = {

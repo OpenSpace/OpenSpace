@@ -1,7 +1,9 @@
-local transforms = asset.require("../transforms")
 asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("../transforms")
 local kernel = asset.require("../kernels").jup365
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Jupiter Labels",
@@ -9,6 +11,7 @@ local labelsPath = asset.syncedResource({
   Identifier = "jupiter_labels",
   Version = 1
 })
+
 
 local Ganymede = {
   Identifier = "Ganymede",
@@ -88,6 +91,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Ganymede)
+asset.export(GanymedeLabel)
 
 
 

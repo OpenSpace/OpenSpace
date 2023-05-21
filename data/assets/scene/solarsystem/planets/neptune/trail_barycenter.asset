@@ -1,6 +1,6 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
-local kernel = asset.require("./kernels").nep097
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local kernel = asset.require("./kernels")
 
 
 
@@ -13,7 +13,7 @@ local NeptuneBarycenterTrail = {
       Type = "SpiceTranslation",
       Target = "NEPTUNE BARYCENTER",
       Observer = "SSB",
-      Kernels = kernel
+      Kernels = kernel.nep097
     },
     Color = { 0.2, 0.5, 1.0 },
     Period  = 60266,
@@ -27,6 +27,7 @@ local NeptuneBarycenterTrail = {
     Description = "BarycenterTrail of Neptune as observed by the Sun"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NeptuneBarycenterTrail)
