@@ -1,7 +1,6 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 local kernel = asset.require("../kernels")
-local kernel346 = asset.require("../kernels")
 
 
 
@@ -386,7 +385,7 @@ local pasiphaeGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 743.69,
-    Kernels = kernel346.jup346
+    Kernels = kernel.jup346
   },
   {
     Identifier = "S2017J6",

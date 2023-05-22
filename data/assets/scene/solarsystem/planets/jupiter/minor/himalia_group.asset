@@ -1,7 +1,6 @@
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 local kernel = asset.require("../kernels")
-local kernel346 = asset.require("../kernels")
 
 
 
@@ -126,7 +125,7 @@ local himaliaGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 261.77,
-    Kernels = kernel346.jup346
+    Kernels = kernel.jup346
   },
   {
     Identifier = "S2018J2",
@@ -144,7 +143,7 @@ local himaliaGroup = {
     },
     TrailColor = trailColor,
     OrbitPeriod = 250.88,
-    Kernels = kernel346.jup346
+    Kernels = kernel.jup346
   },
   {
     Identifier = "Pandia",
