@@ -73,12 +73,14 @@ namespace {
        GL_COLOR_ATTACHMENT2,
     };
 
-    constexpr std::array<const char*, 14> UniformNames = {
-        "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
-        "modelViewTransform", "normalTransform", "projectionTransform",
-        "performShading", "ambientIntensity", "diffuseIntensity",
-        "specularIntensity", "performManualDepthTest", "gBufferDepthTexture",
-        "resolution", "opacity"
+    constexpr std::array<const char*, 26> UniformNames = {
+        "modelViewTransform", "projectionTransform", "normalTransform", "meshTransform",
+        "meshNormalTransform", "ambientIntensity", "diffuseIntensity",
+        "specularIntensity", "performShading", "use_forced_color", "has_texture_diffuse",
+        "has_texture_normal", "has_texture_specular", "has_color_specular",
+        "texture_diffuse", "texture_normal", "texture_specular", "color_diffuse",
+        "color_specular", "opacity", "nLightSources", "lightDirectionsViewSpace",
+        "lightIntensities", "performManualDepthTest", "gBufferDepthTexture", "resolution"
     };
 
     constexpr std::array<const char*, 5> UniformOpacityNames = {
@@ -737,18 +739,29 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         ++nLightSources;
     }
 
-    _program->setUniform(
-        _uniformCache.nLightSources,
-        nLightSources
-    );
-    _program->setUniform(
-        _uniformCache.lightIntensities,
-        _lightIntensitiesBuffer
-    );
-    _program->setUniform(
-        _uniformCache.lightDirectionsViewSpace,
-        _lightDirectionsViewSpaceBuffer
-    );
+    if (_uniformCache.performShading != -1) {
+        _program->setUniform(_uniformCache.performShading, _performShading);
+    }
+
+    if (_performShading) {
+        _program->setUniform(
+            _uniformCache.nLightSources,
+            nLightSources
+        );
+        _program->setUniform(
+            _uniformCache.lightIntensities,
+            _lightIntensitiesBuffer
+        );
+        _program->setUniform(
+            _uniformCache.lightDirectionsViewSpace,
+            _lightDirectionsViewSpaceBuffer
+        );
+
+        _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
+        _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
+        _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
+    }
+
     _program->setUniform(
         _uniformCache.modelViewTransform,
         glm::mat4(modelViewTransform)
@@ -765,10 +778,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _uniformCache.projectionTransform,
         data.camera.projectionMatrix()
     );
-    _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
-    _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
-    _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
-    _program->setUniform(_uniformCache.performShading, _performShading);
 
     if (!_enableFaceCulling) {
         glDisable(GL_CULL_FACE);
@@ -942,6 +951,15 @@ void RenderableModel::update(const UpdateData& data) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    }
+
+    if (_quadProgram->isDirty()) {
+        _quadProgram->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(
+            *_quadProgram,
+            _uniformOpacityCache,
+            UniformOpacityNames
+        );
     }
 
     if (!hasOverrideRenderBin()) {

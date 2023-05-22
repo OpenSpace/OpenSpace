@@ -21,10 +21,9 @@ local model = {
     Type = "RenderableModel",
     GeometryFile = model .. "BoxAnimated.glb",
     ModelScale = 3E7,
-    LightSources = {
-      sun.LightSource
-    },
-    PerformShading = true,
+    -- (malej 2023-MAY-22) Note that PerformShading should be false in this example,
+    -- these example shaders dont't contain any light calculations
+    PerformShading = false,
     VertexShader = asset.localResource("model_vs.glsl"),
     FragmentShader = asset.localResource("model_fs.glsl"),
     EnableAnimation = true,
