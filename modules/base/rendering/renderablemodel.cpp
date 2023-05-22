@@ -141,6 +141,17 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ModelScaleInfo = {
+        "ModelScale",
+        "Model Scale",
+        "This value specifies the scale for the model. If a value for the ModelScale was "
+        "provided in the asset file, you can see and change it here. If instead a unit "
+        "name was provided in the asset, this is the value that that name represents. "
+        "For example 'Centimeter' becomes 0.01. For more information see "
+        "http://wiki.openspaceproject.com/docs/builders/models/model-scale.html",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
         "RotationVector",
         "Rotation Vector",
@@ -194,8 +205,14 @@ namespace {
             Mile
         };
 
-        // The scale of the model. For example if the model is in centimeters
-        // then ModelScale = Centimeter or ModelScale = 0.01
+        // The scale of the model. For example, if the model is in centimeters
+        // then <code>ModelScale = 'Centimeter'</code> or <code>ModelScale = 0.01</code>.
+        // The value that this needs to be in order for the model to be in the correct
+        // scale relative to the rest of OpenSpace can be tricky to find.
+        // Essentially it depends on the model software that the model was created
+        // with and the original intention of the modeler. For more information see
+        // our wiki page for this parameter:
+        // http://wiki.openspaceproject.com/docs/builders/models/model-scale.html
         std::optional<std::variant<ScaleUnit, double>> modelScale;
 
         // By default the given ModelScale is used to scale the model down,
@@ -303,6 +320,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         glm::dmat4(-1.0),
         glm::dmat4(1.0)
     )
+    , _modelScale(ModelScaleInfo, 1.0, std::numeric_limits<double>::epsilon(), 4e+27)
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _enableDepthTest(EnableDepthTestInfo, true)
     , _blendingFuncOption(
@@ -465,6 +483,16 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_enableDepthTest);
     addProperty(_modelTransform);
     addProperty(_rotationVec);
+
+    addProperty(_modelScale);
+    _modelScale.setExponent(20.f);
+
+    _modelScale.onChange([this]() {
+        setBoundingSphere(_geometry->boundingRadius()* _modelScale);
+
+        // Set Interaction sphere size to be 10% of the bounding sphere
+        setInteractionSphere(boundingSphere() * 0.1);
+    });
 
     _rotationVec.onChange([this]() {
         _modelTransform = glm::mat4_cast(glm::quat(glm::radians(_rotationVec.value())));

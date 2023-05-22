@@ -79,7 +79,7 @@ private:
     };
 
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
-    double _modelScale = 1.0;
+    properties::DoubleProperty _modelScale;
     bool _invertModelScale = false;
     bool _forceRenderInvisible = false;
     bool _notifyInvisibleDropped = true;
