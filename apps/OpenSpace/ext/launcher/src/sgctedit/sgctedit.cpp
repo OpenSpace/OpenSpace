@@ -37,6 +37,8 @@
 #include <QVBoxLayout>
 #include <filesystem>
 
+#include "sgctedit/sgctedit.inl"
+
 namespace {
     constexpr QRect MonitorWidgetSize = QRect(0, 0, 500, 500);
     constexpr int MaxNumberWindows = 4;
@@ -189,7 +191,7 @@ bool SgctEdit::doesViewportSubsetMatch(sgct::config::Viewport& first,
     matches &= compareOptionalCfgElement(first.position, compare.position);
     matches &= compareOptionalCfgElement(first.size, compare.size);
 
-    bool projectionMatchFound = false;
+    bool projectionMatchFound = true;
     sgct::config::Projections& firstP = first.projection;
     sgct::config::Projections& compareP = compare.projection;
     if (typeid(firstP) != typeid(compareP)) {
@@ -205,46 +207,46 @@ bool SgctEdit::doesViewportSubsetMatch(sgct::config::Viewport& first,
                 p.heightOffset,
                 std::get<sgct::config::CylindricalProjection>(compareP).heightOffset
             );
-            projectionMatchFound = true;
         },
         [&](sgct::config::EquirectangularProjection p) {
             matches &= compareOptionalCfgElement(
                 p.quality,
                 std::get<sgct::config::EquirectangularProjection>(compareP).quality
             );
-            projectionMatchFound = true;
         },
         [&](sgct::config::FisheyeProjection p) {
             matches &= compareOptionalCfgElement(
                 p.quality,
                 std::get<sgct::config::FisheyeProjection>(compareP).quality
             );
-            projectionMatchFound = true;
         },
         [&](sgct::config::PlanarProjection p) {
             matches &= compareCfgElement(
                 p.fov,
                 std::get<sgct::config::PlanarProjection>(compareP).fov
             );
-            projectionMatchFound = true;
         },
         [&](sgct::config::SphericalMirrorProjection p) {
             matches &= compareOptionalCfgElement(
                 p.quality,
                 std::get<sgct::config::SphericalMirrorProjection>(compareP).quality
             );
-            projectionMatchFound = true;
         },
         [&](sgct::config::SpoutOutputProjection p) {
             matches &= compareOptionalCfgElement(
                 p.quality,
                 std::get<sgct::config::SpoutOutputProjection>(compareP).quality
             );
-            projectionMatchFound = true;
         },
-        [&](sgct::config::NoProjection) {},
-        [&](sgct::config::ProjectionPlane) {},
-        [&](sgct::config::SpoutFlatProjection) {}
+        [&](sgct::config::NoProjection) {
+            projectionMatchFound = false;
+        },
+        [&](sgct::config::ProjectionPlane) {
+            projectionMatchFound = false;
+        },
+        [&](sgct::config::SpoutFlatProjection) {
+            projectionMatchFound = false;
+        }
     }, first.projection);
     matches &= projectionMatchFound;
     return matches;
