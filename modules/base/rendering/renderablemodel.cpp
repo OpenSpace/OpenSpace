@@ -257,7 +257,7 @@ namespace {
         std::optional<bool> enableFaceCulling;
 
         // [[codegen::verbatim(ModelTransformInfo.description)]]
-        std::optional<glm::dmat3x3> modelTransform;
+        std::optional<glm::dmat4x4> modelTransform;
 
         // [[codegen::verbatim(RotationVecInfo.description)]]
         std::optional<glm::dvec3> rotationVector;
@@ -299,9 +299,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _enableFaceCulling(EnableFaceCullingInfo, true)
     , _modelTransform(
         ModelTransformInfo,
-        glm::dmat3(1.0),
-        glm::dmat3(-1.0),
-        glm::dmat3(1.0)
+        glm::dmat4(1.0),
+        glm::dmat4(-1.0),
+        glm::dmat4(1.0)
     )
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _enableDepthTest(EnableDepthTestInfo, true)
