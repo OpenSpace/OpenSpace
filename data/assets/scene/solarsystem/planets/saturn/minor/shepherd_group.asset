@@ -1,4 +1,3 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 
 
@@ -82,14 +81,14 @@ local PrometheusLabel = {
     Type = "RenderableLabel",
     Text = "Prometheus",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -164,14 +163,14 @@ local PandoraLabel = {
     Type = "RenderableLabel",
     Text = "Pandora",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -246,14 +245,14 @@ local AtlasLabel = {
     Type = "RenderableLabel",
     Text = "Atlas",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -328,14 +327,14 @@ local JanusLabel = {
     Type = "RenderableLabel",
     Text = "Janus",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -410,14 +409,14 @@ local EpimetheusLabel = {
     Type = "RenderableLabel",
     Text = "Epimetheus",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -492,14 +491,14 @@ local DaphnisLabel = {
     Type = "RenderableLabel",
     Text = "Daphnis",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -574,14 +573,14 @@ local PanLabel = {
     Type = "RenderableLabel",
     Text = "Pan",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -594,6 +593,7 @@ local PanLabel = {
 asset.onInitialize(function()
   openspace.spice.loadKernel(syncedKernels .. "sat393_daphnis.bsp")
   openspace.spice.loadKernel(syncedKernels .. "sat415.bsp")
+
 
   openspace.addSceneGraphNode(Prometheus)
   openspace.addSceneGraphNode(PrometheusTrail)
@@ -652,6 +652,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PanLabel)
   openspace.removeSceneGraphNode(PanTrail)
   openspace.removeSceneGraphNode(Pan)
+
 
   openspace.spice.unloadKernel(syncedKernels .. "sat415.bsp")
   openspace.spice.unloadKernel(syncedKernels .. "sat393_daphnis.bsp")

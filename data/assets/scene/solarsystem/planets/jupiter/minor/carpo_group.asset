@@ -1,4 +1,3 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 local kernel = asset.require("../kernels")
 
@@ -75,8 +74,8 @@ local CarpoLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 1.0, 100.0 },
+    FadeWidths = { 0.0, 100.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -222,6 +221,7 @@ local S2018J4LabelNear = {
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernel.jup344)
 
+
   openspace.addSceneGraphNode(Carpo)
   openspace.addSceneGraphNode(CarpoTrail)
   openspace.addSceneGraphNode(CarpoLabel)
@@ -239,6 +239,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CarpoLabel)
   openspace.removeSceneGraphNode(CarpoTrail)
   openspace.removeSceneGraphNode(Carpo)
+
+  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
 asset.export(Carpo)

@@ -1,4 +1,3 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 local kernel = asset.require("../kernels")
 
@@ -75,8 +74,8 @@ local KiviuqLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -157,8 +156,8 @@ local IjiraqLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -239,8 +238,8 @@ local PaaliaqLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -321,8 +320,8 @@ local SiarnaqLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -403,8 +402,8 @@ local TarqeqLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -485,8 +484,8 @@ local S2004S29Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -567,8 +566,8 @@ local S2004S31Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -649,8 +648,8 @@ local S2019S01Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -663,6 +662,7 @@ local S2019S01Label = {
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernel.sat452)
+
 
   openspace.addSceneGraphNode(Kiviuq)
   openspace.addSceneGraphNode(KiviuqTrail)
@@ -729,6 +729,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(KiviuqLabel)
   openspace.removeSceneGraphNode(KiviuqTrail)
   openspace.removeSceneGraphNode(Kiviuq)
+
 
   openspace.spice.unloadKernel(kernel.sat452)
 end)

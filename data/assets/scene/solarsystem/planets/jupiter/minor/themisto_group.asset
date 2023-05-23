@@ -1,4 +1,3 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 local kernel = asset.require("../kernels")
 
@@ -75,8 +74,8 @@ local ThemistoLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 1.5, 120.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -90,6 +89,7 @@ local ThemistoLabel = {
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernel.jup344)
 
+
   openspace.addSceneGraphNode(Themisto)
   openspace.addSceneGraphNode(ThemistoTrail)
   openspace.addSceneGraphNode(ThemistoLabel)
@@ -99,6 +99,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ThemistoLabel)
   openspace.removeSceneGraphNode(ThemistoTrail)
   openspace.removeSceneGraphNode(Themisto)
+
 
   openspace.spice.unloadKernel(kernel.jup344)
 end)

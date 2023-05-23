@@ -1,4 +1,3 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("./transforms")
 local kernel = asset.require("./kernels")
 
@@ -69,14 +68,14 @@ local CordeliaLabel = {
     Type = "RenderableLabel",
     Text = "Cordelia",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -151,14 +150,14 @@ local OpheliaLabel = {
     Type = "RenderableLabel",
     Text = "Ophelia",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -233,14 +232,14 @@ local BiancaLabel = {
     Type = "RenderableLabel",
     Text = "Bianca",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -315,14 +314,14 @@ local CressidaLabel = {
     Type = "RenderableLabel",
     Text = "Cressida",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -397,14 +396,14 @@ local DesdemonaLabel = {
     Type = "RenderableLabel",
     Text = "Desdemona",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -479,14 +478,14 @@ local JulietLabel = {
     Type = "RenderableLabel",
     Text = "Juliet",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -561,14 +560,14 @@ local PortiaLabel = {
     Type = "RenderableLabel",
     Text = "Portia",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -643,14 +642,14 @@ local RosalindLabel = {
     Type = "RenderableLabel",
     Text = "Rosalind",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -725,14 +724,14 @@ local CupidLabel = {
     Type = "RenderableLabel",
     Text = "Cupid",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -807,14 +806,14 @@ local BelindaLabel = {
     Type = "RenderableLabel",
     Text = "Belinda",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -889,14 +888,14 @@ local PerditaLabel = {
     Type = "RenderableLabel",
     Text = "Perdita",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -971,14 +970,14 @@ local PuckLabel = {
     Type = "RenderableLabel",
     Text = "Puck",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1053,14 +1052,14 @@ local MabLabel = {
     Type = "RenderableLabel",
     Text = "Mab",
     FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Additive",
     EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1072,6 +1071,7 @@ local MabLabel = {
 
 asset.onInitialize(function()
   openspace.kernel.loadKernel(kernel.ura115)
+
 
   openspace.addSceneGraphNode(Cordelia)
   openspace.addSceneGraphNode(CordeliaTrail)
@@ -1178,6 +1178,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MabLabel)
   openspace.removeSceneGraphNode(MabTrail)
   openspace.removeSceneGraphNode(Mab)
+
 
   openspace.kernel.unloadKernel(kernel.ura115)
 end)

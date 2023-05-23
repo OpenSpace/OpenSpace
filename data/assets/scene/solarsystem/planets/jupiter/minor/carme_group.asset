@@ -74,8 +74,8 @@ local HerseLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -156,8 +156,8 @@ local AitneLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -238,8 +238,8 @@ local KaleLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -320,8 +320,8 @@ local TaygeteLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -402,8 +402,8 @@ local ChaldeneLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -484,8 +484,8 @@ local ErinomeLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -566,8 +566,8 @@ local KallichoreLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -648,8 +648,8 @@ local KalykeLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -730,8 +730,8 @@ local PasitheeLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -812,8 +812,8 @@ local S2010J1Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -894,8 +894,8 @@ local EukeladeLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -976,8 +976,8 @@ local ArcheLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1058,8 +1058,8 @@ local IsonoeLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1140,8 +1140,8 @@ local CarmeLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1222,8 +1222,8 @@ local S2003J5Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1304,8 +1304,8 @@ local S2018J3Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1386,8 +1386,8 @@ local S2021J4Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1468,8 +1468,8 @@ local S2021J5Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1550,8 +1550,8 @@ local S2021J6Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1632,8 +1632,8 @@ local S2016J3Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1714,8 +1714,8 @@ local S2022J1Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1796,8 +1796,8 @@ local S2022J2Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1878,8 +1878,8 @@ local S2017J2Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -1960,8 +1960,8 @@ local S2017J5Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -2042,8 +2042,8 @@ local S2017J8Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -2124,8 +2124,8 @@ local S2011J1Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -2206,8 +2206,8 @@ local S2003J9Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -2288,8 +2288,8 @@ local S2003J10Label = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "Gm",
-    FadeDistances = { 1.5, 90.0 },
-    FadeWidths = { 0.5, 90.0 }
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -2303,6 +2303,7 @@ local S2003J10Label = {
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernel.jup344)
   openspace.spice.loadKernel(kernel.jup346)
+
 
   openspace.addSceneGraphNode(Herse)
   openspace.addSceneGraphNode(HerseTrail)
@@ -2529,6 +2530,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HerseLabel)
   openspace.removeSceneGraphNode(HerseTrail)
   openspace.removeSceneGraphNode(Herse)
+
 
   openspace.spice.loadKernel(kernel.jup346)
   openspace.spice.loadKernel(kernel.jup344)

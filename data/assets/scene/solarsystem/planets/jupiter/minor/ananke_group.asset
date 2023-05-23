@@ -1810,6 +1810,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(S2010J2Trail)
   openspace.removeSceneGraphNode(S2010J2)
 
+
   openspace.spice.unloadKernel(kernel.jup346)
   openspace.spice.unloadKernel(kernel.jup344)
 end)
