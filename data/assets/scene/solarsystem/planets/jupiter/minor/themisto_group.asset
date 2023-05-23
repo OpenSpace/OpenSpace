@@ -26,7 +26,7 @@ local Themisto = {
     "moon_themisto",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Themisto",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto"
@@ -61,7 +61,7 @@ local ThemistoTrail = {
 }
 
 local ThemistoLabel = {
-  Identifier = "EurydomeLabel",
+  Identifier = "ThemistoLabel",
   Parent = Themisto.Identifier,
   Renderable = {
     Enabled = false,

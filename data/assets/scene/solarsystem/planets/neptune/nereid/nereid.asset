@@ -19,7 +19,7 @@ local Nereid = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_neptune" }
+  Tag = { "moon_solarSystem", "moon_giants", "moon_neptune" },
   GUI = {
     Name = "Nereid",
     Path = "/Solar System/Planets/Neptune/Major Moons/Nereid"
@@ -83,9 +83,9 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.addSceneGraphNode(NereidLabel)
-  openspace.addSceneGraphNode(NereidTrail)
-  openspace.addSceneGraphNode(Nereid)
+  openspace.removeSceneGraphNode(NereidLabel)
+  openspace.removeSceneGraphNode(NereidTrail)
+  openspace.removeSceneGraphNode(Nereid)
 
 
   openspace.spice.unloadKernel(kernel.nep101xl_802)

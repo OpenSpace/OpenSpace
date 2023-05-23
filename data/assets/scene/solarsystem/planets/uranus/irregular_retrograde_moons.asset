@@ -26,7 +26,7 @@ local Francisco = {
     "moon_irregular_retrograde",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Francisco",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco"
@@ -108,7 +108,7 @@ local Caliban = {
     "moon_irregular_retrograde",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Caliban",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban"
@@ -190,7 +190,7 @@ local Stephano = {
     "moon_irregular_retrograde",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Stephano",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano"
@@ -272,7 +272,7 @@ local Trinculo = {
     "moon_irregular_retrograde",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Trinculo",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo"
@@ -354,7 +354,7 @@ local Sycorax = {
     "moon_irregular_retrograde",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Sycorax",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax"
@@ -436,7 +436,7 @@ local Prospero = {
     "moon_irregular_retrograde",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Prospero",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero"
@@ -518,7 +518,7 @@ local Setebos = {
     "moon_irregular_retrograde",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Setebos",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos"
@@ -600,7 +600,7 @@ local Ferdinand = {
     "moon_irregular_retrograde",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Ferdinand",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand"

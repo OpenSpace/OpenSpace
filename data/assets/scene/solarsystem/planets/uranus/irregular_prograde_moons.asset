@@ -26,7 +26,7 @@ local Margaret = {
     "moon_irregular_prograde",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Margaret",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Prograde Moons/Margaret"
@@ -96,9 +96,9 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Margaret)
-  openspace.removeSceneGraphNode(MargaretTrail)
   openspace.removeSceneGraphNode(MargaretLabel)
+  openspace.removeSceneGraphNode(MargaretTrail)
+  openspace.removeSceneGraphNode(Margaret)
 
 
   openspace.spice.unloadKernel(kernel.ura116)

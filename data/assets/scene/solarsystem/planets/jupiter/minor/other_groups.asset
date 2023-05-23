@@ -26,7 +26,7 @@ local Eupheme = {
     "moon_other",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Eupheme",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/Eupheme"
@@ -108,7 +108,7 @@ local S2003J19 = {
     "moon_other",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2003 J 19",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/S2003J19"
@@ -190,7 +190,7 @@ local Valetudo = {
     "moon_other",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Valetudo",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/Valetudo"

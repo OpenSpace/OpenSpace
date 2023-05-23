@@ -26,7 +26,7 @@ local Cordelia = {
     "moon_inner",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Cordelia",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cordelia"
@@ -108,7 +108,7 @@ local Ophelia = {
     "moon_inner",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Ophelia",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Ophelia"
@@ -190,7 +190,7 @@ local Bianca = {
     "moon_inner",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Bianca",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Bianca"
@@ -272,7 +272,7 @@ local Cressida = {
     "moon_inner",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Cressida",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cressida"
@@ -354,7 +354,7 @@ local Desdemona = {
     "moon_inner",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Desdemona",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Desdemona"
@@ -436,7 +436,7 @@ local Juliet = {
     "moon_inner",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Juliet",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Juliet"
@@ -518,7 +518,7 @@ local Portia = {
     "moon_inner",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Portia",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Portia"
@@ -600,7 +600,7 @@ local Rosalind = {
     "moon_inner",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Rosalind",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Rosalind"
@@ -682,7 +682,7 @@ local Cupid = {
     "moon_inner",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Cupid",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cupid"
@@ -764,7 +764,7 @@ local Belinda = {
     "moon_inner",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Belinda",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Belinda"
@@ -846,7 +846,7 @@ local Perdita = {
     "moon_inner",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Perdita",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Perdita"
@@ -928,7 +928,7 @@ local Puck = {
     "moon_inner",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Puck",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Puck"
@@ -1010,7 +1010,7 @@ local Mab = {
     "moon_inner",
     "moon_minor",
     "moon_minor_uranus"
-  }
+  },
   GUI = {
     Name = "Mab",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Mab"
@@ -1070,7 +1070,7 @@ local MabLabel = {
 }
 
 asset.onInitialize(function()
-  openspace.kernel.loadKernel(kernel.ura115)
+  openspace.spice.loadKernel(kernel.ura115)
 
 
   openspace.addSceneGraphNode(Cordelia)
@@ -1180,7 +1180,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Mab)
 
 
-  openspace.kernel.unloadKernel(kernel.ura115)
+  openspace.spice.unloadKernel(kernel.ura115)
 end)
 
 asset.export(Cordelia)

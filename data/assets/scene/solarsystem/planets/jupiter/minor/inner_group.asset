@@ -26,7 +26,7 @@ local Metis = {
     "moon_inner",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Metis",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Metis"
@@ -108,7 +108,7 @@ local Adrastea = {
     "moon_inner",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Adrastea",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Adrastea"
@@ -190,7 +190,7 @@ local Amalthea = {
     "moon_inner",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Amalthea",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Amalthea"
@@ -272,7 +272,7 @@ local Thebe = {
     "moon_inner",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Thebe",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Thebe"

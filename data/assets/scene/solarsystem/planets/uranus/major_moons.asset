@@ -19,7 +19,7 @@ local Miranda = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" }
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
   GUI = {
     Name = "Miranda",
     Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
@@ -88,7 +88,7 @@ local Ariel = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" }
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
   GUI = {
     Name = "Ariel",
     Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
@@ -157,7 +157,7 @@ local Umbriel = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" }
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
   GUI = {
     Name = "Umbriel",
     Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
@@ -226,7 +226,7 @@ local Titania = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" }
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
   GUI = {
     Name = "Titania",
     Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
@@ -295,7 +295,7 @@ local Oberon = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" }
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
   GUI = {
     Name = "Oberon",
     Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
@@ -372,8 +372,6 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Oberon)
   openspace.addSceneGraphNode(OberonTrail)
   openspace.addSceneGraphNode(OberonLabel)
-
-  openspace.addSceneGraphNode(node)
 end)
 
 asset.onDeinitialize(function()

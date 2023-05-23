@@ -26,7 +26,7 @@ local Euporie = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Euporie",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Euporie"
@@ -108,7 +108,7 @@ local S2003J18 = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2003 J 18",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J18"
@@ -190,7 +190,7 @@ local Helike = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Helike",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Helike"
@@ -272,7 +272,7 @@ local Orthosie = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Orthosie",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Orthosie"
@@ -354,7 +354,7 @@ local S2016J1 = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2016 J 1",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J1"
@@ -436,7 +436,7 @@ local S2003J15 = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2003 J 15",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J15"
@@ -518,7 +518,7 @@ local Aoede = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Aoede",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Aoede"
@@ -600,7 +600,7 @@ local Callirrhoe = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Callirrhoe",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Callirrhoe"
@@ -682,7 +682,7 @@ local Eurydome = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Eurydome",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Eurydome"
@@ -764,7 +764,7 @@ local Kore = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Kore",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Kore"
@@ -846,7 +846,7 @@ local Cyllene = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Cyllene",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Cyllene"
@@ -928,7 +928,7 @@ local S2011J2 = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2011 J 2",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2011J2"
@@ -1010,7 +1010,7 @@ local S2017J1 = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2017 J 1",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J1"
@@ -1092,7 +1092,7 @@ local S2003J4 = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2003 J 4",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J4"
@@ -1174,7 +1174,7 @@ local Pasiphae = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Pasiphae",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Pasiphae"
@@ -1256,7 +1256,7 @@ local Hegemone = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Hegemone",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Hegemone"
@@ -1338,7 +1338,7 @@ local Sinope = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Sinope",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sinope"
@@ -1420,7 +1420,7 @@ local Sponde = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Sponde",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sponde"
@@ -1502,7 +1502,7 @@ local Autonoe = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Autonoe",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Autonoe"
@@ -1584,7 +1584,7 @@ local Megaclite = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Megaclite",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Megaclite"
@@ -1666,7 +1666,7 @@ local S2016J4 = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2016 J 4",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J4"
@@ -1748,7 +1748,7 @@ local S2017J6 = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2017 J 6",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J6"
@@ -1830,7 +1830,7 @@ local S2003J23 = {
     "moon_pasiphae",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2003 J 23",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J23"

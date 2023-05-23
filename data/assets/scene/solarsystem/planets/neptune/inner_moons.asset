@@ -26,7 +26,7 @@ local Naiad = {
     "moon_inner",
     "moon_minor",
     "moon_minor_neptune"
-  }
+  },
   GUI = {
     Name = "Naiad",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Naiad"
@@ -108,7 +108,7 @@ local Thalassa = {
     "moon_inner",
     "moon_minor",
     "moon_minor_neptune"
-  }
+  },
   GUI = {
     Name = "Thalassa",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Thalassa"
@@ -190,7 +190,7 @@ local Despina = {
     "moon_inner",
     "moon_minor",
     "moon_minor_neptune"
-  }
+  },
   GUI = {
     Name = "Despina",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Despina"
@@ -272,7 +272,7 @@ local Galatea = {
     "moon_inner",
     "moon_minor",
     "moon_minor_neptune"
-  }
+  },
   GUI = {
     Name = "Galatea",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Galatea"
@@ -354,7 +354,7 @@ local Larissa = {
     "moon_inner",
     "moon_minor",
     "moon_minor_neptune"
-  }
+  },
   GUI = {
     Name = "Larissa",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Larissa"
@@ -436,7 +436,7 @@ local Hippocamp = {
     "moon_inner",
     "moon_minor",
     "moon_minor_neptune"
-  }
+  },
   GUI = {
     Name = "Hippocamp",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Hippocamp"
@@ -518,7 +518,7 @@ local Proteus = {
     "moon_inner",
     "moon_minor",
     "moon_minor_neptune"
-  }
+  },
   GUI = {
     Name = "Proteus",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Proteus"

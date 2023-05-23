@@ -26,7 +26,7 @@ local Halimede = {
     "moon_irregular_prograde",
     "moon_minor",
     "moon_minor_neptune"
-  }
+  },
   GUI = {
     Name = "Halimede",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Halimede"
@@ -108,7 +108,7 @@ local Psamathe = {
     "moon_irregular_prograde",
     "moon_minor",
     "moon_minor_neptune"
-  }
+  },
   GUI = {
     Name = "Psamathe",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Psamathe"
@@ -190,7 +190,7 @@ local Sao = {
     "moon_irregular_prograde",
     "moon_minor",
     "moon_minor_neptune"
-  }
+  },
   GUI = {
     Name = "Sao",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Sao"
@@ -272,7 +272,7 @@ local Laomedeia = {
     "moon_irregular_prograde",
     "moon_minor",
     "moon_minor_neptune"
-  }
+  },
   GUI = {
     Name = "Laomedeia",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Laomedeia"
@@ -354,7 +354,7 @@ local Neso = {
     "moon_irregular_prograde",
     "moon_minor",
     "moon_minor_neptune"
-  }
+  },
   GUI = {
     Name = "Neso",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Neso"

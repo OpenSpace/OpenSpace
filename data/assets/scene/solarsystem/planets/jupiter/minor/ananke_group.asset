@@ -26,7 +26,7 @@ local S2010J2 = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2010 J 2",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2010J2"
@@ -108,7 +108,7 @@ local Thelxinoe = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Thelxinoe",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thelxinoe"
@@ -190,7 +190,7 @@ local Euanthe = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Euanthe",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Euanthe"
@@ -272,7 +272,7 @@ local Iocaste = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Iocaste",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Iocaste"
@@ -354,7 +354,7 @@ local S2003J16 = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2003 J 16",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J16"
@@ -436,7 +436,7 @@ local Praxidike = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Praxidike",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Praxidike"
@@ -518,7 +518,7 @@ local Harpalyke = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Harpalyke",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Harpalyke"
@@ -600,7 +600,7 @@ local Mneme = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Mneme",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Mneme"
@@ -682,7 +682,7 @@ local Hermippe = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Hermippe",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Hermippe"
@@ -764,7 +764,7 @@ local Thyone = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Thyone",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thyone"
@@ -846,7 +846,7 @@ local Ananke = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Ananke",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Ananke"
@@ -928,7 +928,7 @@ local S2021J1 = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2021 J 1",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J1"
@@ -1010,7 +1010,7 @@ local S2021J2 = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2021 J 2",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J2"
@@ -1092,7 +1092,7 @@ local S2021J3 = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2021 J 3",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J3"
@@ -1174,7 +1174,7 @@ local S2022J3 = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2022 J 3",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2022J3"
@@ -1256,7 +1256,7 @@ local S2017J3 = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2017 J 3",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J3"
@@ -1338,7 +1338,7 @@ local S2017J7 = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2017 J 7",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J7"
@@ -1420,7 +1420,7 @@ local S2017J9 = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2017 J 9",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J9"
@@ -1502,7 +1502,7 @@ local S2003J2 = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2003 J 2",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J2"
@@ -1584,7 +1584,7 @@ local S2003J12 = {
     "moon_ananke",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2003 J 12",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J12"

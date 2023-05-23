@@ -39,7 +39,7 @@ local Prometheus = {
     "moon_shepherd",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Prometheus",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus"
@@ -121,7 +121,7 @@ local Pandora = {
     "moon_shepherd",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Pandora",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora"
@@ -203,7 +203,7 @@ local Atlas = {
     "moon_shepherd",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Atlas",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas"
@@ -285,7 +285,7 @@ local Janus = {
     "moon_shepherd",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Janus",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus"
@@ -367,7 +367,7 @@ local Epimetheus = {
     "moon_shepherd",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Epimetheus",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus"
@@ -449,7 +449,7 @@ local Daphnis = {
     "moon_shepherd",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Daphnis",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis"
@@ -531,7 +531,7 @@ local Pan = {
     "moon_shepherd",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Pan",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan"

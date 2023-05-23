@@ -131,7 +131,7 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(HideNesw)
   openspace.action.removeAction(ShowNeswLetters)
   openspace.action.removeAction(ShowNeswBand)
-  openspace.removeSceneGraphNode(Sphere)
+  openspace.removeSceneGraphNode(CardinalDirectionSphere)
   openspace.removeSceneGraphNode(CardinalDirectionsPosition)
 end)
 

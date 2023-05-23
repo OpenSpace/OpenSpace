@@ -26,7 +26,7 @@ local Herse = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Herse",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Herse"
@@ -108,7 +108,7 @@ local Aitne = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Aitne",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Aitne"
@@ -190,7 +190,7 @@ local Kale = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Kale",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kale"
@@ -272,7 +272,7 @@ local Taygete = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Taygete",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Taygete"
@@ -354,7 +354,7 @@ local Chaldene = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Chaldene",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Chaldene"
@@ -436,7 +436,7 @@ local Erinome = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Erinome",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Erinome"
@@ -518,7 +518,7 @@ local Kallichore = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Kallichore",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kallichore"
@@ -600,7 +600,7 @@ local Kalyke = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Kalyke",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kalyke"
@@ -682,7 +682,7 @@ local Pasithee = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Pasithee",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Pasithee"
@@ -764,7 +764,7 @@ local S2010J1 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2010 J 1",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2010J1"
@@ -799,7 +799,7 @@ local S2010J1Trail = {
 }
 
 local S2010J1Label = {
-  Identifier = "AitneLabel",
+  Identifier = "S2010J1Label",
   Parent = S2010J1.Identifier,
   Renderable = {
     Enabled = false,
@@ -846,7 +846,7 @@ local Eukelade = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Eukelade",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Eukelade"
@@ -928,7 +928,7 @@ local Arche = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Arche",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Arche"
@@ -1010,7 +1010,7 @@ local Isonoe = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Isonoe",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe"
@@ -1092,7 +1092,7 @@ local Carme = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Carme",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Carme"
@@ -1174,7 +1174,7 @@ local S2003J5 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2003 J 5",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J5"
@@ -1256,7 +1256,7 @@ local S2018J3 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2018 J 3",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2018J3"
@@ -1338,7 +1338,7 @@ local S2021J4 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2021 J 4",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J4"
@@ -1420,7 +1420,7 @@ local S2021J5 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2021 J 5",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J5"
@@ -1502,7 +1502,7 @@ local S2021J6 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2021 J 6",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J6"
@@ -1562,7 +1562,7 @@ local S2021J6Label = {
 }
 
 local S2016J3 = {
-  Identifier = "S2021J6",
+  Identifier = "S2016J3",
   Parent = transforms.JupiterBarycenter.Identifier,
   Transform = {
     Translation = {
@@ -1584,7 +1584,7 @@ local S2016J3 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2016 J 3",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2016J3"
@@ -1666,7 +1666,7 @@ local S2022J1 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2022 J 1",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J1"
@@ -1748,7 +1748,7 @@ local S2022J2 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2022 J 2",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J2"
@@ -1830,7 +1830,7 @@ local S2017J2 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2017 J 2",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J2"
@@ -1912,7 +1912,7 @@ local S2017J5 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2017 J 5",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J5"
@@ -1994,7 +1994,7 @@ local S2017J8 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2017 J 8",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J8"
@@ -2076,7 +2076,7 @@ local S2011J1 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2011 J 1",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2011J1"
@@ -2158,7 +2158,7 @@ local S2003J9 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2003 J 9",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J9"
@@ -2240,7 +2240,7 @@ local S2003J10 = {
     "moon_carme",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2003 J 10",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J10"

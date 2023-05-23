@@ -26,7 +26,7 @@ local Albiorix = {
     "moon_gallic",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Albiorix",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix"
@@ -108,7 +108,7 @@ local Bebhionn = {
     "moon_gallic",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Bebhionn",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn"
@@ -190,7 +190,7 @@ local Erriapus = {
     "moon_gallic",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Erriapus",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus"
@@ -272,7 +272,7 @@ local Tarvos = {
     "moon_gallic",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Tarvos",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos"

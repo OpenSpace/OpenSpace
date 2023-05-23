@@ -19,7 +19,7 @@ local Triton = {
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_neptune" 
+  Tag = { "moon_solarSystem", "moon_giants", "moon_neptune" },
   GUI = {
     Name = "Triton",
     Path = "/Solar System/Planets/Neptune/Major Moons/Triton"
@@ -91,9 +91,9 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(kernel.nep097)
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Triton)
+asset.export(TritonTrail)
+asset.export(TritonLabel)
 
 
 

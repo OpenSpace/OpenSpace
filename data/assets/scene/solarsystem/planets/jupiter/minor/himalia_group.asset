@@ -26,7 +26,7 @@ local Leda = {
     "moon_himalia",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Leda",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Leda"
@@ -108,7 +108,7 @@ local Himalia = {
     "moon_himalia",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Himalia",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Himalia"
@@ -190,7 +190,7 @@ local Lysithea = {
     "moon_himalia",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Lysithea",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Lysithea"
@@ -272,7 +272,7 @@ local Elara = {
     "moon_himalia",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Elara",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Elara"
@@ -354,7 +354,7 @@ local Dia = {
     "moon_himalia",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Dia",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Dia"
@@ -436,7 +436,7 @@ local S2011J3 = {
     "moon_himalia",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2011 J 3",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2011J3"
@@ -518,7 +518,7 @@ local S2018J2 = {
     "moon_himalia",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "S/2018 J 2",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2018J2"
@@ -600,7 +600,7 @@ local Pandia = {
     "moon_himalia",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Pandia",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Pandia"
@@ -682,7 +682,7 @@ local Ersa = {
     "moon_himalia",
     "moon_minor",
     "moon_minor_jupiter"
-  }
+  },
   GUI = {
     Name = "Ersa",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Ersa"
@@ -789,17 +789,17 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ErsaTrail)
   openspace.removeSceneGraphNode(Ersa)
 
-  openspace.removeSceneGraphNode(Pandia)
-  openspace.removeSceneGraphNode(PandiaTrail)
   openspace.removeSceneGraphNode(PandiaLabel)
+  openspace.removeSceneGraphNode(PandiaTrail)
+  openspace.removeSceneGraphNode(Pandia)
 
-  openspace.removeSceneGraphNode(S2018J2)
-  openspace.removeSceneGraphNode(S2018J2Trail)
   openspace.removeSceneGraphNode(S2018J2Label)
+  openspace.removeSceneGraphNode(S2018J2Trail)
+  openspace.removeSceneGraphNode(S2018J2)
 
-  openspace.removeSceneGraphNode(S2011J3)
-  openspace.removeSceneGraphNode(S2011J3Trail)
   openspace.removeSceneGraphNode(S2011J3Label)
+  openspace.removeSceneGraphNode(S2011J3Trail)
+  openspace.removeSceneGraphNode(S2011J3)
 
   openspace.removeSceneGraphNode(DiaLabel)
   openspace.removeSceneGraphNode(DiaTrail)

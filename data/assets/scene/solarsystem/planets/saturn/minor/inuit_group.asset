@@ -26,7 +26,7 @@ local Kiviuq = {
     "moon_inuit",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Kiviuq",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq"
@@ -108,7 +108,7 @@ local Ijiraq = {
     "moon_inuit",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Ijiraq",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq"
@@ -190,7 +190,7 @@ local Paaliaq = {
     "moon_inuit",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Paaliaq",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq"
@@ -272,7 +272,7 @@ local Siarnaq = {
     "moon_inuit",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Siarnaq",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq"
@@ -354,7 +354,7 @@ local Tarqeq = {
     "moon_inuit",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Tarqeq",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq"
@@ -436,7 +436,7 @@ local S2004S29 = {
     "moon_inuit",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 29",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29"
@@ -518,7 +518,7 @@ local S2004S31 = {
     "moon_inuit",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 31",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31"
@@ -600,7 +600,7 @@ local S2019S01 = {
     "moon_inuit",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2019 S 01",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01"

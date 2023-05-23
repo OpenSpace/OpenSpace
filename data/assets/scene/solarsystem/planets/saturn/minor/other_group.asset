@@ -26,7 +26,7 @@ local Aegaeon = {
     "moon_other",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Aegaeon",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon"
@@ -108,7 +108,7 @@ local Methone = {
     "moon_other",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Methone",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone"
@@ -190,7 +190,7 @@ local Anthe = {
     "moon_other",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Anthe",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe"
@@ -272,7 +272,7 @@ local Pallene = {
     "moon_other",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Pallene",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene"
@@ -354,7 +354,7 @@ local Telesto = {
     "moon_other",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Telesto",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto"
@@ -436,7 +436,7 @@ local Calypso = {
     "moon_other",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Calypso",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso"
@@ -518,7 +518,7 @@ local Helene = {
     "moon_other",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Helene",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene"
@@ -600,7 +600,7 @@ local Polydeuces = {
     "moon_other",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Polydeuces",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces"
@@ -682,7 +682,7 @@ local S2004S24 = {
     "moon_other",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 24",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24"

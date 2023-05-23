@@ -26,7 +26,7 @@ local Phoebe = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Phoebe",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe"
@@ -108,7 +108,7 @@ local Skathi = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Skathi",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skathi"
@@ -190,7 +190,7 @@ local S2007S2 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2007 S 2",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S2"
@@ -272,7 +272,7 @@ local Skoll = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Skoll",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skoll"
@@ -354,7 +354,7 @@ local S2004S13 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 13",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S13"
@@ -436,7 +436,7 @@ local Greip = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Greip",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Greip"
@@ -518,7 +518,7 @@ local Hyrrokkin = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Hyrrokkin",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hyrrokkin"
@@ -600,7 +600,7 @@ local Jarnsaxa = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Jarnsaxa",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Jarnsaxa"
@@ -682,7 +682,7 @@ local Mundilfari = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Mundilfari",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari"
@@ -764,7 +764,7 @@ local S2006S1 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2006 S 1",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S1"
@@ -846,7 +846,7 @@ local S2004S17 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 17",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S17"
@@ -928,7 +928,7 @@ local Bergelmir = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Bergelmir",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bergelmir"
@@ -1010,7 +1010,7 @@ local Narvi = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Narvi",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Narvi"
@@ -1092,7 +1092,7 @@ local Suttungr = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Suttungr",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Suttungr"
@@ -1174,7 +1174,7 @@ local Hati = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Hati",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hati"
@@ -1256,7 +1256,7 @@ local S2004S12 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 12",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S12"
@@ -1338,7 +1338,7 @@ local Farbauti = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Farbauti",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Farbauti"
@@ -1420,7 +1420,7 @@ local Thrymr = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Thrymr",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thrymr"
@@ -1502,7 +1502,7 @@ local Aegir = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Aegir",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Aegir"
@@ -1584,7 +1584,7 @@ local S2007S3 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2007 S 3",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S3"
@@ -1666,7 +1666,7 @@ local Bestla = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Bestla",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bestla"
@@ -1748,7 +1748,7 @@ local S2004S7 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 7",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S7"
@@ -1830,7 +1830,7 @@ local S2006S3 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2006 S 3",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S3"
@@ -1912,7 +1912,7 @@ local Fenrir = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Fenrir",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fenrir"
@@ -1994,7 +1994,7 @@ local Surtur = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Surtur",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Surtur"
@@ -2076,7 +2076,7 @@ local Kari = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Kari",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari"
@@ -2158,7 +2158,7 @@ local Ymir = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Ymir",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Ymir"
@@ -2240,7 +2240,7 @@ local Loge = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Loge",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Loge"
@@ -2322,7 +2322,7 @@ local Fornjot = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Fornjot",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fornjot"
@@ -2404,7 +2404,7 @@ local Skadi = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Skadi",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skadi"
@@ -2486,7 +2486,7 @@ local Gridr = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Gridr",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gridr"
@@ -2568,7 +2568,7 @@ local Angrboda = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Angrboda",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Angrboda"
@@ -2650,7 +2650,7 @@ local Skrymir = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Skrymir",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skrymir"
@@ -2732,7 +2732,7 @@ local Gerd = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Gerd",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gerd"
@@ -2814,7 +2814,7 @@ local S2004S26 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 26",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S26"
@@ -2896,7 +2896,7 @@ local Eggther = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Eggther",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Eggther"
@@ -2978,7 +2978,7 @@ local Beli = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Beli",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Beli"
@@ -3060,7 +3060,7 @@ local Gunnlod = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Gunnlod",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gunnlod"
@@ -3142,7 +3142,7 @@ local Thiazzi = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Thiazzi",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thiazzi"
@@ -3224,7 +3224,7 @@ local S2004S34 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 34",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S34"
@@ -3306,7 +3306,7 @@ local Alvaldi = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Alvaldi",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Alvaldi"
@@ -3388,7 +3388,7 @@ local Geirrod = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "Geirrod",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Geirrod"
@@ -3470,7 +3470,7 @@ local S2004S28 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 28",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S28"
@@ -3552,7 +3552,7 @@ local S2004S21 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 21",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S21"
@@ -3634,7 +3634,7 @@ local S2004S36 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 36",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S36"
@@ -3716,7 +3716,7 @@ local S2004S37 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 37",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S37"
@@ -3798,7 +3798,7 @@ local S2004S39 = {
     "moon_norse",
     "moon_minor",
     "moon_minor_saturn"
-  }
+  },
   GUI = {
     Name = "S/2004 S 39",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S39"
@@ -4193,9 +4193,9 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NarviTrail)
   openspace.removeSceneGraphNode(Narvi)
 
-  openspace.removeSceneGraphNode(Bergelmir)
-  openspace.removeSceneGraphNode(BergelmirTrail)
   openspace.removeSceneGraphNode(BergelmirLabel)
+  openspace.removeSceneGraphNode(BergelmirTrail)
+  openspace.removeSceneGraphNode(Bergelmir)
 
   openspace.removeSceneGraphNode(S2004S17Label)
   openspace.removeSceneGraphNode(S2004S17Trail)
@@ -4241,8 +4241,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PhoebeTrail)
   openspace.removeSceneGraphNode(Phoebe)
 
-  openspace.spice.unloadKernel(kernel.sat452)
-  openspace.spice.unloadKernel(kernel.sat441)
+  openspace.spice.unloadKernel(kernels.sat452)
+  openspace.spice.unloadKernel(kernels.sat441)
 end)
 
 asset.export(Phoebe)
