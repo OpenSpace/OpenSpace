@@ -105,15 +105,16 @@ public:
             JoystickCameraStates::AxisInvert::No,
         JoystickCameraStates::JoystickType joystickType =
             JoystickCameraStates::JoystickType::JoystickLike,
-        bool isSticky = false, double sensitivity = 0.0
-    );
+        bool isSticky = false,
+        JoystickCameraStates::AxisFlip shouldFlip = JoystickCameraStates::AxisFlip::No,
+        double sensitivity = 0.0);
 
     void setJoystickAxisMappingProperty(std::string joystickName,
         int axis, std::string propertyUri,
         float min = 0.f, float max = 1.f,
         JoystickCameraStates::AxisInvert shouldInvert =
-        JoystickCameraStates::AxisInvert::No, bool isRemote = true
-    );
+            JoystickCameraStates::AxisInvert::No,
+        bool isRemote = true);
 
     JoystickCameraStates::AxisInformation joystickAxisMapping(
         const std::string& joystickName, int axis) const;
