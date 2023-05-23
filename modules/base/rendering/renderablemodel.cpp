@@ -67,6 +67,8 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
+    constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
+
     const GLenum ColorAttachmentArray[3] = {
        GL_COLOR_ATTACHMENT0,
        GL_COLOR_ATTACHMENT1,
@@ -871,8 +873,9 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         }
 
         glDrawBuffers(3, ColorAttachmentArray);
-        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(glm::vec4(0.f, 0.f, 0.f, 0.f)));
+        glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
 
         // Use a manuel depth test to make the models aware of the rest of the scene
         _program->setUniform(
