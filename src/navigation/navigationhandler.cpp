@@ -524,6 +524,7 @@ void NavigationHandler::setJoystickAxisMapping(std::string joystickName, int axi
                                             JoystickCameraStates::AxisInvert shouldInvert,
                                           JoystickCameraStates::JoystickType joystickType,
                                                bool isSticky,
+                                               JoystickCameraStates::AxisFlip shouldFlip,
                                                double sensitivity)
 {
     _orbitalNavigator.joystickStates().setAxisMapping(
@@ -533,6 +534,7 @@ void NavigationHandler::setJoystickAxisMapping(std::string joystickName, int axi
         shouldInvert,
         joystickType,
         isSticky,
+        shouldFlip,
         sensitivity
     );
 }

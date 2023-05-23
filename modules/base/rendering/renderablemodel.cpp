@@ -67,18 +67,22 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
+    constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
+
     const GLenum ColorAttachmentArray[3] = {
        GL_COLOR_ATTACHMENT0,
        GL_COLOR_ATTACHMENT1,
        GL_COLOR_ATTACHMENT2,
     };
 
-    constexpr std::array<const char*, 14> UniformNames = {
-        "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
-        "modelViewTransform", "normalTransform", "projectionTransform",
-        "performShading", "ambientIntensity", "diffuseIntensity",
-        "specularIntensity", "performManualDepthTest", "gBufferDepthTexture",
-        "resolution", "opacity"
+    constexpr std::array<const char*, 26> UniformNames = {
+        "modelViewTransform", "projectionTransform", "normalTransform", "meshTransform",
+        "meshNormalTransform", "ambientIntensity", "diffuseIntensity",
+        "specularIntensity", "performShading", "use_forced_color", "has_texture_diffuse",
+        "has_texture_normal", "has_texture_specular", "has_color_specular",
+        "texture_diffuse", "texture_normal", "texture_specular", "color_diffuse",
+        "color_specular", "opacity", "nLightSources", "lightDirectionsViewSpace",
+        "lightIntensities", "performManualDepthTest", "gBufferDepthTexture", "resolution"
     };
 
     constexpr std::array<const char*, 5> UniformOpacityNames = {
@@ -139,6 +143,17 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ModelScaleInfo = {
+        "ModelScale",
+        "Model Scale",
+        "This value specifies the scale for the model. If a value for the ModelScale was "
+        "provided in the asset file, you can see and change it here. If instead a unit "
+        "name was provided in the asset, this is the value that that name represents. "
+        "For example 'Centimeter' becomes 0.01. For more information see "
+        "http://wiki.openspaceproject.com/docs/builders/models/model-scale.html",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
         "RotationVector",
         "Rotation Vector",
@@ -192,8 +207,14 @@ namespace {
             Mile
         };
 
-        // The scale of the model. For example if the model is in centimeters
-        // then ModelScale = Centimeter or ModelScale = 0.01
+        // The scale of the model. For example, if the model is in centimeters
+        // then <code>ModelScale = 'Centimeter'</code> or <code>ModelScale = 0.01</code>.
+        // The value that this needs to be in order for the model to be in the correct
+        // scale relative to the rest of OpenSpace can be tricky to find.
+        // Essentially it depends on the model software that the model was created
+        // with and the original intention of the modeler. For more information see
+        // our wiki page for this parameter:
+        // http://wiki.openspaceproject.com/docs/builders/models/model-scale.html
         std::optional<std::variant<ScaleUnit, double>> modelScale;
 
         // By default the given ModelScale is used to scale the model down,
@@ -255,7 +276,7 @@ namespace {
         std::optional<bool> enableFaceCulling;
 
         // [[codegen::verbatim(ModelTransformInfo.description)]]
-        std::optional<glm::dmat3x3> modelTransform;
+        std::optional<glm::dmat4x4> modelTransform;
 
         // [[codegen::verbatim(RotationVecInfo.description)]]
         std::optional<glm::dvec3> rotationVector;
@@ -297,10 +318,11 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _enableFaceCulling(EnableFaceCullingInfo, true)
     , _modelTransform(
         ModelTransformInfo,
-        glm::dmat3(1.0),
-        glm::dmat3(-1.0),
-        glm::dmat3(1.0)
+        glm::dmat4(1.0),
+        glm::dmat4(-1.0),
+        glm::dmat4(1.0)
     )
+    , _modelScale(ModelScaleInfo, 1.0, std::numeric_limits<double>::epsilon(), 4e+27)
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _enableDepthTest(EnableDepthTestInfo, true)
     , _blendingFuncOption(
@@ -463,6 +485,16 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_enableDepthTest);
     addProperty(_modelTransform);
     addProperty(_rotationVec);
+
+    addProperty(_modelScale);
+    _modelScale.setExponent(20.f);
+
+    _modelScale.onChange([this]() {
+        setBoundingSphere(_geometry->boundingRadius()* _modelScale);
+
+        // Set Interaction sphere size to be 10% of the bounding sphere
+        setInteractionSphere(boundingSphere() * 0.1);
+    });
 
     _rotationVec.onChange([this]() {
         _modelTransform = glm::mat4_cast(glm::quat(glm::radians(_rotationVec.value())));
@@ -737,19 +769,28 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         ++nLightSources;
     }
 
-    _program->setUniform(
-        _uniformCache.nLightSources,
-        nLightSources
-    );
-    _program->setUniform(
-        _uniformCache.lightIntensities,
-        _lightIntensitiesBuffer
-    );
+    if (_uniformCache.performShading != -1) {
+        _program->setUniform(_uniformCache.performShading, _performShading);
+    }
 
-    _program->setUniform(
-        _uniformCache.lightDirectionsViewSpace,
-        _lightDirectionsViewSpaceBuffer
-    );
+    if (_performShading) {
+        _program->setUniform(
+            _uniformCache.nLightSources,
+            nLightSources
+        );
+        _program->setUniform(
+            _uniformCache.lightIntensities,
+            _lightIntensitiesBuffer
+        );
+        _program->setUniform(
+            _uniformCache.lightDirectionsViewSpace,
+            _lightDirectionsViewSpaceBuffer
+        );
+
+        _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
+        _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
+        _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
+    }
 
     _program->setUniform(
         _uniformCache.modelViewTransform,
@@ -767,10 +808,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _uniformCache.projectionTransform,
         data.camera.projectionMatrix()
     );
-    _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
-    _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
-    _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
-    _program->setUniform(_uniformCache.performShading, _performShading);
 
     if (!_enableFaceCulling) {
         glDisable(GL_CULL_FACE);
@@ -836,8 +873,9 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         }
 
         glDrawBuffers(3, ColorAttachmentArray);
-        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(glm::vec4(0.f, 0.f, 0.f, 0.f)));
+        glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
 
         // Use a manuel depth test to make the models aware of the rest of the scene
         _program->setUniform(
@@ -944,6 +982,15 @@ void RenderableModel::update(const UpdateData& data) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    }
+
+    if (_quadProgram->isDirty()) {
+        _quadProgram->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(
+            *_quadProgram,
+            _uniformOpacityCache,
+            UniformOpacityNames
+        );
     }
 
     if (!hasOverrideRenderBin()) {
