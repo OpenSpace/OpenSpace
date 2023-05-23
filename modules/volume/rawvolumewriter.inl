@@ -91,7 +91,9 @@ void RawVolumeWriter<VoxelType>::write(
 }
 
 template <typename VoxelType>
-void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
+template <typename T>
+std::enable_if_t<!std::is_same_v<T, gaiavolume::GaiaVolumeDataLayout>>
+RawVolumeWriter<VoxelType>::write(const RawVolume<T>& volume) {
     setDimensions(volume.dimensions());
 
     const char* const buffer = reinterpret_cast<const char*>(volume.data());
@@ -107,4 +109,30 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     file.close();
 }
 
+template <typename VoxelType>
+template <typename T>
+std::enable_if_t<std::is_same_v<T, gaiavolume::GaiaVolumeDataLayout>>
+RawVolumeWriter<VoxelType>::write(const RawVolume<gaiavolume::GaiaVolumeDataLayout>& volume) {
+    // Implementation for GaiaVolumeDataLayout specialization
+    setDimensions(volume.dimensions());
+
+    std::ofstream file(_path, std::ios::binary);
+
+    if (!file.good()) {
+        throw ghoul::RuntimeError(fmt::format("Could not create file {}", _path));
+    }
+    //Loop all voxels and write each vector of data seperately (can't be generalized like the other write function
+    //because data are stored in variable vector containers)
+    gaiavolume::GaiaVolumeDataLayout const* data = volume.data();
+    for (size_t i{ 0 }; i < volume.nCells(); i++) {
+        file.write(reinterpret_cast<const char*>(&data[i].nStars), sizeof(data[i].nStars));
+        if (data[i].nStars > 0) {
+            std::vector<gaiavolume::VoxelDataLayout> const& voxelData = data[i].data;
+            const char* const buffer = reinterpret_cast<const char*>(voxelData.data());
+            size_t length = voxelData.size() * sizeof(gaiavolume::VoxelDataLayout);
+            file.write(buffer, length);
+        }
+    }
+    file.close();
+}
 } // namespace openspace::volume

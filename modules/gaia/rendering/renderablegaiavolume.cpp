@@ -255,31 +255,27 @@ void RenderableGaiaVolume::initializeGL() {
         );
         //Create reader and read raw volume
         RawVolumeReader<gaiavolume::GaiaVolumeDataLayout> reader(path, t.metadata.dimensions);
-        t.rawVolume = reader.read(_invertDataAtZ);
+        t.rawVolume = reader.read(_invertDataAtZ, t.metadata.fileheaders.size());
 
-        // float min = t.metadata.minValue;
-        // float max = t.metadata.maxValue;
-        // float diff = t.metadata.maxValue - t.metadata.minValue;
         gaiavolume::GaiaVolumeDataLayout* data = t.rawVolume->data();
-        //for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
-        //    if (data[i].nStars == 0)
-        //        continue;
 
-        //    data[i].value = glm::clamp((data[i].value - min) / diff, 0.f, 1.f);
-        //}
-
+        std::map<std::string, int> const &column = t.metadata.fileheaders;
         //Create a vector contining the data for the transfer function
         std::vector<float> newdata;
         for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-            newdata.push_back(data[i].firstValue);
-            newdata.push_back(data[i].secondValue);
+            if (data[i].nStars > 0) {
+                int feh = column.at("fe_h");
+                int zradius = column.at("pz");
+                newdata.push_back(data[i].data[feh].avgData);
+                newdata.push_back(data[i].data[zradius].avgData);
+            }
+            //Voxel does not contain any data, for now use 0,0 as coordinates. TODO: See if there is another
+            //That does not involve putting 'fake' data, (0,0) has a meaning in the transfer function.. 
+            else {
+                newdata.push_back(0.0f);
+                newdata.push_back(0.0f);
+            }
         }
-
-        // t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
-        // for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
-        //     t.histogram->add(data[i].firstValue);
-        // }
-        // TODO: handle normalization properly for different timesteps + transfer function
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
             t.metadata.dimensions,

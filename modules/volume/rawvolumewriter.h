@@ -28,6 +28,7 @@
 #include <filesystem>
 #include <functional>
 #include <string>
+#include <modules/gaia/tasks/generateGaiaVolumeTask.h>
 
 namespace openspace::volume {
 
@@ -43,7 +44,12 @@ public:
     void setDimensions(glm::uvec3 dimensions);
     void write(const std::function<VoxelType(const glm::uvec3&)>& fn,
                const std::function<void(float)>& onProgress = [](float) {});
-    void write(const RawVolume<VoxelType>& volume);
+    //Generic write function
+    template<typename T = VoxelType>
+    std::enable_if_t<!std::is_same_v<T, gaiavolume::GaiaVolumeDataLayout>> write(const RawVolume<T>& volume);
+    // Specialized write function for GaiaVolumeDataLayout
+    template <typename T = VoxelType>
+    std::enable_if_t<std::is_same_v<T, gaiavolume::GaiaVolumeDataLayout>> write(const RawVolume<gaiavolume::GaiaVolumeDataLayout>& volume);
 
     size_t coordsToIndex(const glm::uvec3& coords) const;
     glm::ivec3 indexToCoords(size_t linear) const;

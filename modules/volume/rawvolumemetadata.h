@@ -27,6 +27,7 @@
 
 #include <modules/volume/volumegridtype.h>
 #include <ghoul/glm.h>
+#include <map>
 
 namespace openspace::documentation { struct Documentation; }
 namespace ghoul { class Dictionary; }
@@ -50,6 +51,9 @@ struct RawVolumeMetadata {
     float maxValue = 0.f;
     bool hasValueUnit = false;
     std::string valueUnit;
+
+    bool hasfileheaders = false;
+    std::map<std::string, int> fileheaders;
 
     bool hasDomainBounds = false;
     glm::vec3 lowerDomainBound = glm::vec3(0.f);

@@ -7,18 +7,28 @@
 #include <filesystem>
 #include <ghoul/glm.h>
 #include <map>
+#include <vector>
 
-namespace openspace {
-namespace gaiavolume {
+namespace openspace::gaiavolume {
+
+//Limits are specified as [minimum, maximum], values are initialized in reverse. So that 
+//we can use std::min/std::max functions without having to worry about uninitialized values. 
+struct Limits {
+    std::pair<double, double> avg{ std::numeric_limits<double>::max(), std::numeric_limits<double>::lowest() };
+    std::pair<float, float> max{ std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest() };
+    std::pair<float, float> min{ std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest() };
+};
+
+struct VoxelDataLayout {
+    double avgData = 0.0; //Average is double if we have very large values summed before computing the average.
+    float minData{ std::numeric_limits<float>::max() };
+    float maxData{ std::numeric_limits<float>::lowest() };
+};
 
 struct GaiaVolumeDataLayout {
-    //Each voxel should contain all the stars that reside in that perticular voxel
-    //It would store all the data for every star 
-    //then we can use a similiar approach as in the gaia renderable to access the different 
-    //headers when needed, this solution should be able to support choosing any 
-    //column as the x and y axis 
-    double firstValue = 0.0;
-    double secondValue = 0.0;
+    //Each voxel contain data about the stars that reside in that perticular voxel
+    //It stores the combined voxeldata for all the stars and not 1 perticular star's values.
+    std::vector<VoxelDataLayout> data{};
     int nStars = 0;
 };
     
@@ -41,12 +51,9 @@ private:
     glm::vec3 _lowerDomainBound = glm::vec3(0.f);
     glm::vec3 _upperDomainBound = glm::vec3(0.f);
 
-    std::map<std::string, size_t> _fileHeaders;
-
-
+    std::map<std::string, int> _fileHeaders;
 };
 
-} // namespace gaiavolume
-} // namespace openspace
+} // namespace openspace::gaiavolume
 #endif // !__OPENSPACE_MODULE_SPACE___GENERATEGAIAVOLUMETASK___H___
 

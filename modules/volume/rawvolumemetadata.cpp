@@ -55,6 +55,9 @@ namespace {
 
         // Specifies the maximum value stored in the volume
         std::optional<float> maxValue;
+
+        //Column names used to access correct parameter
+        std::optional<std::map<std::string, int>> headers;
    };
 #include "rawvolumemetadata_codegen.cpp"
 } // namespace
@@ -96,6 +99,10 @@ RawVolumeMetadata RawVolumeMetadata::createFromDictionary(
     if (metadata.hasTime) {
         metadata.time = Time::convertTime(*p.time);
     }
+    metadata.hasfileheaders = p.headers.has_value();
+    if (metadata.hasfileheaders) {
+        metadata.fileheaders = p.headers.value();
+    }
 
     return metadata;
 }
@@ -129,6 +136,16 @@ ghoul::Dictionary RawVolumeMetadata::dictionary() {
         }
         dict.setValue("Time", std::string(timeString));
     }
+
+    //Create a dictionary containing the column name and the correspondning access index.
+    if (hasfileheaders) {
+        ghoul::Dictionary headerDictionary;
+        for (auto const& header : fileheaders) {
+            headerDictionary.setValue(header.first, header.second);
+        }
+        dict.setValue("Headers", headerDictionary);
+    }
+
     return dict;
 }
 

@@ -69,7 +69,7 @@ std::string GenerateGaiaVolumeTask::description()
 void GenerateGaiaVolumeTask::perform(const Task::ProgressCallback& onProgress)
 {
     int nStarsRead = 0;
-    //Open file , read and store content of file in data structure
+    //Open file , read and store content of file in local data structure
     std::vector<std::vector<std::string>> dataTable = ghoul::loadCSVFile(_inputFilePath.string(), true);
     std::vector<std::vector<float>> data;
 
@@ -86,13 +86,6 @@ void GenerateGaiaVolumeTask::perform(const Task::ProgressCallback& onProgress)
     for (const auto& s : headers) {
         _fileHeaders[s] = idx++;
     }
-
-    //Starting with just one float value in the volume
-    double minFirstValue{ std::numeric_limits<double>::max() };
-    double maxFirstValue{ std::numeric_limits<double>::min() };
-
-    double minSecondValue{ std::numeric_limits<double>::max() };
-    double maxSecondValue{ std::numeric_limits<double>::min() };
 
     //find min/max x,y,z of position - domain bounds of the volume
     for (auto it{ dataTable.begin() + 1 }; it != dataTable.end(); it++)
@@ -120,12 +113,14 @@ void GenerateGaiaVolumeTask::perform(const Task::ProgressCallback& onProgress)
             std::max(pos.y, _upperDomainBound.y),
             std::max(pos.z, _upperDomainBound.z) };
 
-        float value = starValues[_fileHeaders["fe_h"]];
-
         data.push_back(std::move(starValues));
     }
     onProgress(0.5f);
 
+    //Parameter limits are used to normalize the data between 0 and 1 to be able to use them as coordinates in a texture. 
+    //The idea is that doing the normalization here saves time during rendering.
+    //We store the minimum and maximum for each of the render mode we have respectively, i.e., average, min/max value.
+    std::vector<Limits> parameterLimits{ headers.size() };
     volume::RawVolume<GaiaVolumeDataLayout> rawVolume(_dimensions);
 
     //For every star find the nearest voxel i,j,k that should contain that stars values
@@ -144,72 +139,71 @@ void GenerateGaiaVolumeTask::perform(const Task::ProgressCallback& onProgress)
         glm::uvec3 voxelCell{ i,j,k };
 
         GaiaVolumeDataLayout voxel = rawVolume.get(voxelCell);
-        double value{ star[_fileHeaders["fe_h"]] };
-        double radius{ std::abs(star[_fileHeaders["pz"]])};
+        voxel.data.assign(star.size(), VoxelDataLayout{});
+        //Add all star data to the voxel data
+        int counter{ 0 };
+        for (VoxelDataLayout& parameter : voxel.data) {
+            float value = star[counter];
+            //TODO use the file headers to find these position if we decide to keep this
+            if (counter < 3) //Store the x,y,z position as absolute value, i.e., distance to the origin
+                value = std::abs(value);
 
-        voxel.firstValue += value;
-        voxel.secondValue += radius;
+            parameter.avgData += value;
+            parameter.minData = std::min(parameter.minData, value); //Store the smallest value of all stars
+            parameter.maxData = std::max(parameter.maxData, value); //Store the largest value of all stars
+            ++counter;
+        }     
         ++voxel.nStars;
 
         rawVolume.set(voxelCell, voxel);
     }
     onProgress(0.8f);
 
-    //Take the average of every voxel
+    //Compute the average of each star, and find the minimum and maximum limits for each column
     rawVolume.forEachVoxel([&](glm::uvec3 const& cell, GaiaVolumeDataLayout const& cellData) {
         if (cellData.nStars == 0)
             return; 
-        GaiaVolumeDataLayout avgData;
-        avgData.firstValue = cellData.firstValue / cellData.nStars;
-        avgData.secondValue = cellData.secondValue / cellData.nStars;
-        avgData.nStars = cellData.nStars;
+        GaiaVolumeDataLayout avgData{ cellData };
+
+        int counter{ 0 };
+        for (VoxelDataLayout& parameter : avgData.data) {
+            parameter.avgData = cellData.data[counter].avgData / static_cast<double>(cellData.nStars);
+
+            //Update the minimum and maximum limits for each parameter. 
+            Limits&  limits{ parameterLimits[counter] };
+            limits.avg.first = std::min(limits.avg.first, parameter.avgData);
+            limits.avg.second = std::max(limits.avg.second, parameter.avgData);
+            
+            limits.min.first = std::min(limits.min.first, cellData.data[counter].minData);
+            limits.min.second = std::max(limits.min.second, cellData.data[counter].minData);
+
+            limits.max.first = std::min(limits.max.first, cellData.data[counter].maxData);
+            limits.max.second = std::max(limits.max.second, cellData.data[counter].maxData);
+            ++counter;
+        }
+        
         rawVolume.set(cell, avgData);
 
-        minFirstValue = std::min(minFirstValue, avgData.firstValue);
-        maxFirstValue = std::max(maxFirstValue, avgData.firstValue);
-
-        minSecondValue = std::min(minSecondValue, avgData.secondValue);
-        maxSecondValue = std::max(maxSecondValue, avgData.secondValue);
-
         nStarsRead += avgData.nStars;
-        //LERROR("Stars: " + std::to_string(avgData.nStars));
     });
 
-    //Bring the data values in the range 0.2 - 1.0
+    //Normalize the data to [0,1]
     rawVolume.forEachVoxel([&](glm::uvec3 const& cell, GaiaVolumeDataLayout const& cellData) {
         if (cellData.nStars == 0)
             return;
 
         GaiaVolumeDataLayout voxel = rawVolume.get(cell);
-        float newMin = 0.2f;
-        float newMax = 1.0f;
-        float newRange = newMax - newMin;
-        float oldRange = maxFirstValue - minFirstValue;
-        voxel.firstValue = (((voxel.firstValue - minFirstValue) * newRange) / oldRange + newMin);
 
-        oldRange = maxSecondValue - minSecondValue;
-        voxel.secondValue = (((voxel.secondValue - minFirstValue) * newRange) / oldRange + newMin);
-
-
-        rawVolume.set(cell, voxel);
-
-
-        //rawVolume.set(cell, avgData);
-
-        //LERROR("Stars: " + std::to_string(avgData.nStars));
-        });
-
-    /*int size = 10;
-    for(int i = 0; i < size; ++i){
-        for (int j = 0; j < size; ++j) {
-            for (int k = 0; k < size; ++k) {
-                GaiaVolumeDataLayout voxel;
-                voxel.firstValue = 0.75;
-                voxel.nStars = 1;
-                rawVolume.set(glm::uvec3(i, j, k), voxel);
-            }
+        int index{ 0 };
+        //(value - min) / (max - min) for each parameter column
+        for (VoxelDataLayout& parameter : voxel.data) {
+            parameter.avgData = ((parameter.avgData - parameterLimits[index].avg.first) / (parameterLimits[index].avg.second - parameterLimits[index].avg.first));
+            parameter.minData = ((parameter.minData - parameterLimits[index].min.first) / (parameterLimits[index].min.second - parameterLimits[index].min.first));
+            parameter.avgData = ((parameter.maxData - parameterLimits[index].max.first) / (parameterLimits[index].max.second - parameterLimits[index].max.first));
+            ++index;
         }
-    }*/
+        rawVolume.set(cell, voxel);
+    });
 
     //Write data to file
     std::filesystem::path const directory = _rawVolumeOutputPath.parent_path();
@@ -234,9 +228,9 @@ void GenerateGaiaVolumeTask::perform(const Task::ProgressCallback& onProgress)
     metadata.lowerDomainBound = _lowerDomainBound;
     metadata.upperDomainBound = _upperDomainBound;
     metadata.hasValueRange = true;
-    metadata.minValue = minFirstValue;
-    metadata.maxValue = maxFirstValue;
-
+    metadata.hasfileheaders = true;
+    metadata.fileheaders = std::move(_fileHeaders);
+    
     ghoul::Dictionary outputDictionary = metadata.dictionary();
     std::string metadataString = ghoul::formatLua(outputDictionary);
 
@@ -246,8 +240,6 @@ void GenerateGaiaVolumeTask::perform(const Task::ProgressCallback& onProgress)
     onProgress(1.0f);
 
     LERROR("Nstars read: " + std::to_string(nStarsRead));
-
-
 }
 
 }// namespace 

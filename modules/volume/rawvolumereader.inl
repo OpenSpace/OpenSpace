@@ -78,7 +78,9 @@ glm::uvec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
 }
 
 template <typename VoxelType>
-std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool invertZ) {
+template <typename T>
+std::enable_if_t<!std::is_same_v<T, gaiavolume::GaiaVolumeDataLayout>,
+std::unique_ptr<RawVolume<VoxelType>>> RawVolumeReader<VoxelType>::read(bool invertZ) {
     glm::uvec3 dims = dimensions();
     auto volume = std::make_unique<RawVolume<VoxelType>>(dims);
 
@@ -121,5 +123,52 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool inve
         return volume;
     }
 }
+template <typename VoxelType>
+template <typename T>
+std::enable_if_t<std::is_same_v<T, gaiavolume::GaiaVolumeDataLayout>,
+std::unique_ptr<RawVolume<gaiavolume::GaiaVolumeDataLayout>>> RawVolumeReader<VoxelType>::read(bool invertZ, size_t nHeaders) {
+    glm::uvec3 dims = dimensions();
+    auto volume = std::make_unique<RawVolume<gaiavolume::GaiaVolumeDataLayout>>(dims);
+
+    std::ifstream file(_path, std::ios::binary);
+
+    if (file.fail()) {
+        throw ghoul::FileNotFoundError("Volume file not found");
+    }
+    
+    //Loop each voxel and read its data. Data is stored as: nStars -> datacolumns
+    for (size_t i{ 0 }; i < volume->nCells(); i++) {
+        gaiavolume::GaiaVolumeDataLayout voxel{};
+        file.read(reinterpret_cast<char*>(&voxel.nStars), sizeof(voxel.nStars));
+        //Only read voxel data if there exists stars for that voxel.
+        if (voxel.nStars > 0) {
+            voxel.data.assign(nHeaders, gaiavolume::VoxelDataLayout{});
+            size_t length = voxel.data.size() * sizeof(gaiavolume::VoxelDataLayout);
+            file.read(reinterpret_cast<char*>(voxel.data.data()), length);
+        }
+        volume->set(i, voxel);
+    }
+
+    if (file.fail()) {
+        throw ghoul::RuntimeError("Error reading volume file");
+    }
+
+    if (invertZ) {
+        std::unique_ptr<RawVolume<VoxelType>> newVolume =
+            std::make_unique<RawVolume<VoxelType>>(dims);
+
+        for (size_t i = 0; i < volume->nCells(); ++i) {
+            const glm::uvec3& coords = volume->indexToCoords(i);
+            glm::uvec3 newcoords = glm::uvec3(coords.x, coords.y, dims.z - coords.z - 1);
+
+            newVolume->set(newcoords, volume->get(coords));
+        }
+        return newVolume;
+    }
+    else {
+        return volume;
+    }
+}
+
 
 } // namespace openspace::volume
