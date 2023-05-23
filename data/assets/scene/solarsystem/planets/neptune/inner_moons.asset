@@ -1,4 +1,4 @@
-local transforms = asset.require("./transforms")
+]local transforms = asset.require("./transforms")
 local kernel = asset.require("./kernels")
 
 
@@ -648,21 +648,27 @@ end)
 asset.export(Naiad)
 asset.export(NaiadTrail)
 asset.export(NaiadLabel)
+
 asset.export(Thalassa)
 asset.export(ThalassaTrail)
 asset.export(ThalassaLabel)
+
 asset.export(Despina)
 asset.export(DespinaTrail)
 asset.export(DespinaLabel)
+
 asset.export(Galatea)
 asset.export(GalateaTrail)
 asset.export(GalateaLabel)
+
 asset.export(Larissa)
 asset.export(LarissaTrail)
 asset.export(LarissaLabel)
+
 asset.export(Hippocamp)
 asset.export(HippocampTrail)
 asset.export(HippocampLabel)
+
 asset.export(Proteus)
 asset.export(ProteusTrail)
 asset.export(ProteusLabel)

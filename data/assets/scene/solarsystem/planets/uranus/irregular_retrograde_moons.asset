@@ -10,7 +10,7 @@ local Francisco = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "FRANCISCO",
-      Observer = "URANUS BARYCENTER"
+      Observer = "URANUS BARYCENTER"]
     }
   },
   Renderable = {
@@ -730,31 +730,38 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(FranciscoTrail)
   openspace.removeSceneGraphNode(Francisco)
 
-  
+
   openspace.spice.unloadKernel(kernel.ura116)
 end)
 
 asset.export(Francisco)
 asset.export(FranciscoTrail)
 asset.export(FranciscoLabel)
+
 asset.export(Caliban)
 asset.export(CalibanTrail)
 asset.export(CalibanLabel)
+
 asset.export(Stephano)
 asset.export(StephanoTrail)
 asset.export(StephanoLabel)
+
 asset.export(Trinculo)
 asset.export(TrinculoTrail)
 asset.export(TrinculoLabel)
+
 asset.export(Sycorax)
 asset.export(SycoraxTrail)
 asset.export(SycoraxLabel)
+
 asset.export(Prospero)
 asset.export(ProsperoTrail)
 asset.export(ProsperoLabel)
+
 asset.export(Setebos)
 asset.export(SetebosTrail)
 asset.export(SetebosLabel)
+
 asset.export(Ferdinand)
 asset.export(FerdinandTrail)
 asset.export(FerdinandLabel)
