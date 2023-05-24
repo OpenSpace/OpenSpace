@@ -10,6 +10,7 @@ local modelFolder = asset.syncedResource({
   Version = 1
 })
 
+-- The scientist model is located at Jet Propulsion Laboratory in Pasadena by default
 local Location = { 34.201639, -118.171319, 0.78 }
 
 local ScaleModel = {
@@ -59,7 +60,7 @@ local ResetPositionAction = {
   Name = "Reset Scientist position",
   Command = [[
     openspace.globebrowsing.setNodePosition('Scale_Scientist', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",
-  Documentation = "Resets the Scientist back to its actual location",
+  Documentation = "Resets the Scientist back to its start location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }

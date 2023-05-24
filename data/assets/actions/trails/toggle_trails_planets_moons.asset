@@ -1,5 +1,5 @@
-local fade_up_trails = {
-  Identifier = "os.fade_up_trails_planets_moon",
+local FadeUpTrails = {
+  Identifier = "os.planetsmoon.FadeUpTrails",
   Name = "Show planet and moon trails",
   Command = [[
     openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Fade", 1, 2);
@@ -10,8 +10,8 @@ local fade_up_trails = {
   IsLocal = true
 }
 
-local fade_down_trails = {
-  Identifier = "os.fade_down_trails_planets_moon",
+local FadeDownTrails = {
+  Identifier = "os.planetsmoon.FadeDownTrails",
   Name = "Hide planet and moon trails",
   Command = [[
     openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Fade", 0, 2);
@@ -22,8 +22,8 @@ local fade_down_trails = {
   IsLocal = true
 }
 
-local toggle_trails = {
-  Identifier = "os.toggle_trails_planets_moon",
+local ToggleTrails = {
+  Identifier = "os.planetsmoon.ToggleTrails",
   Name = "Toggle planet and moon trails",
   Command = [[
     local capList = openspace.getProperty("{planetTrail_solarSystem}.Renderable.Fade");
@@ -52,17 +52,17 @@ local toggle_trails = {
 }
 
 asset.onInitialize(function()
-  openspace.action.registerAction(fade_up_trails)
-  openspace.action.registerAction(fade_down_trails)
-  openspace.action.registerAction(toggle_trails)
+  openspace.action.registerAction(FadeUpTrails)
+  openspace.action.registerAction(FadeDownTrails)
+  openspace.action.registerAction(ToggleTrails)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(toggle_trails)
-  openspace.action.removeAction(fade_down_trails)
-  openspace.action.removeAction(fade_up_trails)
+  openspace.action.removeAction(ToggleTrails)
+  openspace.action.removeAction(FadeDownTrails)
+  openspace.action.removeAction(FadeUpTrails)
 end)
 
-asset.export("fade_up_trails", fade_up_trails.Identifier)
-asset.export("fade_down_trails", fade_down_trails.Identifier)
-asset.export("toggle_trails", toggle_trails)
+asset.export("FadeUpTrails", FadeUpTrails.Identifier)
+asset.export("FadeDownTrails", FadeDownTrails.Identifier)
+asset.export("ToggleTrails", ToggleTrails)

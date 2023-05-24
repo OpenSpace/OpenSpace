@@ -17,7 +17,7 @@ local Location = { 38.624880, -90.184939 }
 local ScaleModel = {
   Identifier = "Scale_GatewayArch",
   Parent = earthAsset.Earth.Identifier,
-  -- Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  -- Note: Lat/Lon/Scale values come from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
@@ -81,6 +81,7 @@ end)
 asset.onDeinitialize(function()
   openspace.action.removeAction(ResetPositionAction)
   openspace.action.removeAction(UpdatePositionAction)
+
   openspace.removeSceneGraphNode(ScaleModel)
 end)
 

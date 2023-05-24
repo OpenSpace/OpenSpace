@@ -15,7 +15,7 @@ local Location = { 3.152878, 101.703533 }
 local ScaleModel = {
   Identifier = "Scale_KualaLumpurTower",
   Parent = earthAsset.Earth.Identifier,
-  -- Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  -- Note: Lat/Lon/Scale values come from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",

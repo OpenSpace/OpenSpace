@@ -17,7 +17,7 @@ local Location = { 37.816116, -122.47789, 120.0 }
 local ScaleModel = {
   Identifier = "Scale_GoldenGateBridge",
   Parent = earthAsset.Earth.Identifier,
-  -- Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  -- Note: Lat/Lon/Scale values come from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",

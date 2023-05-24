@@ -173,7 +173,6 @@ asset.export(AnimationBounce)
 
 
 
--- Asset
 asset.meta = {
   Name = "Animation Example asset",
   Version = "1.0",

@@ -64,30 +64,30 @@ local function illuminationAction(node, node_lower, global)
   return action
 end
 
-local current_focus_global = illuminationAction("Current Focus", "current_focus", true)
-local current_focus_standard = illuminationAction("Current Focus", "current_focus", false)
+local CurrentFocusGlobal = illuminationAction("Current Focus", "current_focus", true)
+local CurrentFocusStandard = illuminationAction("Current Focus", "current_focus", false)
 
-local earth_global = illuminationAction("Earth", "earth", true)
-local earth_standard = illuminationAction("Earth", "earth", false)
+local EarthGlobal = illuminationAction("Earth", "earth", true)
+local EarthStandard = illuminationAction("Earth", "earth", false)
 
-local mars_global = illuminationAction("Mars", "mars", true)
-local mars_standard = illuminationAction("Mars", "mars", false)
+local MarsGlobal = illuminationAction("Mars", "mars", true)
+local MarsStandard = illuminationAction("Mars", "mars", false)
 
-local venus_global = illuminationAction("Venus", "venus", true)
-local venus_standard = illuminationAction("Venus", "venus", false)
+local VenusGlobal = illuminationAction("Venus", "venus", true)
+local VenusStandard = illuminationAction("Venus", "venus", false)
 
-local titan_global = illuminationAction("Titan", "titan", true)
-local titan_standard = illuminationAction("Titan", "titan", false)
+local TitanGlobal = illuminationAction("Titan", "titan", true)
+local TitanStandard = illuminationAction("Titan", "titan", false)
 
-local saturn_global = illuminationAction("Saturn", "saturn", true)
-local saturn_standard = illuminationAction("Saturn", "saturn", false)
+local SaturnGlobal = illuminationAction("Saturn", "saturn", true)
+local SaturnStandard = illuminationAction("Saturn", "saturn", false)
 
 
 -- handling Earth special
 -- if we have #2258 we can do all globes with night layers instead of just earth
 -- if we have #1826 we can do the default night layer instead of the first
-local all_globes_global_illumination = {
-  Identifier = "os.all_globes_global_illumination",
+local AllGlobesGlobalIllumination = {
+  Identifier = "os.AllGlobesGlobalIllumination",
   Name = "All globes global illumination",
   Command = [[
     openspace.setPropertyValue("{planet_solarSystem}.Renderable.PerformShading", false)
@@ -101,8 +101,8 @@ local all_globes_global_illumination = {
   IsLocal = true
 }
 
-local all_globes_standard_illumination = {
-  Identifier = "os.all_globes_standard_illumination",
+local AllGlobesStandardIllumination = {
+  Identifier = "os.AllGlobesStandardIllumination",
   Name = "All globes standard illumination",
   Command = [[
     openspace.setPropertyValue("{planet_solarSystem}.Renderable.PerformShading", true)
@@ -119,50 +119,50 @@ local all_globes_standard_illumination = {
 
 
 asset.onInitialize(function()
-  openspace.action.registerAction(current_focus_global)
-  openspace.action.registerAction(current_focus_standard)
-  openspace.action.registerAction(earth_global)
-  openspace.action.registerAction(earth_standard)
-  openspace.action.registerAction(mars_global)
-  openspace.action.registerAction(mars_standard)
-  openspace.action.registerAction(venus_global)
-  openspace.action.registerAction(venus_standard)
-  openspace.action.registerAction(titan_global)
-  openspace.action.registerAction(titan_standard)
-  openspace.action.registerAction(saturn_global)
-  openspace.action.registerAction(saturn_standard)
-  openspace.action.registerAction(all_globes_global_illumination)
-  openspace.action.registerAction(all_globes_standard_illumination)
+  openspace.action.registerAction(CurrentFocusGlobal)
+  openspace.action.registerAction(CurrentFocusStandard)
+  openspace.action.registerAction(EarthGlobal)
+  openspace.action.registerAction(EarthStandard)
+  openspace.action.registerAction(MarsGlobal)
+  openspace.action.registerAction(MarsStandard)
+  openspace.action.registerAction(VenusGlobal)
+  openspace.action.registerAction(VenusStandard)
+  openspace.action.registerAction(TitanGlobal)
+  openspace.action.registerAction(TitanStandard)
+  openspace.action.registerAction(SaturnGlobal)
+  openspace.action.registerAction(SaturnStandard)
+  openspace.action.registerAction(AllGlobesGlobalIllumination)
+  openspace.action.registerAction(AllGlobesStandardIllumination)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(all_globes_global_illumination)
-  openspace.action.removeAction(all_globes_standard_illumination)
-  openspace.action.removeAction(saturn_standard)
-  openspace.action.removeAction(saturn_global)
-  openspace.action.removeAction(titan_standard)
-  openspace.action.removeAction(titan_global)
-  openspace.action.removeAction(venus_standard)
-  openspace.action.removeAction(venus_global)
-  openspace.action.removeAction(mars_standard)
-  openspace.action.removeAction(mars_global)
-  openspace.action.removeAction(earth_standard)
-  openspace.action.removeAction(earth_global)
-  openspace.action.removeAction(current_focus_standard)
-  openspace.action.removeAction(current_focus_global)
+  openspace.action.removeAction(AllGlobesStandardIllumination)
+  openspace.action.removeAction(AllGlobesGlobalIllumination)
+  openspace.action.removeAction(SaturnStandard)
+  openspace.action.removeAction(SaturnGlobal)
+  openspace.action.removeAction(TitanStandard)
+  openspace.action.removeAction(TitanGlobal)
+  openspace.action.removeAction(VenusStandard)
+  openspace.action.removeAction(VenusGlobal)
+  openspace.action.removeAction(MarsStandard)
+  openspace.action.removeAction(MarsGlobal)
+  openspace.action.removeAction(EarthStandard)
+  openspace.action.removeAction(EarthGlobal)
+  openspace.action.removeAction(CurrentFocusStandard)
+  openspace.action.removeAction(CurrentFocusGlobal)
 end)
 
-asset.export("current_focus_global", current_focus_global.Identifier)
-asset.export("current_focus_standard", current_focus_standard.Identifier)
-asset.export("earth_global", earth_global.Identifier)
-asset.export("earth_standard", earth_standard.Identifier)
-asset.export("mars_global", mars_global.Identifier)
-asset.export("mars_standard", mars_standard.Identifier)
-asset.export("venus_global", venus_global.Identifier)
-asset.export("venus_standard", venus_standard.Identifier)
-asset.export("titan_global", titan_global.Identifier)
-asset.export("titan_standard", titan_standard.Identifier)
-asset.export("saturn_global", saturn_global.Identifier)
-asset.export("titan_standard", saturn_standard.Identifier)
-asset.export("all_globes_global_illumination", all_globes_global_illumination.Identifier)
-asset.export("all_globes_standard_illumination", all_globes_standard_illumination.Identifier)
+asset.export("CurrentFocusGlobal", CurrentFocusGlobal.Identifier)
+asset.export("CurrentFocusStandard", CurrentFocusStandard.Identifier)
+asset.export("EarthGlobal", EarthGlobal.Identifier)
+asset.export("EarthStandard", EarthStandard.Identifier)
+asset.export("MarsGlobal", MarsGlobal.Identifier)
+asset.export("MarsStandard", MarsStandard.Identifier)
+asset.export("VenusGlobal", VenusGlobal.Identifier)
+asset.export("VenusStandard", VenusStandard.Identifier)
+asset.export("TitanGlobal", TitanGlobal.Identifier)
+asset.export("TitanStandard", TitanStandard.Identifier)
+asset.export("SaturnGlobal", SaturnGlobal.Identifier)
+asset.export("TitanStandard", SaturnStandard.Identifier)
+asset.export("AllGlobesGlobalIllumination", AllGlobesGlobalIllumination.Identifier)
+asset.export("AllGlobesStandardIllumination", AllGlobesStandardIllumination.Identifier)

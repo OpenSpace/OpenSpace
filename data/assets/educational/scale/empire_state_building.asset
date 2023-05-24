@@ -15,7 +15,7 @@ local Location = { 40.748441, -73.985664 }
 local ScaleModel = {
   Identifier = "Scale_EmpireStateBuilding",
   Parent = earthAsset.Earth.Identifier,
-  -- Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  -- Note: Lat/Lon/Scale values come from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
