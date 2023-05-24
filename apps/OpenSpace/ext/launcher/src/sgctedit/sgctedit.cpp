@@ -599,6 +599,7 @@ void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) 
                 }
                 node.windows[i].draw2D = true;
                 node.windows[i].draw3D = (selectedGraphics > 0);
+                node.windows[i].guiMirrorWindowNumForRender = selectedGraphics;
             }
             else {
                 node.windows[i].draw2D = false;
