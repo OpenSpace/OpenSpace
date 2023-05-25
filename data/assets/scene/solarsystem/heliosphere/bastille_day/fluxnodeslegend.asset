@@ -68,6 +68,10 @@ asset.onDeinitialize(function ()
   openspace.removeScreenSpaceRenderable(Legend)
 end)
 
+asset.export(Legend)
+asset.export("ToggleLegend", ToggleLegend)
+asset.export("HideLegend", HideLegend)
+
 
 
 asset.meta = {

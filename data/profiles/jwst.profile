@@ -100,7 +100,7 @@
       "key": "B"
     },
     {
-      "action": "os.jwst.ToggleTrialsExceptMoon",
+      "action": "os.jwst.ToggleTrailsExceptMoon",
       "key": "G"
     },
     {

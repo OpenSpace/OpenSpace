@@ -90,6 +90,7 @@ asset.onDeinitialize(function ()
 end)
 
 asset.export(DensityVolume)
+asset.export("ToggleVolume", ToggleVolume)
 
 
 

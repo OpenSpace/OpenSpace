@@ -89,7 +89,7 @@ asset.onDeinitialize(function ()
 end)
 
 asset.export(Fieldlines)
-
+asset.export("ToggleFieldlines", ToggleFieldlines)
 
 
 asset.meta = {

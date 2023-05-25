@@ -140,6 +140,8 @@ asset.onDeinitialize(function ()
   openspace.action.removeAction(ToggleMeridial)
 end)
 
+asset.export("ToggleEquatorial", ToggleEquatorial)
+asset.export("ToggleMeridial", ToggleMeridial)
 asset.export(EquatorialCutplane)
 asset.export(MeridialCutplane)
 

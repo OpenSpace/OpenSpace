@@ -90,8 +90,8 @@ local ToggleSunTrail = {
   isLocal = false
 }
 
-local ToggleTrialsExceptMoon = {
-  Identifier = "os.jwst.ToggleTrialsExceptMoon",
+local ToggleTrailsExceptMoon = {
+  Identifier = "os.jwst.ToggleTrailsExceptMoon",
   Name = "Toggle trails (except Moon)",
   Command = [[
     local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled');
@@ -132,13 +132,13 @@ asset.onInitialize(function()
   openspace.action.registerAction(SetupLaunch)
   openspace.action.registerAction(SetupDetach)
   openspace.action.registerAction(ToggleSunTrail)
-  openspace.action.registerAction(ToggleTrialsExceptMoon)
+  openspace.action.registerAction(ToggleTrailsExceptMoon)
   openspace.action.registerAction(ToggleJwstTrails)
 end)
 
 asset.onDeinitialize(function()
   openspace.action.removeAction(ToggleJwstTrails)
-  openspace.action.removeAction(ToggleTrialsExceptMoon)
+  openspace.action.removeAction(ToggleTrailsExceptMoon)
   openspace.action.removeAction(ToggleSunTrail)
   openspace.action.removeAction(SetupDetach)
   openspace.action.removeAction(SetupLaunch)
@@ -147,6 +147,16 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(ToggleHudf)
   openspace.action.removeAction(ToggleLagrangianPoints)
 end)
+
+asset.export("ToggleLagrangianPoints", ToggleLagrangianPoints)
+asset.export("ToggleHudf", ToggleHudf)
+asset.export("ToggleL2", ToggleL2)
+asset.export("ToggleFov", ToggleFov)
+asset.export("SetupLaunch", SetupLaunch)
+asset.export("SetupDetach", SetupDetach)
+asset.export("ToggleSunTrail", ToggleSunTrail)
+asset.export("ToggleTrailsExceptMoon", ToggleTrailsExceptMoon)
+asset.export("ToggleTrailsExceptMoon", ToggleJwstTrails)
 
 
 

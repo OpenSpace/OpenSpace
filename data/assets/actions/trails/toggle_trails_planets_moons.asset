@@ -1,5 +1,5 @@
 local FadeUpTrails = {
-  Identifier = "os.planetsmoon.FadeUpTrails",
+  Identifier = "os.planetsmoons.FadeUpTrails",
   Name = "Show planet and moon trails",
   Command = [[
     openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Fade", 1, 2);
@@ -11,7 +11,7 @@ local FadeUpTrails = {
 }
 
 local FadeDownTrails = {
-  Identifier = "os.planetsmoon.FadeDownTrails",
+  Identifier = "os.planetsmoons.FadeDownTrails",
   Name = "Hide planet and moon trails",
   Command = [[
     openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Fade", 0, 2);
@@ -23,7 +23,7 @@ local FadeDownTrails = {
 }
 
 local ToggleTrails = {
-  Identifier = "os.planetsmoon.ToggleTrails",
+  Identifier = "os.planetsmoons.ToggleTrails",
   Name = "Toggle planet and moon trails",
   Command = [[
     local capList = openspace.getProperty("{planetTrail_solarSystem}.Renderable.Fade");

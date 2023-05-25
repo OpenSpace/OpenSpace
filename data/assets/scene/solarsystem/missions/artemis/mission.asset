@@ -7,7 +7,7 @@ local Mission = {
   Description = "With Artemis missions, NASA will land the first woman and first person of color on the Moon, using innovative technologies to explore more of the lunar surface than ever before. We will collaborate with commercial and international partners and establish the first long-term presence on the Moon. Then, we will use what we learn on and around the Moon to take the next giant leap: sending the first astronauts to Mars.",
   Milestones = {
     {
-      Name = "Mission Launch",
+      Name = "Mission launch",
       Date = "2022 NOV 16 06:47:44",
       Image = "https://www.nasa.gov/sites/default/files/thumbnails/image/sls_rocket.jpg",
       Description = "Following a successful launch of NASA's Space Launch System (SLS), the most powerful rocket in the world, the agency's Orion spacecraft is on its way to the Moon as part of the Artemis program. Carrying an uncrewed Orion, SLS lifted off for its flight test debut at 1:47 a.m. EST Wednesday from Launch Pad 39B at NASA's Kennedy Space Center in Florida. The launch is the first leg of a mission in which Orion is planned to travel approximately 40,000 miles beyond the Moon and return to Earth over the course of 25.5 days. Known as Artemis I, the mission is a critical part of NASA's Moon to Mars exploration approach, in which the agency explores for the benefit of humanity. It's an important test for the agency before flying astronauts on the Artemis II mission.",
@@ -27,7 +27,7 @@ local Mission = {
       Image = "https://www.nasa.gov/sites/default/files/thumbnails/image/orion_day_13_advisory.jpg"
     },
     {
-      Name = "Orion Landing",
+      Name = "Orion landing",
       Description = "NASA's Orion spacecraft for the Artemis I mission splashed down in the Pacific Ocean after a 25.5 day mission to the Moon.",
       Image = "https://www.nasa.gov/sites/default/files/thumbnails/image/orion_splashdown_image.jpg",
       Date = "2022 DEC 11 17:40:30"
