@@ -1050,7 +1050,7 @@ bool SessionRecording::isSavingFramesDuringPlayback() const {
 }
 
 bool SessionRecording::shouldWaitForTileLoading() const {
-    _shouldWaitForFinishLoadingWhenPlayback;
+    return _shouldWaitForFinishLoadingWhenPlayback;
 }
 
 SessionRecording::SessionState SessionRecording::state() const {

@@ -257,7 +257,7 @@ public:
      */
     bool isSavingFramesDuringPlayback() const;
 
-    bool shouldWaitForTileLoading() const
+    bool shouldWaitForTileLoading() const;
 
     /**
      * Used to obtain the state of idle/recording/playback.
