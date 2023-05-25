@@ -341,7 +341,7 @@ void SessionRecording::stopRecording() {
 bool SessionRecording::startPlayback(std::string& filename,
                                      KeyframeTimeRef timeMode,
                                      bool forceSimTimeAtStart,
-                                     bool loop)
+                                     bool loop, bool shouldWaitForFinishedTiles)
 {
     std::string absFilename;
     if (std::filesystem::is_regular_file(filename)) {
@@ -372,6 +372,7 @@ bool SessionRecording::startPlayback(std::string& filename,
     _playbackLineNum = 1;
     _playbackFilename = absFilename;
     _playbackLoopMode = loop;
+    _shouldWaitForFinishLoadingWhenPlayback = shouldWaitForFinishedTiles;
 
     // Open in ASCII first
     _playbackFile.open(_playbackFilename, std::ifstream::in);
@@ -1046,6 +1047,10 @@ bool SessionRecording::isPlayingBack() const {
 
 bool SessionRecording::isSavingFramesDuringPlayback() const {
     return (isPlayingBack() && _saveRenderingDuringPlayback);
+}
+
+bool SessionRecording::shouldWaitForTileLoading() const {
+    _shouldWaitForFinishLoadingWhenPlayback;
 }
 
 SessionRecording::SessionState SessionRecording::state() const {
@@ -1857,7 +1862,7 @@ void SessionRecording::moveAheadInTime() {
         _saveRendering_isFirstFrame = false;
         return;
     }
-    if (isSavingFramesDuringPlayback()) {
+    if (_shouldWaitForFinishLoadingWhenPlayback && isSavingFramesDuringPlayback()) {
         // Check if renderable in focus is still resolving tile loading
         // do not adjust time while we are doing this, or take screenshot
         const SceneGraphNode* focusNode =

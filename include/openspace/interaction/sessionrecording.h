@@ -203,11 +203,15 @@ public:
      *        LuaLibrary entry for SessionRecording for details on these time modes
      * \param loop if true then the file will playback in loop mode, continuously
      *             looping back to the beginning until it is manually stopped
+     * \param shouldWaitForFinishedTiles if true, the playback will wait for tiles to be
+     *        finished before progressing to the next frame. This value is only used when
+     *        `enableTakeScreenShotDuringPlayback` was called before. Otherwise this value
+     *        will be ignored
      *
      * \return `true` if recording to file starts without errors
      */
     bool startPlayback(std::string& filename, KeyframeTimeRef timeMode,
-        bool forceSimTimeAtStart, bool loop);
+        bool forceSimTimeAtStart, bool loop, bool shouldWaitForFinishedTiles);
 
     /**
      * Used to stop a playback in progress. If open, the playback file will be closed,
@@ -252,6 +256,8 @@ public:
      * Is saving frames during playback
      */
     bool isSavingFramesDuringPlayback() const;
+
+    bool shouldWaitForTileLoading() const
 
     /**
      * Used to obtain the state of idle/recording/playback.
@@ -743,6 +749,7 @@ protected:
     bool _saveRenderingDuringPlayback = false;
     double _saveRenderingDeltaTime = 1.0 / 30.0;
     double _saveRenderingCurrentRecordedTime = 0.0;
+    bool _shouldWaitForFinishLoadingWhenPlayback = false;
     std::chrono::steady_clock::duration _saveRenderingDeltaTime_interpolation_usec;
     std::chrono::steady_clock::time_point _saveRenderingCurrentRecordedTime_interpolation;
     double _saveRenderingCurrentApplicationTime_interpolation = 0.0;
