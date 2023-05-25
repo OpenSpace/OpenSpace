@@ -52,9 +52,10 @@ local LocalKernels = {
 
 
 local RotationMatrix = {
-  1, 0, 0,
-  0, 0, -1,
-  0, 1, 0
+  1, 0, 0, 0,
+  0, 0, -1, 0,
+  0, 1, 0, 0,
+  0, 0, 0, 1
 }
 
 local Messenger = {
@@ -92,12 +93,7 @@ local MessengerProbeBlack = {
     GeometryFile = models .. "MessengerProbe_black.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
+      sun.LightSource
     }
   },
   GUI = {
@@ -114,12 +110,7 @@ local MessengerProbeFoil = {
     GeometryFile = models .. "MessengerProbe_foil.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
+      sun.LightSource
     }
   },
   GUI = {
@@ -136,12 +127,7 @@ local MessengerProbeHeatShield = {
     GeometryFile = models .. "MessengerProbe_heatShield.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
+      sun.LightSource
     }
   },
   GUI = {
@@ -158,12 +144,7 @@ local MessengerProbeMetal = {
     GeometryFile = models .. "MessengerProbe_metal.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
+      sun.LightSource
     }
   },
   GUI = {
@@ -180,12 +161,7 @@ local MessengerProbePanels = {
     GeometryFile = models .. "MessengerProbe_panels.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
+      sun.LightSource
     }
   },
   GUI = {

@@ -1,20 +1,27 @@
 -- Color layers
 asset.require("./layers/colorlayers/wac_utah", true)
 asset.require("./layers/colorlayers/wac_sweden", false)
+asset.require("./layers/colorlayers/wac_newyork", false)
 asset.require("./layers/colorlayers/clemuvvis_utah", false)
 asset.require("./layers/colorlayers/clemuvvis_sweden", false)
+asset.require("./layers/colorlayers/clemuvvis_newyork", false)
 asset.require("./layers/colorlayers/uvvishybrid_utah", false)
 asset.require("./layers/colorlayers/uvvishybrid_sweden", false)
+asset.require("./layers/colorlayers/uvvishybrid_newyork", false)
 asset.require("./layers/colorlayers/kaguya_utah", false)
 asset.require("./layers/colorlayers/kaguya_sweden", false)
+asset.require("./layers/colorlayers/kaguya_newyork", false)
 asset.require("./layers/colorlayers/lola_clr_shade_utah", false)
 asset.require("./layers/colorlayers/lola_clr_shade_sweden", false)
+asset.require("./layers/colorlayers/lola_clr_shade_newyork", false)
 asset.require("./layers/colorlayers/lola_shade_utah", false)
 asset.require("./layers/colorlayers/lola_shade_sweden", false)
+asset.require("./layers/colorlayers/lola_shade_newyork", false)
 
 -- Height layers
 asset.require("./layers/heightlayers/loladem_utah", true)
 asset.require("./layers/heightlayers/loladem_sweden", false)
+asset.require("./layers/heightlayers/loladem_newyork", false)
 
 
 asset.meta = {

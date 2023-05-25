@@ -1,0 +1,35 @@
+local globeIdentifier = asset.require("../../jupiter").Jupiter.Identifier
+
+local data = asset.syncedResource({
+  Name = "Jupiter Video Layer",
+  Type = "HttpSynchronization",
+  Identifier = "jupiter_videos",
+  Version = 1
+})
+
+local layer = {
+  Identifier = "JupiterVideo",
+  Video = data .. "/jupiter_movie_3600.mp4",
+  Name = "Jupiter Video",
+  Enabled = true,
+  Type = "VideoTileLayer"
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+asset.meta = {
+  Name = "Jupiter Video",
+  Version = "1.0",
+  Description = "An video showing Jupiter.",
+  Author = "NOAA",
+  URL = "https://sos.noaa.gov/copyright/",
+  License = "No License"
+}

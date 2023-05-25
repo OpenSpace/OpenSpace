@@ -1,0 +1,186 @@
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+
+local textures = asset.syncedResource({
+  Name = "Ground Panorama Textures",
+  Type = "UrlSynchronization",
+  Identifier = "ground_panorama_textures",
+  Url = {
+    "https://wms.openspace.amnh.org/static/sync/url/panos/0.png",
+    "https://wms.openspace.amnh.org/static/sync/url/panos/1.png",
+    "https://wms.openspace.amnh.org/static/sync/url/panos/2.png",
+    "https://wms.openspace.amnh.org/static/sync/url/panos/3.png",
+    "https://wms.openspace.amnh.org/static/sync/url/panos/4.png",
+    "https://wms.openspace.amnh.org/static/sync/url/panos/5.png",
+    "https://wms.openspace.amnh.org/static/sync/url/panos/6.png",
+  },
+  Override = false
+})
+
+local position = {
+  Identifier = "GroundPanoPosition",
+  Parent = earthAsset.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 34.201639,
+      Longitude = -118.171319,
+      Altitude = 10.0,
+      UseCamera = true,
+      UseCameraAltitude = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 34.201639,
+      Longitude = -118.171319,
+      UseHeightmap = false,
+      Angle = 270.0
+    }
+  },
+  GUI = {
+    Name = "Ground Pano Position",
+    Path = "/Other/Night Sky",
+    Hidden = true
+  }
+}
+
+local sphere = {
+  Identifier = "GroundPanoSphere",
+  Parent = position.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi/2, 0.0, 0.0 }
+    },
+  },
+  Renderable = {
+    Type = "RenderableSphere",
+    Size = 8.5,
+    Segments = 40,
+    Opacity = 1.0,
+    Enabled = asset.enabled,
+    Texture = textures .. "3.png",
+    Orientation = "Inside",
+    MirrorTexture = true,
+    FadeOutThreshold = 1.00,
+    Background = true,
+    RenderBinMode = "Overlay"
+  },
+  GUI = {
+    Name = "Ground Panorama",
+    Path = "/Other/Night Sky"
+  }
+}
+
+local showCommand = [[
+  local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
+  local camera = openspace.navigation.getNavigationState();
+  openspace.setParent('GroundPanoPosition', camera.Anchor)
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Translation.Globe', camera.Anchor);
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Translation.Latitude', lat);
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Translation.Longitude', lon);
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Translation.Altitude', alt);
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Rotation.Globe', camera.Anchor);
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Rotation.Latitude', lat);
+  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Rotation.Longitude', lon);
+  openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Enabled', true);
+  openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 0.0);
+  openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 1.0, 1.0);
+]]
+
+local setTextureCommand = function(scene) 
+  local command = 'openspace.setPropertyValueSingle("Scene.GroundPanoSphere.Renderable.Texture", "'
+  command = command .. textures
+  if (scene == "forest") then 
+    command = command .. "1"
+  elseif (scene == 'city') then
+    command = command .. "2"
+  elseif (scene == 'backyard') then
+    command = command .. "3"
+  elseif (scene == 'desert') then
+    command = command .. "4"
+  else
+    openspace.printDebug("unknown scene")
+  end
+  command = command .. '.png")'
+  command = command:gsub( "\\", "\\\\")
+  return command
+end
+
+local showForestAction = {
+  Identifier = "os.nightsky.show_forest_pano",
+  Name = "Show forest panorama",
+  Command = setTextureCommand("forest") .. showCommand,
+  Documentation = "Shows the panorama sphere with a forest scene",
+  GuiPath = "/Night Sky/Panoramas",
+  IsLocal = false
+}
+
+local showCityAction = {
+  Identifier = "os.nightsky.show_city_pano",
+  Name = "Show city panorama",
+  Command = setTextureCommand("city") .. showCommand,
+  Documentation = "Shows the panorama sphere with a city scene",
+  GuiPath = "/Night Sky/Panoramas",
+  IsLocal = false
+}
+
+local showBackyardAction = {
+  Identifier = "os.nightsky.show_backyard_pano",
+  Name = "Show backyard panorama",
+  Command = setTextureCommand("backyard") .. showCommand,
+  Documentation = "Shows the panorama sphere with a backyard scene",
+  GuiPath = "/Night Sky/Panoramas",
+  IsLocal = false
+}
+
+local showDesertAction = {
+  Identifier = "os.nightsky.show_desert_pano",
+  Name = "Show desert panorama",
+  Command = setTextureCommand("desert") .. showCommand,
+  Documentation = "Shows the panorama sphere with a desert scene",
+  GuiPath = "/Night Sky/Panoramas",
+  IsLocal = false
+}
+
+local hideAction = {
+  Identifier = "os.nightsky.hide_ground_pano",
+  Name = "Hide ground panorama",
+  Command = [[
+    -- same position as above
+    openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 0.0, 0.5);
+  ]],
+  Documentation = "Hides the ground panorama",
+  GuiPath = "/Night Sky/Panoramas",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(position)
+  openspace.addSceneGraphNode(sphere)
+  openspace.action.registerAction(hideAction)
+  openspace.action.registerAction(showForestAction)
+  openspace.action.registerAction(showCityAction)
+  openspace.action.registerAction(showBackyardAction)
+  openspace.action.registerAction(showDesertAction)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(showForestAction)
+  openspace.action.removeAction(showCityAction)
+  openspace.action.removeAction(showBackyardAction)
+  openspace.action.removeAction(showDesertAction)
+  openspace.action.removeAction(hideAction)
+  openspace.removeSceneGraphNode(sphere)
+  openspace.removeSceneGraphNode(position)
+end)
+
+asset.export(position)
+asset.export(sphere)
+asset.export(hideAction)
+asset.export(showForestAction)
+asset.export(showCityAction)
+asset.export(showBackyardAction)
+asset.export(showDesertAction)

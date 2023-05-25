@@ -6,7 +6,8 @@
     "scene/solarsystem/missions/apollo/11/apollo11",
     "scene/solarsystem/missions/apollo/11/lem_flipbook",
     "scene/solarsystem/missions/apollo/17/apollo17",
-    "scene/solarsystem/missions/apollo/insignias_map"
+    "scene/solarsystem/missions/apollo/insignias_map",
+    "scene/solarsystem/missions/apollo/mission"
   ],
   "camera": {
     "altitude": 15000000.0,
@@ -93,7 +94,7 @@
   },
   "properties": [
     {
-      "name": "NavigationHandler.OrbitalNavigator.MinimumAllowedDistance",
+      "name": "NavigationHandler.OrbitalNavigator.LimitZoom.MinimumAllowedDistance",
       "type": "setPropertyValue",
       "value": "0"
     },

@@ -74,68 +74,84 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DisableZoomInfo = {
         "DisableZoom",
         "Disable zoom navigation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableRollInfo = {
         "DisableRoll",
         "Disable roll navigation",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
         "SetDefault",
         "Reset all properties to default",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxTapTimeInfo = {
         "MaxTapTime",
         "Max tap delay (in ms) for double tap",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DecelatesPerSecondInfo = {
         "DeceleratesPerSecond",
         "Number of times velocity is decelerated per second",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TouchScreenSizeInfo = {
         "TouchScreenSize",
         "Touch Screen size in inches",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TapZoomFactorInfo = {
         "TapZoomFactor",
         "Scaling distance travelled on tap",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PinchZoomFactorInfo = {
         "PinchZoomFactor",
         "Scaling distance travelled on pinch",
         "This value is used to reduce the amount of pinching needed. A linear kind of "
-        "sensitivity that will alter the pinch-zoom speed"
+        "sensitivity that will alter the pinch-zoom speed",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RollThresholdInfo = {
         "RollThreshold",
         "Threshold for min angle for roll interpret",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZoomSensitivityExpInfo = {
         "ZoomSensitivityExp",
         "Sensitivity of exponential zooming in relation to distance from focus node",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZoomSensitivityPropInfo = {
         "ZoomSensitivityProp",
         "Sensitivity of zooming proportional to distance from focus node",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -144,7 +160,9 @@ namespace {
         "ZoomSensitivityDistanceThreshold",
         "Threshold of distance to target node for whether or not to use exponential "
         "zooming",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -153,7 +171,9 @@ namespace {
         "ZoomInBoundarySphereMultiplier",
         "Multiplies a node's boundary sphere by this in order to limit zoom in & prevent "
         "surface collision",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -167,37 +187,44 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ConstantTimeDecaySecsInfo = {
         "ConstantTimeDecaySecs",
         "Time duration that a pitch/roll/zoom/pan should take to decay to zero (seconds)",
-        ""
+        "",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
         "InputSensitivity",
         "Threshold for interpreting input as still",
-        ""
+        "",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StationaryCentroidInfo = {
         "CentroidStationary",
         "Threshold for stationary centroid",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PanModeInfo = {
         "PanMode",
         "Allow panning gesture",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PanDeltaDistanceInfo = {
         "PanDeltaDistance",
         "Delta distance between fingers allowed for interpreting pan interaction",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrictionInfo = {
         "Friction",
         "Friction for different interactions (orbit, zoom, roll, pan)",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZoomOutLimitInfo = {
@@ -205,7 +232,9 @@ namespace {
         "Zoom Out Limit",
         "The maximum distance you are allowed to navigate away from the anchor. "
         "This should always be larger than the zoom in value if you want to be able "
-        "to zoom. Defaults to maximum allowed double"
+        "to zoom. Defaults to maximum allowed double",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZoomInLimitInfo = {
@@ -213,7 +242,9 @@ namespace {
         "Zoom In Limit",
         "The minimum distance from the anchor that you are allowed to navigate to. "
         "Its purpose is to limit zooming in on a node. If this value is not set it "
-        "defaults to the surface of the current anchor."
+        "defaults to the surface of the current anchor.",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -221,7 +252,8 @@ namespace {
     {
         "EnableDirectManipulation",
         "Enable direct manipulation",
-        "Decides whether the direct manipulation mode should be enabled or not. "
+        "Decides whether the direct manipulation mode should be enabled or not.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -231,7 +263,8 @@ namespace {
         "Direct manipulation threshold",
         "This threshold affects the distance from the interaction sphere at which the "
         "direct manipulation interaction mode starts being active. The value is given "
-        "as a factor times the interaction sphere"
+        "as a factor times the interaction sphere",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     // Compute coefficient of decay based on current frametime; if frametime has been
@@ -269,12 +302,17 @@ TouchInteraction::TouchInteraction()
         0.01f,
         0.25f
     )
-    , _zoomInBoundarySphereMultiplier(ZoomInBoundarySphereMultiplierInfo, 1.001f, 0.01f, 4e+27)
+    , _zoomInBoundarySphereMultiplier(
+        ZoomInBoundarySphereMultiplierInfo,
+        1.001f,
+        0.01f,
+        4e+27f
+    )
     , _zoomOutBoundarySphereMultiplier(
         ZoomOutBoundarySphereMultiplierInfo,
-        4e+27,
+        4e+27f,
         1.f,
-        4e+27
+        4e+27f
     )
     , _zoomInLimit(ZoomInLimitInfo, -1.0, 0.0, 4e+27)
     , _zoomOutLimit(
@@ -295,7 +333,7 @@ TouchInteraction::TouchInteraction()
         glm::vec4(0.2f)
     )
     , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.f)
-    , _pinchInputs({ TouchInput(0, 0, 0.0, 0.0, 0.0), TouchInput(0, 0, 0.0, 0.0, 0.0) })
+    , _pinchInputs({ TouchInput(0, 0, 0.f, 0.f, 0.0), TouchInput(0, 0, 0.f, 0.f, 0.0) })
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0, 2.75, glm::dvec2(0.08, 0.045) }
     // Calculated with two vectors with known diff in length, then
@@ -441,7 +479,12 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     std::vector<double> par(6, 0.0);
     par[0] = _lastVel.orbit.x; // use _lastVel for orbit
     par[1] = _lastVel.orbit.y;
-    bool lmSuccess = _directInputSolver.solve(list, _selectedNodeSurfacePoints, &par, *_camera);
+    bool lmSuccess = _directInputSolver.solve(
+        list,
+        _selectedNodeSurfacePoints,
+        &par,
+        *_camera
+    );
     int nDof = _directInputSolver.nDof();
 
     if (lmSuccess && !_unitTest) {
@@ -472,7 +515,8 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     }
 }
 
-void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolder>& list) {
+void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolder>& list)
+{
     _selectedNodeSurfacePoints.clear();
 
     const SceneGraphNode* anchor =

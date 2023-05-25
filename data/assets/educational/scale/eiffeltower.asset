@@ -2,30 +2,30 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
 local modelFolder = asset.syncedResource({
-  Name = "Eiffel Tower Model",
+  Name = "Scale Eiffel Tower",
   Type = "HttpSynchronization",
-  Identifier = "eiffel_tower_model",
+  Identifier = "scale_model_eiffel_tower",
   Version = 1
 })
 
-local eiffelTower = {
-  Identifier = "eiffelTower",
+local scaleModel = {
+  Identifier = "Scale_EiffelTower",
   Parent = earthAsset.Earth.Identifier,
   --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Longitude = 2.29448,
       Latitude = 48.85824,
+      Longitude = 2.29448,
       Altitude = 0.0,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Longitude = 2.29448,
       Latitude = 48.85824,
+      Longitude = 2.29448,
       UseHeightmap = false
     },
     Scale = {
@@ -36,9 +36,9 @@ local eiffelTower = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = modelFolder .. "eiffeltower.osmodel",
-    ModelScale = "Centimeter",
     RotationVector = { 0.0, 45.0, 0.0 },
-    LightSources = { sunAsset.LightSource }
+    LightSources = { sunAsset.LightSource },
+    ModelScale = "Centimeter"
   },
   GUI = {
     Name = "Eiffel Tower",
@@ -47,18 +47,10 @@ local eiffelTower = {
 }
 
 local updatePositionAction = {
-  Identifier = "os.drop_eiffel_tower",
-  Name = "Drop Eiffel tower under camera",
+  Identifier = "os.scale_models.drop_eiffel_tower",
+  Name = "Drop Eiffel Tower under camera",
   Command = [[
-    local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
-    local camera = openspace.navigation.getNavigationState();
-    openspace.setParent('eiffelTower', camera.Anchor)
-    openspace.setPropertyValueSingle('Scene.eiffelTower.Translation.Globe', camera.Anchor);
-    openspace.setPropertyValueSingle('Scene.eiffelTower.Translation.Latitude', lat);
-    openspace.setPropertyValueSingle('Scene.eiffelTower.Translation.Longitude', lon);
-    openspace.setPropertyValueSingle('Scene.eiffelTower.Rotation.Globe', camera.Anchor);
-    openspace.setPropertyValueSingle('Scene.eiffelTower.Rotation.Latitude', lat);
-    openspace.setPropertyValueSingle('Scene.eiffelTower.Rotation.Longitude', lon);
+    openspace.globebrowsing.setNodePositionFromCamera('Scale_EiffelTower')
   ]],
   Documentation = "Updates the Eiffel Tower position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
@@ -66,29 +58,18 @@ local updatePositionAction = {
 }
 
 local resetPositionAction = {
-  Identifier = "os.reset_eiffel_tower",
-  Name = "Reset Eiffel tower position",
+  Identifier = "os.os.scale_models.reset_eiffel_tower",
+  Name = "Reset Eiffel Tower position",
   Command = [[
-    -- same position as above
-    local lat = 48.85824
-    local lon = 2.29448
-    local globe = ']] .. earthAsset.Earth.Identifier .. [['
-    openspace.setParent('eiffelTower', globe)
-    openspace.setPropertyValueSingle('Scene.eiffelTower.Translation.Globe', globe);
-    openspace.setPropertyValueSingle('Scene.eiffelTower.Translation.Latitude', lat);
-    openspace.setPropertyValueSingle('Scene.eiffelTower.Translation.Longitude', lon);
-    openspace.setPropertyValueSingle('Scene.eiffelTower.Rotation.Globe', globe);
-    openspace.setPropertyValueSingle('Scene.eiffelTower.Rotation.Latitude', lat);
-    openspace.setPropertyValueSingle('Scene.eiffelTower.Rotation.Longitude', lon);
+    openspace.globebrowsing.setNodePosition('Scale_EiffelTower', ']] .. earthAsset.Earth.Identifier .. [[', 48.85824, 2.29448)
   ]],
-  Documentation = "Updates the Eiffel Tower position based on the globe location of the camera",
+  Documentation = "Resets the Eiffel Tower back to it's actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
-
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(eiffelTower)
+  openspace.addSceneGraphNode(scaleModel)
   openspace.action.registerAction(updatePositionAction)
   openspace.action.registerAction(resetPositionAction)
 end)
@@ -96,7 +77,9 @@ end)
 asset.onDeinitialize(function()
   openspace.action.removeAction(resetPositionAction)
   openspace.action.removeAction(updatePositionAction)
-  openspace.removeSceneGraphNode(eiffelTower)
+  openspace.removeSceneGraphNode(scaleModel)
 end)
 
-asset.export(eiffelTower)
+asset.export(scaleModel)
+asset.export(updatePositionAction)
+asset.export(resetPositionAction)

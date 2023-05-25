@@ -1,3 +1,4 @@
+asset.require("scene/solarsystem/missions/dawn/mission")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 

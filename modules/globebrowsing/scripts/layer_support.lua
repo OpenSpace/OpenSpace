@@ -245,7 +245,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
             Name = name,
             Description = Description or "",
             FilePath = dir .. '/' .. HeightFile,
-            TilePixelSize = 90
+            TilePixelSize = 512
         }
     end
 

@@ -48,14 +48,16 @@ namespace {
         "Type",
         "Type",
         "The type of this Layer. This value is a read-only property and thus cannot be "
-        "changed"
+        "changed",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blend Mode",
         "This value specifies the blend mode that is applied to this layer. The blend "
-        "mode determines how this layer is added to the underlying layers beneath"
+        "mode determines how this layer is added to the underlying layers beneath",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -63,28 +65,36 @@ namespace {
         "Enabled",
         "If this value is enabled, the layer will be used for the final composition of "
         "the planet. If this value is disabled, the layer will be ignored in the "
-        "composition"
+        "composition",
+        // @VISIBILITY(1.17)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
         "Reset",
         "Reset",
         "If this value is triggered, this layer will be reset. This will delete the "
-        "local cache for this layer and will trigger a fresh load of all tiles"
+        "local cache for this layer and will trigger a fresh load of all tiles",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RemoveInfo = {
         "Remove",
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
-        "layer before the next frame"
+        "layer before the next frame",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "If the 'Type' of this layer is a solid color, this value determines what this "
-        "solid color is"
+        "solid color is",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
@@ -115,7 +125,7 @@ namespace {
         std::optional<std::string> type [[codegen::inlist("DefaultTileLayer",
             "SingleImageTileLayer", "ImageSequenceTileLayer", "SizeReferenceTileLayer",
             "TemporalTileLayer", "TileIndexTileLayer", "ByIndexTileLayer",
-            "ByLevelTileLayer", "SolidColor", "SpoutImageTileLayer")]];
+            "ByLevelTileLayer", "SolidColor", "SpoutImageTileLayer", "VideoTileLayer")]];
 
         // Determine whether the layer is enabled or not. If this value is not specified,
         // the layer is disabled
@@ -249,7 +259,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
         _typeOption.addOption(static_cast<int>(li.id), std::string(li.identifier));
     }
     _typeOption.setValue(static_cast<int>(typeID));
-    _type = static_cast<layers::Layer::ID>(_typeOption.value());
+    _typeId = static_cast<layers::Layer::ID>(_typeOption.value());
 
     for (const layers::Blend& bi : layers::Blends) {
         _blendModeOption.addOption(static_cast<int>(bi.id), std::string(bi.identifier));
@@ -319,6 +329,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
             case layers::Layer::ID::TileIndexTileLayer:
             case layers::Layer::ID::ByIndexTileLayer:
             case layers::Layer::ID::ByLevelTileLayer:
+            case layers::Layer::ID::VideoTileLayer:
                 if (_tileProvider) {
                     removePropertySubOwner(*_tileProvider);
                 }
@@ -330,7 +341,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
                 throw ghoul::MissingCaseException();
         }
 
-        _type = static_cast<layers::Layer::ID>(_typeOption.value());
+        _typeId = static_cast<layers::Layer::ID>(_typeOption.value());
         initializeBasedOnType(type(), {});
         addVisibleProperties();
         if (_onChangeCallback) {
@@ -406,7 +417,7 @@ Tile::Status Layer::tileStatus(const TileIndex& index) const {
 }
 
 layers::Layer::ID Layer::type() const {
-    return _type;
+    return _typeId;
 }
 
 layers::Blend::ID Layer::blendMode() const {
@@ -488,6 +499,7 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
         case layers::Layer::ID::TileIndexTileLayer:
         case layers::Layer::ID::ByIndexTileLayer:
         case layers::Layer::ID::ByLevelTileLayer:
+        case layers::Layer::ID::VideoTileLayer:
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
             initDict.setValue(
@@ -522,6 +534,7 @@ void Layer::addVisibleProperties() {
         case layers::Layer::ID::TileIndexTileLayer:
         case layers::Layer::ID::ByIndexTileLayer:
         case layers::Layer::ID::ByLevelTileLayer:
+        case layers::Layer::ID::VideoTileLayer:
             if (_tileProvider) {
                 addPropertySubOwner(*_tileProvider);
             }

@@ -24,7 +24,7 @@ local unzippedDataDestination = {
 
 local loop = {
   Documentation = "Sets time to start of data, sets higher delta time and loops back from start, when at end of data",
-  GuiPath = "2012July",
+  GuiPath = "/2012July",
   Identifier = "2012july.loop_batsrus",
   IsLocal = false,
   Name = "Loop BATSRUS",

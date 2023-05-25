@@ -36,7 +36,7 @@ namespace {
 
     double is = node->interactionSphere();
     global::navigationHandler->orbitalNavigator().setMinimumAllowedDistance(
-        is * multiplier
+        static_cast<float>(is * multiplier)
     );
 }
 
@@ -52,7 +52,7 @@ namespace {
 
     double is = node->interactionSphere();
     global::navigationHandler->orbitalNavigator().setMaximumAllowedDistance(
-        is * multiplier
+        static_cast<float>(is * multiplier)
     );
 }
 

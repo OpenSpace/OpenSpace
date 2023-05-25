@@ -34,8 +34,6 @@
 #include <algorithm>
 #include <filesystem>
 
-#include <openspace/modulepath.h>
-
 namespace {
     constexpr std::string_view _loggerCat = "OpenSpaceModule";
     constexpr std::string_view ModuleBaseToken = "MODULE_";
@@ -62,8 +60,10 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
     std::string moduleToken = "${" + std::string(ModuleBaseToken) + upperIdentifier + "}";
 
     std::filesystem::path path = modulePath();
-    LDEBUG(fmt::format("Registering module path {}: {}", moduleToken, path));
-    FileSys.registerPathToken(moduleToken, std::move(path));
+    if (!path.empty()) {
+        LDEBUG(fmt::format("Registering module path {}: {}", moduleToken, path));
+        FileSys.registerPathToken(moduleToken, std::move(path));
+    }
 
     internalInitialize(configuration);
 }
@@ -109,7 +109,7 @@ std::vector<std::string> OpenSpaceModule::requiredOpenGLExtensions() const {
     return {};
 }
 
-std::string OpenSpaceModule::modulePath() const {
+std::filesystem::path OpenSpaceModule::modulePath() const {
     std::string moduleIdentifier = identifier();
     std::transform(
         moduleIdentifier.begin(),
@@ -120,23 +120,7 @@ std::string OpenSpaceModule::modulePath() const {
 
     // First try the internal module directory
     std::filesystem::path path = absPath("${MODULES}/" + moduleIdentifier);
-    if (std::filesystem::is_directory(path)) {
-        return path.string();
-    }
-    else { // Otherwise, it might be one of the external directories
-        for (std::string_view dir : ModulePaths) {
-            const std::string& p = std::string(dir) + '/' + moduleIdentifier;
-            if (std::filesystem::is_directory(absPath(p))) {
-                return absPath(p).string();
-            }
-        }
-    }
-
-    // If we got this far, neither the internal module nor any of the external modules fit
-    throw ghoul::RuntimeError(
-        fmt::format("Could not resolve path for module {}", identifier()),
-        "OpenSpaceModule"
-    );
+    return std::filesystem::is_directory(path) ? path : "";
 }
 
 void OpenSpaceModule::internalInitialize(const ghoul::Dictionary&) {}

@@ -43,7 +43,8 @@ namespace {
         "Points",
         "This value determines the number of control points that is used to construct "
         "the shadow geometry. The higher this number, the more detailed the shadow is, "
-        "but it will have a negative impact on the performance"
+        "but it will have a negative impact on the performance",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
@@ -51,55 +52,65 @@ namespace {
         "Shadow Length",
         "This value determines the length of the shadow that is cast by the target "
         "object. The total distance of the shadow is equal to the distance from the "
-        "target to the Sun multiplied with this value"
+        "target to the Sun multiplied with this value",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowColorInfo = {
         "ShadowColor",
         "Shadow Color",
-        "This value determines the color that is used for the shadow cylinder"
+        "This value determines the color that is used for the shadow cylinder",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
         "TerminatorType",
         "Terminator Type",
         "This value determines the type of the terminator that is used to calculate the "
-        "shadow eclipse"
+        "shadow eclipse",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
         "LightSource",
         "Light Source",
         "This value determines the SPICE name of the object that is used as the "
-        "illuminator for computing the shadow cylinder"
+        "illuminator for computing the shadow cylinder",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
         "This value specifies the SPICE name of the object that is the observer of the "
-        "shadow cylinder"
+        "shadow cylinder",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BodyInfo = {
         "Body",
         "Target Body",
         "This value is the SPICE name of target body that is used as the shadow caster "
-        "for the shadow cylinder"
+        "for the shadow cylinder",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BodyFrameInfo = {
         "BodyFrame",
         "Body Frame",
         "This value is the SPICE name of the reference frame in which the shadow "
-        "cylinder is expressed"
+        "cylinder is expressed",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AberrationInfo = {
         "Aberration",
         "Aberration",
         "This value determines the aberration method that is used to compute the shadow "
-        "cylinder"
+        "cylinder",
+        // @VISIBILITY(3.5)
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {

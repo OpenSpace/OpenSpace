@@ -41,14 +41,17 @@ namespace {
         "Format String",
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will contain the value "
-        "of the elapsed time."
+        "of the elapsed time.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReferenceTimeInfo = {
         "ReferenceTime",
         "Reference Time",
         "The reference time relative to which the elapsed time is specified. The format "
-        "must be an ISO 8601-compliant date string"
+        "must be an ISO 8601-compliant date string",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SimplifyTimeInfo = {
@@ -56,14 +59,18 @@ namespace {
         "Simplify Time",
         "If this value is enabled, the elapsed time will be simplified into seconds, "
         "minutes, hours, etc. If the value is disabled, the elapsed time is always "
-        "presented in seconds. The default value for this is 'true'."
+        "presented in seconds. The default value for this is 'true'.",
+        // @VISIBILITY(2.25)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LowestTimeUnitInfo = {
         "LowestTimeUnit",
         "Lowest Time Unit when Simplifying",
         "If 'SimplifyTime' is enabled, this is the lowest time unit that will be shown. "
-        "All finer grained timesteps will be ignored."
+        "All finer grained timesteps will be ignored.",
+        // @VISIBILITY(2.75)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemElapsedTime)]] Parameters {

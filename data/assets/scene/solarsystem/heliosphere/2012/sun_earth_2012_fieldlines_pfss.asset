@@ -17,7 +17,7 @@ local fieldlineData  = asset.syncedResource({
 
 local darkenSun = {
   Documentation = "Makes the Sun turn black",
-  GuiPath = "2012July",
+  GuiPath = "/2012July",
   Identifier = "2012july.dark_sun",
   IsLocal = false,
   Name = "Dark sun",

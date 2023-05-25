@@ -18,7 +18,7 @@ local fieldlineData = asset.syncedResource({
 
 local loop = {
   Documentation = "Sets time to start of data, sets high delta time and loops back from start when at end of data",
-  GuiPath = "2012July",
+  GuiPath = "/2012July",
   Identifier = "2012july.loop_enlil",
   IsLocal = false,
   Name = "Loop ENLIL",

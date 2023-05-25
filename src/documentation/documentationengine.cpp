@@ -27,20 +27,13 @@
 #include <openspace/openspace.h>
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/json.h>
 #include <openspace/util/json_helper.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/profiling.h>
 
 #include <fstream>
-
-namespace {
-    constexpr std::string_view HandlebarsFilename =
-        "${WEB}/documentation/handlebars-v4.0.5.js";
-    constexpr std::string_view BootstrapFilename = "${WEB}/common/bootstrap.min.css";
-    constexpr std::string_view CssFilename = "${WEB}/documentation/style.css";
-    constexpr std::string_view JsFilename = "${WEB}/documentation/script.js";
-} // namespace
 
 namespace openspace::documentation {
 
@@ -54,15 +47,7 @@ DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationExce
     , documentation(std::move(doc))
 {}
 
-DocumentationEngine::DocumentationEngine()
-    : DocumentationGenerator(
-        "Top Level",
-        "toplevel",
-        {
-            { "toplevelTemplate", "${WEB}/documentation/toplevel.hbs" },
-        }
-    )
-{}
+DocumentationEngine::DocumentationEngine() {}
 
 void DocumentationEngine::initialize() {
     ghoul_assert(!isInitialized(), "DocumentationEngine is already initialized");
@@ -87,19 +72,20 @@ DocumentationEngine& DocumentationEngine::ref() {
     return *_instance;
 }
 
-std::string generateJsonDocumentation(const Documentation& d) {
-    std::stringstream result;
-    result << "{";
+nlohmann::json generateJsonDocumentation(const Documentation& d) {
+    nlohmann::json json;
 
-    result << R"("name": ")" << d.name << "\",";
-    result << R"("id": ")" << d.id << "\",";
-    result << R"("entries": [)";
+    json["name"] = d.name;
+    json["id"] = d.id;
+    json["properties"] = nlohmann::json::array();
+
     for (const DocumentationEntry& p : d.entries) {
-        result << '{';
-        result << R"("key": ")" << p.key << "\",";
-        result << R"("optional": )" << (p.optional ? "true" : "false") << ',';
-        result << R"("type": ")" << p.verifier->type() << "\",";
-        result << R"("documentation": ")" << escapedJson(p.documentation) << "\",";
+        nlohmann::json entry;
+        entry["key"] = p.key;
+        entry["optional"] = p.optional ? true : false;
+        entry["type"] = p.verifier->type();
+        entry["documentation"] = p.documentation;
+
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
 
@@ -112,52 +98,51 @@ std::string generateJsonDocumentation(const Documentation& d) {
             );
 
             if (it == documentations.end()) {
-                result << R"("reference": { "found": false })";
+                entry["reference"]["found"] = false;
             }
             else {
-                result << R"("reference": {)"
-                    << R"("found": true,)"
-                    << R"("name": ")" << it->name << "\","
-                    << R"("identifier": ")" << rv->identifier << '\"'
-                    << '}';
+                nlohmann::json reference;
+                reference["found"] = true;
+                reference["name"] = it->name;
+                reference["identifier"] = rv->identifier;
+
+                entry["reference"] = reference;
             }
         }
         else if (tv) {
-            std::string json = generateJsonDocumentation({ "", "", tv->documentations });
+            nlohmann::json restrictions = generateJsonDocumentation(tv->documentations);
             // We have a TableVerifier, so we need to recurse
-            result << R"("restrictions": )" << json;
+            entry["restrictions"] = restrictions;
         }
         else {
-            result << R"("description": ")" << p.verifier->documentation() << '\"';
+            entry["description"] = p.verifier->documentation();
         }
-        result << '}';
-        if (&p != &d.entries.back()) {
-            result << ", ";
-        }
-
+        json["properties"].push_back(entry);
     }
 
-    result << ']';
-    result << '}';
-
-    return result.str();
+    return json;
 }
 
 std::string DocumentationEngine::generateJson() const {
-    std::stringstream json;
-    json << "[";
+    nlohmann::json json;
 
     for (const Documentation& d : _documentations) {
-        json << generateJsonDocumentation(d);
-        if (&d != &_documentations.back()) {
-            json << ", ";
-        }
+        json["data"].push_back(generateJsonDocumentation(d));
     }
 
-    json << "]";
-
-    return json.str();
+    return json.dump();
 }
+
+nlohmann::json DocumentationEngine::generateJsonJson() const {
+    nlohmann::json json;
+
+    for (const Documentation& d : _documentations) {
+        json.push_back(generateJsonDocumentation(d));
+    }
+
+    return json;
+}
+
 
 void DocumentationEngine::addDocumentation(Documentation documentation) {
     if (documentation.id.empty()) {
@@ -179,142 +164,7 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
     }
 }
 
-void DocumentationEngine::addHandlebarTemplates(std::vector<HandlebarTemplate> templates)
-{
-    _handlebarTemplates.insert(
-        _handlebarTemplates.end(),
-        templates.begin(), templates.end()
-    );
-}
-
 std::vector<Documentation> DocumentationEngine::documentations() const {
     return _documentations;
 }
-
-void DocumentationEngine::writeDocumentationHtml(const std::string& path,
-                                                 std::string data)
-{
-    ZoneScoped;
-
-    std::ifstream handlebarsInput;
-    handlebarsInput.exceptions(~std::ofstream::goodbit);
-    handlebarsInput.open(absPath(HandlebarsFilename));
-    const std::string handlebarsContent = std::string(
-        std::istreambuf_iterator<char>(handlebarsInput),
-        std::istreambuf_iterator<char>()
-    );
-    std::ifstream jsInput;
-    jsInput.exceptions(~std::ofstream::goodbit);
-    jsInput.open(absPath(JsFilename));
-    const std::string jsContent = std::string(
-        std::istreambuf_iterator<char>(jsInput),
-        std::istreambuf_iterator<char>()
-    );
-
-    std::ifstream bootstrapInput;
-    bootstrapInput.exceptions(~std::ofstream::goodbit);
-    bootstrapInput.open(absPath(BootstrapFilename));
-    const std::string bootstrapContent = std::string(
-        std::istreambuf_iterator<char>(bootstrapInput),
-        std::istreambuf_iterator<char>()
-    );
-
-    std::ifstream cssInput;
-    cssInput.exceptions(~std::ofstream::goodbit);
-    cssInput.open(absPath(CssFilename));
-    const std::string cssContent = std::string(
-        std::istreambuf_iterator<char>(cssInput),
-        std::istreambuf_iterator<char>()
-    );
-
-    std::string filename = path + ("index.html");
-    std::ofstream file;
-    file.exceptions(~std::ofstream::goodbit);
-    file.open(filename);
-
-    // We probably should escape backslashes here?
-    file << "<!DOCTYPE html>" << '\n'
-        << "<html>" << '\n'
-        << "  " << "<head>" << '\n';
-
-    //write handlebar templates to htmlpage as script elements (as per hb)
-    for (const HandlebarTemplate& t : _handlebarTemplates) {
-        const char* Type = "text/x-handlebars-template";
-        file << "    <script id=\"" << t.name << "\" type=\"" << Type << "\">";
-        file << '\n';
-
-        std::ifstream templateFilename(absPath(t.filename));
-        std::string templateContent(
-            std::istreambuf_iterator<char>{templateFilename},
-            std::istreambuf_iterator<char>{}
-        );
-        file << templateContent << "\n    </script>" << '\n';
-    }
-
-    //write main template
-    file << "    <script id=\"mainTemplate\" type=\"text/x-handlebars-template\">";
-    file << '\n';
-    std::ifstream templateFilename(absPath("${WEB}/documentation/main.hbs"));
-    std::string templateContent(
-        std::istreambuf_iterator<char>{templateFilename},
-        std::istreambuf_iterator<char>{}
-    );
-    file << templateContent << "    </script>" << '\n';
-
-    //write scripte to register templates dynamically
-    file << "    <script type=\"text/javascript\">" << '\n';
-    file << "      templates = [];" << '\n';
-    file << "      registerTemplates = function() {" << '\n';
-
-    for (const HandlebarTemplate& t : _handlebarTemplates) {
-        std::string nameOnly = t.name.substr(0, t.name.length() - 8); //-8 for Template
-        file << "\t\t\t\tvar " << t.name;
-        file << "Element = document.getElementById('" << t.name << "');" << '\n';
-
-        file << "\t\t\t\tHandlebars.registerPartial('" << nameOnly << "', ";
-        file << t.name << "Element.innerHTML);" << '\n';
-
-        file << "\t\t\t\ttemplates['" << nameOnly << "'] = Handlebars.compile(";
-        file << t.name << "Element.innerHTML);" << '\n';
-    }
-    file << "\t\t\t}" << '\n';
-    file << "\t\t</script>" << '\n';
-
-
-    const std::string DataId = "data";
-
-    const std::string Version =
-        "[" +
-        std::to_string(OPENSPACE_VERSION_MAJOR) + "," +
-        std::to_string(OPENSPACE_VERSION_MINOR) + "," +
-        std::to_string(OPENSPACE_VERSION_PATCH) +
-        "]";
-
-    file
-        << "    " << "<script id=\"" << DataId
-        << "\" type=\"text/application/json\">" << '\n'
-        << "      " << std::move(data) << '\n'
-        << "    " << "</script>" << '\n';
-
-
-    file
-        << "  " << "<script>" << '\n'
-        << "    " << jsContent << '\n'
-        << "    " << "var documentation = parseJson('" << DataId << "').documentation;\n"
-        << "    " << "var version = " << Version << ";" << '\n'
-        << "    " << "var currentDocumentation = documentation[0];" << '\n'
-        << "    " << handlebarsContent << '\n'
-        << "  " << "</script>" << '\n'
-        << "  " << "<style type=\"text/css\">" << '\n'
-        << "    " << cssContent << '\n'
-        << "    " << bootstrapContent << '\n'
-        << "  " << "</style>" << '\n'
-        << "    " << "<title>OpenSpace Documentation</title>" << '\n'
-        << "  " << "</head>" << '\n'
-        << "  " << "<body>" << '\n'
-        << "  " << "</body>" << '\n'
-        << "</html>" << '\n';
-}
-
-
 } // namespace openspace::documentation

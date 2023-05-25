@@ -37,20 +37,23 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
         "Intensity",
         "Intensity",
-        "The intensity of this light source"
+        "The intensity of this light source",
+        // @VISIBILITY(1.75)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NodeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo NodeCameraStateInfo = {
         "Node",
         "Node",
-        "The identifier of the scene graph node to follow"
+        "The identifier of the scene graph node to follow",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(SceneGraphLightSource)]] Parameters {
         // [[codegen::verbatim(IntensityInfo.description)]]
         std::optional<float> intensity;
 
-        // [[codegen::verbatim(NodeInfo.description)]]
+        // [[codegen::verbatim(NodeCameraStateInfo.description)]]
         std::string node [[codegen::identifier()]];
     };
 #include "scenegraphlightsource_codegen.cpp"
@@ -64,7 +67,7 @@ documentation::Documentation SceneGraphLightSource::Documentation() {
 
 SceneGraphLightSource::SceneGraphLightSource()
     : _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-    , _sceneGraphNodeReference(NodeInfo, "")
+    , _sceneGraphNodeReference(NodeCameraStateInfo, "")
 {
     addProperty(_intensity);
     _sceneGraphNodeReference.onChange([this]() {

@@ -62,7 +62,13 @@ struct WindowDelegate {
 
     glm::ivec2 (*currentViewportSize)() = []() { return glm::ivec2(0); };
 
+    glm::ivec2(*currentViewportResolution)() = []() { return glm::ivec2(0); };
+
     glm::vec2 (*dpiScaling)() = []() { return glm::vec2(1.f); };
+
+    glm::ivec2(*firstWindowResolution)() = []() { return glm::ivec2(0); };
+
+    glm::ivec2(*guiWindowResolution)() = []() { return glm::ivec2(0); };
 
     float (*osDpiScaling)() = []() { return 1.f; };
 
@@ -89,6 +95,8 @@ struct WindowDelegate {
 
     int (*currentWindowId)() = []() { return 0; };
 
+    int (*firstWindowId)() = []() { return 0; };
+
     double (*getHorizFieldOfView)() = []() { return 0.0; };
 
     void (*setHorizFieldOfView)(float hFovDeg) = [](float) { };
@@ -113,6 +121,9 @@ struct WindowDelegate {
     int (*numberOfNodes)() = []() { return 0; };
 
     int (*currentNode)() = []() { return 0; };
+
+    glm::vec2 (*mousePositionViewportRelative)(glm::vec2 mousePosition) =
+        [](glm::vec2) { return glm::vec2(0); };
 };
 
 } // namespace openspace

@@ -1,0 +1,38 @@
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
+
+local layer = {
+  Identifier = "LolaDem_NewYork",
+  Name = "Lola DEM [New York]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("loladem_newyork.wms"),
+  TilePixelSize = 360,
+  Settings = { Multiplier = 0.5 },
+  Description = [[This digital elevation model (DEM) is based on data from the Lunar
+    Orbiter Laser Altimeter (LOLA; Smith et al., 2010), an instrument on the National
+    Aeronautics and Space Agency (NASA) Lunar Reconnaissance Orbiter (LRO) spacecraft
+    (Tooley et al., 2010). The created DEM represents more than 6.5 billion measurements
+    gathered between July 2009 and July 2013, adjusted for consistency in the coordinate
+    system described below, and then converted to lunar radii (Mazarico et al., 2012)]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Lola DEM [New York]",
+  Version = "1.1",
+  Description = [[Moon LRO LOLA DEM 118m v1 layer for Moon globe. This map is hosted on
+    the OpenSpace server in New York]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Moon/LRO/LOLA/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014",
+  License = "NASA/PDS"
+}

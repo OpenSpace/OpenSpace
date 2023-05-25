@@ -132,6 +132,8 @@ public:
      */
     Image latestImageForInstrument(const std::string& instrumentID) const;
 
+    const std::vector<double>& captureProgression() const;
+
 private:
     void sortData();
 

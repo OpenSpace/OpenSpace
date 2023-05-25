@@ -1,0 +1,80 @@
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local sunAsset = asset.require('scene/solarsystem/sun/sun')
+
+local modelFolder = asset.syncedResource({
+  Name = "Scale Rose Bowl",
+  Type = "HttpSynchronization",
+  Identifier = "scale_model_rose_bowl",
+  Version = 1
+})
+
+local scaleModel = {
+  Identifier = "Scale_RoseBowl",
+  Parent = earthAsset.Earth.Identifier,
+  --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 34.161318,
+      Longitude = -118.167623,
+      Altitude = 0.0,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 34.161318,
+      Longitude = -118.167623,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. "rose_bowl.gltf",
+    RotationVector = { 0.0, 98.68, 0.0 },
+    LightSources = { sunAsset.LightSource }
+  },
+  GUI = {
+    Name = "Rose Bowl",
+    Path = "/Scale Objects"
+  }
+}
+
+local updatePositionAction = {
+  Identifier = "os.scale_models.drop_rose_bowl",
+  Name = "Drop Rose Bowl under camera",
+  Command = [[
+    openspace.globebrowsing.setNodePositionFromCamera('Scale_RoseBowl')
+  ]],
+  Documentation = "Updates the Rose Bowl position based on the globe location of the camera",
+  GuiPath = "/Scale Objects",
+  IsLocal = false
+}
+
+local resetPositionAction = {
+  Identifier = "os.os.scale_models.reset_rose_bowl",
+  Name = "Reset Rose Bowl position",
+  Command = [[
+    openspace.globebrowsing.setNodePosition('Scale_RoseBowl', ']] .. earthAsset.Earth.Identifier .. [[', 34.161318, -118.167623)
+  ]],
+  Documentation = "Resets the Rose Bowl back to it's actual location",
+  GuiPath = "/Scale Objects",
+  IsLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(scaleModel)
+  openspace.action.registerAction(updatePositionAction)
+  openspace.action.registerAction(resetPositionAction)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(resetPositionAction)
+  openspace.action.removeAction(updatePositionAction)
+  openspace.removeSceneGraphNode(scaleModel)
+end)
+
+asset.export(scaleModel)
+asset.export(updatePositionAction)
+asset.export(resetPositionAction)

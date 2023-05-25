@@ -45,7 +45,8 @@ namespace {
         "EnableTouchInteraction",
         "Enable Touch Interaction",
         "Use this property to turn on/off touch input navigation in the 3D scene. "
-        "Disabling will reset all current touch inputs to the navigation."
+        "Disabling will reset all current touch inputs to the navigation.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
@@ -66,7 +67,8 @@ namespace {
         "relatively spherical objects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
-}
+} // namespace openspace
+
 namespace openspace {
 
 TouchModule::TouchModule()

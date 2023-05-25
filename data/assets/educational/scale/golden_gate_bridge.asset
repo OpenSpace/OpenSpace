@@ -1,0 +1,87 @@
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local sunAsset = asset.require('scene/solarsystem/sun/sun')
+
+local modelFolder = asset.syncedResource({
+  Name = "Scale Golden Gate Bridge",
+  Type = "UrlSynchronization",
+  Identifier = "scale_model_golden_gate_bridge",
+  Url = "https://wms.openspace.amnh.org/static/sync/url/scalemodels/golden_gate.osmodel",
+  Filename = "golden_gate.osmodel",
+  Override = false
+})
+
+local scaleModel = {
+  Identifier = "Scale_GoldenGateBridge",
+  Parent = earthAsset.Earth.Identifier,
+  --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 37.816116,
+      Longitude = -122.477890,
+      Altitude = 120.0,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earthAsset.Earth.Identifier,
+      Latitude = 37.816116,
+      Longitude = -122.477890,
+      UseHeightmap = false
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 0.2
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. "golden_gate.osmodel",
+    ForceRenderInvisible = true,
+    RotationVector = { 0.0, 95.4, 0.0 },
+    LightSources = { sunAsset.LightSource }
+  },
+  GUI = {
+    Name = "Golden Gate Bridge",
+    Path = "/Scale Objects"
+  }
+}
+
+local updatePositionAction = {
+  Identifier = "os.scale_models.drop_golden_gate_bridge",
+  Name = "Drop Golden Gate Bridge under camera",
+  Command = [[
+    openspace.globebrowsing.setNodePositionFromCamera('Scale_GoldenGateBridge')
+  ]],
+  Documentation = "Updates the Golden Gate Bridge position based on the globe location of the camera",
+  GuiPath = "/Scale Objects",
+  IsLocal = false
+}
+
+local resetPositionAction = {
+  Identifier = "os.os.scale_models.reset_golden_gate_bridge",
+  Name = "Reset Golden Gate Bridge position",
+  Command = [[
+    openspace.globebrowsing.setNodePosition('Scale_GoldenGateBridge', ']] .. earthAsset.Earth.Identifier .. [[', 37.816116, -122.477890)
+  ]],
+  Documentation = "Resets the Golden Gate Bridge back to it's actual location",
+  GuiPath = "/Scale Objects",
+  IsLocal = false
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(scaleModel)
+  openspace.action.registerAction(updatePositionAction)
+  openspace.action.registerAction(resetPositionAction)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(resetPositionAction)
+  openspace.action.removeAction(updatePositionAction)
+  openspace.removeSceneGraphNode(scaleModel)
+end)
+
+asset.export(scaleModel)
+asset.export(updatePositionAction)
+asset.export(resetPositionAction)

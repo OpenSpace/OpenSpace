@@ -33,7 +33,25 @@ local EUVLayer = {
 local toggle_EUV_layer = {
   Identifier = "os.solarsystem.sun.toggleeuv",
   Name = "Toggle EUV layer",
-  Command = propertyHelper.invert("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled"),
+  Command = [[
+    if openspace.getPropertyValue("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled") then
+      openspace.setPropertyValueSingle(
+        "Scene.EUV-Layer-bastille-day-2000.Renderable.Fade",
+        0.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "Scene.EUV-Layer-bastille-day-2000.Renderable.Fade",
+        1.0,
+        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
   Documentation = "Toggle EUV layer of sun",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false

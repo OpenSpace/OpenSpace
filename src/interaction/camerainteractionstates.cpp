@@ -84,13 +84,16 @@ void CameraInteractionStates::resetVelocities() {
     _globalRollState.velocity.setHard({ 0.0, 0.0 });
 }
 
-bool CameraInteractionStates::hasNonZeroVelocities() {
-    glm::dvec2 sum = globalRotationVelocity();
-    sum += localRotationVelocity();
+bool CameraInteractionStates::hasNonZeroVelocities(bool checkOnlyMovement) {
+    glm::dvec2 sum = glm::dvec2(0.0);
+    sum += globalRotationVelocity();
     sum += truckMovementVelocity();
-    sum += localRotationVelocity();
-    sum += localRollVelocity();
-    sum += globalRollVelocity();
+    if (!checkOnlyMovement) {
+        sum += localRotationVelocity();
+        sum += localRotationVelocity();
+        sum += localRollVelocity();
+        sum += globalRollVelocity();
+    }
     // Epsilon size based on that even if no interaction is happening,
     // there might still be some residual velocity in the variables
     return glm::length(sum) > 0.001;

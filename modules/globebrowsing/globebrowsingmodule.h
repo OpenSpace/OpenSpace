@@ -95,6 +95,9 @@ public:
     bool isMRFCachingEnabled() const;
     const std::string mrfCacheLocation() const;
 
+    bool hasDefaultGeoPointTexture() const;
+    std::string_view defaultGeoPointTexture() const;
+
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
@@ -113,6 +116,7 @@ private:
 
     properties::UIntProperty _tileCacheSizeMB;
 
+    properties::StringProperty _defaultGeoPointTexturePath;
     properties::BoolProperty _mrfCacheEnabled;
     properties::StringProperty _mrfCacheLocation;
 
@@ -124,6 +128,8 @@ private:
     std::map<std::string, Capabilities> _capabilitiesMap;
 
     std::multimap<std::string, UrlInfo> _urlList;
+
+    bool _hasDefaultGeoPointTexture = false;
 };
 
 } // namespace openspace

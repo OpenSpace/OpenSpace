@@ -40,27 +40,34 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered"
+        "This value determines the color of the grid lines that are rendered",
+        // @VISIBILITY(1.25)
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridSegmentsInfo = {
         "GridSegments",
         "Number of Grid Segments",
         "Specifies the number of segments for the grid, in the radial and angular "
-        "direction respectively"
+        "direction respectively",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo CircleSegmentsInfo = {
         "CircleSegments",
         "Number of Circle Segments",
         "This value specifies the number of segments that is used to render each circle "
-        "in the grid"
+        "in the grid",
+        // @VISIBILITY(2.5)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the spherical grid"
+        "This value specifies the line width of the spherical grid",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiiInfo = {
@@ -68,7 +75,9 @@ namespace {
         "Inner and Outer Radius",
         "The radii values that determine the size of the circular grid. The first value "
         "is the radius of the inmost ring and the second is the radius of the outmost "
-        "ring"
+        "ring",
+        // @VISIBILITY(2.67)
+        openspace::properties::Property::Visibility::User
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {

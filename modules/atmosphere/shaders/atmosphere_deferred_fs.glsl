@@ -64,6 +64,7 @@ in vec2 texCoord;
 out vec4 renderTarget;
 
 uniform int cullAtmosphere;
+uniform float opacity;
 uniform float Rg;
 uniform float Rt;
 uniform float groundRadianceEmission;
@@ -641,6 +642,8 @@ void main() {
     atmColor = sunColor(v, s, r, mu, irradianceFactor);
   }
 
-  // Final Color of ATM plus terrain:
-  renderTarget = vec4(inscatterColor + atmColor, 1.0);;
+  // Final Color of ATM plus terrain. We want to support opacity so we blend between the
+  // planet color and the full atmosphere color using the opacity value
+  vec3 c = mix(color, inscatterColor + atmColor, opacity);
+  renderTarget = vec4(c, 1.0);
 }

@@ -50,26 +50,30 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeckInfo = {
         "File",
         "Constellation Data File Path",
-        "The file that contains the data for the constellation lines"
+        "The file that contains the data for the constellation lines",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the constellations"
+        "Enables/Disables the drawing of the constellations",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UnitInfo = {
         "Unit",
         "Unit",
-        "The distance unit used for the constellation lines data"
+        "The distance unit used for the constellation lines data",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorsInfo = {
         "Colors",
         "Constellation Colors",
         "The defined colors for the constellations to be rendered. There can be several "
-        "groups of constellaitons that can have distinct colors."
+        "groups of constellaitons that can have distinct colors.",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableConstellationLines)]] Parameters {

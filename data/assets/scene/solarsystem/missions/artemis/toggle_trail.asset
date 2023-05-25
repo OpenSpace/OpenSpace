@@ -13,7 +13,6 @@ local toggle_trail = {
       return
     end
 
-
     local earthTrail = "ArtemisEarthTrail"
     local moonTrail = "ArtemisMoonTrail"
 
@@ -28,20 +27,20 @@ local toggle_trail = {
       end
     else
       visibility = not (
-        openspace.getPropertyValue("Scene." .. earthTrail .. ".Renderable.Enabled") or
-        openspace.getPropertyValue("Scene." .. moonTrail .. ".Renderable.Enabled")
+        (openspace.getPropertyValue("Scene." .. earthTrail .. ".Renderable.Fade") == 1) or 
+        (openspace.getPropertyValue("Scene." .. moonTrail .. ".Renderable.Fade") == 1)
       )
     end
 
-    openspace.setPropertyValueSingle(
-      "Scene." .. earthTrail .. ".Renderable.Enabled",
-      visibility
-    )
-    openspace.setPropertyValueSingle(
-      "Scene." .. moonTrail .. ".Renderable.Enabled",
-      visibility
-    )
-  ]],
+    if visibility then
+      openspace.fadeIn("Scene." .. earthTrail .. ".Renderable")
+      openspace.fadeIn("Scene." .. moonTrail .. ".Renderable")
+    else 
+      openspace.fadeOut("Scene." .. earthTrail .. ".Renderable")
+      openspace.fadeOut("Scene." .. moonTrail .. ".Renderable")
+    end
+
+     ]],
   Documentation = [[Toggles the visibility of the Artemis trails with an
     approaching/exiting event. This action takes optional arguments to 1) determine which
     node is currently in focus and only hide Artemis trails if it is in focus (as the

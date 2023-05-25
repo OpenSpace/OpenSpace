@@ -72,6 +72,8 @@ public:
         User = 2, ///< Visible in User mode
         NoviceUser = 1, ///< Visible in Novice User mode
         Always = 0,  ///< Visible for all types, no matter what
+
+        Default = Always ///< The default visibility for properties
     };
 
     /**
@@ -102,7 +104,7 @@ public:
         /// The user facing description of this Property
         const char* description;
         /// Determines the visibility of this Property in the user interface
-        Visibility visibility = Visibility::Always;
+        Visibility visibility = Visibility::Default;
     };
 
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an

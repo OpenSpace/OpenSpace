@@ -37,31 +37,41 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShowWhenEnabledInfo = {
         "ShowWhenEnabled",
         "Show when enabled",
-        "Show text when the input is enabled"
+        "Show text when the input is enabled",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowWhenDisabledInfo = {
         "ShowWhenDisabled",
         "Show when disabled",
-        "Show text when the input is disabled"
+        "Show text when the input is disabled",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowKeyboardInfo = {
         "ShowKeyboard",
         "Show Keyboard information",
-        "Display the state of the keyboard input"
+        "Display the state of the keyboard input",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowMouseInfo = {
         "ShowMouse",
         "Show Mouse information",
-        "Display the state of the mouse input"
+        "Display the state of the mouse input",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowJoystickInfo = {
         "ShowJoystick",
         "Show Joystick information",
-        "Display the state of the joystick input"
+        "Display the state of the joystick input",
+        // @VISIBILITY(?)
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {

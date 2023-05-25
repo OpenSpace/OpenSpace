@@ -1,3 +1,6 @@
+
+asset.require("scene/solarsystem/missions/juno/mission")
+asset.require("scene/solarsystem/planets/jupiter/layers/colorlayers/jupiter_video")
 local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
@@ -127,9 +130,10 @@ local JunoKernels = {
 }
 
 local RotationMatrix = {
-  0, 1, 0,
-  0, 0, 1,
-  1, 0, 0
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  1, 0, 0, 0,
+  0, 0, 0, 1
 }
 
 local Juno = {

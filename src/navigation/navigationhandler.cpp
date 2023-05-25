@@ -33,6 +33,7 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/scriptcamerastates.h>
 #include <openspace/navigation/navigationstate.h>
+#include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
@@ -63,26 +64,30 @@ namespace {
         "DisableKeybindings",
         "Disable all Keybindings",
         "Disables all keybindings without removing them. Please note that this does not "
-        "apply to the key to open the console"
+        "apply to the key to open the console",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
         "Disable all mouse inputs",
-        "Disables all mouse inputs and prevents them from affecting the camera"
+        "Disables all mouse inputs and prevents them from affecting the camera",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableJoystickInputInfo = {
         "DisableJoystickInputs",
         "Disable all joystick inputs",
-        "Disables all joystick inputs and prevents them from affecting the camera"
+        "Disables all joystick inputs and prevents them from affecting the camera",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "
-        "than using the mouse interaction"
+        "than using the mouse interaction",
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 
@@ -136,8 +141,12 @@ void NavigationHandler::setCamera(Camera* camera) {
     _orbitalNavigator.setCamera(camera);
 }
 
-void NavigationHandler::setNavigationStateNextFrame(NavigationState state) {
-    _pendingNavigationState = std::move(state);
+void NavigationHandler::setNavigationStateNextFrame(const NavigationState& state) {
+    _pendingState = state;
+}
+
+void NavigationHandler::setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec) {
+    _pendingState = std::move(spec);
 }
 
 OrbitalNavigator& NavigationHandler::orbitalNavigator() {
@@ -171,9 +180,9 @@ void NavigationHandler::setInterpolationTime(float durationInSeconds) {
 void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 
-    // If there is a navigation state to set, do so immediately and then return
-    if (_pendingNavigationState.has_value()) {
-        applyNavigationState(*_pendingNavigationState);
+    // If there is a state to set, do so immediately and then return
+    if (_pendingState.has_value()) {
+        applyPendingState();
         return;
     }
 
@@ -210,13 +219,27 @@ void NavigationHandler::updateCamera(double deltaTime) {
     _orbitalNavigator.updateCameraScalingFromAnchor(deltaTime);
 }
 
-void NavigationHandler::applyNavigationState(const NavigationState& ns) {
-    _orbitalNavigator.setAnchorNode(ns.anchor);
-    _orbitalNavigator.setAimNode(ns.aim);
-    _camera->setPose(ns.cameraPose());
+void NavigationHandler::applyPendingState() {
+    ghoul_assert(_pendingState.has_value(), "Pending pose must have a value");
+
+    std::variant<NodeCameraStateSpec, NavigationState> pending = *_pendingState;
+    if (std::holds_alternative<NavigationState>(pending)) {
+        NavigationState ns = std::get<NavigationState>(pending);
+        _orbitalNavigator.setAnchorNode(ns.anchor);
+        _orbitalNavigator.setAimNode(ns.aim);
+        _camera->setPose(ns.cameraPose());
+    }
+    else if (std::holds_alternative<NodeCameraStateSpec>(pending)) {
+        NodeCameraStateSpec spec = std::get<NodeCameraStateSpec>(pending);
+        Waypoint wp = computeWaypointFromNodeInfo(spec);
+
+        _orbitalNavigator.setAnchorNode(wp.nodeIdentifier());
+        _orbitalNavigator.setAimNode("");
+        _camera->setPose(wp.pose());
+    }
 
     resetNavigationUpdateVariables();
-    _pendingNavigationState.reset();
+    _pendingState.reset();
 }
 
 void NavigationHandler::updateCameraTransitions() {
@@ -520,6 +543,7 @@ void NavigationHandler::setJoystickAxisMapping(std::string joystickName, int axi
                                             JoystickCameraStates::AxisInvert shouldInvert,
                                           JoystickCameraStates::JoystickType joystickType,
                                                bool isSticky,
+                                               JoystickCameraStates::AxisFlip shouldFlip,
                                                double sensitivity)
 {
     _orbitalNavigator.joystickStates().setAxisMapping(
@@ -529,6 +553,7 @@ void NavigationHandler::setJoystickAxisMapping(std::string joystickName, int axi
         shouldInvert,
         joystickType,
         isSticky,
+        shouldFlip,
         sensitivity
     );
 }
