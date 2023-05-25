@@ -74,7 +74,6 @@ namespace {
         "Additive Blending",
         "Activate/deactivate additive blending"
     };
-
     constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
         "Domain Limits Enabled",
@@ -100,7 +99,6 @@ namespace {
         "Radial limits",
         "Valid radial range. [Min, Max]"
     };
-
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
         "Flow Enabled",
@@ -132,7 +130,6 @@ namespace {
         "Speed",
         "Speed of the flow"
     };
-
     constexpr openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
         "MaskingEnabled",
         "Masking Enabled",
@@ -151,13 +148,11 @@ namespace {
         "Quantity used for Masking",
         "Quantity used for masking"
     };
-
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
         "This value specifies the line width of the fieldlines"
     };
-
 
 
     struct [[codegen::Dictionary(RenderableFieldlinesSequenceNew)]] Parameters {
