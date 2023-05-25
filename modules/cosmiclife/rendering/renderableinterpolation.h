@@ -50,7 +50,7 @@ namespace ghoul::fontrendering { class Font; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-} // namespace ghoul::opengl
+}
 
 namespace openspace {
 
@@ -83,15 +83,32 @@ namespace openspace {
             float location[3];
         };
 
-        std::vector<float> createDataSlice(speck::Dataset& dataset);
+        struct DistancePoints {
+            float distance;
+            speck::Dataset::Entry p1;
+            speck::Dataset::Entry p2;
+
+            // Overload the less-than operator to compare ValueIndex objects
+            bool operator<(const DistancePoints& other) const {
+                // Compare values in reverse order for max heap
+                return distance < other.distance;
+            }
+        };
+
+        std::vector<float> createDataSlice(speck::Dataset& dataset, const RenderData& data);
         void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
             const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
         speck::Dataset interpolationFunc(const speck::Dataset& d1, const speck::Dataset& d2, float iv);
         speck::Dataset::Entry interpol(const speck::Dataset::Entry& e1, const speck::Dataset::Entry& e2, float iv);
         void sort(const speck::Dataset& d1, const speck::Dataset& d2);
 
-        void compareDist(const speck::Dataset& d1, const speck::Dataset& d2);
-        float averageDistance(const speck::Dataset& d);
+        void initializeLines();
+        std::vector<float> computeDistances(const speck::Dataset::Entry& e1, const std::vector<speck::Dataset::Entry>& d1);
+        std::vector<speck::Dataset::Entry> findPointsOfInterest(const speck::Dataset::Entry& e, const speck::Dataset& d);
+        void ComputeOutliers(const speck::Dataset& d1, const speck::Dataset& d2);
+        void renderLines(const RenderData& data);
+        float fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e);
+        void updateRenderData(const RenderData& data);
 
         // bool variables
         bool _dataIsDirty = true;
@@ -107,7 +124,10 @@ namespace openspace {
 
         properties::FloatProperty _scaleFactor;
         properties::Vec3Property _pointColor;
+        properties::Vec3Property _frameColor;
         properties::StringProperty _spriteTexturePath;
+        properties::BoolProperty _useFade;
+        properties::FloatProperty _maxThreshold;
         properties::BoolProperty _pixelSizeControl;
         properties::OptionProperty _colorOption;
         properties::Vec2Property _optionColorRangeData;
@@ -127,6 +147,7 @@ namespace openspace {
 
         //const std::string directory_path = "C:/OpenSpace/OpenSpace/user/data/assets/cosmic_life/morphing/data";
         std::map<std::string, std::string> _filePaths; 
+        std::optional<std::string> _uniqueSpecies;
 
         std::vector<Point> _MDS_points;
         std::vector<Point> _Umap_points;
@@ -136,6 +157,7 @@ namespace openspace {
 
         ghoul::opengl::Texture* _spriteTexture = nullptr;
         ghoul::opengl::ProgramObject* _program = nullptr;
+        ghoul::opengl::ProgramObject* _programL = nullptr;
 
 
         // variables that are sent to the shaders
@@ -143,7 +165,7 @@ namespace openspace {
             cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
             minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
             correctionSizeFactor, color, alphaValue, scaleFactor, up, right,
-            screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling
+            screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling, frameColor, useGamma
         ) _uniformCache;
 
         // font variable from ghoul library

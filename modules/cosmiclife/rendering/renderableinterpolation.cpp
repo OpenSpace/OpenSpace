@@ -25,6 +25,8 @@
 #include <modules/cosmiclife/rendering/renderableinterpolation.h>
 #include <modules/cosmiclife/cosmiclifemodule.h>
 
+#include <queue>
+#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -59,12 +61,12 @@ namespace {
     constexpr const char* ProgramObjectName = "RenderableInterpolation";
 
 
-    constexpr const std::array<const char*, 19> UniformNames = {
+    constexpr const std::array<const char*, 21> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize",
         "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
         "scaleFactor", "up", "right", "screenSize", "spriteTexture",
-        "hasColorMap", "enabledRectSizeControl", "hasDvarScaling"
+        "hasColorMap", "enabledRectSizeControl", "hasDvarScaling", "frameColor", "useGamma"
     };
 
     enum RenderOption {
@@ -77,6 +79,25 @@ namespace {
         "Texture",
         "Point Sprite Texture",
         "The path to the texture that should be used as the point sprite."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
+        "FadeInfo",
+        "Fade Info",
+        "This value is used to tell if the asset should be faded or not."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FrameColorInfo = {
+        "FrameColor",
+        "Frame Color",
+        "This value gives the color of the frame around each point."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MaxThresholdInfo = {
+        "MaxThresholdInfo",
+        "Max Threshold Info",
+        "This value is used to tell the max distance when the object should be shown or not."
+        "When shown it is faded according to distance to camera."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
@@ -205,6 +226,15 @@ namespace {
         // [[codegen::verbatim(SpriteTextureInfo.description)]]
         std::optional<std::string> texture;
 
+        // [[codegen::verbatim(FadeInfo.description)]]
+        std::optional<bool> useFade;
+
+        // [[codegen::verbatim(FrameColorInfo.description)]]
+        std::optional<glm::vec3> frameColor;
+
+        // [[codegen::verbatim(MaxThresholdInfo.description)]]
+        std::optional<float> maxThreshold;
+
         enum class [[codegen::map(RenderOption)]] RenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
             PositionNormal [[codegen::key("Camera Position Normal")]]
@@ -270,6 +300,8 @@ namespace {
         // [[codegen::verbatim(DirectoryPathInfo.description)]]
         std::optional<std::string> directoryPath;
 
+        std::optional<std::string> uniqueSpecies;
+
 
     };
 #include "renderableinterpolation_codegen.cpp"
@@ -287,7 +319,10 @@ namespace openspace {
         : Renderable(dictionary)
         , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
         , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+        , _frameColor(FrameColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
         , _spriteTexturePath(SpriteTextureInfo)
+        , _useFade(FadeInfo, false)
+        , _maxThreshold(MaxThresholdInfo, 100000.f)
         , _pixelSizeControl(PixelSizeControlInfo, false)
         , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _optionColorRangeData(OptionColorRangeInfo, glm::vec2(0.f))
@@ -335,14 +370,20 @@ namespace openspace {
         _dataSetOneOption.addOptions(fileOptionNames);
         _dataSetTwoOption.addOptions(fileOptionNames);
 
+        _uniqueSpecies = p.uniqueSpecies;
+        _useFade = p.useFade.value_or(_useFade);
+        _maxThreshold = p.maxThreshold.value_or(_maxThreshold);
+        _frameColor = p.frameColor.value_or(_frameColor);
 
         auto func = [this]() {
+
             _dataSetOne =_datasets[_dataSetOneOption.getDescriptionByValue(_dataSetOneOption.value())];
             _dataSetTwo =_datasets[_dataSetTwoOption.getDescriptionByValue(_dataSetTwoOption.value())];
 
              sort(_dataSetOne, _dataSetTwo);
 
-             compareDist(_dataSetOne, _dataSetTwo);
+             //ComputeOutliers(_dataSetOne, _dataSetTwo);
+             //initializeLines();
 
             _dataIsDirty = true;
         };
@@ -358,6 +399,7 @@ namespace openspace {
             _interpolationValue = _interpolationValue.value();
             _dataIsDirty = true;
             LDEBUG(std::to_string(_interpolationValue));
+            //initializeLines();
             });
         addProperty(_interpolationValue); //puts it on the GUI 
 
@@ -495,49 +537,108 @@ namespace openspace {
         bool hasAllDataSetData = std::all_of(_datasets.begin(), _datasets.end(), [](const auto& d) {
             return !d.second.entries.empty();
             });
-        return (_program && hasAllDataSetData);
+        return (_program && _programL && hasAllDataSetData);
     }
 
-    float RenderableInterpolation::averageDistance(const speck::Dataset& d) {
-        float sumDistances = 0.0;
-        int numPairs = 0;
+    std::vector<speck::Dataset::Entry> RenderableInterpolation::findPointsOfInterest(const speck::Dataset::Entry& e, const speck::Dataset& d) {
+        
+        std::vector<speck::Dataset::Entry> pointsOfInterest;
 
-        for (int i = 0; i < d.entries.size() - 1; i++) {
-            for (int j = i + 1; j < d.entries.size(); j++) {
-                float dx = d.entries[i].position.x - d.entries[j].position.x;
-                float dy = d.entries[i].position.y - d.entries[j].position.y;
-                float dz = d.entries[i].position.z - d.entries[j].position.z;
-                float distance = std::sqrt(dx * dx + dy * dy + dz * dz);
-                sumDistances += distance;
-                numPairs++;
+        for (int i = 0; i < d.entries.size(); i++) {
+            if (e.data[0] == d.entries[i].data[0]) {
+                pointsOfInterest.push_back(d.entries[i]);
             }
         }
-        return sumDistances / numPairs;
+
+        return pointsOfInterest;
     }
 
-    void RenderableInterpolation::compareDist(const speck::Dataset& d1, const speck::Dataset& d2) {
+    std::vector<float> RenderableInterpolation::computeDistances(const speck::Dataset::Entry& e1, const std::vector<speck::Dataset::Entry>& d1) {
+        //Store distances
+        std::vector<float> distances;
 
-        float averageDistance1 = averageDistance(d1);
-        float averageDistance2 = averageDistance(d2);
+        //Loop all the entries in the dataset
+        for (int i = 0; i < d1.size(); i++) {
+                //compute distance
+                float distance = glm::distance(e1.position, d1[i].position);
+                //push back the distances
+                distances.push_back(distance);
+            }
 
-        float averageDistanceDiff = (averageDistance1 + averageDistance2) / 2;
+        return distances;
+    }
 
+    void RenderableInterpolation::ComputeOutliers(const speck::Dataset& d1, const speck::Dataset& d2) {
         _vertices1.clear();
         _vertices2.clear();
 
+        std::priority_queue<DistancePoints> maxHeap1;
+        std::priority_queue<DistancePoints> maxHeap2;
+            
         for (int i = 0; i < d1.entries.size(); i++) {
-            for (int j = 0; j < d1.entries.size(); j++) {
-                if (i == j) continue;
-                double distance1 = sqrt(pow(d1.entries[i].position.x - d1.entries[j].position.x, 2) + pow(d1.entries[i].position.y - d1.entries[j].position.y, 2) + pow(d1.entries[i].position.z - d1.entries[j].position.z, 2));
-                double distance2 = sqrt(pow(d2.entries[i].position.x - d2.entries[j].position.x, 2) + pow(d2.entries[i].position.y - d2.entries[j].position.y, 2) + pow(d2.entries[i].position.z - d2.entries[j].position.z, 2));
-                if (abs(distance1 - distance2) > averageDistanceDiff) {
-                    _vertices1.push_back(Vertex{ d1.entries[i].position.x, d1.entries[i].position.y, d1.entries[i].position.z });
-                    _vertices1.push_back(Vertex{ d1.entries[j].position.x, d1.entries[j].position.y, d1.entries[j].position.z });
-                    _vertices2.push_back(Vertex{ d2.entries[i].position.x, d2.entries[i].position.y, d2.entries[i].position.z });
-                    _vertices2.push_back(Vertex{ d2.entries[j].position.x, d2.entries[j].position.y, d2.entries[j].position.z });
-                }
+            // Find the points of interest
+            std::vector<speck::Dataset::Entry> poi_d1 = findPointsOfInterest(d1.entries[i], d1);
+            std::vector<speck::Dataset::Entry> poi_d2 = findPointsOfInterest(d2.entries[i], d2);
+
+            
+            // Compute distances in both datasets,
+            std::vector<float> d1Distances = computeDistances(d1.entries[i], poi_d1);
+            std::vector<float> d2Distances = computeDistances(d2.entries[i], poi_d2);
+
+            // Compute the difference
+            // Store the difference in maxheap
+            for (int j = 0; j < d1Distances.size(); j++) {
+                float distanceDiff = abs(d1Distances[j] - d2Distances[j]);
+                maxHeap1.push({ distanceDiff, d1.entries[i], poi_d1[j] });
+                maxHeap2.push({ distanceDiff, d2.entries[i], poi_d2[j] });
             }
         }
+
+        // Find the top 5% and take their indices to get the correct point in the datasets
+        int numElementsToPop = maxHeap1.size() * 0.0001;
+
+        // Pop the top 10% elements from the max heap and store their indices
+        for (int k = 0; k < numElementsToPop; k++) {
+            
+            DistancePoints maxValue1 = maxHeap1.top();
+            maxHeap1.pop();
+
+            _vertices1.push_back(Vertex{ maxValue1.p1.position.x, maxValue1.p1.position.y, maxValue1.p1.position.z });
+            _vertices1.push_back(Vertex{ maxValue1.p2.position.x, maxValue1.p2.position.y, maxValue1.p2.position.z });
+
+            DistancePoints maxValue2 = maxHeap2.top();
+            maxHeap2.pop();
+
+            _vertices2.push_back(Vertex{ maxValue2.p1.position.x, maxValue2.p1.position.y, maxValue2.p1.position.z });
+            _vertices2.push_back(Vertex{ maxValue2.p2.position.x, maxValue2.p2.position.y, maxValue2.p2.position.z });
+        }
+
+  
+    }
+
+    void RenderableInterpolation::initializeLines() {
+
+
+        if (_vaoLines == 0) {
+            glGenVertexArrays(1, &_vaoLines);  // Generate VAO
+            glBindVertexArray(_vaoLines);  // Bind VAO
+            glGenBuffers(1, &_vboLines);  // Generate and bind VBO
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, _vboLines);
+
+        // Set VBO data
+        if (_interpolationValue < 0.01) {
+            glBufferData(GL_ARRAY_BUFFER, _vertices1.size() * sizeof(Vertex), _vertices1.data(), GL_DYNAMIC_DRAW);
+        }
+        else if (_interpolationValue > 0.99) {
+            glBufferData(GL_ARRAY_BUFFER, _vertices2.size() * sizeof(Vertex), _vertices2.data(), GL_DYNAMIC_DRAW);
+        }
+
+        // Enable vertex attribute array and specify layout
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+
     }
 
     void RenderableInterpolation::sort(const speck::Dataset& d1, const speck::Dataset& d2) {
@@ -551,13 +652,13 @@ namespace openspace {
             for (int j = 0; j < d2.entries.size(); j++) {
                 if (d1.entries[i].comment == d2.entries[j].comment) {
                     d1_copy.entries.push_back(d1.entries[i]);
-                    d2_copy.entries.push_back( d2.entries[j]);
+                    d2_copy.entries.push_back(d2.entries[j]);
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                d1_copy.entries.push_back( d1.entries[i]);
+                d1_copy.entries.push_back(d1.entries[i]);
                 d2_copy.entries.push_back(d1.entries[i]);
             }
         }
@@ -582,7 +683,20 @@ namespace openspace {
     void RenderableInterpolation::initialize() {
         for (const auto& [name, path] : _filePaths) {
             _datasets[name] = speck::data::loadFileWithCache(path);
+
+            if (_uniqueSpecies.has_value()) {
+                //Find all occurences in _dataset that correspond to specie store those instead
+                std::vector<openspace::speck::Dataset::Entry> newdataset;
+                std::copy_if(_datasets[name].entries.begin(), _datasets[name].entries.end(), std::back_inserter(newdataset), [this](const openspace::speck::Dataset::Entry& entry) {
+                    //function to find species
+                    return entry.comment == _uniqueSpecies.value();
+                    });
+
+                _datasets[name].entries = std::move(newdataset);
+            }
         }
+
+        //Compute Outliers for all datasets
         
         if (_hasColorMapFile) {
             _colorMap = speck::color::loadFileWithCache(_colorMapFile);
@@ -604,38 +718,23 @@ namespace openspace {
             []() {
                 return global::renderEngine->buildRenderProgram(
                     ProgramObjectName,
-                    absPath("${MODULE_COSMICLIFE}/shaders/points_interpolation_vs.glsl"),
-                    absPath("${MODULE_COSMICLIFE}/shaders/points_interpolation_fs.glsl"),
-                    absPath("${MODULE_COSMICLIFE}/shaders/points_interpolation_gs.glsl")
+                    absPath("${MODULE_COSMICLIFE}/shaders/points_vs.glsl"),
+                    absPath("${MODULE_COSMICLIFE}/shaders/points_fs.glsl"),
+                    absPath("${MODULE_COSMICLIFE}/shaders/points_gs.glsl")
                 );
             }
         );
 
-        _dataSetOne = _datasets.begin()->second;
-        _dataSetTwo = _datasets.rbegin()->second;
-
-        sort(_dataSetOne, _dataSetTwo);
-
-        compareDist(_dataSetOne, _dataSetTwo);
-
-        _dataIsDirty = true;
-
-        glGenVertexArrays(1, &_vaoLines);  // Generate VAO
-        glBindVertexArray(_vaoLines);  // Bind VAO
-
-        // Generate and bind VBO
-        glGenBuffers(1, &_vboLines);
-        glBindBuffer(GL_ARRAY_BUFFER, _vboLines);
-
-        // Set VBO data
-        glBufferData(GL_ARRAY_BUFFER, _vertices1.size() * sizeof(Vertex), _vertices1.data(), GL_STATIC_DRAW);
-
-        // Enable vertex attribute array and specify layout
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-
-        // Unbind VAO
-        glBindVertexArray(0);
+        _programL = BaseModule::ProgramObjectManager.request(
+            "CartesianAxesProgram",
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return global::renderEngine->buildRenderProgram(
+                    "CartesianAxesProgram",
+                    absPath("${MODULE_COSMICLIFE}/shaders/axes_vs.glsl"),
+                    absPath("${MODULE_COSMICLIFE}/shaders/axes_fs.glsl")
+                );
+            }
+        );
 
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
@@ -649,6 +748,11 @@ namespace openspace {
         glDeleteVertexArrays(1, &_vao);
         _vao = 0;
 
+        glDeleteBuffers(1, &_vboLines);
+        _vboLines = 0;
+        glDeleteVertexArrays(1, &_vaoLines);
+        _vaoLines = 0;
+
         CosmicLifeModule::ProgramObjectManager.release(
             ProgramObjectName,
             [](ghoul::opengl::ProgramObject* p) {
@@ -657,7 +761,13 @@ namespace openspace {
         );
         _program = nullptr;
 
-
+        BaseModule::ProgramObjectManager.release(
+            "CartesianAxesProgram",
+            [](ghoul::opengl::ProgramObject* p) {
+                global::renderEngine->removeRenderProgram(p);
+            }
+        );
+        _programL = nullptr;
 
         CosmicLifeModule::TextureManager.release(_spriteTexture);
         _spriteTexture = nullptr;
@@ -717,6 +827,9 @@ namespace openspace {
 
         _program->setUniform(_uniformCache.hasDvarScaling, _hasDatavarSize);
 
+        _program->setUniform(_uniformCache.frameColor, _frameColor);
+        _program->setUniform(_uniformCache.useGamma, _useFade);
+
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
         _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
@@ -738,8 +851,68 @@ namespace openspace {
         global::renderEngine->openglStateCache().resetDepthState();
     }
 
+    float RenderableInterpolation::fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e) {
+        // Calculate distance between object and camera
+        float distance = sqrt(pow((e.position.x * toMeter(_unit)) - data.camera.positionVec3().x, 2) + pow((e.position.y * toMeter(_unit)) - data.camera.positionVec3().y, 2) + pow((e.position.z * toMeter(_unit)) - data.camera.positionVec3().z, 2));
+
+        // Set alpha value based on distance
+        float alpha = 1.0f;
+        if (distance > _maxThreshold) {
+            alpha = 0.0f;  // Object is completely transparent when beyond the maximum distance
+        }
+        else if (distance > 0) {
+            alpha = 1.0f - (distance / _maxThreshold);
+        }
+
+        // Set object alpha value
+        return alpha;
+    }
+
+    void RenderableInterpolation::renderLines(const RenderData& data) {
+        _programL->activate();
+
+        const glm::dmat4 modelTransform =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            glm::dmat4(data.modelTransform.rotation) *
+            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+        const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
+            modelTransform;
+
+        _programL->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+        _programL->setUniform("projectionTransform", data.camera.projectionMatrix());
+
+        // Changes GL state:
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnablei(GL_BLEND, 0);
+        glEnable(GL_LINE_SMOOTH);
+        glLineWidth(1.0);
+
+        // Bind VAO
+        glBindVertexArray(_vaoLines);
+
+        // Render lines
+        if (_interpolationValue < 0.01) {
+            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_vertices1.size()));
+        }
+        else if (_interpolationValue > 0.99) {
+            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_vertices2.size()));
+        }
+
+        // Unbind VAO
+        glBindVertexArray(0);
+
+        _programL->deactivate();
+
+        // Restores GL State
+        global::renderEngine->openglStateCache().resetBlendState();
+        global::renderEngine->openglStateCache().resetLineState();
+    }
+
 
     void RenderableInterpolation::render(const RenderData& data, RendererTasks&) {
+
+        updateRenderData(data);
         
         glm::dmat4 modelMatrix =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
@@ -768,14 +941,7 @@ namespace openspace {
 
         renderPoints(data, modelMatrix, orthoRight, orthoUp);
 
-        // Bind VAO
-        glBindVertexArray(_vaoLines);
-
-        // Render lines
-        glDrawArrays(GL_LINES, 0, 6);
-
-        // Unbind VAO
-        glBindVertexArray(0);
+        //renderLines(data);
   
     }
 
@@ -797,18 +963,20 @@ namespace openspace {
         }
         return result;
     }
-    void RenderableInterpolation::update(const UpdateData&) {
+
+    void RenderableInterpolation::updateRenderData(const RenderData& data) {
+
         if (_dataIsDirty) {
             ZoneScopedN("Data dirty")
                 TracyGpuZone("Data dirty")
                 LDEBUG("Regenerating data");
 
-            //todo interpolation
+
             _interpolationDataset = interpolationFunc(
                 _datasets[_dataSetOneOption.getDescriptionByValue(_dataSetOneOption.value())],
                 _datasets[_dataSetTwoOption.getDescriptionByValue(_dataSetTwoOption.value())],
                 _interpolationValue);
-            std::vector<float> slice = createDataSlice(_interpolationDataset);
+            std::vector<float> slice = createDataSlice(_interpolationDataset, data);
 
             int size = static_cast<int>(slice.size());
 
@@ -963,6 +1131,10 @@ namespace openspace {
 
             _dataIsDirty = false;
         }
+    
+    }
+
+    void RenderableInterpolation::update(const UpdateData&) {
 
         if (_hasSpriteTexture && _spriteTextureIsDirty && !_spriteTexturePath.value().empty())
         {
@@ -993,7 +1165,7 @@ namespace openspace {
     }
 
 
-    std::vector<float> RenderableInterpolation::createDataSlice(speck::Dataset& dataset) {
+    std::vector<float> RenderableInterpolation::createDataSlice(speck::Dataset& dataset, const RenderData& data) {
 
         if (_interpolationDataset.entries.empty()) {
             return std::vector<float>();
@@ -1156,7 +1328,14 @@ namespace openspace {
                     result.push_back(position[j]);
                 }
             }
-            result.push_back(1);
+
+            if (_useFade) {
+                float fade = fadeObjectDependingOnDistance(data, e);
+                result.push_back(1);
+            }
+            else {
+                result.push_back(1);
+            }
         }
         setBoundingSphere(maxRadius);
         return result;

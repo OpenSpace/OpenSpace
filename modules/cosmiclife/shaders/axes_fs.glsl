@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,22 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+in float vs_screenSpaceDepth;
+in vec4 vs_positionViewSpace;
+in vec3 vs_positionModelSpace;
 
-in vec4 in_position;
-in vec4 in_colormap;
-in float in_dvarScaling;
-in float in_opacity;
+Fragment getFragment() {
+  Fragment frag;
 
-flat out vec4 colorMap;
-flat out float dvarScaling;
-flat out float opacity;
+  frag.color.rgb = vec3(1.0, 0.0, 0.0);
+  frag.color.a = 1.0;
 
-void main() {
-  colorMap = in_colormap;
-  dvarScaling = in_dvarScaling;
-  opacity = in_opacity;
-  gl_Position = in_position;
+  frag.depth = vs_screenSpaceDepth;
+  frag.gPosition = vs_positionViewSpace;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+  return frag;
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,71 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#version __CONTEXT__
 
-flat in vec4 gs_colorMap;
-flat in float vs_screenSpaceDepth;
-in vec2 texCoord;
-in float ta;
-in float gs_opacity;
+layout(location = 0) in vec3 in_position;
 
-uniform float alphaValue;
-uniform vec3 color;
-uniform vec3 frameColor;
-uniform sampler2D spriteTexture;
-uniform bool hasColorMap;
-uniform bool useGamma;
+out float vs_screenSpaceDepth;
+out vec4 vs_positionViewSpace;
+out vec3 vs_positionModelSpace;
 
-Fragment getFragment() {
-  
-  vec4 textureColor = texture(spriteTexture, texCoord);
- 
-  vec4 fullColor = textureColor;
-    
-  if (hasColorMap) {
-    fullColor *= gs_colorMap;
-  }
-  else {
-    fullColor.rgb *= color;
-  }
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
 
-  fullColor.a *= alphaValue * gs_opacity * ta;
-  fullColor.a = max(fullColor.a, 0.0f);
-  fullColor.a = min(fullColor.a, 1.0f);
+const double PARSEC = 0.308567756e17LF;
 
-  float textureOpacity = dot(fullColor.rgb, vec3(fullColor.a));
 
-  Fragment frag;
-  
-  if(useGamma) {
-      // Define a gamma value for brightning the pictures
-      float gamma = 1.5;
+void main() {
 
-      // Define the outline width and color
-      float outlineWidth = 0.07;  // Adjust this value as needed
-      vec4 outlineColor = vec4(frameColor, alphaValue * gs_opacity * ta);  // Color connected to DNA sequences
+  vec4 positionViewSpace = modelViewTransform * vec4(in_position * 1E3, 1.0);
+  vec4 positionClipSpace = projectionTransform * positionViewSpace;
+  vec4 positionScreenSpace = positionClipSpace;
+  positionScreenSpace.z = 0.0;
+  vs_positionModelSpace = in_position;
+  vs_screenSpaceDepth  = positionScreenSpace.w;
+  vs_positionViewSpace = positionViewSpace;
 
-      // Apply the outline effect if any of the neighboring pixels are black
-      if (texCoord.y < outlineWidth) {
-        frag.color = outlineColor;
-      }
-      else {
-        frag.color = fullColor;
-        frag.color.rgb = pow(frag.color.rgb, vec3(1.0/(gamma)));
-      }
-  }
-  else {
-      frag.color = fullColor;
-  }
-
-  if (frag.color.a < 0.01) {
-    discard;
-  }
-
-  frag.depth = vs_screenSpaceDepth;
-  // Setting the position of the billboards to not interact with the ATM
-  frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
-  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-
-  return frag;
+  gl_Position = positionScreenSpace;
 }
