@@ -21,6 +21,7 @@ local Sphere = {
   }
 }
 
+
 asset.onInitialize(function()
     openspace.addSceneGraphNode(Sphere)
 end)

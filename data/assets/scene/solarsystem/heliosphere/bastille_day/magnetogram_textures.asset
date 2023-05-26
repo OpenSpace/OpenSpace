@@ -30,7 +30,7 @@ local SwitchColorLayer = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   magnetograms = openspace.walkDirectoryFiles(magnetogramDirectory.TexturesPath);
   rawset(_G, "magnetogramsTextureIndex", -1)
   for i, imagename in ipairs(magnetograms) do
@@ -50,12 +50,14 @@ asset.onInitialize(function ()
   openspace.action.registerAction(SwitchColorLayer)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   for i, imagename in ipairs(magnetograms) do
     openspace.globebrowsing.deleteLayer("Sun", "ColorLayers", "magnetogram-" .. i)
   end
   openspace.action.removeAction(SwitchColorLayer)
 end)
+
+asset.export("SwitchColorLayer", SwitchColorLayer.Identifier)
 
 
 

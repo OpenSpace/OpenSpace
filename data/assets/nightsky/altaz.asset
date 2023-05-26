@@ -42,7 +42,7 @@ local AltAzGrid = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = { -math.pi / 2.0, 0.0, 0.0 }
-    },
+    }
   },
   Renderable = {
     Type = "RenderableSphericalGrid",
@@ -108,5 +108,5 @@ end)
 
 asset.export(AltAzGridPosition)
 asset.export(AltAzGrid)
-asset.export(ShowAltaz)
-asset.export(HideAltaz)
+asset.export("ShowAltaz", ShowAltaz.Identifier)
+asset.export("HideAltaz", HideAltaz.Identifier)

@@ -37,7 +37,7 @@ local Object = {
       the Milky Way's spiral arms. We label them in this manner ("hard coding" the
       labels into an image rather than having native labels) so that they can retain
       their size, shape, and location as they overlay the galaxy. (Description from
-      Digital Universe Data Profiles)]],
+      Digital Universe Data Profiles)]]
   }
 }
 

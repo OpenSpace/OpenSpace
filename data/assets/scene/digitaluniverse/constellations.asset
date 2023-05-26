@@ -93,7 +93,7 @@ local Constellations = {
       88 regions. Of course, today we know the stars in any given constellation do
       not necessarily have any physical relationship with one another. One star may
       be nearby, while an adjacent star in the sky may be far away.(Description
-      from URL) <br><br> Data Reference: various]],
+      from URL) <br><br> Data Reference: various]]
   }
 }
 
@@ -156,6 +156,9 @@ end)
 
 asset.export(ConstellationsExtragalactic)
 asset.export(Constellations)
+asset.export("ShowConstellations", ShowConstellations.Identifier)
+asset.export("HideConstellations", HideConstellations.Identifier)
+asset.export("ShowZodiacs", ShowZodiacs.Identifier)
 
 
 

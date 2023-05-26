@@ -36,7 +36,7 @@ local MeridianPlane = {
     Scale = {
       Type = "StaticScale",
       Scale = 1000000
-    },
+    }
   },
   Renderable = {
     Type = "RenderableRadialGrid",
@@ -87,6 +87,7 @@ local HideMeridian = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MeridianPosition)
   openspace.addSceneGraphNode(MeridianPlane)
@@ -103,5 +104,5 @@ end)
 
 asset.export(MeridianPosition)
 asset.export(MeridianPlane)
-asset.export(ShowMeridian)
-asset.export(HideMeridian)
+asset.export("ShowMeridian", ShowMeridian.Identifier)
+asset.export("HideMeridian", HideMeridian.Identifier)

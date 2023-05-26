@@ -107,10 +107,10 @@ local function registerNode(containerAsset, nodeCreationFunction,
 
   specification.Identifier = identifier
 
-  containerAsset.onInitialize(function ()
+  containerAsset.onInitialize(function()
     nodeCreationFunction(specification)
   end)
-  containerAsset.onDeinitialize(function ()
+  containerAsset.onDeinitialize(function()
     openspace.removeSceneGraphNode(identifier)
   end)
 end

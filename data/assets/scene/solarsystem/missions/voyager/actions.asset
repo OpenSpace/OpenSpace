@@ -77,6 +77,12 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(SetupJupiterApproach)
 end)
 
+asset.export("SetupJupiterApproach", SetupJupiterApproach.Identifier)
+asset.export("SetupSaturnApproach", SetupSaturnApproach.Identifier)
+asset.export("JupiterFocus", JupiterFocus.Identifier)
+asset.export("SaturnFocus", SaturnFocus.Identifier)
+asset.export("ToggleMinorMoonTrails", ToggleMinorMoonTrails.Identifier)
+
 
 
 asset.meta = {

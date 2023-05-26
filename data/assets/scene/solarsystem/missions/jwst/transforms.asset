@@ -1,7 +1,7 @@
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 asset.require("scene/solarsystem/planets/earth/lagrange_points/L2")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -47,7 +47,7 @@ local JWSTPosition = {
           Kernels = { kernels .. "webb.bsp" }
         }
       }
-    },
+    }
   },
   GUI = {
     Name = "JWST Position",

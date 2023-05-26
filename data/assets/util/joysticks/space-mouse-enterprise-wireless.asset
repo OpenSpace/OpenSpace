@@ -34,9 +34,10 @@ local SpaceMouse = {
   -- keybindings instead, for more information see our wiki page.
 }
 
+
 asset.onInitialize(function()
-  local controller = SpaceMouse;
-  local name = "3Dconnexion Universal Receiver";
+  local controller = SpaceMouse
+  local name = "3Dconnexion Universal Receiver"
 
   local deadzone = 0.15
   openspace.navigation.setAxisDeadZone(name, controller.Push[1], deadzone)
@@ -46,10 +47,10 @@ asset.onInitialize(function()
   openspace.navigation.setAxisDeadZone(name, controller.Push[3], deadzone)
   openspace.navigation.setAxisDeadZone(name, controller.Tilt[1], deadzone)
 
-  openspace.navigation.bindJoystickAxis(name, controller.Push[1], "Orbit X");
-  openspace.navigation.bindJoystickAxis(name, controller.Push[2], "Orbit Y");
-  openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "Pan X", true);
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y");
-  openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom");
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll");
+  openspace.navigation.bindJoystickAxis(name, controller.Push[1], "Orbit X")
+  openspace.navigation.bindJoystickAxis(name, controller.Push[2], "Orbit Y")
+  openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "Pan X", true)
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y")
+  openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom")
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll")
 end)

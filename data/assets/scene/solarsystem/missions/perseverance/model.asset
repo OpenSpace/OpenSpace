@@ -49,7 +49,7 @@ local TranslationKeyframes = {
     Target = spice.ID,
     Observer = "MARS",
     Frame = "IAU_MARS",
-    Kernels = spice.Kernels,
+    Kernels = spice.Kernels
   },
   ["2021 FEB 18 20:43:49"] = {
     Type = "SpiceTranslation",

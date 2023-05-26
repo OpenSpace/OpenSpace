@@ -64,6 +64,7 @@ local GaiaStars = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GaiaStars)
 end)

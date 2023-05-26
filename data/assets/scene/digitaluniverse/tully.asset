@@ -107,6 +107,7 @@ local TullyGalaxiesImages = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(TullyGalaxies)
   openspace.addSceneGraphNode(TullyGalaxiesImages)

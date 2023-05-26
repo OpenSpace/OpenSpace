@@ -15,7 +15,6 @@ local Translation = {
   Period = 205472.1258735657 * 60 * 60 * 24
 }
 
-
 local Position = {
   Identifier = "ErisPosition",
   Parent = transforms.SunECLIPJ2000.Identifier,

@@ -76,6 +76,7 @@ local PlutoLabel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Pluto)
   openspace.addSceneGraphNode(PlutoLabel)

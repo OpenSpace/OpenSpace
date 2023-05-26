@@ -22,7 +22,7 @@ local MarsTrail = {
     Name = "Mars Trail",
     Path = "/Solar System/Planets/Mars",
     Description = [[Trail of Mars as observed by the Sun. Data from NASA Spice (see
-      base spice asset)]],
+      base spice asset)]]
   }
 }
 

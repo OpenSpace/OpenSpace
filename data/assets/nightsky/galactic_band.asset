@@ -51,6 +51,7 @@ local HideGalacticBand = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GalacticBand)
   openspace.action.registerAction(ShowGalacticBand)
@@ -64,5 +65,5 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(GalacticBand)
-asset.export(ShowGalacticBand)
-asset.export(HideGalacticBand)
+asset.export("ShowGalacticBand", ShowGalacticBand.Identifier)
+asset.export("HideGalacticBand", HideGalacticBand.Identifier)

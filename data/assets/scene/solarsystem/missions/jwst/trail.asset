@@ -1,7 +1,7 @@
+asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/L2")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-asset.require("spice/base")
 
 
 

@@ -62,15 +62,15 @@ asset.onInitialize(function()
   openspace.action.registerAction(HideLegend)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.action.removeAction(HideLegend)
   openspace.action.removeAction(ToggleLegend)
   openspace.removeScreenSpaceRenderable(Legend)
 end)
 
 asset.export(Legend)
-asset.export("ToggleLegend", ToggleLegend)
-asset.export("HideLegend", HideLegend)
+asset.export("ToggleLegend", ToggleLegend.Identifier)
+asset.export("HideLegend", HideLegend.Identifier)
 
 
 

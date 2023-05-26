@@ -63,6 +63,7 @@ local InputState = {
   Identifier = "InputState"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Angle)
   openspace.dashboard.addDashboardItem(Date)

@@ -15,7 +15,7 @@ local HH212Image = {
   Tag = { "mission_jwst_target" },
   Description = [[
     Image of HH 212 by ESO/M. McCaughrean.
-  ]],
+  ]]
 }
 
 

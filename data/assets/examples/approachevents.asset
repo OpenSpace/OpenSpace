@@ -53,6 +53,7 @@ local Model = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.action.registerAction(GenericAction)
   openspace.addSceneGraphNode(Model)

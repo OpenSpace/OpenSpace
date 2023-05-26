@@ -16,7 +16,7 @@ local IoTrail = {
       Kernels = kernel
     },
     Color = { 0.4, 0.4, 0.2 },
-    Period =  42.0 / 24.0,
+    Period = 42.0 / 24.0,
     Resolution = 1000
   },
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },

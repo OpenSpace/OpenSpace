@@ -148,6 +148,7 @@ local AnimationBounce = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(AnimationLoop)
   openspace.addSceneGraphNode(AnimationLoopInf)

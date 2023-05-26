@@ -62,7 +62,7 @@ local Colorbar = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   for i,v in ipairs(layers) do
     openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", v)
   end

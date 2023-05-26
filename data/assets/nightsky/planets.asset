@@ -27,7 +27,7 @@ local Mercury = {
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = { "nightsky_billboard"},
+  Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Mercury",
     Path = "/Other/Night Sky/Planets"
@@ -47,7 +47,7 @@ local Venus = {
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = { "nightsky_billboard"},
+  Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Venus",
     Path = "/Other/Night Sky/Planets"
@@ -67,7 +67,7 @@ local Mars = {
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = { "nightsky_billboard"},
+  Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Mars",
     Path = "/Other/Night Sky/Planets"
@@ -87,7 +87,7 @@ local Jupiter = {
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = { "nightsky_billboard"},
+  Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Jupiter",
     Path = "/Other/Night Sky/Planets"
@@ -107,7 +107,7 @@ local Saturn = {
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = { "nightsky_billboard"},
+  Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Saturn",
     Path = "/Other/Night Sky/Planets"
@@ -180,5 +180,5 @@ asset.export(Venus)
 asset.export(Mars)
 asset.export(Jupiter)
 asset.export(Saturn)
-asset.export(ShowNightSkyPlanets)
-asset.export(HideNightSkyPlanets)
+asset.export("ShowNightSkyPlanets", ShowNightSkyPlanets.Identifier)
+asset.export("HideNightSkyPlanets", HideNightSkyPlanets.Identifier)

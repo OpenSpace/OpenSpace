@@ -15,7 +15,7 @@ local HD84406Image = {
   Tag = { "mission_jwst_target" },
   Description = [[
     JWST alignment image of star HD 84406 by NASA/STScI.
-  ]],
+  ]]
 }
 
 

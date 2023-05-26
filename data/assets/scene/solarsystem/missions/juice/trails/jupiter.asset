@@ -1,11 +1,11 @@
-local jupiterTransforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
+local transforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
 local kernels = asset.require('../kernels')
 
 
 
 local JuiceTrailJupiter = {
   Identifier = "JuiceTrailJupiter",
-  Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  Parent = transforms.JupiterBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {

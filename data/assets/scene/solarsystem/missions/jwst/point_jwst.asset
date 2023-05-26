@@ -140,6 +140,7 @@ local PointJwst = {
   IsLocal = true
 }
 
+
 asset.onInitialize(function()
   openspace.action.registerAction(PointJwst)
 

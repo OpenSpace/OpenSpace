@@ -138,7 +138,8 @@ local BatsrusAsherStaticSeedsFlowLines = {
   }
 }
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   openspace.action.registerAction(LoopBatsrus)
 
   openspace.addSceneGraphNode(BatsrusJ12OpenClosed)
@@ -147,7 +148,7 @@ asset.onInitialize(function ()
 
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(BatsrusAsherStaticSeedsFlowLines)
   openspace.removeSceneGraphNode(BatsrusJ12FlowLines)
   openspace.removeSceneGraphNode(BatsrusJ12OpenClosed)
@@ -155,7 +156,7 @@ asset.onDeinitialize(function ()
   openspace.action.removeAction(LoopBatsrus)
 end)
 
-asset.export("LoopBatsrus", LoopBatsrus)
+asset.export("LoopBatsrus", LoopBatsrus.Identifier)
 asset.export(BatsrusJ12OpenClosed)
 asset.export(BatsrusJ12FlowLines)
 asset.export(BatsrusAsherStaticSeedsFlowLines)

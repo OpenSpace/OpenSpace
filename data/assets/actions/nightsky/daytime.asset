@@ -26,5 +26,5 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(EnableDimming)
 end)
 
-asset.export(EnableDimming)
-asset.export(DisableDimming)
+asset.export("EnableDimming", EnableDimming.Identifier)
+asset.export("EnableDimming", DisableDimming.Identifier)

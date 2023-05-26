@@ -220,7 +220,7 @@ asset.onInitialize(function()
   openspace.bindKey("F5", ReloadGui.Identifier)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.clearKey("F5")
   openspace.action.removeAction(ReloadGui)
 

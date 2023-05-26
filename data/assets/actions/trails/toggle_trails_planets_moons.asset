@@ -65,4 +65,4 @@ end)
 
 asset.export("FadeUpTrails", FadeUpTrails.Identifier)
 asset.export("FadeDownTrails", FadeDownTrails.Identifier)
-asset.export("ToggleTrails", ToggleTrails)
+asset.export("ToggleTrails", ToggleTrails.Identifier)

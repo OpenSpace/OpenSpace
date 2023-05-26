@@ -74,6 +74,7 @@ local StyxLabel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Styx)
   openspace.addSceneGraphNode(StyxTrail)

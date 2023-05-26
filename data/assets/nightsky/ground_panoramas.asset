@@ -13,7 +13,7 @@ local textures = asset.syncedResource({
     "https://wms.openspace.amnh.org/static/sync/url/panos/3.png",
     "https://wms.openspace.amnh.org/static/sync/url/panos/4.png",
     "https://wms.openspace.amnh.org/static/sync/url/panos/5.png",
-    "https://wms.openspace.amnh.org/static/sync/url/panos/6.png",
+    "https://wms.openspace.amnh.org/static/sync/url/panos/6.png"
   },
   Override = false
 })
@@ -54,8 +54,8 @@ local GroundPanoSphere = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
-    },
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
+    }
   },
   Renderable = {
     Type = "RenderableSphere",
@@ -182,8 +182,8 @@ end)
 
 asset.export(GroundPanoPosition)
 asset.export(GroundPanoSphere)
-asset.export(ShowForestPano)
-asset.export(ShowCityPano)
-asset.export(ShowBackyardPano)
-asset.export(ShowDesertPano)
-asset.export(HideGroundPano)
+asset.export("ShowForestPano", ShowForestPano.Identifier)
+asset.export("ShowCityPano", ShowCityPano.Identifier)
+asset.export("ShowBackyardPano", ShowBackyardPano.Identifier)
+asset.export("ShowDesertPano", ShowDesertPano.Identifier)
+asset.export("HideGroundPano", HideGroundPano.Identifier)

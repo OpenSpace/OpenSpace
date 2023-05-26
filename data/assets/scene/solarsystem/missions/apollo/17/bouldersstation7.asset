@@ -37,7 +37,7 @@ local Station7BoulderModel = {
     Scale = {
       Type = "StaticScale",
       Scale = 0.1
-    },
+    }
   },
   Renderable = {
     Type = "RenderableModel",

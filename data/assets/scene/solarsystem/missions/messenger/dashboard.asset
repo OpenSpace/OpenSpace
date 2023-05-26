@@ -12,6 +12,7 @@ local Distance = {
   DestinationNodeName = "Mercury"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Distance)
 end)

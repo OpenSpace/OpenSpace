@@ -45,7 +45,7 @@ local ZenithDot = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = { -math.pi, 0.0, 0.0 }
-    },
+    }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
@@ -111,5 +111,5 @@ end)
 
 asset.export(ZenithPosition)
 asset.export(ZenithDot)
-asset.export(HideZenith)
-asset.export(ShowZenith)
+asset.export("ShowZenith", ShowZenith.Identifier)
+asset.export("HideZenith", HideZenith.Identifier)

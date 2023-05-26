@@ -45,7 +45,7 @@ local LedaTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 240.82,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -127,7 +127,7 @@ local HimaliaTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 250.23,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -209,7 +209,7 @@ local LysitheaTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 259.89,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -291,7 +291,7 @@ local ElaraTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 257.62,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -373,7 +373,7 @@ local DiaTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 287.93,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -455,7 +455,7 @@ local S2011J3Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 261.77,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -537,7 +537,7 @@ local S2018J2Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 250.88,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -619,7 +619,7 @@ local PandiaTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 251.911,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -701,7 +701,7 @@ local ErsaTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 249.229,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",

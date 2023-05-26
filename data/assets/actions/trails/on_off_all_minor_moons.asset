@@ -56,8 +56,8 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(MinorMoonsOn)
 end)
 
-asset.export("MinorMoonsOn", MinorMoonsOn)
-asset.export("MinorMoonsOff", MinorMoonsOff)
+asset.export("MinorMoonsOn", MinorMoonsOn.Identifier)
+asset.export("MinorMoonsOff", MinorMoonsOff.Identifier)
 
 
 

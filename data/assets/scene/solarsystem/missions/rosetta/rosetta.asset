@@ -317,7 +317,7 @@ local TogglePhilaeTrail = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.addSceneGraphNode(RosettaPosition)
   openspace.addSceneGraphNode(Rosetta)
   openspace.addSceneGraphNode(PhilaePosition)
@@ -334,7 +334,7 @@ asset.onInitialize(function ()
   openspace.action.registerAction(TogglePhilaeTrail)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.action.removeAction(TogglePhilaeTrail)
   openspace.action.removeAction(ToggleImagePlane)
   openspace.action.removeAction(SetupLanderRelease)
@@ -359,4 +359,8 @@ asset.export(NavCam)
 asset.export(NavCamFov)
 asset.export(ImagePlane)
 asset.export(RosettaCometTrail)
-asset.export(PhilaeTrail)
+asset.export("FocusRosetta", FocusRosetta.Identifier)
+asset.export("SetupLanderRelease", SetupLanderRelease.Identifier)
+asset.export("ToggleImagePlane", ToggleImagePlane.Identifier)
+asset.export("TogglePhilaeTrail", TogglePhilaeTrail.Identifier)
+i

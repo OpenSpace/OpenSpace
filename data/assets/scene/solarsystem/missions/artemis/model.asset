@@ -23,7 +23,7 @@ local ArtemisModel = {
       XAxisOrthogonal = true,
       YAxis = "Sun",
       YAxisInvert = true
-    },
+    }
   },
   Renderable = {
     Type = "RenderableModel",
@@ -36,7 +36,7 @@ local ArtemisModel = {
   GUI = {
     Name = "Orion (Artemis-1) Model",
     Path = "/Solar System/Missions/Artemis",
-    Description = "Model of the Orion capsule for the Artemis-1 mission",
+    Description = "Model of the Orion capsule for the Artemis-1 mission"
   }
 }
 

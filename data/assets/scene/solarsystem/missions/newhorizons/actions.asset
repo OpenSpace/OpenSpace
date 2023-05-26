@@ -264,6 +264,23 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(FocusNewHorizons)
 end)
 
+asset.export("FocusNewHorizons", FocusNewHorizons.Identifier)
+asset.export("AimPluto", AimPluto.Identifier)
+asset.export("FocusPluto", FocusPluto.Identifier)
+asset.export("FocusCharon", FocusCharon.Identifier)
+asset.export("ToggleImageProjection", ToggleImageProjection.Identifier)
+asset.export("ClearImageProjections", ClearImageProjections.Identifier)
+asset.export("Approach", Approach.Identifier)
+asset.export("IncreaseHeightmapPluto", IncreaseHeightmapPluto.Identifier)
+asset.export("DecreaseHeightmapPluto", DecreaseHeightmapPluto.Identifier)
+asset.export("IncreaseHeightmapCharon", IncreaseHeightmapCharon.Identifier)
+asset.export("DecreaseHeightmapCharon", DecreaseHeightmapCharon.Identifier)
+asset.export("TogglePlutoTrail", TogglePlutoTrail.Identifier)
+asset.export("TogglePlutoLabels", TogglePlutoLabels.Identifier)
+asset.export("ToggleNewHorizonsLabels", ToggleNewHorizonsLabels.Identifier)
+asset.export("ToggleShadows", ToggleShadows.Identifier)
+asset.export("ToggleNewHorizonsTrail", ToggleNewHorizonsTrail.Identifier)
+
 
 
 asset.meta = {

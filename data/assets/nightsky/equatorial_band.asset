@@ -61,6 +61,7 @@ local HideEquatorialLine = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EquatorialLine)
   openspace.action.registerAction(ShowEquatorialLine)
@@ -74,5 +75,5 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(EquatorialLine)
-asset.export(ShowEquatorialLine)
-asset.export(HideEquatorialLine)
+asset.export("ShowEquatorialLine", ShowEquatorialLine.Identifier)
+asset.export("HideEquatorialLine", HideEquatorialLine.Identifier)

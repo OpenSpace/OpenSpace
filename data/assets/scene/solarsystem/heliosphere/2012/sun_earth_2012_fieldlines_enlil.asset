@@ -195,7 +195,7 @@ local ENLILStereoA = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.action.registerAction(LoopEnlil)
 
   openspace.addSceneGraphNode(ENLILSliceEqPlane11AU1)
@@ -206,7 +206,7 @@ asset.onInitialize(function ()
   openspace.addSceneGraphNode(ENLILStereoA)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ENLILStereoA)
   openspace.removeSceneGraphNode(ENLILEarth)
   openspace.removeSceneGraphNode(ENLILSliceLat411AU2)
@@ -217,13 +217,14 @@ asset.onDeinitialize(function ()
   openspace.action.removeAction(LoopEnlil)
 end)
 
-asset.export("LoopEnlil", LoopEnlil)
+asset.export("LoopEnlil", LoopEnlil.Identifier)
 asset.export(ENLILSliceEqPlane11AU1)
 asset.export(ENLILSliceEqPlane11AU2)
 asset.export(ENLILSliceLat411AU1)
 asset.export(ENLILSliceLat411AU2)
 asset.export(ENLILEarth)
 asset.export(ENLILStereoA)
+
 
 
 asset.meta = {

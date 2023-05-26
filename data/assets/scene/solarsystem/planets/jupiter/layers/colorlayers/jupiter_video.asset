@@ -1,4 +1,6 @@
-local globeIdentifier = asset.require("../../jupiter").Jupiter.Identifier
+local globe = asset.require("../../jupiter")
+
+
 
 local data = asset.syncedResource({
   Name = "Jupiter Video Layer",
@@ -7,7 +9,8 @@ local data = asset.syncedResource({
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = "JupiterVideo",
   Video = data .. "/jupiter_movie_3600.mp4",
   Name = "Jupiter Video",
@@ -15,15 +18,18 @@ local layer = {
   Type = "VideoTileLayer"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Jupiter.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Jupiter.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
+
+
 
 asset.meta = {
   Name = "Jupiter Video",

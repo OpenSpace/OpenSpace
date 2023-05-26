@@ -13,7 +13,7 @@ local Layer = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "HeightLayers", Layer)
 end)
 

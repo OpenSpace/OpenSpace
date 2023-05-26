@@ -159,6 +159,17 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(FocusOsirisRex)
 end)
 
+asset.export("FocusOsirisRex", FocusOsirisRex.Identifier)
+asset.export("FocusBennu", FocusBennu.Identifier)
+asset.export("SetupBennuApproach", SetupBennuApproach.Identifier)
+asset.export("SetupBennuSurvey", SetupBennuSurvey.Identifier)
+asset.export("SetupBennuEventB", SetupBennuEventB.Identifier)
+asset.export("SetupBennuReconEvent", SetupBennuReconEvent.Identifier)
+asset.export("ToggleSunMarker", ToggleSunMarker.Identifier)
+asset.export("AimAtBennu", AimAtBennu.Identifier)
+asset.export("SetLaunchTime", SetLaunchTime.Identifier)
+asset.export("LookImageCapture", LookImageCapture.Identifier)
+
 
 
 asset.meta = {

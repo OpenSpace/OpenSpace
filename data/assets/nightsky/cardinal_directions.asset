@@ -51,8 +51,8 @@ local CardinalDirectionSphere = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
-    },
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
+    }
   },
   Renderable = {
     Type = "RenderableSphere",
@@ -137,6 +137,6 @@ end)
 
 asset.export(CardinalDirectionsPosition)
 asset.export(CardinalDirectionSphere)
-asset.export(ShowNeswBand)
-asset.export(ShowNeswLetters)
-asset.export(HideNesw)
+asset.export("ShowNeswBand", ShowNeswBand.Identifier)
+asset.export("ShowNeswLetters", ShowNeswLetters.Identifier)
+asset.export("HideNesw", HideNesw.Identifier)

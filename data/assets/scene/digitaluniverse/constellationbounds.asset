@@ -34,9 +34,10 @@ local Object = {
     Name = "Constellation Bounds",
     Path = "/Milky Way/Constellations",
     Description = [[A Spherical mesh dividing the sky into regions that fit the
-      constellations]],
+      constellations]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Object)

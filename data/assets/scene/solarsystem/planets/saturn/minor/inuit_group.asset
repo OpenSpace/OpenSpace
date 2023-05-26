@@ -45,7 +45,7 @@ local KiviuqTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 448.16,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -127,7 +127,7 @@ local IjiraqTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 451.77,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -209,7 +209,7 @@ local PaaliaqTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 692.98,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -291,7 +291,7 @@ local SiarnaqTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 884.88,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -373,7 +373,7 @@ local TarqeqTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 894.86,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -455,7 +455,7 @@ local S2004S29Trail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 858.77,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -537,7 +537,7 @@ local S2004S31Trail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 853.80,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -619,7 +619,7 @@ local S2019S01Trail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 443.78,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",

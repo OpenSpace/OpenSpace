@@ -52,7 +52,7 @@ local L1 = {
   Tag = { "lagrange_points_earth" , "lagrange_points_earth_l1" },
   GUI = {
     Name = "L1",
-    Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Path = "/Solar System/Planets/Earth/Lagrange Points"
   }
 }
 

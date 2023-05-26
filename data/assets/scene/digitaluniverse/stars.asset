@@ -49,7 +49,7 @@ local Stars = {
       Vz = "vz",
       Speed = "speed"
     },
-    DimInAtmosphere = true,
+    DimInAtmosphere = true
   },
   Tag = { "daytime_hidden" },
   GUI = {
@@ -61,7 +61,7 @@ local Stars = {
       accurately as is possible. (Description from URL) <br><br> Data Reference:
       XHIP: An Extended Hipparcos Compilation (Anderson E., Francis C. 2012);
       Hipparcos Catalog (European Space Agency 1997); Gliese Catalog (Gliese and
-      Jahriess 1991)]],
+      Jahriess 1991)]]
   }
 }
 
@@ -88,7 +88,7 @@ local SunStar = {
       Vz = "vz",
       Speed = "speed"
     },
-    DimInAtmosphere = true,
+    DimInAtmosphere = true
   },
   GUI = {
     Name = "Sun Star",

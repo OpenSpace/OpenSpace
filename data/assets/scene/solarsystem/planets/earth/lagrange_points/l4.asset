@@ -18,30 +18,30 @@ local kernels = asset.syncedResource({
 })
 
 
-local L5 = 395
+local L4 = 394
 
-local L5Position = {
-  Identifier = "L5Position",
+local L4Position = {
+  Identifier = "L4Position",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = L5,
+      Target = L4,
       Observer = "SSB",
-      Kernels = kernels .. "L5_de431.bsp"
+      Kernels = kernels .. "L4_de431.bsp"
     }
   },
-  Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l4" },
   GUI = {
-    Name = "L5 Position",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Name = "L4 Position",
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
     Hidden = true
   }
 }
 
-local L5 = {
-  Identifier = "L5",
-  Parent = L5Position.Identifier,
+local L4 = {
+  Identifier = "L4",
+  Parent = L4Position.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Billboard = true,
@@ -49,19 +49,19 @@ local L5 = {
     Texture = circle .. "circle.png",
     BlendMode = "Additive"
   },
-  Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l4" },
   GUI = {
-    Name = "L5",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Name = "L4",
+    Path = "/Solar System/Planets/Earth/Lagrange Points"
   }
 }
 
-local L5Label = {
-  Identifier = "L5Label",
-  Parent = L5Position.Identifier,
+local L4Label = {
+  Identifier = "L4Label",
+  Parent = L4Position.Identifier,
   Renderable = {
     Type = "RenderableLabel",
-    Text = "L5",
+    Text = "L4",
     FontSize = 50,
     Size = 8.5,
     MinMaxSize = { 1.0, 100.0 },
@@ -69,37 +69,37 @@ local L5Label = {
     BlendMode = "Normal",
     EnableFading = false
   },
-  Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l4" },
   GUI = {
-    Name = "L5 Label",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
-    Description = "Main label for L5"
+    Name = "L4 Label",
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Description = "Main label for L4"
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(L5Position)
-  openspace.addSceneGraphNode(L5)
-  openspace.addSceneGraphNode(L5Label)
+  openspace.addSceneGraphNode(L4Position)
+  openspace.addSceneGraphNode(L4)
+  openspace.addSceneGraphNode(L4Label)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(L5Label)
-  openspace.removeSceneGraphNode(L5)
-  openspace.removeSceneGraphNode(L5Position)
+  openspace.removeSceneGraphNode(L4Label)
+  openspace.removeSceneGraphNode(L4)
+  openspace.removeSceneGraphNode(L4Position)
 end)
 
-asset.export(L5Position)
-asset.export(L5)
-asset.export(L5Label)
+asset.export(L4Position)
+asset.export(L4)
+asset.export(L4Label)
 
 
 
 asset.meta = {
-  Name = "Lagrange point L5",
+  Name = "Lagrange point L4",
   Version = "1.0",
-  Description = "Lagrange point L5 node and label",
+  Description = "Lagrange point L4 node and label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

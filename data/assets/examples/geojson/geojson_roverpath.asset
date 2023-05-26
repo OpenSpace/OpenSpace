@@ -21,6 +21,7 @@ local ExampleRoverPath = {
   Name = "Perseverance Rover Path"
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addGeoJson(mars.Mars.Identifier, ExampleRoverPath)
 end)
@@ -30,6 +31,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(ExampleRoverPath)
+
 
 
 asset.meta = {

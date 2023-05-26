@@ -36,6 +36,7 @@ local ExamplePolygonDiffHeights = {
   Description = "A GeoJSON test layer with some different heights"
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExamplePolygon)
   openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExamplePolygonDiffHeights)

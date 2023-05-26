@@ -43,9 +43,10 @@ local Object = {
     Description = [[
       Hubble Ultra Deep Field galaxy survey <br><br>
       Data Reference: Hubble Ultra Deep Field 2012 program (Ellis+, Koekemoer+, 2013)
-    ]],
+    ]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Object)
@@ -56,6 +57,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Object)
+
 
 
 asset.meta = {

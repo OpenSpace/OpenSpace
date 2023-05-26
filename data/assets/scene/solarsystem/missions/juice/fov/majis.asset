@@ -100,8 +100,8 @@ local MajisIr = {
     End = "2035 OCT 05 00:00:00.000"
   },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_MAJIS_IR",
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {

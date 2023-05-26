@@ -18,7 +18,7 @@ local vrts = asset.syncedResource({
 
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.globebrowsing.addBlendingLayersFromDirectory(vrts, assetGlobe);
   flipbook = helper.createFlipbook(assetPrefix, assetGlobe, 19);
 
@@ -44,7 +44,7 @@ asset.onInitialize(function ()
 end)
 
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   flipbook = nil;
 
   openspace.action.removeAction("os.lemFlipbook.NextFlip")

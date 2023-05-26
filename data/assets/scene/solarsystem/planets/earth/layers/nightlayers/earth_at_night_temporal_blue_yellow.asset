@@ -2,7 +2,7 @@ local globe = asset.require("../../earth")
 
 
 
-local Layer =  {
+local Layer = {
   Identifier = "Earth_at_Night_Temporal_Blue_Yellow",
   Name = "Earth at Night Blue Yellow (Temporal)",
   Enabled = asset.enabled,

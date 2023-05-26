@@ -1,11 +1,11 @@
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local kernels = asset.require('../kernels')
 
 
 
 local JuiceTrailEarth = {
   Identifier = "JuiceTrailEarth",
-  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Parent = transforms.EarthBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {

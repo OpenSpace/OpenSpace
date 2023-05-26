@@ -89,6 +89,12 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(StartOfCme)
 end)
 
+asset.export("StartOfCme", StartOfCme.Identifier)
+asset.export("ShortLoop", ShortLoop.Identifier)
+asset.export("StandardLoop", StandardLoop.Identifier)
+asset.export("FastLoop", FastLoop.Identifier)
+asset.export("LongLoop", LongLoop.Identifier)
+
 
 
 asset.meta = {

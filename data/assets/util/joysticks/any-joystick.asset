@@ -24,6 +24,7 @@ local function addJoystickAsset(joystick)
   end
 end
 
+
 asset.onInitialize(function()
   local rawJoysticks = openspace.navigation.listAllJoysticks()
   local numJoysticks = #rawJoysticks

@@ -210,6 +210,7 @@ local UndoLightPollution = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(LightPollutionSphere)
   openspace.action.registerAction(SetLightPollutionLevel1)
@@ -239,13 +240,13 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(LightPollutionSphere)
-asset.export(SetLightPollutionLevel1)
-asset.export(SetLightPollutionLevel2)
-asset.export(SetLightPollutionLevel3)
-asset.export(SetLightPollutionLevel4)
-asset.export(SetLightPollutionLevel5)
-asset.export(SetLightPollutionLevel6)
-asset.export(SetLightPollutionLevel7)
-asset.export(SetLightPollutionLevel8)
-asset.export(SetLightPollutionLevel9)
-asset.export(UndoLightPollution)
+asset.export("SetLightPollutionLevel1", SetLightPollutionLevel1.Identifier)
+asset.export("SetLightPollutionLevel2", SetLightPollutionLevel2.Identifier)
+asset.export("SetLightPollutionLevel3", SetLightPollutionLevel3.Identifier)
+asset.export("SetLightPollutionLevel4", SetLightPollutionLevel4.Identifier)
+asset.export("SetLightPollutionLevel5", SetLightPollutionLevel5.Identifier)
+asset.export("SetLightPollutionLevel6", SetLightPollutionLevel6.Identifier)
+asset.export("SetLightPollutionLevel7", SetLightPollutionLevel7.Identifier)
+asset.export("SetLightPollutionLevel8", SetLightPollutionLevel8.Identifier)
+asset.export("SetLightPollutionLevel9", SetLightPollutionLevel9.Identifier)
+asset.export("UndoLightPollution", UndoLightPollution.Identifier)

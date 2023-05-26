@@ -126,6 +126,9 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Moon)
+asset.export(MoonLabel)
+asset.export("FocusMoon", FocusMoon.Identifier)
+asset.export("ToggleMoonShading", ToggleMoonShading.Identifier)
 
 
 

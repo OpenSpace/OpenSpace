@@ -62,6 +62,9 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(NeptuneMinorMoonsOn)
 end)
 
+asset.export("NeptuneMinorMoonsOn", NeptuneMinorMoonsOn.Identifier)
+asset.export("NeptuneMinorMoonsOff", NeptuneMinorMoonsOff.Identifier)
+
 
 
 asset.meta = {

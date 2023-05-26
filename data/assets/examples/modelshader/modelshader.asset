@@ -41,6 +41,7 @@ local Model = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Model)
 end)

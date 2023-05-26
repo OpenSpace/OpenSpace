@@ -1,6 +1,6 @@
+asset.require("scene/solarsystem/missions/dawn/mission")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
-asset.require("scene/solarsystem/missions/dawn/mission")
 
 
 
@@ -154,13 +154,13 @@ local DawnFramingCamera1 = {
   Identifier = "Dawn_framing_camera_1",
   Parent = Dawn.Identifier,
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "DAWN",
+    Type = "RenderableFov",
+    Body = "DAWN",
     Frame = "DAWN_SPACECRAFT",
     Color = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "DAWN_FC1",
-      Method     = "ELLIPSOID",
+      Name = "DAWN_FC1",
+      Method = "ELLIPSOID",
       Aberration = "NONE"
     },
     PotentialTargets = { "VESTA", "CERES" }
@@ -175,13 +175,13 @@ local DawnFramingCamera2 = {
   Identifier = "Dawn_framing_camera_2",
   Parent = Dawn.Identifier,
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "DAWN",
+    Type = "RenderableFov",
+    Body = "DAWN",
     Frame = "DAWN_SPACECRAFT",
     Color = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "DAWN_FC2",
-      Method     = "ELLIPSOID",
+      Name = "DAWN_FC2",
+      Method = "ELLIPSOID",
       Aberration = "NONE"
     },
     PotentialTargets = { "VESTA", "CERES" }
@@ -190,14 +190,6 @@ local DawnFramingCamera2 = {
     Name = "Dawn Framing Camera 2",
     Path = "/Solar System/Missions/Dawn"
   }
-}
-
-local nodes = {
-  DawnPosition,
-  Dawn,
-  DawnTrail,
-  DawnFramingCamera1,
-  DawnFramingCamera2
 }
 
 

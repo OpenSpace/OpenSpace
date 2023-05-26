@@ -28,6 +28,7 @@ local ExamplePolygon = {
   Name = "Extruded and Shaded Polygon (lit by Sun)"
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExamplePolygon)
 end)

@@ -2,7 +2,7 @@ local Kernels = asset.syncedResource({
   Name = "New Horizons Kernels",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_kernels",
-  Version =  1
+  Version = 1
 })
 
 

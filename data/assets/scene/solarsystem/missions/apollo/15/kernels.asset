@@ -1,8 +1,8 @@
-local folder  = asset.syncedResource({
+local folder = asset.syncedResource({
   Name = "Apollo Kernels",
   Type = "HttpSynchronization",
   Identifier = "apollo_spice",
-  Version =  1
+  Version = 1
 })
 
 

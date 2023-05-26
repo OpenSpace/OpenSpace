@@ -21,4 +21,4 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(ToggleTrailsInstant)
 end)
 
-asset.export(ToggleTrailsInstant)
+asset.export("ToggleTrailsInstant", ToggleTrailsInstant.Identifier)

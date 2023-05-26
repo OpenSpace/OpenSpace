@@ -145,7 +145,7 @@ local ShowZodiacArt = {
 local HideZodiacArt = {
   Identifier = "os.constellation_art.HideZodiacArt",
   Name = "Hide zodiac",
-  Command =  [[
+  Command = [[
     openspace.fadeOut("{zodiac}")
   ]],
   Documentation = "Fades down zodiac art work",
@@ -155,7 +155,7 @@ local HideZodiacArt = {
 
 local nodes = {}
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   local constellationsCSV = images .. "constellation_data.csv"
 
   nodes = createConstellations("ImageConstellation", "Constellation Art", constellationsCSV)
@@ -170,7 +170,7 @@ asset.onInitialize(function ()
   openspace.action.registerAction(HideZodiacArt)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   for _, n in ipairs(nodes) do
     openspace.removeSceneGraphNode(n.Identifier);
   end
@@ -185,11 +185,11 @@ end)
 for _, n in ipairs(nodes) do
   asset.export(n)
 end
-asset.export("ShowArtAction", ShowArt)
-asset.export("HideArtAction", HideArt)
-asset.export("DisableArtAction", DisableArt)
-asset.export("ShowZodiacArt", ShowZodiacArt)
-asset.export("HideZodiacArt", HideZodiacArt)
+asset.export("ShowArtAction", ShowArt.Identifier)
+asset.export("HideArtAction", HideArt.Identifier)
+asset.export("DisableArtAction", DisableArt.Identifier)
+asset.export("ShowZodiacArt", ShowZodiacArt.Identifier)
+asset.export("HideZodiacArt", HideZodiacArt.Identifier)
 
 asset.meta = {
   Name = "Constellation Images",

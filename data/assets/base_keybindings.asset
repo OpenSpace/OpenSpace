@@ -16,16 +16,18 @@ local TogglePlanetLabels = {
   Key = "l"
 }
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.action.registerAction(TogglePlanetLabels)
   openspace.bindKey(TogglePlanetLabels.Key, TogglePlanetLabels.Identifier)
 
   openspace.bindKey("h", trailAction.Identifier)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.clearKey("h")
 
   openspace.action.removeAction(TogglePlanetLabels)
   openspace.clearKey(TogglePlanetLabels.Key)
 end)
+
+asset.export("TogglePlanetLabels", TogglePlanetLabels.Identifier)

@@ -41,12 +41,13 @@ local Fieldlines = {
       { 0, 1000000 },
       { 100, 2000 }
     },
-    SimulationModel = "mas",
+    SimulationModel = "mas"
   },
   GUI = {
     Path = "/Solar System/Heliosphere/Bastille Day 2000",
     Name = "MAS Fieldlines",
-    Description = "Magnetic fieldlines for the bastille day CME event. This asset contains data from 2000-07-14 08:33 to 2000-07-14 11:49"
+    Description = [[Magnetic fieldlines for the bastille day CME event. This asset
+      contains data from 2000-07-14 08:33 to 2000-07-14 11:49]]
   }
 }
 
@@ -78,18 +79,19 @@ local ToggleFieldlines = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.action.registerAction(ToggleFieldlines)
   openspace.addSceneGraphNode(Fieldlines)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Fieldlines)
   openspace.action.removeAction(ToggleFieldlines)
 end)
 
 asset.export(Fieldlines)
-asset.export("ToggleFieldlines", ToggleFieldlines)
+asset.export("ToggleFieldlines", ToggleFieldlines.Identifier)
+
 
 
 asset.meta = {

@@ -34,9 +34,10 @@ local SpaceMouse = {
   RightButton = 1
 }
 
+
 asset.onInitialize(function()
-  local controller = SpaceMouse;
-  local name = "3Dconnexion Universal Receiver";
+  local controller = SpaceMouse
+  local name = "3Dconnexion Universal Receiver"
 
   openspace.navigation.bindJoystickAxis(name, controller.Push[1], "Orbit X", false, "JoystickLike", true, false, 40.0);
   openspace.navigation.bindJoystickAxis(name, controller.Push[2], "Orbit Y", false, "JoystickLike", true, false, 40.0);

@@ -1,5 +1,5 @@
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
@@ -23,13 +23,13 @@ local ArtemisPosition = {
       Observer = "EARTH",
       Frame = "GALACTIC",
       Kernels = kernels .. "artemis.bsp"
-    },
+    }
   },
   GUI = {
     Name = "Artemis-1 Position",
     Path = "/Solar System/Missions/Artemis",
     Hidden = true,
-    Description = "Artemis-1 position relative to Earth",
+    Description = "Artemis-1 position relative to Earth"
   }
 }
 

@@ -38,7 +38,7 @@ local NereidTrail = {
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 360.13,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_neptune" },
   GUI = {
@@ -62,7 +62,7 @@ local NereidLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 1, 15.0 },
-    FadeWidths = { 1, 15.0 },
+    FadeWidths = { 1, 15.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {

@@ -17,6 +17,7 @@ local ToyVolume = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ToyVolume)
 end)

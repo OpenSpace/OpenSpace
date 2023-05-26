@@ -50,9 +50,10 @@ local Object = {
       center may be invisible to us. The clusters orbit the Milky Way in random
       orientations, as comets orbit the Sun.(Description from URL) <br><br> Data
       Reference: Properties of Galactic Globular Clusters, C. Francis+
-      (U Cambridge)]],
+      (U Cambridge)]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Object)

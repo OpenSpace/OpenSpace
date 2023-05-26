@@ -16,7 +16,7 @@ local NeptuneBarycenterTrail = {
       Kernels = kernel.nep097
     },
     Color = { 0.2, 0.5, 1.0 },
-    Period  = 60266,
+    Period = 60266,
     Resolution = 1000,
     Enabled = false
   },

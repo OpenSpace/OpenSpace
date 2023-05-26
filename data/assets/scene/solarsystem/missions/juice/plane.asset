@@ -139,7 +139,7 @@ local xz_n = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
@@ -161,7 +161,7 @@ local xz_t = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
@@ -183,7 +183,7 @@ local xz_u = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
@@ -206,7 +206,7 @@ local xz_utot = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
@@ -229,7 +229,7 @@ local xz_ux = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
@@ -252,7 +252,7 @@ local xz_uy = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
@@ -275,7 +275,7 @@ local xz_uz = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
@@ -343,6 +343,7 @@ asset.export(xz_utot)
 asset.export(xz_ux)
 asset.export(xz_uy)
 asset.export(xz_uz)
+
 
 
 asset.meta = {

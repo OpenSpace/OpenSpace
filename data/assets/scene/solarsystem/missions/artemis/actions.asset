@@ -16,7 +16,7 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(SetupLaunch)
 end)
 
-asset.export("SetupLaunch", SetupLaunch)
+asset.export("SetupLaunch", SetupLaunch.Identifier)
 
 
 

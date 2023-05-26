@@ -1,11 +1,11 @@
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
 local kernels = asset.require('../kernels')
 
 
 
 local JuiceTrail = {
   Identifier = "JuiceTrail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {

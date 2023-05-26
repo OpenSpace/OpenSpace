@@ -14,7 +14,7 @@ local frontend = asset.syncedResource({
 })
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   -- Unzip the frontend bundle
   local dest = frontend .. "frontend"
   if not openspace.directoryExists(dest) then
@@ -50,7 +50,7 @@ asset.onInitialize(function ()
   end
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   -- Remove the frontend endpoint
   local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
   local newDirectories = {};
@@ -84,7 +84,6 @@ function setCefRoute(route)
     "http://127.0.0.1:" .. port .. "/frontend/#/" .. route
   )
 end
-
 
 asset.export("setCefRoute", setCefRoute)
 

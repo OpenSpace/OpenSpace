@@ -148,7 +148,7 @@ local Apollo11LemTrail = {
     EndTime = "1969 JUL 20 20:17:46.183",
     SampleInterval = 2,
     EnableFade = false,
-    Enabled = false,
+    Enabled = false
   },
   GUI = {
     Name = "Apollo 11 Lunar Lander Trail",
@@ -240,6 +240,7 @@ local Apollo11LemLandedModel = {
     Path = "/Solar System/Missions/Apollo/11"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo11Position)

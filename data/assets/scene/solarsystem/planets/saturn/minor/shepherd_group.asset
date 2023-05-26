@@ -58,7 +58,7 @@ local PrometheusTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.612990038,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -140,7 +140,7 @@ local PandoraTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.628504213,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -222,7 +222,7 @@ local AtlasTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.6016947883,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -304,7 +304,7 @@ local JanusTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.694660342,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -386,7 +386,7 @@ local EpimetheusTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.694333517,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -468,7 +468,7 @@ local DaphnisTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.5940798,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -550,7 +550,7 @@ local PanTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.575050718,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",

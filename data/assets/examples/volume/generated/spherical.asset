@@ -35,6 +35,7 @@ local Volume = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Volume)
 end)

@@ -45,7 +45,7 @@ local ThemistoTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 129.87,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",

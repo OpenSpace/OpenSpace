@@ -21,6 +21,8 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(ToggleOuterPlanetaryTrails)
 end)
 
+asset.export("ToggleOuterPlanetaryTrails", ToggleOuterPlanetaryTrails.Identifier)
+
 
 
 asset.meta = {

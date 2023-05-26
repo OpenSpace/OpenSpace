@@ -45,7 +45,7 @@ local HalimedeTrail = {
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 1879.08,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -75,7 +75,7 @@ local HalimedeLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 1, 250.0 },
-    FadeWidths = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -127,7 +127,7 @@ local PsamatheTrail = {
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 9074.3,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -157,7 +157,7 @@ local PsamatheLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 1, 250.0 },
-    FadeWidths = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -209,7 +209,7 @@ local SaoTrail = {
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 2912.72,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -239,7 +239,7 @@ local SaoLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 1, 250.0 },
-    FadeWidths = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -291,7 +291,7 @@ local LaomedeiaTrail = {
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 3171.33,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -321,7 +321,7 @@ local LaomedeiaLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 1, 250.0 },
-    FadeWidths = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -373,7 +373,7 @@ local NesoTrail = {
     },
     Color = { 0.2, 0.5, 0.75 },
     Period = 9740.73,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -403,7 +403,7 @@ local NesoLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 1, 250.0 },
-    FadeWidths = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {

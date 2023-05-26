@@ -9,7 +9,7 @@ local transferFunctions = asset.syncedResource({
   Version = 1
 })
 
-local fieldlineData  = asset.syncedResource({
+local fieldlineData = asset.syncedResource({
   Name = "Fieldlines Data PFSS",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-pfss",
@@ -66,8 +66,8 @@ local PFSS = {
     },
     ColorTableRanges = {
       { 0, 2 },
-      { -1, 1 },
-    },
+      { -1, 1 }
+    }
   },
   GUI = {
     Name = "Fieldlines PFSS",
@@ -76,7 +76,7 @@ local PFSS = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.action.registerAction(DarkSun)
 
   openspace.addSceneGraphNode(PFSS)
@@ -88,13 +88,14 @@ asset.onInitialize(function ()
   --openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.speed", 75.0)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PFSS)
   openspace.action.removeAction(DarkSun)
 end)
 
 asset.export(PFSS)
-asset.export("DarkSun", DarkSun)
+asset.export("DarkSun", DarkSun.Identifier)
+
 
 
 asset.meta = {

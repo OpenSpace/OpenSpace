@@ -12,7 +12,5 @@ function setEnabled(renderable, enabled)
   return 'openspace.setPropertyValue("' .. renderable .. '.Renderable.Enabled", ' .. (enabled and "true" or "false") .. ");";
 end
 
-
-
 asset.export("toggle", toggle)
 asset.export("setEnabled", setEnabled)

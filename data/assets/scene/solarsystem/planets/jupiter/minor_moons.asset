@@ -68,6 +68,9 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(JupiterMinorMoonsOn)
 end)
 
+asset.export("JupiterMinorMoonsOn", JupiterMinorMoonsOn.Identifier)
+asset.export("JupiterMinorMoonsOff", JupiterMinorMoonsOff.Identifier)
+
 
 
 asset.meta = {

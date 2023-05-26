@@ -20,6 +20,7 @@ local ExampleHoles = {
   Name = "Example Polygon (holes)"
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExampleHoles)
 end)
@@ -29,6 +30,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(ExampleHoles)
+
 
 
 asset.meta = {

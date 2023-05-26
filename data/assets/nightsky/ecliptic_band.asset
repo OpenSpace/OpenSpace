@@ -117,6 +117,7 @@ local HideEclipticBand = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EclipticLine)
   openspace.addSceneGraphNode(EclipticBand)
@@ -137,7 +138,7 @@ end)
 
 asset.export(EclipticLine)
 asset.export(EclipticBand)
-asset.export(ShowEclipticLine)
-asset.export(HideEclipticLine)
-asset.export(ShowEclipticBand)
-asset.export(HideEclipticBand)
+asset.export("ShowEclipticLine", ShowEclipticLine.Identifier)
+asset.export("HideEclipticLine", HideEclipticLine.Identifier)
+asset.export("ShowEclipticBand", ShowEclipticBand.Identifier)
+asset.export("HideEclipticBand", HideEclipticBand.Identifier)

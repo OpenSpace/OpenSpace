@@ -9,7 +9,7 @@ local Planet = {
   Transform = {
     Rotation = {
       Type = "ConstantRotation",
-      RotationAxis = {0.0, 0.0, 1.0},
+      RotationAxis = { 0.0, 0.0, 1.0 },
       RotationRate = 1.0 / (10.273 * 60.0 * 60.0)
     }
   },

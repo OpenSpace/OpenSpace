@@ -47,7 +47,8 @@ local DensityVolume = {
   GUI = {
     Name = "MAS Density",
     Path = "/Solar System/Heliosphere/Bastille Day 2000",
-    Description = "Volumetric rendering for the bastille day CME event. This asset contain data from 2000-07-14 08:33 to 2000-07-14 11:49"
+    Description = [[Volumetric rendering for the bastille day CME event. This asset
+      contain data from 2000-07-14 08:33 to 2000-07-14 11:49]]
   }
 }
 
@@ -79,18 +80,18 @@ local ToggleVolume = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.action.registerAction(ToggleVolume)
   openspace.addSceneGraphNode(DensityVolume)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(DensityVolume)
   openspace.action.removeAction(ToggleVolume)
 end)
 
 asset.export(DensityVolume)
-asset.export("ToggleVolume", ToggleVolume)
+asset.export("ToggleVolume", ToggleVolume.Identifier)
 
 
 

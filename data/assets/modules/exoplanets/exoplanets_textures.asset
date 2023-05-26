@@ -1,6 +1,6 @@
 local habitableZoneTextures = asset.require(
   "scene/milkyway/habitable_zones/habitable_zone_textures"
-).TexturesPath
+)
 
 
 
@@ -19,14 +19,14 @@ local texturesPath = asset.syncedResource({
 })
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   local starTexture = texturesPath .. "sun.jpg"
   local noDataTexture = texturesPath .. "grid-32.png"
   local discTexture = texturesPath .. "disc_bw_texture.png"
 
   local starGlareTexture = sunTextures .. "halo.png"
 
-  local hzTexture = habitableZoneTextures .. "hot_to_cold_faded.png"
+  local hzTexture = habitableZoneTextures.TexturesPath .. "hot_to_cold_faded.png"
 
   -- Set the default textures used for the exoplanet system creation
   -- (Check if already set, to not override value set in another file)

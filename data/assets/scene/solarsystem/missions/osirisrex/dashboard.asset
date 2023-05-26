@@ -21,6 +21,7 @@ local Instruments = {
   GuiName = "OSIRIS-REx Instruments",
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Spacing)
   openspace.dashboard.addDashboardItem(Distance)

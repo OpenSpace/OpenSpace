@@ -18,6 +18,7 @@ local Layer = {
   BlendMode = "Multiply",
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)

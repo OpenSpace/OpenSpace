@@ -13,7 +13,7 @@ local colormaps = asset.syncedResource({
 })
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   -- Set the default data files used for the exoplanet system creation
   -- (Check if already set, to not override value set in another file)
   local p1 = "Modules.Exoplanets.DataFolder";

@@ -35,7 +35,7 @@ local BennuProjection = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_BENNU",
       DestinationFrame = "GALACTIC"
-    },
+    }
   },
   Renderable = {
     Enabled = true,

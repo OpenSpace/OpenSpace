@@ -1,9 +1,9 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./actions")
 asset.require("./mission")
+local sun = asset.require("scene/solarsystem/sun/sun")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
 
 
 
@@ -113,7 +113,7 @@ local JWSTFov = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = { 0, 0, math.rad(30) }
-    },
+    }
   },
   Tag = { "mission_jwst_fov" },
   GUI = {
@@ -150,6 +150,7 @@ local JWSTLabel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTBand)
   openspace.addSceneGraphNode(JWSTModel)
@@ -170,6 +171,8 @@ asset.export(JWSTBand)
 asset.export(JWSTModel)
 asset.export(JWSTFov)
 asset.export(JWSTLabel)
+
+
 
 asset.meta = {
   Name = "James Webb Space Telescope",

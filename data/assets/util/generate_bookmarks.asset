@@ -56,7 +56,7 @@ local function loadBookmarks(guiPath, bookmarkfile)
     }
 
     if (group ~= "") then
-      sgn.GUI.Path  = sgn.GUI.Path .. "/" .. group
+      sgn.GUI.Path = sgn.GUI.Path .. "/" .. group
     end
 
     if (globe == "") then

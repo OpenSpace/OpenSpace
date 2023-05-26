@@ -4,6 +4,7 @@ local Item = {
   GuiName = "Parallel Connection"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

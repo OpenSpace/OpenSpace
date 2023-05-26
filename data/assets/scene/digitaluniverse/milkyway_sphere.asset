@@ -31,7 +31,7 @@ local Sphere = {
     Name = "Milky Way Sphere",
     Path = "/Milky Way",
     Description = [[All sky image of the Milky Way that is visible when inside. Fades
-      out when zooming away from the Milky Way]],
+      out when zooming away from the Milky Way]]
   }
 }
 

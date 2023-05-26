@@ -43,6 +43,7 @@ local LayerFolder = {
   Description = "Temporal coverage: 01 Jan 1981 - 31 Dec 2020"
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", LayerPrototype)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", LayerFolder)

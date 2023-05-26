@@ -44,7 +44,7 @@ local C2019Y4AtlasPosition = {
     Translation = {
       Type = "HorizonsTranslation",
       HorizonsTextFile = orbit
-    },
+    }
   },
   GUI = {
     Name = "C/2019 Y4 Atlas",

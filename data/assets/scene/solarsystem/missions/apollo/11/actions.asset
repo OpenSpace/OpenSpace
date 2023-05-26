@@ -29,6 +29,8 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(LandingSite)
 end)
 
+asset.export("LandingSite", LandingSite.Identifier)
+
 
 
 asset.meta = {

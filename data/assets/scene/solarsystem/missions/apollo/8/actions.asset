@@ -36,6 +36,9 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(EarthRise)
 end)
 
+asset.export("EarthRise", EarthRise.Identifier)
+asset.export("Launch", Launch.Identifier)
+
 
 
 asset.meta = {

@@ -25,7 +25,7 @@ local GaiaPosition = {
         -- End time: 2026-Sep-14 00:00:00 (last data point)
         -- Step size: First file has 40 minutes and seocnd has 1 day step size
       }
-    },
+    }
   },
   GUI = {
     Name = "Position",

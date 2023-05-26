@@ -23,7 +23,7 @@ local Juice = {
       SourceFrame = "JUICE_SPACECRAFT",
       DestinationFrame = "GALACTIC",
       Kernels = kernels.Kernels
-    },
+    }
   },
   GUI = {
     Name = "Juice",

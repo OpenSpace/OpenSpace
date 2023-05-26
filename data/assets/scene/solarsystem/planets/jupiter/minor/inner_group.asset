@@ -45,7 +45,7 @@ local MetisTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 0.117912037,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -75,7 +75,7 @@ local MetisLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 0.1, 3.0 },
-    FadeWidths = { 0.1, 3.0 },
+    FadeWidths = { 0.1, 3.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -127,7 +127,7 @@ local AdrasteaTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 0.2982638889,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -157,7 +157,7 @@ local AdrasteaLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 0.1, 3.0 },
-    FadeWidths = { 0.1, 3.0 },
+    FadeWidths = { 0.1, 3.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -209,7 +209,7 @@ local AmaltheaTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 0.4981828704,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -239,7 +239,7 @@ local AmaltheaLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 0.1, 3.0 },
-    FadeWidths = { 0.1, 3.0 },
+    FadeWidths = { 0.1, 3.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -291,7 +291,7 @@ local ThebeTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 0.6745023148,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -321,7 +321,7 @@ local ThebeLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 0.1, 3.0 },
-    FadeWidths = { 0.1, 3.0 },
+    FadeWidths = { 0.1, 3.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {

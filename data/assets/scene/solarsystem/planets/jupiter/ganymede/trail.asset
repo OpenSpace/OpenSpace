@@ -16,7 +16,7 @@ local GanymedeTrail = {
       Kernels = kernel
     },
     Color = { 0.4, 0.3, 0.3 },
-    Period =  172.0 / 24.0,
+    Period = 172.0 / 24.0,
     Resolution = 1000
   },
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },

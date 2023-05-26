@@ -1,7 +1,7 @@
 -- Create a state machine with a few different states. The state machine can be controlled through
 -- the scripting commands from the state machine module.
 
-local targetNode = function(nodeIdentifier)
+local function targetNode(nodeIdentifier)
   return [[
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
     openspace.setPropertyValueSingle(
@@ -45,7 +45,7 @@ local Transitions = {
   },
   {
     From = "Earth",
-    To = "Constellations",
+    To = "Constellations"
   },
   {
     From = "Constellations",
@@ -62,6 +62,7 @@ local Transitions = {
     Action = targetNode("Moon")
   }
 }
+
 
 asset.onInitialize(function()
   -- Setup (could be done in the profile)

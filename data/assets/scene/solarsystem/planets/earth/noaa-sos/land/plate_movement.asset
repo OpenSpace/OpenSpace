@@ -51,7 +51,7 @@ local AgeScale = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
   openspace.addScreenSpaceRenderable(AgeScale)
 end)

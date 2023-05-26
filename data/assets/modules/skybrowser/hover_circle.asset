@@ -9,6 +9,7 @@ local imageFolder = asset.syncedResource({
   Version = 1
 })
 
+
 local circle = {
   Identifier = "hoverCircle",
   Parent = transforms.SolarSystemBarycenter.Identifier,
@@ -28,9 +29,10 @@ local circle = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(circle)
-  openspace.skybrowser.setHoverCircle('hoverCircle')
+  openspace.skybrowser.setHoverCircle("hoverCircle")
 end)
 
 asset.onDeinitialize(function()
@@ -38,6 +40,8 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(circle)
+
+
 
 asset.meta = {
   Name = "SkyBrowser Hover Circle",

@@ -624,6 +624,7 @@ local Plane20Gly = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(RadioSphere)
   openspace.addSceneGraphNode(OortSphere)

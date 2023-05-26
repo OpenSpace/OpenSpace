@@ -1,4 +1,4 @@
-asset.onInitialize(function ()
+asset.onInitialize(function()
   local scale = openspace.dpiScaling()
   openspace.printInfo("Setting the DPI scaling factor to " .. tostring(scale))
 

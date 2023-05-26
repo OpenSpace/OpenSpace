@@ -12,6 +12,7 @@ local modelFolder = asset.syncedResource({
   Override = false
 })
 
+
 local Location = { 37.816116, -122.47789, 120.0 }
 
 local ScaleModel = {
@@ -72,6 +73,7 @@ local ResetPositionAction = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ScaleModel)
 
@@ -87,5 +89,5 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(ScaleModel)
-asset.export(UpdatePositionAction)
-asset.export(ResetPositionAction)
+asset.export(UpdatePositionAction.Identifier)
+asset.export(ResetPositionAction.Identifier)

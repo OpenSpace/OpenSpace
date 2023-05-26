@@ -32,6 +32,7 @@ local Plane = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Plane)
 end)

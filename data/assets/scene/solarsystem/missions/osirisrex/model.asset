@@ -30,7 +30,7 @@ local OsirisRex = {
       Type = "SpiceRotation",
       SourceFrame = "ORX_SPACECRAFT",
       DestinationFrame = "GALACTIC"
-    },
+    }
   },
   Renderable = {
     Type = "RenderableModel",
@@ -109,7 +109,7 @@ local Rexis = {
       Type = "SpiceRotation",
       SourceFrame = "ORX_REXIS",
       DestinationFrame = "ORX_SPACECRAFT"
-    },
+    }
   },
   GUI = {
     Name = "REXIS",

@@ -35,7 +35,6 @@ local Janus = {
     Name = "Janus FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
     Description = "The field-of-view for the JANUS instrument onboard Juice"
-
   }
 }
 

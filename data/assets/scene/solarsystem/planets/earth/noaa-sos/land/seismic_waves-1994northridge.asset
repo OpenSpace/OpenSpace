@@ -61,7 +61,7 @@ local Pips = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerStations)
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerImages)

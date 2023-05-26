@@ -8,12 +8,12 @@ local ResetLoop = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.action.registerAction(ResetLoop)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.action.removeAction(ResetLoop)
 end)
 
-asset.export(ResetLoop)
+asset.export("ResetLoop", ResetLoop.Identifier)

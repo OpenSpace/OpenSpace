@@ -25,6 +25,8 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(Setup)
 end)
 
+asset.export("Setup", Setup.Identifier)
+
 
 
 asset.meta = {

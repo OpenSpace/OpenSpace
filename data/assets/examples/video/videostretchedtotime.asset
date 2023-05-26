@@ -22,6 +22,7 @@ local Layer = {
   Description = [[Video stretched to time]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(earth.Earth.Identifier, "ColorLayers", Layer)
 end)

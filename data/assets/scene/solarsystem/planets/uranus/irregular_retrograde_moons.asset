@@ -45,7 +45,7 @@ local FranciscoTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 266.56,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -127,7 +127,7 @@ local CalibanTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 579.50,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -209,7 +209,7 @@ local StephanoTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 676.50,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -291,7 +291,7 @@ local TrinculoTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 758.10,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -373,7 +373,7 @@ local SycoraxTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 1283.4,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -455,7 +455,7 @@ local ProsperoTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 1992.8,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -537,7 +537,7 @@ local SetebosTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 2202.3,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -619,7 +619,7 @@ local FerdinandTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 2823.4,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",

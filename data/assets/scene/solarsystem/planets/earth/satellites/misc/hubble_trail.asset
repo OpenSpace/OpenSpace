@@ -60,7 +60,7 @@ local HubbleTrail = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   local hubble = openspace.space.readKeplerFile(omm .. "hst.txt", "OMM")
   HubbleTrail.Renderable.Period = hubble[1].Period / (60 * 60 * 24)
 
@@ -68,7 +68,7 @@ asset.onInitialize(function ()
   openspace.addSceneGraphNode(HubbleTrail)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HubbleTrail)
   openspace.removeSceneGraphNode(HubblePosition)
 end)

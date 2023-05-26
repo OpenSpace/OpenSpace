@@ -10,6 +10,7 @@ local modelFolder = asset.syncedResource({
   Version = 1
 })
 
+
 local Location = { 48.87389, 2.29492 }
 
 local ScaleModel = {
@@ -35,7 +36,7 @@ local ScaleModel = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = modelFolder .. "Fr_arch_OBJ.osmodel",
-    LightSources = { sunAsset.LightSource },
+    LightSources = { sunAsset.LightSource }
   },
   GUI = {
     Name = "Arc de Triomphe",
@@ -63,6 +64,7 @@ local ResetPositionAction = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ScaleModel)
 
@@ -78,5 +80,5 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(ScaleModel)
-asset.export(UpdatePositionAction)
-asset.export(ResetPositionAction)
+asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
+asset.export("ResetPositionAction", ResetPositionAction.Identifier)
