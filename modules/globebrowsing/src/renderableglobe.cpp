@@ -1282,7 +1282,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     }
     _localRenderer.program->deactivate();
 
-    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
+    if (global::sessionRecording->isSavingFramesDuringPlayback() &&
+        global::sessionRecording->shouldWaitForTileLoading())
+    {
         // If our tile cache is very full, we assume we need to adjust the level of detail
         // dynamically to not keep rendering frames with unavailable data
         // After certain number of iterations(_debugProperties.dynamicLodIterationCount)

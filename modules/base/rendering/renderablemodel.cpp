@@ -345,12 +345,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    std::string file = absPath(p.geometryFile.string()).string();
-    _geometry = ghoul::io::ModelReader::ref().loadModel(
-        file,
-        ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
-        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
-    );
+    _file = absPath(p.geometryFile.string());
+    if (!std::filesystem::exists(_file)) {
+        throw ghoul::RuntimeError(fmt::format("Cannot find model file {}", _file));
+    }
 
     _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
 
@@ -373,43 +371,32 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
+    if (p.modelTransform.has_value()) {
+        _modelTransform = *p.modelTransform;
+    }
+
     if (p.animationStartTime.has_value()) {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Animation start time given to model without animation");
-        }
         _animationStart = *p.animationStartTime;
     }
 
     if (p.enableAnimation.has_value()) {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Attempting to enable animation for a model that does not have any");
-        }
-        else if (*p.enableAnimation && _animationStart.empty()) {
-            LWARNING("Cannot enable animation without a given start time");
-        }
-        else {
-            _enableAnimation = *p.enableAnimation;
-            _geometry->enableAnimation(_enableAnimation);
-        }
+        _enableAnimation = *p.enableAnimation;
     }
 
     if (p.animationTimeScale.has_value()) {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Animation time scale given to model without animation");
-        }
-        else if (std::holds_alternative<float>(*p.animationTimeScale)) {
-            _geometry->setTimeScale(std::get<float>(*p.animationTimeScale));
+        if (std::holds_alternative<float>(*p.animationTimeScale)) {
+            _animationTimeScale = std::get<float>(*p.animationTimeScale);
         }
         else if (std::holds_alternative<Parameters::AnimationTimeUnit>(
-                    *p.animationTimeScale)
-                )
+                *p.animationTimeScale
+            ))
         {
             Parameters::AnimationTimeUnit animationTimeUnit =
                 std::get<Parameters::AnimationTimeUnit>(*p.animationTimeScale);
             TimeUnit timeUnit = codegen::map<TimeUnit>(animationTimeUnit);
 
-            _geometry->setTimeScale(static_cast<float>(
-                convertTime(1.0, timeUnit, TimeUnit::Second))
+            _animationTimeScale = static_cast<double>(
+                convertTime(1.0, timeUnit, TimeUnit::Second)
             );
         }
         else {
@@ -418,10 +405,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     }
 
     if (p.animationMode.has_value()) {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Animation mode given to model without animation");
-        }
-
         switch (*p.animationMode) {
             case Parameters::AnimationMode::LoopFromStart:
                 _animationMode = AnimationMode::LoopFromStart;
@@ -441,10 +424,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             default:
                 throw ghoul::MissingCaseException();
         }
-    }
-
-    if (p.modelTransform.has_value()) {
-        _modelTransform = *p.modelTransform;
     }
 
     _ambientIntensity = p.ambientIntensity.value_or(_ambientIntensity);
@@ -472,10 +451,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (_geometry->hasAnimation()) {
-        addProperty(_enableAnimation);
-    }
-
+    addProperty(_enableAnimation);
     addPropertySubOwner(_lightSourcePropertyOwner);
     addProperty(_ambientIntensity);
     addProperty(_diffuseIntensity);
@@ -490,7 +466,12 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _modelScale.setExponent(20.f);
 
     _modelScale.onChange([this]() {
-        setBoundingSphere(_geometry->boundingRadius()* _modelScale);
+        if (!_geometry) {
+            LWARNING(fmt::format("Cannot set scale for model {}; not loaded yet", _file));
+            return;
+        }
+
+        setBoundingSphere(_geometry->boundingRadius() * _modelScale);
 
         // Set Interaction sphere size to be 10% of the bounding sphere
         setInteractionSphere(boundingSphere() * 0.1);
@@ -501,14 +482,25 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     });
 
     _enableAnimation.onChange([this]() {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Attempting to enable animation for a model that does not have any");
+        if (!_modelHasAnimation) {
+            LWARNING(fmt::format(
+                "Cannot enable animation for model {}; it does not have any", _file
+            ));
         }
         else if (_enableAnimation && _animationStart.empty()) {
-            LWARNING("Cannot enable animation without a given start time");
+            LWARNING(fmt::format(
+                "Cannot enable animation for model {}; it does not have a start time",
+                _file
+            ));
             _enableAnimation = false;
         }
         else {
+            if (!_geometry) {
+                LWARNING(fmt::format(
+                    "Cannot enable animation for model {}; not loaded yet", _file
+                ));
+                return;
+            }
             _geometry->enableAnimation(_enableAnimation);
         }
     });
@@ -539,15 +531,6 @@ bool RenderableModel::isReady() const {
 void RenderableModel::initialize() {
     ZoneScoped;
 
-    if (_geometry->hasAnimation() && _enableAnimation && _animationStart.empty()) {
-        LWARNING("Model with animation not given any start time");
-    }
-    else if (_geometry->hasAnimation() && !_enableAnimation) {
-        LINFO("Model with deactivated animation was found. "
-            "The animation can be activated by entering a start time in the asset file"
-        );
-    }
-
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
     }
@@ -556,6 +539,49 @@ void RenderableModel::initialize() {
 void RenderableModel::initializeGL() {
     ZoneScoped;
 
+    // Load model
+    _geometry = ghoul::io::ModelReader::ref().loadModel(
+        _file,
+        ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
+        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
+    );
+    _modelHasAnimation = _geometry->hasAnimation();
+
+    if (!_modelHasAnimation) {
+        if (!_animationStart.empty()) {
+            LWARNING(fmt::format(
+                "Animation start time given to model {} without animation", _file
+            ));
+        }
+
+        if (_enableAnimation) {
+            LWARNING(fmt::format(
+                "Cannot enable animation for model {}; it does not have any", _file
+            ));
+            _enableAnimation = false;
+        }
+
+        _enableAnimation.setReadOnly(true);
+    }
+    else {
+        if (_enableAnimation && _animationStart.empty()) {
+            LWARNING(fmt::format(
+                "Cannot enable animation for model {}; it does not have a start time",
+                _file
+            ));
+        }
+        else if (!_enableAnimation) {
+            LINFO(fmt::format(
+                "Model {} with deactivated animation was found. The animation can be "
+                "activated by entering a start time in the asset file", _file
+            ));
+        }
+
+        // Set animation settings
+        _geometry->setTimeScale(_animationTimeScale);
+    }
+
+    // Initialize shaders
     std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
         program += "|vs=" + _vertexShaderPath;

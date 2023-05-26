@@ -17,7 +17,7 @@ local Model = {
   Transform = {
     Translation = {
       Type = "StaticTranslation",
-      Position = { 11E7, 0.0, 0.0 }
+      Position = { -11E7, 0.0, 0.0 }
     }
   },
   Renderable = {
