@@ -851,19 +851,6 @@ void setSgctDelegateFunctions() {
 
         return currentWindow->hasTag("GUI");
     };
-    sgctDelegate.shouldRenderInGuiWindow = []() {
-        ZoneScoped;
-        const int nWindows = static_cast<int>(Engine::instance().windows().size());
-
-        bool shouldRender = false;
-        if (currentWindow->guiMirrorWindowNumForRender() > 0 &&
-            currentWindow->guiMirrorWindowNumForRender() <= nWindows)
-        {
-            shouldRender = true;
-        } 
-
-        return shouldRender;
-    };
     sgctDelegate.isMaster = []() {
         ZoneScoped;
 

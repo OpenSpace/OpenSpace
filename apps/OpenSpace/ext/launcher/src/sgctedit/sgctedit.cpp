@@ -29,6 +29,7 @@
 #include <sgctedit/settingswidget.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <QApplication>
+#include <QCheckBox>
 #include <QFileDialog>
 #include <QFrame>
 #include <QMessageBox>
@@ -36,8 +37,6 @@
 #include <QScreen>
 #include <QVBoxLayout>
 #include <filesystem>
-
-#include "sgctedit/sgctedit.inl"
 
 namespace {
     constexpr QRect MonitorWidgetSize = QRect(0, 0, 500, 500);
@@ -143,6 +142,8 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
 
 void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
     bool firstWindowGuiIsEnabled = (nWindows > 1);
+    int graphicsSelectionForFirstWindow = 0;
+    int nGuiRenderTagsFound = 0;
     for (size_t i = 0; i < nWindows; ++i) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
         //First window needs to have "GUI" tag if this mode is set
@@ -152,6 +153,19 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
             }
             else {
                 firstWindowGuiIsEnabled = false;
+            }
+            if (std::find(w.tags.begin(), w.tags.end(), "GUI_No_Render") != w.tags.end())
+            {
+                graphicsSelectionForFirstWindow = 0;
+                nGuiRenderTagsFound++;
+            }
+            for (int winNum = 0; winNum <= 4; ++winNum) {
+                std::string tagToLookFor = "GUI_Render_Win" + std::to_string(winNum);
+                if (std::find(w.tags.begin(), w.tags.end(), tagToLookFor) != w.tags.end())
+                {
+                    graphicsSelectionForFirstWindow = winNum;
+                    nGuiRenderTagsFound++;
+                }
             }
         }
         // If first window only renders 2D, and all subsequent windows do not, then
@@ -163,93 +177,18 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
             firstWindowGuiIsEnabled = false;
         }
     }
-    _settingsWidget->setShowUiOnFirstWindow(firstWindowGuiIsEnabled);
-    _settingsWidget->setEnableShowUiOnFirstWindowCheckbox(nWindows > 1);
 
-    int graphicsSelectionForFirstWindow = 0;
-    if (firstWindowGuiIsEnabled) {
-        sgct::config::Viewport firstWindowViewport =
-            _cluster.nodes.front().windows[0].viewports.back();
-        for (size_t i = 1; i < nWindows; ++i) {
-            sgct::config::Window& w = _cluster.nodes.front().windows[i];
-            if (doesViewportSubsetMatch(firstWindowViewport, w.viewports.back())) {
-                graphicsSelectionForFirstWindow = static_cast<int>(i);
-                break;
-            }
-        }
+    if ((nGuiRenderTagsFound > 1) ||
+        (graphicsSelectionForFirstWindow > static_cast<int>(nWindows)))
+    {
+        graphicsSelectionForFirstWindow = 0;
     }
+
+    _settingsWidget->setShowUiOnFirstWindow(firstWindowGuiIsEnabled);
+    _settingsWidget->setEnableShowUiOnFirstWindowCheckbox(firstWindowGuiIsEnabled);
     _settingsWidget->setGraphicsSelectionForShowUiOnFirstWindow(
         graphicsSelectionForFirstWindow
     );
-}
-
-bool SgctEdit::doesViewportSubsetMatch(sgct::config::Viewport& first,
-                                       sgct::config::Viewport& compare)
-{
-    bool matches = true;
-    matches &= compareOptionalCfgElement(first.isTracked, compare.isTracked);
-    matches &= compareOptionalCfgElement(first.position, compare.position);
-    matches &= compareOptionalCfgElement(first.size, compare.size);
-
-    bool projectionMatchFound = true;
-    sgct::config::Projections& firstP = first.projection;
-    sgct::config::Projections& compareP = compare.projection;
-    if (typeid(firstP) != typeid(compareP)) {
-        return false;
-    }
-    std::visit(overloaded{
-        [&](sgct::config::CylindricalProjection p) {
-            matches &= compareOptionalCfgElement(
-                p.quality,
-                std::get<sgct::config::CylindricalProjection>(compareP).quality
-            );
-            matches &= compareOptionalCfgElement(
-                p.heightOffset,
-                std::get<sgct::config::CylindricalProjection>(compareP).heightOffset
-            );
-        },
-        [&](sgct::config::EquirectangularProjection p) {
-            matches &= compareOptionalCfgElement(
-                p.quality,
-                std::get<sgct::config::EquirectangularProjection>(compareP).quality
-            );
-        },
-        [&](sgct::config::FisheyeProjection p) {
-            matches &= compareOptionalCfgElement(
-                p.quality,
-                std::get<sgct::config::FisheyeProjection>(compareP).quality
-            );
-        },
-        [&](sgct::config::PlanarProjection p) {
-            matches &= compareCfgElement(
-                p.fov,
-                std::get<sgct::config::PlanarProjection>(compareP).fov
-            );
-        },
-        [&](sgct::config::SphericalMirrorProjection p) {
-            matches &= compareOptionalCfgElement(
-                p.quality,
-                std::get<sgct::config::SphericalMirrorProjection>(compareP).quality
-            );
-        },
-        [&](sgct::config::SpoutOutputProjection p) {
-            matches &= compareOptionalCfgElement(
-                p.quality,
-                std::get<sgct::config::SpoutOutputProjection>(compareP).quality
-            );
-        },
-        [&](sgct::config::NoProjection) {
-            projectionMatchFound = false;
-        },
-        [&](sgct::config::ProjectionPlane) {
-            projectionMatchFound = false;
-        },
-        [&](sgct::config::SpoutFlatProjection) {
-            projectionMatchFound = false;
-        }
-    }, first.projection);
-    matches &= projectionMatchFound;
-    return matches;
 }
 
 void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
@@ -377,6 +316,7 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
             _displayWidget, &DisplayWindowUnion::nWindowsChanged,
             monitorBox, &MonitorBox::nWindowsDisplayedChanged
         );
+
         for (unsigned int i = 0; i < nWindows; ++i) {
             _displayWidget->addWindow();
         }
@@ -392,7 +332,29 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
         _displayWidget, &DisplayWindowUnion::nWindowsChanged,
         _settingsWidget, &SettingsWidget::nWindowsDisplayedChanged
     );
-    
+
+    connect(
+        _displayWidget, &DisplayWindowUnion::nWindowsChanged,
+        this, &SgctEdit::nWindowsDisplayedChanged
+    );
+
+    if (_settingsWidget->firstWindowGraphicsSelection()) {
+        connect(
+            _settingsWidget->firstWindowGraphicsSelection(),
+            &QComboBox::currentTextChanged,
+            this,
+            &SgctEdit::firstWindowGraphicsSelectionChanged
+        ); 
+    }
+    if (_settingsWidget->showUiOnFirstWindowCheckbox()) {
+        connect(
+            _settingsWidget->showUiOnFirstWindowCheckbox(),
+            &QCheckBox::clicked,
+            this,
+            &SgctEdit::firstWindowGuiOptionClicked
+        ); 
+    }
+
     {
         QHBoxLayout* layoutButtonBox = new QHBoxLayout;
         layoutButtonBox->addStretch(1);
@@ -587,19 +549,22 @@ void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) 
                 node.windows[i].tags.push_back("GUI");
                 int selectedGraphics =
                     _settingsWidget->graphicsSelectionForShowUiOnFirstWindow();
+
                 if (selectedGraphics == 0) {
                     node.windows[i].viewports.back().isTracked = false;
+                    node.windows[i].tags.push_back("GUI_No_Render");
                 }
                 else if (selectedGraphics > 0 &&
                          selectedGraphics <= static_cast<int>(node.windows.size()))
                 {
+                    node.windows[i].tags.push_back("GUI_Render_Win" +
+                        std::to_string(selectedGraphics));
                     //Set first window viewport to mirror the selected window's viewport
                     node.windows[i].viewports =
                         node.windows[(selectedGraphics - 1)].viewports;
                 }
                 node.windows[i].draw2D = true;
                 node.windows[i].draw3D = (selectedGraphics > 0);
-                node.windows[i].guiMirrorWindowNumForRender = selectedGraphics;
             }
             else {
                 node.windows[i].draw2D = false;
@@ -611,4 +576,38 @@ void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) 
 
 sgct::config::Cluster SgctEdit::cluster() const {
     return _cluster;
+}
+
+void SgctEdit::firstWindowGraphicsSelectionChanged(const QString &text) {
+    (void)text;
+    if (!_settingsWidget)
+        return;
+
+    int newSetting = _settingsWidget->graphicsSelectionForShowUiOnFirstWindow();
+
+    if (_settingsWidget->showUiOnFirstWindow()) {
+        _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(
+            newSetting == 1
+        );
+    }
+}
+
+void SgctEdit::nWindowsDisplayedChanged(int newCount) {
+    if (!_settingsWidget)
+        return;
+    if (newCount == 1) {
+        _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(true);
+    }
+    else {
+        firstWindowGraphicsSelectionChanged("");
+    }
+}
+
+void SgctEdit::firstWindowGuiOptionClicked(bool checked) {
+    if (checked) {
+        firstWindowGraphicsSelectionChanged("");
+    }
+    else {
+        _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(true);
+    }
 }

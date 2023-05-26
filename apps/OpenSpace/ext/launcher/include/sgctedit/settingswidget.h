@@ -121,6 +121,23 @@ public:
      */
     void nWindowsDisplayedChanged(int newCount);
 
+    /**
+     * Gets the pointer to the QComboBox that selects the graphics for first window
+     * 
+     * \return pointer to the QComboBox object
+     */
+    QComboBox* firstWindowGraphicsSelection();
+
+    /**
+     * Gets the pointer to the QCheckBox that selects if UI is in first window only
+     * 
+     * \return pointer to the QCheckBox object
+     */
+    QCheckBox* showUiOnFirstWindowCheckbox();
+
+signals:
+    void firstWindowGraphicsSelected(int selection);
+
 private:
     sgct::quat _orientationValue = sgct::quat(0.f, 0.f, 0.f, 0.f);
     QCheckBox* _checkBoxVsync = nullptr;
@@ -131,6 +148,7 @@ private:
     bool _stateOfUiOnFirstWindowWhenDisabled = false;
 
     void showUiOnFirstWindowClicked(bool checked);
+    void firstWindowGraphicsSelectionChanged(const QString &text);
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__

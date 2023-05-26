@@ -187,3 +187,8 @@ WindowControl QLabel#info {
   font-weight: normal;
   font-size: 8pt;
 }
+
+WindowControl QLabel#notice {
+  font-weight: normal;
+  font-size: 11pt;
+}

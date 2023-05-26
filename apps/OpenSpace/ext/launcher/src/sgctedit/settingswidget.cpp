@@ -43,11 +43,10 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     _showUiOnFirstWindow->setEnabled(false);
     _showUiOnFirstWindow->setToolTip(
         "If enabled the first window is marked as a GUI window resulting in the user "
-        "interface only being shown on that window and the rendering is suppressed on "
-        "this first window. The remaining windows will render normally but they will not "
-        "show the user interface"
+        "interface only being shown\non that window and the rendering is suppressed on "
+        "this first window. The remaining windows will render\nnormally but they will "
+        "not show the user interface"
     );
-//    layout->addWidget(_showUiOnFirstWindow);
 
     _firstWindowSelectionLayout = new QHBoxLayout;
 
@@ -117,7 +116,6 @@ void SettingsWidget::setGraphicsSelectionForShowUiOnFirstWindow(int selection) {
     _firstWindowGraphicsSelection->setCurrentIndex(selection);
 }
 
-
 void SettingsWidget::setVsync(bool enableVsync) {
     _checkBoxVsync->setChecked(enableVsync);
 }
@@ -161,4 +159,12 @@ void SettingsWidget::nWindowsDisplayedChanged(int newCount) {
 
 void SettingsWidget::showUiOnFirstWindowClicked(bool checked) {
     _firstWindowGraphicsSelection->setEnabled(checked);
+}
+
+QComboBox* SettingsWidget::firstWindowGraphicsSelection() {
+    return _firstWindowGraphicsSelection;
+}
+
+QCheckBox* SettingsWidget::showUiOnFirstWindowCheckbox() {
+    return _showUiOnFirstWindow;
 }

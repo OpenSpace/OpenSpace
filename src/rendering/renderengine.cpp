@@ -686,7 +686,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     const bool renderingEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
-    if (renderingEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
+    if (renderingEnabled && _globalBlackOutFactor > 0.f) {
         _renderer.render(_scene, _camera, _globalBlackOutFactor);
     }
 
