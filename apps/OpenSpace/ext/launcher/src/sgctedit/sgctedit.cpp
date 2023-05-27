@@ -150,12 +150,8 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
         //First window needs to have "GUI" tag if this mode is set
         if (i == 0) {
-            if (std::find(w.tags.begin(), w.tags.end(), "GUI") != w.tags.end()) {
-                firstWindowGuiIsEnabled = true;
-            }
-            else {
-                firstWindowGuiIsEnabled = false;
-            }
+            firstWindowGuiIsEnabled =
+                (std::find(w.tags.begin(), w.tags.end(), "GUI") != w.tags.end());
             if (std::find(w.tags.begin(), w.tags.end(), "GUI_No_Render") != w.tags.end())
             {
                 graphicsSelectionForFirstWindow = 0;
@@ -575,9 +571,15 @@ void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) 
 }
 
 void SgctEdit::deleteFromTags(sgct::config::Window& window) {
-    for (std::string tag : {"GUI", "GUI_No_Render", "GUI_Render_Win1",
-                            "GUI_Render_Win2", "GUI_Render_Win3", "GUI_Render_Win4"})
-    {
+    constexpr std::array<std::string_view, 6> Tags = {
+        "GUI",
+        "GUI_No_Render",
+        "GUI_Render_Win1",
+        "GUI_Render_Win2",
+        "GUI_Render_Win3",
+        "GUI_Render_Win4"
+    };
+    for (std::string_view tag : Tags) {
         window.tags.erase(
             std::remove(window.tags.begin(), window.tags.end(), tag),
             window.tags.end()
@@ -589,8 +591,7 @@ sgct::config::Cluster SgctEdit::cluster() const {
     return _cluster;
 }
 
-void SgctEdit::firstWindowGraphicsSelectionChanged(const QString &text) {
-    (void)text;
+void SgctEdit::firstWindowGraphicsSelectionChanged(const QString&) {
     if (!_settingsWidget)
         return;
 
@@ -604,8 +605,9 @@ void SgctEdit::firstWindowGraphicsSelectionChanged(const QString &text) {
 }
 
 void SgctEdit::nWindowsDisplayedChanged(int newCount) {
-    if (!_settingsWidget)
+    if (!_settingsWidget) {
         return;
+    }
     if (newCount == 1) {
         _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(true);
     }

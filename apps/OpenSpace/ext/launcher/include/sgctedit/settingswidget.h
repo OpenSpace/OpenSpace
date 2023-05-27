@@ -87,11 +87,8 @@ public:
      * return a value even if the checkbox is not enabled.
      * 
      * \return -1 if in a disabled state (e.g. when showUiOnFirstWindow() returns false)
-     *          0 if no window is being mirrored (only the UI will appear in first
-     *            window, with no 3D rendering)
-     *          1 if the second window's viewport is mirrored in the first window
-     *          2 if the third window's viewport is mirrored in the first window
-     *          3 if the fourth window's viewport is mirrored in the first window
+     *          0 if no window graphics are selected (only the UI will appear)
+     *          (1-4) for which window's setting will be used for window 1 graphics
      */
     int graphicsSelectionForShowUiOnFirstWindow() const;
 
@@ -100,10 +97,8 @@ public:
      * first window will mirror.
      * 
      * \param selection int value for the combo box selection.
-     *                  0 if no window is being mirrored (only the UI will appear)
-     *                  1 if the second window's viewport is mirrored in the first window
-     *                  2 if the third window's viewport is mirrored in the first window
-     *                  3 if the fourth window's viewport is mirrored in the first window
+     *                  0 if no window graphics are selected (only the UI will appear)
+     *                  (1-4) for which window's setting to use for window 1 graphics
      */
     void setGraphicsSelectionForShowUiOnFirstWindow(int selection);
 
@@ -139,6 +134,9 @@ signals:
     void firstWindowGraphicsSelected(int selection);
 
 private:
+    void showUiOnFirstWindowClicked(bool checked);
+    void firstWindowGraphicsSelectionChanged(const QString &text);
+
     sgct::quat _orientationValue = sgct::quat(0.f, 0.f, 0.f, 0.f);
     QCheckBox* _checkBoxVsync = nullptr;
     QCheckBox* _showUiOnFirstWindow = nullptr;
@@ -146,9 +144,6 @@ private:
     QBoxLayout* _firstWindowSelectionLayout = nullptr;
     int _stateOfUiOnFirstWindowPreviousCount = 1;
     bool _stateOfUiOnFirstWindowWhenDisabled = false;
-
-    void showUiOnFirstWindowClicked(bool checked);
-    void firstWindowGraphicsSelectionChanged(const QString &text);
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__

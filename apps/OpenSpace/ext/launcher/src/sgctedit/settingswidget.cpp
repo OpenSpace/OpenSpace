@@ -121,30 +121,30 @@ void SettingsWidget::setVsync(bool enableVsync) {
 }
 
 void SettingsWidget::nWindowsDisplayedChanged(int newCount) {
-    constexpr int countOneWindow = 1;
-    constexpr int countTwoWindows = 2;
+    constexpr int CountOneWindow = 1;
+    constexpr int CountTwoWindows = 2;
     int graphicsSelect = _firstWindowGraphicsSelection->currentIndex();
     graphicsSelect = std::max(0, graphicsSelect);
 
     QList<QString> graphicsOptions = {"None (GUI only)"};
-    for (int i = countOneWindow; i <= newCount; ++i) {
+    for (int i = CountOneWindow; i <= newCount; ++i) {
         graphicsOptions.append("Window " + QString::number(i));
     }
     _firstWindowGraphicsSelection->clear();
     _firstWindowGraphicsSelection->addItems(graphicsOptions);
-    setEnableShowUiOnFirstWindowCheckbox(newCount > countOneWindow);
+    setEnableShowUiOnFirstWindowCheckbox(newCount > CountOneWindow);
     if (graphicsSelect > newCount) {
         graphicsSelect = newCount;
     }
     _firstWindowGraphicsSelection->setCurrentIndex(graphicsSelect);
 
-    if (newCount == countOneWindow) {
+    if (newCount == CountOneWindow) {
         _stateOfUiOnFirstWindowWhenDisabled = _showUiOnFirstWindow->isChecked();
         _showUiOnFirstWindow->setChecked(false);
         _firstWindowGraphicsSelection->setEnabled(false);
     }
-    else if (newCount == countTwoWindows &&
-             _stateOfUiOnFirstWindowPreviousCount == countOneWindow)
+    else if (newCount == CountTwoWindows &&
+             _stateOfUiOnFirstWindowPreviousCount == CountOneWindow)
     {
         if (_stateOfUiOnFirstWindowWhenDisabled) {
             _showUiOnFirstWindow->setChecked(true);

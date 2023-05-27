@@ -666,7 +666,7 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
 
 void LauncherWindow::onNewWindowConfigSelection(int newIndex) {
     std::filesystem::path pathSelected = absPath(selectedWindowConfig());
-    std::string fileSelected = pathSelected.generic_string();
+    std::string fileSelected = pathSelected.string();
     if (newIndex == _windowConfigBoxIndexSgctCfgDefault) {
         _editWindowButton->setEnabled(false);
         _editWindowButton->setToolTip(
