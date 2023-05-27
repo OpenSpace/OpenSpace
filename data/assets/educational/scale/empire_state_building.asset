@@ -53,7 +53,7 @@ local UpdatePositionAction = {
   Identifier = "os.scalemodels.DropEmpireStateBuilding",
   Name = "Drop Empire State Building under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_EmpireStateBuilding')
+    openspace.globebrowsing.setNodePositionFromCamera("Scale_EmpireStateBuilding")
   ]],
   Documentation = "Updates the Empire State Building position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
@@ -64,7 +64,7 @@ local ResetPositionAction = {
   Identifier = "os.scalemodels.ResetEmpireStateBuilding",
   Name = "Reset Empire State Building position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_EmpireStateBuilding', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",
+    openspace.globebrowsing.setNodePosition("Scale_EmpireStateBuilding", "]] .. earthAsset.Earth.Identifier .. [[", ]] .. Location[1] .. "," .. Location[2] .. ")",
   Documentation = "Resets the Empire State Building back to its actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false

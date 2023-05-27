@@ -49,7 +49,7 @@ local UpdatePositionAction = {
   Identifier = "os.scalemodels.DropScientist",
   Name = "Drop Scientist under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_Scientist')
+    openspace.globebrowsing.setNodePositionFromCamera("Scale_Scientist")
   ]],
   Documentation = "Updates the Scientist position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
@@ -60,7 +60,7 @@ local ResetPositionAction = {
   Identifier = "os.scalemodels.ResetScientist",
   Name = "Reset Scientist position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_Scientist', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",
+    openspace.globebrowsing.setNodePosition("Scale_Scientist", "]] .. earthAsset.Earth.Identifier .. [[", ]] .. Location[1] .. "," .. Location[2] .. ")",
   Documentation = "Resets the Scientist back to its start location",
   GuiPath = "/Scale Objects",
   IsLocal = false

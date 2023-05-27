@@ -79,29 +79,29 @@ local GroundPanoSphere = {
 local showCommand = [[
   local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera()
   local camera = openspace.navigation.getNavigationState()
-  openspace.setParent('GroundPanoPosition', camera.Anchor)
-  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Translation.Globe', camera.Anchor)
-  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Translation.Latitude', lat)
-  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Translation.Longitude', lon)
-  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Translation.Altitude', alt)
-  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Rotation.Globe', camera.Anchor)
-  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Rotation.Latitude', lat)
-  openspace.setPropertyValueSingle('Scene.GroundPanoPosition.Rotation.Longitude', lon)
-  openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Enabled', true)
-  openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 0.0)
-  openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 1.0, 1.0)
+  openspace.setParent("GroundPanoPosition", camera.Anchor)
+  openspace.setPropertyValueSingle("Scene.GroundPanoPosition.Translation.Globe", camera.Anchor)
+  openspace.setPropertyValueSingle("Scene.GroundPanoPosition.Translation.Latitude", lat)
+  openspace.setPropertyValueSingle("Scene.GroundPanoPosition.Translation.Longitude", lon)
+  openspace.setPropertyValueSingle("Scene.GroundPanoPosition.Translation.Altitude", alt)
+  openspace.setPropertyValueSingle("Scene.GroundPanoPosition.Rotation.Globe", camera.Anchor)
+  openspace.setPropertyValueSingle("Scene.GroundPanoPosition.Rotation.Latitude", lat)
+  openspace.setPropertyValueSingle("Scene.GroundPanoPosition.Rotation.Longitude", lon)
+  openspace.setPropertyValueSingle("Scene.GroundPanoSphere.Renderable.Enabled", true)
+  openspace.setPropertyValueSingle("Scene.GroundPanoSphere.Renderable.Fade", 0.0)
+  openspace.setPropertyValueSingle("Scene.GroundPanoSphere.Renderable.Fade", 1.0, 1.0)
 ]]
 
 local setTextureCommand = function(scene)
-  local command = 'openspace.setPropertyValueSingle("Scene.GroundPanoSphere.Renderable.Texture", "'
+  local command = [[openspace.setPropertyValueSingle("Scene.GroundPanoSphere.Renderable.Texture", "]]
   command = command .. textures
   if (scene == "forest") then
     command = command .. "1"
-  elseif (scene == 'city') then
+  elseif (scene == "city") then
     command = command .. "2"
-  elseif (scene == 'backyard') then
+  elseif (scene == "backyard") then
     command = command .. "3"
-  elseif (scene == 'desert') then
+  elseif (scene == "desert") then
     command = command .. "4"
   else
     openspace.printDebug("unknown scene")
@@ -152,7 +152,7 @@ local HideGroundPano = {
   Name = "Hide ground panorama",
   Command = [[
     -- same position as above
-    openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 0.0, 0.5)
+    openspace.setPropertyValueSingle("Scene.GroundPanoSphere.Renderable.Fade", 0.0, 0.5)
   ]],
   Documentation = "Hides the ground panorama",
   GuiPath = "/Night Sky/Panoramas",

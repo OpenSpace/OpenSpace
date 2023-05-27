@@ -60,16 +60,16 @@ local ShowMeridian = {
   Command = [[
     local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera()
     local camera = openspace.navigation.getNavigationState()
-    openspace.setParent('MeridianPosition', camera.Anchor)
-    openspace.setPropertyValueSingle('Scene.MeridianPosition.Translation.Globe', camera.Anchor)
-    openspace.setPropertyValueSingle('Scene.MeridianPosition.Translation.Latitude', lat)
-    openspace.setPropertyValueSingle('Scene.MeridianPosition.Translation.Longitude', lon)
-    openspace.setPropertyValueSingle('Scene.MeridianPosition.Rotation.Globe', camera.Anchor)
-    openspace.setPropertyValueSingle('Scene.MeridianPosition.Rotation.Latitude', lat)
-    openspace.setPropertyValueSingle('Scene.MeridianPosition.Rotation.Longitude', lon)
-    openspace.setPropertyValueSingle('Scene.MeridianPlane.Renderable.Enabled', true)
-    openspace.setPropertyValueSingle('Scene.MeridianPlane.Renderable.Fade', 0.0)
-    openspace.setPropertyValueSingle('Scene.MeridianPlane.Renderable.Fade', 1.0, 1.0)
+    openspace.setParent("MeridianPosition", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.MeridianPosition.Translation.Globe", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.MeridianPosition.Translation.Latitude", lat)
+    openspace.setPropertyValueSingle("Scene.MeridianPosition.Translation.Longitude", lon)
+    openspace.setPropertyValueSingle("Scene.MeridianPosition.Rotation.Globe", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.MeridianPosition.Rotation.Latitude", lat)
+    openspace.setPropertyValueSingle("Scene.MeridianPosition.Rotation.Longitude", lon)
+    openspace.setPropertyValueSingle("Scene.MeridianPlane.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.MeridianPlane.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.MeridianPlane.Renderable.Fade", 1.0, 1.0)
   ]],
   Documentation = "Shows a line for the local meridian",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -80,7 +80,7 @@ local HideMeridian = {
   Identifier = "os.nightsky.HideMeridian",
   Name = "Hide local meridian",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.MeridianPlane.Renderable.Fade', 0.0, 1.0)
+    openspace.setPropertyValueSingle("Scene.MeridianPlane.Renderable.Fade", 0.0, 1.0)
   ]],
   Documentation = "Hides the line for the local meridian",
   GuiPath = "/Night Sky/Lines and Grids",

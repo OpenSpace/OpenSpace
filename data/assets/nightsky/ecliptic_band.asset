@@ -73,9 +73,9 @@ local ShowEclipticLine = {
   Identifier = "os.nightsky.ShowEclipticLine",
   Name = "Show ecliptic line",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticLine.Renderable.Fade', 0.0)
-    openspace.setPropertyValueSingle('Scene.EclipticLine.Renderable.Enabled', true)
-    openspace.setPropertyValueSingle('Scene.EclipticLine.Renderable.Fade', 1.0, 1.0)
+    openspace.setPropertyValueSingle("Scene.EclipticLine.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.EclipticLine.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.EclipticLine.Renderable.Fade", 1.0, 1.0)
   ]],
   Documentation = "Shows the ecliptic line",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -86,7 +86,7 @@ local HideEclipticLine = {
   Identifier = "os.nightsky.HideEclipticLine",
   Name = "Hide ecliptic line",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticLine.Renderable.Fade', 0.0, 1.0)
+    openspace.setPropertyValueSingle("Scene.EclipticLine.Renderable.Fade", 0.0, 1.0)
   ]],
   Documentation = "Hides the ecliptic line",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -97,9 +97,9 @@ local ShowEclipticBand = {
   Identifier = "os.nightsky.ShowEclipticBand",
   Name = "Show ecliptic band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 0.0)
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Enabled', true)
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 1.0, 1.0)
+    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Fade", 1.0, 1.0)
   ]],
   Documentation = "Shows the ecliptic band",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -110,7 +110,7 @@ local HideEclipticBand = {
   Identifier = "os.nightsky.HideEclipticBand",
   Name = "Hide ecliptic band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 0.0, 1.0)
+    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Fade", 0.0, 1.0)
   ]],
   Documentation = "Hides the ecliptic band",
   GuiPath = "/Night Sky/Lines and Grids",

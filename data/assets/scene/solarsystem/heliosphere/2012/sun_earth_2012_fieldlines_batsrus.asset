@@ -31,9 +31,9 @@ local LoopBatsrus = {
   Command = [[
     openspace.scriptScheduler.clear()
     openspace.time.setDeltaTime(1400)
-    openspace.time.setTime('2012-JUL-14 06:00:00.00')
-    local StarttimescriptBatsrusLoop = "openspace.time.setTime('2012 JUL 14 06:00:00')"
-    openspace.scriptScheduler.loadScheduledScript('2012 JUL 16 07:30:00', StarttimescriptBatsrusLoop)
+    openspace.time.setTime("2012-JUL-14 06:00:00.000")
+    local StartTimeScriptBatsrusLoop = "openspace.time.setTime('2012 JUL 14 06:00:00')"
+    openspace.scriptScheduler.loadScheduledScript("2012 JUL 16 07:30:00", StartTimeScriptBatsrusLoop)
   ]],
   Documentation = "Sets time to start of data, sets higher delta time and loops back from start, when at end of data",
   GuiPath = "/2012July",

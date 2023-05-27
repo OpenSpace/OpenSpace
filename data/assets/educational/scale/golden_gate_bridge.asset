@@ -56,7 +56,7 @@ local UpdatePositionAction = {
   Identifier = "os.scalemodels.DropGoldenGateBridge",
   Name = "Drop Golden Gate Bridge under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_GoldenGateBridge')
+    openspace.globebrowsing.setNodePositionFromCamera("Scale_GoldenGateBridge")
   ]],
   Documentation = "Updates the Golden Gate Bridge position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
@@ -67,7 +67,7 @@ local ResetPositionAction = {
   Identifier = "os.scalemodels.ResetGoldenGateBridge",
   Name = "Reset Golden Gate Bridge position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_GoldenGateBridge', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",
+    openspace.globebrowsing.setNodePosition("Scale_GoldenGateBridge", "]] .. earthAsset.Earth.Identifier .. [[", ]] .. Location[1] .. "," .. Location[2] .. ")",
   Documentation = "Resets the Golden Gate Bridge back to its actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false

@@ -1,47 +1,47 @@
 asset.onInitialize(function()
   openspace.scriptScheduler.loadScheduledScript(
     "2016 SEP 08 23:05:00",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailSolarSystem.Renderable.Enabled', false)"
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailSolarSystem.Renderable.Enabled", false)]]
   )
   openspace.scriptScheduler.loadScheduledScript(
     "2016 SEP 08 23:05:00",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailBennu.Renderable.Enabled', false)"
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailBennu.Renderable.Enabled", false)]]
   )
 
   openspace.scriptScheduler.loadScheduledScript(
     "2016 SEP 08 23:05:01",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailEarth.Renderable.Enabled', true)",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailEarth.Renderable.Enabled', false)"
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailEarth.Renderable.Enabled", true)]],
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailEarth.Renderable.Enabled", false)]]
   )
   openspace.scriptScheduler.loadScheduledScript(
     "2016 SEP 09 00:00:00",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailSolarSystem.Renderable.Enabled', true)",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailSolarSystem.Renderable.Enabled', false)"
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailSolarSystem.Renderable.Enabled", true)]],
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailSolarSystem.Renderable.Enabled", false)]]
   )
   openspace.scriptScheduler.loadScheduledScript(
     "2016 SEP 09 02:00:00",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailEarth.Renderable.Enabled', false)",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailEarth.Renderable.Enabled', true)"
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailEarth.Renderable.Enabled", false)]],
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailEarth.Renderable.Enabled", true)]]
   )
   openspace.scriptScheduler.loadScheduledScript(
     "2018 OCT 11 00:00:00",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailBennu.Renderable.Enabled', true)",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailBennu.Renderable.Enabled', false)"
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailBennu.Renderable.Enabled", true)]],
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailBennu.Renderable.Enabled", false)]]
   )
   openspace.scriptScheduler.loadScheduledScript(
     "2018 OCT 15 00:00:00",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailSolarSystem.Renderable.Enabled', false)",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailSolarSystem.Renderable.Enabled', true)"
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailSolarSystem.Renderable.Enabled", false)]],
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailSolarSystem.Renderable.Enabled", true)]]
   )
   openspace.scriptScheduler.loadScheduledScript(
     "2019 AUG 01 00:00:00",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailSolarSystem.Renderable.Enabled', true)",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailSolarSystem.Renderable.Enabled', false)"
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailSolarSystem.Renderable.Enabled", true)]],
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailSolarSystem.Renderable.Enabled", false)]]
   )
   openspace.scriptScheduler.loadScheduledScript(
     "2019 AUG 01 00:00:00",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailBennu.Renderable.Enabled', false)",
-    "openspace.setPropertyValueSingle('Scene.OsirisRexTrailBennu.Renderable.Enabled', true)"
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailBennu.Renderable.Enabled", false)]],
+    [[openspace.setPropertyValueSingle("Scene.OsirisRexTrailBennu.Renderable.Enabled", true)]]
   )
 end)
 

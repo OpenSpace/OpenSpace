@@ -2,7 +2,7 @@ local ResetLoop = {
   Identifier = "os.2012july.ResetLoop",
   Name = "Reset button",
   Command = [[
-    openspace.time.setTime('2012-JUL-01 07:00:00.00')
+    openspace.time.setTime("2012-JUL-01 07:00:00.000")
     openspace.time.setDeltaTime(1400)
     openspace.scriptScheduler.clear()
   ]],

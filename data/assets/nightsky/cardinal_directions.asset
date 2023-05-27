@@ -74,24 +74,24 @@ local CardinalDirectionSphere = {
 local showCommand = [[
   local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera()
   local camera = openspace.navigation.getNavigationState()
-  openspace.setParent('CardinalDirectionsPosition', camera.Anchor)
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Globe', camera.Anchor)
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Latitude', lat)
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Longitude', lon)
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Globe', camera.Anchor)
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Latitude', lat)
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Longitude', lon)
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Enabled', true)
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0.0)
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 1.0, 1.0)
+  openspace.setParent("CardinalDirectionsPosition", camera.Anchor)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Translation.Globe", camera.Anchor)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Translation.Latitude", lat)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Translation.Longitude", lon)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Rotation.Globe", camera.Anchor)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Rotation.Latitude", lat)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Rotation.Longitude", lon)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Enabled", true)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Fade", 0.0)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Fade", 1.0, 1.0)
 ]]
 
 local ShowNeswBand = {
 Identifier = "os.nightsky.ShowNeswBand",
   Name = "Show cardinal directions (with ticks)",
-  Command = "openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Texture','"
-  .. textures:gsub("\\","/") .. "sphere5.png')"
-  .. showCommand,
+  Command = [[
+    openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Texture", "]] ..
+    textures:gsub("\\","/") .. [[sphere5.png")]] .. showCommand,
   Documentation = "Shows the cardinal direction sphere with letters and circle with tick marks",
   GuiPath = "/Night Sky/Directions",
   IsLocal = false
@@ -100,9 +100,9 @@ Identifier = "os.nightsky.ShowNeswBand",
 local ShowNeswLetters = {
   Identifier = "os.nightsky.ShowNeswLetters",
   Name = "Show cardinal directions (letters only)",
-  Command = "openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Texture','"
-  .. textures:gsub("\\","/") .. "sphere.png')"
-  .. showCommand,
+  Command = [[
+    openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Texture","]] ..
+    textures:gsub("\\","/") .. [[sphere.png")]] .. showCommand,
   Documentation = "Shows the cardinal direction sphere with letters only",
   GuiPath = "/Night Sky/Directions",
   IsLocal = false
@@ -112,7 +112,7 @@ local HideNesw = {
   Identifier = "os.nightsky.HideNesw",
   Name = "Hide cardinal directions",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0.0, 1.0)
+    openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Fade", 0.0, 1.0)
   ]],
   Documentation = "Hides the cardinal directions",
   GuiPath = "/Night Sky/Directions",

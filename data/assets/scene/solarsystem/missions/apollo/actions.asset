@@ -2,7 +2,10 @@ local ToggleMoonShading = {
   Identifier = "os.apollo.ToggleMoonShading",
   Name = "Toggle Moon shading",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.PerformShading', not openspace.getPropertyValue('Scene.Moon.Renderable.PerformShading'))
+    openspace.setPropertyValueSingle(
+      "Scene.Moon.Renderable.PerformShading",
+      not openspace.getPropertyValue("Scene.Moon.Renderable.PerformShading")
+    )
   ]],
   Documentation = "Toggles the shading of the Moon",
   GuiPath = "/Missions/Apollo",
@@ -13,9 +16,9 @@ local FocusMoon = {
   Identifier = "os.apollo.FocusMoon",
   Name = "Focus on Moon",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon')
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Moon")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Set camera focus on the Moon",
   GuiPath = "/Missions/Apollo",
@@ -26,9 +29,9 @@ local FocusEarth = {
   Identifier = "os.apollo.FocusEarth",
   Name = "Focus on Earth",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Set camera focus on the Earth",
   GuiPath = "/Missions/Apollo",

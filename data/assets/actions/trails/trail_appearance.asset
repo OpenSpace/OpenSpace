@@ -10,9 +10,9 @@ local function highlightCommand(identifierString, value)
 end
 
 local function highlightAction(identifierString, value, nameString)
-  local actionString = 'Dehighlight'
+  local actionString = "Dehighlight"
   if value > 1 then
-    actionString = 'Highlight'
+    actionString = "Highlight"
   end
   return {
     Identifier = "os." .. actionString .. identifierString .. "_trail",

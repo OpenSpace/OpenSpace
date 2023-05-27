@@ -107,8 +107,8 @@ local PointJwst = {
     end
 
     local coordinates = convertRaDec(ra, dec)
-    local JWSTPosition = openspace.worldPosition('JWSTModel')
-    local JWSTRotation = openspace.worldRotation('JWSTRotation')
+    local JWSTPosition = openspace.worldPosition("JWSTModel")
+    local JWSTRotation = openspace.worldRotation("JWSTRotation")
 
     local JWSTtoCoord = {
       coordinates[1] - JWSTPosition[1],
@@ -122,7 +122,7 @@ local PointJwst = {
     -- Check if the new angle violate the sunshield
     -- -45 deg to 5 deg is valid in x rotation
     if JWSTAngles[1] < math.rad(-45) or JWSTAngles[1] > math.rad(5) then
-      openspace.printWarning('Coordinate violates the sunshield')
+      openspace.printWarning("Coordinate violates the sunshield")
     end
 
     openspace.setPropertyValueSingle(

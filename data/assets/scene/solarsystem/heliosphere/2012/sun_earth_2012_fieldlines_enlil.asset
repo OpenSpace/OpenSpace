@@ -25,9 +25,9 @@ local LoopEnlil = {
   Command = [[
     openspace.scriptScheduler.clear()
     openspace.time.setDeltaTime(43200)
-    openspace.time.setTime('2012-JUL-01 07:00:00.00')
+    openspace.time.setTime("2012-JUL-01 07:00:00.000")
     local StartTimeScriptEnlilLoop = "openspace.time.setTime('2012 JUL 01 07:00:00')"
-    openspace.scriptScheduler.loadScheduledScript('2012 AUG 01 06:58:00', StartTimeScriptEnlilLoop)
+    openspace.scriptScheduler.loadScheduledScript("2012 AUG 01 06:58:00", StartTimeScriptEnlilLoop)
   ]],
   Documentation = "Sets time to start of data, sets high delta time and loops back from start when at end of data",
   GuiPath = "/2012July",

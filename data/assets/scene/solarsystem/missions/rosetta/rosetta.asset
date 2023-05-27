@@ -274,9 +274,9 @@ local FocusRosetta = {
   Identifier = "os.rosetta.FocusRosetta",
   Name = "Focus on Rosetta",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Rosetta')
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '')
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Anchor", "Rosetta")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Sets the focus of the camera on Rosetta",
   GuiPath = "/Missions/Rosetta",
@@ -287,7 +287,7 @@ local SetupLanderRelease = {
   Identifier = "os.rosetta.SetupLanderRelease",
   Name = "Set lander release time",
   Command = [[
-    openspace.time.setTime('2014-11-12T08:20:00.00')
+    openspace.time.setTime("2014-11-12T08:20:00.00")
   ]],
   Documentation = "Jumps to the time when the Philae lander is released",
   GuiPath = "/Missions/Rosetta",
@@ -298,7 +298,10 @@ local ToggleImagePlane = {
   Identifier = "os.rosetta.ToggleImagePlane",
   Name = "Toggle image plane",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.ImagePlaneRosetta.Renderable.Enabled', not openspace.getPropertyValue('Scene.ImagePlaneRosetta.Renderable.Enabled'))
+    openspace.setPropertyValueSingle(
+      "Scene.ImagePlaneRosetta.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.ImagePlaneRosetta.Renderable.Enabled")
+    )
   ]],
   Documentation = "Toggles the visibility of the free floating image plane",
   GuiPath = "/Missions/Rosetta",
@@ -309,7 +312,10 @@ local TogglePhilaeTrail = {
   Identifier = "os.rosetta.TogglePhilaeTrail",
   Name = "Toggle Philae trail",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.PhilaeTrail.Renderable.Enabled', not openspace.getPropertyValue('Scene.PhilaeTrail.Renderable.Enabled'))
+    openspace.setPropertyValueSingle(
+      "Scene.PhilaeTrail.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.PhilaeTrail.Renderable.Enabled")
+    )
   ]],
   Documentation = "Toggles the visibility of Philae's trail",
   GuiPath = "/Missions/Rosetta",
