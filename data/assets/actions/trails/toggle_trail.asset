@@ -93,6 +93,7 @@ local ShowTrail = {
   IsLocal = true
 }
 
+
 asset.onInitialize(function()
   openspace.action.registerAction(ToggleTrail)
   openspace.action.registerAction(HideTrail)

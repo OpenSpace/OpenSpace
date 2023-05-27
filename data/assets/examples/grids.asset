@@ -37,7 +37,7 @@ local PlanarGrid = {
     LineWidth = 2.0,
     Segments = { 6, 10 },
     Size = { 1, 2 },
-    HighlightColor = {1.0, 0.8, 0.0 },
+    HighlightColor = { 1.0, 0.8, 0.0 },
     HighlightLineWidth = 3.2,
     HighlightRate = { 3, 3 }
   },

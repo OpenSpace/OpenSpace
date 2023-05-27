@@ -6,7 +6,7 @@ local Layer = {
   Identifier = "ExampleVideoLocal",
   Type = "VideoTileLayer",
   Enabled = true,
-  Video = asset.localResource("./examplevideo.mp4"),
+  Video = asset.localResource("examplevideo.mp4"),
   Name = "Example Video Local"
 }
 

@@ -66,7 +66,7 @@ local KernelFiles = {
   kernels .. "dawn_sa_070927_070930.bc",
   -- kernels .. "dawn_sa_110801_110807.bc",
   -- kernels .. "dawn_sa_110808_110814.bc",
-  -- kernels .. "dawn_sa_120910_120916.bc",
+  -- kernels .. "dawn_sa_120910_120916.bc"
 }
 
 local LightSources = {

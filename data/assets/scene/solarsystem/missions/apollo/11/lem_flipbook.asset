@@ -3,11 +3,11 @@ local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
-local assetPrefix = "A11flip";
-local assetGlobe = moonAsset.Moon.Identifier;
-local flipbookCount = 19;
+local assetPrefix = "A11flip"
+local assetGlobe = moonAsset.Moon.Identifier
+local flipbookCount = 19
 
-local flipbook = nil;
+local flipbook = nil
 
 local vrts = asset.syncedResource({
   Name = "Apollo 11 Flipbook",
@@ -19,8 +19,8 @@ local vrts = asset.syncedResource({
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addBlendingLayersFromDirectory(vrts, assetGlobe);
-  flipbook = helper.createFlipbook(assetPrefix, assetGlobe, 19);
+  openspace.globebrowsing.addBlendingLayersFromDirectory(vrts, assetGlobe)
+  flipbook = helper.createFlipbook(assetPrefix, assetGlobe, 19)
 
   rawset(_G, "nextFlip", function() helper.nextFlipbookPage(flipbook) end)
   openspace.action.registerAction({
@@ -45,7 +45,7 @@ end)
 
 
 asset.onDeinitialize(function()
-  flipbook = nil;
+  flipbook = nil
 
   openspace.action.removeAction("os.lemFlipbook.NextFlip")
   openspace.action.removeAction("os.lemFlipbook.PrevFlip")

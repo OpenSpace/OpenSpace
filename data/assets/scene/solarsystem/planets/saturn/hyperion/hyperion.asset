@@ -29,7 +29,7 @@ local Hyperion = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 360200, 266000, 205400},
+    Radii = { 360200, 266000, 205400 },
     SegmentsPerPatch = 64,
     Layers = {},
     Labels = {

@@ -1,4 +1,4 @@
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 

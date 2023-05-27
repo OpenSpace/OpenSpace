@@ -1,10 +1,10 @@
 local function scaleCommand(identifier, scale, speed)
-  local command = 'openspace.setPropertyValue("' .. identifier .. '.Scale.Scale", '
+  local command = [[openspace.setPropertyValue("]] .. identifier .. [[.Scale.Scale", ]]
   command = command .. scale .. ", " .. speed
   if (scale == 1) then
     command = command .. ")"
   else
-    command = command .. ', "CubicEaseOut")'
+    command = command .. [[, "CubicEaseOut")]]
   end
   return command
 end
@@ -29,13 +29,13 @@ local function toggleScaleAction(identifier, scale, name, speedup, speeddown)
     Identifier = "os.toggle_" .. string.gsub(name, "%s+", "") .. "_scale",
     Name = "Toggle " .. name .. " scale",
     Command = [[
-local list = openspace.getProperty("]] .. identifier .. [[.Scale.Scale");
+local list = openspace.getProperty("]] .. identifier .. [[.Scale.Scale")
 if #list == 0 then
-  openspace.printWarning("No planets to resize");
+  openspace.printWarning("No planets to resize")
 else
-  local prop = list[1];
-  local currentScale = openspace.getPropertyValue(prop);
-  local newScale = 1;
+  local prop = list[1]
+  local currentScale = openspace.getPropertyValue(prop)
+  local newScale = 1
   if (currentScale == 1) then
     ]] .. scaleCommand(identifier, scale, speedup) .. [[
   else
@@ -68,6 +68,7 @@ local ToggleJupiterMoonScales = toggleScaleAction("{moon_jupiter}", 50, "Jupiter
 local GrowMoon = scaleAction("Scene.Moon", 25, "Moon", 3)
 local ShrinkMoon = scaleAction("Scene.Moon", 1, "Moon", 2)
 local ToggleMoonScale = toggleScaleAction("Scene.Moon", 25, "Moon", 3, 2)
+
 
 asset.onInitialize(function()
   openspace.action.registerAction(GrowPlanets)

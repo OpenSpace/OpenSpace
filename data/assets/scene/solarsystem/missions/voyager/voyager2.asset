@@ -355,8 +355,8 @@ local FocusVoyager2 = {
   Identifier = "os.voyager.FocusVoyager2",
   Name = "Focus on Voyager 2",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Voyager_2');
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Voyager_2')
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')
   ]],
   Documentation = "Set camera focus to Voyager 2",

@@ -1,5 +1,5 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
 
 
@@ -42,7 +42,7 @@ local ScaleModel = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = modelFolder .. "GatewayArch_fbx.osmodel",
-    RotationVector = { 0.0, 157, 0.0 },
+    RotationVector = { 0.0, 157.0, 0.0 },
     LightSources = { sunAsset.LightSource }
   },
   GUI = {

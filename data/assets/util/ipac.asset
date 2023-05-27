@@ -105,9 +105,9 @@ local FocusMoon = {
   Identifier = "ipac.FocusMoon",
   Name = "Focus on the Moon",
   Command = [[
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Moon");
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Moon")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Focuses the camera on the Moon",
   GuiPath = "/Ipac",
@@ -119,8 +119,8 @@ local FocusEarth = {
   Identifier = "ipac.FocusEarth",
   Name = "Focus on the Earth",
   Command = [[
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth");
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth")
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Focuses the camera on Earth",
@@ -129,21 +129,6 @@ local FocusEarth = {
 }
 asset.export("IpacFocusEarth", FocusEarth)
 
-
-local actions = {
-  OrbitRight,
-  OrbitLeft,
-  OrbitUp,
-  OrbitDown,
-  PanRight,
-  PanLeft,
-  PanUp,
-  PanDown,
-  ZoomIn,
-  ZoomOut,
-  FocusMoon,
-  FocusEarth
-}
 
 asset.onInitialize(function()
   openspace.action.registerAction(OrbitRight)

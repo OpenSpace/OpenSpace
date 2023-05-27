@@ -11,7 +11,7 @@ local textures = asset.syncedResource({
 })
 
 
-local CharonRadius = 6.035E5
+local CharonRadius = 603500
 
 local CharonProjection = {
   Identifier = "CharonProjection",
@@ -78,7 +78,7 @@ local CharonText = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 10^6.3,
+    Size = 19952623.15,
     Origin = "Center",
     Billboard = true,
     Texture = textures .. "Charon-Text.png",

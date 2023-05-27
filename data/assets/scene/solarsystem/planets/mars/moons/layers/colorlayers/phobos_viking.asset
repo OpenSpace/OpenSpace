@@ -1,4 +1,4 @@
-local globe = asset.require("./../../phobos_globe")
+local globe = asset.require("../../phobos_globe")
 
 
 

@@ -101,12 +101,13 @@ local ToggleMainGui = {
 local ToggleOverlays = {
   Identifier = "os.ToggleOverlays",
   Name = "Toggle dashboard and overlays",
-  Command =
-[[local isEnabled = openspace.getPropertyValue("Dashboard.IsEnabled");
-openspace.setPropertyValueSingle("Dashboard.IsEnabled", not isEnabled);
-openspace.setPropertyValueSingle("RenderEngine.ShowLog", not isEnabled);
-openspace.setPropertyValueSingle("RenderEngine.ShowVersion", not isEnabled);
-openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
+  Command = [[
+    local isEnabled = openspace.getPropertyValue("Dashboard.IsEnabled")
+    openspace.setPropertyValueSingle("Dashboard.IsEnabled", not isEnabled)
+    openspace.setPropertyValueSingle("RenderEngine.ShowLog", not isEnabled)
+    openspace.setPropertyValueSingle("RenderEngine.ShowVersion", not isEnabled)
+    openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)
+  ]],
   Documentation = "Toggles the dashboard and overlays",
   GuiPath = "/System/GUI",
   IsLocal = true

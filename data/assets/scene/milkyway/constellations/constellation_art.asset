@@ -21,16 +21,16 @@ local data = asset.syncedResource({
 
 --function that reads the file
 local function createConstellations(baseIdentifier, guiPath, constellationfile)
-  local genConstellations = {};
+  local genConstellations = {}
   --skip the first line
-  local notFirstLine = false;
+  local notFirstLine = false
   -- define parsec to meters
-  local PARSEC_CONSTANT = 3.0856776E16;
+  local PARSEC_CONSTANT = 3.0856776E16
   -- how many parsecs away do you want the images to be?
   -- this setting puts the billboards at the location of the constellation bounds grid from DU.
   -- but they can really be anywhere since the billboard size will scale with distance.
-  local distanceMultiplier = 3.2;
-  local baseScale = 1e17;
+  local distanceMultiplier = 3.2
+  local baseScale = 1e17
   for line in io.lines(openspace.absPath(constellationfile)) do
     if (notFirstLine) then
       -- describes the data
@@ -88,7 +88,7 @@ local function createConstellations(baseIdentifier, guiPath, constellationfile)
           Description = name .. " Image"
         }
       }
-      table.insert(genConstellations, aconstellation);
+      table.insert(genConstellations, aconstellation)
 
     else
       notFirstLine = true
@@ -155,12 +155,13 @@ local HideZodiacArt = {
 
 local nodes = {}
 
+
 asset.onInitialize(function()
   local constellationsCSV = images .. "constellation_data.csv"
 
   nodes = createConstellations("ImageConstellation", "Constellation Art", constellationsCSV)
   for _, n in ipairs(nodes) do
-    openspace.addSceneGraphNode(n);
+    openspace.addSceneGraphNode(n)
   end
 
   openspace.action.registerAction(ShowArt)
@@ -172,7 +173,7 @@ end)
 
 asset.onDeinitialize(function()
   for _, n in ipairs(nodes) do
-    openspace.removeSceneGraphNode(n.Identifier);
+    openspace.removeSceneGraphNode(n.Identifier)
   end
 
   openspace.action.removeAction(HideZodiacArt)

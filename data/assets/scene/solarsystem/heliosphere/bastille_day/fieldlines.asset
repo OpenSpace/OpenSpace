@@ -1,6 +1,6 @@
 local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 local propertyHelper = asset.require("util/property_helper")
-local rot = asset.require("./carrington_to_heeq_rotation.asset")
+local rot = asset.require("./carrington_to_heeq_rotation")
 
 
 
@@ -12,7 +12,7 @@ local fieldlinesDirectory = asset.syncedResource({
 })
 
 
-local SunRadius = 6.957E8
+local SunRadius = 695700000
 
 -- Fieldlies from binaries
 local Fieldlines = {
@@ -20,7 +20,7 @@ local Fieldlines = {
   Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
-  InteractionSphere = 1 / 695700000,
+  InteractionSphere = 1 / SunRadius,
   Transform = {
     Rotation = rot.CarringtonLongitudeToHEEQ180Rotation,
     Scale = {

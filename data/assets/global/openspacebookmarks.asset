@@ -16,16 +16,16 @@ local nodes = {}
 asset.onInitialize(function()
   nodes = bookmarkHelper.loadBookmarks("OpenSpace Bookmarks", bookmarksCSV .. "bookmarks.csv")
   for _, n in ipairs(nodes) do
-    openspace.addSceneGraphNode(n);
+    openspace.addSceneGraphNode(n)
   end
 end)
 
 asset.onDeinitialize(function()
   for _, n in ipairs(nodes) do
-    openspace.removeSceneGraphNode(n);
+    openspace.removeSceneGraphNode(n)
   end
 end)
 
 for _, n in ipairs(nodes) do
-  asset.export(n);
+  asset.export(n)
 end

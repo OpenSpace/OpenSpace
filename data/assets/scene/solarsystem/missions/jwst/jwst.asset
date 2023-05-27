@@ -37,7 +37,7 @@ local JWSTBand = {
     Rotation = {
       Type = "FixedRotation",
       Attached = "JWSTBand",
-      XAxis = { 1, 0, 0 },
+      XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
       ZAxis = sunTransforms.SolarSystemBarycenter.Identifier
     }

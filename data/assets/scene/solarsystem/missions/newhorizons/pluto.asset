@@ -202,12 +202,12 @@ local PlutoText = {
   Transform = {
     Translation = {
       Type = "StaticTranslation",
-      Position = {0, -2000000.0, 0}
+      Position = { 0, -2000000.0, 0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 10^6.3,
+    Size = 19952623.15,
     Origin = "Center",
     Billboard = true,
     Texture = encounterTextures .. "Pluto-Text.png",

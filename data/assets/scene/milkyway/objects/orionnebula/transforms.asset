@@ -2,7 +2,7 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local Parsec = 3.0856776E16;
+local Parsec = 3.0856776E16
 
 local NebulaPosition = {
   Identifier = "NebulaPosition",

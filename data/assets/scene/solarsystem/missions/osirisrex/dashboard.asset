@@ -18,7 +18,7 @@ local Distance = {
 local Instruments = {
   Type = "DashboardItemInstruments",
   Identifier = "OsirisRexInstruments",
-  GuiName = "OSIRIS-REx Instruments",
+  GuiName = "OSIRIS-REx Instruments"
 }
 
 

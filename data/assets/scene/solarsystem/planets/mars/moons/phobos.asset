@@ -1,5 +1,5 @@
-local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
 
@@ -41,7 +41,7 @@ local Phobos = {
     Type = "RenderableModel",
     GeometryFile = model .. "Phobos_1_1000.glb",
     ModelScale = "Kilometer",
-    RotationVector = { 90.0, 0, 90.0 },
+    RotationVector = { 90.0, 0.0, 90.0 },
     AmbientIntensity = 0.02,
     SpecularIntensity = 0.0,
     LightSources = {

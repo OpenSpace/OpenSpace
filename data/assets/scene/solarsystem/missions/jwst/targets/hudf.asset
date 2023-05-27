@@ -5,7 +5,7 @@ local hudf = asset.require("./hudf_image")
 
 
 
-local Distance = 9.2E15;
+local Distance = 9.2E15
 
 -- ra = 3h32m38.92s
 -- dec = -27d47m29.37s

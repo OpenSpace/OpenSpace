@@ -156,10 +156,6 @@ local Station6Frag3Model = {
   }
 }
 
-local nodes = {
-  Station6Frag1Holder, Station6Frag1Model, Station6Frag23Holder, Station6Frag2Model,
-  Station6Frag3Model,
-}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Station6Frag1Holder)

@@ -6,7 +6,7 @@ local LandingSite = {
   Identifier = "os.apollo17.setup.LandingSite",
   Name = "Setup for Apollo 17 landing site",
   Command = [[
-    openspace.time.setTime('1972 DEC 12 19:47:11');
+    openspace.time.setTime('1972 DEC 12 19:47:11')
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode', 0.000000)
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.Enabled', true)
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled', true)

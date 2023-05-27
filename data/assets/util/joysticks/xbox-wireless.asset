@@ -161,7 +161,7 @@ asset.onInitialize(function()
     name,
     controller.Back,
     [[
-      openspace.time.setDeltaTime(1);
+      openspace.time.setDeltaTime(1)
       local yesterday = openspace.time.advancedTime(openspace.time.currentWallTime(), "-1d")
       openspace.time.setTime(yesterday)
     ]],

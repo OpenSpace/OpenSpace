@@ -26,7 +26,7 @@ local iKernels = {
   ikernels .. "insight_v02.tfr",
   ikernels .. "mar085s.bsp",
   ikernels .. "nsyt_spk_cruise_POST_approach2surface_SC_Lander.bsp",
-  ikernels .. "nsyt_spk_cruise_POST_approach2surface_SC_Lander.bck",
+  ikernels .. "nsyt_spk_cruise_POST_approach2surface_SC_Lander.bck"
 }
 
 local RotationMatrix = {
@@ -52,7 +52,7 @@ local LightSources = {
 }
 
 -- expected timeline
-local EntryTimeStart = "2018 NOV 26 19:39:03.68"; --(-00:08:07.32 less then pdf)
+local EntryTimeStart = "2018 NOV 26 19:39:03.68" -- (-00:08:07.32 less then pdf)
 local ParachuteDeployTime1 = "2018 NOV 26 19:42:41.68" -- entry + 218s
 local ParachuteDeployTime20 = "2018 NOV 26 19:42:42.18" -- entry + 218.5s
 local ParachuteDeployTime40 = "2018 NOV 26 19:42:42.68" -- entry + 219s
@@ -151,7 +151,7 @@ local RotationKeyframes = {
     SourceFrame = "INSIGHT_LANDER_CRUISE",
     DestinationFrame = "IAU_MARS",
     FixedDate = "2018 NOV 26 19:45:34"
-  },
+  }
 }
 
 

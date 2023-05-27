@@ -13,7 +13,7 @@ local SetupSaturnApproach = {
   Identifier = "os.voyager.SetupSaturnApproach",
   Name = "Set Saturn approach",
   Command = [[
-    openspace.time.setTime('1980-10-20T07:43:42.645');
+    openspace.time.setTime('1980-10-20T07:43:42.645')
   ]],
   Documentation = "Sets the time for Voyager's approach to Saturn",
   GuiPath = "/Missions/Voyager",
@@ -24,9 +24,9 @@ local JupiterFocus = {
   Identifier = "os.voyager.JupiterFocus",
   Name = "Focus on Jupiter",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Jupiter');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Jupiter')
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')
   ]],
   Documentation = "Set the camera focus to Jupiter",
   GuiPath = "/Missions/Voyager",
@@ -37,9 +37,9 @@ local SaturnFocus = {
   Identifier = "os.voyager.SaturnFocus",
   Name = "Focus on Saturn",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')
   ]],
   Documentation = "Sets the camera focus on Saturn",
   GuiPath = "/Missions/Voyager",

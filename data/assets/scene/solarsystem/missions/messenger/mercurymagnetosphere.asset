@@ -8,7 +8,7 @@ local localFolder = asset.syncedResource({
 })
 
 
-local MercuryRadius = 2.4397E6
+local MercuryRadius = 2439700
 
 local Magnetosphere = {
   Name = "Mercury Magnetosphere",
@@ -39,7 +39,7 @@ local Magnetosphere = {
     TransferFunction = localFolder .. "transferfunction.txt",
     Variable = "rho",
     StepSize = 0.003,
-    Dimensions = {64, 64, 64},
+    Dimensions = { 64, 64, 64 },
     GridType = "Cartesian",
     SecondsBefore = 24 * 60 * 60 * 365 * 100,
     SecondsAfter = 24 * 60 * 60 * 365 * 100,

@@ -16,6 +16,7 @@ local DisableDimming = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.action.registerAction(EnableDimming)
   openspace.action.registerAction(DisableDimming)

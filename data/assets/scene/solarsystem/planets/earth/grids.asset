@@ -9,7 +9,7 @@ local EclipticRotationMatrix = {
 }
 
 local LightSecond = 299792458
-local LightMinute = 1.798754748E10
+local LightMinute = 17987547480
 
 local plane1lsec = {
   Identifier = "1lsecGrid",

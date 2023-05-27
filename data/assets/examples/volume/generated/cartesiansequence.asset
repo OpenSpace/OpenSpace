@@ -1,5 +1,3 @@
--- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_VOLUME enabled
-
 -- Before using this example,
 -- the volume data itself needs to be generated,
 -- using the task 'data/tasks/volume/generate_cartesian_sequence.task'
@@ -21,8 +19,8 @@ local Volume = {
     MinValue = 0,
     MaxValue = 1,
     GridType = "Cartesian",
-    SecondsBefore = 50*365*24*60*60, -- 50 years before
-    SecondsAfter = 50*365*24*60*60 -- 50 years after
+    SecondsBefore = 50 * 365 * 24 * 60 * 60, -- 50 years before
+    SecondsAfter = 50 * 365 * 24 * 60 * 60 -- 50 years after
   },
   GUI = {
     Path = "/Examples"

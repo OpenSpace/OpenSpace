@@ -10,7 +10,7 @@ asset.onInitialize(function()
     )
   end
 
-  local dashboards = openspace.getProperty("Dashboard.*.FontSize");
+  local dashboards = openspace.getProperty("Dashboard.*.FontSize")
   for _, v in ipairs(dashboards) do
     openspace.setPropertyValueSingle(
       v,

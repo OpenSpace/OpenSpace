@@ -1,5 +1,5 @@
-local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere.asset')
-asset.require('scene/solarsystem/heliosphere/2012/reset_loop_action.asset')
+asset.require("scene/solarsystem/heliosphere/2012/reset_loop_action")
+local transforms = asset.require("scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere")
 
 
 
@@ -51,7 +51,7 @@ local colorRanges = {
   { 0, 60 },
   { -0.015, 0.015 },
   { 150, 900 },
-  { 0, 3 },
+  { 0, 3 }
 }
 
 local InteractionSphere = 6380000  -- A value slightly bigger than earth radius

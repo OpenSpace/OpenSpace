@@ -3,8 +3,8 @@ asset.require("../actions")
 asset.require("./actions")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local descentKeyframes = asset.require("./lem_descent.asset")
-local descentRotationKeyframes = asset.require("./lem_descent_rotation.asset")
+local descentKeyframes = asset.require("./lem_descent")
+local descentRotationKeyframes = asset.require("./lem_descent_rotation")
 local kernels = asset.require("./kernels")
 
 
@@ -225,7 +225,7 @@ local Apollo11LemLandedModel = {
     Type = "RenderableModel",
     GeometryFile = lemModel .. "LM-2_ver2clean.obj",
     SpecularIntensity = 0.0,
-    RotationVector = { 273.750,28.0,309.85 },
+    RotationVector = { 273.750, 28.0, 309.85 },
     LightSources = {
       sun.LightSource,
       {

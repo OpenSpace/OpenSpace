@@ -148,7 +148,7 @@ local ClearImageProjections = {
   Identifier = "os.rosetta.ClearImageProjections",
   Name = "Clear 67P projections",
   Command = [[
-    openspace.setPropertyValue('Scene.67P.Renderable.ProjectionComponent.ClearAllProjections', true);
+    openspace.setPropertyValue('Scene.67P.Renderable.ProjectionComponent.ClearAllProjections', true)
   ]],
   Documentation = "Removes all image projections from 67P",
   GuiPath = "/Missions/Rosetta",
@@ -159,7 +159,7 @@ local Toggle67pProjection = {
   Identifier = "os.rosetta.Toggle67pProjection",
   Name = "Toggle 67P projection",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.67P.Renderable.ProjectionComponent.PerformProjection', not openspace.getPropertyValue('Scene.67P.Renderable.ProjectionComponent.PerformProjection'));
+    openspace.setPropertyValueSingle('Scene.67P.Renderable.ProjectionComponent.PerformProjection', not openspace.getPropertyValue('Scene.67P.Renderable.ProjectionComponent.PerformProjection'))
   ]],
   Documentation = "Enables or disables the image projection on 67P",
   GuiPath = "/Missions/Rosetta",

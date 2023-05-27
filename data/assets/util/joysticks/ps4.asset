@@ -63,12 +63,12 @@ asset.onInitialize(function()
   openspace.navigation.setAxisDeadZone(name, controller.L2, deadzoneTriggers)
   openspace.navigation.setAxisDeadZone(name, controller.R2, deadzoneTriggers)
 
-  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[1], "Orbit X");
-  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[2], "Orbit Y");
-  openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[1], "Pan X", true);
-  openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[2], "Pan Y", true);
-  openspace.navigation.bindJoystickAxis(name, controller.L2, "Zoom Out", false, "TriggerLike");
-  openspace.navigation.bindJoystickAxis(name, controller.R2, "Zoom In", false, "TriggerLike");
+  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[1], "Orbit X")
+  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[2], "Orbit Y")
+  openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[1], "Pan X", true)
+  openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[2], "Pan Y", true)
+  openspace.navigation.bindJoystickAxis(name, controller.L2, "Zoom Out", false, "TriggerLike")
+  openspace.navigation.bindJoystickAxis(name, controller.R2, "Zoom In", false, "TriggerLike")
 
   -- Roll
   openspace.navigation.bindJoystickButton(
@@ -174,7 +174,7 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickButton(
     name,
     controller.TouchPad,
-    "openspace.time.togglePause();",
+    "openspace.time.togglePause()",
     "Pause time simulation"
   )
 

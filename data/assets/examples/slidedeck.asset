@@ -39,7 +39,7 @@ asset.onInitialize(function()
     GuiPath = "/Slides",
     IsLocal = false
   })
-  openspace.bindKey("KP_4", "slide_deck.prevslide");
+  openspace.bindKey("KP_4", "slide_deck.prevslide")
 
   openspace.action.registerAction({
     Identifier = "slide_deck.nextslide",

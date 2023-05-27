@@ -1,4 +1,4 @@
-local mars = asset.require('scene/solarsystem/planets/mars/mars')
+local mars = asset.require("scene/solarsystem/planets/mars/mars")
 
 
 

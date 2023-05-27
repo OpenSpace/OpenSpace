@@ -17,6 +17,7 @@ local Layer = {
     system described below, and then converted to lunar radii (Mazarico et al., 2012)]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globe.Moon.Identifier, "HeightLayers", Layer)
 end)

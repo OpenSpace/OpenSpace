@@ -1,7 +1,7 @@
 asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup365
+local kernel = asset.require("../kernels")
 
 
 
@@ -21,13 +21,13 @@ local Ganymede = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_GANYMEDE",
       DestinationFrame = "GALACTIC",
-      Kernels = kernel
+      Kernels = kernel.jup365
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "GANYMEDE",
       Observer = "JUPITER BARYCENTER",
-      Kernels = kernel
+      Kernels = kernel.jup365
     }
   },
   Renderable = {
@@ -45,7 +45,7 @@ local Ganymede = {
       FadeOutEnabled = true,
       FadeDistances = { 2250000.0, 8000000.0 },
       DistanceEPS = 1750000.0,
-      Color = {1.0, 1.0, 0.0}
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },

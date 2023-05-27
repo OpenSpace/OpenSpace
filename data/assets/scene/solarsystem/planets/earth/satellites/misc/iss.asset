@@ -124,9 +124,9 @@ local FocusIss = {
   Identifier = "os.solarsystem.FocusIss",
   Name = "Focus on ISS",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "ISS")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Refocuses the camera on the ISS",
   GuiPath = "/Solar System/Earth",

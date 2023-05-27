@@ -3,10 +3,10 @@ local function highlightCommand(identifierString, value)
   if value > 1 then
     easeFunction = "QuinticEaseIn"
   end
-  local command = 'openspace.setPropertyValue("'
-  command = command .. identifierString .. '.Renderable.Appearance.Fade", '
-  command = command .. value .. ', 2, "' .. easeFunction .. '")'
-  return command;
+  local command = [[openspace.setPropertyValue("]]
+  command = command .. identifierString .. [[.Renderable.Appearance.Fade", ]]
+  command = command .. value .. [[, 2, "]] .. easeFunction .. [[")]]
+  return command
 end
 
 local function highlightAction(identifierString, value, nameString)
@@ -29,11 +29,11 @@ local function toggleHighlightAction(identifierString, value, nameString)
     Identifier = "os.toggle_" .. identifierString .. "_trail_highlight",
     Name = "Toggle " .. nameString .. " trail highlight",
     Command = [[
-local list = openspace.getProperty("]] .. identifierString .. [[.Renderable.Appearance.Fade");
+local list = openspace.getProperty("]] .. identifierString .. [[.Renderable.Appearance.Fade")
 if #list == 0 then
-  openspace.printWarning("No planets to resize");
+  openspace.printWarning("No planets to resize")
 else
-  local prop = list[1];
+  local prop = list[1]
   local fadeValue = openspace.getPropertyValue(prop)
   if fadeValue > 1 then
     ]] .. highlightCommand(identifierString, 1, nameString) .. "\n" .. [[
@@ -52,8 +52,8 @@ local EnableTrailFading = {
   Identifier = "os.EnableTrailFading",
   Name = "Enable trail fading",
   Command = [[
-    openspace.setPropertyValue("Scene.*Trail.Renderable.Appearance.EnableFade", true);
-    openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", true);
+    openspace.setPropertyValue("Scene.*Trail.Renderable.Appearance.EnableFade", true)
+    openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", true)
   ]],
   Documentation = "Set orbits to fade out towards the end",
   GuiPath = "/Trails/Appearance",
@@ -64,8 +64,8 @@ local DisableTrailFading = {
   Identifier = "os.DisableTrailFading",
   Name = "Disable trail fading",
   Command = [[
-    openspace.setPropertyValue("Scene.*Trail.Renderable.Appearance.EnableFade", false);
-    openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", false);
+    openspace.setPropertyValue("Scene.*Trail.Renderable.Appearance.EnableFade", false)
+    openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", false)
   ]],
   Documentation = "Sets trails not to fade out torwards end",
   GuiPath = "/Trails/Appearance",
@@ -79,18 +79,18 @@ local ToggleTrailFading = {
     local capList = openspace.getProperty("*Trail.Renderable.Appearance.EnableFade")
     local list = openspace.getProperty("*trail.Renderable.Appearance.EnableFade")
     if (#capList == 0) and (#list == 0) then
-      openspace.printWarning("No trails to toggle");
+      openspace.printWarning("No trails to toggle")
     else
-      local prop;
+      local prop
       if #capList > 0 then
-        prop = capList[1];
+        prop = capList[1]
       else
-        prop = list[1];
+        prop = list[1]
       end
-      local currentFade = openspace.getPropertyValue(prop);
-      local newFade = not currentFade;
-      openspace.setPropertyValue("Scene.*Trail.Renderable.Appearance.EnableFade", newFade);
-      openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", newFade);
+      local currentFade = openspace.getPropertyValue(prop)
+      local newFade = not currentFade
+      openspace.setPropertyValue("Scene.*Trail.Renderable.Appearance.EnableFade", newFade)
+      openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", newFade)
     end
   ]],
   Documentation = "Toggle trails to fade out towards the end for all trails in the Scene",

@@ -16,7 +16,7 @@ local Hydra = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 0.53E5, 0.53E5, 0.53E5 },
+    Radii = { 53000, 53000, 53000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },

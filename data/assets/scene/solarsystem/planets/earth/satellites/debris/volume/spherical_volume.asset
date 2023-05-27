@@ -5,7 +5,7 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
-local MaxApogee = 10946320;
+local MaxApogee = 10946320
 
 local DebrisVolumeSpherical = {
   Identifier = "DebrisVolumeSpherical",

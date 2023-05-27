@@ -1,6 +1,6 @@
 local propertyHelper = asset.require("util/property_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
-local rot = asset.require("./carrington_to_heeq_rotation.asset")
+local rot = asset.require("./carrington_to_heeq_rotation")
 
 
 
@@ -30,7 +30,7 @@ local EquatorialCutplane = {
   },
   Renderable = {
     Type = "RenderablePlaneTimeVaryingImage",
-    Size = 1.57E11,
+    Size = 157000000000,
     Enabled = true,
     SourceFolder = TexturesPathEquatorial,
     BlendMode = "Normal",
@@ -59,7 +59,7 @@ local MeridialCutplane = {
   },
   Renderable = {
     Type = "RenderablePlaneTimeVaryingImage",
-    Size = 1.57E11,
+    Size = 157000000000,
     Enabled = true,
     SourceFolder = TexturesPathMeridial,
     BlendMode = "Normal",

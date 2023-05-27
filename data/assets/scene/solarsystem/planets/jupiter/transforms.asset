@@ -1,11 +1,11 @@
 asset.require("spice/base")
-local sun_transforms_asset = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
 local JupiterBarycenter = {
   Identifier = "JupiterBarycenter",
-  Parent = sun_transforms_asset.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",

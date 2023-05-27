@@ -1,4 +1,4 @@
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
@@ -48,7 +48,7 @@ local HubbleTrail = {
       Format = "OMM"
     },
     RenderBinMode = "PostDeferredTransparent",
-    Color = { 0.0, 0.902, 0.6},
+    Color = { 0.0, 0.902, 0.6 },
     Fade = 1.5,
     Resolution = 320
   },

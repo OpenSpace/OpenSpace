@@ -15,7 +15,7 @@ local Triton = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2709000, 2706000, 2705000},
+    Radii = { 2709000, 2706000, 2705000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },

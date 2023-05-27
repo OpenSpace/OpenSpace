@@ -1,5 +1,5 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
 
 
@@ -58,7 +58,8 @@ local UpdatePositionAction = {
 local ResetPositionAction = {
   Identifier = "os.scalemodels.ResetArcDeTriomphe",
   Name = "Reset Arc de Triomphe position",
-  Command = [[ openspace.globebrowsing.setNodePosition('Scale_ArcDeTriomphe', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",
+  Command = [[
+    openspace.globebrowsing.setNodePosition('Scale_ArcDeTriomphe', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",
   Documentation = "Resets the Arc de Triomphe back to its actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false

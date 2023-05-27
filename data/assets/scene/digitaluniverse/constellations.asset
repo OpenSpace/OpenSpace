@@ -27,7 +27,7 @@ local function zodiacsString(zodiacsList)
         zodiacsString = zodiacsString .. ", "
       end
 
-      zodiacsString = zodiacsString .. '"' .. fullName .. '"'
+      zodiacsString = zodiacsString .. [["]] .. fullName .. [["]]
     end
   end
 
@@ -81,7 +81,7 @@ local Constellations = {
     Unit = "pc",
     DimInAtmosphere = true
   },
-  Tag = {"daytime_hidden"},
+  Tag = { "daytime_hidden" },
   GUI = {
     Name = "Constellations",
     Path = "/Milky Way/Constellations",

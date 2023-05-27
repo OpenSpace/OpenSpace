@@ -28,7 +28,7 @@ local PointJwst = {
     end
 
     local function length(v)
-      return math.sqrt(v[1]*v[1] + v[2]*v[2]+ v[3]*v[3])
+      return math.sqrt(v[1]*v[1] + v[2]*v[2] + v[3]*v[3])
     end
 
     local function normalize(v)
@@ -103,8 +103,7 @@ local PointJwst = {
         newYAngle = -op2
       end
 
-      local res = { newXAngle, newYAngle }
-      return res
+      return { newXAngle, newYAngle }
     end
 
     local coordinates = convertRaDec(ra, dec)
@@ -127,8 +126,8 @@ local PointJwst = {
     end
 
     openspace.setPropertyValueSingle(
-      'Scene.JWSTModel.Rotation.Rotation',
-      { JWSTAngles[1], JWSTAngles[2],  0.0},
+      "Scene.JWSTModel.Rotation.Rotation",
+      { JWSTAngles[1], JWSTAngles[2],  0.0 },
       duration
     )
   ]],

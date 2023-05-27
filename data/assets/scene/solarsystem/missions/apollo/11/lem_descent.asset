@@ -1829,6 +1829,6 @@ local keyframes = {
     Altitude = -1927.65,
     UseHeightmap = false
   }
-};
+}
 
-asset.export("keyframes", keyframes);
+asset.export("keyframes", keyframes)

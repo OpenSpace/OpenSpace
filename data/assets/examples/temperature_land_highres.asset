@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("scene/solarsystem/planets/earth/earth.asset").Earth.Identifier
+local globe = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
@@ -45,13 +45,13 @@ local LayerFolder = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", LayerPrototype)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", LayerFolder)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerPrototype)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerFolder)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", LayerFolder)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", LayerPrototype)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerFolder)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerPrototype)
 end)
 
 asset.export("Prototype", LayerPrototype)
