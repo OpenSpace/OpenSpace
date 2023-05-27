@@ -413,12 +413,6 @@ QWidget* WindowControl::createPlanarWidget() {
     _planar.buttonLockFov->setFocusPolicy(Qt::NoFocus);
     layout->addWidget(_planar.buttonLockFov, 1, 2, 2, 1);
     connect(
-        _planar.buttonLockFov, &QPushButton::released,
-        [this]() {
-            _planar.buttonLockFov->setIcon(_fovLocked ? _lockIcon : _unlockIcon);
-        }
-    );
-    connect(
         _planar.buttonLockFov,
         &QPushButton::released,
         this,
@@ -923,6 +917,7 @@ void WindowControl::onFovLockClicked() {
         _planar.fovH->setEnabled(true);
         _planar.fovV->setEnabled(true);
     }
+    _planar.buttonLockFov->setIcon(_fovLocked ? _lockIcon : _unlockIcon);
 }
 
 void WindowControl::updatePlanarLockedFov() {

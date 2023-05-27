@@ -119,6 +119,7 @@ private:
     void generateConfigIndividualWindowSettings(sgct::config::Node& node);
     void setupProjectionTypeInGui(sgct::config::Viewport& vPort, WindowControl* wCtrl);
     void setupStateOfUiOnFirstWindow(size_t nWindows);
+    void deleteFromTags(sgct::config::Window& window);
 
     void save();
     void apply();

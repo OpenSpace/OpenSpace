@@ -144,6 +144,8 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
     bool firstWindowGuiIsEnabled = (nWindows > 1);
     int graphicsSelectionForFirstWindow = 0;
     int nGuiRenderTagsFound = 0;
+    _settingsWidget->nWindowsDisplayedChanged(nWindows);
+
     for (size_t i = 0; i < nWindows; ++i) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
         //First window needs to have "GUI" tag if this mode is set
@@ -185,7 +187,12 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
     }
 
     _settingsWidget->setShowUiOnFirstWindow(firstWindowGuiIsEnabled);
-    _settingsWidget->setEnableShowUiOnFirstWindowCheckbox(firstWindowGuiIsEnabled);
+    if (firstWindowGuiIsEnabled) {
+        // Call these again in order to ensure that GUI is configured correctly based on
+        // the values read from the config file
+        _settingsWidget->setEnableShowUiOnFirstWindowCheckbox(true);
+        _settingsWidget->nWindowsDisplayedChanged(nWindows);
+    }
     _settingsWidget->setGraphicsSelectionForShowUiOnFirstWindow(
         graphicsSelectionForFirstWindow
     );
@@ -534,14 +541,7 @@ void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) 
         node.windows[i].draw2D = true;
         node.windows[i].draw3D = true;
         node.windows[i].viewports.back().isTracked = true;
-        node.windows[i].tags.erase(
-            std::remove(
-                node.windows[i].tags.begin(),
-                node.windows[i].tags.end(),
-                "GUI"
-            ),
-            node.windows[i].tags.end()
-        );
+        deleteFromTags(node.windows[i]);
         // If "show UI on first window" option is enabled, then modify the settings
         // depending on if this is the first window or not
         if (_settingsWidget->showUiOnFirstWindow()) {
@@ -571,6 +571,17 @@ void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) 
                 node.windows[i].draw3D = true;
             }
         }
+    }
+}
+
+void SgctEdit::deleteFromTags(sgct::config::Window& window) {
+    for (std::string tag : {"GUI", "GUI_No_Render", "GUI_Render_Win1",
+                            "GUI_Render_Win2", "GUI_Render_Win3", "GUI_Render_Win4"})
+    {
+        window.tags.erase(
+            std::remove(window.tags.begin(), window.tags.end(), tag),
+            window.tags.end()
+        );
     }
 }
 
