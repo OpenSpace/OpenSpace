@@ -1,4 +1,6 @@
-local globeIdentifier = asset.require("../../io").Io.Identifier
+local globe = asset.require("../../io")
+
+
 
 local texturesPath = asset.syncedResource({
   Name = "Io Textures",
@@ -7,21 +9,24 @@ local texturesPath = asset.syncedResource({
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "io.jpg",
   Enabled = asset.enabled
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Io.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Io.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
+
 
 
 asset.meta = {

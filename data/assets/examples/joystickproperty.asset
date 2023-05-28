@@ -54,28 +54,28 @@ local XBoxController = {
 
 local freezeValue = function(name, axis, min, max)
   return [[
-  local joystickType = openspace.navigation.joystickAxis("]] .. name .. [[", ]] .. axis .. [[);
-  local isPropertyBound = true;
+  local joystickType = openspace.navigation.joystickAxis("]] .. name .. [[", ]] .. axis .. [[)
+  local isPropertyBound = true
   if joystickType == "None" then
-    isPropertyBound = false;
+    isPropertyBound = false
   end
 
   if isPropertyBound then
-    openspace.navigation.bindJoystickAxis("]] .. name .. [[", ]] .. axis .. [[, "None");
-    isPropertyBound = false;
+    openspace.navigation.bindJoystickAxis("]] .. name .. [[", ]] .. axis .. [[, "None")
+    isPropertyBound = false
   else
-    openspace.navigation.bindJoystickAxisProperty("]] .. name .. [[", ]] .. axis .. [[, "Scene.Earth.Scale.Scale", ]] .. min ..", " .. max.. [[);
-    isPropertyBound = true;
+    openspace.navigation.bindJoystickAxisProperty("]] .. name .. [[", ]] .. axis .. [[, "Scene.Earth.Scale.Scale", ]] .. min ..", " .. max.. [[)
+    isPropertyBound = true
   end
   ]]
 end
 
 asset.onInitialize(function()
-  local controller = XBoxController;
-  local name = "Xbox Controller";
+  local controller = XBoxController
+  local name = "Xbox Controller"
 
   -- Bind Right trigger to Earth Scale
-  openspace.navigation.bindJoystickAxisProperty(name, controller.RightTrigger, "Scene.Earth.Scale.Scale", 0.1, 100);
+  openspace.navigation.bindJoystickAxisProperty(name, controller.RightTrigger, "Scene.Earth.Scale.Scale", 0.1, 100)
 
   -- Bind 'A' button to freeze current value
   openspace.navigation.bindJoystickButton(

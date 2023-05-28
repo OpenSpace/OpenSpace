@@ -1,7 +1,9 @@
-local transforms = asset.require("../transforms")
 asset.require("spice/base")
 asset.require("./trail")
-local kernel = asset.require("../kernels").jup365
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Jupiter Labels",
@@ -10,6 +12,7 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
+
 local Ganymede = {
   Identifier = "Ganymede",
   Parent = transforms.JupiterBarycenter.Identifier,
@@ -17,14 +20,12 @@ local Ganymede = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_GANYMEDE",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernel
+      DestinationFrame = "GALACTIC"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "GANYMEDE",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernel
+      Observer = "JUPITER BARYCENTER"
     }
   },
   Renderable = {
@@ -42,7 +43,7 @@ local Ganymede = {
       FadeOutEnabled = true,
       FadeDistances = { 2250000.0, 8000000.0 },
       DistanceEPS = 1750000.0,
-      Color = {1.0, 1.0, 0.0}
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
@@ -78,6 +79,8 @@ local GanymedeLabel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.jup365)
+
   openspace.addSceneGraphNode(Ganymede)
   openspace.addSceneGraphNode(GanymedeLabel)
 end)
@@ -85,9 +88,12 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GanymedeLabel)
   openspace.removeSceneGraphNode(Ganymede)
+
+  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(Ganymede)
+asset.export(GanymedeLabel)
 
 
 

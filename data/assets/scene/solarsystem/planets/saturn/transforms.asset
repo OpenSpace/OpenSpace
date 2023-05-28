@@ -1,5 +1,7 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local SaturnBarycenter = {
   Identifier = "SaturnBarycenter",
@@ -18,6 +20,7 @@ local SaturnBarycenter = {
     Description = "Saturn Barycenter position"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SaturnBarycenter)

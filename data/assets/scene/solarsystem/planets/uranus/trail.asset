@@ -20,9 +20,10 @@ local UranusTrail = {
   GUI = {
     Name = "Uranus Trail",
     Path = "/Solar System/Planets/Uranus",
-    Description = "Trail of Uranus as observed by the Sun",
+    Description = "Trail of Uranus as observed by the Sun"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(UranusTrail)

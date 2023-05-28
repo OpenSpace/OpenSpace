@@ -48,55 +48,55 @@
   ],
   "keybindings": [
     {
-      "action": "os.events.bastilleday.setup.startofcme",
+      "action": "os.bastilleday.setup.StartOfCme",
       "key": "R"
     },
     {
-      "action": "os.events.bastilleday.setup.shortloop",
+      "action": "os.bastilleday.setup.ShortLoop",
       "key": "CTRL+1"
     },
     {
-      "action": "os.events.bastilleday.setup.standardloop",
+      "action": "os.bastilleday.setup.StandardLoop",
       "key": "CTRL+2"
     },
     {
-      "action": "os.events.bastilleday.setup.fastloop",
+      "action": "os.bastilleday.setup.FastLoop",
       "key": "CTRL+3"
     },
     {
-      "action": "os.events.bastilleday.setup.longloop",
+      "action": "os.bastilleday.setup.LongLoop",
       "key": "CTRL+4"
     },
     {
-      "action": "os.events.bastilleday.densityvolume.togglevolume",
+      "action": "os.bastilleday.densityvolume.ToggleVolume",
       "key": "D"
     },
     {
-      "action": "os.events.bastilleday.fluxnodelegend.togglelegend",
+      "action": "os.bastilleday.fluxnodelegend.ToggleLegend",
       "key": "N"
     },
     {
-      "action": "os.events.bastilleday.magnetogramtexture.switchcolorlayer",
+      "action": "os.bastilleday.magnetogramtexture.SwitchColorLayer",
       "key": "I"
     },
     {
-      "action": "os.solarsystem.sun.toggleeuv",
+      "action": "os.solarsystem.ToggleEuv",
       "key": "E"
     },
     {
-      "action": "os.events.bastilleday.fluxnodes.togglefluxnodes",
+      "action": "os.bastilleday.fluxnodes.ToggleFluxnodes",
       "key": "O"
     },
     {
-      "action": "os.events.bastilleday.fieldlines.togglefieldlines",
+      "action": "os.bastilleday.fieldlines.ToggleFieldlines",
       "key": "U"
     },
     {
-      "action": "os.events.bastilleday.fluxnodescutplane.toggleequatorial",
+      "action": "os.bastilleday.fluxnodescutplane.ToggleEquatorial",
       "key": "P"
     },
     {
-      "action": "os.events.bastilleday.fluxnodescutplane.togglemeridial",
+      "action": "os.bastilleday.fluxnodescutplane.ToggleMeridial",
       "key": "LEFTBRACKET"
     }
   ],

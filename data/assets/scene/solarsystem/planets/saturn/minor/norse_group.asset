@@ -1,895 +1,4438 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels")
-local kernel441 = kernels.sat441
-local kernel452 = kernels.sat452
 
 
 
-local parentIdentifier = transforms.SaturnBarycenter.Identifier
-local parentSpice = "SATURN BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_norse", "moon_minor", "moon_minor_saturn" }
-local trailColor = { 0.5, 0.3, 0.3 }
-local trailTags = {
-  "moonTrail_solarSystem",
-  "moonTrail_giants",
-  "moonTrail_saturn",
-  "moonTrail_minor",
-  "moonTrail_minor_saturn"
-}
-
-local norseGroup = {
-  {
-    Identifier = "Phoebe",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "PHOEBE",
-    Radii = { 218800, 217000, 203600 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 545.09,
-    Kernels = kernel441
-  },
-  {
-    Identifier = "Skathi",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "SKATHI",
-    Radii = { 8000, 8000, 8000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skathi"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 732.52,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2007S2",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "65091",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2007 S 2",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S2"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 792.96,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Skoll",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "SKOLL",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skoll"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 862.37,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2004S13",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "65087",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2004 S 13",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S13"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 905.85,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Greip",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "GREIP",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Greip"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 906.56,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Hyrrokkin",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "HYRROKKIN",
-    Radii = { 8000, 8000, 8000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hyrrokkin"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 914.29,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Jarnsaxa",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "JARNSAXA",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Jarnsaxa"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 943.78,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Mundilfari",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "MUNDILFARI",
-    Radii = { 7000, 7000, 7000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 956.70,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2006S1",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "65089",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2006 S 1",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S1"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 972.41,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2004S17",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "65088",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2004 S 17",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S17"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 985.45,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Bergelmir",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "BERGELMIR",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bergelmir"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 985.83,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Narvi",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "NARVI",
-    Radii = { 7000, 7000, 7000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Narvi"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1008.45,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Suttungr",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "SUTTUNGR",
-    Radii = { 7000, 7000, 7000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Suttungr"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1022.82,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Hati",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "HATI",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hati"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1033.05,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2004S12",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "65086",
-    Radii = { 5000, 5000, 5000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2004 S 12",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S12"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1048.54,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Farbauti",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "FARBAUTI",
-    Radii = { 5000, 5000, 5000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Farbauti"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1054.78,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Thrymr",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "THRYMR",
-    Radii = { 7000, 7000, 7000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thrymr"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1078.09,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Aegir",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "AEGIR",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Aegir"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1094.46,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2007S3",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "65092",
-    Radii = { 5000, 5000, 5000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2007 S 3",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S3"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1100,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Bestla",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "BESTLA",
-    Radii = { 7000, 7000, 7000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bestla"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1101.45,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2004S7",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "65085",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2004 S 7",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S7"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1101.99,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2006S3",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "65090",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2006 S 3",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S3"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1142.37,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Fenrir",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "FENRIR",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fenrir"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1212.53,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Surtur", -- Rising
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "648",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Surtur"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1297.7,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Kari",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "KARI",
-    Radii = { 7000, 7000, 7000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1245.06,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Ymir",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "YMIR",
-    Radii = { 18000, 18000, 18000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Ymir"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1254.15,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Loge",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "LOGE",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Loge"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1300.95,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Fornjot",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "FORNJOT",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fornjot"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1432.16,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Skadi",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "627",
-    Radii = { 8000, 8000, 8000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skadi"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 728.2,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Gridr",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "654",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gridr"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 990.23,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Angrboda",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "655",
-    Radii = { 3000, 3000, 3000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Angrboda"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1080.4,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Skrymir",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "656",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skrymir"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1164.3,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Gerd",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "657",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gerd"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1095.0,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2004S26",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "658",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2004 S 26",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S26"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1624.2,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Eggther",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "659",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Eggther"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1033.0,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Beli",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "661",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Beli"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1084.1,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Gunnlod",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "662",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gunnlod"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1175.3,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Thiazzi",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "663",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thiazzi"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1361.5,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2004S34",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "664",
-    Radii = { 3000, 3000, 3000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2004 S 34",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S34"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1412.5,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Alvaldi",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "665",
-    Radii = { 5000, 5000, 5000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Alvaldi"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1208.1,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "Geirrod",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "666",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Geirrod"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1295.8,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2004S28",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "65077",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2004 S 28",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S28"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1197.2,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2004S21",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "65079",
-    Radii = { 3000, 3000, 3000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2004 S 21",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S21"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1365.1,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2004S36",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "65081",
-    Radii = { 3000, 3000, 3000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2004 S 36",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S36"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1354.2,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2004S37",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "65082",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2004 S 37",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S37"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 752.88,
-    Kernels = kernel452
-  },
-  {
-    Identifier = "S2004S39",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "65084",
-    Radii = { 3000, 3000, 3000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2004 S 39",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S39"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1277.5,
-    Kernels = kernel452
-  }
-}
-
--- Generate all moon labels
-local moon_labels = {}
-
-for i, moon in ipairs(norseGroup) do
-  local moonName = moon.GUI.Name or moon.Identifier
-  moon_labels[i] = {
-    Identifier = moon.Identifier .. "Label",
-    Parent = moon.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabel",
-      Text = moonName,
-      FontSize = 70.0,
-      Size = 7.1,
-      MinMaxSize = { 1, 25 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Additive",
-      EnableFading = true,
-      FadeUnit = "Gm",
-      FadeDistances = { 1.25, 90.0 },
-      FadeWidths = { 0.25, 90.0 }
-    },
-    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
-    GUI = {
-      Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/" .. moon.Identifier,
-      Description = "Label for Saturn's moon " .. moonName .. " (Norse group)"
+local Phoebe = {
+  Identifier = "Phoebe",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PHOEBE",
+      Observer = "SATURN BARYCENTER"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 218800, 217000, 203600 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Phoebe",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe"
   }
-end
+}
 
-local nodes = proceduralGlobes.createGlobes(norseGroup)
+local PhoebeTrail = {
+  Identifier = "PhoebeTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PHOEBE",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 545.09,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Phoebe Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe"
+  }
+}
+
+local PhoebeLabel = {
+  Identifier = "PhoebeLabel",
+  Parent = Phoebe.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Phoebe",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Phoebe Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe",
+    Description = "Label for Saturn's moon Phoebe (Norse group)"
+  }
+}
+
+local Skathi = {
+  Identifier = "Skathi",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SKATHI",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 8000, 8000, 8000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Skathi",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skathi"
+  }
+}
+
+local SkathiTrail = {
+  Identifier = "SkathiTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SKATHI",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 732.52,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Skathi Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skathi"
+  }
+}
+
+local SkathiLabel = {
+  Identifier = "SkathiLabel",
+  Parent = Skathi.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Skathi",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Skathi Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skathi",
+    Description = "Label for Saturn's moon Skathi (Norse group)"
+  }
+}
+
+local S2007S2 = {
+  Identifier = "S2007S2",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65091",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 2",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S2"
+  }
+}
+
+local S2007S2Trail = {
+  Identifier = "S2007S2Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65091",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 792.96,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 2 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S2"
+  }
+}
+
+local S2007S2Label = {
+  Identifier = "S2007S2Label",
+  Parent = S2007S2.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2007 S 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2007 S 2 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S2",
+    Description = "Label for Saturn's moon S/2007 S 2 (Norse group)"
+  }
+}
+
+local Skoll = {
+  Identifier = "Skoll",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SKOLL",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Skoll",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skoll"
+  }
+}
+
+local SkollTrail = {
+  Identifier = "SkollTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SKOLL",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 862.37,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Skoll Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skoll"
+  }
+}
+
+local SkollLabel = {
+  Identifier = "SkollLabel",
+  Parent = Skoll.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Skoll",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Skoll Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skoll",
+    Description = "Label for Saturn's moon Skoll (Norse group)"
+  }
+}
+
+local S2004S13 = {
+  Identifier = "S2004S13",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65087",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 13",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S13"
+  }
+}
+
+local S2004S13Trail = {
+  Identifier = "S2004S13Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65087",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 905.85,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 13 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S13"
+  }
+}
+
+local S2004S13Label = {
+  Identifier = "S2004S13Label",
+  Parent = S2004S13.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2004 S 13",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2004 S 13 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S13",
+    Description = "Label for Saturn's moon S/2004 S 13 (Norse group)"
+  }
+}
+
+local Greip = {
+  Identifier = "Greip",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "GREIP",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Greip",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Greip"
+  }
+}
+
+local GreipTrail = {
+  Identifier = "GreipTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "GREIP",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 906.56,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Greip Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Greip"
+  }
+}
+
+local GreipLabel = {
+  Identifier = "GreipLabel",
+  Parent = Greip.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Greip",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Greip Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Greip",
+    Description = "Label for Saturn's moon Greip (Norse group)"
+  }
+}
+
+local Hyrrokkin = {
+  Identifier = "Hyrrokkin",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "HYRROKKIN",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 8000, 8000, 8000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Hyrrokkin",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hyrrokkin"
+  }
+}
+
+local HyrrokkinTrail = {
+  Identifier = "HyrrokkinTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "HYRROKKIN",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 914.29,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Hyrrokkin Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hyrrokkin"
+  }
+}
+
+local HyrrokkinLabel = {
+  Identifier = "HyrrokkinLabel",
+  Parent = Hyrrokkin.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Hyrrokkin",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Hyrrokkin Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hyrrokkin",
+    Description = "Label for Saturn's moon Hyrrokkin (Norse group)"
+  }
+}
+
+local Jarnsaxa = {
+  Identifier = "Jarnsaxa",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JARNSAXA",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Jarnsaxa",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Jarnsaxa"
+  }
+}
+
+local JarnsaxaTrail = {
+  Identifier = "JarnsaxaTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JARNSAXA",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 943.78,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Jarnsaxa Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Jarnsaxa"
+  }
+}
+
+local JarnsaxaLabel = {
+  Identifier = "JarnsaxaLabel",
+  Parent = Jarnsaxa.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Jarnsaxa",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Jarnsaxa Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Jarnsaxa",
+    Description = "Label for Saturn's moon Jarnsaxa (Norse group)"
+  }
+}
+
+local Mundilfari = {
+  Identifier = "Mundilfari",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MUNDILFARI",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Mundilfari",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari"
+  }
+}
+
+local MundilfariTrail = {
+  Identifier = "MundilfariTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MUNDILFARI",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 956.70,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Mundilfari Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari"
+  }
+}
+
+local MundilfariLabel = {
+  Identifier = "MundilfariLabel",
+  Parent = Mundilfari.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Mundilfari",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Mundilfari Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari",
+    Description = "Label for Saturn's moon Mundilfari (Norse group)"
+  }
+}
+
+local S2006S1 = {
+  Identifier = "S2006S1",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65089",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 1",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S1"
+  }
+}
+
+local S2006S1Trail = {
+  Identifier = "S2006S1Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65089",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 972.41,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 1 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S1"
+  }
+}
+
+local S2006S1Label = {
+  Identifier = "S2006S1Label",
+  Parent = S2006S1.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2006 S 1",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2006 S 1 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S1",
+    Description = "Label for Saturn's moon S/2006 S 1 (Norse group)"
+  }
+}
+
+local S2004S17 = {
+  Identifier = "S2004S17",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65088",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 17",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S17"
+  }
+}
+
+local S2004S17Trail = {
+  Identifier = "S2004S17Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65088",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 985.45,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 17 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S17"
+  }
+}
+
+local S2004S17Label = {
+  Identifier = "S2004S17Label",
+  Parent = S2004S17.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2004 S 17",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2004 S 17 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S17",
+    Description = "Label for Saturn's moon S/2004 S 17 (Norse group)"
+  }
+}
+
+local Bergelmir = {
+  Identifier = "Bergelmir",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "BERGELMIR",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Bergelmir",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bergelmir"
+  }
+}
+
+local BergelmirTrail = {
+  Identifier = "BergelmirTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "BERGELMIR",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 985.83,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Bergelmir Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bergelmir"
+  }
+}
+
+local BergelmirLabel = {
+  Identifier = "BergelmirLabel",
+  Parent = Bergelmir.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Bergelmir",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Bergelmir Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bergelmir",
+    Description = "Label for Saturn's moon Bergelmir (Norse group)"
+  }
+}
+
+local Narvi = {
+  Identifier = "Narvi",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NARVI",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Narvi",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Narvi"
+  }
+}
+
+local NarviTrail = {
+  Identifier = "NarviTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NARVI",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1008.45,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Narvi Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Narvi"
+  }
+}
+
+local NarviLabel = {
+  Identifier = "NarviLabel",
+  Parent = Narvi.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Narvi",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Narvi Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Narvi",
+    Description = "Label for Saturn's moon Narvi (Norse group)"
+  }
+}
+
+local Suttungr = {
+  Identifier = "Suttungr",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SUTTUNGR",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Suttungr",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Suttungr"
+  }
+}
+
+local SuttungrTrail = {
+  Identifier = "SuttungrTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SUTTUNGR",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1022.82,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Suttungr Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Suttungr"
+  }
+}
+
+local SuttungrLabel = {
+  Identifier = "SuttungrLabel",
+  Parent = Suttungr.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Suttungr",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Suttungr Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Suttungr",
+    Description = "Label for Saturn's moon Suttungr (Norse group)"
+  }
+}
+
+local Hati = {
+  Identifier = "Hati",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "HATI",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Hati",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hati"
+  }
+}
+
+local HatiTrail = {
+  Identifier = "HatiTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "HATI",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1033.05,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Hati Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hati"
+  }
+}
+
+local HatiLabel = {
+  Identifier = "HatiLabel",
+  Parent = Hati.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Hati",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Hati Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hati",
+    Description = "Label for Saturn's moon Hati (Norse group)"
+  }
+}
+
+local S2004S12 = {
+  Identifier = "S2004S12",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65086",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 12",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S12"
+  }
+}
+
+local S2004S12Trail = {
+  Identifier = "S2004S12Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65086",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1048.54,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 12 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S12"
+  }
+}
+
+local S2004S12Label = {
+  Identifier = "S2004S12Label",
+  Parent = S2004S12.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2004 S 12",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2004 S 12 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S12",
+    Description = "Label for Saturn's moon S/2004 S 12 (Norse group)"
+  }
+}
+
+local Farbauti = {
+  Identifier = "Farbauti",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "FARBAUTI",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Farbauti",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Farbauti"
+  }
+}
+
+local FarbautiTrail = {
+  Identifier = "FarbautiTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "FARBAUTI",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1054.78,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Farbauti Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Farbauti"
+  }
+}
+
+local FarbautiLabel = {
+  Identifier = "FarbautiLabel",
+  Parent = Farbauti.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Farbauti",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Farbauti Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Farbauti",
+    Description = "Label for Saturn's moon Farbauti (Norse group)"
+  }
+}
+
+local Thrymr = {
+  Identifier = "Thrymr",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "THRYMR",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Thrymr",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thrymr"
+  }
+}
+
+local ThrymrTrail = {
+  Identifier = "ThrymrTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "THRYMR",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1078.09,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Thrymr Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thrymr"
+  }
+}
+
+local ThrymrLabel = {
+  Identifier = "ThrymrLabel",
+  Parent = Thrymr.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Thrymr",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Thrymr Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thrymr",
+    Description = "Label for Saturn's moon Thrymr (Norse group)"
+  }
+}
+
+local Aegir = {
+  Identifier = "Aegir",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "AEGIR",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Aegir",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Aegir"
+  }
+}
+
+local AegirTrail = {
+  Identifier = "AegirTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "AEGIR",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1094.46,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Aegir Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Aegir"
+  }
+}
+
+local AegirLabel = {
+  Identifier = "AegirLabel",
+  Parent = Aegir.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Aegir",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Aegir Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Aegir",
+    Description = "Label for Saturn's moon Aegir (Norse group)"
+  }
+}
+
+local S2007S3 = {
+  Identifier = "S2007S3",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65092",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 3",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S3"
+  }
+}
+
+local S2007S3Trail = {
+  Identifier = "S2007S3Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65092",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1100.0,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 3 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S3"
+  }
+}
+
+local S2007S3Label = {
+  Identifier = "S2007S3Label",
+  Parent = S2007S3.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2007 S 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2007 S 3 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S3",
+    Description = "Label for Saturn's moon S/2007 S 3 (Norse group)"
+  }
+}
+
+local Bestla = {
+  Identifier = "Bestla",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "BESTLA",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Bestla",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bestla"
+  }
+}
+
+local BestlaTrail = {
+  Identifier = "BestlaTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "BESTLA",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1101.45,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Bestla Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bestla"
+  }
+}
+
+local BestlaLabel = {
+  Identifier = "BestlaLabel",
+  Parent = Bestla.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Bestla",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Bestla Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bestla",
+    Description = "Label for Saturn's moon Bestla (Norse group)"
+  }
+}
+
+local S2004S7 = {
+  Identifier = "S2004S7",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65085",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 7",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S7"
+  }
+}
+
+local S2004S7Trail = {
+  Identifier = "S2004S7Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65085",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1101.99,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 7 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S7"
+  }
+}
+
+local S2004S7Label = {
+  Identifier = "S2004S7Label",
+  Parent = S2004S7.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2004 S 7",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2004 S 7 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S7",
+    Description = "Label for Saturn's moon S/2004 S 7 (Norse group)"
+  }
+}
+
+local S2006S3 = {
+  Identifier = "S2006S3",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65090",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 3",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S3"
+  }
+}
+
+local S2006S3Trail = {
+  Identifier = "S2006S3Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65090",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1142.37,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 3 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S3"
+  }
+}
+
+local S2006S3Label = {
+  Identifier = "S2006S3Label",
+  Parent = S2006S3.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2006 S 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2006 S 3 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S3",
+    Description = "Label for Saturn's moon S/2006 S 3 (Norse group)"
+  }
+}
+
+local Fenrir = {
+  Identifier = "Fenrir",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "FENRIR",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Fenrir",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fenrir"
+  }
+}
+
+local FenrirTrail = {
+  Identifier = "FenrirTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "FENRIR",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1212.53,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Fenrir Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fenrir"
+  }
+}
+
+local FenrirLabel = {
+  Identifier = "FenrireLabel",
+  Parent = Fenrir.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Fenrir",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Fenrir Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fenrir",
+    Description = "Label for Saturn's moon Fenrir (Norse group)"
+  }
+}
+
+local Surtur = {
+  Identifier = "Surtur", -- Rising
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "648",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Surtur",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Surtur"
+  }
+}
+
+local SurturTrail = {
+  Identifier = "SurturTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "648",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1297.7,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Surtur Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Surtur"
+  }
+}
+
+local SurturLabel = {
+  Identifier = "SurturLabel",
+  Parent = Surtur.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Surtur",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Surtur Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Surtur",
+    Description = "Label for Saturn's moon Surtur (Norse group)"
+  }
+}
+
+local Kari = {
+  Identifier = "Kari",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "KARI",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Kari",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari"
+  }
+}
+
+local KariTrail = {
+  Identifier = "KariTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "KARI",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1245.06,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Kari Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari"
+  }
+}
+
+local KariLabel = {
+  Identifier = "KariLabel",
+  Parent = Kari.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Kari",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Kari Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari",
+    Description = "Label for Saturn's moon Kari (Norse group)"
+  }
+}
+
+local Ymir = {
+  Identifier = "Ymir",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "YMIR",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 18000, 18000, 18000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Ymir",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Ymir"
+  }
+}
+
+local YmirTrail = {
+  Identifier = "YmirTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "YMIR",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1254.15,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Ymir Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Ymir"
+  }
+}
+
+local YmirLabel = {
+  Identifier = "YmirLabel",
+  Parent = Ymir.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Ymir",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Ymir Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Ymir",
+    Description = "Label for Saturn's moon Ymir (Norse group)"
+  }
+}
+
+local Loge = {
+  Identifier = "Loge",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "LOGE",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Loge",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Loge"
+  }
+}
+
+local LogeTrail = {
+  Identifier = "LogeTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "LOGE",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1300.95,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Loge Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Loge"
+  }
+}
+
+local LogeLabel = {
+  Identifier = "LogeLabel",
+  Parent = Loge.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Cyllene",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Loge Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Loge",
+    Description = "Label for Saturn's moon Loge (Norse group)"
+  }
+}
+
+local Fornjot = {
+  Identifier = "Fornjot",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "FORNJOT",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Fornjot",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fornjot"
+  }
+}
+
+local FornjotTrail = {
+  Identifier = "FornjotTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "FORNJOT",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1432.16,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Fornjot Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fornjot"
+  }
+}
+
+local FornjotLabel = {
+  Identifier = "FornjotLabel",
+  Parent = Fornjot.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Fornjot",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Fornjot Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fornjot",
+    Description = "Label for Saturn's moon Fornjot (Norse group)"
+  }
+}
+
+local Skadi = {
+  Identifier = "Skadi",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "627",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 8000, 8000, 8000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Skadi",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skadi"
+  }
+}
+
+local SkadiTrail = {
+  Identifier = "SkadiTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "627",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 728.2,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Skadi Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skadi"
+  }
+}
+
+local SkadiLabel = {
+  Identifier = "SkadiLabel",
+  Parent = Skadi.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Skadi",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Skadi Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skadi",
+    Description = "Label for Saturn's moon Skadi (Norse group)"
+  }
+}
+
+local Gridr = {
+  Identifier = "Gridr",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "654",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Gridr",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gridr"
+  }
+}
+
+local GridrTrail = {
+  Identifier = "GridrTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "654",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 990.23,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Gridr Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gridr"
+  }
+}
+
+local GridrLabel = {
+  Identifier = "GridrLabel",
+  Parent = Gridr.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Gridr",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Gridr Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gridr",
+    Description = "Label for Saturn's moon Gridr (Norse group)"
+  }
+}
+
+local Angrboda = {
+  Identifier = "Angrboda",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "655",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Angrboda",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Angrboda"
+  }
+}
+
+local AngrbodaTrail = {
+  Identifier = "AngrbodaTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "655",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1080.4,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Angrboda Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Angrboda"
+  }
+}
+
+local AngrbodaLabel = {
+  Identifier = "AngrbodaLabel",
+  Parent = Angrboda.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Angrboda",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Angrboda Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Angrboda",
+    Description = "Label for Saturn's moon Angrboda (Norse group)"
+  }
+}
+
+local Skrymir = {
+  Identifier = "Skrymir",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "656",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Skrymir",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skrymir"
+  }
+}
+
+local SkrymirTrail = {
+  Identifier = "SkrymirTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "656",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1164.3,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Skrymir Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skrymir"
+  }
+}
+
+local SkrymirLabel = {
+  Identifier = "SkrymirLabel",
+  Parent = Skrymir.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Skrymir",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Skrymir Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skrymir",
+    Description = "Label for Saturn's moon Skrymir (Norse group)"
+  }
+}
+
+local Gerd = {
+  Identifier = "Gerd",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "657",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Gerd",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gerd"
+  }
+}
+
+local GerdTrail = {
+  Identifier = "GerdTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "657",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1095.0,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Gerd Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gerd"
+  }
+}
+
+local GerdLabel = {
+  Identifier = "GerdLabel",
+  Parent = Gerd.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Gerd",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Gerd Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gerd",
+    Description = "Label for Saturn's moon Gerd (Norse group)"
+  }
+}
+
+local S2004S26 = {
+  Identifier = "S2004S26",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "658",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 26",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S26"
+  }
+}
+
+local S2004S26Trail = {
+  Identifier = "S2004S26Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "658",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1624.2,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 26 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S26"
+  }
+}
+
+local S2004S26Label = {
+  Identifier = "S2004S26Label",
+  Parent = S2004S26.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2004 S 26",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2004 S 26 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S26",
+    Description = "Label for Saturn's moon S/2004 S 26 (Norse group)"
+  }
+}
+
+local Eggther = {
+  Identifier = "Eggther",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "659",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Eggther",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Eggther"
+  }
+}
+
+local EggtherTrail = {
+  Identifier = "EggtherTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "659",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1033.0,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Eggther Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Eggther"
+  }
+}
+
+local EggtherLabel = {
+  Identifier = "EggtherLabel",
+  Parent = Eggther.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Eggther",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Eggther Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Eggther",
+    Description = "Label for Saturn's moon Eggther (Norse group)"
+  }
+}
+
+local Beli = {
+  Identifier = "Beli",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "661",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Beli",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Beli"
+  }
+}
+
+local BeliTrail = {
+  Identifier = "BeliTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "661",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1084.1,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Beli Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Beli"
+  }
+}
+
+local BeliLabel = {
+  Identifier = "BeliLabel",
+  Parent = Beli.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Beli",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Beli Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Beli",
+    Description = "Label for Saturn's moon Beli (Norse group)"
+  }
+}
+
+local Gunnlod = {
+  Identifier = "Gunnlod",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "662",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Gunnlod",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gunnlod"
+  }
+}
+
+local GunnlodTrail = {
+  Identifier = "GunnlodTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "662",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1175.3,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Gunnlod Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gunnlod"
+  }
+}
+
+local GunnlodLabel = {
+  Identifier = "GunnlodLabel",
+  Parent = Gunnlod.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Gunnlod",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Gunnlod Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gunnlod",
+    Description = "Label for Saturn's moon Gunnlod (Norse group)"
+  }
+}
+
+local Thiazzi = {
+  Identifier = "Thiazzi",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "663",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Thiazzi",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thiazzi"
+  }
+}
+
+local ThiazziTrail = {
+  Identifier = "ThiazziTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "663",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1361.5,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Thiazzi Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thiazzi"
+  }
+}
+
+local ThiazziLabel = {
+  Identifier = "ThiazziLabel",
+  Parent = Thiazzi.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Thiazzi",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Thiazzi Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thiazzi",
+    Description = "Label for Saturn's moon Thiazzi (Norse group)"
+  }
+}
+
+local S2004S34 = {
+  Identifier = "S2004S34",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "664",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 34",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S34"
+  }
+}
+
+local S2004S34Trail = {
+  Identifier = "S2004S34Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "664",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1412.5,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 34 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S34"
+  }
+}
+
+local S2004S34Label = {
+  Identifier = "S2004S34Label",
+  Parent = S2004S34.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2004 S 34",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2004 S 34 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S34",
+    Description = "Label for Saturn's moon S/2004 S 34 (Norse group)"
+  }
+}
+
+local Alvaldi = {
+  Identifier = "Alvaldi",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "665",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Alvaldi",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Alvaldi"
+  }
+}
+
+local AlvaldiTrail = {
+  Identifier = "AlvaldiTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "665",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1208.1,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Alvaldi Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Alvaldi"
+  }
+}
+
+local AlvaldiLabel = {
+  Identifier = "AlvaldiLabel",
+  Parent = Alvaldi.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Alvaldi",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Alvaldi Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Alvaldi",
+    Description = "Label for Saturn's moon Alvaldi (Norse group)"
+  }
+}
+
+local Geirrod = {
+  Identifier = "Geirrod",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "666",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Geirrod",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Geirrod"
+  }
+}
+
+local GeirrodTrail = {
+  Identifier = "GeirrodTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "666",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1295.8,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Geirrod Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Geirrod"
+  }
+}
+
+local GeirrodLabel = {
+  Identifier = "GeirrodLabel",
+  Parent = Geirrod.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Geirrod",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Geirrod Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Geirrod",
+    Description = "Label for Saturn's moon Geirrod (Norse group)"
+  }
+}
+
+local S2004S28 = {
+  Identifier = "S2004S28",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65077",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 28",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S28"
+  }
+}
+
+local S2004S28Trail = {
+  Identifier = "S2004S28Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65077",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1197.2,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 28 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S28"
+  }
+}
+
+local S2004S28Label = {
+  Identifier = "S2004S28Label",
+  Parent = S2004S28.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2004 S 28",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2004 S 28 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S28",
+    Description = "Label for Saturn's moon S/2004 S 28 (Norse group)"
+  }
+}
+
+local S2004S21 = {
+  Identifier = "S2004S21",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65079",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 21",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S21"
+  }
+}
+
+local S2004S21Trail = {
+  Identifier = "S2004S21Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65079",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1365.1,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 21 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S21"
+  }
+}
+
+local S2004S21Label = {
+  Identifier = "S2004S21Label",
+  Parent = S2004S21.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2004 S 21",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2004 S 21 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S21",
+    Description = "Label for Saturn's moon S/2004 S 21 (Norse group)"
+  }
+}
+
+local S2004S36 = {
+  Identifier = "S2004S36",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65081",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 36",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S36"
+  }
+}
+
+local S2004S36Trail = {
+  Identifier = "S2004S36Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65081",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1354.2,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 36 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S36"
+  }
+}
+
+local S2004S36Label = {
+  Identifier = "S2004S36Label",
+  Parent = S2004S36.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2004 S 36",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2004 S 36 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S36",
+    Description = "Label for Saturn's moon S/2004 S 36 (Norse group)"
+  }
+}
+
+local S2004S37 = {
+  Identifier = "S2004S37",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65082",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 37",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S37"
+  }
+}
+
+local S2004S37Trail = {
+  Identifier = "S2004S37Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65082",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 752.88,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 37 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S37"
+  }
+}
+
+local S2004S37Label = {
+  Identifier = "S2004S37Label",
+  Parent = S2004S37.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2004 S 37",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2004 S 37 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S37",
+    Description = "Label for Saturn's moon S/2004 S 37 (Norse group)"
+  }
+}
+
+local S2004S39 = {
+  Identifier = "S2004S39",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65084",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 39",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S39"
+  }
+}
+
+local S2004S39Trail = {
+  Identifier = "S2004S39Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "65084",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1277.5,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 39 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S39"
+  }
+}
+
+local S2004S39Label = {
+  Identifier = "S2004S39Label",
+  Parent = S2004S39.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2004 S 39",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2004 S 39 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S39",
+    Description = "Label for Saturn's moon S/2004 S 39 (Norse group)"
+  }
+}
+
 
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernels.sat441)
+  openspace.spice.loadKernel(kernels.sat452)
 
-  for _, moon in ipairs(moon_labels) do
-    openspace.addSceneGraphNode(moon)
-  end
+
+  openspace.addSceneGraphNode(Phoebe)
+  openspace.addSceneGraphNode(PhoebeTrail)
+  openspace.addSceneGraphNode(PhoebeLabel)
+
+  openspace.addSceneGraphNode(Skathi)
+  openspace.addSceneGraphNode(SkathiTrail)
+  openspace.addSceneGraphNode(SkathiLabel)
+
+  openspace.addSceneGraphNode(S2007S2)
+  openspace.addSceneGraphNode(S2007S2Trail)
+  openspace.addSceneGraphNode(S2007S2Label)
+
+  openspace.addSceneGraphNode(Skoll)
+  openspace.addSceneGraphNode(SkollTrail)
+  openspace.addSceneGraphNode(SkollLabel)
+
+  openspace.addSceneGraphNode(S2004S13)
+  openspace.addSceneGraphNode(S2004S13Trail)
+  openspace.addSceneGraphNode(S2004S13Label)
+
+  openspace.addSceneGraphNode(Greip)
+  openspace.addSceneGraphNode(GreipTrail)
+  openspace.addSceneGraphNode(GreipLabel)
+
+  openspace.addSceneGraphNode(Hyrrokkin)
+  openspace.addSceneGraphNode(HyrrokkinTrail)
+  openspace.addSceneGraphNode(HyrrokkinLabel)
+
+  openspace.addSceneGraphNode(Jarnsaxa)
+  openspace.addSceneGraphNode(JarnsaxaTrail)
+  openspace.addSceneGraphNode(JarnsaxaLabel)
+
+  openspace.addSceneGraphNode(Mundilfari)
+  openspace.addSceneGraphNode(MundilfariTrail)
+  openspace.addSceneGraphNode(MundilfariLabel)
+
+  openspace.addSceneGraphNode(S2006S1)
+  openspace.addSceneGraphNode(S2006S1Trail)
+  openspace.addSceneGraphNode(S2006S1Label)
+
+  openspace.addSceneGraphNode(S2004S17)
+  openspace.addSceneGraphNode(S2004S17Trail)
+  openspace.addSceneGraphNode(S2004S17Label)
+
+  openspace.addSceneGraphNode(Bergelmir)
+  openspace.addSceneGraphNode(BergelmirTrail)
+  openspace.addSceneGraphNode(BergelmirLabel)
+
+  openspace.addSceneGraphNode(Narvi)
+  openspace.addSceneGraphNode(NarviTrail)
+  openspace.addSceneGraphNode(NarviLabel)
+
+  openspace.addSceneGraphNode(Suttungr)
+  openspace.addSceneGraphNode(SuttungrTrail)
+  openspace.addSceneGraphNode(SuttungrLabel)
+
+  openspace.addSceneGraphNode(Hati)
+  openspace.addSceneGraphNode(HatiTrail)
+  openspace.addSceneGraphNode(HatiLabel)
+
+  openspace.addSceneGraphNode(S2004S12)
+  openspace.addSceneGraphNode(S2004S12Trail)
+  openspace.addSceneGraphNode(S2004S12Label)
+
+  openspace.addSceneGraphNode(Farbauti)
+  openspace.addSceneGraphNode(FarbautiTrail)
+  openspace.addSceneGraphNode(FarbautiLabel)
+
+  openspace.addSceneGraphNode(Thrymr)
+  openspace.addSceneGraphNode(ThrymrTrail)
+  openspace.addSceneGraphNode(ThrymrLabel)
+
+  openspace.addSceneGraphNode(Aegir)
+  openspace.addSceneGraphNode(AegirTrail)
+  openspace.addSceneGraphNode(AegirLabel)
+
+  openspace.addSceneGraphNode(S2007S3)
+  openspace.addSceneGraphNode(S2007S3Trail)
+  openspace.addSceneGraphNode(S2007S3Label)
+
+  openspace.addSceneGraphNode(Bestla)
+  openspace.addSceneGraphNode(BestlaTrail)
+  openspace.addSceneGraphNode(BestlaLabel)
+
+  openspace.addSceneGraphNode(S2004S7)
+  openspace.addSceneGraphNode(S2004S7Trail)
+  openspace.addSceneGraphNode(S2004S7Label)
+
+  openspace.addSceneGraphNode(S2006S3)
+  openspace.addSceneGraphNode(S2006S3Trail)
+  openspace.addSceneGraphNode(S2006S3Label)
+
+  openspace.addSceneGraphNode(Fenrir)
+  openspace.addSceneGraphNode(FenrirTrail)
+  openspace.addSceneGraphNode(FenrirLabel)
+
+  openspace.addSceneGraphNode(Surtur)
+  openspace.addSceneGraphNode(SurturTrail)
+  openspace.addSceneGraphNode(SurturLabel)
+
+  openspace.addSceneGraphNode(Kari)
+  openspace.addSceneGraphNode(KariTrail)
+  openspace.addSceneGraphNode(KariLabel)
+
+  openspace.addSceneGraphNode(Ymir)
+  openspace.addSceneGraphNode(YmirTrail)
+  openspace.addSceneGraphNode(YmirLabel)
+
+  openspace.addSceneGraphNode(Loge)
+  openspace.addSceneGraphNode(LogeTrail)
+  openspace.addSceneGraphNode(LogeLabel)
+
+  openspace.addSceneGraphNode(Fornjot)
+  openspace.addSceneGraphNode(FornjotTrail)
+  openspace.addSceneGraphNode(FornjotLabel)
+
+  openspace.addSceneGraphNode(Skadi)
+  openspace.addSceneGraphNode(SkadiTrail)
+  openspace.addSceneGraphNode(SkadiLabel)
+
+  openspace.addSceneGraphNode(Gridr)
+  openspace.addSceneGraphNode(GridrTrail)
+  openspace.addSceneGraphNode(GridrLabel)
+
+  openspace.addSceneGraphNode(Angrboda)
+  openspace.addSceneGraphNode(AngrbodaTrail)
+  openspace.addSceneGraphNode(AngrbodaLabel)
+
+  openspace.addSceneGraphNode(Skrymir)
+  openspace.addSceneGraphNode(SkrymirTrail)
+  openspace.addSceneGraphNode(SkrymirLabel)
+
+  openspace.addSceneGraphNode(Gerd)
+  openspace.addSceneGraphNode(GerdTrail)
+  openspace.addSceneGraphNode(GerdLabel)
+
+  openspace.addSceneGraphNode(S2004S26)
+  openspace.addSceneGraphNode(S2004S26Trail)
+  openspace.addSceneGraphNode(S2004S26Label)
+
+  openspace.addSceneGraphNode(Eggther)
+  openspace.addSceneGraphNode(EggtherTrail)
+  openspace.addSceneGraphNode(EggtherLabel)
+
+  openspace.addSceneGraphNode(Beli)
+  openspace.addSceneGraphNode(BeliTrail)
+  openspace.addSceneGraphNode(BeliLabel)
+
+  openspace.addSceneGraphNode(Gunnlod)
+  openspace.addSceneGraphNode(GunnlodTrail)
+  openspace.addSceneGraphNode(GunnlodLabel)
+
+  openspace.addSceneGraphNode(Thiazzi)
+  openspace.addSceneGraphNode(ThiazziTrail)
+  openspace.addSceneGraphNode(ThiazziLabel)
+
+  openspace.addSceneGraphNode(S2004S34)
+  openspace.addSceneGraphNode(S2004S34Trail)
+  openspace.addSceneGraphNode(S2004S34Label)
+
+  openspace.addSceneGraphNode(Alvaldi)
+  openspace.addSceneGraphNode(AlvaldiTrail)
+  openspace.addSceneGraphNode(AlvaldiLabel)
+
+  openspace.addSceneGraphNode(Geirrod)
+  openspace.addSceneGraphNode(GeirrodTrail)
+  openspace.addSceneGraphNode(GeirrodLabel)
+
+  openspace.addSceneGraphNode(S2004S28)
+  openspace.addSceneGraphNode(S2004S28Trail)
+  openspace.addSceneGraphNode(S2004S28Label)
+
+  openspace.addSceneGraphNode(S2004S21)
+  openspace.addSceneGraphNode(S2004S21Trail)
+  openspace.addSceneGraphNode(S2004S21Label)
+
+  openspace.addSceneGraphNode(S2004S36)
+  openspace.addSceneGraphNode(S2004S36Trail)
+  openspace.addSceneGraphNode(S2004S36Label)
+
+  openspace.addSceneGraphNode(S2004S37)
+  openspace.addSceneGraphNode(S2004S37Trail)
+  openspace.addSceneGraphNode(S2004S37Label)
+
+  openspace.addSceneGraphNode(S2004S39)
+  openspace.addSceneGraphNode(S2004S39Trail)
+  openspace.addSceneGraphNode(S2004S39Label)
 end)
 
 asset.onDeinitialize(function()
-  for i = #moon_labels, 1, -1 do
-    openspace.removeSceneGraphNode(moon_labels[i])
-  end
+  openspace.removeSceneGraphNode(S2004S39Label)
+  openspace.removeSceneGraphNode(S2004S39Trail)
+  openspace.removeSceneGraphNode(S2004S39)
 
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.removeSceneGraphNode(S2004S37Label)
+  openspace.removeSceneGraphNode(S2004S37Trail)
+  openspace.removeSceneGraphNode(S2004S37)
+
+  openspace.removeSceneGraphNode(S2004S36Label)
+  openspace.removeSceneGraphNode(S2004S36Trail)
+  openspace.removeSceneGraphNode(S2004S36)
+
+  openspace.removeSceneGraphNode(S2004S21Label)
+  openspace.removeSceneGraphNode(S2004S21Trail)
+  openspace.removeSceneGraphNode(S2004S21)
+
+  openspace.removeSceneGraphNode(S2004S28Label)
+  openspace.removeSceneGraphNode(S2004S28Trail)
+  openspace.removeSceneGraphNode(S2004S28)
+
+  openspace.removeSceneGraphNode(GeirrodLabel)
+  openspace.removeSceneGraphNode(GeirrodTrail)
+  openspace.removeSceneGraphNode(Geirrod)
+
+  openspace.removeSceneGraphNode(AlvaldiLabel)
+  openspace.removeSceneGraphNode(AlvaldiTrail)
+  openspace.removeSceneGraphNode(Alvaldi)
+
+  openspace.removeSceneGraphNode(S2004S34Label)
+  openspace.removeSceneGraphNode(S2004S34Trail)
+  openspace.removeSceneGraphNode(S2004S34)
+
+  openspace.removeSceneGraphNode(ThiazziLabel)
+  openspace.removeSceneGraphNode(ThiazziTrail)
+  openspace.removeSceneGraphNode(Thiazzi)
+
+  openspace.removeSceneGraphNode(GunnlodLabel)
+  openspace.removeSceneGraphNode(GunnlodTrail)
+  openspace.removeSceneGraphNode(Gunnlod)
+
+  openspace.removeSceneGraphNode(BeliLabel)
+  openspace.removeSceneGraphNode(BeliTrail)
+  openspace.removeSceneGraphNode(Beli)
+
+  openspace.removeSceneGraphNode(EggtherLabel)
+  openspace.removeSceneGraphNode(EggtherTrail)
+  openspace.removeSceneGraphNode(Eggther)
+
+  openspace.removeSceneGraphNode(S2004S26Label)
+  openspace.removeSceneGraphNode(S2004S26Trail)
+  openspace.removeSceneGraphNode(S2004S26)
+
+  openspace.removeSceneGraphNode(GerdLabel)
+  openspace.removeSceneGraphNode(GerdTrail)
+  openspace.removeSceneGraphNode(Gerd)
+
+  openspace.removeSceneGraphNode(SkrymirLabel)
+  openspace.removeSceneGraphNode(SkrymirTrail)
+  openspace.removeSceneGraphNode(Skrymir)
+
+  openspace.removeSceneGraphNode(AngrbodaLabel)
+  openspace.removeSceneGraphNode(AngrbodaTrail)
+  openspace.removeSceneGraphNode(Angrboda)
+
+  openspace.removeSceneGraphNode(GridrLabel)
+  openspace.removeSceneGraphNode(GridrTrail)
+  openspace.removeSceneGraphNode(Gridr)
+
+  openspace.removeSceneGraphNode(SkadiLabel)
+  openspace.removeSceneGraphNode(SkadiTrail)
+  openspace.removeSceneGraphNode(Skadi)
+
+  openspace.removeSceneGraphNode(FornjotLabel)
+  openspace.removeSceneGraphNode(FornjotTrail)
+  openspace.removeSceneGraphNode(Fornjot)
+
+  openspace.removeSceneGraphNode(LogeLabel)
+  openspace.removeSceneGraphNode(LogeTrail)
+  openspace.removeSceneGraphNode(Loge)
+
+  openspace.removeSceneGraphNode(YmirLabel)
+  openspace.removeSceneGraphNode(YmirTrail)
+  openspace.removeSceneGraphNode(Ymir)
+
+  openspace.removeSceneGraphNode(KariLabel)
+  openspace.removeSceneGraphNode(KariTrail)
+  openspace.removeSceneGraphNode(Kari)
+
+  openspace.removeSceneGraphNode(SurturLabel)
+  openspace.removeSceneGraphNode(SurturTrail)
+  openspace.removeSceneGraphNode(Surtur)
+
+  openspace.removeSceneGraphNode(FenrirLabel)
+  openspace.removeSceneGraphNode(FenrirTrail)
+  openspace.removeSceneGraphNode(Fenrir)
+
+  openspace.removeSceneGraphNode(S2006S3Label)
+  openspace.removeSceneGraphNode(S2006S3Trail)
+  openspace.removeSceneGraphNode(S2006S3)
+
+  openspace.removeSceneGraphNode(S2004S7Label)
+  openspace.removeSceneGraphNode(S2004S7Trail)
+  openspace.removeSceneGraphNode(S2004S7)
+
+  openspace.removeSceneGraphNode(BestlaLabel)
+  openspace.removeSceneGraphNode(BestlaTrail)
+  openspace.removeSceneGraphNode(Bestla)
+
+  openspace.removeSceneGraphNode(S2007S3Label)
+  openspace.removeSceneGraphNode(S2007S3Trail)
+  openspace.removeSceneGraphNode(S2007S3)
+
+  openspace.removeSceneGraphNode(AegirLabel)
+  openspace.removeSceneGraphNode(AegirTrail)
+  openspace.removeSceneGraphNode(Aegir)
+
+  openspace.removeSceneGraphNode(ThrymrLabel)
+  openspace.removeSceneGraphNode(ThrymrTrail)
+  openspace.removeSceneGraphNode(Thrymr)
+
+  openspace.removeSceneGraphNode(FarbautiLabel)
+  openspace.removeSceneGraphNode(FarbautiTrail)
+  openspace.removeSceneGraphNode(Farbauti)
+
+  openspace.removeSceneGraphNode(S2004S12Label)
+  openspace.removeSceneGraphNode(S2004S12Trail)
+  openspace.removeSceneGraphNode(S2004S12)
+
+  openspace.removeSceneGraphNode(HatiLabel)
+  openspace.removeSceneGraphNode(HatiTrail)
+  openspace.removeSceneGraphNode(Hati)
+
+  openspace.removeSceneGraphNode(SuttungrLabel)
+  openspace.removeSceneGraphNode(SuttungrTrail)
+  openspace.removeSceneGraphNode(Suttungr)
+
+  openspace.removeSceneGraphNode(NarviLabel)
+  openspace.removeSceneGraphNode(NarviTrail)
+  openspace.removeSceneGraphNode(Narvi)
+
+  openspace.removeSceneGraphNode(BergelmirLabel)
+  openspace.removeSceneGraphNode(BergelmirTrail)
+  openspace.removeSceneGraphNode(Bergelmir)
+
+  openspace.removeSceneGraphNode(S2004S17Label)
+  openspace.removeSceneGraphNode(S2004S17Trail)
+  openspace.removeSceneGraphNode(S2004S17)
+
+  openspace.removeSceneGraphNode(S2006S1Label)
+  openspace.removeSceneGraphNode(S2006S1Trail)
+  openspace.removeSceneGraphNode(S2006S1)
+
+  openspace.removeSceneGraphNode(MundilfariLabel)
+  openspace.removeSceneGraphNode(MundilfariTrail)
+  openspace.removeSceneGraphNode(Mundilfari)
+
+  openspace.removeSceneGraphNode(JarnsaxaLabel)
+  openspace.removeSceneGraphNode(JarnsaxaTrail)
+  openspace.removeSceneGraphNode(Jarnsaxa)
+
+  openspace.removeSceneGraphNode(HyrrokkinLabel)
+  openspace.removeSceneGraphNode(HyrrokkinTrail)
+  openspace.removeSceneGraphNode(Hyrrokkin)
+
+  openspace.removeSceneGraphNode(GreipLabel)
+  openspace.removeSceneGraphNode(GreipTrail)
+  openspace.removeSceneGraphNode(Greip)
+
+  openspace.removeSceneGraphNode(S2004S13Label)
+  openspace.removeSceneGraphNode(S2004S13Trail)
+  openspace.removeSceneGraphNode(S2004S13)
+
+  openspace.removeSceneGraphNode(SkollLabel)
+  openspace.removeSceneGraphNode(SkollTrail)
+  openspace.removeSceneGraphNode(Skoll)
+
+  openspace.removeSceneGraphNode(S2007S2Label)
+  openspace.removeSceneGraphNode(S2007S2Trail)
+  openspace.removeSceneGraphNode(S2007S2)
+
+  openspace.removeSceneGraphNode(SkathiLabel)
+  openspace.removeSceneGraphNode(SkathiTrail)
+  openspace.removeSceneGraphNode(Skathi)
+
+  openspace.removeSceneGraphNode(PhoebeLabel)
+  openspace.removeSceneGraphNode(PhoebeTrail)
+  openspace.removeSceneGraphNode(Phoebe)
+
+  openspace.spice.unloadKernel(kernels.sat452)
+  openspace.spice.unloadKernel(kernels.sat441)
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Phoebe)
+asset.export(PhoebeTrail)
+asset.export(PhoebeLabel)
+
+asset.export(Skathi)
+asset.export(SkathiTrail)
+asset.export(SkathiLabel)
+
+asset.export(S2007S2)
+asset.export(S2007S2Trail)
+asset.export(S2007S2Label)
+
+asset.export(Skoll)
+asset.export(SkollTrail)
+asset.export(SkollLabel)
+
+asset.export(S2004S13)
+asset.export(S2004S13Trail)
+asset.export(S2004S13Label)
+
+asset.export(Greip)
+asset.export(GreipTrail)
+asset.export(GreipLabel)
+
+asset.export(Hyrrokkin)
+asset.export(HyrrokkinTrail)
+asset.export(HyrrokkinLabel)
+
+asset.export(Jarnsaxa)
+asset.export(JarnsaxaTrail)
+asset.export(JarnsaxaLabel)
+
+asset.export(Mundilfari)
+asset.export(MundilfariTrail)
+asset.export(MundilfariLabel)
+
+asset.export(S2006S1)
+asset.export(S2006S1Trail)
+asset.export(S2006S1Label)
+
+asset.export(S2004S17)
+asset.export(S2004S17Trail)
+asset.export(S2004S17Label)
+
+asset.export(Bergelmir)
+asset.export(BergelmirTrail)
+asset.export(BergelmirLabel)
+
+asset.export(Narvi)
+asset.export(NarviTrail)
+asset.export(NarviLabel)
+
+asset.export(Suttungr)
+asset.export(SuttungrTrail)
+asset.export(SuttungrLabel)
+
+asset.export(Hati)
+asset.export(HatiTrail)
+asset.export(HatiLabel)
+
+asset.export(S2004S12)
+asset.export(S2004S12Trail)
+asset.export(S2004S12Label)
+
+asset.export(Farbauti)
+asset.export(FarbautiTrail)
+asset.export(FarbautiLabel)
+
+asset.export(Thrymr)
+asset.export(ThrymrTrail)
+asset.export(ThrymrLabel)
+
+asset.export(Aegir)
+asset.export(AegirTrail)
+asset.export(AegirLabel)
+
+asset.export(S2007S3)
+asset.export(S2007S3Trail)
+asset.export(S2007S3Label)
+
+asset.export(Bestla)
+asset.export(BestlaTrail)
+asset.export(BestlaLabel)
+
+asset.export(S2004S7)
+asset.export(S2004S7Trail)
+asset.export(S2004S7Label)
+
+asset.export(S2006S3)
+asset.export(S2006S3Trail)
+asset.export(S2006S3Label)
+
+asset.export(Fenrir)
+asset.export(FenrirTrail)
+asset.export(FenrirLabel)
+
+asset.export(Surtur)
+asset.export(SurturTrail)
+asset.export(SurturLabel)
+
+asset.export(Kari)
+asset.export(KariTrail)
+asset.export(KariLabel)
+
+asset.export(Ymir)
+asset.export(YmirTrail)
+asset.export(YmirLabel)
+
+asset.export(Loge)
+asset.export(LogeTrail)
+asset.export(LogeLabel)
+
+asset.export(Fornjot)
+asset.export(FornjotTrail)
+asset.export(FornjotLabel)
+
+asset.export(Skadi)
+asset.export(SkadiTrail)
+asset.export(SkadiLabel)
+
+asset.export(Gridr)
+asset.export(GridrTrail)
+asset.export(GridrLabel)
+
+asset.export(Angrboda)
+asset.export(AngrbodaTrail)
+asset.export(AngrbodaLabel)
+
+asset.export(Skrymir)
+asset.export(SkrymirTrail)
+asset.export(SkrymirLabel)
+
+asset.export(Gerd)
+asset.export(GerdTrail)
+asset.export(GerdLabel)
+
+asset.export(S2004S26)
+asset.export(S2004S26Trail)
+asset.export(S2004S26Label)
+
+asset.export(Eggther)
+asset.export(EggtherTrail)
+asset.export(EggtherLabel)
+
+asset.export(Beli)
+asset.export(BeliTrail)
+asset.export(BeliLabel)
+
+asset.export(Gunnlod)
+asset.export(GunnlodTrail)
+asset.export(GunnlodLabel)
+
+asset.export(Thiazzi)
+asset.export(ThiazziTrail)
+asset.export(ThiazziLabel)
+
+asset.export(S2004S34)
+asset.export(S2004S34Trail)
+asset.export(S2004S34Label)
+
+asset.export(Alvaldi)
+asset.export(AlvaldiTrail)
+asset.export(AlvaldiLabel)
+
+asset.export(Geirrod)
+asset.export(GeirrodTrail)
+asset.export(GeirrodLabel)
+
+asset.export(S2004S28)
+asset.export(S2004S28Trail)
+asset.export(S2004S28Label)
+
+asset.export(S2004S21)
+asset.export(S2004S21Trail)
+asset.export(S2004S21Label)
+
+asset.export(S2004S36)
+asset.export(S2004S36Trail)
+asset.export(S2004S36Label)
+
+asset.export(S2004S37)
+asset.export(S2004S37Trail)
+asset.export(S2004S37Label)
+
+asset.export(S2004S39)
+asset.export(S2004S39Trail)
+asset.export(S2004S39Label)
+
 
 
 asset.meta = {

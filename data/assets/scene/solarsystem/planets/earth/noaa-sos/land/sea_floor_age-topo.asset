@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Age of the Seafloor (topography)"
@@ -24,28 +25,29 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_base = {
+
+local LayerBase = {
   Identifier = Identifier,
   Name = Name,
   FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }
 
-local layer_aol = {
+local LayerAol = {
   Identifier = Identifier .. "-aol",
   Name = Name .. " (AOL)",
   FilePath = syncedDirectory .. "4096_aol.png",
   Description = Description
 }
 
-local layer_orig = {
+local LayerOrig = {
   Identifier = Identifier .. "-orig",
   Name = Name .. " (Original)",
   FilePath = syncedDirectory .. "4096_orig.png",
   Description = Description
 }
 
-local colorbar = {
+local Colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
@@ -56,24 +58,25 @@ local colorbar = {
 }
 
 
-asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_aol)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_orig)
-  openspace.addScreenSpaceRenderable(colorbar)
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerAol)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerOrig)
+  openspace.addScreenSpaceRenderable(Colorbar)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_aol)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_orig)
-  openspace.removeScreenSpaceRenderable(colorbar)
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerOrig)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerAol)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
 end)
 
-asset.export(layer_base)
-asset.export(layer_aol)
-asset.export(layer_orig)
-asset.export(colorbar)
+asset.export(LayerBase)
+asset.export(LayerAol)
+asset.export(LayerOrig)
+asset.export(Colorbar)
+
 
 
 asset.meta = {

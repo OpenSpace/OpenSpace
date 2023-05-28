@@ -38,83 +38,83 @@
   ],
   "keybindings": [
     {
-      "action": "os.missions.newhorizons.focus",
+      "action": "os.newhorizons.FocusNewHorizons",
       "key": "A"
     },
     {
-      "action": "os.missions.newhorizons.aimpluto",
+      "action": "os.newhorizons.AimPluto",
       "key": "SHIFT+A"
     },
     {
-      "action": "os.missions.newhorizons.pluto.focus",
+      "action": "os.newhorizons.FocusPluto",
       "key": "S"
     },
     {
-      "action": "os.missions.newhorizons.charon.focus",
+      "action": "os.newhorizons.FocusCharon",
       "key": "D"
     },
     {
-      "action": "os.missions.newhorizons.toggleimageprojection",
+      "action": "os.newhorizons.ToggleImageProjection",
       "key": "F7"
     },
     {
-      "action": "os.missions.newhorizons.clearimageprojections",
+      "action": "os.newhorizons.ClearImageProjections",
       "key": "F8"
     },
     {
-      "action": "os.missions.newhorizons.approach",
+      "action": "os.newhorizons.Approach",
       "key": "F9"
     },
     {
-      "action": "os.missions.newhorizons.pluto.increasehightmap",
+      "action": "os.newhorizons.IncreaseHeightmapPluto",
       "key": "KP_8"
     },
     {
-      "action": "os.missions.newhorizons.pluto.increasehightmap",
+      "action": "os.newhorizons.IncreaseHeightmapPluto",
       "key": "CTRL+I"
     },
     {
-      "action": "os.missions.newhorizons.pluto.decreasehightmap",
+      "action": "os.newhorizons.DecreaseHeightmapPluto",
       "key": "CTRL+K"
     },
     {
-      "action": "os.missions.newhorizons.pluto.decreasehightmap",
+      "action": "os.newhorizons.DecreaseHeightmapPluto",
       "key": "KP_2"
     },
     {
-      "action": "os.missions.newhorizons.charon.increasehightmap",
+      "action": "os.newhorizons.IncreaseHeightmapCharon",
       "key": "KP_9"
     },
     {
-      "action": "os.missions.newhorizons.charon.increasehightmap",
+      "action": "os.newhorizons.IncreaseHeightmapCharon",
       "key": "CTRL+O"
     },
     {
-      "action": "os.missions.newhorizons.charon.decreasehightmap",
+      "action": "os.newhorizons.DecreaseHeightmapCharon",
       "key": "KP_3"
     },
     {
-      "action": "os.missions.newhorizons.charon.decreasehightmap",
+      "action": "os.newhorizons.DecreaseHeightmapCharon",
       "key": "CTRL+L"
     },
     {
-      "action": "os.missions.newhorizons.pluto.toggletrail",
+      "action": "os.newhorizons.TogglePlutoTrail",
       "key": "O"
     },
     {
-      "action": "os.missions.newhorizons.pluto.togglelabels",
+      "action": "os.newhorizons.TogglePlutoLabels",
       "key": "J"
     },
     {
-      "action": "os.missions.newhorizons.togglelabels",
+      "action": "os.newhorizons.ToggleNewHorizonsLabels",
       "key": "I"
     },
     {
-      "action": "os.missions.newhorizons.toggleshadows",
+      "action": "os.newhorizons.ToggleShadows",
       "key": "SHIFT+T"
     },
     {
-      "action": "os.missions.newhorizons.toggletrail",
+      "action": "os.newhorizons.ToggleNewHorizonsTrail",
       "key": "T"
     }
   ],

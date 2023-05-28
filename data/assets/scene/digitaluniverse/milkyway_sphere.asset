@@ -6,7 +6,7 @@ local sphereTextures = asset.syncedResource({
 })
 
 
-local sphere = {
+local Sphere = {
   Identifier = "MilkyWay",
   Transform = {
     Rotation = {
@@ -24,26 +24,27 @@ local sphere = {
     MirrorTexture = true,
     FadeOutThreshold = 0.0015,
     Background = true,
-    DimInAtmosphere = true,
+    DimInAtmosphere = true
   },
-  Tag = {"daytime_hidden"},
+  Tag = { "daytime_hidden" },
   GUI = {
     Name = "Milky Way Sphere",
     Path = "/Milky Way",
     Description = [[All sky image of the Milky Way that is visible when inside. Fades
-      out when zooming away from the Milky Way]],
+      out when zooming away from the Milky Way]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(sphere)
+  openspace.addSceneGraphNode(Sphere)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(sphere)
+  openspace.removeSceneGraphNode(Sphere)
 end)
 
-asset.export(sphere)
+asset.export(Sphere)
 
 
 

@@ -1,5 +1,5 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -24,6 +24,7 @@ local JupiterBarycenterTrail = {
     Path = "/Solar System/Planets/Jupiter"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JupiterBarycenterTrail)

@@ -1,22 +1,25 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local equatorialRotationMatrix = {
+
+
+local EquatorialRotationMatrix = {
     -0.05487554,  0.4941095, -0.8676661,
     -0.8734371,  -0.4448296, -0.1980764,
-    -0.483835,     0.7469823,  0.4559838
+    -0.483835,    0.7469823,  0.4559838
 }
 
-local line = {
+
+local EquatorialLine = {
   Identifier = "EquatorialLine",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 4.28601E17;
-    },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = equatorialRotationMatrix
+      Rotation = EquatorialRotationMatrix
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 4.28601E17
     }
   },
   Renderable = {
@@ -34,42 +37,43 @@ local line = {
   }
 }
 
-local showLineAction = {
-  Identifier = "os.nightsky.show_equatorial_line",
+local ShowEquatorialLine = {
+  Identifier = "os.nightsky.ShowEquatorialLine",
   Name = "Show equatorial line",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Fade', 1.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.EquatorialLine.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.EquatorialLine.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.EquatorialLine.Renderable.Fade", 1.0, 1.0)
   ]],
   Documentation = "Shows the equatorial line",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
 
-local hideLineAction = {
-  Identifier = "os.nightsky.hide_equatorial_line",
+local HideEquatorialLine = {
+  Identifier = "os.nightsky.HideEquatorialLine",
   Name = "Hide equatorial line",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Fade', 0.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.EquatorialLine.Renderable.Fade", 0.0, 1.0)
   ]],
   Documentation = "Hides the equatorial line",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(line)
-  openspace.action.registerAction(showLineAction)
-  openspace.action.registerAction(hideLineAction)
+  openspace.addSceneGraphNode(EquatorialLine)
+  openspace.action.registerAction(ShowEquatorialLine)
+  openspace.action.registerAction(HideEquatorialLine)
 end)
-  
+
 asset.onDeinitialize(function()
-  openspace.action.removeAction(hideLineAction)
-  openspace.action.removeAction(showLineAction)
-  openspace.removeSceneGraphNode(line)
+  openspace.action.removeAction(HideEquatorialLine)
+  openspace.action.removeAction(ShowEquatorialLine)
+  openspace.removeSceneGraphNode(EquatorialLine)
 end)
-  
-asset.export(line)
-asset.export(showLineAction)
-asset.export(hideLineAction)
+
+asset.export(EquatorialLine)
+asset.export("ShowEquatorialLine", ShowEquatorialLine.Identifier)
+asset.export("HideEquatorialLine", HideEquatorialLine.Identifier)

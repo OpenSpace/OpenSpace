@@ -1,11 +1,11 @@
-local spacing = {
+local Spacing = {
   Type = "DashboardItemSpacing",
   Identifier = "OsirisRexSpacing",
   GuiName = "OSIRIS-REx Spacing",
   Spacing = 25
 }
 
-local distance = {
+local Distance = {
   Type = "DashboardItemDistance",
   Identifier = "OsirisRexBennuDistance",
   GuiName = "OSIRIS-REx Bennu Distance",
@@ -15,20 +15,21 @@ local distance = {
   DestinationNodeName = "BennuBarycenter"
 }
 
-local instruments = {
+local Instruments = {
   Type = "DashboardItemInstruments",
   Identifier = "OsirisRexInstruments",
-  GuiName = "OSIRIS-REx Instruments",
+  GuiName = "OSIRIS-REx Instruments"
 }
 
+
 asset.onInitialize(function()
-  openspace.dashboard.addDashboardItem(spacing)
-  openspace.dashboard.addDashboardItem(distance)
-  openspace.dashboard.addDashboardItem(instruments)
+  openspace.dashboard.addDashboardItem(Spacing)
+  openspace.dashboard.addDashboardItem(Distance)
+  openspace.dashboard.addDashboardItem(Instruments)
 end)
 
 asset.onDeinitialize(function()
-  openspace.dashboard.removeDashboardItem(instruments)
-  openspace.dashboard.removeDashboardItem(distance)
-  openspace.dashboard.removeDashboardItem(spacing)
+  openspace.dashboard.removeDashboardItem(Instruments)
+  openspace.dashboard.removeDashboardItem(Distance)
+  openspace.dashboard.removeDashboardItem(Spacing)
 end)

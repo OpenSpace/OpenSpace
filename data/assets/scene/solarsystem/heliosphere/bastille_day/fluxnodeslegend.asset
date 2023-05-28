@@ -1,5 +1,7 @@
 asset.require("spice/base")
 
+
+
 local TexturesPath = asset.syncedResource({
   Type = "HttpSynchronization",
   Name = "Streamnodes textures",
@@ -7,16 +9,18 @@ local TexturesPath = asset.syncedResource({
   Version = 1
 })
 
-local legend = {
+
+local Legend = {
   Identifier = "LegendFluxNodes-bastille-day-2000",
   Type = "ScreenSpaceImageLocal",
   TexturePath = TexturesPath .. "CMR_transparent_white_text.png",
   Scale = 0.15,
-  CartesianPosition = { 0.677970, 0.0, -1.049180 }
+  CartesianPosition = { 0.677970, 0.0, -1.049180 },
+  Rotation = { 0.0, 0.0, 0.56652 }
 }
 
-local toggle_legend = {
-  Identifier = "os.events.bastilleday.fluxnodelegend.togglelegend",
+local ToggleLegend = {
+  Identifier = "os.bastilleday.fluxnodelegend.ToggleLegend",
   Name = "Toggle the legend image",
   Command = [[
     if openspace.getPropertyValue("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled") then
@@ -42,26 +46,41 @@ local toggle_legend = {
   IsLocal = false
 }
 
-local hide_legend = {
-  Identifier = "os.events.bastilleday.fluxnodelegend.hidelegend",
+local HideLegend = {
+  Identifier = "os.bastilleday.fluxnodelegend.HideLegend",
   Name = "Hides the legend image",
-  Command = [[openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade", 0.0, openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"), "Linear", 'openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", false)')]],
+  Command = [[
+    openspace.setPropertyValueSingle(
+      "ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade",
+      0.0,
+      openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+      "Linear",
+      'openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", false)'
+    )
+  ]],
   Documentation = "Hides the legend image",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(legend)
-  -- These numbers are there to put the legend on the side of the screen.
-  openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Rotation", { 0.0, 0.0, 0.56652 });
-  openspace.action.registerAction(toggle_legend)
+  openspace.addScreenSpaceRenderable(Legend)
+  openspace.action.registerAction(ToggleLegend)
+  openspace.action.registerAction(HideLegend)
 end)
 
-asset.onDeinitialize(function ()
-  openspace.removeScreenSpaceRenderable(legend)
-  openspace.action.removeAction(toggle_legend)
+asset.onDeinitialize(function()
+  openspace.action.removeAction(HideLegend)
+  openspace.action.removeAction(ToggleLegend)
+  openspace.removeScreenSpaceRenderable(Legend)
 end)
+
+asset.export(Legend)
+asset.export("ToggleLegend", ToggleLegend.Identifier)
+asset.export("HideLegend", HideLegend.Identifier)
+
+
 
 asset.meta = {
   Name = "Predictive Science Inc. Flux nodes legend for Bastille Days",

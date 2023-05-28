@@ -1,5 +1,7 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
+
+
 
 local modelFolder = asset.syncedResource({
   Name = "Scale Model Arc de Triomphe",
@@ -8,31 +10,33 @@ local modelFolder = asset.syncedResource({
   Version = 1
 })
 
-local scaleModel = {
+
+local Location = { 48.87389, 2.29492 }
+
+local ScaleModel = {
   Identifier = "Scale_ArcDeTriomphe",
   Parent = earthAsset.Earth.Identifier,
-  --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  -- Note: Lat/Lon/Scale values come from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 48.87389,
-      Longitude = 2.29492,
+      Latitude = Location[1],
+      Longitude = Location[2],
       Altitude = 0.0,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 48.87389,
-      Longitude = 2.29492,
-      UseHeightmap = false
+      Latitude = Location[1],
+      Longitude = Location[2]
     }
   },
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = modelFolder .. "Fr_arch_OBJ.osmodel",
-    LightSources = { sunAsset.LightSource },
+    LightSources = { sunAsset.LightSource }
   },
   GUI = {
     Name = "Arc de Triomphe",
@@ -40,40 +44,42 @@ local scaleModel = {
   }
 }
 
-local updatePositionAction = {
-  Identifier = "os.scale_models.drop_arc_de_triomphe",
+local UpdatePositionAction = {
+  Identifier = "os.scalemodels.DropArcDeTriomphe",
   Name = "Drop Arc de Triomphe under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_ArcDeTriomphe')
+    openspace.globebrowsing.setNodePositionFromCamera("Scale_ArcDeTriomphe")
   ]],
   Documentation = "Updates the Arc de Triomphe position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
-local resetPositionAction = {
-  Identifier = "os.scale_models.reset_arc_de_triomphe",
+local ResetPositionAction = {
+  Identifier = "os.scalemodels.ResetArcDeTriomphe",
   Name = "Reset Arc de Triomphe position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_ArcDeTriomphe', ']] .. earthAsset.Earth.Identifier .. [[', 48.87389, 2.29492)
-  ]],
-  Documentation = "Resets the Arc de Triomphe back to it's actual location",
+    openspace.globebrowsing.setNodePosition("Scale_ArcDeTriomphe", "]] .. earthAsset.Earth.Identifier .. [[", ]] .. Location[1] .. "," .. Location[2] .. ")",
+  Documentation = "Resets the Arc de Triomphe back to its actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(scaleModel)
-  openspace.action.registerAction(updatePositionAction)
-  openspace.action.registerAction(resetPositionAction)
+  openspace.addSceneGraphNode(ScaleModel)
+
+  openspace.action.registerAction(UpdatePositionAction)
+  openspace.action.registerAction(ResetPositionAction)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(resetPositionAction)
-  openspace.action.removeAction(updatePositionAction)
-  openspace.removeSceneGraphNode(scaleModel)
+  openspace.action.removeAction(ResetPositionAction)
+  openspace.action.removeAction(UpdatePositionAction)
+
+  openspace.removeSceneGraphNode(ScaleModel)
 end)
 
-asset.export(scaleModel)
-asset.export(updatePositionAction)
-asset.export(resetPositionAction)
+asset.export(ScaleModel)
+asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
+asset.export("ResetPositionAction", ResetPositionAction.Identifier)

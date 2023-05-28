@@ -13,19 +13,19 @@ local bookmarksCSV = asset.syncedResource({
 
 local nodes = {}
 
-asset.onInitialize(function ()
-  nodes = bookmarkHelper.getBookmarks("OpenSpace Bookmarks", bookmarksCSV .. "bookmarks.csv")
+asset.onInitialize(function()
+  nodes = bookmarkHelper.loadBookmarks("OpenSpace Bookmarks", bookmarksCSV .. "bookmarks.csv")
   for _, n in ipairs(nodes) do
-    openspace.addSceneGraphNode(n);
+    openspace.addSceneGraphNode(n)
   end
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   for _, n in ipairs(nodes) do
-    openspace.removeSceneGraphNode(n);
+    openspace.removeSceneGraphNode(n)
   end
 end)
 
 for _, n in ipairs(nodes) do
-  asset.export(n);
+  asset.export(n)
 end

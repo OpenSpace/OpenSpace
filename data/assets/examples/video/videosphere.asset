@@ -5,22 +5,15 @@ local data = asset.syncedResource({
   Url = "http://liu-se.cdn.openspaceproject.com/files/examples/video/test-video.mp4"
 })
 
-local sphere = {
+
+local Sphere = {
   Identifier = "ExampleVideoOnSphere",
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0, 0, 0 }
-    }
-  },
   Renderable = {
     Type = "RenderableVideoSphere",
-    Enabled = true,
     Size = 100.0,
     Segments = 80,
-    Opacity = 1,
-    Video = data .. "/test-video.mp4",
-    Orientation = "Both",
+    Video = data .. "test-video.mp4",
+    Orientation = "Both"
   },
   GUI = {
     Name = "Video Sphere",
@@ -28,15 +21,18 @@ local sphere = {
   }
 }
 
+
 asset.onInitialize(function()
-    openspace.addSceneGraphNode(sphere)
+    openspace.addSceneGraphNode(Sphere)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(sphere)
+  openspace.removeSceneGraphNode(Sphere)
 end)
 
-asset.export(sphere)
+asset.export(Sphere)
+
+
 
 asset.meta = {
   Name = "Video Player on Sphere",

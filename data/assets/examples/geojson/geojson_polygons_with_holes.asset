@@ -1,5 +1,6 @@
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
-local earthIdentifier = earth.Earth.Identifier
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+
 
 local data = asset.syncedResource({
   Name = "GeoJSON Example Polygon with holes",
@@ -8,7 +9,8 @@ local data = asset.syncedResource({
   Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_with_holes.geojson"
 })
 
-local Example_Holes = {
+
+local ExampleHoles = {
   Identifier = "PolygonWithHoles",
   File = data .. "polygon_with_holes.geojson",
   HeightOffset = 2000.0,
@@ -18,15 +20,17 @@ local Example_Holes = {
   Name = "Example Polygon (holes)"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Holes)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExampleHoles)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Holes)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExampleHoles)
 end)
 
-asset.export(Example_Holes)
+asset.export(ExampleHoles)
+
 
 
 asset.meta = {

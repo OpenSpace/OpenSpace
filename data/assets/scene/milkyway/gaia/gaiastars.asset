@@ -4,7 +4,8 @@ if string.find(fullOS, "Darwin") then
   return
 end
 
--- Download a preprocessed binary octree of Radial Velocity subset values per star (preprocessed into 8 binary files).
+-- Download a preprocessed binary octree of Radial Velocity subset values per star
+-- (preprocessed into 8 binary files).
 local starsFolder = asset.syncedResource({
   Name = "Gaia Stars RV",
   Type = "HttpSynchronization",
@@ -25,6 +26,7 @@ local textures = asset.syncedResource({
   Identifier = "stars_textures",
   Version = 1
 })
+
 
 local GaiaStars = {
   Identifier = "GaiaStars",
@@ -53,7 +55,7 @@ local GaiaStars = {
     FilterPosZ = { 0.0, 0.0 },
     FilterGMag = { 20.0, 20.0 },
     FilterBpRp = { 0.0, 0.0 },
-    FilterDist = { 9.0, 9.0 },
+    FilterDist = { 9.0, 9.0 }
   },
   GUI = {
     Name = "Gaia Stars",
@@ -61,6 +63,7 @@ local GaiaStars = {
     Description = "Radial Velocity subset of GaiaDR2"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GaiaStars)

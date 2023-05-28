@@ -1,44 +1,44 @@
 -- Function that returns the string that inverts the fully qualified boolean property 'property'
-local invert = function(prop)
-  local escaped_property = '"' .. prop .. '"'
-  return "openspace.setPropertyValueSingle(" .. escaped_property .. ", not openspace.getPropertyValue(" .. escaped_property .. "));"
+function invert(prop)
+  local escaped_property = [["]] .. prop .. [["]]
+  return "openspace.setPropertyValueSingle(" .. escaped_property .. ", not openspace.getPropertyValue(" .. escaped_property .. "))"
 end
 
 -- Function that returns the string that increments the 'property' by the 'value'
-local increment = function(prop, value)
+function increment(prop, value)
   local v = value or 1
-  local escaped_property = '"' .. prop .. '"'
-  return "openspace.setPropertyValueSingle(" .. escaped_property .. ", openspace.getPropertyValue(" .. escaped_property .. ") + " .. v .. ");"
+  local escaped_property = [["]] .. prop .. [["]]
+  return "openspace.setPropertyValueSingle(" .. escaped_property .. ", openspace.getPropertyValue(" .. escaped_property .. ") + " .. v .. ")"
 end
 
 -- Function that returns the string that decrements the 'property' by the 'value'
-local decrement = function(prop, value)
+function decrement(prop, value)
   return increment(prop, -value)
 end
 
-local fade = function(prop, value, duration)
+function fade(prop, value, duration)
   assert(type(prop) == "string", "prop must be a number")
   assert(type(duration) == "number", "duration must be a number")
 
-  local escaped_property = '"' .. prop .. '"'
+  local escaped_property = [["]] .. prop .. [["]]
   return "openspace.setPropertyValueSingle(" .. escaped_property ..", " .. tostring(value) .. ", " .. tostring(duration) .. ")"
 end
 
-local fadeOut = function(prop, duration)
+function fadeOut(prop, duration)
   return fade(prop, 0.0, duration)
 end
 
-local fadeIn = function(prop, duration)
+function fadeIn(prop, duration)
   return fade(prop, 1.0, duration)
 end
 
-local fadeInOut = function(prop, duration)
+function fadeInOut(prop, duration)
   assert(type(prop) == "string", "prop must be a number")
   assert(type(duration) == "number", "duration must be a number")
 
-  local escaped_property = '"' .. prop .. '"'
+  local escaped_property = [["]] .. prop .. [["]]
   -- If the value is > 0.5 fade out, otherwise fade in
-  return "local v = openspace.getPropertyValue(" .. escaped_property .. "); if v <= 0.5 then " .. fadeIn(prop, duration) .. " else " .. fadeOut(prop, duration) .. " end"
+  return "local v = openspace.getPropertyValue(" .. escaped_property .. ") if v <= 0.5 then " .. fadeIn(prop, duration) .. " else " .. fadeOut(prop, duration) .. " end"
 end
 
 asset.export("invert", invert)

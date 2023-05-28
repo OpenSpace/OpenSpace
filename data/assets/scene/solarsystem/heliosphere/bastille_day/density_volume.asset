@@ -2,6 +2,8 @@ local propertyHelper = asset.require("util/property_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
+
+
 local densityDirectory = asset.syncedResource({
   Name = "Bastille Day MAS Density",
   Type = "HttpSynchronization",
@@ -9,24 +11,25 @@ local densityDirectory = asset.syncedResource({
   Version = 1
 })
 
-local sunRadius = 6.957E8
 
-local densityVolume = {
+local SunRadius = 6.957E8
+
+local DensityVolume = {
   Identifier = "MAS-MHD-Density-bastille-day-2000",
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
-  InteractionSphere = 1/695700000,
+  InteractionSphere = 1 / 695700000,
   Parent = sunTransforms.SunIAU.Identifier,
   Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = sunRadius
-    },
     Rotation = {
       Type = "FixedRotation",
       XAxis = { -1.0, 0.0, 0.0 },
       YAxis = { 0.0, 1.0, 0.0 },
       ZAxis = { 0.0, 0.0, -1.0 }
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = SunRadius
     }
   },
   Renderable = {
@@ -36,20 +39,21 @@ local densityVolume = {
     TransferFunction = asset.localResource("transferfunctions/mas-mhd-r-squared-old.txt"),
     SourceDirectory = densityDirectory,
     GridType = "Spherical",
-    SecondsBefore = 24*60*60,
-    SecondsAfter = 24*60*60,
+    SecondsBefore = 24 * 60 * 60,
+    SecondsAfter = 24 * 60 * 60,
     Dimensions = { 100, 100, 128 },
     InvertDataAtZ = true
   },
   GUI = {
     Name = "MAS Density",
     Path = "/Solar System/Heliosphere/Bastille Day 2000",
-    Description = "Volumetric rendering for the bastille day CME event. This asset contain data from 2000-07-14 08:33 to 2000-07-14 11:49"
+    Description = [[Volumetric rendering for the bastille day CME event. This asset
+      contain data from 2000-07-14 08:33 to 2000-07-14 11:49]]
   }
 }
 
-local toggle_volume = {
-  Identifier = "os.events.bastilleday.densityvolume.togglevolume",
+local ToggleVolume = {
+  Identifier = "os.bastilleday.densityvolume.ToggleVolume",
   Name = "Toggle volume",
   Command = [[
     if openspace.getPropertyValue("Scene.MAS-MHD-Density-bastille-day-2000.Renderable.Enabled") then
@@ -75,17 +79,20 @@ local toggle_volume = {
   IsLocal = false
 }
 
-asset.onInitialize(function ()
-  openspace.action.registerAction(toggle_volume)
-  openspace.addSceneGraphNode(densityVolume)
+
+asset.onInitialize(function()
+  openspace.action.registerAction(ToggleVolume)
+  openspace.addSceneGraphNode(DensityVolume)
 end)
 
-asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(densityVolume)
-  openspace.action.removeAction(toggle_volume)
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DensityVolume)
+  openspace.action.removeAction(ToggleVolume)
 end)
 
-asset.export(densityVolume)
+asset.export(DensityVolume)
+asset.export("ToggleVolume", ToggleVolume.Identifier)
+
 
 
 asset.meta = {

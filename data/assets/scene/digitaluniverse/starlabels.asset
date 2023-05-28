@@ -5,7 +5,8 @@ local speck = asset.syncedResource({
   Version = 2
 })
 
-local object = {
+
+local Object = {
   Identifier = "StarsLabels",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -29,15 +30,16 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

@@ -2,6 +2,8 @@ asset.require("scene/solarsystem/missions/dawn/mission")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
+
+
 local kernels = asset.syncedResource({
   Name = "Dawn Kernels",
   Type = "HttpSynchronization",
@@ -22,6 +24,7 @@ local models = asset.syncedResource({
   Identifier = "dawn_model",
   Version = 2
 })
+
 
 local KernelFiles = {
   kernels .. "dawn_ref_070926-150201_070829.bsp",
@@ -63,7 +66,7 @@ local KernelFiles = {
   kernels .. "dawn_sa_070927_070930.bc",
   -- kernels .. "dawn_sa_110801_110807.bc",
   -- kernels .. "dawn_sa_110808_110814.bc",
-  -- kernels .. "dawn_sa_120910_120916.bc",
+  -- kernels .. "dawn_sa_120910_120916.bc"
 }
 
 local LightSources = {
@@ -82,13 +85,12 @@ local DawnPosition = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "DAWN",
-      Observer = "SSB",
-      Kernels = KernelFiles
+      Observer = "SSB"
     },
     -- Rotation for model version 2
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { math.pi/2.0, 0.0, math.pi/2.0 }
+      Rotation = { math.pi / 2.0, 0.0, math.pi / 2.0 }
     }
   },
   GUI = {
@@ -105,8 +107,7 @@ local Dawn = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "DAWN_SPACECRAFT",
-      DestinationFrame = "GALACTIC",
-      Kernels = KernelFiles
+      DestinationFrame = "GALACTIC"
     }
   },
   Renderable = {
@@ -151,13 +152,13 @@ local DawnFramingCamera1 = {
   Identifier = "Dawn_framing_camera_1",
   Parent = Dawn.Identifier,
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "DAWN",
+    Type = "RenderableFov",
+    Body = "DAWN",
     Frame = "DAWN_SPACECRAFT",
     Color = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "DAWN_FC1",
-      Method     = "ELLIPSOID",
+      Name = "DAWN_FC1",
+      Method = "ELLIPSOID",
       Aberration = "NONE"
     },
     PotentialTargets = { "VESTA", "CERES" }
@@ -172,13 +173,13 @@ local DawnFramingCamera2 = {
   Identifier = "Dawn_framing_camera_2",
   Parent = Dawn.Identifier,
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "DAWN",
+    Type = "RenderableFov",
+    Body = "DAWN",
     Frame = "DAWN_SPACECRAFT",
     Color = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "DAWN_FC2",
-      Method     = "ELLIPSOID",
+      Name = "DAWN_FC2",
+      Method = "ELLIPSOID",
       Aberration = "NONE"
     },
     PotentialTargets = { "VESTA", "CERES" }
@@ -189,30 +190,34 @@ local DawnFramingCamera2 = {
   }
 }
 
-local nodes = {
-  DawnPosition,
-  Dawn,
-  DawnTrail,
-  DawnFramingCamera1,
-  DawnFramingCamera2
-}
 
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(KernelFiles)
+
+  openspace.addSceneGraphNode(DawnPosition)
+  openspace.addSceneGraphNode(Dawn)
+  openspace.addSceneGraphNode(DawnTrail)
+  openspace.addSceneGraphNode(DawnFramingCamera1)
+  openspace.addSceneGraphNode(DawnFramingCamera2)
 end)
 
 asset.onDeinitialize(function()
-  for i = #nodes, 1, -1 do
-    local node = nodes[i]
-    openspace.removeSceneGraphNode(node)
-  end
+  openspace.removeSceneGraphNode(DawnFramingCamera2)
+  openspace.removeSceneGraphNode(DawnFramingCamera1)
+  openspace.removeSceneGraphNode(DawnTrail)
+  openspace.removeSceneGraphNode(Dawn)
+  openspace.removeSceneGraphNode(DawnPosition)
+
+  openspace.spice.unloadKernel(KernelFiles)
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(DawnPosition)
+asset.export(Dawn)
+asset.export(DawnTrail)
+asset.export(DawnFramingCamera1)
+asset.export(DawnFramingCamera2)
+
+
 
 asset.meta = {
   Name = "Dawn",

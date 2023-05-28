@@ -1,11 +1,14 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+
 local trajectory = asset.syncedResource({
   Name = "'Oumuamua Trajectory",
   Type = "HttpSynchronization",
   Identifier = "oumuamua_horizons",
   Version = 3
 })
+
 
 local OumuamuaTrail = {
   Identifier = "OumuamuaTrail",
@@ -31,7 +34,7 @@ local OumuamuaTrail = {
     Name = "'Oumuamua Trail",
     Path = "/Solar System/Interstellar",
     Description = [[Trail of 'Oumuamua from 2014 JAN 01 00:00:00 to 2050 JAN 01 00:00:00.
-      Data from JPL Horizons]],
+      Data from JPL Horizons]]
   }
 }
 
@@ -42,15 +45,16 @@ local OumuamuaPosition = {
     Translation = {
       Type = "HorizonsTranslation",
       HorizonsTextFile = trajectory .. "horizons_oumuamua.hrz"
-    },
+    }
   },
   GUI = {
     Name = "'Oumuamua",
     Path = "/Solar System/Interstellar",
     Description = [[Position of 'Oumuamua from 2014 JAN 01 00:00:00 to 2050 JAN 01
-      00:00:00. Data from JPL Horizons]],
+      00:00:00. Data from JPL Horizons]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(OumuamuaPosition)

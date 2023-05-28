@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "PALEOMAP PaleoAtlas 0 - 750 Million Years Ago"
@@ -24,6 +25,7 @@ local syncedDirectory = asset.syncedResource({
   Version = 1,
   UnzipFiles = true
 })
+
 
 local imagesDestination = syncedDirectory .. "3600"
 
@@ -126,14 +128,14 @@ for i,v in ipairs(layers_names) do
     Identifier = Identifier .. "-" .. v,
     Name = Name .. " " .. v,
     Enabled = asset.enabled,
-    FilePath = imagesDestination .. '/' .. v .. ".jpg",
+    FilePath = imagesDestination .. "/" .. v .. ".jpg",
     Description = Description
   }
 
   table.insert(layers, layer)
 end
 
-local legend = {
+local Legend = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -144,25 +146,28 @@ local legend = {
   CartesianPosition = { 0.85, 0.0, -2.0 }
 }
 
+
 asset.onInitialize(function()
   for i,v in ipairs(layers) do
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", v)
+    openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", v)
   end
 
-  openspace.addScreenSpaceRenderable(legend)
+  openspace.addScreenSpaceRenderable(Legend)
 end)
 
 asset.onDeinitialize(function()
   for i,v in ipairs(layers) do
-    openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", v)
+    openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", v)
   end
 
-  openspace.removeScreenSpaceRenderable(legend)
+  openspace.removeScreenSpaceRenderable(Legend)
 end)
 
 for _,v in ipairs(layers) do
   asset.export(v)
 end
+
+
 
 asset.meta = {
   Name = Name,

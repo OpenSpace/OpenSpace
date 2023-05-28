@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Paleoclimate Proxies"
@@ -24,49 +25,50 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_base = {
+
+local LayerBase = {
   Identifier = Identifier,
   Name = Name,
   FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }
 
-local layer_corals = {
+local LayerCorals = {
   Identifier = Identifier .. "-corals",
   Name = Name .. " (Corals)",
   FilePath = syncedDirectory .. "corals.png",
   Description = Description
 }
 
-local layer_icerings = {
+local LayerIcerings = {
   Identifier = Identifier .. "-icerings",
   Name = Name .. " (Icerings)",
   FilePath = syncedDirectory .. "icerings.png",
   Description = Description
 }
 
-local layer_ocean = {
+local LayerOcean = {
   Identifier = Identifier .. "-ocean",
   Name = Name .. " (Ocean)",
   FilePath = syncedDirectory .. "ocean.png",
   Description = Description
 }
 
-local layer_speleothem = {
+local LayerSpeleothem = {
   Identifier = Identifier .. "-speleothem",
   Name = Name .. " (Speleothem)",
   FilePath = syncedDirectory .. "speleothem.png",
   Description = Description
 }
 
-local layer_tree_rings = {
+local LayerTreeRings = {
   Identifier = Identifier .. "-tree_rings",
   Name = Name .. " (Tree Rings)",
   FilePath = syncedDirectory .. "tree_rings.png",
   Description = Description
 }
 
-local legend = {
+local Legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
@@ -77,33 +79,35 @@ local legend = {
 }
 
 
-asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_corals)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_icerings)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_ocean)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_speleothem)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_tree_rings)
-  openspace.addScreenSpaceRenderable(legend)
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerCorals)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerIcerings)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerOcean)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerSpeleothem)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerTreeRings)
+  openspace.addScreenSpaceRenderable(Legend)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_corals)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_icerings)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_ocean)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_speleothem)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_tree_rings)
-  openspace.removeScreenSpaceRenderable(legend)
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerTreeRings)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerSpeleothem)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerOcean)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerIcerings)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerCorals)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
 end)
 
-asset.export(layer_base)
-asset.export(layer_corals)
-asset.export(layer_icerings)
-asset.export(layer_ocean)
-asset.export(layer_speleothem)
-asset.export(layer_tree_rings)
-asset.export(legend)
+asset.export(LayerBase)
+asset.export(LayerCorals)
+asset.export(LayerIcerings)
+asset.export(LayerOcean)
+asset.export(LayerSpeleothem)
+asset.export(LayerTreeRings)
+asset.export(Legend)
+
+
 
 asset.meta = {
   Name = Name,

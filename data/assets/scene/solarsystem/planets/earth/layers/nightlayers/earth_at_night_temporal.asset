@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
-local layer =  {
+
+
+local Layer = {
   Identifier = "Earth_at_Night_Temporal",
   Name = "Earth at Night (Temporal)",
   Enabled = asset.enabled,
@@ -36,18 +38,19 @@ local layer =  {
     available from the Visible Infrared Imaging Radiometer Suite (VIIRS) on the joint
     NASA/NOAA Suomi National Polar orbiting Partnership (Suomi NPP) satellite.
     The sensor resolution is 750 m at nadir, imagery resolution is 500 m, and the
-    temporal resolution is daily. (Description from NASA Worldview)]],
+    temporal resolution is daily. (Description from NASA Worldview)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "NightLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "NightLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "NightLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "NightLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

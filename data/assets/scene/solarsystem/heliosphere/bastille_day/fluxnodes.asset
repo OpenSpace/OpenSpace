@@ -1,6 +1,8 @@
 local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 local propertyHelper = asset.require("util/property_helper")
-local rot = asset.require("./carringtonToHEEQRotation.asset")
+local rot = asset.require("./carrington_to_heeq_rotation")
+
+
 
 local fluxNodesBinaries = asset.syncedResource({
   Name = "Bastille day Flux nodes binaries",
@@ -9,8 +11,9 @@ local fluxNodesBinaries = asset.syncedResource({
   Version = 1
 })
 
+
 -- FluxNodes from binaries
-local fluxNodes = {
+local Fluxnodes = {
   Identifier = "MAS-MHD-FluxNodes-bastille-day-2000",
   Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
@@ -23,17 +26,18 @@ local fluxNodes = {
     Type = "RenderableFluxNodes",
     SourceFolder = fluxNodesBinaries,
     ColorTablePath = asset.localResource("transferfunctions/CMR.txt"),
-    ColorTableRange = {-2.0, 4.0}
+    ColorTableRange = { -2.0, 4.0 }
   },
   GUI = {
     Path = "/Solar System/Heliosphere/Bastille Day 2000",
     Name = "Flux Nodes",
-    Description = "Flux nodes for the bastille day CME event. This asset contains data from 2000-07-14 08:38 to 2000-07-14 19:48"
+    Description = [[Flux nodes for the bastille day CME event. This asset contains data
+      from 2000-07-14 08:38 to 2000-07-14 19:48]]
   }
 }
 
-local toggle_fluxnodes = {
-  Identifier = "os.events.bastilleday.fluxnodes.togglefluxnodes",
+local ToggleFluxnodes = {
+  Identifier = "os.bastilleday.fluxnodes.ToggleFluxnodes",
   Name = "Toggle flux nodes",
   Command = [[
     if openspace.getPropertyValue("Scene.MAS-MHD-FluxNodes-bastille-day-2000.Renderable.Enabled") then
@@ -59,17 +63,20 @@ local toggle_fluxnodes = {
   IsLocal = false
 }
 
-asset.onInitialize(function ()
-  openspace.action.registerAction(toggle_fluxnodes)
-  openspace.addSceneGraphNode(fluxNodes)
+
+asset.onInitialize(function()
+  openspace.action.registerAction(ToggleFluxnodes)
+  openspace.addSceneGraphNode(Fluxnodes)
 end)
 
-asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(fluxNodes)
-  openspace.action.removeAction(toggle_fluxnodes)
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Fluxnodes)
+  openspace.action.removeAction(ToggleFluxnodes)
 end)
 
-asset.export(fluxNodes)
+asset.export(Fluxnodes)
+asset.export("ToggleFluxnodes", ToggleFluxnodes.Identifier)
+
 
 
 asset.meta = {

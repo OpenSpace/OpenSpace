@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Species Richness - Mammals"
@@ -21,21 +22,22 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_8192 = {
+
+local Layer8192 = {
   Identifier = Identifier,
   Name = Name,
   FilePath = syncedDirectory .. "8192.png",
   Description = Description
 }
 
-local layer_with_background = {
+local LayerWithBackground = {
   Identifier = Identifier .. "-background",
   Name = Name .. " (w/ Background)",
   FilePath = syncedDirectory .. "4096-background.png",
   Description = Description
 }
 
-local labels = {
+local Labels = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
@@ -44,21 +46,23 @@ local labels = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_8192)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_with_background)
-  openspace.addScreenSpaceRenderable(labels);
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer8192)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerWithBackground)
+  openspace.addScreenSpaceRenderable(Labels)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_8192)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_with_background)
-  openspace.removeScreenSpaceRenderable(labels);
+  openspace.removeScreenSpaceRenderable(Labels)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerWithBackground)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer8192)
 end)
 
-asset.export(layer_8192)
-asset.export(layer_with_background)
-asset.export(labels)
+asset.export(Layer8192)
+asset.export(LayerWithBackground)
+asset.export(Labels)
+
 
 
 asset.meta = {

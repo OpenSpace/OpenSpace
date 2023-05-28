@@ -1,22 +1,27 @@
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "ExampleVideoLocal",
-  Video = asset.localResource("./examplevideo.mp4"),
-  Name = "Example Video Local",
+  Type = "VideoTileLayer",
   Enabled = true,
-  Type = "VideoTileLayer"
+  Video = asset.localResource("examplevideo.mp4"),
+  Name = "Example Video Local"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(earth.Earth.Identifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(earth.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(earth.Earth.Identifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(earth.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
+
+
 
 asset.meta = {
   Name = "Video Player Test",

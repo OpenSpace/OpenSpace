@@ -1,6 +1,8 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("scene/solarsystem/sun/sun")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local circle = asset.syncedResource({
   Name = "Circle",
@@ -16,21 +18,23 @@ local kernels = asset.syncedResource({
   Version = 2
 })
 
+
+local L2 = 392
+
 local L2Position = {
   Identifier = "L2Position",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = 392, -- L2
-      Observer = "SSB",
-      Kernels = kernels .. "L2_de431.bsp"
+      Target = L2,
+      Observer = "SSB"
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
   GUI = {
     Name = "L2 Position",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
     Hidden = true
   }
 }
@@ -44,17 +48,13 @@ local L2CoRevFrame = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "L2_COREV",
-      DestinationFrame = 'GALACTIC',
-      Kernels = {
-        kernels .. "L2_de431.bsp",
-        kernels .. "L2_corev.tf"
-      }
+      DestinationFrame = "GALACTIC"
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
   GUI = {
     Name = "L2 Co-revolving Reference Frame",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
     Hidden = true
   }
 }
@@ -65,14 +65,14 @@ local L2Small = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Billboard = true,
-    Size = 400E4,
+    Size = 4000000,
     Texture = circle .. "circle.png",
     BlendMode = "Additive"
   },
   Tag = { "lagrange_points_earth_l2_small" },
   GUI = {
     Name = "L2 Small",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Path = "/Solar System/Planets/Earth/Lagrange Points"
   }
 }
 
@@ -82,14 +82,14 @@ local L2 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Billboard = true,
-    Size = 700E5,
+    Size = 70000000,
     Texture = circle .. "circle.png",
     BlendMode = "Additive"
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
   GUI = {
     Name = "L2",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Path = "/Solar System/Planets/Earth/Lagrange Points"
   }
 }
 
@@ -109,7 +109,7 @@ local L2SmallLabel = {
   Tag = { "lagrange_points_earth_l2_small" },
   GUI = {
     Name = "L2 Small Label",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
     Description = "Small label for L2"
   }
 }
@@ -122,7 +122,7 @@ local L2Label = {
     Text = "L2",
     FontSize = 50,
     Size = 7.5,
-    MinMaxSize = { 1.0, 100.0},
+    MinMaxSize = { 1.0, 100.0 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Normal",
     EnableFading = false
@@ -130,7 +130,7 @@ local L2Label = {
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
   GUI = {
     Name = "L2 Label",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
     Description = "Main label for L2"
   }
 }
@@ -148,35 +148,45 @@ local L2SunLine = {
   Tag = { "lagrange_points_earth_l2_small" },
   GUI = {
     Name = "Sun to L2 Line",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Path = "/Solar System/Planets/Earth/Lagrange Points"
   }
 }
 
-local nodes = {
-  L2Position,
-  L2CoRevFrame,
-  L2Small,
-  L2,
-  L2SunLine,
-  L2SmallLabel,
-  L2Label
-}
 
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernels .. "L2_de431.bsp")
+  openspace.spice.loadKernel(kernels .. "L2_corev.tf")
+
+  openspace.addSceneGraphNode(L2Position)
+  openspace.addSceneGraphNode(L2CoRevFrame)
+  openspace.addSceneGraphNode(L2Small)
+  openspace.addSceneGraphNode(L2)
+  openspace.addSceneGraphNode(L2SunLine)
+  openspace.addSceneGraphNode(L2SmallLabel)
+  openspace.addSceneGraphNode(L2Label)
 end)
 
 asset.onDeinitialize(function()
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.removeSceneGraphNode(L2Label)
+  openspace.removeSceneGraphNode(L2SmallLabel)
+  openspace.removeSceneGraphNode(L2SunLine)
+  openspace.removeSceneGraphNode(L2)
+  openspace.removeSceneGraphNode(L2Small)
+  openspace.removeSceneGraphNode(L2CoRevFrame)
+  openspace.removeSceneGraphNode(L2Position)
+
+  openspace.spice.unloadKernel(kernels .. "L2_corev.tf")
+  openspace.spice.unloadKernel(kernels .. "L2_de431.bsp")
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(L2Position)
+asset.export(L2CoRevFrame)
+asset.export(L2Small)
+asset.export(L2)
+asset.export(L2SunLine)
+asset.export(L2SmallLabel)
+asset.export(L2Label)
+
 
 
 asset.meta = {

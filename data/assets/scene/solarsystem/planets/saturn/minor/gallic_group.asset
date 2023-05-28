@@ -1,148 +1,395 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat452
+local kernel = asset.require("../kernels")
 
 
 
-local parentIdentifier = transforms.SaturnBarycenter.Identifier
-local parentSpice = "SATURN BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_gallic", "moon_minor", "moon_minor_saturn" }
-local trailColor = { 0.5, 0.3, 0.3 }
-local trailTags = {
-  "moonTrail_solarSystem",
-  "moonTrail_giants",
-  "moonTrail_saturn",
-  "moonTrail_minor",
-  "moonTrail_minor_saturn"
-}
-
-local gallicGroup = {
-  {
-    Identifier = "Albiorix",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "ALBIORIX",
-    Radii = { 32000, 32000, 32000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 774.58,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Bebhionn",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "BEBHIONN",
-    Radii = { 6000, 6000, 6000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 838.77,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Erriapus",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "ERRIAPUS",
-    Radii = { 10000, 10000, 10000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 844.89,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Tarvos",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "TARVOS",
-    Radii = { 15000, 15000, 15000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 944.23,
-    Kernels = kernel
-  }
-}
-
--- Generate all moon labels
-local moon_labels = {}
-
-for i, moon in ipairs(gallicGroup) do
-  local moonName = moon.GUI.Name or moon.Identifier
-  moon_labels[i] = {
-    Identifier = moon.Identifier .. "Label",
-    Parent = moon.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabel",
-      Text = moonName,
-      FontSize = 70.0,
-      Size = 7.1,
-      MinMaxSize = { 1, 25 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Additive",
-      EnableFading = true,
-      FadeUnit = "Gm",
-      FadeDistances = { 1.25, 90.0 },
-      FadeWidths = { 0.25, 90.0 }
-    },
-    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
-    GUI = {
-      Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/" .. moon.Identifier,
-      Description = "Label for Saturn's moon " .. moonName .. " (Gallic group)"
+local Albiorix = {
+  Identifier = "Albiorix",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ALBIORIX",
+      Observer = "SATURN BARYCENTER"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 32000, 32000, 32000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_gallic",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Albiorix",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix"
   }
-end
+}
 
-local nodes = proceduralGlobes.createGlobes(gallicGroup)
+local AlbiorixTrail = {
+  Identifier = "AlbiorixTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ALBIORIX",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 774.58,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Albiorix Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix"
+  }
+}
+
+local AlbiorixLabel = {
+  Identifier = "AlbiorixLabel",
+  Parent = Albiorix.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Albiorix",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Albiorix Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix",
+    Description = "Label for Saturn's moon Albiorix (Gallic group)"
+  }
+}
+
+local Bebhionn = {
+  Identifier = "Bebhionn",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "BEBHIONN",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_gallic",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Bebhionn",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn"
+  }
+}
+
+local BebhionnTrail = {
+  Identifier = "BebhionnTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "BEBHIONN",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 838.77,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Bebhionn Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn"
+  }
+}
+
+local BebhionnLabel = {
+  Identifier = "BebhionnLabel",
+  Parent = Bebhionn.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Bebhionn",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Bebhionn Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn",
+    Description = "Label for Saturn's moon Bebhionn (Gallic group)"
+  }
+}
+
+local Erriapus = {
+  Identifier = "Erriapus",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ERRIAPUS",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 10000, 10000, 10000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_gallic",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Erriapus",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus"
+  }
+}
+
+local ErriapusTrail = {
+  Identifier = "ErriapusTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ERRIAPUS",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 844.89,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Erriapus Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus"
+  }
+}
+
+local ErriapusLabel = {
+  Identifier = "ErriapusLabel",
+  Parent = Erriapus.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Erriapus",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Erriapus Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus",
+    Description = "Label for Saturn's moon Erriapus (Gallic group)"
+  }
+}
+
+local Tarvos = {
+  Identifier = "Tarvos",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "TARVOS",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 15000, 15000, 15000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_gallic",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Tarvos",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos"
+  }
+}
+
+local TarvosTrail = {
+  Identifier = "TarvosTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "TARVOS",
+      Observer = "SATURN BARYCENTER"
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 944.23,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Tarvos Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos"
+  }
+}
+
+local TarvosLabel = {
+  Identifier = "TarvosLabel",
+  Parent = Tarvos.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Tarvos",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Tarvos Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos",
+    Description = "Label for Saturn's moon Tarvos (Gallic group)"
+  }
+}
+
 
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernel.sat452)
 
-  for _, moon in ipairs(moon_labels) do
-    openspace.addSceneGraphNode(moon)
-  end
+
+  openspace.addSceneGraphNode(Albiorix)
+  openspace.addSceneGraphNode(AlbiorixTrail)
+  openspace.addSceneGraphNode(AlbiorixLabel)
+
+  openspace.addSceneGraphNode(Bebhionn)
+  openspace.addSceneGraphNode(BebhionnTrail)
+  openspace.addSceneGraphNode(BebhionnLabel)
+
+  openspace.addSceneGraphNode(Erriapus)
+  openspace.addSceneGraphNode(ErriapusTrail)
+  openspace.addSceneGraphNode(ErriapusLabel)
+
+  openspace.addSceneGraphNode(Tarvos)
+  openspace.addSceneGraphNode(TarvosTrail)
+  openspace.addSceneGraphNode(TarvosLabel)
 end)
 
 asset.onDeinitialize(function()
-  for i = #moon_labels, 1, -1 do
-    openspace.removeSceneGraphNode(moon_labels[i])
-  end
+  openspace.removeSceneGraphNode(TarvosLabel)
+  openspace.removeSceneGraphNode(TarvosTrail)
+  openspace.removeSceneGraphNode(Tarvos)
 
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.removeSceneGraphNode(ErriapusLabel)
+  openspace.removeSceneGraphNode(ErriapusTrail)
+  openspace.removeSceneGraphNode(Erriapus)
+
+  openspace.removeSceneGraphNode(BebhionnLabel)
+  openspace.removeSceneGraphNode(BebhionnTrail)
+  openspace.removeSceneGraphNode(Bebhionn)
+
+  openspace.removeSceneGraphNode(AlbiorixLabel)
+  openspace.removeSceneGraphNode(AlbiorixTrail)
+  openspace.removeSceneGraphNode(Albiorix)
+
+
+  openspace.spice.unloadKernel(kernel.sat452)
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Albiorix)
+asset.export(AlbiorixTrail)
+asset.export(AlbiorixLabel)
+
+asset.export(Bebhionn)
+asset.export(BebhionnTrail)
+asset.export(BebhionnLabel)
+
+asset.export(Erriapus)
+asset.export(ErriapusTrail)
+asset.export(ErriapusLabel)
+
+asset.export(Tarvos)
+asset.export(TarvosTrail)
+asset.export(TarvosLabel)
+
 
 
 asset.meta = {

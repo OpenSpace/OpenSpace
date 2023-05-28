@@ -1,5 +1,7 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local EarthBarycenter = {
   Identifier = "EarthBarycenter",
@@ -70,6 +72,7 @@ local EarthIAU = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthBarycenter)
   openspace.addSceneGraphNode(EarthCenter)
@@ -88,6 +91,8 @@ asset.export(EarthBarycenter)
 asset.export(EarthCenter)
 asset.export(EarthInertial)
 asset.export(EarthIAU)
+
+
 
 asset.meta = {
   Name = "Earth Transforms",

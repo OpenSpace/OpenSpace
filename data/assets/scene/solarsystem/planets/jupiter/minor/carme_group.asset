@@ -1,584 +1,2660 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup344
-local kernel346 = asset.require("../kernels").jup346
+local kernel = asset.require("../kernels")
 
 
 
-local parentIdentifier = transforms.JupiterBarycenter.Identifier
-local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_carme", "moon_minor", "moon_minor_jupiter" }
-local trailColor = { 0.4, 0.3, 0.01 }
-local trailTags = {
-  "moonTrail_solarSystem",
-  "moonTrail_giants",
-  "moonTrail_jupiter",
-  "moonTrail_minor",
-  "moonTrail_minor_jupiter"
-}
-
-local carmeGroup = {
-  {
-    Identifier = "Herse",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "HERSE",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Herse"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 672.75,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Aitne",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "AITNE",
-    Radii = { 3000, 3000, 3000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Aitne"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 679.64,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Kale",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "KALE",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kale"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 685.32,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Taygete",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "TAYGETE",
-    Radii = { 5000, 5000, 5000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Taygete"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 686.67,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Chaldene",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "CHALDENE",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Chaldene"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 699.33,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Erinome",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "ERINOME",
-    Radii = { 3000, 3000, 3000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Erinome"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 711.96,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Kallichore",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "KALLICHORE",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kallichore"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 717.81,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Kalyke",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "KALYKE",
-    Radii = { 5000, 5000, 5000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kalyke"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 721.02,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Pasithee",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "PASITHEE",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Pasithee"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 726.93,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2010J1",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "551",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2010 J 1",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2010J1"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 722.83,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Eukelade",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "EUKELADE",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Eukelade"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 735.20,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Arche",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "ARCHE",
-    Radii = { 3000, 3000, 3000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Arche"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 746.19,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Isonoe",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "ISONOE",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 750.13,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Carme",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "CARME",
-    Radii = { 46000, 46000, 46000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Carme"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 763.95,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2003J5",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "557",
-    Radii = { 4000, 4000, 4000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2003 J 5",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J5"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 758.34,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2018J3",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55511",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2018 J 3",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2018J3"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 704.56,
-    Kernels = kernel346
-  },
-  {
-    Identifier = "S2021J4",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55515",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2021 J 4",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J4"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 710.13,
-    Kernels = kernel346
-  },
-  {
-    Identifier = "S2021J5",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55516",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2021 J 5",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J5"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 704.80,
-    Kernels = kernel346
-  },
-  {
-    Identifier = "S2021J6",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55517",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2021 J 6",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J6"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 732.55,
-    Kernels = kernel346
-  },
-  {
-    Identifier = "S2016J3",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55518",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2016 J 3",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2016J3"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 676.37,
-    Kernels = kernel346
-  },
-  {
-    Identifier = "S2022J1",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55521",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2022 J 1",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J1"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 667.34,
-    Kernels = kernel346
-  },
-  {
-    Identifier = "S2022J2",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55522",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2022 J 2",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J2"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 685.51,
-    Kernels = kernel346
-  },
-  {
-    Identifier = "S2017J2",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "563",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2017 J 2",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J2"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 723.1,
-    Kernels = kernel346
-  },
-  {
-    Identifier = "S2017J5",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "566",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2017 J 5",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J5"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 719.5,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2017J8",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "569",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2017 J 8",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J8"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 719.6,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2011J1",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "572",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2011 J 1",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2011J1"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 686.6,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2003J9",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55503",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2003 J 9",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J9"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 767.6,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2003J10",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55504",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2003 J 10",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J10"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 705.96,
-    Kernels = kernel
-  }
-}
-
-
--- Generate labels for each moon
-local moon_labels = {}
-
-for i, moon in ipairs(carmeGroup) do
-  local moonName = moon.GUI.Name or moon.Identifier
-  moon_labels[i] = {
-    Identifier = moon.Identifier .. "Label",
-    Parent = moon.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabel",
-      Text = moonName,
-      FontSize = 70.0,
-      Size = 7.1,
-      MinMaxSize = { 1, 25 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Additive",
-      EnableFading = true,
-      FadeUnit = "Gm",
-      FadeDistances = { 2.0, 125.0 },
-      FadeWidths = { 0.5, 50.0 }
-    },
-    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
-    GUI = {
-      Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/" .. moon.Identifier,
-      Description = "Label for Jupiter's moon " .. moonName .. " (Carme group)"
+local Herse = {
+  Identifier = "Herse",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "HERSE",
+      Observer = "JUPITER BARYCENTER"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Herse",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Herse"
   }
-end
+}
 
+local HerseTrail = {
+  Identifier = "HerseTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "HERSE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 672.75,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Herse Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Herse"
+  }
+}
 
+local HerseLabel = {
+  Identifier = "HerseLabel",
+  Parent = Herse.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Herse",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Herse Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Herse",
+    Description = "Label for Jupiter's moon Herse (Carme group)"
+  }
+}
 
-local nodes = proceduralGlobes.createGlobes(carmeGroup)
+local Aitne = {
+  Identifier = "Aitne",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "AITNE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Aitne",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Aitne"
+  }
+}
+
+local AitneTrail = {
+  Identifier = "AitneTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "AITNE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 679.64,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Aitne Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Aitne"
+  }
+}
+
+local AitneLabel = {
+  Identifier = "AitneLabel",
+  Parent = Aitne.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Aitne",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Aitne Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Aitne",
+    Description = "Label for Jupiter's moon Aitne (Carme group)"
+  }
+}
+
+local Kale = {
+  Identifier = "Kale",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "KALE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Kale",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kale"
+  }
+}
+
+local KaleTrail = {
+  Identifier = "KaleTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "KALE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 685.32,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Kale Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kale"
+  }
+}
+
+local KaleLabel = {
+  Identifier = "KaleLabel",
+  Parent = Kale.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Kale",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Kale Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kale",
+    Description = "Label for Jupiter's moon Kale (Carme group)"
+  }
+}
+
+local Taygete = {
+  Identifier = "Taygete",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "TAYGETE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Taygete",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Taygete"
+  }
+}
+
+local TaygeteTrail = {
+  Identifier = "TaygeteTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "TAYGETE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 686.67,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Taygete Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Taygete"
+  }
+}
+
+local TaygeteLabel = {
+  Identifier = "TaygeteLabel",
+  Parent = Taygete.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Taygete",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Taygete Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Taygete",
+    Description = "Label for Jupiter's moon Taygete (Carme group)"
+  }
+}
+
+local Chaldene = {
+  Identifier = "Chaldene",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "CHALDENE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Chaldene",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Chaldene"
+  }
+}
+
+local ChaldeneTrail = {
+  Identifier = "ChaldeneTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "CHALDENE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 699.33,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Chaldene Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Chaldene"
+  }
+}
+
+local ChaldeneLabel = {
+  Identifier = "ChaldeneLabel",
+  Parent = Chaldene.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Chaldene",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Chaldene Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Chaldene",
+    Description = "Label for Jupiter's moon Chaldene (Carme group)"
+  }
+}
+
+local Erinome = {
+  Identifier = "Erinome",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ERINOME",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Erinome",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Erinome"
+  }
+}
+
+local ErinomeTrail = {
+  Identifier = "ErinomeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ERINOME",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 711.96,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Erinome Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Erinome"
+  }
+}
+
+local ErinomeLabel = {
+  Identifier = "ErinomeLabel",
+  Parent = Erinome.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Erinome",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Erinome Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Erinome",
+    Description = "Label for Jupiter's moon Erinome (Carme group)"
+  }
+}
+
+local Kallichore = {
+  Identifier = "Kallichore",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "KALLICHORE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Kallichore",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kallichore"
+  }
+}
+
+local KallichoreTrail = {
+  Identifier = "KallichoreTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "KALLICHORE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 717.81,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Kallichore Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kallichore"
+  }
+}
+
+local KallichoreLabel = {
+  Identifier = "KallichoreLabel",
+  Parent = Kallichore.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Kallichore",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Kallichore Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kallichore",
+    Description = "Label for Jupiter's moon Kallichore (Carme group)"
+  }
+}
+
+local Kalyke = {
+  Identifier = "Kalyke",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "KALYKE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Kalyke",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kalyke"
+  }
+}
+
+local KalykeTrail = {
+  Identifier = "KalykeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "KALYKE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 721.02,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Kalyke Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kalyke"
+  }
+}
+
+local KalykeLabel = {
+  Identifier = "KalykeLabel",
+  Parent = Kalyke.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Kalyke",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Kalyke Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kalyke",
+    Description = "Label for Jupiter's moon Kalyke (Carme group)"
+  }
+}
+
+local Pasithee = {
+  Identifier = "Pasithee",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PASITHEE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Pasithee",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Pasithee"
+  }
+}
+
+local PasitheeTrail = {
+  Identifier = "PasitheeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PASITHEE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 726.93,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Pasithee Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Pasithee"
+  }
+}
+
+local PasitheeLabel = {
+  Identifier = "PasitheeLabel",
+  Parent = Pasithee.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Pasithee",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Pasithee Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Pasithee",
+    Description = "Label for Jupiter's moon Pasithee (Carme group)"
+  }
+}
+
+local S2010J1 = {
+  Identifier = "S2010J1",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "551",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2010 J 1",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2010J1"
+  }
+}
+
+local S2010J1Trail = {
+  Identifier = "S2010J1Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "551",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 722.83,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2010 J 1 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2010J1"
+  }
+}
+
+local S2010J1Label = {
+  Identifier = "S2010J1Label",
+  Parent = S2010J1.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2010 J 1",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2010 J 1 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2010J1",
+    Description = "Label for Jupiter's moon S2010J1 (Carme group)"
+  }
+}
+
+local Eukelade = {
+  Identifier = "Eukelade",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "EUKELADE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Eukelade",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Eukelade"
+  }
+}
+
+local EukeladeTrail = {
+  Identifier = "EukeladeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "EUKELADE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 735.20,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Eukelade Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Eukelade"
+  }
+}
+
+local EukeladeLabel = {
+  Identifier = "EukeladeLabel",
+  Parent = Eukelade.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Eukelade",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Eukelade Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Eukelade",
+    Description = "Label for Jupiter's moon Eukelade (Carme group)"
+  }
+}
+
+local Arche = {
+  Identifier = "Arche",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ARCHE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Arche",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Arche"
+  }
+}
+
+local ArcheTrail = {
+  Identifier = "ArcheTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ARCHE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 746.19,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Arche Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Arche"
+  }
+}
+
+local ArcheLabel = {
+  Identifier = "ArcheLabel",
+  Parent = Arche.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Arche",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Arche Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Arche",
+    Description = "Label for Jupiter's moon Arche (Carme group)"
+  }
+}
+
+local Isonoe = {
+  Identifier = "Isonoe",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ISONOE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Isonoe",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe"
+  }
+}
+
+local IsonoeTrail = {
+  Identifier = "IsonoeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ISONOE",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 750.13,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Isonoe Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe"
+  }
+}
+
+local IsonoeLabel = {
+  Identifier = "IsonoeLabel",
+  Parent = Isonoe.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Isonoe",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Isonoe Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe",
+    Description = "Label for Jupiter's moon Isonoe (Carme group)"
+  }
+}
+
+local Carme = {
+  Identifier = "Carme",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "CARME",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 46000, 46000, 46000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Carme",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Carme"
+  }
+}
+
+local CarmeTrail = {
+  Identifier = "CarmeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "CARME",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 763.95,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Carme Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Carme"
+  }
+}
+
+local CarmeLabel = {
+  Identifier = "CarmeLabel",
+  Parent = Carme.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Carme",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Carme Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Carme",
+    Description = "Label for Jupiter's moon Carme (Carme group)"
+  }
+}
+
+local S2003J5 = {
+  Identifier = "S2003J5",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "557",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 5",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J5"
+  }
+}
+
+local S2003J5Trail = {
+  Identifier = "S2003J5Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "557",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 758.34,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 5 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J5"
+  }
+}
+
+local S2003J5Label = {
+  Identifier = "S2003J5Label",
+  Parent = S2003J5.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2003 J 5",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2003 J 5 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J5",
+    Description = "Label for Jupiter's moon S2003J5 (Carme group)"
+  }
+}
+
+local S2018J3 = {
+  Identifier = "S2018J3",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55511",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2018 J 3",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2018J3"
+  }
+}
+
+local S2018J3Trail = {
+  Identifier = "S2018J3Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55511",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 704.56,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2018 J 3 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2018J3"
+  }
+}
+
+local S2018J3Label = {
+  Identifier = "S2018J3Label",
+  Parent = S2018J3.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2018 J 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2018 J 3 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2018J3",
+    Description = "Label for Jupiter's moon S2018J3 (Carme group)"
+  }
+}
+
+local S2021J4 = {
+  Identifier = "S2021J4",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55515",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 4",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J4"
+  }
+}
+
+local S2021J4Trail = {
+  Identifier = "S2021J4Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55515",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 710.13,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 4 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J4"
+  }
+}
+
+local S2021J4Label = {
+  Identifier = "S2021J4Label",
+  Parent = S2021J4.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2021 J 4",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2021 J 4 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J4",
+    Description = "Label for Jupiter's moon S2021J4 (Carme group)"
+  }
+}
+
+local S2021J5 = {
+  Identifier = "S2021J5",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55516",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 5",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J5"
+  }
+}
+
+local S2021J5Trail = {
+  Identifier = "S2021J5Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55516",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 704.80,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 5 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J5"
+  }
+}
+
+local S2021J5Label = {
+  Identifier = "S2021J5Label",
+  Parent = S2021J5.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2021 J 5",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2021 J 5 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J5",
+    Description = "Label for Jupiter's moon S2021J5 (Carme group)"
+  }
+}
+
+local S2021J6 = {
+  Identifier = "S2021J6",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55517",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 6",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J6"
+  }
+}
+
+local S2021J6Trail = {
+  Identifier = "S2021J6Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55517",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 732.55,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 6 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J6"
+  }
+}
+
+local S2021J6Label = {
+  Identifier = "S2021J6Label",
+  Parent = S2021J6.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2021 J 6",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2021 J 6 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J6",
+    Description = "Label for Jupiter's moon S2021J6 (Carme group)"
+  }
+}
+
+local S2016J3 = {
+  Identifier = "S2016J3",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55518",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2016 J 3",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2016J3"
+  }
+}
+
+local S2016J3Trail = {
+  Identifier = "S2016J3Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55518",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 676.37,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2016 J 3 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2016J3"
+  }
+}
+
+local S2016J3Label = {
+  Identifier = "S2016J3Label",
+  Parent = S2016J3.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2016 J 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2016 J 3 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2016J3",
+    Description = "Label for Jupiter's moon S2016J3 (Carme group)"
+  }
+}
+
+local S2022J1 = {
+  Identifier = "S2022J1",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55521",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2022 J 1",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J1"
+  }
+}
+
+local S2022J1Trail = {
+  Identifier = "S2022J1Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55521",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 667.34,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2022 J 1 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J1"
+  }
+}
+
+local S2022J1Label = {
+  Identifier = "S2022J1Label",
+  Parent = S2022J1.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2022 J 1",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2022 J 1 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J1",
+    Description = "Label for Jupiter's moon S2022J1 (Carme group)"
+  }
+}
+
+local S2022J2 = {
+  Identifier = "S2022J2",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55522",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2022 J 2",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J2"
+  }
+}
+
+local S2022J2Trail = {
+  Identifier = "S2022J2Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55522",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 685.51,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2022 J 2 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J2"
+  }
+}
+
+local S2022J2Label = {
+  Identifier = "S2022J2Label",
+  Parent = S2022J2.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2022 J 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2022 J 2 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J2",
+    Description = "Label for Jupiter's moon S2022J2 (Carme group)"
+  }
+}
+
+local S2017J2 = {
+  Identifier = "S2017J2",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "563",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 2",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J2"
+  }
+}
+
+local S2017J2Trail = {
+  Identifier = "S2017J2Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "563",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 723.1,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 2 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J2"
+  }
+}
+
+local S2017J2Label = {
+  Identifier = "S2017J2Label",
+  Parent = S2017J2.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2017 J 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2017 J 2 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J2",
+    Description = "Label for Jupiter's moon S2017J2 (Carme group)"
+  }
+}
+
+local S2017J5 = {
+  Identifier = "S2017J5",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "566",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 5",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J5"
+  }
+}
+
+local S2017J5Trail = {
+  Identifier = "S2017J5Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "566",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 719.5,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 5 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J5"
+  }
+}
+
+local S2017J5Label = {
+  Identifier = "S2017J5Label",
+  Parent = S2017J5.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2017 J 5",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2017 J 5 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J5",
+    Description = "Label for Jupiter's moon S2017J5 (Carme group)"
+  }
+}
+
+local S2017J8 = {
+  Identifier = "S2017J8",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "569",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 8",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J8"
+  }
+}
+
+local S2017J8Trail = {
+  Identifier = "S2017J8Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "569",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 719.6,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 8 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J8"
+  }
+}
+
+local S2017J8Label = {
+  Identifier = "S2017J8Label",
+  Parent = S2017J8.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2017 J 8",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2017 J 8 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J8",
+    Description = "Label for Jupiter's moon S2017J8 (Carme group)"
+  }
+}
+
+local S2011J1 = {
+  Identifier = "S2011J1",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "572",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2011 J 1",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2011J1"
+  }
+}
+
+local S2011J1Trail = {
+  Identifier = "S2011J1Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "572",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 686.6,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2011 J 1 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2011J1"
+  }
+}
+
+local S2011J1Label = {
+  Identifier = "S2011J1Label",
+  Parent = S2011J1.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2011 J 1",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2011 J 1 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2011J1",
+    Description = "Label for Jupiter's moon S2011J1 (Carme group)"
+  }
+}
+
+local S2003J9 = {
+  Identifier = "S2003J9",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55503",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 9",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J9"
+  }
+}
+
+local S2003J9Trail = {
+  Identifier = "S2003J9Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55503",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 767.6,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 9 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J9"
+  }
+}
+
+local S2003J9Label = {
+  Identifier = "S2003J9Label",
+  Parent = S2003J9.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2003 J 9",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2003 J 9 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J9",
+    Description = "Label for Jupiter's moon S2003J9 (Carme group)"
+  }
+}
+
+local S2003J10 = {
+  Identifier = "S2003J10",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55504",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 10",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J10"
+  }
+}
+
+local S2003J10Trail = {
+  Identifier = "S2003J10Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55504",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 705.96,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 10 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J10"
+  }
+}
+
+local S2003J10Label = {
+  Identifier = "S2003J10Label",
+  Parent = S2003J10.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2003 J 10",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2003 J 10 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J10",
+    Description = "Label for Jupiter's moon S2003J10 (Carme group)"
+  }
+}
+
 
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernel.jup344)
+  openspace.spice.loadKernel(kernel.jup346)
 
-  for _, moonlabel in ipairs(moon_labels) do
-    openspace.addSceneGraphNode(moonlabel)
-  end
+
+  openspace.addSceneGraphNode(Herse)
+  openspace.addSceneGraphNode(HerseTrail)
+  openspace.addSceneGraphNode(HerseLabel)
+
+  openspace.addSceneGraphNode(Aitne)
+  openspace.addSceneGraphNode(AitneTrail)
+  openspace.addSceneGraphNode(AitneLabel)
+
+  openspace.addSceneGraphNode(Kale)
+  openspace.addSceneGraphNode(KaleTrail)
+  openspace.addSceneGraphNode(KaleLabel)
+
+  openspace.addSceneGraphNode(Taygete)
+  openspace.addSceneGraphNode(TaygeteTrail)
+  openspace.addSceneGraphNode(TaygeteLabel)
+
+  openspace.addSceneGraphNode(Chaldene)
+  openspace.addSceneGraphNode(ChaldeneTrail)
+  openspace.addSceneGraphNode(ChaldeneLabel)
+
+  openspace.addSceneGraphNode(Erinome)
+  openspace.addSceneGraphNode(ErinomeTrail)
+  openspace.addSceneGraphNode(ErinomeLabel)
+
+  openspace.addSceneGraphNode(Kallichore)
+  openspace.addSceneGraphNode(KallichoreTrail)
+  openspace.addSceneGraphNode(KallichoreLabel)
+
+  openspace.addSceneGraphNode(Kalyke)
+  openspace.addSceneGraphNode(KalykeTrail)
+  openspace.addSceneGraphNode(KalykeLabel)
+
+  openspace.addSceneGraphNode(Pasithee)
+  openspace.addSceneGraphNode(PasitheeTrail)
+  openspace.addSceneGraphNode(PasitheeLabel)
+
+  openspace.addSceneGraphNode(S2010J1)
+  openspace.addSceneGraphNode(S2010J1Trail)
+  openspace.addSceneGraphNode(S2010J1Label)
+
+  openspace.addSceneGraphNode(Eukelade)
+  openspace.addSceneGraphNode(EukeladeTrail)
+  openspace.addSceneGraphNode(EukeladeLabel)
+
+  openspace.addSceneGraphNode(Arche)
+  openspace.addSceneGraphNode(ArcheTrail)
+  openspace.addSceneGraphNode(ArcheLabel)
+
+  openspace.addSceneGraphNode(Isonoe)
+  openspace.addSceneGraphNode(IsonoeTrail)
+  openspace.addSceneGraphNode(IsonoeLabel)
+
+  openspace.addSceneGraphNode(Carme)
+  openspace.addSceneGraphNode(CarmeTrail)
+  openspace.addSceneGraphNode(CarmeLabel)
+
+  openspace.addSceneGraphNode(S2003J5)
+  openspace.addSceneGraphNode(S2003J5Trail)
+  openspace.addSceneGraphNode(S2003J5Label)
+
+  openspace.addSceneGraphNode(S2018J3)
+  openspace.addSceneGraphNode(S2018J3Trail)
+  openspace.addSceneGraphNode(S2018J3Label)
+
+  openspace.addSceneGraphNode(S2021J4)
+  openspace.addSceneGraphNode(S2021J4Trail)
+  openspace.addSceneGraphNode(S2021J4Label)
+
+  openspace.addSceneGraphNode(S2021J5)
+  openspace.addSceneGraphNode(S2021J5Trail)
+  openspace.addSceneGraphNode(S2021J5Label)
+
+  openspace.addSceneGraphNode(S2021J6)
+  openspace.addSceneGraphNode(S2021J6Trail)
+  openspace.addSceneGraphNode(S2021J6Label)
+
+  openspace.addSceneGraphNode(S2016J3)
+  openspace.addSceneGraphNode(S2016J3Trail)
+  openspace.addSceneGraphNode(S2016J3Label)
+
+  openspace.addSceneGraphNode(S2022J1)
+  openspace.addSceneGraphNode(S2022J1Trail)
+  openspace.addSceneGraphNode(S2022J1Label)
+
+  openspace.addSceneGraphNode(S2022J2)
+  openspace.addSceneGraphNode(S2022J2Trail)
+  openspace.addSceneGraphNode(S2022J2Label)
+
+  openspace.addSceneGraphNode(S2017J2)
+  openspace.addSceneGraphNode(S2017J2Trail)
+  openspace.addSceneGraphNode(S2017J2Label)
+
+  openspace.addSceneGraphNode(S2017J5)
+  openspace.addSceneGraphNode(S2017J5Trail)
+  openspace.addSceneGraphNode(S2017J5Label)
+
+  openspace.addSceneGraphNode(S2017J8)
+  openspace.addSceneGraphNode(S2017J8Trail)
+  openspace.addSceneGraphNode(S2017J8Label)
+
+  openspace.addSceneGraphNode(S2011J1)
+  openspace.addSceneGraphNode(S2011J1Trail)
+  openspace.addSceneGraphNode(S2011J1Label)
+
+  openspace.addSceneGraphNode(S2003J9)
+  openspace.addSceneGraphNode(S2003J9Trail)
+  openspace.addSceneGraphNode(S2003J9Label)
+
+  openspace.addSceneGraphNode(S2003J10)
+  openspace.addSceneGraphNode(S2003J10Trail)
+  openspace.addSceneGraphNode(S2003J10Label)
 end)
 
 asset.onDeinitialize(function()
-  for i = #moon_labels, 1, -1 do
-    openspace.removeSceneGraphNode(moon_labels[i])
-  end
+  openspace.removeSceneGraphNode(S2003J10Label)
+  openspace.removeSceneGraphNode(S2003J10Trail)
+  openspace.removeSceneGraphNode(S2003J10)
 
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.removeSceneGraphNode(S2003J9Label)
+  openspace.removeSceneGraphNode(S2003J9Trail)
+  openspace.removeSceneGraphNode(S2003J9)
+
+  openspace.removeSceneGraphNode(S2011J1Label)
+  openspace.removeSceneGraphNode(S2011J1Trail)
+  openspace.removeSceneGraphNode(S2011J1)
+
+  openspace.removeSceneGraphNode(S2017J8Label)
+  openspace.removeSceneGraphNode(S2017J8Trail)
+  openspace.removeSceneGraphNode(S2017J8)
+
+  openspace.removeSceneGraphNode(S2017J5Label)
+  openspace.removeSceneGraphNode(S2017J5Trail)
+  openspace.removeSceneGraphNode(S2017J5)
+
+  openspace.removeSceneGraphNode(S2017J2Label)
+  openspace.removeSceneGraphNode(S2017J2Trail)
+  openspace.removeSceneGraphNode(S2017J2)
+
+  openspace.removeSceneGraphNode(S2022J2Label)
+  openspace.removeSceneGraphNode(S2022J2Trail)
+  openspace.removeSceneGraphNode(S2022J2)
+
+  openspace.removeSceneGraphNode(S2022J1Label)
+  openspace.removeSceneGraphNode(S2022J1Trail)
+  openspace.removeSceneGraphNode(S2022J1)
+
+  openspace.removeSceneGraphNode(S2016J3Label)
+  openspace.removeSceneGraphNode(S2016J3Trail)
+  openspace.removeSceneGraphNode(S2016J3)
+
+  openspace.removeSceneGraphNode(S2021J6Label)
+  openspace.removeSceneGraphNode(S2021J6Trail)
+  openspace.removeSceneGraphNode(S2021J6)
+
+  openspace.removeSceneGraphNode(S2021J5Label)
+  openspace.removeSceneGraphNode(S2021J5Trail)
+  openspace.removeSceneGraphNode(S2021J5)
+
+  openspace.removeSceneGraphNode(S2021J4Label)
+  openspace.removeSceneGraphNode(S2021J4Trail)
+  openspace.removeSceneGraphNode(S2021J4)
+
+  openspace.removeSceneGraphNode(S2018J3Label)
+  openspace.removeSceneGraphNode(S2018J3Trail)
+  openspace.removeSceneGraphNode(S2018J3)
+
+  openspace.removeSceneGraphNode(S2003J5Label)
+  openspace.removeSceneGraphNode(S2003J5Trail)
+  openspace.removeSceneGraphNode(S2003J5)
+
+  openspace.removeSceneGraphNode(CarmeLabel)
+  openspace.removeSceneGraphNode(CarmeTrail)
+  openspace.removeSceneGraphNode(Carme)
+
+  openspace.removeSceneGraphNode(IsonoeLabel)
+  openspace.removeSceneGraphNode(IsonoeTrail)
+  openspace.removeSceneGraphNode(Isonoe)
+
+  openspace.removeSceneGraphNode(ArcheLabel)
+  openspace.removeSceneGraphNode(ArcheTrail)
+  openspace.removeSceneGraphNode(Arche)
+
+  openspace.removeSceneGraphNode(EukeladeLabel)
+  openspace.removeSceneGraphNode(EukeladeTrail)
+  openspace.removeSceneGraphNode(Eukelade)
+
+  openspace.removeSceneGraphNode(S2010J1Label)
+  openspace.removeSceneGraphNode(S2010J1Trail)
+  openspace.removeSceneGraphNode(S2010J1)
+
+  openspace.removeSceneGraphNode(PasitheeLabel)
+  openspace.removeSceneGraphNode(PasitheeTrail)
+  openspace.removeSceneGraphNode(Pasithee)
+
+  openspace.removeSceneGraphNode(KalykeLabel)
+  openspace.removeSceneGraphNode(KalykeTrail)
+  openspace.removeSceneGraphNode(Kalyke)
+
+  openspace.removeSceneGraphNode(KallichoreLabel)
+  openspace.removeSceneGraphNode(KallichoreTrail)
+  openspace.removeSceneGraphNode(Kallichore)
+
+  openspace.removeSceneGraphNode(ErinomeLabel)
+  openspace.removeSceneGraphNode(ErinomeTrail)
+  openspace.removeSceneGraphNode(Erinome)
+
+  openspace.removeSceneGraphNode(ChaldeneLabel)
+  openspace.removeSceneGraphNode(ChaldeneTrail)
+  openspace.removeSceneGraphNode(Chaldene)
+
+  openspace.removeSceneGraphNode(TaygeteLabel)
+  openspace.removeSceneGraphNode(TaygeteTrail)
+  openspace.removeSceneGraphNode(Taygete)
+
+  openspace.removeSceneGraphNode(KaleLabel)
+  openspace.removeSceneGraphNode(KaleTrail)
+  openspace.removeSceneGraphNode(Kale)
+
+  openspace.removeSceneGraphNode(AitneLabel)
+  openspace.removeSceneGraphNode(AitneTrail)
+  openspace.removeSceneGraphNode(Aitne)
+
+  openspace.removeSceneGraphNode(HerseLabel)
+  openspace.removeSceneGraphNode(HerseTrail)
+  openspace.removeSceneGraphNode(Herse)
+
+
+  openspace.spice.loadKernel(kernel.jup346)
+  openspace.spice.loadKernel(kernel.jup344)
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Herse)
+asset.export(HerseTrail)
+asset.export(HerseLabel)
+
+asset.export(Aitne)
+asset.export(AitneTrail)
+asset.export(AitneLabel)
+
+asset.export(Kale)
+asset.export(KaleTrail)
+asset.export(KaleLabel)
+
+asset.export(Taygete)
+asset.export(TaygeteTrail)
+asset.export(TaygeteLabel)
+
+asset.export(Chaldene)
+asset.export(ChaldeneTrail)
+asset.export(ChaldeneLabel)
+
+asset.export(Erinome)
+asset.export(ErinomeTrail)
+asset.export(ErinomeLabel)
+
+asset.export(Kallichore)
+asset.export(KallichoreTrail)
+asset.export(KallichoreLabel)
+
+asset.export(Kalyke)
+asset.export(KalykeTrail)
+asset.export(KalykeLabel)
+
+asset.export(Pasithee)
+asset.export(PasitheeTrail)
+asset.export(PasitheeLabel)
+
+asset.export(S2010J1)
+asset.export(S2010J1Trail)
+asset.export(S2010J1Label)
+
+asset.export(Eukelade)
+asset.export(EukeladeTrail)
+asset.export(EukeladeLabel)
+
+asset.export(Arche)
+asset.export(ArcheTrail)
+asset.export(ArcheLabel)
+
+asset.export(Isonoe)
+asset.export(IsonoeTrail)
+asset.export(IsonoeLabel)
+
+asset.export(Carme)
+asset.export(CarmeTrail)
+asset.export(CarmeLabel)
+
+asset.export(S2003J5)
+asset.export(S2003J5Trail)
+asset.export(S2003J5Label)
+
+asset.export(S2018J3)
+asset.export(S2018J3Trail)
+asset.export(S2018J3Label)
+
+asset.export(S2021J4)
+asset.export(S2021J4Trail)
+asset.export(S2021J4Label)
+
+asset.export(S2021J5)
+asset.export(S2021J5Trail)
+asset.export(S2021J5Label)
+
+asset.export(S2021J6)
+asset.export(S2021J6Trail)
+asset.export(S2021J6Label)
+
+asset.export(S2016J3)
+asset.export(S2016J3Trail)
+asset.export(S2016J3Label)
+
+asset.export(S2022J1)
+asset.export(S2022J1Trail)
+asset.export(S2022J1Label)
+
+asset.export(S2022J2)
+asset.export(S2022J2Trail)
+asset.export(S2022J2Label)
+
+asset.export(S2017J2)
+asset.export(S2017J2Trail)
+asset.export(S2017J2Label)
+
+asset.export(S2017J5)
+asset.export(S2017J5Trail)
+asset.export(S2017J5Label)
+
+asset.export(S2017J8)
+asset.export(S2017J8Trail)
+asset.export(S2017J8Label)
+
+asset.export(S2011J1)
+asset.export(S2011J1Trail)
+asset.export(S2011J1Label)
+
+asset.export(S2003J9)
+asset.export(S2003J9Trail)
+asset.export(S2003J9Label)
+
+asset.export(S2003J10)
+asset.export(S2003J10Trail)
+asset.export(S2003J10Label)
+
 
 
 asset.meta = {
   Name = "Jupiter Carme Group Moons",
   Version = "1.0",
-  Description = [[Procedural Globe asset containing Jupiter's Carme Group moons: Herse,
-    Aitne, Kale, Taygete, Chaldene, Erinome, Kallichore, Kalyke, Pasithee, S2010J1,
-    Eukelade, Arche, Isonoe, Carme, and S2003J5. Blank globes and SPICE trails are
-    generated for each moon]],
+  Description = [[Asset containing Jupiter's Carme Group moons. Blank globes, SPICE
+  trails, and labels are generated for each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

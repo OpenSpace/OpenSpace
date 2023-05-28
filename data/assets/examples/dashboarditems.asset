@@ -1,4 +1,4 @@
-local angle = {
+local Angle = {
   Type = "DashboardItemAngle",
   Identifier = "Angle",
   GuiName = "Angle",
@@ -8,43 +8,43 @@ local angle = {
   DestinationNodeName = "Moon"
 }
 
-local date = {
+local Date = {
   Type = "DashboardItemDate",
   Identifier = "Date",
   GuiName = "Date"
 }
 
-local simulation_increment = {
+local SimulationIncrement = {
   Type = "DashboardItemSimulationIncrement",
   Identifier = "SimulationIncrement",
   GuiName = "Simulation Increment"
 }
 
-local distance = {
+local Distance = {
   Type = "DashboardItemDistance",
   Identifier = "Distance",
   GuiName = "Distance"
 }
 
-local framerate = {
+local Framerate = {
   Type = "DashboardItemFramerate",
   Identifier = "Framerate",
   GuiName = "Framerate"
 }
 
-local parallel_connection = {
+local ParallelConnection = {
   Type = "DashboardItemParallelConnection",
   Identifier = "ParallelConnection",
   GuiName = "Parallel Connection"
 }
 
-local mission = {
+local Mission = {
   Type = "DashboardItemMission",
   Identifier = "Mission",
   GuiName = "Mission"
 }
 
-local property_value = {
+local PropertyValue = {
   Type = "DashboardItemPropertyValue",
   Identifier = "asd",
   GuiName = "adasd",
@@ -52,49 +52,51 @@ local property_value = {
   DisplayString = "Earth is enabled: {}"
 }
 
-local elapsed_time = {
+local ElapsedTime = {
   Type = "DashboardItemElapsedTime",
   Identifier = "ElapsedTime",
   ReferenceTime = "2022-10-12 12:00:00"
 }
 
-local input_state = {
+local InputState = {
   Type = "DashboardItemInputState",
   Identifier = "InputState"
 }
 
+
 asset.onInitialize(function()
-  openspace.dashboard.addDashboardItem(angle)
-  openspace.dashboard.addDashboardItem(date)
-  openspace.dashboard.addDashboardItem(simulation_increment)
-  openspace.dashboard.addDashboardItem(distance)
-  openspace.dashboard.addDashboardItem(framerate)
-  openspace.dashboard.addDashboardItem(parallel_connection)
-  openspace.dashboard.addDashboardItem(mission)
-  openspace.dashboard.addDashboardItem(property_value)
-  openspace.dashboard.addDashboardItem(elapsed_time)
-  openspace.dashboard.addDashboardItem(input_state)
+  openspace.dashboard.addDashboardItem(Angle)
+  openspace.dashboard.addDashboardItem(Date)
+  openspace.dashboard.addDashboardItem(SimulationIncrement)
+  openspace.dashboard.addDashboardItem(Distance)
+  openspace.dashboard.addDashboardItem(Framerate)
+  openspace.dashboard.addDashboardItem(ParallelConnection)
+  openspace.dashboard.addDashboardItem(Mission)
+  openspace.dashboard.addDashboardItem(PropertyValue)
+  openspace.dashboard.addDashboardItem(ElapsedTime)
+  openspace.dashboard.addDashboardItem(InputState)
 end)
 
 asset.onDeinitialize(function()
-  openspace.dashboard.removeDashboardItem(input_state)
-  openspace.dashboard.removeDashboardItem(elapsed_time)
-  openspace.dashboard.removeDashboardItem(property_value)
-  openspace.dashboard.removeDashboardItem(mission)
-  openspace.dashboard.removeDashboardItem(parallel_connection)
-  openspace.dashboard.removeDashboardItem(framerate)
-  openspace.dashboard.removeDashboardItem(distance)
-  openspace.dashboard.removeDashboardItem(simulation_increment)
-  openspace.dashboard.removeDashboardItem(date)
-  openspace.dashboard.removeDashboardItem(angle)
+  openspace.dashboard.removeDashboardItem(InputState)
+  openspace.dashboard.removeDashboardItem(ElapsedTime)
+  openspace.dashboard.removeDashboardItem(PropertyValue)
+  openspace.dashboard.removeDashboardItem(Mission)
+  openspace.dashboard.removeDashboardItem(ParallelConnection)
+  openspace.dashboard.removeDashboardItem(Framerate)
+  openspace.dashboard.removeDashboardItem(Distance)
+  openspace.dashboard.removeDashboardItem(SimulationIncrement)
+  openspace.dashboard.removeDashboardItem(Date)
+  openspace.dashboard.removeDashboardItem(Angle)
 end)
 
-asset.export(elapsed_time)
-asset.export(property_value)
-asset.export(mission)
-asset.export(parallel_connection)
-asset.export(framerate)
-asset.export(distance)
-asset.export(simulation_increment)
-asset.export(date)
-asset.export(angle)
+asset.export(Angle)
+asset.export(Date)
+asset.export(SimulationIncrement)
+asset.export(Distance)
+asset.export(Framerate)
+asset.export(ParallelConnection)
+asset.export(Mission)
+asset.export(PropertyValue)
+asset.export(ElapsedTime)
+asset.export(InputState)

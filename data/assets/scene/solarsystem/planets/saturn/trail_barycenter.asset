@@ -25,6 +25,7 @@ local SaturnBarycenterTrail = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SaturnBarycenterTrail)
 end)

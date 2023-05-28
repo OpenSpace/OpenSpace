@@ -1,5 +1,7 @@
 local transforms = asset.require("./transforms")
 
+
+
 local labelsPath = asset.syncedResource({
   Name = "Earth Labels",
   Type = "HttpSynchronization",
@@ -7,24 +9,25 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
--- local earthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
-local earthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
+
+-- local EarthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
+local EarthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
 
 local Earth = {
   Identifier = "Earth",
   Parent = transforms.EarthIAU.Identifier,
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = earthEllipsoid,
+    Radii = EarthEllipsoid,
     SegmentsPerPatch = 64,
     PerformShading = false,
     Layers = {},
     ShadowGroup = {
       Sources = {
-        { Name = "Sun", Radius = 696.3E6 },
+        { Name = "Sun", Radius = 696300000 },
       },
       Casters = {
-        { Name = "Moon", Radius = 1.737E6 },
+        { Name = "Moon", Radius = 1737000 },
       }
     },
     Labels = {
@@ -73,24 +76,24 @@ local EarthLabel = {
   }
 }
 
-local focus_earth = {
-  Identifier = "os.solarsystem.earth.focus",
+local FocusEarth = {
+  Identifier = "os.solarsystem.FocusEarth",
   Name = "Focus on Earth",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Set camera focus on the Earth",
   GuiPath = "/Solar System/Earth",
   isLocal = false
 }
 
-local toggle_earth_satellitetrails = {
-  Identifier = "os.solarsystem.earth.togglesatellitetrails",
+local ToggleSatelliteTrails = {
+  Identifier = "os.solarsystem.ToggleSatelliteTrails",
   Name = "Toggle satellite trails",
   Command = [[
-    local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled');
+    local list = openspace.getProperty("{earth_satellites}.Renderable.Enabled")
     for _,v in pairs(list) do
       openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
     end
@@ -100,17 +103,18 @@ local toggle_earth_satellitetrails = {
   isLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Earth)
   openspace.addSceneGraphNode(EarthLabel)
 
-  openspace.action.registerAction(focus_earth)
-  openspace.action.registerAction(toggle_earth_satellitetrails)
+  openspace.action.registerAction(FocusEarth)
+  openspace.action.registerAction(ToggleSatelliteTrails)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(toggle_earth_satellitetrails)
-  openspace.action.removeAction(focus_earth)
+  openspace.action.removeAction(ToggleSatelliteTrails)
+  openspace.action.removeAction(FocusEarth)
 
   openspace.removeSceneGraphNode(EarthLabel)
   openspace.removeSceneGraphNode(Earth)

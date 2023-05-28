@@ -1,5 +1,7 @@
 local constellations_helper = asset.require("util/constellations_helper")
 
+
+
 local speck = asset.syncedResource({
   Name = "Constellation Files",
   Type = "HttpSynchronization",
@@ -7,11 +9,33 @@ local speck = asset.syncedResource({
   Version = 1
 })
 
+
 local zodiacs = {
   "CNC", "TAU", "PSC", "ARI", "LIB", "AQR", "CAP", "SCO", "VIR", "SGR", "GEM", "LEO"
 }
 
-local constellationsExtragalactic = {
+local function zodiacsString(zodiacsList)
+  local zodiacsString = "{"
+  local isFirst = true
+
+  for k, zodiac in pairs(zodiacsList) do
+    local fullName = constellations_helper.findFullName(zodiac)
+    if fullName ~= nil then
+      if isFirst then
+        isFirst = false
+      else
+        zodiacsString = zodiacsString .. ", "
+      end
+
+      zodiacsString = zodiacsString .. [["]] .. fullName .. [["]]
+    end
+  end
+
+  zodiacsString = zodiacsString .. "}"
+  return zodiacsString
+end
+
+local ConstellationsExtragalactic = {
   Identifier = "ConstellationsExtragalactic",
   Renderable = {
     Type = "RenderableConstellationLines",
@@ -37,7 +61,7 @@ local constellationsExtragalactic = {
   }
 }
 
-local constellations = {
+local Constellations = {
   Identifier = "Constellations",
   Renderable = {
     Type = "RenderableConstellationLines",
@@ -57,7 +81,7 @@ local constellations = {
     Unit = "pc",
     DimInAtmosphere = true
   },
-  Tag = {"daytime_hidden"},
+  Tag = { "daytime_hidden" },
   GUI = {
     Name = "Constellations",
     Path = "/Milky Way/Constellations",
@@ -69,37 +93,15 @@ local constellations = {
       88 regions. Of course, today we know the stars in any given constellation do
       not necessarily have any physical relationship with one another. One star may
       be nearby, while an adjacent star in the sky may be far away.(Description
-      from URL) <br><br> Data Reference: various]],
+      from URL) <br><br> Data Reference: various]]
   }
 }
 
-
-local getZodiacsString = function(zodiacsList)
-  local zodiacsString = "{"
-  local isFirst = true
-
-  for k, zodiac in pairs(zodiacsList) do
-    local fullName = constellations_helper.findFullName(zodiac)
-    if fullName ~= nil then
-      if isFirst then
-        isFirst = false
-      else
-        zodiacsString = zodiacsString .. ", "
-      end
-
-      zodiacsString = zodiacsString .. '"' .. fullName .. '"'
-    end
-  end
-
-  zodiacsString = zodiacsString .. "}"
-  return zodiacsString
-end
-
-local zodiacsString = getZodiacsString(zodiacs)
+local zodiacsString = zodiacsString(zodiacs)
 
 -- Actions
-local show_constellations = {
-  Identifier = "constellations.show",
+local ShowConstellations = {
+  Identifier = "os.constellations.ShowConstellations",
   Name = "Show all",
   Command = [[
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", {})
@@ -110,19 +112,19 @@ local show_constellations = {
   IsLocal = false
 }
 
-local hide_constellations = {
-  Identifier = "constellations.hide",
+local HideConstellations = {
+  Identifier = "os.constellations.HideConstellations",
   Name = "Hide all",
   Command = [[
-    openspace.fadeOut("Scene.Constellations.Renderable", nil, "openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', false); openspace.setPropertyValueSingle('Scene.Constellations.Renderable.ConstellationSelection', {})")
+    openspace.fadeOut("Scene.Constellations.Renderable", nil, "openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', false); openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", {})")
   ]],
   Documentation = "Hides all the constellations lines",
   GuiPath = "/Constellations/Lines",
   IsLocal = false
 }
 
-local show_zodiacs = {
-  Identifier = "constellation.show_zodiacs",
+local ShowZodiacs = {
+  Identifier = "os.constellation.ShowZodiacs",
   Name = "Show zodiac",
   Command = [[
     openspace.setPropertyValueSingle("Scene.Constellations.Renderable.ConstellationSelection", ]] .. zodiacsString .. [[)
@@ -133,26 +135,30 @@ local show_zodiacs = {
   IsLocal = false
 }
 
-asset.onInitialize(function()
-  openspace.addSceneGraphNode(constellationsExtragalactic)
-  openspace.addSceneGraphNode(constellations)
 
-  openspace.action.registerAction(show_constellations)
-  openspace.action.registerAction(hide_constellations)
-  openspace.action.registerAction(show_zodiacs)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(ConstellationsExtragalactic)
+  openspace.addSceneGraphNode(Constellations)
+
+  openspace.action.registerAction(ShowConstellations)
+  openspace.action.registerAction(HideConstellations)
+  openspace.action.registerAction(ShowZodiacs)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(show_zodiacs)
-  openspace.action.removeAction(hide_constellations)
-  openspace.action.removeAction(show_constellations)
+  openspace.action.removeAction(ShowZodiacs)
+  openspace.action.removeAction(HideConstellations)
+  openspace.action.removeAction(ShowConstellations)
 
-  openspace.removeSceneGraphNode(constellations)
-  openspace.removeSceneGraphNode(constellationsExtragalactic)
+  openspace.removeSceneGraphNode(Constellations)
+  openspace.removeSceneGraphNode(ConstellationsExtragalactic)
 end)
 
-asset.export(constellationsExtragalactic)
-asset.export(constellations)
+asset.export(ConstellationsExtragalactic)
+asset.export(Constellations)
+asset.export("ShowConstellations", ShowConstellations.Identifier)
+asset.export("HideConstellations", HideConstellations.Identifier)
+asset.export("ShowZodiacs", ShowZodiacs.Identifier)
 
 
 

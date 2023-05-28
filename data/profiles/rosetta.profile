@@ -51,35 +51,35 @@
   ],
   "keybindings": [
     {
-      "action": "os.missions.rosetta.67p.focus",
+      "action": "os.rosetta.Focus67p",
       "key": "A"
     },
     {
-      "action": "os.missions.rosetta.focus",
+      "action": "os.rosetta.FocusRosetta",
       "key": "S"
     },
     {
-      "action": "os.missions.rosetta.setup.landerrelease",
+      "action": "os.rosetta.SetupLanderRelease",
       "key": "F6"
     },
     {
-      "action": "os.missions.rosetta.67p.clearimageprojections",
+      "action": "os.rosetta.ClearImageProjections",
       "key": "F8"
     },
     {
-      "action": "os.missions.rosetta.toggleouterplanetarytrails",
+      "action": "os.rosetta.ToggleOuterPlanetaryTrails",
       "key": "E"
     },
     {
-      "action": "os.missions.rosetta.toggleimageplane",
+      "action": "os.rosetta.ToggleImagePlane",
       "key": "I"
     },
     {
-      "action": "os.mission.rosetta.togglephilaetrail",
+      "action": "os.rosetta.TogglePhilaeTrail",
       "key": "O"
     },
     {
-      "action": "os.missions.rosetta.toggle67pprojection",
+      "action": "os.rosetta.Toggle67pProjection",
       "key": "P"
     }
   ],

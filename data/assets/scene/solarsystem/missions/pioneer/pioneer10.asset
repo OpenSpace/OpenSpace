@@ -2,6 +2,7 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local model = asset.require("scene/solarsystem/missions/pioneer/pioneermodel")
 
 
+
 local kernelsFolder = asset.syncedResource({
   Name = "Pioneer Kernels",
   Type = "HttpSynchronization",
@@ -9,9 +10,8 @@ local kernelsFolder = asset.syncedResource({
   Version = 1
 })
 
-local kernelsList = { kernelsFolder .. "p10-a.bsp" }
 
-local Pioneer10NAIF = -23
+local Pioneer10ID = -23
 
 local Pioneer10 = {
   Identifier = "Pioneer_10",
@@ -19,9 +19,8 @@ local Pioneer10 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = Pioneer10NAIF,
-      Observer = "SSB",
-      Kernels = kernelsList
+      Target = Pioneer10ID,
+      Observer = "SSB"
     }
   },
   Renderable = model.PioneerModel,
@@ -39,9 +38,8 @@ local Pioneer10Trail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = Pioneer10NAIF,
-      Observer = "SSB",
-      Kernels = kernelsList
+      Target = Pioneer10ID,
+      Observer = "SSB"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1972 MAR 03 02:04:00",
@@ -58,7 +56,10 @@ local Pioneer10Trail = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernelsFolder .. "p10-a.bsp")
+
   openspace.addSceneGraphNode(Pioneer10)
   openspace.addSceneGraphNode(Pioneer10Trail)
 end)
@@ -66,6 +67,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Pioneer10Trail)
   openspace.removeSceneGraphNode(Pioneer10)
+
+  openspace.spice.unloadKernel(kernelsFolder .. "p10-a.bsp")
 end)
 
 asset.export(Pioneer10)

@@ -1,171 +1,206 @@
-local focus_newhorizons = {
-  Identifier = "os.missions.newhorizons.focus",
+local FocusNewHorizons = {
+  Identifier = "os.newhorizons.FocusNewHorizons",
   Name = "Focus on New Horizons",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'NewHorizons');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Anchor", "NewHorizons")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Sets the focus of the camera on 'NewHorizons'",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local anchor_nh_aim_pluto = {
-  Identifier = "os.missions.newhorizons.aimpluto",
+local AimPluto = {
+  Identifier = "os.newhorizons.AimPluto",
   Name = "Anchor NH, Aim Pluto",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'NewHorizons');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', 'Pluto');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Anchor", "NewHorizons")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Aim", "Pluto")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Anchor at New Horizons, Aim at Pluto",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local focus_pluto = {
-  Identifier = "os.missions.newhorizons.pluto.focus",
+local FocusPluto = {
+  Identifier = "os.newhorizons.FocusPluto",
   Name = "Focus on Pluto",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'PlutoProjection');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Anchor", "PlutoProjection")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Sets the focus of the camera on 'Pluto'",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local focus_charon = {
-  Identifier = "os.missions.newhorizons.charon.focus",
+local FocusCharon = {
+  Identifier = "os.newhorizons.FocusCharon",
   Name = "Focus on Charon",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Charon');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Anchor", "Charon")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Sets the focus of the camera on 'Charon'",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local toggle_nh_imageprojection = {
-  Identifier = "os.missions.newhorizons.toggleimageprojection",
+local ToggleImageProjection = {
+  Identifier = "os.newhorizons.ToggleImageProjection",
   Name = "Toggle NH image projection",
   Command = [[
-    local enabled = openspace.getPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection');
-    openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection', not enabled);
-    openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.PerformProjection', not enabled);
+    local enabled = openspace.getPropertyValue("Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection")
+    openspace.setPropertyValue("Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection", not enabled)
+    openspace.setPropertyValue("Scene.CharonProjection.Renderable.ProjectionComponent.PerformProjection", not enabled)
   ]],
   Documentation = "Toggles New Horizons image projection",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local clear_image_projections = {
-  Identifier = "os.missions.newhorizons.clearimageprojections",
+local ClearImageProjections = {
+  Identifier = "os.newhorizons.ClearImageProjections",
   Name = "Clear image projections",
   Command = [[
-    openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections', true);
-    openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections', true);
+    openspace.setPropertyValue("Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections", true)
+    openspace.setPropertyValue("Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections", true)
   ]],
   Documentation = "Removes all image projections from Pluto and Charon",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local approach_time_and_projections = {
-  Identifier = "os.missions.newhorizons.approach",
+local Approach = {
+  Identifier = "os.newhorizons.Approach",
   Name = "Reset time and projections",
   Command = [[
-    openspace.time.setTime('2015-07-14T09:00:00.00');
-    openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections', true);
-    openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections', true);
+    openspace.time.setTime("2015-07-14T09:00:00.000")
+    openspace.setPropertyValue("Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections", true)
+    openspace.setPropertyValue("Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections", true)
   ]],
   Documentation = "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local increase_hightmap_pluto = {
-  Identifier = "os.missions.newhorizons.pluto.increasehightmap",
+local IncreaseHeightmapPluto = {
+  Identifier = "os.newhorizons.IncreaseHeightmapPluto",
   Name = "Pluto height exaggeration +",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.PlutoProjection.Renderable.HeightExaggeration", openspace.getPropertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") + 5000);
+    openspace.setPropertyValueSingle(
+      "Scene.PlutoProjection.Renderable.HeightExaggeration",
+      openspace.getPropertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") + 5000
+    )
   ]],
   Documentation = "Increases the height map exaggeration on Pluto",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local decrease_hightmap_pluto = {
-  Identifier = "os.missions.newhorizons.pluto.decreasehightmap",
+local DecreaseHeightmapPluto = {
+  Identifier = "os.newhorizons.DecreaseHeightmapPluto",
   Name = "Pluto height exaggeration -",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.PlutoProjection.Renderable.HeightExaggeration", openspace.getPropertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") - 5000);
+    openspace.setPropertyValueSingle(
+      "Scene.PlutoProjection.Renderable.HeightExaggeration",
+      openspace.getPropertyValue("Scene.PlutoProjection.Renderable.HeightExaggeration") - 5000
+    )
   ]],
   Documentation = "Decreases the height map exaggeration on Pluto",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local increase_hightmap_charon = {
-  Identifier = "os.missions.newhorizons.charon.increasehightmap",
+local IncreaseHeightmapCharon = {
+  Identifier = "os.newhorizons.IncreaseHeightmapCharon",
   Name = "Charon height exaggeration +",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.CharonProjection.Renderable.HeightExaggeration", openspace.getPropertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") + 5000);
+    openspace.setPropertyValueSingle(
+      "Scene.CharonProjection.Renderable.HeightExaggeration",
+      openspace.getPropertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") + 5000
+    )
   ]],
   Documentation = "Increases the height map exaggeration on Charon",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local decrease_hightmap_charon = {
-  Identifier = "os.missions.newhorizons.charon.decreasehightmap",
+local DecreaseHeightmapCharon = {
+  Identifier = "os.newhorizons.DecreaseHeightmapCharon",
   Name = "Charon height exaggeration -",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.CharonProjection.Renderable.HeightExaggeration", openspace.getPropertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") - 5000);
+    openspace.setPropertyValueSingle(
+      "Scene.CharonProjection.Renderable.HeightExaggeration",
+      openspace.getPropertyValue("Scene.CharonProjection.Renderable.HeightExaggeration") - 5000
+    )
   ]],
   Documentation = "Decreases the height map exaggeration on Charon",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local toggle_pluto_trail = {
-  Identifier = "os.missions.newhorizons.pluto.toggletrail",
+local TogglePlutoTrail = {
+  Identifier = "os.newhorizons.TogglePlutoTrail",
   Name = "Toggle Pluto trail",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.PlutoBarycentricTrail.Renderable.Enabled', not openspace.getPropertyValue('Scene.PlutoBarycentricTrail.Renderable.Enabled'));
+    openspace.setPropertyValueSingle(
+      "Scene.PlutoBarycentricTrail.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.PlutoBarycentricTrail.Renderable.Enabled")
+    )
   ]],
   Documentation = "Toggles the visibility of the trail behind Pluto",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local toggle_pluto_labels = {
-  Identifier = "os.missions.newhorizons.pluto.togglelabels",
+local TogglePlutoLabels = {
+  Identifier = "os.newhorizons.TogglePlutoLabels",
   Name = "Toggle Pluto labels",
   Command = [[
-    local list = {"Scene.PlutoText.Renderable.Enabled", "Scene.CharonText.Renderable.Enabled", "Scene.HydraText.Renderable.Enabled", "Scene.NixText.Renderable.Enabled", "Scene.KerberosText.Renderable.Enabled", "Scene.StyxText.Renderable.Enabled"};
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
-    end
+    openspace.setPropertyValueSingle(
+      "Scene.PlutoText.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.PlutoText.Renderable.Enabled")
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.CharonText.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.CharonText.Renderable.Enabled")
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.HydraText.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.HydraText.Renderable.Enabled")
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.NixText.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.NixText.Renderable.Enabled")
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.KerberosText.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.KerberosText.Renderable.Enabled")
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.StyxText.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.StyxText.Renderable.Enabled")
+    )
   ]],
   Documentation = "Toggles the visibility of the text labels of Pluto, Charon, Hydra, Nix, Kerberos, and Styx",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local toggle_nh_labels = {
-  Identifier = "os.missions.newhorizons.togglelabels",
+local ToggleNewHorizonsLabels = {
+  Identifier = "os.newhorizons.ToggleNewHorizonsLabels",
   Name = "Toggle New Horizons labels",
   Command = [[
-    local v = openspace.getPropertyValue("Scene.Labels.Renderable.Opacity");
+    local v = openspace.getPropertyValue("Scene.Labels.Renderable.Opacity")
     if v <= 0.5 then
-      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity",1.0,2.0)
+      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity", 1.0, 2.0)
     else
-      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity",0.0,2.0)
+      openspace.setPropertyValueSingle("Scene.Labels.Renderable.Opacity", 0.0, 2.0)
     end
   ]],
   Documentation = "Toggles the visibility of the labels for the New Horizons instruments",
@@ -173,66 +208,95 @@ local toggle_nh_labels = {
   isLocal = false
 }
 
-local toggle_shadows = {
-  Identifier = "os.missions.newhorizons.toggleshadows",
+local ToggleShadows = {
+  Identifier = "os.newhorizons.ToggleShadows",
   Name = "Toggle shadows",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.PlutoShadow.Renderable.Enabled', not openspace.getPropertyValue('Scene.PlutoShadow.Renderable.Enabled'));
-    openspace.setPropertyValueSingle('Scene.CharonShadow.Renderable.Enabled', not openspace.getPropertyValue('Scene.CharonShadow.Renderable.Enabled'));
+    openspace.setPropertyValueSingle(
+      "Scene.PlutoShadow.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.PlutoShadow.Renderable.Enabled")
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.CharonShadow.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.CharonShadow.Renderable.Enabled")
+    )
   ]],
   Documentation = "Toggles the visibility of the shadow visualization of Pluto and Charon",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
-local toggle_nh_trail = {
-  Identifier = "os.missions.newhorizons.toggletrail",
+local ToggleNewHorizonsTrail = {
+  Identifier = "os.newhorizons.ToggleNewHorizonsTrail",
   Name = "Toggle New Horizons trail",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.NewHorizonsTrailPluto.Renderable.Enabled', not openspace.getPropertyValue('Scene.NewHorizonsTrailPluto.Renderable.Enabled'));
+    openspace.setPropertyValueSingle(
+      "Scene.NewHorizonsTrailPluto.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.NewHorizonsTrailPluto.Renderable.Enabled")
+    )
   ]],
   Documentation = "Toggles the trail of New Horizons",
   GuiPath = "/Missions/New Horizons",
   isLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(focus_newhorizons)
-  openspace.action.registerAction(anchor_nh_aim_pluto)
-  openspace.action.registerAction(focus_pluto)
-  openspace.action.registerAction(focus_charon)
-  openspace.action.registerAction(toggle_nh_imageprojection)
-  openspace.action.registerAction(clear_image_projections)
-  openspace.action.registerAction(approach_time_and_projections)
-  openspace.action.registerAction(decrease_hightmap_pluto)
-  openspace.action.registerAction(increase_hightmap_charon)
-  openspace.action.registerAction(decrease_hightmap_charon)
-  openspace.action.registerAction(toggle_pluto_trail)
-  openspace.action.registerAction(toggle_pluto_labels)
-  openspace.action.registerAction(toggle_nh_labels)
-  openspace.action.registerAction(toggle_shadows)
-  openspace.action.registerAction(toggle_nh_trail)
-  openspace.action.registerAction(increase_hightmap_pluto)
+  openspace.action.registerAction(FocusNewHorizons)
+  openspace.action.registerAction(AimPluto)
+  openspace.action.registerAction(FocusPluto)
+  openspace.action.registerAction(FocusCharon)
+  openspace.action.registerAction(ToggleImageProjection)
+  openspace.action.registerAction(ClearImageProjections)
+  openspace.action.registerAction(Approach)
+  openspace.action.registerAction(IncreaseHeightmapPluto)
+  openspace.action.registerAction(DecreaseHeightmapPluto)
+  openspace.action.registerAction(IncreaseHeightmapCharon)
+  openspace.action.registerAction(DecreaseHeightmapCharon)
+  openspace.action.registerAction(TogglePlutoTrail)
+  openspace.action.registerAction(TogglePlutoLabels)
+  openspace.action.registerAction(ToggleNewHorizonsLabels)
+  openspace.action.registerAction(ToggleShadows)
+  openspace.action.registerAction(ToggleNewHorizonsTrail)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(increase_hightmap_pluto)
-  openspace.action.removeAction(toggle_nh_trail)
-  openspace.action.removeAction(toggle_shadows)
-  openspace.action.removeAction(toggle_nh_labels)
-  openspace.action.removeAction(toggle_pluto_labels)
-  openspace.action.removeAction(toggle_pluto_trail)
-  openspace.action.removeAction(decrease_hightmap_charon)
-  openspace.action.removeAction(increase_hightmap_charon)
-  openspace.action.removeAction(decrease_hightmap_pluto)
-  openspace.action.removeAction(approach_time_and_projections)
-  openspace.action.removeAction(clear_image_projections)
-  openspace.action.removeAction(toggle_nh_imageprojection)
-  openspace.action.removeAction(focus_charon)
-  openspace.action.removeAction(focus_pluto)
-  openspace.action.removeAction(anchor_nh_aim_pluto)
-  openspace.action.removeAction(focus_newhorizons)
+  openspace.action.removeAction(ToggleNewHorizonsTrail)
+  openspace.action.removeAction(ToggleShadows)
+  openspace.action.removeAction(ToggleNewHorizonsLabels)
+  openspace.action.removeAction(TogglePlutoLabels)
+  openspace.action.removeAction(TogglePlutoTrail)
+  openspace.action.removeAction(DecreaseHeightmapCharon)
+  openspace.action.removeAction(IncreaseHeightmapCharon)
+  openspace.action.removeAction(DecreaseHeightmapPluto)
+  openspace.action.removeAction(IncreaseHeightmapPluto)
+  openspace.action.removeAction(Approach)
+  openspace.action.removeAction(ClearImageProjections)
+  openspace.action.removeAction(ToggleImageProjection)
+  openspace.action.removeAction(FocusCharon)
+  openspace.action.removeAction(FocusPluto)
+  openspace.action.removeAction(AimPluto)
+  openspace.action.removeAction(FocusNewHorizons)
 end)
+
+asset.export("FocusNewHorizons", FocusNewHorizons.Identifier)
+asset.export("AimPluto", AimPluto.Identifier)
+asset.export("FocusPluto", FocusPluto.Identifier)
+asset.export("FocusCharon", FocusCharon.Identifier)
+asset.export("ToggleImageProjection", ToggleImageProjection.Identifier)
+asset.export("ClearImageProjections", ClearImageProjections.Identifier)
+asset.export("Approach", Approach.Identifier)
+asset.export("IncreaseHeightmapPluto", IncreaseHeightmapPluto.Identifier)
+asset.export("DecreaseHeightmapPluto", DecreaseHeightmapPluto.Identifier)
+asset.export("IncreaseHeightmapCharon", IncreaseHeightmapCharon.Identifier)
+asset.export("DecreaseHeightmapCharon", DecreaseHeightmapCharon.Identifier)
+asset.export("TogglePlutoTrail", TogglePlutoTrail.Identifier)
+asset.export("TogglePlutoLabels", TogglePlutoLabels.Identifier)
+asset.export("ToggleNewHorizonsLabels", ToggleNewHorizonsLabels.Identifier)
+asset.export("ToggleShadows", ToggleShadows.Identifier)
+asset.export("ToggleNewHorizonsTrail", ToggleNewHorizonsTrail.Identifier)
+
+
 
 asset.meta = {
   Name = "New Horizons actions",

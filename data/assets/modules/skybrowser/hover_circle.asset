@@ -1,5 +1,3 @@
--- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_SPOUT enabled
-
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local imageFolder = asset.syncedResource({
@@ -8,6 +6,7 @@ local imageFolder = asset.syncedResource({
   Identifier = "misc_ring_image",
   Version = 1
 })
+
 
 local circle = {
   Identifier = "hoverCircle",
@@ -28,9 +27,10 @@ local circle = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(circle)
-  openspace.skybrowser.setHoverCircle('hoverCircle')
+  openspace.skybrowser.setHoverCircle("hoverCircle")
 end)
 
 asset.onDeinitialize(function()
@@ -38,6 +38,8 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(circle)
+
+
 
 asset.meta = {
   Name = "SkyBrowser Hover Circle",

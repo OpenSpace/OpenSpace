@@ -1,6 +1,8 @@
 local propertyHelper = asset.require("../property_helper")
 local joystickHelper = asset.require("./joystick_helper")
 
+
+
 -- Allowed values for the third parameter of bindJoystickAxis:
 -- "None"
 -- "Orbit X"
@@ -47,9 +49,10 @@ local PS4Controller = {
   }
 }
 
+
 asset.onInitialize(function()
-  local controller = PS4Controller;
-  local name = "Wireless Controller";
+  local controller = PS4Controller
+  local name = "Wireless Controller"
 
   local deadzoneJoysticks = 0.2
   local deadzoneTriggers = 0.05
@@ -60,26 +63,26 @@ asset.onInitialize(function()
   openspace.navigation.setAxisDeadZone(name, controller.L2, deadzoneTriggers)
   openspace.navigation.setAxisDeadZone(name, controller.R2, deadzoneTriggers)
 
-  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[1], "Orbit X");
-  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[2], "Orbit Y");
-  openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[1], "Pan X", true);
-  openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[2], "Pan Y", true);
-  openspace.navigation.bindJoystickAxis(name, controller.L2, "Zoom Out", false, "TriggerLike");
-  openspace.navigation.bindJoystickAxis(name, controller.R2, "Zoom In", false, "TriggerLike");
+  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[1], "Orbit X")
+  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[2], "Orbit Y")
+  openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[1], "Pan X", true)
+  openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[2], "Pan Y", true)
+  openspace.navigation.bindJoystickAxis(name, controller.L2, "Zoom Out", false, "TriggerLike")
+  openspace.navigation.bindJoystickAxis(name, controller.R2, "Zoom In", false, "TriggerLike")
 
   -- Roll
   openspace.navigation.bindJoystickButton(
     name,
     controller.DPad.Up,
     joystickHelper.bindLocalRoll(name, controller.RightThumbStick[1]) ..
-    "openspace.navigation.bindJoystickAxis('" .. name .. "', " .. controller.RightThumbStick[2] .. ", 'None');",
+    "openspace.navigation.bindJoystickAxis('" .. name .. "', " .. controller.RightThumbStick[2] .. ", 'None')",
     "Switch to roll mode"
   )
   openspace.navigation.bindJoystickButton(
     name,
     controller.DPad.Up,
     joystickHelper.unbindRoll(name, controller.RightThumbStick[1]) ..
-    "openspace.navigation.bindJoystickAxis('" .. name .. "', " .. controller.RightThumbStick[2] .. ", 'Pan Y', true);",
+    "openspace.navigation.bindJoystickAxis('" .. name .. "', " .. controller.RightThumbStick[2] .. ", 'Pan Y', true)",
     "Switch back to normal mode",
     "Release"
   )
@@ -89,8 +92,8 @@ asset.onInitialize(function()
     name,
     controller.L1,
     [[
-      openspace.navigation.targetPreviousInterestingAnchor();
-      openspace.navigation.retargetAnchor();
+      openspace.navigation.targetPreviousInterestingAnchor()
+      openspace.navigation.retargetAnchor()
     ]],
     "Switch target to the previous interesting node"
   )
@@ -99,8 +102,8 @@ asset.onInitialize(function()
     name,
     controller.R1,
     [[
-      openspace.navigation.targetNextInterestingAnchor();
-      openspace.navigation.retargetAnchor();
+      openspace.navigation.targetNextInterestingAnchor()
+      openspace.navigation.retargetAnchor()
     ]],
     "Switch target to the next interesting node"
   )
@@ -129,7 +132,7 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickButton(
     name,
     controller.RightStickButton,
-    "openspace.navigation.retargetAnchor();",
+    "openspace.navigation.retargetAnchor()",
     "Retarget on current focus"
   )
 
@@ -137,21 +140,21 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickButton(
     name,
     controller.DPad.Left,
-    "openspace.time.interpolatePreviousDeltaTimeStep();",
+    "openspace.time.interpolatePreviousDeltaTimeStep()",
     "Go backwards in time, faster the more times this button is pressed"
   )
 
   openspace.navigation.bindJoystickButton(
     name,
     controller.DPad.Down,
-    "openspace.time.interpolateDeltaTime(1);",
+    "openspace.time.interpolateDeltaTime(1)",
     "Reset realtime"
   )
 
   openspace.navigation.bindJoystickButton(
     name,
     controller.DPad.Right,
-    "openspace.time.interpolateNextDeltaTimeStep();",
+    "openspace.time.interpolateNextDeltaTimeStep()",
     "Go forwards in time, faster the more times this button is pressed"
   )
 
@@ -160,9 +163,9 @@ asset.onInitialize(function()
     name,
     controller.Options,
     [[
-      openspace.time.setDeltaTime(1);
-      local yesterday = openspace.time.advancedTime(openspace.time.currentWallTime(), "-1d");
-      openspace.time.setTime(yesterday);
+      openspace.time.setDeltaTime(1)
+      local yesterday = openspace.time.advancedTime(openspace.time.currentWallTime(), "-1d")
+      openspace.time.setTime(yesterday)
     ]],
     "Reset to yesterday realtime"
   )
@@ -171,7 +174,7 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickButton(
     name,
     controller.TouchPad,
-    "openspace.time.togglePause();",
+    "openspace.time.togglePause()",
     "Pause time simulation"
   )
 

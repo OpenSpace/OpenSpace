@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Earthquakes - 2001-2015"
@@ -24,42 +25,43 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_allquakes = {
+
+local LayerAllquakes = {
   Identifier = Identifier .. "-allquakes",
   Name = Name .. " (All Quakes)",
   FilePath = syncedDirectory .. "All_Quakes_2001-2015_4k.jpg",
   Description = Description
 }
 
-local layer_quake_basemap = {
+local LayerQuakeBasemap = {
   Identifier = Identifier .. "-quake-basemap",
   Name = Name .. " (Quake Basemap)",
   FilePath = syncedDirectory .. "quake_basemap_4k.jpg",
   Description = Description
 }
 
-local layer_tsunami_basemap = {
+local LayerTsunamiBasemap = {
   Identifier = Identifier .. "-tsunami-basemap",
   Name = Name .. " (Tsunami Basemap)",
   FilePath = syncedDirectory .. "Tsunami_basemap_4k.jpg",
   Description = Description
 }
 
-local layer_quakes_gte6_5 = {
+local LayerQuakesGte6p5 = {
   Identifier = Identifier .. "-gte6_5",
   Name = Name .. " (GTE 6.5)",
   FilePath = syncedDirectory .. "Quakes_gte6.5_2001-2015_4k.jpg",
   Description = Description
 }
 
-local layer_quakes_gte8 = {
+local LayerQuakesGte8 = {
   Identifier = Identifier .. "-gte8",
   Name = Name .. " (GTE 8.0)",
   FilePath = syncedDirectory .. "Quakes_gte8_2001-2015_4k.jpg",
   Description = Description
 }
 
-local legend = {
+local Legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
@@ -68,29 +70,31 @@ local legend = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_allquakes)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_quake_basemap)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_tsunami_basemap)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_quakes_gte6_5)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_quakes_gte8)
-  openspace.addScreenSpaceRenderable(legend)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerAllquakes)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakeBasemap)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerTsunamiBasemap)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakesGte6p5)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakesGte8)
+  openspace.addScreenSpaceRenderable(Legend)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_allquakes)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quake_basemap)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_tsunami_basemap)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quakes_gte6_5)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quakes_gte8)
-  openspace.removeScreenSpaceRenderable(legend)
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakesGte8)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakesGte6p5)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerTsunamiBasemap)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakeBasemap)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerAllquakes)
 end)
 
-asset.export(layer_allquakes)
-asset.export(layer_quake_basemap)
-asset.export(layer_tsunami_basemap)
-asset.export(layer_quakes_gte6_5)
-asset.export(layer_quakes_gte8)
+asset.export(LayerAllquakes)
+asset.export(LayerQuakeBasemap)
+asset.export(LayerTsunamiBasemap)
+asset.export(LayerQuakesGte6p5)
+asset.export(LayerQuakesGte8)
+
 
 
 asset.meta = {

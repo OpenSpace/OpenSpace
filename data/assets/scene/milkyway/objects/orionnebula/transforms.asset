@@ -1,6 +1,8 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
-local PARSEC_CONSTANT = 3.0856776E16;
+
+
+local Parsec = 3.0856776E16
 
 local NebulaPosition = {
   Identifier = "NebulaPosition",
@@ -9,11 +11,11 @@ local NebulaPosition = {
     Translation = {
       Type = "StaticTranslation",
       Position = {
-        -329.915 * PARSEC_CONSTANT,
-        -183.153 * PARSEC_CONSTANT,
-        -132.706 * PARSEC_CONSTANT
+        -329.915 * Parsec,
+        -183.153 * Parsec,
+        -132.706 * Parsec
       }
-    },
+    }
   },
   GUI = {
     Name = "Orion Nebula Position",
@@ -22,6 +24,7 @@ local NebulaPosition = {
     Description = "Static position for Orion Nebula"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NebulaPosition)

@@ -1,6 +1,7 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
+local kernels = asset.require("./kernels")
 
 
 local models = asset.syncedResource({
@@ -10,63 +11,27 @@ local models = asset.syncedResource({
   Version = 2
 })
 
-local kernels = asset.syncedResource({
-  Name = "Messenger Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "messenger_spice",
-  Version = 2
-})
-
-
-local LocalKernels = {
-  kernels .. "messenger_2548.tsc",
-  kernels .. "msgr_v231.tf",
-
-  kernels .. "de405.bsp",
-  kernels .. "msgr_040803_150430_150430_od431sc_2.bsp",
-  kernels .. "msgr_antenna_v000.bsp",
-  kernels .. "msgr_de405_de423s.bsp",
-
-  kernels .. "msgr_epps_v100.ti",
-  kernels .. "msgr_grns_v110.ti",
-  kernels .. "msgr_mag_v021.ti",
-  kernels .. "msgr_mascs_v100.ti",
-  kernels .. "msgr_mdis_v160.ti",
-  kernels .. "msgr_mla_v010.ti",
-  kernels .. "msgr_rs_v111.ti",
-  kernels .. "msgr_xrs_v001.ti",
-
-
-  kernels .. "pck00008.tpc",
-  kernels .. "pck00008_msgr.tpc",
-  kernels .. "pck00009_msgr_v10.tpc",
-  kernels .. "pck00010_msgr_v10.tpc",
-  kernels .. "pck00010_msgr_v23.tpc",
-  kernels .. "pck00010.tpc",
-
-  kernels .. "msgr_1103_v02.bc",
-  kernels .. "msgr_1104_v02.bc",
-  kernels .. "msgr_1105_v02.bc",
-  kernels .. "msgr_1106_v02.bc"
-}
-
 
 local RotationMatrix = {
-  1, 0, 0, 0,
+  1, 0,  0, 0,
   0, 0, -1, 0,
-  0, 1, 0, 0,
-  0, 0, 0, 1
+  0, 1,  0, 0,
+  0, 0,  0, 1
 }
 
 local Messenger = {
   Identifier = "Messenger",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2011-03-01",
+    End = "2011-06-30"
+  },
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "MESSENGER",
-      Observer = "SSB",
-      Kernels = LocalKernels
+      Observer = "SSB"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -74,13 +39,7 @@ local Messenger = {
       DestinationFrame = "GALACTIC"
     }
   },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = "2011-03-01",
-    End = "2011-06-30"
-  },
   GUI = {
-    Name = "Messenger",
     Path = "/Solar System/Missions/Messenger"
   }
 }
@@ -131,7 +90,7 @@ local MessengerProbeHeatShield = {
     }
   },
   GUI = {
-    Name = "MessengerProbe Heat Sheild",
+    Name = "MessengerProbe Heat Shield",
     Path = "/Solar System/Missions/Messenger"
   }
 }
@@ -178,8 +137,7 @@ local MessengerTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "MESSENGER",
-      Observer = "MERCURY BARYCENTER",
-      Kernels = LocalKernels
+      Observer = "MERCURY BARYCENTER"
     },
     Color = { 0.288, 0.375, 0.934 },
     EnableFade = false,
@@ -194,28 +152,34 @@ local MessengerTrail = {
 }
 
 
-local nodes = {
-  Messenger,
-  MessengerProbeBlack,
-  MessengerProbeFoil,
-  MessengerProbeHeatShield,
-  MessengerProbeMetal,
-  MessengerProbePanels,
-  MessengerTrail
-}
-
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernels.Kernels)
+
+  openspace.addSceneGraphNode(Messenger)
+  openspace.addSceneGraphNode(MessengerProbeBlack)
+  openspace.addSceneGraphNode(MessengerProbeFoil)
+  openspace.addSceneGraphNode(MessengerProbeHeatShield)
+  openspace.addSceneGraphNode(MessengerProbeMetal)
+  openspace.addSceneGraphNode(MessengerProbePanels)
+  openspace.addSceneGraphNode(MessengerTrail)
 end)
 
 asset.onDeinitialize(function()
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.removeSceneGraphNode(MessengerTrail)
+  openspace.removeSceneGraphNode(MessengerProbePanels)
+  openspace.removeSceneGraphNode(MessengerProbeMetal)
+  openspace.removeSceneGraphNode(MessengerProbeHeatShield)
+  openspace.removeSceneGraphNode(MessengerProbeFoil)
+  openspace.removeSceneGraphNode(MessengerProbeBlack)
+  openspace.removeSceneGraphNode(Messenger)
+
+  openspace.spice.unloadKernel(kernels.Kernels)
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Messenger)
+asset.export(MessengerProbeBlack)
+asset.export(MessengerProbeFoil)
+asset.export(MessengerProbeHeatShield)
+asset.export(MessengerProbeMetal)
+asset.export(MessengerProbePanels)
+asset.export(MessengerTrail)

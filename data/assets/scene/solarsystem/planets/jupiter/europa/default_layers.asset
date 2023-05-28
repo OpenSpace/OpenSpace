@@ -1,9 +1,8 @@
-local colorLayersPath = "./layers/colorlayers"
+asset.require("./layers/colorlayers/europa_texture", false)
+asset.require("./layers/colorlayers/voyager_global_mosaic_local", false)
+asset.require("./layers/colorlayers/voyager_global_mosaic_sweden", false)
+asset.require("./layers/colorlayers/voyager_global_mosaic_newyork", true)
 
-asset.require(colorLayersPath .. "/europa_texture", false)
-asset.require(colorLayersPath .. "/voyager_global_mosaic_local", false)
-asset.require(colorLayersPath .. "/voyager_global_mosaic_sweden", false)
-asset.require(colorLayersPath .. "/voyager_global_mosaic_newyork", true)
 
 
 asset.meta = {

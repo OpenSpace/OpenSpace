@@ -1,9 +1,10 @@
-local folder  = asset.syncedResource({
+local folder = asset.syncedResource({
   Name = "Apollo Kernels",
   Type = "HttpSynchronization",
   Identifier = "apollo_spice",
-  Version =  1
+  Version = 1
 })
+
 
 local kernels = {
   folder .. "apollo15.0001.tsc",
@@ -15,8 +16,8 @@ local kernels = {
   folder .. "apollo15_metric.0002.ti",
   -- folder .. "apollo15_panoramic.0001.ti",
   folder .. "apollo15-1.bsp",
-  folder .. "AS15-M_v01.bc",
-  -- folder .. "AS15-M_v01.bsp",
+  folder .. "AS15-M_v01.bc"
+  -- folder .. "AS15-M_v01.bsp"
 }
 
 -- local kernels = {

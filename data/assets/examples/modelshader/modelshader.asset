@@ -1,6 +1,8 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
+
+
 local model = asset.syncedResource({
   Name = "Animated Box",
   Type = "HttpSynchronization",
@@ -8,8 +10,9 @@ local model = asset.syncedResource({
   Version = 1
 })
 
-local model = {
-  Identifier = "modelshader",
+
+local Model = {
+  Identifier = "ModelShader",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
     Translation = {
@@ -29,21 +32,22 @@ local model = {
     EnableAnimation = true,
     AnimationStartTime = "2023 05 11 00:00:00",
     AnimationTimeScale = "Second",
-    AnimationMode = "LoopInfinitely",
+    AnimationMode = "LoopInfinitely"
   },
   GUI = {
     Name = "Model Shader",
     Path = "/Example",
-    Description = "Simple box model with a custom shader",
+    Description = "Simple box model with a custom shader"
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(model)
+  openspace.addSceneGraphNode(Model)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(model)
+  openspace.removeSceneGraphNode(Model)
 end)
 
-asset.export(model)
+asset.export(Model)

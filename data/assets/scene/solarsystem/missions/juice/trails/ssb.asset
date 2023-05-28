@@ -1,17 +1,17 @@
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("../kernels")
+
 
 
 local JuiceTrail = {
   Identifier = "JuiceTrail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
       Target = "JUICE",
-      Observer = "SSB",
-      Kernels = kernels.Kernels
+      Observer = "SSB"
     },
     Color = { 0.85, 0.85, 0.85 },
     StartTime = "2023 APR 05 12:00:00.000",
@@ -27,14 +27,19 @@ local JuiceTrail = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.Kernels)
+
   openspace.addSceneGraphNode(JuiceTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JuiceTrail)
+
+  openspace.spice.unloadKernel(kernels.Kernels)
 end)
 
 asset.export(JuiceTrail)
+
 
 
 asset.meta = {

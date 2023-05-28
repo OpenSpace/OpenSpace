@@ -1,6 +1,8 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Saturn Labels",
@@ -9,6 +11,7 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
+
 local Tethys = {
   Identifier = "Tethys",
   Parent = transforms.SaturnBarycenter.Identifier,
@@ -16,8 +19,7 @@ local Tethys = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "TETHYS",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Observer = "SATURN BARYCENTER"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -49,7 +51,6 @@ local Tethys = {
   }
 }
 
-
 local TethysLabel = {
   Identifier = "TethysLabel",
   Parent = Tethys.Identifier,
@@ -77,6 +78,8 @@ local TethysLabel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.sat441)
+
   openspace.addSceneGraphNode(Tethys)
   openspace.addSceneGraphNode(TethysLabel)
 end)
@@ -84,9 +87,12 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TethysLabel)
   openspace.removeSceneGraphNode(Tethys)
+
+  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Tethys)
+asset.export(TethysLabel)
 
 
 

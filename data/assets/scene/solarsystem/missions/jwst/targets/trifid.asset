@@ -1,4 +1,6 @@
-local image = asset.require("./trifid_image").image
+local trifid = asset.require("./trifid_image")
+
+
 
 local TrifidImage = {
   Identifier = "TrifidImage",
@@ -9,21 +11,25 @@ local TrifidImage = {
   RadiusAzimuthElevation = { 1.0, 0.5, 0.1 },
   UsePerspectiveProjection = false,
   Opacity = 1.0,
-  TexturePath = image .. "trifid-nebula.png",
+  TexturePath = trifid.image .. "trifid-nebula.png",
   Tag = { "mission_jwst_target" },
   Description = [[
     Image of the Trifid Nebula by ESO/Gábor Tóth.
-  ]],
+  ]]
 }
+
 
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(TrifidImage)
 end)
+
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(TrifidImage)
 end)
 
 asset.export(TrifidImage)
+
+
 
 asset.meta = {
   Name = "Trifid Nebula Image",

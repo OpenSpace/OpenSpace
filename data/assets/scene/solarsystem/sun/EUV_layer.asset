@@ -2,12 +2,15 @@ asset.require("spice/base")
 local propertyHelper = asset.require("util/property_helper")
 local transforms = asset.require("./transforms")
 
+
+
 local textureSourcePath = asset.syncedResource({
   Type = "HttpSynchronization",
   Name = "euv_textures_bastille_event",
   Identifier = "euv_textures_bastille_event",
   Version = 1
 })
+
 
 local EUVLayer = {
   Identifier = "EUV-Layer-bastille-day-2000",
@@ -26,12 +29,13 @@ local EUVLayer = {
   GUI = {
     Name = "EUV Layer",
     Path = "/Solar System/Sun",
-    Description = "Texture sequence of an extreme ultra violet (EUV) simulation, during the CME. This asset contains data from 2000-07-14 08:38 to 2000-07-14 19:48"
+    Description = [[Texture sequence of an extreme ultra violet (EUV) simulation, during
+      the CME. This asset contains data from 2000-07-14 08:38 to 2000-07-14 19:48]]
   }
 }
 
-local toggle_EUV_layer = {
-  Identifier = "os.solarsystem.sun.toggleeuv",
+local ToggleEuv = {
+  Identifier = "os.solarsystem.ToggleEuv",
   Name = "Toggle EUV layer",
   Command = [[
     if openspace.getPropertyValue("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled") then
@@ -57,17 +61,20 @@ local toggle_EUV_layer = {
   IsLocal = false
 }
 
-asset.onInitialize(function ()
-  openspace.action.registerAction(toggle_EUV_layer)
+
+asset.onInitialize(function()
+  openspace.action.registerAction(ToggleEuv)
   openspace.addSceneGraphNode(EUVLayer)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EUVLayer)
-  openspace.action.removeAction(toggle_EUV_layer)
+  openspace.action.removeAction(ToggleEuv)
 end)
 
+asset.export("ToggleEuv", ToggleEuv.Identifier)
 asset.export(EUVLayer)
+
 
 
 asset.meta = {

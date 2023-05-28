@@ -5,7 +5,8 @@ local textures = asset.syncedResource({
   Version = 2
 })
 
-local multiverse_planck_1 = {
+
+local PlanckMultiverse1 = {
   Identifier = "PlanckMultiverse1",
   Transform = {
     Translation = {
@@ -34,7 +35,7 @@ local multiverse_planck_1 = {
   }
 }
 
-local multiverse_planck_2 = {
+local PlanckMultiverse2 = {
   Identifier = "PlanckMultiverse2",
   Transform = {
     Translation = {
@@ -63,7 +64,7 @@ local multiverse_planck_2 = {
   }
 }
 
-local multiverse_planck_3 = {
+local PlanckMultiverse3 = {
   Identifier = "PlanckMultiverse3",
   Transform = {
     Translation = {
@@ -92,7 +93,7 @@ local multiverse_planck_3 = {
   }
 }
 
-local multiverse_planck_4 = {
+local PlanckMultiverse4 = {
   Identifier = "PlanckMultiverse4",
   Transform = {
     Translation = {
@@ -123,23 +124,23 @@ local multiverse_planck_4 = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(multiverse_planck_1)
-  openspace.addSceneGraphNode(multiverse_planck_2)
-  openspace.addSceneGraphNode(multiverse_planck_3)
-  openspace.addSceneGraphNode(multiverse_planck_4)
+  openspace.addSceneGraphNode(PlanckMultiverse1)
+  openspace.addSceneGraphNode(PlanckMultiverse2)
+  openspace.addSceneGraphNode(PlanckMultiverse3)
+  openspace.addSceneGraphNode(PlanckMultiverse4)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(multiverse_planck_4)
-  openspace.removeSceneGraphNode(multiverse_planck_3)
-  openspace.removeSceneGraphNode(multiverse_planck_2)
-  openspace.removeSceneGraphNode(multiverse_planck_1)
+  openspace.removeSceneGraphNode(PlanckMultiverse4)
+  openspace.removeSceneGraphNode(PlanckMultiverse3)
+  openspace.removeSceneGraphNode(PlanckMultiverse2)
+  openspace.removeSceneGraphNode(PlanckMultiverse1)
 end)
 
-asset.export(multiverse_planck_1)
-asset.export(multiverse_planck_2)
-asset.export(multiverse_planck_3)
-asset.export(multiverse_planck_4)
+asset.export(PlanckMultiverse1)
+asset.export(PlanckMultiverse2)
+asset.export(PlanckMultiverse3)
+asset.export(PlanckMultiverse4)
 
 
 

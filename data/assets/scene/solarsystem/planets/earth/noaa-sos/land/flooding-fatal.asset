@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Flood Events: 50 or More Fatalities - 2000 - 2009"
@@ -23,7 +24,8 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -31,7 +33,7 @@ local layer = {
   Description = Description
 }
 
-local layer_night = {
+local LayerNight = {
   Identifier = Identifier .. "-night",
   Name = Name .. " (Night)",
   Enabled = asset.enabled,
@@ -39,18 +41,20 @@ local layer_night = {
   Description = Description
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_night)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNight)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_night)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNight)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(layer_night)
+asset.export(Layer)
+asset.export(LayerNight)
+
 
 
 asset.meta = {

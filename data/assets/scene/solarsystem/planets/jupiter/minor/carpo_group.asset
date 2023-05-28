@@ -1,143 +1,256 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup344
-local kernel346 = asset.require("../kernels").jup346
+local kernel = asset.require("../kernels")
 
 
 
-local parentIdentifier = transforms.JupiterBarycenter.Identifier
-local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_carpo", "moon_minor", "moon_minor_jupiter" }
-local trailColor = { 0.4, 0.3, 0.01 }
-local trailTags = {
-  "moonTrail_solarSystem",
-  "moonTrail_giants",
-  "moonTrail_jupiter",
-  "moonTrail_minor",
-  "moonTrail_minor_jupiter"
-}
-
-local carpoGroup = {
-  {
-    Identifier = "Carpo",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "CARPO",
-    Radii = { 3000, 3000, 3000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 458.62,
-    Kernels = kernel
+local Carpo = {
+  Identifier = "Carpo",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "CARPO",
+      Observer = "JUPITER BARYCENTER"
+    }
   },
-  {
-    Identifier = "S2018J4",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "55520",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2018 J 4",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 427.631,
-    Kernels = kernel346
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carpo",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Carpo",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo"
   }
 }
 
--- Generate labels for each moon
-local moon_labels = {}
-
-for i, moon in ipairs(carpoGroup) do
-  local moonName = moon.GUI.Name or moon.Identifier
-  moon_labels[i] = {
-    Identifier = moon.Identifier .. "Label",
-    Parent = moon.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabel",
-      Text = moonName,
-      FontSize = 70.0,
-      Size = 7.1,
-      MinMaxSize = { 1, 25 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Additive",
-      EnableFading = true,
-      FadeUnit = "Gm",
-      FadeDistances = { 1.0, 100.0 },
-      FadeWidths = { 0.0, 100.0 }
+local CarpoTrail = {
+  Identifier = "CarpoTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "CARPO",
+      Observer = "JUPITER BARYCENTER"
     },
-    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
-    GUI = {
-      Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/" .. moon.Identifier,
-      Description = "Label for Jupiter's moon " .. moonName .. " (Carpo group)"
-    }
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 458.62,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Carpo Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo"
   }
+}
 
-  -- 'Hacky' solution to case where the main label gets culled on approach due to its onscreen size.
-  -- We need the size of the original label to be big as it needs to be legible from long distances when focusing on Jupiter.
-  moon_labels[i+1] = {
-    Identifier = moon.Identifier .. "LabelNear",
-    Parent = moon.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabel",
-      Text = moonName,
-      FontSize = 70.0,
-      Size = 5.5,
-      MinMaxSize = { 1, 25 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Additive",
-      EnableFading = true,
-      FadeUnit = "Gm",
-      FadeDistances = { 0.2, 1.0 },
-      FadeWidths = { 0.1, 0.0 }
+local CarpoLabel = {
+  Identifier = "CarpoLabel",
+  Parent = Carpo.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Carpo",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 100.0 },
+    FadeWidths = { 0.0, 100.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Carpo Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo",
+    Description = "Label for Jupiter's moon Carpo (Carpo group)"
+  }
+}
+
+local CarpoLabelNear = {
+  Identifier = "CarpoLabelNear",
+  Parent = Carpo.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Carpo",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.2, 1.0 },
+    FadeWidths = { 0.1, 0.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Carpo Label (Near)",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo",
+    Description = "Transitional Label for close-range viewing of Carpo (Carpo group)"
+  }
+}
+
+local S2018J4 = {
+  Identifier = "S2018J4",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55520",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carpo",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2018 J 4",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4"
+  }
+}
+
+local S2018J4Trail = {
+  Identifier = "S2018J4Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "55520",
+      Observer = "JUPITER BARYCENTER"
     },
-    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
-    GUI = {
-      Name = moonName .. " Label (Near)",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/" .. moon.Identifier,
-      Description = "Transitional Label for close-range viewing of " .. moonName .. " (Carpo group)"
-    }
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 458.62,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2018 J 4 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4"
   }
-end
+}
 
-local nodes = proceduralGlobes.createGlobes(carpoGroup)
+local S2018J4Label = {
+  Identifier = "S2018J4Label",
+  Parent = S2018J4.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2018 J 4",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2018 J 4 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4",
+    Description = "Label for Jupiter's moon S2018J4 (Carpo group)"
+  }
+}
+
+local S2018J4LabelNear = {
+  Identifier = "S2018J4LabelNear",
+  Parent = S2018J4.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S2018J4",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.2, 1.0 },
+    FadeWidths = { 0.1, 0.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S2018J4 Label (Near)",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4",
+    Description = "Transitional Label for close-range viewing of S2018J4 (Carpo group)"
+  }
+}
+
 
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernel.jup344)
 
-  for _, moonlabel in ipairs(moon_labels) do
-    openspace.addSceneGraphNode(moonlabel)
-  end
+
+  openspace.addSceneGraphNode(Carpo)
+  openspace.addSceneGraphNode(CarpoTrail)
+  openspace.addSceneGraphNode(CarpoLabel)
+  openspace.addSceneGraphNode(CarpoLabelNear)
+  openspace.addSceneGraphNode(S2018J4)
+  openspace.addSceneGraphNode(S2018J4Trail)
+  openspace.addSceneGraphNode(S2018J4Label)
 end)
 
 asset.onDeinitialize(function()
-  for i = #moon_labels, 1, -1 do
-    openspace.removeSceneGraphNode(moon_labels[i])
-  end
+  openspace.removeSceneGraphNode(S2018J4Label)
+  openspace.removeSceneGraphNode(S2018J4Trail)
+  openspace.removeSceneGraphNode(S2018J4)
+  openspace.removeSceneGraphNode(CarpoLabelNear)
+  openspace.removeSceneGraphNode(CarpoLabel)
+  openspace.removeSceneGraphNode(CarpoTrail)
+  openspace.removeSceneGraphNode(Carpo)
 
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Carpo)
+asset.export(CarpoTrail)
+asset.export(CarpoLabel)
+asset.export(CarpoLabelNear)
+asset.export(S2018J4)
+asset.export(S2018J4Trail)
+asset.export(S2018J4Label)
+
 
 
 asset.meta = {

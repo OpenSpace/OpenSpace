@@ -1,6 +1,7 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
+
 local kernels = asset.syncedResource({
   Name = "Vesta Kernels",
   Type = "HttpSynchronization",
@@ -29,6 +30,7 @@ local models = asset.syncedResource({
   Version = 1
 })
 
+
 local Vesta = {
   Identifier = "Vesta",
   Parent = transforms.SolarSystemBarycenter.Identifier,
@@ -36,11 +38,7 @@ local Vesta = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VESTA",
-      Observer = "SSB",
-      Kernels = {
-        --kernels .. "vesta_v06.tpc",
-        kernels .. "sb_vesta_071107.bsp"
-      }
+      Observer = "SSB"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -54,25 +52,25 @@ local Vesta = {
     Type = "RenderableModelProjection",
     GeometryFile = models .. "VestaComet_5000.obj",
     Projection = {
-      Sequence   = images,
+      Sequence = images,
       SequenceType = "image-sequence",
-      Observer   = "DAWN",
-      Target     = "VESTA",
+      Observer = "DAWN",
+      Target = "VESTA",
       Aberration = "NONE",
 
       DataInputTranslation = {
         Instrument = {
           -- FC1 = {
-          --   DetectorType  = "Camera",
+          --   DetectorType = "Camera",
           --   Spice = { "DAWN_FC1" },
           -- },
           FC2 = {
-            DetectorType  = "Camera",
+            DetectorType = "Camera",
             Spice = { "DAWN_FC2" }
           }
         },
         Target = {
-          Read  = {
+          Read = {
             "TARGET_NAME",
             "INSTRUMENT_HOST_NAME",
             "INSTRUMENT_ID",
@@ -82,31 +80,31 @@ local Vesta = {
             --"SEQUENCE_ID"
           },
           Convert = {
-            VESTA           = { "VESTA" },
-            DAWN            = { "DAWN" },
-            --FRAMINGCAMERA1  = { "DAWN_FC1" },
-            FRAMINGCAMERA2  = { "DAWN_FC2" },
-            --FC1           = { "DAWN_FC1" },
-            FC2             = { "DAWN_FC2" }
+            VESTA = { "VESTA" },
+            DAWN = { "DAWN" },
+            --FRAMINGCAMERA1 = { "DAWN_FC1" },
+            FRAMINGCAMERA2 = { "DAWN_FC2" },
+            --FC1 = { "DAWN_FC1" },
+            FC2 = { "DAWN_FC2" }
           }
         }
       },
       Instrument = {
-        Name       = "DAWN_FC2",
-        Method     = "ELLIPSOID",
+        Name = "DAWN_FC2",
+        Method = "ELLIPSOID",
         Aberration = "NONE",
-        Fovy       = 5.46,
-        Aspect     = 1
+        Fovy = 5.46,
+        Aspect = 1
       },
 
       --[[ Instrument = {
-          Name       = "DAWN_FC1",
-          Method     = "ELLIPSOID",
+          Name = "DAWN_FC1",
+          Method = "ELLIPSOID",
           Aberration = "NONE",
-          Fovy       = 5.46,
-          Aspect     = 1,
-          Near       = 0.2,
-          Far        = 10000
+          Fovy = 5.46,
+          Aspect = 1,
+          Near = 0.2,
+          Far = 10000
       },--]]
       PotentialTargets = { "VESTA" }
     }
@@ -138,18 +136,25 @@ local VestaTrail = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "sb_vesta_071107.bsp")
+
   openspace.addSceneGraphNode(Vesta)
   openspace.addSceneGraphNode(VestaTrail)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(VestaTrail.Identifier)
-  openspace.removeSceneGraphNode(Vesta.Identifier)
+  openspace.removeSceneGraphNode(VestaTrail)
+  openspace.removeSceneGraphNode(Vesta)
+
+  openspace.spice.unloadKernel(kernels .. "sb_vesta_071107.bsp")
 end)
 
 asset.export(Vesta)
 asset.export(VestaTrail)
+
+
 
 asset.meta = {
   Name = "Vesta",

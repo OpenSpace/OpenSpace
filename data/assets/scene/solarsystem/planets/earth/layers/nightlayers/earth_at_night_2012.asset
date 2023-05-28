@@ -1,23 +1,26 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Earth_at_Night_2012",
   Name = "Earth at Night 2012",
   Enabled = asset.enabled,
   FilePath = asset.localResource("earth_at_night_2012.wms"),
   Description = [[The lights of cities and villages trace the outlines of civilization
-    in this global view]],
+    in this global view]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "NightLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "NightLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "NightLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "NightLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

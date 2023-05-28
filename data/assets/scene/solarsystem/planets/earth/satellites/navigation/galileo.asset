@@ -1,5 +1,7 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
+
+
 local omm = asset.syncedResource({
   Name = "Satellite OMM Data (Galileo)",
   Type = "UrlSynchronization",
@@ -9,8 +11,9 @@ local omm = asset.syncedResource({
   Override = true
 })
 
-local galileo = {
-  Identifier = "galileo",
+
+local GalileoSatellites = {
+  Identifier = "GalileoSatellites",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -28,15 +31,16 @@ local galileo = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(galileo)
+  openspace.addSceneGraphNode(GalileoSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(galileo)
+  openspace.removeSceneGraphNode(GalileoSatellites)
 end)
 
-asset.export(galileo)
+asset.export(GalileoSatellites)
 
 
 

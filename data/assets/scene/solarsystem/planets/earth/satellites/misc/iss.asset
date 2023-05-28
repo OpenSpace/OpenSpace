@@ -1,6 +1,8 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
+
+
 local models = asset.syncedResource({
   Name = "ISS Models",
   Type = "HttpSynchronization",
@@ -17,7 +19,8 @@ local omm = asset.syncedResource({
   Override = true
 })
 
-local issPosition = {
+
+local IssPosition = {
   Identifier = "ISSPosition",
   Parent = transforms.EarthInertial.Identifier,
   BoundingSphere = 54.5, -- half the width
@@ -42,9 +45,9 @@ local issPosition = {
   }
 }
 
-local issModel = {
+local IssModel = {
   Identifier = "ISS",
-  Parent = issPosition.Identifier,
+  Parent = IssPosition.Identifier,
   Transform = {
     Rotation = {
       Type = "FixedRotation",
@@ -70,7 +73,7 @@ local issModel = {
   }
 }
 
-local issTrail = {
+local IssTrail = {
   Identifier = "ISS_trail",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
@@ -96,7 +99,7 @@ local issTrail = {
 -- @TODO (emmbr, 2021-05-27) add to scene when label rendering issues have been fixed
 local IssLabel = {
   Identifier = "IssLabel",
-  Parent = issPosition.Identifier,
+  Parent = IssPosition.Identifier,
   Renderable = {
     Enabled = false,
     Type = "RenderableLabel",
@@ -117,42 +120,45 @@ local IssLabel = {
   }
 }
 
-local focus_iss = {
-  Identifier = "os.solarsystem.earth.iss.focus",
+local FocusIss = {
+  Identifier = "os.solarsystem.FocusIss",
   Name = "Focus on ISS",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "ISS")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Refocuses the camera on the ISS",
   GuiPath = "/Solar System/Earth",
   isLocal = false
 }
 
-asset.onInitialize(function ()
-  local i = openspace.space.readKeplerFile(omm .. "ISS.txt", "OMM")
-  issTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
 
-  openspace.addSceneGraphNode(issPosition)
-  openspace.addSceneGraphNode(issModel)
-  openspace.addSceneGraphNode(issTrail)
+asset.onInitialize(function()
+  local i = openspace.space.readKeplerFile(omm .. "ISS.txt", "OMM")
+  IssTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
+
+  openspace.addSceneGraphNode(IssPosition)
+  openspace.addSceneGraphNode(IssModel)
+  openspace.addSceneGraphNode(IssTrail)
 
   openspace.setPropertyValueSingle("Scene.ISS.Rotation.yAxisInvertObject", true)
-  openspace.action.registerAction(focus_iss)
+  openspace.action.registerAction(FocusIss)
 end)
 
-asset.onDeinitialize(function ()
-  openspace.action.removeAction(focus_iss)
+asset.onDeinitialize(function()
+  openspace.action.removeAction(FocusIss)
 
-  openspace.removeSceneGraphNode(issTrail)
-  openspace.removeSceneGraphNode(issModel)
-  openspace.removeSceneGraphNode(issPosition)
+  openspace.removeSceneGraphNode(IssTrail)
+  openspace.removeSceneGraphNode(IssModel)
+  openspace.removeSceneGraphNode(IssPosition)
 end)
 
-asset.export(issTrail)
-asset.export(issModel)
-asset.export(issPosition)
+asset.export(IssTrail)
+asset.export(IssModel)
+asset.export(IssPosition)
+
+
 
 asset.meta = {
   Name = "ISS",

@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Latitude Longitude Layers"
@@ -16,52 +17,55 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_base = {
+
+local LayerBase = {
   Identifier = Identifier,
   Name = Name,
   FilePath = syncedDirectory .. "2048-base.png",
   Description = Description
 }
 
-local layer_combined = {
+local LayerCombined = {
   Identifier = Identifier .. "-combined",
   Name = Name .. " (Combined)",
   FilePath = syncedDirectory .. "2048-flat-combined.png",
   Description = Description
 }
 
-local layer_latitude = {
+local LayerLatitude = {
   Identifier = Identifier .. "-latitude",
   Name = Name .. " (Latitude)",
   FilePath = syncedDirectory .. "2048-layer-latitude.png",
   Description = Description
 }
 
-local layer_longitude = {
+local LayerLongitude = {
   Identifier = Identifier .. "-longitude",
   Name = Name .. " (Longitude)",
   FilePath = syncedDirectory .. "2048-layer-longitude.png",
   Description = Description
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_combined)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_latitude)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_longitude)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerCombined)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerLatitude)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerLongitude)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_combined)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_latitude)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_longitude)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerLongitude)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerLatitude)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerCombined)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
 end)
 
-asset.export(layer_base)
-asset.export(layer_combined)
-asset.export(layer_latitude)
-asset.export(layer_longitude)
+asset.export(LayerBase)
+asset.export(LayerCombined)
+asset.export(LayerLatitude)
+asset.export(LayerLongitude)
+
 
 
 asset.meta = {

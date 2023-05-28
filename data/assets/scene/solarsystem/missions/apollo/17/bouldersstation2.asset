@@ -1,5 +1,7 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
-local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+
+
 
 local models = asset.syncedResource({
   Name = "Apollo Boulders Models",
@@ -8,14 +10,15 @@ local models = asset.syncedResource({
   Version = 2
 })
 
+
 local Station2Boulder1Holder = {
   Identifier = "Station_2_Boulder1",
-  Parent = moon_asset.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon_asset.Moon.Identifier,
-      Longitude = -360+30.5294692,
+      Globe = moonAsset.Moon.Identifier,
+      Longitude = -360 + 30.5294692,
       Latitude = 20.098824,
       Altitude = -2442.8,
       UseHeightMap = false
@@ -39,7 +42,7 @@ local Station2Boulder1Model = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "b1-v2.obj",
-    RotationVector = { 243.243256 ,206.270264, 309.677429 },
+    RotationVector = { 243.243256, 206.270264, 309.677429 },
     LightSources = {
       sun.LightSource,
       {
@@ -59,12 +62,12 @@ local Station2Boulder1Model = {
 
 local Station2Boulder2Holder = {
   Identifier = "Station_2_Boulder2",
-  Parent = moon_asset.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon_asset.Moon.Identifier,
-      Longitude = -360+30.5287892,
+      Globe = moonAsset.Moon.Identifier,
+      Longitude = -360 + 30.5287892,
       Latitude = 20.098240,
       Altitude = -2434.6,
       UseHeightMap = false
@@ -108,12 +111,12 @@ local Station2Boulder2Model = {
 
 local Station2Boulder3Holder = {
   Identifier = "Station_2_Boulder3",
-  Parent = moon_asset.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon_asset.Moon.Identifier,
-      Longitude = -360+30.5294692,
+      Globe = moonAsset.Moon.Identifier,
+      Longitude = -360 + 30.5294692,
       Latitude = 20.098610,
       Altitude = -2441.55,
       UseHeightMap = false
@@ -137,7 +140,7 @@ local Station2Boulder3Model = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "b3model.obj",
-    RotationVector = { 161.513519 ,243.243256, 65.806450 },
+    RotationVector = { 161.513519, 243.243256, 65.806450 },
     LightSources = {
       sun.LightSource,
       {
@@ -155,25 +158,27 @@ local Station2Boulder3Model = {
   }
 }
 
-local nodes = {
-  Station2Boulder1Holder, Station2Boulder1Model,
-  Station2Boulder2Holder, Station2Boulder2Model,
-  Station2Boulder3Holder, Station2Boulder3Model
-}
-
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.addSceneGraphNode(Station2Boulder1Holder)
+  openspace.addSceneGraphNode(Station2Boulder1Model)
+  openspace.addSceneGraphNode(Station2Boulder2Holder)
+  openspace.addSceneGraphNode(Station2Boulder2Model)
+  openspace.addSceneGraphNode(Station2Boulder3Holder)
+  openspace.addSceneGraphNode(Station2Boulder3Model)
 end)
 
 asset.onDeinitialize(function()
-  for i = #nodes, 1, -1 do
-    local node = nodes[i]
-    openspace.removeSceneGraphNode(node)
-  end
+  openspace.removeSceneGraphNode(Station2Boulder3Model)
+  openspace.removeSceneGraphNode(Station2Boulder3Holder)
+  openspace.removeSceneGraphNode(Station2Boulder2Model)
+  openspace.removeSceneGraphNode(Station2Boulder2Holder)
+  openspace.removeSceneGraphNode(Station2Boulder1Model)
+  openspace.removeSceneGraphNode(Station2Boulder1Holder)
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Station2Boulder1Holder)
+asset.export(Station2Boulder1Model)
+asset.export(Station2Boulder2Holder)
+asset.export(Station2Boulder2Model)
+asset.export(Station2Boulder3Holder)
+asset.export(Station2Boulder3Model)

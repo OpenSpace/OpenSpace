@@ -12,7 +12,8 @@ local speck = asset.syncedResource({
   Version = 1
 })
 
-local deepSkyPoints = {
+
+local DeepSkyObjects = {
   Identifier = "DeepSkyObjects",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -54,7 +55,7 @@ local deepSkyPoints = {
   }
 }
 
-local deepSkyImages = {
+local DeepSkyObjectsImages = {
   Identifier = "DeepSkyObjectsImages",
   Renderable = {
     Type = "RenderablePlanesCloud",
@@ -89,22 +90,23 @@ local deepSkyImages = {
       6, 7, 11, 16, 18, 21, 23-26, 29, 34-39, 41, 46-48, 50, 52, 67, 93, 103, 2-5,
       9, 10, 12-15, 19, 22, 28, 30, 53-56, 68-72, 75, 79, 80, 92, 107, 27, 57, 76,
       97, 8, 17, 20, 78, 1 (Description from URL) <br><br> Data Reference: Largely
-      NOAO and various other sources (each image has a ref)]],
+      NOAO and various other sources (each image has a ref)]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(deepSkyPoints)
-  openspace.addSceneGraphNode(deepSkyImages)
+  openspace.addSceneGraphNode(DeepSkyObjects)
+  openspace.addSceneGraphNode(DeepSkyObjectsImages)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(deepSkyImages)
-  openspace.removeSceneGraphNode(deepSkyPoints)
+  openspace.removeSceneGraphNode(DeepSkyObjectsImages)
+  openspace.removeSceneGraphNode(DeepSkyObjects)
 end)
 
-asset.export(deepSkyPoints)
-asset.export(deepSkyImages)
+asset.export(DeepSkyObjects)
+asset.export(DeepSkyObjectsImages)
 
 
 

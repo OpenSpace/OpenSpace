@@ -1,6 +1,8 @@
 local transforms = asset.require("./transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
+
+
 local models = asset.syncedResource({
   Name = "Bennu Models",
   Type = "HttpSynchronization",
@@ -8,7 +10,8 @@ local models = asset.syncedResource({
   Version = 2
 })
 
-local BENNU_BODY = "2101955"
+
+local BennuBodyId = "2101955"
 
 local Bennu = {
   Identifier = "Bennu",
@@ -18,12 +21,12 @@ local Bennu = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_BENNU",
       DestinationFrame = "GALACTIC"
-    },
+    }
   },
   Renderable = {
     Enabled = false,
     Type = "RenderableModel",
-    Body = BENNU_BODY,
+    Body = BennuBodyId,
     GeometryFile = models .. "Bennu_v20_200k_an.obj",
     LightSources = {
       sun.LightSource
@@ -34,6 +37,7 @@ local Bennu = {
     Path = "/Solar System/Asteroid"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Bennu)

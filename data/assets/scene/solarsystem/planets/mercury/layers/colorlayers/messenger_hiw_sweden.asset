@@ -1,21 +1,24 @@
-local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+local globe = asset.require("../../mercury")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Messenger_HIW_Sweden",
   Name = "Messenger HIW [Sweden]",
   Enabled = asset.enabled,
   FilePath = asset.localResource("messenger_hiw_sweden.wms")
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

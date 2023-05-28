@@ -1,8 +1,8 @@
-local toggle_outer_planetary_trails = {
-  Identifier = "os.missions.rosetta.toggleouterplanetarytrails",
+local ToggleOuterPlanetaryTrails = {
+  Identifier = "os.rosetta.ToggleOuterPlanetaryTrails",
   Name = "Toggle outer planetary trails",
   Command = [[
-    local list = openspace.getProperty('{planetTrail_giants}.Renderable.Enabled')
+    local list = openspace.getProperty("{planetTrail_giants}.Renderable.Enabled")
     for _,v in pairs(list) do
       openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
     end
@@ -12,18 +12,23 @@ local toggle_outer_planetary_trails = {
   isLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(toggle_outer_planetary_trails)
+  openspace.action.registerAction(ToggleOuterPlanetaryTrails)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(toggle_outer_planetary_trails)
+  openspace.action.removeAction(ToggleOuterPlanetaryTrails)
 end)
+
+asset.export("ToggleOuterPlanetaryTrails", ToggleOuterPlanetaryTrails.Identifier)
+
+
 
 asset.meta = {
   Name = "Rosetta actions",
   Version = "1.0",
-  Description = "Actions related to the rosetta mission",
+  Description = "Actions related to the Rosetta mission",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

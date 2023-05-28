@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+local globe = asset.require("../../mercury")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Messenger_SHADE_NewYork",
   Name = "Messenger SHADE [New York]",
   Enabled = asset.enabled,
@@ -12,15 +14,16 @@ local layer = {
   BlendMode = "Multiply"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

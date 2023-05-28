@@ -1,6 +1,8 @@
 local propertyHelper = asset.require("../property_helper")
 local joystickHelper = asset.require("./joystick_helper")
 
+
+
 -- Allowed values for the third parameter of bindJoystickAxis:
 -- "None"
 -- "Orbit X"
@@ -24,24 +26,25 @@ local joystickHelper = asset.require("./joystick_helper")
 -- Eighth parameter is the sensitivity for the axis
 
 local SpaceMouse = {
-  Push = {0, 1, 2}, -- left/right, back/forth, up/down
-  Twist = {5}, -- left/right
-  Tilt = {4, 3}, -- left/right, back/forth
+  Push = { 0, 1, 2 }, -- left/right, back/forth, up/down
+  Twist = { 5 }, -- left/right
+  Tilt = { 4, 3 }, -- left/right, back/forth
 
   LeftButton = 0,
   RightButton = 1
 }
 
-asset.onInitialize(function()
-  local controller = SpaceMouse;
-  local name = "3Dconnexion Universal Receiver";
 
-  openspace.navigation.bindJoystickAxis(name, controller.Push[1], "Orbit X", false, "JoystickLike", true, false, 40.0);
-  openspace.navigation.bindJoystickAxis(name, controller.Push[2], "Orbit Y", false, "JoystickLike", true, false, 40.0);
-  openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "Pan X", true, "JoystickLike", true, false, 40.0);
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y", false, "JoystickLike", true, false, 35.0);
-  openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom", false, "JoystickLike", true, false, 40.0);
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll", false, "JoystickLike", true, false, 35.0);
+asset.onInitialize(function()
+  local controller = SpaceMouse
+  local name = "3Dconnexion Universal Receiver"
+
+  openspace.navigation.bindJoystickAxis(name, controller.Push[1], "Orbit X", false, "JoystickLike", true, false, 40.0)
+  openspace.navigation.bindJoystickAxis(name, controller.Push[2], "Orbit Y", false, "JoystickLike", true, false, 40.0)
+  openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "Pan X", true, "JoystickLike", true, false, 40.0)
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y", false, "JoystickLike", true, false, 35.0)
+  openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom", false, "JoystickLike", true, false, 40.0)
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll", false, "JoystickLike", true, false, 35.0)
 
   openspace.navigation.bindJoystickButton(
     name,

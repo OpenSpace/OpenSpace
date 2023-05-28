@@ -5,14 +5,15 @@ local speck = asset.syncedResource({
   Version = 2
 })
 
-local transformMatrix = {
+
+local TransformMatrix = {
   -0.7357425748,    0.67726129641,  0.0,           0.0,
   -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
   0.67314530211,    0.73127116582,  0.11008126223, 0.0,
   0.0,              0.0,            0.0,           1.0
 }
 
-local object = {
+local Object = {
   Identifier = "GalaxyClusterLabels",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -24,12 +25,12 @@ local object = {
       Size = 22,
       MinMaxSize = { 8, 20 },
       Unit = "Mpc",
-      TransformationMatrix = transformMatrix
+      TransformationMatrix = TransformMatrix
     },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "Mpc",
-    TransformationMatrix = transformMatrix
+    TransformationMatrix = TransformMatrix
   },
   GUI = {
     Name = "Galaxy Cluster Labels",
@@ -38,19 +39,20 @@ local object = {
       clusters dataset is a series of labels that mark where the large clusters of
       galaxies are in the nearby universe. These labels must be used in conjunction
       with the Tully galaxy group.(Description from URL) <br><br> Data Reference:
-      Brian Abbott (AMNH)]],
+      Brian Abbott (AMNH)]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

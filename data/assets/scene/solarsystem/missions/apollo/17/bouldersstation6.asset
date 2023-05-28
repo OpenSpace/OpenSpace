@@ -1,5 +1,7 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
-local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+
+
 
 local models = asset.syncedResource({
   Name = "Apollo Boulders Models",
@@ -11,12 +13,12 @@ local models = asset.syncedResource({
 
 local Station6Frag1Holder = {
   Identifier = "Station_6_Fragment1",
-  Parent = moon_asset.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon_asset.Moon.Identifier,
-      Longitude = -360+30.80068,
+      Globe = moonAsset.Moon.Identifier,
+      Longitude = -360 + 30.80068,
       Latitude = 20.2903,
       Altitude = -2562.6,
       UseHeightmap = false
@@ -34,8 +36,8 @@ local Station6Frag1Model = {
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon_asset.Moon.Identifier,
-      Longitude = -360+30.8007,
+      Globe = moonAsset.Moon.Identifier,
+      Longitude = -360 + 30.8007,
       Latitude = 20.2903,
       Altitude = -2562.6,
       UseHeightmap = false
@@ -48,7 +50,7 @@ local Station6Frag1Model = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "A17-S6-frag1.obj",
-    RotationVector = { 235.909088,165.000000,286.299194 },
+    RotationVector = { 235.909088, 165.000000, 286.299194 },
     LightSources = {
       sun.LightSource,
       {
@@ -70,7 +72,7 @@ local Station6Frag1Model = {
 
 local Station6Frag23Holder = {
   Identifier = "Station_6_Fragments_2_3",
-  Parent = moon_asset.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   GUI = {
     Name = "Station 6 Fragments 2 & 3 Holder",
     Path = "/Solar System/Missions/Apollo/17/Station 6"
@@ -88,8 +90,8 @@ local Station6Frag2Model = {
     },
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon_asset.Moon.Identifier,
-      Longitude = -360+30.80055,
+      Globe = moonAsset.Moon.Identifier,
+      Longitude = -360 + 30.80055,
       Latitude = 20.289808,
       Altitude = -2566.5,
       UseHeightmap = false
@@ -98,7 +100,7 @@ local Station6Frag2Model = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "station6_boulder_frag2.obj",
-    RotationVector = { 336.959991,210.239990,325.984253 },
+    RotationVector = { 336.959991, 210.239990, 325.984253 },
     LightSources = {
       sun.LightSource,
       {
@@ -108,7 +110,7 @@ local Station6Frag2Model = {
       }
     },
     PerformShading = false,
-    EnableFaceCulling = false,
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Station 6 Fragment 2 Model",
@@ -126,8 +128,8 @@ local Station6Frag3Model = {
     },
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon_asset.Moon.Identifier,
-      Longitude = -360+30.80053,
+      Globe = moonAsset.Moon.Identifier,
+      Longitude = -360 + 30.80053,
       Latitude = 20.29030,
       Altitude = -2563.0,
       UseHeightMap = false
@@ -136,7 +138,7 @@ local Station6Frag3Model = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "station6_boulder_frag3.obj",
-    RotationVector = { 293.181824,255.000000,4.090910 },
+    RotationVector = { 293.181824, 255.000000, 4.090910 },
     LightSources = {
       sun.LightSource,
       {
@@ -154,24 +156,25 @@ local Station6Frag3Model = {
   }
 }
 
-local nodes = {
-  Station6Frag1Holder, Station6Frag1Model, Station6Frag23Holder, Station6Frag2Model,
-  Station6Frag3Model,
-}
 
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.addSceneGraphNode(Station6Frag1Holder)
+  openspace.addSceneGraphNode(Station6Frag1Model)
+  openspace.addSceneGraphNode(Station6Frag23Holder)
+  openspace.addSceneGraphNode(Station6Frag2Model)
+  openspace.addSceneGraphNode(Station6Frag3Model)
 end)
 
 asset.onDeinitialize(function()
-  for i = #nodes, 1, -1 do
-    local node = nodes[i]
-    openspace.removeSceneGraphNode(node)
-  end
+  openspace.removeSceneGraphNode(Station6Frag3Model)
+  openspace.removeSceneGraphNode(Station6Frag2Model)
+  openspace.removeSceneGraphNode(Station6Frag23Holder)
+  openspace.removeSceneGraphNode(Station6Frag1Model)
+  openspace.removeSceneGraphNode(Station6Frag1Holder)
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Station6Frag1Holder)
+asset.export(Station6Frag1Model)
+asset.export(Station6Frag23Holder)
+asset.export(Station6Frag2Model)
+asset.export(Station6Frag3Model)

@@ -1,7 +1,9 @@
 asset.require("./jwst")
 
-local point_jwst = {
-  Identifier = "event.jwst.point",
+
+
+local PointJwst = {
+  Identifier = "os.jwst.PointJwst",
   Name = "Point JWST",
   Command = [[
     local ra
@@ -26,7 +28,7 @@ local point_jwst = {
     end
 
     local function length(v)
-      return math.sqrt(v[1]*v[1] + v[2]*v[2]+ v[3]*v[3])
+      return math.sqrt(v[1]*v[1] + v[2]*v[2] + v[3]*v[3])
     end
 
     local function normalize(v)
@@ -101,13 +103,12 @@ local point_jwst = {
         newYAngle = -op2
       end
 
-      local res = { newXAngle, newYAngle }
-      return res
+      return { newXAngle, newYAngle }
     end
 
     local coordinates = convertRaDec(ra, dec)
-    local JWSTPosition = openspace.worldPosition('JWSTModel')
-    local JWSTRotation = openspace.worldRotation('JWSTRotation')
+    local JWSTPosition = openspace.worldPosition("JWSTModel")
+    local JWSTRotation = openspace.worldRotation("JWSTRotation")
 
     local JWSTtoCoord = {
       coordinates[1] - JWSTPosition[1],
@@ -121,12 +122,12 @@ local point_jwst = {
     -- Check if the new angle violate the sunshield
     -- -45 deg to 5 deg is valid in x rotation
     if JWSTAngles[1] < math.rad(-45) or JWSTAngles[1] > math.rad(5) then
-      openspace.printWarning('Coordinate violates the sunshield')
+      openspace.printWarning("Coordinate violates the sunshield")
     end
 
     openspace.setPropertyValueSingle(
-      'Scene.JWSTModel.Rotation.Rotation',
-      { JWSTAngles[1], JWSTAngles[2],  0.0},
+      "Scene.JWSTModel.Rotation.Rotation",
+      { JWSTAngles[1], JWSTAngles[2],  0.0 },
       duration
     )
   ]],
@@ -138,22 +139,23 @@ local point_jwst = {
   IsLocal = true
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(point_jwst)
+  openspace.action.registerAction(PointJwst)
 
   openspace.event.registerEventAction(
     "PointSpacecraft",
-    point_jwst.Identifier
+    PointJwst.Identifier
   )
 end)
 
 asset.onDeinitialize(function()
   openspace.event.unregisterEventAction(
     "PointSpacecraft",
-    point_jwst.Identifier
+    PointJwst.Identifier
   )
 
-  openspace.action.removeAction(point_jwst)
+  openspace.action.removeAction(PointJwst)
 end)
 
-asset.export("jwst.point", point_jwst.Identifier)
+asset.export("jwst.point", PointJwst.Identifier)

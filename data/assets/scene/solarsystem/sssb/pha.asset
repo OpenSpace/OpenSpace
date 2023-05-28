@@ -1,5 +1,7 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+
 local sssb = asset.syncedResource({
   Name = "Small SolarSystem Body Data (Potentially hazardous Asteroids)",
   Type = "HttpSynchronization",
@@ -7,7 +9,8 @@ local sssb = asset.syncedResource({
   Version = 2
 })
 
-local object = {
+
+local Object = {
   Identifier = "sssb_pha",
   Parent = transforms.SunECLIPJ2000.Identifier,
   Renderable = {
@@ -29,15 +32,16 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

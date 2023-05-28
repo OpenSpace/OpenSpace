@@ -1,5 +1,7 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
+local transforms = asset.require("./transforms")
+
+
 
 local Ceres = {
   Identifier = "Ceres",
@@ -50,6 +52,7 @@ end)
 
 asset.export(Ceres)
 asset.export(CeresLabel)
+
 
 
 asset.meta = {

@@ -1,6 +1,8 @@
 local habitableZoneTextures = asset.require(
   "scene/milkyway/habitable_zones/habitable_zone_textures"
-).TexturesPath
+)
+
+
 
 local sunTextures = asset.syncedResource({
   Type = "HttpSynchronization",
@@ -9,51 +11,54 @@ local sunTextures = asset.syncedResource({
   Version = 4
 })
 
-local TexturesPath = asset.syncedResource({
+local texturesPath = asset.syncedResource({
   Name = "Exoplanet Textures",
   Type = "HttpSynchronization",
   Identifier = "exoplanets_textures",
   Version = 2
 })
 
-asset.onInitialize(function ()
-  local starTexture = TexturesPath .. "sun.jpg"
-  local noDataTexture = TexturesPath .. "grid-32.png"
-  local discTexture = TexturesPath .. "disc_bw_texture.png"
+
+asset.onInitialize(function()
+  local starTexture = texturesPath .. "sun.jpg"
+  local noDataTexture = texturesPath .. "grid-32.png"
+  local discTexture = texturesPath .. "disc_bw_texture.png"
 
   local starGlareTexture = sunTextures .. "halo.png"
 
-  local hzTexture = habitableZoneTextures .. "hot_to_cold_faded.png"
+  local hzTexture = habitableZoneTextures.TexturesPath .. "hot_to_cold_faded.png"
 
   -- Set the default textures used for the exoplanet system creation
   -- (Check if already set, to not override value set in another file)
-  local p = "Modules.Exoplanets.StarTexture";
-  if (openspace.getPropertyValue(p) == "") then
-    openspace.setPropertyValueSingle(p, starTexture)
+  local p1 = "Modules.Exoplanets.StarTexture"
+  if (openspace.getPropertyValue(p1) == "") then
+    openspace.setPropertyValueSingle(p1, starTexture)
   end
 
-  local p = "Modules.Exoplanets.StarGlareTexture";
-  if (openspace.getPropertyValue(p) == "") then
-    openspace.setPropertyValueSingle(p, starGlareTexture)
+  local p2 = "Modules.Exoplanets.StarGlareTexture"
+  if (openspace.getPropertyValue(p2) == "") then
+    openspace.setPropertyValueSingle(p2, starGlareTexture)
   end
 
-  p = "Modules.Exoplanets.NoDataTexture";
-  if (openspace.getPropertyValue(p) == "") then
-    openspace.setPropertyValueSingle(p, noDataTexture)
+  local p3 = "Modules.Exoplanets.NoDataTexture"
+  if (openspace.getPropertyValue(p3) == "") then
+    openspace.setPropertyValueSingle(p3, noDataTexture)
   end
 
-  p = "Modules.Exoplanets.OrbitDiscTexture";
-  if (openspace.getPropertyValue(p) == "") then
-    openspace.setPropertyValueSingle(p, discTexture)
+  local p4 = "Modules.Exoplanets.OrbitDiscTexture"
+  if (openspace.getPropertyValue(p4) == "") then
+    openspace.setPropertyValueSingle(p4, discTexture)
   end
 
-  p = "Modules.Exoplanets.HabitableZoneTexture";
-  if (openspace.getPropertyValue(p) == "") then
-    openspace.setPropertyValueSingle(p, hzTexture)
+  local p5 = "Modules.Exoplanets.HabitableZoneTexture"
+  if (openspace.getPropertyValue(p5) == "") then
+    openspace.setPropertyValueSingle(p5, hzTexture)
   end
 end)
 
-asset.export("TexturesPath", TexturesPath)
+asset.export("TexturesPath", texturesPath)
+
+
 
 asset.meta = {
   Name = "Exoplanet Textures",
@@ -62,5 +67,5 @@ asset.meta = {
     visualizations]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
+  License = "MIT license"
 }

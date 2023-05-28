@@ -1,5 +1,6 @@
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
+local transforms = asset.require("./transforms")
+
 
 
 local textures = asset.syncedResource({
@@ -8,6 +9,7 @@ local textures = asset.syncedResource({
   Identifier = "sun_textures",
   Version = 4
 })
+
 
 local SunGlare = {
   Identifier = "SunGlare",
@@ -24,9 +26,10 @@ local SunGlare = {
   GUI = {
     Name = "Sun Glare",
     Path = "/Solar System/Sun",
-    Description = "Sun glare effect. Enabled by default instead of sun orb"
+    Description = "Sun glare effect. Enabled by default instead of sun globe"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SunGlare)
@@ -37,7 +40,6 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(SunGlare)
-
 
 
 

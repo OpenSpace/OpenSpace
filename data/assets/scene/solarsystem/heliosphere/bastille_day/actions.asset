@@ -1,92 +1,101 @@
-local bastilleday_setup_startofcme = {
-  Identifier = "os.events.bastilleday.setup.startofcme",
+local StartOfCme = {
+  Identifier = "os.bastilleday.setup.StartOfCme",
   Name = "Reset to start of CME, no loop",
   Command = [[
-    openspace.time.setTime('2000-JUL-14 10:03:00.00');
-    openspace.time.setDeltaTime(1);
-    openspace.scriptScheduler.clear();
+    openspace.time.setTime("2000-JUL-14 10:03:00.000")
+    openspace.time.setDeltaTime(1)
+    openspace.scriptScheduler.clear()
   ]],
   Documentation = "Button to reset to the the start of the CME",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
 
-local bastilleday_setup_shortloop = {
-  Identifier = "os.events.bastilleday.setup.shortloop",
+local ShortLoop = {
+  Identifier = "os.bastilleday.setup.ShortLoop",
   Name = "Loop 10:03 - 10:16, at 2 min/second",
   Command = [[
-    local EndtimeShortLoop = "2000 JUL 14 10:16:00";
-    local starttimescriptslowloop = "openspace.time.setTime('2000 JUL 14 10:03:00')";
-    openspace.scriptScheduler.clear();
-    openspace.time.setDeltaTime(120);
-    openspace.time.setTime('2000-JUL-14 10:03:00.00');
-    openspace.scriptScheduler.loadScheduledScript(EndtimeShortLoop, starttimescriptslowloop);
+    local EndtimeShortLoop = "2000 JUL 14 10:16:00"
+    local StartTimeScriptsLowLoop = "openspace.time.setTime('2000 JUL 14 10:03:00')"
+    openspace.scriptScheduler.clear()
+    openspace.time.setDeltaTime(120)
+    openspace.time.setTime("2000-JUL-14 10:03:00.000")
+    openspace.scriptScheduler.loadScheduledScript(EndtimeShortLoop, StartTimeScriptsLowLoop)
   ]],
   Documentation = "New loop: Restarts time at 10:03 and stops at 10:16, sets delta time to 2 min/second (120 seconds/second)",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
 
-local bastilleday_setup_standardloop = {
-  Identifier = "os.events.bastilleday.setup.standardloop",
+local StandardLoop = {
+  Identifier = "os.bastilleday.setup.StandardLoop",
   Name = "Loop 10:03 - 11:00, at 4 min/second",
   Command = [[
-    local starttimescriptslowloop = "openspace.time.setTime('2000 JUL 14 10:03:00')";
-    openspace.scriptScheduler.clear();
-    openspace.time.setDeltaTime(240);
-    openspace.time.setTime('2000-JUL-14 10:03:00.00');
-    openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 11:00:00', starttimescriptslowloop);
+    local StartTimeScriptsLowLoop = "openspace.time.setTime('2000 JUL 14 10:03:00')"
+    openspace.scriptScheduler.clear()
+    openspace.time.setDeltaTime(240)
+    openspace.time.setTime("2000-JUL-14 10:03:00.000")
+    openspace.scriptScheduler.loadScheduledScript("2000 JUL 14 11:00:00", StartTimeScriptsLowLoop)
   ]],
   Documentation = "New loop: Restarts time at 10:03 and stops at 11:00, delta time to 4 min/second (240 seconds/second)",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
 
-local bastilleday_setup_fastloop = {
-  Identifier = "os.events.bastilleday.setup.fastloop",
+local FastLoop = {
+  Identifier = "os.bastilleday.setup.FastLoop",
   Name = "Loop 10:03 - 11.48, at 15 min/second",
   Command = [[
-    local starttimescriptfastloop = "openspace.time.setTime('2000 JUL 14 10:03:00')";
-    openspace.scriptScheduler.clear();
-    openspace.time.setDeltaTime(900);
-    openspace.time.setTime('2000-JUL-14 10:03:00.00');
-    openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 11:48:00', starttimescriptfastloop);
+    local StartTimeScriptFastLoop = "openspace.time.setTime('2000 JUL 14 10:03:00')"
+    openspace.scriptScheduler.clear()
+    openspace.time.setDeltaTime(900)
+    openspace.time.setTime("2000-JUL-14 10:03:00.000")
+    openspace.scriptScheduler.loadScheduledScript("2000 JUL 14 11:48:00", StartTimeScriptFastLoop)
   ]],
   Documentation = "Fast loop: Starts from 10:03 and sets delta time to 15 min/second (900 seconds/second)",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
 
-local bastilleday_setup_longloop = {
-  Identifier = "os.events.bastilleday.setup.longloop",
+local LongLoop = {
+  Identifier = "os.bastilleday.setup.LongLoop",
   Name = "Loop 09:30 - 13:00, at 4 min/second",
   Command = [[
-    local starttimescriptlongloop = "openspace.time.setTime('2000 JUL 14 09:30:00')";
-    openspace.scriptScheduler.clear();
-    openspace.time.setDeltaTime(240);
-    openspace.time.setTime('2000-JUL-14 09:30:00.00');
-    openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 13:00:00', starttimescriptlongloop);
+    local StartTimeScriptLongLoop = "openspace.time.setTime('2000 JUL 14 09:30:00')"
+    openspace.scriptScheduler.clear()
+    openspace.time.setDeltaTime(240)
+    openspace.time.setTime("2000-JUL-14 09:30:00.00")
+    openspace.scriptScheduler.loadScheduledScript("2000 JUL 14 13:00:00", StartTimeScriptLongLoop)
   ]],
   Documentation = "Long loop: Restarts time at 09:30 and stops at 11:50, delta time to 4 min/second (240 seconds/second)",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(bastilleday_setup_startofcme)
-  openspace.action.registerAction(bastilleday_setup_shortloop)
-  openspace.action.registerAction(bastilleday_setup_standardloop)
-  openspace.action.registerAction(bastilleday_setup_fastloop)
-  openspace.action.registerAction(bastilleday_setup_longloop)
+  openspace.action.registerAction(StartOfCme)
+  openspace.action.registerAction(ShortLoop)
+  openspace.action.registerAction(StandardLoop)
+  openspace.action.registerAction(FastLoop)
+  openspace.action.registerAction(LongLoop)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(bastilleday_setup_longloop)
-  openspace.action.removeAction(bastilleday_setup_fastloop)
-  openspace.action.removeAction(bastilleday_setup_standardloop)
-  openspace.action.removeAction(bastilleday_setup_shortloop)
-  openspace.action.removeAction(bastilleday_setup_startofcme)
+  openspace.action.removeAction(LongLoop)
+  openspace.action.removeAction(FastLoop)
+  openspace.action.removeAction(StandardLoop)
+  openspace.action.removeAction(ShortLoop)
+  openspace.action.removeAction(StartOfCme)
 end)
+
+asset.export("StartOfCme", StartOfCme.Identifier)
+asset.export("ShortLoop", ShortLoop.Identifier)
+asset.export("StandardLoop", StandardLoop.Identifier)
+asset.export("FastLoop", FastLoop.Identifier)
+asset.export("LongLoop", LongLoop.Identifier)
+
+
 
 asset.meta = {
   Name = "Bastille day actions",

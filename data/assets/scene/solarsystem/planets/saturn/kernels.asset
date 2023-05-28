@@ -1,13 +1,15 @@
-local Kernels = asset.syncedResource({
+local kernels = asset.syncedResource({
   Name = "Saturn Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "saturn_kernels",
   Version = 2
 })
 
-asset.export("sat415", Kernels .. "sat415.bsp")
-asset.export("sat441", Kernels .. "sat441.bsp")
-asset.export("sat452", Kernels .. "sat452.bsp")
+
+asset.export("sat415", kernels .. "sat415.bsp")
+asset.export("sat441", kernels .. "sat441.bsp")
+asset.export("sat452", kernels .. "sat452.bsp")
+
 
 
 asset.meta = {

@@ -1,4 +1,6 @@
-local globeIdentifier = asset.require("../../iapetus").Iapetus.Identifier
+local globe = asset.require("../../iapetus")
+
+
 
 local texturesPath = asset.syncedResource({
   Name = "Iapetus textures",
@@ -7,18 +9,20 @@ local texturesPath = asset.syncedResource({
   Version = 1
 })
 
+
 local layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "iapetus.jpg",
   Enabled = asset.enabled
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Iapetus.Identifier, "ColorLayers", layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Iapetus.Identifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)

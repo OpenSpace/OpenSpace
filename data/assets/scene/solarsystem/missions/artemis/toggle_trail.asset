@@ -1,5 +1,5 @@
-local toggle_trail = {
-  Identifier = "event.artemis.toggle_trail",
+local ToggleTrail = {
+  Identifier = "os.artemis.ToggleTrail",
   Name = "Toggle Artemis trails (auto)",
   Command = [[
     local node
@@ -27,7 +27,7 @@ local toggle_trail = {
       end
     else
       visibility = not (
-        (openspace.getPropertyValue("Scene." .. earthTrail .. ".Renderable.Fade") == 1) or 
+        (openspace.getPropertyValue("Scene." .. earthTrail .. ".Renderable.Fade") == 1) or
         (openspace.getPropertyValue("Scene." .. moonTrail .. ".Renderable.Fade") == 1)
       )
     end
@@ -35,7 +35,7 @@ local toggle_trail = {
     if visibility then
       openspace.fadeIn("Scene." .. earthTrail .. ".Renderable")
       openspace.fadeIn("Scene." .. moonTrail .. ".Renderable")
-    else 
+    else
       openspace.fadeOut("Scene." .. earthTrail .. ".Renderable")
       openspace.fadeOut("Scene." .. moonTrail .. ".Renderable")
     end
@@ -51,16 +51,16 @@ local toggle_trail = {
 
 
 asset.onInitialize(function()
-  openspace.action.registerAction(toggle_trail)
+  openspace.action.registerAction(ToggleTrail)
 
   openspace.event.registerEventAction(
     "CameraFocusTransition",
-    toggle_trail.Identifier,
+    ToggleTrail.Identifier,
     { Transition = "Exiting" }
   )
   openspace.event.registerEventAction(
     "CameraFocusTransition",
-    toggle_trail.Identifier,
+    ToggleTrail.Identifier,
     { Transition = "Approaching" }
   )
 end)
@@ -68,16 +68,16 @@ end)
 asset.onDeinitialize(function()
   openspace.event.unregisterEventAction(
     "CameraFocusTransition",
-    toggle_trail.Identifier,
+    ToggleTrail.Identifier,
     { Transition = "Exiting" }
   )
   openspace.event.unregisterEventAction(
     "CameraFocusTransition",
-    toggle_trail.Identifier,
+    ToggleTrail.Identifier,
     { Transition = "Approaching" }
   )
 
-  openspace.action.removeAction(toggle_trail)
+  openspace.action.removeAction(ToggleTrail)
 end)
 
-asset.export("artemis.toggle_trail", toggle_trail.Identifier)
+asset.export("ToggleTrail", ToggleTrail.Identifier)

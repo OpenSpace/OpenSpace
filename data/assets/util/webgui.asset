@@ -1,19 +1,20 @@
 asset.require("./static_server")
-
 local guiCustomization = asset.require("customization/gui")
+
+
 
 -- Select which commit hashes to use for the frontend and backend
 local frontendHash = "79f012650c585c1d62c5c74d90c6708031312347"
-local dataProvider = "data.openspaceproject.com/files/webgui"
 
 local frontend = asset.syncedResource({
   Identifier = "WebGuiFrontend",
   Name = "Web Gui Frontend",
   Type = "UrlSynchronization",
-  Url = dataProvider .. "/frontend/" ..  frontendHash .. "/frontend.zip"
+  Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/frontend.zip"
 })
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   -- Unzip the frontend bundle
   local dest = frontend .. "frontend"
   if not openspace.directoryExists(dest) then
@@ -49,10 +50,10 @@ asset.onInitialize(function ()
   end
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   -- Remove the frontend endpoint
   local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
-  local newDirectories = {};
+  local newDirectories = {}
 
   -- @TODO(maci, 2019-08-23) see message below
   --openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "")
@@ -84,12 +85,13 @@ function setCefRoute(route)
   )
 end
 
-
 asset.export("setCefRoute", setCefRoute)
+
+
 
 asset.meta = {
   Name = "WebGUI",
-  Version = "0.1",
+  Version = "1.0",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

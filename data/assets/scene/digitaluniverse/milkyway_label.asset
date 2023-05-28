@@ -5,14 +5,15 @@ local homespeck = asset.syncedResource({
   Version = 1
 })
 
-local transformMatrix = {
+local TransformMatrix = {
   -0.7357425748,    0.67726129641,  0.0,           0.0,
   -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
   0.67314530211,    0.73127116582,  0.11008126223, 0.0,
   0.0,              0.0,            0.0,           1.0
 }
 
-local homeLabel = {
+
+local HomeLabel = {
   Identifier = "HomeLabel",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -24,13 +25,13 @@ local homeLabel = {
       Size = 20.50,
       MinMaxSize = { 16, 20 },
       Unit = "Mpc",
-      TransformationMatrix = transformMatrix
+      TransformationMatrix = TransformMatrix
     },
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.99,
     ScaleFactor = 500.0,
     Unit = "Mpc",
-    TransformationMatrix = transformMatrix,
+    TransformationMatrix = TransformMatrix,
     FadeInDistances = { 0.05, 1.0 },
     BillboardMinMaxSize = { 0.0, 8.22 },
     EnablePixelSizeControl = true
@@ -42,15 +43,16 @@ local homeLabel = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(homeLabel)
+  openspace.addSceneGraphNode(HomeLabel)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(homeLabel)
+  openspace.removeSceneGraphNode(HomeLabel)
 end)
 
-asset.export(homeLabel)
+asset.export(HomeLabel)
 
 
 

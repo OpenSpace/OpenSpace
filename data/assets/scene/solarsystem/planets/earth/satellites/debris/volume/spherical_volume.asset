@@ -1,16 +1,21 @@
--- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_VOLUME enabled
-
--- Before using this asset,
--- the volume data itself needs to be generated,
+-- Before using this asset, the volume data itself needs to be generated,
 -- using the task 'data/tasks/volume/debristasks/generate_debris_volume.task'
 
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local maxApogee = 10946320;
 
-local volume = {
-  Identifier = "DebrisVolume - Spherical",
+
+local MaxApogee = 10946320
+
+local DebrisVolumeSpherical = {
+  Identifier = "DebrisVolumeSpherical",
   Parent = transforms.EarthInertial.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = MaxApogee
+    }
+  },
   Renderable = {
     Type = "RenderableTimeVaryingVolume",
     SourceDirectory = asset.localResource("generated"),
@@ -19,29 +24,25 @@ local volume = {
     MinValue = 0,
     MaxValue = 1,
     GridType = "Spherical",
-    SecondsBefore = 50*365*24*60*60,
-    SecondsAfter = 50*365*24*60*60
+    SecondsBefore = 50 * 365 * 24 * 60 * 60,
+    SecondsAfter = 50 * 365 * 24 * 60 * 60
   },
   GUI = {
+    Name = "DebrisVolume - Spherical",
     Path = "/Volumes"
-  },
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = maxApogee    --do not multiply this. That will not show real representation.
-    }
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(volume)
+  openspace.addSceneGraphNode(DebrisVolumeSpherical)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(volume)
+  openspace.removeSceneGraphNode(DebrisVolumeSpherical)
 end)
 
-asset.export(volume)
+asset.export(DebrisVolumeSpherical)
 
 
 

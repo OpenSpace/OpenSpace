@@ -7,24 +7,26 @@ asset.require("./minor/other_groups")
 asset.require("./minor/pasiphae_group")
 asset.require("./minor/themisto_group")
 
-local minormoons_on = {
-  Identifier = "os.solarsystem.jupiter.minormoonson",
+
+
+local JupiterMinorMoonsOn = {
+  Identifier = "os.solarsystem.JupiterMinorMoonsOn",
   Name = "Turn on minor moons and trails",
   Command = [[
-    local trails = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Enabled');
-    local trails_fade = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Fade');
+    local trails = openspace.getProperty("{moonTrail_minor_jupiter}.Renderable.Enabled")
+    local trails_fade = openspace.getProperty("{moonTrail_minor_jupiter}.Renderable.Fade")
 
-    local moons = openspace.getProperty('{moon_minor_jupiter}.Renderable.Enabled');
-    local moons_fade = openspace.getProperty('{moon_minor_jupiter}.Renderable.Fade');
+    local moons = openspace.getProperty("{moon_minor_jupiter}.Renderable.Enabled")
+    local moons_fade = openspace.getProperty("{moon_minor_jupiter}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
       openspace.setPropertyValueSingle(trails[i], true)
-      openspace.setPropertyValueSingle(v, 1, 2, 'Linear')
+      openspace.setPropertyValueSingle(v, 1, 2, "Linear")
     end
 
     for i, v in pairs(moons_fade) do
       openspace.setPropertyValueSingle(moons[i], true)
-      openspace.setPropertyValueSingle(v, 1, 2, 'Linear')
+      openspace.setPropertyValueSingle(v, 1, 2, "Linear")
     end
   ]],
   Documentation = "Turn ON Jupiter's minor moons and their trails",
@@ -32,22 +34,34 @@ local minormoons_on = {
   IsLocal = true
 }
 
-local minormoons_off = {
-  Identifier = "os.solarsystem.jupiter.minormoonsoff",
+local JupiterMinorMoonsOff = {
+  Identifier = "os.solarsystem.JupiterMinorMoonsOff",
   Name = "Turn off minors moon and trails",
   Command = [[
-    local trails = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Enabled');
-    local trails_fade = openspace.getProperty('{moonTrail_minor_jupiter}.Renderable.Fade');
+    local trails = openspace.getProperty("{moonTrail_minor_jupiter}.Renderable.Enabled")
+    local trails_fade = openspace.getProperty("{moonTrail_minor_jupiter}.Renderable.Fade")
 
-    local moons = openspace.getProperty('{moon_minor_jupiter}.Renderable.Enabled');
-    local moons_fade = openspace.getProperty('{moon_minor_jupiter}.Renderable.Fade');
+    local moons = openspace.getProperty("{moon_minor_jupiter}.Renderable.Enabled")
+    local moons_fade = openspace.getProperty("{moon_minor_jupiter}.Renderable.Fade")
 
     for i, v in pairs(trails_fade) do
-      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)" )
+      openspace.setPropertyValueSingle(
+        v,
+        0,
+        2,
+        "Linear",
+        "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)"
+      )
     end
 
     for i, v in pairs(moons_fade) do
-      openspace.setPropertyValueSingle(v, 0, 2, 'Linear', "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)" )
+      openspace.setPropertyValueSingle(
+        v,
+        0,
+        2,
+        "Linear",
+        "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)"
+      )
     end
   ]],
   Documentation = "Turn OFF Jupiter's minor moons and their trails",
@@ -55,15 +69,20 @@ local minormoons_off = {
   IsLocal = true
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(minormoons_on)
-  openspace.action.registerAction(minormoons_off)
+  openspace.action.registerAction(JupiterMinorMoonsOn)
+  openspace.action.registerAction(JupiterMinorMoonsOff)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(minormoons_off)
-  openspace.action.removeAction(minormoons_on)
+  openspace.action.removeAction(JupiterMinorMoonsOff)
+  openspace.action.removeAction(JupiterMinorMoonsOn)
 end)
+
+asset.export("JupiterMinorMoonsOn", JupiterMinorMoonsOn.Identifier)
+asset.export("JupiterMinorMoonsOff", JupiterMinorMoonsOff.Identifier)
+
 
 
 asset.meta = {

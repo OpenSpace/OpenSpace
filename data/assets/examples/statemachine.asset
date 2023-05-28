@@ -1,7 +1,7 @@
 -- Create a state machine with a few different states. The state machine can be controlled through
 -- the scripting commands from the state machine module.
 
-local targetNode = function(nodeIdentifier)
+local function targetNode(nodeIdentifier)
   return [[
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
     openspace.setPropertyValueSingle(
@@ -12,7 +12,7 @@ local targetNode = function(nodeIdentifier)
   ]]
 end
 
-local states = {
+local States = {
   {
     Identifier = "Constellations",
     Enter = [[
@@ -24,15 +24,15 @@ local states = {
   },
   {
     Identifier = "Earth",
-    Enter = 'openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", true)',
-    Exit = 'openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", false)'
+    Enter = [[openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", true)]],
+    Exit = [[openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", false)]]
   },
   {
     Identifier = "Moon"
   }
 }
 
-local transitions = {
+local Transitions = {
   {
     From = "Earth",
     To = "Moon",
@@ -45,7 +45,7 @@ local transitions = {
   },
   {
     From = "Earth",
-    To = "Constellations",
+    To = "Constellations"
   },
   {
     From = "Constellations",
@@ -63,10 +63,11 @@ local transitions = {
   }
 }
 
+
 asset.onInitialize(function()
   -- Setup (could be done in the profile)
   openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", true)
   openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Opacity", 0.0)
 
-  openspace.statemachine.createStateMachine(states, transitions, "Earth")
+  openspace.statemachine.createStateMachine(States, Transitions, "Earth")
 end)

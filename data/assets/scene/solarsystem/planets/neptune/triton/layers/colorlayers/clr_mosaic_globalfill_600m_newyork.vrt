@@ -4,7 +4,7 @@
   <VRTRasterBand dataType="Byte" band="1">
     <ColorInterp>Red</ColorInterp>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">Triton_Voyager2_ClrMosaic_GlobalFill_600m_newyork.wms</SourceFilename>
+      <SourceFilename relativeToVRT="1">clr_mosaic_globalfill_600m_newyork.wms</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="14138" RasterYSize="7069" DataType="Byte" BlockXSize="512" BlockYSize="512" />
       <SrcRect xOff="0" yOff="0" xSize="14138" ySize="7069" />
@@ -14,7 +14,7 @@
   <VRTRasterBand dataType="Byte" band="2">
     <ColorInterp>Green</ColorInterp>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">Triton_Voyager2_ClrMosaic_GlobalFill_600m_newyork.wms</SourceFilename>
+      <SourceFilename relativeToVRT="1">clr_mosaic_globalfill_600m_newyork.wms</SourceFilename>
       <SourceBand>2</SourceBand>
       <SourceProperties RasterXSize="14138" RasterYSize="7069" DataType="Byte" BlockXSize="512" BlockYSize="512" />
       <SrcRect xOff="0" yOff="0" xSize="14138" ySize="7069" />
@@ -24,7 +24,7 @@
   <VRTRasterBand dataType="Byte" band="3">
     <ColorInterp>Blue</ColorInterp>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">Triton_Voyager2_ClrMosaic_GlobalFill_600m_newyork.wms</SourceFilename>
+      <SourceFilename relativeToVRT="1">clr_mosaic_globalfill_600m_newyork.wms</SourceFilename>
       <SourceBand>3</SourceBand>
       <SourceProperties RasterXSize="14138" RasterYSize="7069" DataType="Byte" BlockXSize="512" BlockYSize="512" />
       <SrcRect xOff="0" yOff="0" xSize="14138" ySize="7069" />
@@ -35,7 +35,7 @@
     <ColorInterp>Alpha</ColorInterp>
     <NoDataValue>0</NoDataValue>
     <ComplexSource>
-      <SourceFilename relativeToVRT="1">Triton_Voyager2_ClrMosaic_GlobalFill_600m_newyork.wms</SourceFilename>
+      <SourceFilename relativeToVRT="1">clr_mosaic_globalfill_600m_newyork.wms</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="14138" RasterYSize="7069" DataType="Byte" BlockXSize="512" BlockYSize="512" />
       <SrcRect xOff="0" yOff="0" xSize="14138" ySize="7069" />

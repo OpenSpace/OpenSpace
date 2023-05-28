@@ -1,5 +1,7 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
-local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+
+
 
 local models = asset.syncedResource({
   Name = "Apollo Boulders Models",
@@ -8,14 +10,15 @@ local models = asset.syncedResource({
   Version = 2
 })
 
+
 local Station7BoulderHolder = {
   Identifier = "Station_7_Boulder",
-  Parent = moon_asset.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon_asset.Moon.Identifier,
-      Longitude = -360+30.8165882,
+      Globe = moonAsset.Moon.Identifier,
+      Longitude = -360 + 30.8165882,
       Latitude = 20.2908556,
       Altitude = -2593.5,
       UseHeightMap = true
@@ -34,12 +37,12 @@ local Station7BoulderModel = {
     Scale = {
       Type = "StaticScale",
       Scale = 0.1
-    },
+    }
   },
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "b7model.obj",
-    RotationVector = { 1.945950,274.378387,212.903214 },
+    RotationVector = { 1.945950, 274.378387, 212.903214 },
     LightSources = {
       sun.LightSource,
       {
@@ -56,6 +59,7 @@ local Station7BoulderModel = {
     Path = "/Solar System/Missions/Apollo/17/Station 7"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Station7BoulderHolder)

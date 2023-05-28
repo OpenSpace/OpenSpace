@@ -1,6 +1,8 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Saturn Labels",
@@ -9,6 +11,7 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
+
 local Rhea = {
   Identifier = "Rhea",
   Parent = transforms.SaturnBarycenter.Identifier,
@@ -16,8 +19,7 @@ local Rhea = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "RHEA",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Observer = "SATURN BARYCENTER"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -51,7 +53,6 @@ local Rhea = {
   }
 }
 
-
 local RheaLabel = {
   Identifier = "RheaLabel",
   Parent = Rhea.Identifier,
@@ -79,6 +80,8 @@ local RheaLabel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.sat441)
+
   openspace.addSceneGraphNode(Rhea)
   openspace.addSceneGraphNode(RheaLabel)
 end)
@@ -86,9 +89,12 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(RheaLabel)
   openspace.removeSceneGraphNode(Rhea)
+
+  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Rhea)
+asset.export(RheaLabel)
 
 
 
