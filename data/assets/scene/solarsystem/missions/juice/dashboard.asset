@@ -1,11 +1,16 @@
+local juice = asset.require("./transforms")
+local jupiter = asset.require("scene/solarsystem/planets/jupiter/jupiter")
+local ganymede = asset.require("scene/solarsystem/planets/jupiter/ganymede/ganymede")
+
+
 local DistanceJuiceJupiter = {
   Type = "DashboardItemDistance",
   Identifier = "JuiceJupiterDistance",
   Enabled = asset.enabled,
   SourceType = "Node",
-  SourceNodeName = "Juice",
+  SourceNodeName = juice.Juice.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = "Jupiter",
+  DestinationNodeName = jupiter.Jupiter.Identifier,
   GuiName = "Juice - Jupiter Distance"
 }
 
@@ -14,9 +19,9 @@ local DistanceJuiceGanymede = {
   Identifier = "JuiceGanymedeDistance",
   Enabled = asset.enabled,
   SourceType = "Node",
-  SourceNodeName = "Juice",
+  SourceNodeName = juice.Juice.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = "Ganymede",
+  DestinationNodeName = ganymede.Ganymede.Identifier,
   GuiName = "Juice - Ganymede Distance"
 }
 

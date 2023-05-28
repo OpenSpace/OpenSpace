@@ -369,4 +369,3 @@ asset.export("FocusRosetta", FocusRosetta.Identifier)
 asset.export("SetupLanderRelease", SetupLanderRelease.Identifier)
 asset.export("ToggleImagePlane", ToggleImagePlane.Identifier)
 asset.export("TogglePhilaeTrail", TogglePhilaeTrail.Identifier)
-i

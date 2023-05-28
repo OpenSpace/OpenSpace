@@ -22,7 +22,7 @@ asset.onInitialize(function()
   openspace.action.registerAction(TogglePlanetLabels)
   openspace.bindKey(TogglePlanetLabels.Key, TogglePlanetLabels.Identifier)
 
-  openspace.bindKey("h", trailAction.Identifier)
+  openspace.bindKey("h", trailAction)
 end)
 
 asset.onDeinitialize(function()

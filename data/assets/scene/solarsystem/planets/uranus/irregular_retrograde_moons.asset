@@ -10,7 +10,7 @@ local Francisco = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "FRANCISCO",
-      Observer = "URANUS BARYCENTER"]
+      Observer = "URANUS BARYCENTER"
     }
   },
   Renderable = {

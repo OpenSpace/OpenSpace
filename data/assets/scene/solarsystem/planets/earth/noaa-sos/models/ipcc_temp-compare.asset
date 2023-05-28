@@ -70,10 +70,10 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Colorbar)
   for i,v in ipairs(layers) do
     openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", v)
   end
-  openspace.removeScreenSpaceRenderable(Colorbar)
 end)
 
 for _,v in ipairs(layers) do
