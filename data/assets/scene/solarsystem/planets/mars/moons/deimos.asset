@@ -27,14 +27,12 @@ local Deimos = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_DEIMOS",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels .. "mar097.bsp"
+      DestinationFrame = "GALACTIC"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "DEIMOS",
-      Observer = "MARS BARYCENTER",
-      Kernels = kernels .. "mar097.bsp"
+      Observer = "MARS BARYCENTER"
     }
   },
   Renderable = {
@@ -106,6 +104,8 @@ local DeimosLabel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "mar097.bsp")
+
   openspace.addSceneGraphNode(Deimos)
   openspace.addSceneGraphNode(DeimosTrail)
   openspace.addSceneGraphNode(DeimosLabel)
@@ -115,6 +115,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(DeimosLabel)
   openspace.removeSceneGraphNode(DeimosTrail)
   openspace.removeSceneGraphNode(Deimos)
+
+  openspace.spice.unloadKernel(kernels .. "mar097.bsp")
 end)
 
 asset.export(Deimos)

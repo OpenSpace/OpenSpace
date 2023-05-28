@@ -82,8 +82,7 @@ local RosettaPosition = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "ROSETTA",
-      Observer = "SSB",
-      Kernels = RosettaKernels
+      Observer = "SSB"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -134,8 +133,7 @@ local PhilaePosition = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "PHILAE",
-      Observer = "CHURYUMOV-GERASIMENKO",
-      Kernels = RosettaKernels
+      Observer = "CHURYUMOV-GERASIMENKO"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -324,6 +322,8 @@ local TogglePhilaeTrail = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(RosettaKernels)
+
   openspace.addSceneGraphNode(RosettaPosition)
   openspace.addSceneGraphNode(Rosetta)
   openspace.addSceneGraphNode(PhilaePosition)
@@ -355,6 +355,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PhilaePosition)
   openspace.removeSceneGraphNode(Rosetta)
   openspace.removeSceneGraphNode(RosettaPosition)
+
+  openspace.spice.unloadKernel(RosettaKernels)
 end)
 
 asset.export(RosettaPosition)

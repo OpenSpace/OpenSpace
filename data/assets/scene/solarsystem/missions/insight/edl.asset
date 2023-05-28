@@ -71,7 +71,6 @@ local TranslationKeyframes = {
       Target = "INSIGHT",
       Observer = "MARS",
       Frame = "IAU_MARS",
-      Kernels = iKernels,
       FixedDate = "2018 NOV 26 19:39:03"
   },
   ["2018 NOV 26 19:39:02"] = {
@@ -79,36 +78,31 @@ local TranslationKeyframes = {
       Target = "INSIGHT",
       Observer = "MARS",
       Frame = "IAU_MARS",
-      Kernels = iKernels,
       FixedDate = "2018 NOV 26 19:39:03"
   },
   ["2018 NOV 26 19:39:03"] = {
     Type = "SpiceTranslation",
     Target = "INSIGHT",
     Observer = "MARS",
-    Frame = "IAU_MARS",
-    Kernels = iKernels
+    Frame = "IAU_MARS"
   },
   ["2018 NOV 26 19:39:04"] = {
     Type = "SpiceTranslation",
     Target = "INSIGHT",
     Observer = "MARS",
-    Frame = "IAU_MARS",
-    Kernels = iKernels
+    Frame = "IAU_MARS"
   },
  ["2018 NOV 26 19:45:34"] = {
     Type = "SpiceTranslation",
     Target = "INSIGHT",
     Observer = "MARS",
-    Frame = "IAU_MARS",
-    Kernels = iKernels
+    Frame = "IAU_MARS"
   },
   ["2018 NOV 26 19:45:35"] = {
       Type = "SpiceTranslation",
       Target = "INSIGHT",
       Observer = "MARS",
       Frame = "IAU_MARS",
-      Kernels = iKernels,
       FixedDate = "2018 NOV 26 19:45:34"
   }
 }
@@ -118,33 +112,28 @@ local RotationKeyframes = {
     Type = "SpiceRotation",
     SourceFrame = "INSIGHT_LANDER_CRUISE",
     DestinationFrame = "IAU_MARS",
-    FixedDate = "2018 NOV 26 19:39:02",
-    Kernels = iKernels
+    FixedDate = "2018 NOV 26 19:39:02"
   },
   ["2018 NOV 26 19:39:02"] = {
     Type = "SpiceRotation",
     SourceFrame = "INSIGHT_LANDER_CRUISE",
     DestinationFrame = "IAU_MARS",
-    FixedDate = "2018 NOV 26 19:39:02",
-    Kernels = iKernels
+    FixedDate = "2018 NOV 26 19:39:02"
   },
   ["2018 NOV 26 19:39:03"] = {
     Type = "SpiceRotation",
     SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS",
-    Kernels = iKernels
+    DestinationFrame = "IAU_MARS"
   },
   ["2018 NOV 26 19:39:04"] = {
     Type = "SpiceRotation",
     SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS",
-    Kernels = iKernels
+    DestinationFrame = "IAU_MARS"
   },
  ["2018 NOV 26 19:45:34"] = {
     Type = "SpiceRotation",
     SourceFrame = "INSIGHT_LANDER_CRUISE",
-    DestinationFrame = "IAU_MARS",
-    Kernels = iKernels
+    DestinationFrame = "IAU_MARS"
   },
   ["2018 NOV 26 19:45:35"] = {
     Type = "SpiceRotation",
@@ -778,8 +767,7 @@ local Insight_Trail = {
       Type = "SpiceTranslation",
       Target = -189,
       Observer = "MARS",
-      Frame = "IAU_MARS",
-      Kernels = iKernels
+      Frame = "IAU_MARS"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "2018 NOV 26 19:30:13.390",
@@ -798,6 +786,8 @@ local Insight_Trail = {
 }
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(iKernels)
+
   openspace.addSceneGraphNode(InsightParent)
   openspace.addSceneGraphNode(Insight)
   openspace.addSceneGraphNode(Insight_Entry_CapsuleA)
@@ -869,6 +859,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Insight_Entry_CapsuleA)
   openspace.removeSceneGraphNode(Insight)
   openspace.removeSceneGraphNode(InsightParent)
+
+  openspace.spice.unloadKernel(iKernels)
 end)
 
 asset.export(InsightParent)

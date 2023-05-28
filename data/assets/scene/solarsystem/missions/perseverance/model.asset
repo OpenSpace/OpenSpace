@@ -18,7 +18,6 @@ local TranslationKeyframes = {
     Type = "SpiceTranslation",
     Target = spice.ID,
     Observer = "MARS",
-    Kernels = spice.Kernels,
     Frame = "IAU_MARS",
     FixedDate = "2020 JUL 17 13:56:43"
   },
@@ -26,7 +25,6 @@ local TranslationKeyframes = {
     Type = "SpiceTranslation",
     Target = spice.ID,
     Observer = "MARS",
-    Kernels = spice.Kernels,
     Frame = "IAU_MARS",
     FixedDate = "2020 JUL 17 13:56:43"
   },
@@ -34,29 +32,25 @@ local TranslationKeyframes = {
     Type = "SpiceTranslation",
     Target = spice.ID,
     Observer = "MARS",
-    Frame = "IAU_MARS",
-    Kernels = spice.Kernels
+    Frame = "IAU_MARS"
   },
   ["2020 JUL 17 13:56:44"] = {
     Type = "SpiceTranslation",
     Target = spice.ID,
     Observer = "MARS",
-    Frame = "IAU_MARS",
-    Kernels = spice.Kernels
+    Frame = "IAU_MARS"
   },
   ["2021 FEB 18 20:43:48"] = {
     Type = "SpiceTranslation",
     Target = spice.ID,
     Observer = "MARS",
-    Frame = "IAU_MARS",
-    Kernels = spice.Kernels
+    Frame = "IAU_MARS"
   },
   ["2021 FEB 18 20:43:49"] = {
     Type = "SpiceTranslation",
     Target = spice.ID,
     Observer = "MARS",
     Frame = "IAU_MARS",
-    Kernels = spice.Kernels,
     FixedDate = "2021 FEB 18 20:43:48"
   }
 }
@@ -136,6 +130,8 @@ local Body = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(spice.Kernels)
+
   openspace.addSceneGraphNode(PerseveranceNode)
   openspace.addSceneGraphNode(Perseverance)
   openspace.addSceneGraphNode(PerseveranceModel)
@@ -147,6 +143,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PerseveranceModel)
   openspace.removeSceneGraphNode(Perseverance)
   openspace.removeSceneGraphNode(PerseveranceNode)
+
+  openspace.spice.unloadKernel(spice.Kernels)
 end)
 
 asset.export(PerseveranceNode)

@@ -21,8 +21,7 @@ local ArtemisPosition = {
       Type = "SpiceTranslation",
       Target = ArtemisSpiceId,
       Observer = "EARTH",
-      Frame = "GALACTIC",
-      Kernels = kernels .. "artemis.bsp"
+      Frame = "GALACTIC"
     }
   },
   GUI = {
@@ -35,11 +34,15 @@ local ArtemisPosition = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "artemis.bsp")
+
   openspace.addSceneGraphNode(ArtemisPosition)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ArtemisPosition)
+
+  openspace.spice.unloadKernel(kernels .. "artemis.bsp")
 end)
 
 asset.export(ArtemisPosition)

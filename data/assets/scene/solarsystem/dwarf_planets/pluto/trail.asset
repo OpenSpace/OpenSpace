@@ -12,8 +12,7 @@ local PlutoBarycenterTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "PLUTO BARYCENTER",
-      Observer = "SSB",
-      Kernels = kernels.PlutoKernels
+      Observer = "SSB"
     },
     Color = { 0.3, 0.7, 0.3 },
     Period = 365.25,
@@ -30,11 +29,15 @@ local PlutoBarycenterTrail = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.PlutoKernels)
+
   openspace.addSceneGraphNode(PlutoBarycenterTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoBarycenterTrail)
+
+  openspace.spice.unloadKernel(kernels.PlutoKernels)
 end)
 
 asset.export(PlutoBarycenterTrail)

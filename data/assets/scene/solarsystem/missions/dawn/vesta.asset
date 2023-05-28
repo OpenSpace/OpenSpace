@@ -38,10 +38,7 @@ local Vesta = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VESTA",
-      Observer = "SSB",
-      Kernels = {
-        kernels .. "sb_vesta_071107.bsp"
-      }
+      Observer = "SSB"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -141,6 +138,8 @@ local VestaTrail = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "sb_vesta_071107.bsp")
+
   openspace.addSceneGraphNode(Vesta)
   openspace.addSceneGraphNode(VestaTrail)
 end)
@@ -148,6 +147,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VestaTrail)
   openspace.removeSceneGraphNode(Vesta)
+
+  openspace.spice.unloadKernel(kernels .. "sb_vesta_071107.bsp")
 end)
 
 asset.export(Vesta)

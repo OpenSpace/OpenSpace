@@ -85,8 +85,7 @@ local DawnPosition = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "DAWN",
-      Observer = "SSB",
-      Kernels = KernelFiles
+      Observer = "SSB"
     },
     -- Rotation for model version 2
     Rotation = {
@@ -108,8 +107,7 @@ local Dawn = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "DAWN_SPACECRAFT",
-      DestinationFrame = "GALACTIC",
-      Kernels = KernelFiles
+      DestinationFrame = "GALACTIC"
     }
   },
   Renderable = {
@@ -194,6 +192,8 @@ local DawnFramingCamera2 = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(KernelFiles)
+
   openspace.addSceneGraphNode(DawnPosition)
   openspace.addSceneGraphNode(Dawn)
   openspace.addSceneGraphNode(DawnTrail)
@@ -207,6 +207,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(DawnTrail)
   openspace.removeSceneGraphNode(Dawn)
   openspace.removeSceneGraphNode(DawnPosition)
+
+  openspace.spice.unloadKernel(KernelFiles)
 end)
 
 asset.export(DawnPosition)

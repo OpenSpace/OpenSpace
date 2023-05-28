@@ -15,8 +15,7 @@ local LaunchTrail = {
       Type = "SpiceTranslation",
       Target = ApolloSpiceId,
       Observer = "EARTH",
-      Frame = "IAU_EARTH",
-      Kernels = kernels.kernels
+      Frame = "IAU_EARTH"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1968 DEC 21 12:51:00",
@@ -39,8 +38,7 @@ local MoonTrail = {
       Type = "SpiceTranslation",
       Target = ApolloSpiceId,
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels.kernels
+      Frame = "IAU_MOON"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1968 DEC 23",
@@ -63,8 +61,7 @@ local EarthBarycenterTrail = {
       Type = "SpiceTranslation",
       Target = ApolloSpiceId,
       Observer = "EARTH",
-      Frame = "GALACTIC",
-      Kernels = kernels.kernels
+      Frame = "GALACTIC"
     },
     Color = { 0.8, 0.2, 0.2 },
     StartTime = "1968 DEC 21",
@@ -80,6 +77,8 @@ local EarthBarycenterTrail = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.kernels)
+
   openspace.addSceneGraphNode(LaunchTrail)
   openspace.addSceneGraphNode(MoonTrail)
   openspace.addSceneGraphNode(EarthBarycenterTrail)
@@ -89,6 +88,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthBarycenterTrail)
   openspace.removeSceneGraphNode(MoonTrail)
   openspace.removeSceneGraphNode(LaunchTrail)
+
+  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(LaunchTrail)

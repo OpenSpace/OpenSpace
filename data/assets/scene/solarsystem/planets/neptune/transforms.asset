@@ -11,8 +11,7 @@ local NeptuneBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "NEPTUNE BARYCENTER",
-      Observer = "SSB",
-      Kernels = kernel.nep097
+      Observer = "SSB"
     }
   },
   GUI = {
@@ -25,11 +24,15 @@ local NeptuneBarycenter = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.nep097)
+
   openspace.addSceneGraphNode(NeptuneBarycenter)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneBarycenter)
+
+  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(NeptuneBarycenter)

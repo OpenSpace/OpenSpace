@@ -12,8 +12,7 @@ local GSMReferenceFrame = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "GSM", -- Geocentric Solar Magnetospheric
-      DestinationFrame = "GALACTIC",
-      Kernels = GSMKernel
+      DestinationFrame = "GALACTIC"
     }
   },
   GUI = {
@@ -25,11 +24,15 @@ local GSMReferenceFrame = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(GSMKernel)
+
   openspace.addSceneGraphNode(GSMReferenceFrame)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GSMReferenceFrame)
+
+  openspace.spice.unloadKernel(GSMKernel)
 end)
 
 asset.export(GSMReferenceFrame)

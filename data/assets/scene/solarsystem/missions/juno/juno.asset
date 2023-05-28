@@ -32,14 +32,12 @@ local Juno = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "JUNO",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernels.kernels
+      Observer = "JUPITER BARYCENTER"
     },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "JUNO_SPACECRAFT",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels.kernels
+      DestinationFrame = "GALACTIC"
     }
   },
   Renderable = {
@@ -68,8 +66,7 @@ local JunoTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "JUNO",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernels.kernels
+      Observer = "JUPITER BARYCENTER"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "2016 JUL 01",
@@ -84,6 +81,8 @@ local JunoTrail = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.kernels)
+
   openspace.addSceneGraphNode(Juno)
   openspace.addSceneGraphNode(JunoTrail)
 end)
@@ -91,6 +90,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JunoTrail)
   openspace.removeSceneGraphNode(Juno)
+
+  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Juno)

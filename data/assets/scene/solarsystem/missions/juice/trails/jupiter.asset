@@ -11,8 +11,7 @@ local JuiceTrailJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "JUICE",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernels.Kernels
+      Observer = "JUPITER BARYCENTER"
     },
     Color = { 0.70, 0.370, 0.45 },
     StartTime = "2031 JUL 02 00:00:00.000",
@@ -28,11 +27,15 @@ local JuiceTrailJupiter = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.Kernels)
+
   openspace.addSceneGraphNode(JuiceTrailJupiter)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JuiceTrailJupiter)
+
+  openspace.spice.unloadKernel(kernels.Kernels)
 end)
 
 asset.export(JuiceTrailJupiter)

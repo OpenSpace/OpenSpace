@@ -25,8 +25,7 @@ local Pioneer11 = {
     Translation = {
       Type = "SpiceTranslation",
       Target = Pioneer11ID,
-      Observer = "SSB",
-      Kernels = kernel
+      Observer = "SSB"
     }
   },
   Renderable = model.PioneerModel,
@@ -45,8 +44,7 @@ local Pioneer11Trail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = Pioneer11ID,
-      Observer = "SSB",
-      Kernels = kernel
+      Observer = "SSB"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1973 APR 06 02:25:00.000",
@@ -65,6 +63,8 @@ local Pioneer11Trail = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel)
+
   openspace.addSceneGraphNode(Pioneer11)
   openspace.addSceneGraphNode(Pioneer11Trail)
 end)
@@ -72,6 +72,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Pioneer11Trail)
   openspace.removeSceneGraphNode(Pioneer11)
+
+  openspace.spice.unloadKernel(kernel)
 end)
 
 asset.export(Pioneer11)

@@ -20,14 +20,12 @@ local Callisto = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_CALLISTO",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernel.jup365
+      DestinationFrame = "GALACTIC"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "CALLISTO",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernel.jup365
+      Observer = "JUPITER BARYCENTER"
     }
   },
   Renderable = {
@@ -82,6 +80,8 @@ local CallistoLabel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.jup365)
+
   openspace.addSceneGraphNode(Callisto)
   openspace.addSceneGraphNode(CallistoLabel)
 end)
@@ -89,6 +89,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CallistoLabel)
   openspace.removeSceneGraphNode(Callisto)
+
+  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(Callisto)

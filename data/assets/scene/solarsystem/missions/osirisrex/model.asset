@@ -2,7 +2,7 @@ local transforms = asset.require("./transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local kernels = asset.require("./kernels").kernels
+local kernels = asset.require("./kernels")
 
 
 
@@ -23,8 +23,7 @@ local OsirisRex = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "OSIRIS-REX",
-      Observer = "SSB",
-      Kernels = kernels.kernels
+      Observer = "SSB"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -165,6 +164,8 @@ local PolyCamFov = {
 -- }
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.kernels)
+
   openspace.addSceneGraphNode(OsirisRex)
   openspace.addSceneGraphNode(PolyCam)
   openspace.addSceneGraphNode(Rexis)
@@ -178,6 +179,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Rexis)
   openspace.removeSceneGraphNode(PolyCam)
   openspace.removeSceneGraphNode(OsirisRex)
+
+  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(OsirisRex)

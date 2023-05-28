@@ -28,8 +28,7 @@ local L2Position = {
     Translation = {
       Type = "SpiceTranslation",
       Target = L2,
-      Observer = "SSB",
-      Kernels = kernels .. "L2_de431.bsp"
+      Observer = "SSB"
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
@@ -49,11 +48,7 @@ local L2CoRevFrame = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "L2_COREV",
-      DestinationFrame = "GALACTIC",
-      Kernels = {
-        kernels .. "L2_de431.bsp",
-        kernels .. "L2_corev.tf"
-      }
+      DestinationFrame = "GALACTIC"
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
@@ -159,6 +154,9 @@ local L2SunLine = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "L2_de431.bsp")
+  openspace.spice.loadKernel(kernels .. "L2_corev.tf")
+
   openspace.addSceneGraphNode(L2Position)
   openspace.addSceneGraphNode(L2CoRevFrame)
   openspace.addSceneGraphNode(L2Small)
@@ -176,6 +174,9 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(L2Small)
   openspace.removeSceneGraphNode(L2CoRevFrame)
   openspace.removeSceneGraphNode(L2Position)
+
+  openspace.spice.unloadKernel(kernels .. "L2_corev.tf")
+  openspace.spice.unloadKernel(kernels .. "L2_de431.bsp")
 end)
 
 asset.export(L2Position)

@@ -22,8 +22,7 @@ local ArtemisEarthTrail = {
       Type = "SpiceTranslation",
       Target = ArtemisSpiceId,
       Observer = "EARTH",
-      Frame = "GALACTIC",
-      Kernels = kernels .. "artemis.bsp"
+      Frame = "GALACTIC"
     },
     Color = { 0.2, 0.78, 0.635 },
     Fade = 7.0,
@@ -47,8 +46,7 @@ local ArtemisMoonTrail= {
       Type = "SpiceTranslation",
       Target = ArtemisSpiceId,
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels .. "artemis.bsp"
+      Frame = "IAU_MOON"
     },
     Color = { 0.78, 0.43, 0.20 },
     Fade = 7.0,
@@ -65,6 +63,8 @@ local ArtemisMoonTrail= {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "artemis.bsp")
+
   openspace.addSceneGraphNode(ArtemisEarthTrail)
   openspace.addSceneGraphNode(ArtemisMoonTrail)
 end)
@@ -72,6 +72,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ArtemisMoonTrail)
   openspace.removeSceneGraphNode(ArtemisEarthTrail)
+
+  openspace.spice.unloadKernel(kernels .. "artemis.bsp")
 end)
 
 asset.export(ArtemisEarthTrail)

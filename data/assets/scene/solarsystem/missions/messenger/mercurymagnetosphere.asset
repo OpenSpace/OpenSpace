@@ -23,10 +23,7 @@ local Magnetosphere = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "MERCURYSE",
-      DestinationFrame = "GALACTIC",
-      Kernels = {
-        localFolder .. "openspace_mercury.ti"
-      }
+      DestinationFrame = "GALACTIC"
     },
     Scale = {
       Type = "StaticScale",
@@ -53,11 +50,15 @@ local Magnetosphere = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(localFolder .. "openspace_mercury.ti")
+
   openspace.addSceneGraphNode(Magnetosphere)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Magnetosphere)
+
+  openspace.spice.unloadKernel(localFolder .. "openspace_mercury.ti")
 end)
 
 asset.export(Magnetosphere)

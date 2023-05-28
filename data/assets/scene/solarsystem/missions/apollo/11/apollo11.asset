@@ -41,8 +41,7 @@ local Apollo11Position = {
       Type = "SpiceTranslation",
       Target = ApolloSpiceId,
       Observer = "MOON",
-      Frame = "MOON_ME",
-      Kernels = kernels.kernels
+      Frame = "MOON_ME"
     }
   },
   GUI = {
@@ -93,8 +92,7 @@ local Apollo11MoonTrail = {
       Type = "SpiceTranslation",
       Target = ApolloSpiceId,
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels.kernels
+      Frame = "IAU_MOON"
     },
     Color = { 0.180000,0.510000,0.750000 },
     StartTime = "1969 JUL 19 19:38:29.183",
@@ -120,8 +118,7 @@ local lemTranslation = {
       Type = "SpiceTranslation",
       Target = ApolloLemSpiceId,
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels.kernels
+      Frame = "IAU_MOON"
     },
     ["1969 JUL 20 20:14:40"] = {
       Type = "TimelineTranslation",
@@ -243,6 +240,8 @@ local Apollo11LemLandedModel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.kernels)
+
   openspace.addSceneGraphNode(Apollo11Position)
   openspace.addSceneGraphNode(Apollo11LemPosition)
   openspace.addSceneGraphNode(Apollo11Model)
@@ -260,6 +259,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo11Model)
   openspace.removeSceneGraphNode(Apollo11LemPosition)
   openspace.removeSceneGraphNode(Apollo11Position)
+
+  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Apollo11Position)

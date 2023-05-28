@@ -27,8 +27,7 @@ local L4Position = {
     Translation = {
       Type = "SpiceTranslation",
       Target = L4,
-      Observer = "SSB",
-      Kernels = kernels .. "L4_de431.bsp"
+      Observer = "SSB"
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l4" },
@@ -79,6 +78,8 @@ local L4Label = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "L4_de431.bsp")
+
   openspace.addSceneGraphNode(L4Position)
   openspace.addSceneGraphNode(L4)
   openspace.addSceneGraphNode(L4Label)
@@ -88,6 +89,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(L4Label)
   openspace.removeSceneGraphNode(L4)
   openspace.removeSceneGraphNode(L4Position)
+
+  openspace.spice.unloadKernel(kernels .. "L4_de431.bsp")
 end)
 
 asset.export(L4Position)

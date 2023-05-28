@@ -12,8 +12,7 @@ local CallistoTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "CALLISTO",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernel.jup365
+      Observer = "JUPITER BARYCENTER"
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 17.0,
@@ -28,11 +27,15 @@ local CallistoTrail = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.jup365)
+
   openspace.addSceneGraphNode(CallistoTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CallistoTrail)
+
+  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(CallistoTrail)

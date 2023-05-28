@@ -11,8 +11,7 @@ local JuiceTrailGanymede = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "JUICE",
-      Observer = "GANYMEDE",
-      Kernels = kernels.Kernels
+      Observer = "GANYMEDE"
     },
     Color = { 0.70, 0.770, 0.35 },
     StartTime = "2034 DEC 01 00:00:00.000",
@@ -28,11 +27,15 @@ local JuiceTrailGanymede = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.Kernels)
+
   openspace.addSceneGraphNode(JuiceTrailGanymede)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JuiceTrailGanymede)
+
+  openspace.spice.unloadKernel(kernels.Kernels)
 end)
 
 asset.export(JuiceTrailGanymede)

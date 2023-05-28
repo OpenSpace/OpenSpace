@@ -12,8 +12,7 @@ local NeptuneTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "NEPTUNE",
-      Observer = "SSB",
-      Kernels = kernel.nep097
+      Observer = "SSB"
     },
     Color = { 0.2, 0.5, 1.0 },
     -- Period = 60200,
@@ -40,11 +39,15 @@ local NeptuneTrail = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.nep097)
+
   openspace.addSceneGraphNode(NeptuneTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneTrail)
+
+  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(NeptuneTrail)

@@ -29,22 +29,19 @@ local JWSTPosition = {
           Type = "SpiceTranslation",
           Target = 170, -- JWST
           Observer = "EARTH",
-          Frame = "IAU_EARTH",
-          Kernels = { kernels .. "webb.bsp" }
+          Frame = "IAU_EARTH"
         },
         [DetachTime] = {
           Type = "SpiceTranslation",
           Target = 170, -- JWST
           Observer = "EARTH",
-          Frame = "GALACTIC",
-          Kernels = { kernels .. "webb.bsp" }
+          Frame = "GALACTIC"
         },
         [L2orbitInsertionTime] = {
           Type = "SpiceTranslation",
           Target = 170, -- JWST
           Observer = 392, -- L2
-          Frame = "GALACTIC",
-          Kernels = { kernels .. "webb.bsp" }
+          Frame = "GALACTIC"
         }
       }
     }
@@ -85,6 +82,8 @@ local JWSTRotation = {
 
 -- Reparent the JWSTPosition node when the data changes
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "webb.bsp")
+
   openspace.addSceneGraphNode(JWSTPosition)
   openspace.addSceneGraphNode(JWSTRotation)
 
@@ -119,6 +118,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTRotation)
   openspace.removeSceneGraphNode(JWSTPosition)
   openspace.scriptScheduler.clear(1)
+
+  openspace.spice.unloadKernel(kernels .. "webb.bsp")
 end)
 
 asset.export(JWSTPosition)

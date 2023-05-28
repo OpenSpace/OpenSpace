@@ -22,8 +22,7 @@ local Apollo15 = {
       Type = "SpiceTranslation",
       Target = "APOLLO 15",
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels.kernels
+      Frame = "IAU_MOON"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -60,8 +59,7 @@ local Apollo15Trail = {
       Type = "SpiceTranslation",
       Target = "APOLLO 15",
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels.kernels
+      Frame = "IAU_MOON"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1971 JUL 26",
@@ -75,6 +73,8 @@ local Apollo15Trail = {
 }
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.kernels)
+
   openspace.addSceneGraphNode(Apollo15)
   openspace.addSceneGraphNode(Apollo15Trail)
 end)
@@ -82,6 +82,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo15Trail)
   openspace.removeSceneGraphNode(Apollo15)
+
+  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Apollo15)

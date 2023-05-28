@@ -20,14 +20,12 @@ local Europa = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_EUROPA",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernel.jup365
+      DestinationFrame = "GALACTIC"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "EUROPA",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernel.jup365
+      Observer = "JUPITER BARYCENTER"
     }
   },
   Renderable = {
@@ -81,6 +79,8 @@ local EuropaLabel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.jup365)
+
   openspace.addSceneGraphNode(Europa)
   openspace.addSceneGraphNode(EuropaLabel)
 end)
@@ -88,6 +88,8 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EuropaLabel)
   openspace.removeSceneGraphNode(Europa)
+
+  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(Europa)
