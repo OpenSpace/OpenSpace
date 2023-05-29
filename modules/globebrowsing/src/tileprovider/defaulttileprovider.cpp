@@ -251,9 +251,16 @@ Tile::Status DefaultTileProvider::tileStatus(const TileIndex& index) {
         .tileIndex = index,
         .providerID = uniqueIdentifier
     };
+    
     cache::MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
-    return tileCache->get(key).status;
+
+    Tile t = tileCache->get(key);
+    if (t.metaData.has_value() && t.metaData->allMissingData) {
+        return Tile::Status::OutOfRange;
+    }
+
+    return t.status;
 }
 
 TileDepthTransform DefaultTileProvider::depthTransform() {
