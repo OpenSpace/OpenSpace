@@ -266,7 +266,7 @@ namespace openspace::fls {
                 {
                     int amountOfPreviousFieldlines = 0;
                     float prevZ = 0;
-                    float stepLength = 4;
+                    float stepLength = 2;
 
                     glm::vec3 modifiedSeedpoint = modifySeedpoint(
                         seedPoints[i],
