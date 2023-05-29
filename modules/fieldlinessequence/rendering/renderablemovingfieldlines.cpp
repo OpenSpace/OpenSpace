@@ -163,6 +163,12 @@ namespace openspace {
     std::vector<RenderableMovingFieldlines::SetOfSeedPoints> extractSeedPointsFromCSVFile(
         std::filesystem::path filePath
     );
+
+    std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectSetOfSeedPoints(
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedPoints,
+        float percentageOfSeedPoints
+    );
+
     std::ifstream readTxtOrCSVFile(std::filesystem::path filePath);
     std::vector<std::string> extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
 
@@ -796,14 +802,44 @@ namespace openspace {
     std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectSeedpoints(
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedpoints,
         int stepLength,
-        int numberOfFieldlines
+        int numberOfFieldlines,
+        std::string side
     )
     {
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSeedpoints;
 
-        for (int i = 0; i < numberOfFieldlines; i++)
+        if (side == "left")
         {
-            double find = abs(stepLength * i);
+            // buuble sort: sort decending order based on y-value
+            for (int i = 0; i < setOfSeedpoints.size() - 1; ++i) {
+                for (int j = 0; j < setOfSeedpoints.size() - i - 1; ++j) {
+                    if (setOfSeedpoints[j].IMF.y > setOfSeedpoints[j + 1].IMF.y) {
+                        std::swap(setOfSeedpoints[j], setOfSeedpoints[j + 1]);
+                    }
+                }
+            }
+        }
+        else if (side == "right")
+        {
+            // bubble sort: sort incremental order based on y-value
+            for (int i = 0; i < setOfSeedpoints.size() - 1; ++i) {
+                for (int j = 0; j < setOfSeedpoints.size() - i - 1; ++j) {
+                    if (setOfSeedpoints[j].IMF.y < setOfSeedpoints[j + 1].IMF.y) {
+                        std::swap(setOfSeedpoints[j], setOfSeedpoints[j + 1]);
+                    }
+                }
+            }
+        }
+        else
+        {
+            throw ghoul::RuntimeError(
+                fmt::format("selectSeedpoints incorrect fourth parameter"));
+        }
+
+        for (int i = 0; i < numberOfFieldlines - 1; i++)
+        {
+            double find = abs(stepLength * (i + 1));
+            //std::cout << "Find: " << find << std::endl;
 
             int left = 0, right = setOfSeedpoints.size() - 1;
             int closestIndex = -1;
@@ -812,6 +848,7 @@ namespace openspace {
                 int mid = (left + right) / 2;
 
                 float relativeAngle = 90 - (atan(abs(setOfSeedpoints[mid].IMF.x) / abs(setOfSeedpoints[mid].IMF.y)) * (180 / 3.14));
+                //std::cout << "Relative angle: " << relativeAngle << std::endl;
 
                 if (abs(relativeAngle) == find) {
                     closestIndex = mid;
@@ -826,8 +863,6 @@ namespace openspace {
                 }
             }
 
-            std::cout << "Number " << i << " find." << " Resulting closest index was: " << closestIndex << std::endl;
-
             // save setOfSeedpoints.y closest to find
             if (closestIndex == -1) {
                 throw ghoul::RuntimeError(
@@ -836,9 +871,11 @@ namespace openspace {
             }
             else if (closestIndex == 0) {
                 selectedSeedpoints.push_back(setOfSeedpoints[closestIndex]);
+                setOfSeedpoints.erase(setOfSeedpoints.begin() + closestIndex);
             }
             else if (closestIndex == setOfSeedpoints.size() - 1) {
                 selectedSeedpoints.push_back(setOfSeedpoints[closestIndex]);
+                setOfSeedpoints.erase(setOfSeedpoints.begin() + closestIndex);
             }
             else {
                 float relativeAngle = 90 - (atan(abs(setOfSeedpoints[closestIndex].IMF.x) / abs(setOfSeedpoints[closestIndex].IMF.y)) * (180 / 3.14));
@@ -847,9 +884,11 @@ namespace openspace {
                 double dist2 = std::abs(relativeAngle2 - find);
                 if (dist1 <= dist2) {
                     selectedSeedpoints.push_back(setOfSeedpoints[closestIndex]);
+                    setOfSeedpoints.erase(setOfSeedpoints.begin() + closestIndex);
                 }
                 else {
                     selectedSeedpoints.push_back(setOfSeedpoints[closestIndex + 1]);
+                    setOfSeedpoints.erase(setOfSeedpoints.begin() + closestIndex + 1);
                 }
             }
         }
@@ -877,6 +916,112 @@ namespace openspace {
         return numberOfFieldlinesOnSide;
     }
 
+    std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectSetOfSeedPoints(
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedPoints,
+        float percentageOfSeedPoints
+    )
+    {
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSetOfSeedpoints;
+        int numberOfFieldlines = int(setOfSeedPoints.size() * percentageOfSeedPoints);
+
+        if (numberOfFieldlines > 1)
+        {
+            std::vector<RenderableMovingFieldlines::SetOfSeedPoints> leftSideSeedpoints;
+            std::vector<RenderableMovingFieldlines::SetOfSeedPoints> rightSideSeedpoints;
+
+            for (int i = 0; i < setOfSeedPoints.size(); i++)
+            {
+                if (setOfSeedPoints[i].IMF.y < 0)
+                {
+                    leftSideSeedpoints.push_back(setOfSeedPoints[i]);
+                }
+                else
+                {
+                    rightSideSeedpoints.push_back(setOfSeedPoints[i]);
+                }
+            }
+
+            int numberOfFieldlinesOnSide = getNumberOfFieldLinesOnSide(
+                numberOfFieldlines,
+                rightSideSeedpoints.size(),
+                leftSideSeedpoints.size()
+            );
+
+            int furthestRelativeAngleRight = 90 - (atan(abs(rightSideSeedpoints[rightSideSeedpoints.size() - 1].IMF.x) / abs(rightSideSeedpoints[rightSideSeedpoints.size() - 1].IMF.y)) * (180 / 3.14));
+            int furthestRelativeAngleLeft = 90 - (atan(abs(leftSideSeedpoints[0].IMF.x) / abs(leftSideSeedpoints[0].IMF.y)) * (180 / 3.14));
+
+            int stepAngleRight = furthestRelativeAngleRight / numberOfFieldlinesOnSide;
+            int stepAngleLeft = furthestRelativeAngleLeft / numberOfFieldlinesOnSide;
+
+            std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSeedpointsRightSide;
+            std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSeedpointsLeftSide;
+
+            if (numberOfFieldlinesOnSide == leftSideSeedpoints.size())
+            {
+                selectedSeedpointsLeftSide = leftSideSeedpoints;
+            }
+            else
+            {
+                selectedSeedpointsLeftSide = selectSeedpoints(
+                    leftSideSeedpoints,
+                    stepAngleLeft,
+                    numberOfFieldlinesOnSide,
+                    "left"
+                );
+            }
+
+            if (numberOfFieldlinesOnSide == rightSideSeedpoints.size())
+            {
+                selectedSeedpointsRightSide = rightSideSeedpoints;
+            }
+            else
+            {
+                selectedSeedpointsRightSide = selectSeedpoints(
+                    rightSideSeedpoints,
+                    stepAngleRight,
+                    numberOfFieldlinesOnSide,
+                    "right"
+                );
+            }
+
+            // Merge the vectors
+            selectedSeedpointsLeftSide.insert(
+                selectedSeedpointsLeftSide.end(),
+                selectedSeedpointsRightSide.begin(),
+                selectedSeedpointsRightSide.end()
+            );
+
+            selectedSetOfSeedpoints = selectedSeedpointsLeftSide;
+        }
+        else if (numberOfFieldlines == 1)
+        {
+            int bestIndex;
+            double smallest_y_value = 100;
+            double y_value;
+
+            // select seedpoint set with smallest y value on imf
+            for (int i = 0; i < setOfSeedPoints.size(); i++)
+            {
+                y_value = abs(setOfSeedPoints[i].IMF.y);
+                if (y_value < smallest_y_value)
+                {
+                    smallest_y_value = y_value;
+                    bestIndex = i;
+                    std::cout << smallest_y_value << std::endl;
+                }
+            }
+            std::cout << setOfSeedPoints[bestIndex].IMF.x << setOfSeedPoints[bestIndex].IMF.y << setOfSeedPoints[bestIndex].IMF.z << std::endl;
+            selectedSetOfSeedpoints.push_back(setOfSeedPoints[bestIndex]);
+        }
+        else
+        {
+            throw ghoul::RuntimeError(
+                fmt::format("Invalid number of selected fieldlines"));
+        }
+
+        return selectedSetOfSeedpoints;
+    }
+
     /**
     * Extracts seed points from csv file and return tuple
     */
@@ -894,97 +1039,23 @@ namespace openspace {
                 fmt::format("SeedPointFile needs to be a .csv file"));
         }
 
-        // TODO: make selecct function
-
         // input parameters:
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedpoints =
             extractSeedPointsFromCSVFile(filePath);
 
-        //Split up seedpoints for each side
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> leftSideSeedpoints;
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> rightSideSeedpoints;
-        for (int i = 0; i < setOfSeedpoints.size(); i++)
-        {
-            if (setOfSeedpoints[i].IMF.y < 0)
-            {
-                leftSideSeedpoints.push_back(setOfSeedpoints[i]);
-            }
-            else
-            {
-                rightSideSeedpoints.push_back(setOfSeedpoints[i]);
-            }
-        }
+        float percentageOfSetSeedPoints = 0.4;
 
-        double factor = 0.02;
+        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSetOfSeedpoints =
+            selectSetOfSeedPoints(setOfSeedpoints, percentageOfSetSeedPoints);
 
-        // functionality
-        int numberOfFieldlines = int(setOfSeedpoints.size() * factor);
+        addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSetOfSeedpoints);
 
-        int numberOfFieldlinesOnSide = getNumberOfFieldLinesOnSide(numberOfFieldlines,
-            rightSideSeedpoints.size(),
-            leftSideSeedpoints.size());
-
-        int furthestRelativeAngle = 90 - (atan(abs(rightSideSeedpoints[rightSideSeedpoints.size()-1].IMF.x) / abs(rightSideSeedpoints[rightSideSeedpoints.size()-1].IMF.y)) * (180 / 3.14));
-        int furthestRelativeAngleLeft = 90 - (atan(abs(setOfSeedpoints[0].IMF.x) / abs(setOfSeedpoints[0].IMF.y)) * (180 / 3.14));
-
-        int stepLengthRight = furthestRelativeAngle / numberOfFieldlinesOnSide;
-        int stepLengthLeft = furthestRelativeAngleLeft / numberOfFieldlinesOnSide;
-
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSeedpointsRightSide;
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSeedpointsLeftSide;
-
-        if (numberOfFieldlinesOnSide == rightSideSeedpoints.size())
-        {
-            selectedSeedpointsRightSide = rightSideSeedpoints;
-        }
-        else
-        {
-            selectedSeedpointsRightSide = selectSeedpoints(
-                    rightSideSeedpoints,
-                    stepLengthRight,
-                    numberOfFieldlinesOnSide
-                );
-        }
-        if (numberOfFieldlinesOnSide == leftSideSeedpoints.size())
-        {
-            selectedSeedpointsLeftSide = leftSideSeedpoints;
-        }
-        else
-        {
-            selectedSeedpointsLeftSide = selectSeedpoints(
-                    leftSideSeedpoints,
-                    stepLengthLeft,
-                    numberOfFieldlinesOnSide
-                );
-        }
-        std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSeedpoints;
-        if (numberOfFieldlines == 1)
-        {
-            int closestToMiddleSteplength = 0;
-            selectedSeedpoints = selectSeedpoints(
-                setOfSeedpoints,
-                closestToMiddleSteplength,
-                numberOfFieldlinesOnSide
-            );
-        }
-        else
-        {
-
-        }
-
-        std::vector<std::string> seedPointsTopology;
-        addCoordinatesOfTopologies(seedPoints, birthTimes, selectedSeedpoints);
-
-        // TEMP!!!! Keep only one set of the chosen seed points since it doesnt work having several
-        // Test to pick a point
-        const glm::vec3& testPointON = seedPoints[2].first;
-
-        // hard coded path to cdf file
+        // TODO: Fix hard coded path
         std::string cdfPathTemp = "C:/Dev/OpenSpaceLocalData/simonmans/3d__var_1_e20000101-020000-000.out.cdf";
 
         size_t _nPointsOnPathLine = 50;
         std::string _tracingVariable = "u_perp_b";
-        // create kameleon
+
         std::unique_ptr<ccmc::Kameleon> kameleon =
             kameleonHelper::createKameleonObject(cdfPathTemp);
 
