@@ -63,6 +63,8 @@ namespace openspace::fls {
     );
 
     bool checkIfFieldlineIsOpen(std::vector<glm::vec3> fieldlinePositions, std::string topology);
+    bool checkIfFieldlineIsClosed(std::vector<glm::vec3> fieldlinePositions, std::string topology);
+        bool checkIfFieldlineIsIMF(std::vector<glm::vec3> fieldlinePositions, std::string topology);
 
     bool keepCheckingFlowlinesFieldline(std::vector<glm::vec3> flowlinePos, int flowlineIndex);
 
@@ -215,7 +217,7 @@ namespace openspace::fls {
         }
         else
         {
-            int counter = 1;
+            int counter = 0;
             ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
                 tracingVar,
                 tracer,
@@ -225,6 +227,7 @@ namespace openspace::fls {
 
             std::vector<glm::vec3> flowlinePositions
                 = getPositionsFromLine(flowline);
+
             std::vector<std::vector<glm::vec3>> testFieldlinePositions;
 
             for (int i = 0; i < flowlinePositions.size(); i++)
@@ -253,6 +256,8 @@ namespace openspace::fls {
                 std::cerr << "Unable to open file" << std::endl;
             }
 
+
+
             while(keepCheckingFlowlinesFieldline(flowlinePositions, counter))
             {
                 std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
@@ -262,12 +267,14 @@ namespace openspace::fls {
                     _nPointsOnFieldLine
                 );
 
-                if (!checkIfFieldlineIsOpen(fieldlinePositions, seedPoints[i].second))
+
+                if (checkIfFieldlineIsClosed(fieldlinePositions, seedPoints[i].second))
                 {
                     int amountOfPreviousFieldlines = 0;
                     float prevZ = 0;
-                    float stepLength = 4;
+                    float stepLength = 5;
 
+                    std::cout << "CLOSED! - Move seed point" << std::endl;
                     glm::vec3 modifiedSeedpoint = modifySeedpoint(
                         seedPoints[i],
                         tracingVar,
@@ -288,6 +295,60 @@ namespace openspace::fls {
 
                     break;
                 }
+                else if (checkIfFieldlineIsIMF(fieldlinePositions, seedPoints[i].second))
+                {
+                    int amountOfPreviousFieldlines = 0;
+                    float prevZ = 0;
+                    float stepLength = 5;
+
+                    std::cout << "IMF! - Move seed point" << std::endl;
+                    glm::vec3 modifiedSeedpoint = modifySeedpoint(
+                        seedPoints[i],
+                        tracingVar,
+                        tracer,
+                        nPointsOnPathLine,
+                        seedPointFieldlinePositions,
+                        kameleon,
+                        innerBoundaryLimit,
+                        _nPointsOnFieldLine,
+                        amountOfPreviousFieldlines,
+                        prevZ,
+                        stepLength,
+                        accuracy,
+                        false
+                    );
+
+                    seedPoints[i].first = modifiedSeedpoint;
+
+                    break;
+                }
+
+                /*if (!checkIfFieldlineIsOpen(fieldlinePositions, seedPoints[i].second))
+                {
+                    int amountOfPreviousFieldlines = 0;
+                    float prevZ = 0;
+                    float stepLength = 5;
+
+                    glm::vec3 modifiedSeedpoint = modifySeedpoint(
+                        seedPoints[i],
+                        tracingVar,
+                        tracer,
+                        nPointsOnPathLine,
+                        seedPointFieldlinePositions,
+                        kameleon,
+                        innerBoundaryLimit,
+                        _nPointsOnFieldLine,
+                        amountOfPreviousFieldlines,
+                        prevZ,
+                        stepLength,
+                        accuracy,
+                        true
+                    );
+
+                    seedPoints[i].first = modifiedSeedpoint;
+
+                    break;
+                }*/
                 counter++;
             }
 
@@ -335,6 +396,33 @@ namespace openspace::fls {
 
             return false;
         }
+    }
+
+    bool checkIfFieldlineIsClosed(std::vector<glm::vec3> fieldlinePositions, std::string topology)
+    {
+        std::pair<double, double> threshold_end_z = { std::make_pair(-0.6, 0.6) };
+
+        if (fieldlinePositions[0].z > threshold_end_z.first &&
+            fieldlinePositions[0].z < threshold_end_z.second &&
+            fieldlinePositions[fieldlinePositions.size() - 1].z > threshold_end_z.first &&
+            fieldlinePositions[fieldlinePositions.size() - 1].z < threshold_end_z.second) {
+
+            return true;
+        }
+    }
+
+    bool checkIfFieldlineIsIMF(std::vector<glm::vec3> fieldlinePositions, std::string topology)
+    {
+        std::pair<double, double> threshold_start_z = { std::make_pair(25.0, -25.0) };
+
+        if (fieldlinePositions[0].z > threshold_start_z.first || fieldlinePositions[0].z < threshold_start_z.second &&
+            fieldlinePositions[fieldlinePositions.size() - 1].z > threshold_start_z.first ||
+            fieldlinePositions[fieldlinePositions.size() - 1].z < threshold_start_z.second) {
+
+            return true;
+        }
+
+        return false;
     }
 
     /*
@@ -459,7 +547,7 @@ namespace openspace::fls {
         std::vector<glm::vec3> fieldlinePositions;
 
         // TODO: FIX: First traced fieldline is an IMF... therefor we skip it
-        int flowlineIndex = 1;
+        int flowlineIndex = 0;
 
         if (up)
         {
@@ -479,6 +567,8 @@ namespace openspace::fls {
             nPointsOnPathLine,
             ccmc::Tracer::Direction::FOWARD);
 
+
+
         std::vector<glm::vec3> seedPointFlowlinePositions
             = getPositionsFromLine(seedPointFlowline);
 
@@ -492,9 +582,27 @@ namespace openspace::fls {
                 _nPointsOnFieldLine
             );
 
-            if (!checkIfFieldlineIsOpen(fieldlinePositions, seedPoint.second))
+            if (!checkIfFieldlineIsClosed(fieldlinePositions, seedPoint.second))
             {
-                std::cout << "Bad fieldline! - Move seed point" << std::endl;
+                std::cout << "CLOSED! - Move seed point" << std::endl;
+                glm::vec3 modifiedSeedpoint = modifySeedpoint(
+                    seedPoint,
+                    tracingVar,
+                    tracer,
+                    nPointsOnPathLine,
+                    seedPointFieldlinePositions,
+                    kameleon,
+                    innerBoundaryLimit,
+                    _nPointsOnFieldLine,
+                    amountOfPreviousFieldlines,
+                    prevZ,
+                    stepLength,
+                    accuracy,
+                    true
+                );
+            } else if (!checkIfFieldlineIsIMF(fieldlinePositions, seedPoint.second))
+            {
+                std::cout << "IMF! - Move seed point" << std::endl;
                 glm::vec3 modifiedSeedpoint = modifySeedpoint(
                     seedPoint,
                     tracingVar,
