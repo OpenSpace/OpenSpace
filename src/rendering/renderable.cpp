@@ -197,6 +197,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings s
 
     // set type for UI
     _renderableType = p.type.value_or(_renderableType);
+    _renderableType.setReadOnly(true);
     addProperty(_renderableType);
 
     _dimInAtmosphere = p.dimInAtmosphere.value_or(_dimInAtmosphere);
