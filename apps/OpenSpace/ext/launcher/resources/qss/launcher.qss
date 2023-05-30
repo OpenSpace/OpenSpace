@@ -82,6 +82,11 @@ LauncherWindow  QPushButton#small:hover {
   background: rgb(120, 120, 120);
 }
 
+LauncherWindow  QPushButton#small:disabled {
+  color: rgb(180, 180, 180);
+  background: rgb(160, 160, 160);
+}
+
 /*
  * ProfileEdit
  */
@@ -193,4 +198,9 @@ WindowControl QLabel#info {
   font-style: italic;
   font-weight: normal;
   font-size: 8pt;
+}
+
+WindowControl QLabel#notice {
+  font-weight: normal;
+  font-size: 11pt;
 }

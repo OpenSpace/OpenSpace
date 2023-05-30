@@ -83,6 +83,27 @@ public:
      */
     sgct::config::Cluster cluster() const;
 
+    /**
+     * Called when the number of windows that should be displayed changes.
+     * 
+     * \param newCount The new number of windows included
+     */
+    void nWindowsDisplayedChanged(int newCount);
+
+    /**
+     * Called when the checkbox for GUI only on first window is clicked.
+     * 
+     * \param checked true if GUI is selected for first window only.
+     */
+    void firstWindowGuiOptionClicked(bool checked);
+
+    /**
+     * Called when the QComboBox is selected and has a new value
+     * 
+     * \param text the QString of the selected value
+     */
+    void firstWindowGraphicsSelectionChanged(const QString& text);
+
 private:
     std::vector<QRect> createMonitorInfoSet();
     void createWidgets(const std::vector<QRect>& monitorSizes, unsigned int nWindows,
@@ -94,6 +115,8 @@ private:
     void generateConfigResizeWindowsAccordingToSelected(sgct::config::Node& node);
     void generateConfigIndividualWindowSettings(sgct::config::Node& node);
     void setupProjectionTypeInGui(sgct::config::Viewport& vPort, WindowControl* wCtrl);
+    void setupStateOfUiOnFirstWindow(size_t nWindows);
+    void deleteFromTags(sgct::config::Window& window);
 
     void save();
     void apply();

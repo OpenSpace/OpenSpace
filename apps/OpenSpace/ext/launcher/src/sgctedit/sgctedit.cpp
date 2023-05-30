@@ -29,6 +29,7 @@
 #include <sgctedit/settingswidget.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <QApplication>
+#include <QCheckBox>
 #include <QFileDialog>
 #include <QFrame>
 #include <QMessageBox>
@@ -87,7 +88,6 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
 {
     setWindowTitle("Window Configuration Editor");
     size_t nWindows = _cluster.nodes.front().windows.size();
-    bool firstWindowGuiIsEnabled = (nWindows > 1);
     std::vector<QRect> monitorSizes = createMonitorInfoSet();
     createWidgets(monitorSizes, static_cast<unsigned int>(nWindows), false);
     size_t existingWindowsControlSize = _displayWidget->windowControls().size();
@@ -128,22 +128,67 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
             }
             wCtrl->setDecorationState(w.isDecorated.value());
         }
-        // If first window only renders 2D, and all subsequent windows render 3D, then
-        // will enable the checkbox option for showing GUI only on first window
-        if (w.draw2D.has_value() && w.draw3D.has_value()) {
-            firstWindowGuiIsEnabled &= (i == 0) ?  w.draw2D.value() : !w.draw2D.value();
-            firstWindowGuiIsEnabled &= (i == 0) ? !w.draw3D.value() :  w.draw3D.value();
-        }
-        else {
-            firstWindowGuiIsEnabled = false;
-        }
         setupProjectionTypeInGui(w.viewports.back(), wCtrl);
     }
-    _settingsWidget->setShowUiOnFirstWindow(firstWindowGuiIsEnabled);
+    setupStateOfUiOnFirstWindow(nWindows);
     _settingsWidget->setVsync(
         _cluster.settings &&
         _cluster.settings.value().display &&
         _cluster.settings.value().display.value().swapInterval
+    );
+}
+
+void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
+    bool firstWindowGuiIsEnabled = (nWindows > 1);
+    int graphicsSelectionForFirstWindow = 0;
+    int nGuiRenderTagsFound = 0;
+    _settingsWidget->nWindowsDisplayedChanged(nWindows);
+
+    for (size_t i = 0; i < nWindows; ++i) {
+        sgct::config::Window& w = _cluster.nodes.front().windows[i];
+        //First window needs to have "GUI" tag if this mode is set
+        if (i == 0) {
+            firstWindowGuiIsEnabled =
+                (std::find(w.tags.begin(), w.tags.end(), "GUI") != w.tags.end());
+            if (std::find(w.tags.begin(), w.tags.end(), "GUI_No_Render") != w.tags.end())
+            {
+                graphicsSelectionForFirstWindow = 0;
+                nGuiRenderTagsFound++;
+            }
+            for (int winNum = 0; winNum <= 4; ++winNum) {
+                std::string tagToLookFor = "GUI_Render_Win" + std::to_string(winNum);
+                if (std::find(w.tags.begin(), w.tags.end(), tagToLookFor) != w.tags.end())
+                {
+                    graphicsSelectionForFirstWindow = winNum;
+                    nGuiRenderTagsFound++;
+                }
+            }
+        }
+        // If first window only renders 2D, and all subsequent windows do not, then
+        // will enable the checkbox option for showing GUI only on first window
+        if (w.draw2D.has_value()) {
+            firstWindowGuiIsEnabled &= (i == 0) ?  w.draw2D.value() : !w.draw2D.value();
+        }
+        else {
+            firstWindowGuiIsEnabled = false;
+        }
+    }
+
+    if ((nGuiRenderTagsFound > 1) ||
+        (graphicsSelectionForFirstWindow > static_cast<int>(nWindows)))
+    {
+        graphicsSelectionForFirstWindow = 0;
+    }
+
+    _settingsWidget->setShowUiOnFirstWindow(firstWindowGuiIsEnabled);
+    if (firstWindowGuiIsEnabled) {
+        // Call these again in order to ensure that GUI is configured correctly based on
+        // the values read from the config file
+        _settingsWidget->setEnableShowUiOnFirstWindowCheckbox(true);
+        _settingsWidget->nWindowsDisplayedChanged(nWindows);
+    }
+    _settingsWidget->setGraphicsSelectionForShowUiOnFirstWindow(
+        graphicsSelectionForFirstWindow
     );
 }
 
@@ -272,6 +317,7 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
             _displayWidget, &DisplayWindowUnion::nWindowsChanged,
             monitorBox, &MonitorBox::nWindowsDisplayedChanged
         );
+
         for (unsigned int i = 0; i < nWindows; ++i) {
             _displayWidget->addWindow();
         }
@@ -283,7 +329,33 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
     
     _settingsWidget = new SettingsWidget(orientation, this);
     layout->addWidget(_settingsWidget);
-    
+    connect(
+        _displayWidget, &DisplayWindowUnion::nWindowsChanged,
+        _settingsWidget, &SettingsWidget::nWindowsDisplayedChanged
+    );
+
+    connect(
+        _displayWidget, &DisplayWindowUnion::nWindowsChanged,
+        this, &SgctEdit::nWindowsDisplayedChanged
+    );
+
+    if (_settingsWidget->firstWindowGraphicsSelection()) {
+        connect(
+            _settingsWidget->firstWindowGraphicsSelection(),
+            &QComboBox::currentTextChanged,
+            this,
+            &SgctEdit::firstWindowGraphicsSelectionChanged
+        ); 
+    }
+    if (_settingsWidget->showUiOnFirstWindowCheckbox()) {
+        connect(
+            _settingsWidget->showUiOnFirstWindowCheckbox(),
+            &QCheckBox::clicked,
+            this,
+            &SgctEdit::firstWindowGuiOptionClicked
+        ); 
+    }
+
     {
         QHBoxLayout* layoutButtonBox = new QHBoxLayout;
         layoutButtonBox->addStretch(1);
@@ -463,27 +535,90 @@ void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) 
         node.windows[i].draw2D = true;
         node.windows[i].draw3D = true;
         node.windows[i].viewports.back().isTracked = true;
-        node.windows[i].tags.erase(
-            std::remove(
-                node.windows[i].tags.begin(),
-                node.windows[i].tags.end(),
-                "GUI"
-            ),
-            node.windows[i].tags.end()
-        );
+        deleteFromTags(node.windows[i]);
         // If "show UI on first window" option is enabled, then modify the settings
         // depending on if this is the first window or not
         if (_settingsWidget->showUiOnFirstWindow()) {
             if (i == 0) {
-                node.windows[i].viewports.back().isTracked = false;
                 node.windows[i].tags.push_back("GUI");
+                int selectedGraphics =
+                    _settingsWidget->graphicsSelectionForShowUiOnFirstWindow();
+
+                if (selectedGraphics == 0) {
+                    node.windows[i].viewports.back().isTracked = false;
+                    node.windows[i].tags.push_back("GUI_No_Render");
+                }
+                else if (selectedGraphics > 0 &&
+                         selectedGraphics <= static_cast<int>(node.windows.size()))
+                {
+                    node.windows[i].tags.push_back("GUI_Render_Win" +
+                        std::to_string(selectedGraphics));
+                    //Set first window viewport to mirror the selected window's viewport
+                    node.windows[i].viewports =
+                        node.windows[(selectedGraphics - 1)].viewports;
+                }
+                node.windows[i].draw2D = true;
+                node.windows[i].draw3D = (selectedGraphics > 0);
             }
-            node.windows[i].draw2D = (i == 0);
-            node.windows[i].draw3D = (i != 0);
+            else {
+                node.windows[i].draw2D = false;
+                node.windows[i].draw3D = true;
+            }
         }
+    }
+}
+
+void SgctEdit::deleteFromTags(sgct::config::Window& window) {
+    constexpr std::array<std::string_view, 6> Tags = {
+        "GUI",
+        "GUI_No_Render",
+        "GUI_Render_Win1",
+        "GUI_Render_Win2",
+        "GUI_Render_Win3",
+        "GUI_Render_Win4"
+    };
+    for (std::string_view tag : Tags) {
+        window.tags.erase(
+            std::remove(window.tags.begin(), window.tags.end(), tag),
+            window.tags.end()
+        );
     }
 }
 
 sgct::config::Cluster SgctEdit::cluster() const {
     return _cluster;
+}
+
+void SgctEdit::firstWindowGraphicsSelectionChanged(const QString&) {
+    if (!_settingsWidget)
+        return;
+
+    int newSetting = _settingsWidget->graphicsSelectionForShowUiOnFirstWindow();
+
+    if (_settingsWidget->showUiOnFirstWindow()) {
+        _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(
+            newSetting == 1
+        );
+    }
+}
+
+void SgctEdit::nWindowsDisplayedChanged(int newCount) {
+    if (!_settingsWidget) {
+        return;
+    }
+    if (newCount == 1) {
+        _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(true);
+    }
+    else {
+        firstWindowGraphicsSelectionChanged("");
+    }
+}
+
+void SgctEdit::firstWindowGuiOptionClicked(bool checked) {
+    if (checked) {
+        firstWindowGraphicsSelectionChanged("");
+    }
+    else {
+        _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(true);
+    }
 }

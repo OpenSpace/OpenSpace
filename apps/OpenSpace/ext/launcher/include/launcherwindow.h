@@ -102,6 +102,7 @@ private:
     void populateWindowConfigsList(std::string preset);
     void handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
         std::filesystem::path savePath, const std::string& saveWindowCfgPath);
+    void onNewWindowConfigSelection(int newIndex);
     bool versionCheck(sgct::config::GeneratorVersion& v) const;
 
     const std::string _assetPath;
