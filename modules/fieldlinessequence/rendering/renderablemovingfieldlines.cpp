@@ -1045,6 +1045,19 @@ namespace openspace {
 
         float percentageOfSetSeedPoints = 0.4;
 
+        //Filters data from unusable seedpoints
+        //TODO: Make function and make dynamic
+        //for (auto it = setOfSeedpoints.begin(); it != setOfSeedpoints.end();) {
+        //    if (it->IMF.y > 10 || it->IMF.y < -10 || (it->IMF.y > -1 && it->IMF.y < 1)) {
+        //        it = setOfSeedpoints.erase(it);
+        //    }
+        //    else {
+        //        ++it;
+        //    }
+        //}
+
+        float percentageOfSetSeedPoints = 0.5;
+
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> selectedSetOfSeedpoints =
             selectSetOfSeedPoints(setOfSeedpoints, percentageOfSetSeedPoints);
 
@@ -1073,7 +1086,16 @@ namespace openspace {
                 accuracy
             );
 
-        std::ofstream output_file("C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/ON_MODIFIERAD.txt");
+        //Hardcoded adding of nightside seedpoints
+        //TODO: Make dynamic
+        std::filesystem::path filePathNightside = "C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/nightside.txt";
+
+        double startTimeNightside = 0.0;
+
+        std::tuple<std::vector<glm::vec3>, std::vector<double>> nightsideSeedpoints =
+            extractSeedPointsFromFile(filePathNightside, seedPoints, birthTimes, startTimeNightside);
+
+        /*std::ofstream output_file("C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/ON_MODIFIERAD.txt");
 
         if (output_file.is_open()){
             for (const auto& subvec : testFieldlinePositions) {
@@ -1085,11 +1107,11 @@ namespace openspace {
         }
         else {
             std::cerr << "Unable to open file" << std::endl;
-        }
+        }*/
 
         // ALGORITHM
         // TODO: remove just for testing
-        for (int i = 0; i < seedPoints.size(); i++)
+         for (int i = 0; i < seedPoints.size(); i++)
         {
             std::cout << "seedpoint " << i << ": " << seedPoints[i].first << std::endl;
 
