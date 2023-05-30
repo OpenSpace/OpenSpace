@@ -37,7 +37,7 @@ local Object = {
       plucked from NASA's Kepler and TESS space telescopes. The Kepler mission was
       designed to stare at one spot, roughly twelve degrees across, in the constellation
       Cygnus. By staring at one spot, the spacecraft could monitor over 500,000 stars in
-      that field for subtle variations in brightness.The data included here are the stars
+      that field for subtle variations in brightness. The data included here are the stars
       that are considered good candidates to host planets. Rather than represent them
       photo-realistically, with accurate colors, we choose to visualize them as generic,
       pure yellow stars. (Description from URL) <br><br> Data Reference: NASA Exoplanet
