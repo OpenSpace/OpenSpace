@@ -296,11 +296,11 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     //glDepthMask(false);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE)
 
+    GLint* _si = &_startIndex[0];
+    GLint* _ss = &_segmentSize[0];
+
     glBindVertexArray(_vertexArray);
-    for (size_t i = 0; i < nrOrbits; ++i) {
-        glDrawArrays(GL_LINE_STRIP, vertices, static_cast<GLsizei>(_segmentSize[i] + 1));
-        vertices = vertices + static_cast<GLint>(_segmentSize[i]) + 1;
-    }
+    glMultiDrawArrays(GL_LINE_STRIP, _si, _ss, static_cast<GLsizei>(_startIndex.size()));
     glBindVertexArray(0);
 
     _programObject->deactivate();
@@ -363,12 +363,17 @@ void RenderableOrbitalKepler::updateBuffers() {
     }
 
     _segmentSize.clear();
-    for (const kepler::Parameters& p : parameters) {
+    _startIndex.clear();
+    _startIndex.push_back(0);
+    for (int i = 0; i < parameters.size(); ++i) {
         const double scale = static_cast<double>(_segmentQuality) * 10.0;
+        const kepler::Parameters& p = parameters[i];
         _segmentSize.push_back(
             static_cast<size_t>(scale + (scale / pow(1 - p.eccentricity, 1.2)))
         );
+        _startIndex.push_back(_startIndex[i] + static_cast<GLint>(_segmentSize[i]) + 1);
     }
+    _startIndex.pop_back();
 
     size_t nVerticesTotal = 0;
 
