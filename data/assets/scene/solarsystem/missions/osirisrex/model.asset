@@ -2,8 +2,9 @@ local transforms = asset.require("./transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local kernels = asset.require("./kernels")
 
-local OsirisRexKernels = asset.require("./kernels").kernels
+
 
 local models = asset.syncedResource({
   Name = "Osiris Rex Models",
@@ -12,7 +13,8 @@ local models = asset.syncedResource({
   Version = 3
 })
 
-local BENNU_BODY = "2101955"
+
+local BennuBodyId = "2101955"
 
 local OsirisRex = {
   Identifier = "OsirisRex",
@@ -21,14 +23,13 @@ local OsirisRex = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "OSIRIS-REX",
-      Observer = "SSB",
-      Kernels = OsirisRexKernels
+      Observer = "SSB"
     },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "ORX_SPACECRAFT",
       DestinationFrame = "GALACTIC"
-    },
+    }
   },
   Renderable = {
     Type = "RenderableModel",
@@ -107,7 +108,7 @@ local Rexis = {
       Type = "SpiceRotation",
       SourceFrame = "ORX_REXIS",
       DestinationFrame = "ORX_SPACECRAFT"
-    },
+    }
   },
   GUI = {
     Name = "REXIS",
@@ -128,7 +129,7 @@ local PolyCamFov = {
       Method = "ELLIPSOID",
       Aberration = "NONE"
     },
-    PotentialTargets = { BENNU_BODY }
+    PotentialTargets = { BennuBodyId }
   },
   GUI = {
     Name = "POLYCAM FOV",
@@ -151,9 +152,9 @@ local PolyCamFov = {
 --       Method = "ELLIPSOID",
 --       Aberration = "NONE"
 --     },
---     PotentialTargets = { BENNU_BODY },
+--     PotentialTargets = { BennuBodyId },
 --     FrameConversions = {
---       [BENNU_BODY] = "IAU_BENNU"
+--       [BennuBodyId] = "IAU_BENNU"
 --     }
 --   },
 --   GUI = {
@@ -162,26 +163,28 @@ local PolyCamFov = {
 --   }
 -- }
 
-local nodes =  {
-  OsirisRex,
-  PolyCam,
-  Rexis,
-  PolyCamFov,
-  -- RexisFov
-}
-
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernels.kernels)
+
+  openspace.addSceneGraphNode(OsirisRex)
+  openspace.addSceneGraphNode(PolyCam)
+  openspace.addSceneGraphNode(Rexis)
+  openspace.addSceneGraphNode(PolyCamFov)
+  -- openspace.addSceneGraphNode(RexisFov)
 end)
 
 asset.onDeinitialize(function()
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  -- openspace.removeSceneGraphNode(RexisFov)
+  openspace.removeSceneGraphNode(PolyCamFov)
+  openspace.removeSceneGraphNode(Rexis)
+  openspace.removeSceneGraphNode(PolyCam)
+  openspace.removeSceneGraphNode(OsirisRex)
+
+  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(OsirisRex)
+asset.export(PolyCam)
+asset.export(Rexis)
+asset.export(PolyCamFov)
+-- asset.export(RexisFov)

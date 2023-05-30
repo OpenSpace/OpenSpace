@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Land Cover (animation)"
@@ -26,7 +27,8 @@ local syncedDirectory = asset.syncedResource({
   UnzipFiles = true
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -35,7 +37,7 @@ local layer = {
   Description = Description
 }
 
-local label = {
+local Label = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -46,18 +48,20 @@ local label = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(label)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Label)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.removeScreenSpaceRenderable(label)
+  openspace.removeScreenSpaceRenderable(Label)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(label)
+asset.export(Layer)
+asset.export(Label)
+
 
 
 asset.meta = {

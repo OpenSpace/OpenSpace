@@ -67,7 +67,7 @@ private:
         Allow
     };
 
-    properties::OptionProperty _type;
+    properties::OptionProperty _socketType;
     properties::IntProperty _port;
     properties::BoolProperty _enabled;
     properties::StringListProperty _allowAddresses;

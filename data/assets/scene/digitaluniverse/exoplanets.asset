@@ -12,7 +12,8 @@ local speck = asset.syncedResource({
   Version = 2
 })
 
-local object = {
+
+local Object = {
   Identifier = "Exoplanets",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -33,7 +34,7 @@ local object = {
     CorrectionSizeEndDistance = 15.23,
     CorrectionSizeFactor = 13.3,
     BillboardMinMaxSize = { 0.0, 75.0 },
-    EnablePixelSizeControl = true,
+    EnablePixelSizeControl = true
   },
   GUI = {
     Name = "Exoplanets",
@@ -44,19 +45,20 @@ local object = {
       observational evidence was available until 1995. Since that time, scientists
       have discovered thousands of systems consisting of one or more planets around
       a host star.(Description from URL) <br><br> Data Reference: NASA Exoplanet
-      Archive (CalTech/NASA)]],
+      Archive (CalTech/NASA)]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

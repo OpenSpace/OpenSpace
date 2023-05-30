@@ -1,11 +1,14 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+
 local orbit = asset.syncedResource({
   Name = "Comet C/2019 Y4 ATLAS",
   Type = "HttpSynchronization",
   Identifier = "horizons_c2019y4atlas",
   Version = 3
 }) .. "c2019y4atlas.hrz"
+
 
 local C2019Y4AtlasTrail = {
   Identifier = "C2019Y4AtlasTrail",
@@ -41,7 +44,7 @@ local C2019Y4AtlasPosition = {
     Translation = {
       Type = "HorizonsTranslation",
       HorizonsTextFile = orbit
-    },
+    }
   },
   GUI = {
     Name = "C/2019 Y4 Atlas",
@@ -49,6 +52,7 @@ local C2019Y4AtlasPosition = {
     Description = "This is the position for C/2019 Y4 Atlas"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(C2019Y4AtlasPosition)

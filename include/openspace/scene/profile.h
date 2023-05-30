@@ -106,6 +106,13 @@ public:
         bool startPaused = false;
     };
 
+    struct CameraGoToNode {
+        static constexpr std::string_view Type = "goToNode";
+
+        std::string anchor;
+        std::optional<double> height;
+    };
+
     struct CameraNavState {
         static constexpr std::string_view Type = "setNavigationState";
 
@@ -127,7 +134,7 @@ public:
         std::optional<double> altitude;
     };
 
-    using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
+    using CameraType = std::variant<CameraGoToNode, CameraNavState, CameraGoToGeo>;
 
     Profile() = default;
     explicit Profile(const std::string& content);
@@ -147,7 +154,7 @@ public:
     /// Removes an asset unless the `ignoreUpdates` member is set to `true`
     void removeAsset(const std::string& path);
 
-    static constexpr Version CurrentVersion = Version{ 1, 2 };
+    static constexpr Version CurrentVersion = Version{ 1, 3 };
 
     Version version = CurrentVersion;
     std::vector<Module> modules;

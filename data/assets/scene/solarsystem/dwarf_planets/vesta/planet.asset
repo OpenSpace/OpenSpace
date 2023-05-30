@@ -1,6 +1,8 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("./transforms")
 
+
+
 local models = asset.syncedResource({
   Name = "Vesta Models",
   Type = "HttpSynchronization",
@@ -8,14 +10,15 @@ local models = asset.syncedResource({
   Version = 1
 })
 
-local Planet = {
+
+local VestaModel = {
   Identifier = "VestaModel",
   Parent = transforms.Position.Identifier,
   Transform = {
     Rotation = {
       Type = "ConstantRotation",
-      RotationAxis = {0.0, 0.0, 1.0},
-      RotationRate = 1.0/(5.34212766*60.0*60.0)
+      RotationAxis = { 0.0, 0.0, 1.0 },
+      RotationRate = 1.0 / (5.34212766 * 60.0 * 60.0)
     }
   },
   Renderable = {
@@ -25,24 +28,27 @@ local Planet = {
     AmbientIntensity = 0.0,
     LightSources = {
       sun.LightSource
-    },
+    }
   },
   GUI = {
     Name = "Vesta",
     Path = "/Solar System/Dwarf Planets/Vesta",
     Description = "Model of Vesta"
-  } 
+  }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Planet)
+  openspace.addSceneGraphNode(VestaModel)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Planet)
+  openspace.removeSceneGraphNode(VestaModel)
 end)
 
-asset.export("Planet", Planet)
+asset.export("Planet", VestaModel)
+
+
 
 asset.meta = {
   Name = "Vesta Model",

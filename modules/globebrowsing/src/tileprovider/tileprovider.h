@@ -132,7 +132,7 @@ struct TileProvider : public properties::PropertyOwner {
     virtual float noDataValueAsFloat() = 0;
 
 
-    virtual ChunkTile chunkTile(TileIndex tileIndex, int parents = 0, 
+    virtual ChunkTile chunkTile(TileIndex tileIndex, int parents = 0,
         int maxParents = 1337);
     ChunkTilePile chunkTilePile(TileIndex tileIndex, int pileSize);
 
@@ -142,8 +142,8 @@ struct TileProvider : public properties::PropertyOwner {
     uint16_t uniqueIdentifier = 0;
     bool isInitialized = false;
 protected:
-    ChunkTile traverseTree(TileIndex tileIndex, int parents, int maxParents, 
-        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent, 
+    ChunkTile traverseTree(TileIndex tileIndex, int parents, int maxParents,
+        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent,
         TileUvTransform& uvTransform);
 
 private:

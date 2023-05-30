@@ -1,4 +1,3 @@
--- mercurymagnetosphere.asset
 local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
 
 local localFolder = asset.syncedResource({
@@ -9,25 +8,12 @@ local localFolder = asset.syncedResource({
 })
 
 
-local MercuryRadius = 2.4397E6
+local MercuryRadius = 2439700
 
 local Magnetosphere = {
   Name = "Mercury Magnetosphere",
   Identifier = "MercuryMagnetosphere",
   Parent = mercuryTransforms.MercuryBarycenter.Identifier,
-  SceneRadius = 0.8E+5,
-  Renderable = {
-    Type = "RenderableTimeVaryingVolume",
-    SourceDirectory = localFolder,
-    TransferFunction = localFolder .. "transferfunction.txt",
-    Variable = "rho",
-    StepSize = 0.003,
-    Dimensions = {64, 64, 64},
-    GridType = "Cartesian",
-    SecondsBefore = 24*60*60*365*100,
-    SecondsAfter = 24*60*60*365*100,
-    Enabled = false
-  },
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -37,15 +23,24 @@ local Magnetosphere = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "MERCURYSE",
-      DestinationFrame = "GALACTIC",
-      Kernels = {
-        localFolder .. "openspace_mercury.ti"
-      }
+      DestinationFrame = "GALACTIC"
     },
     Scale = {
       Type = "StaticScale",
       Scale = MercuryRadius
     }
+  },
+  Renderable = {
+    Type = "RenderableTimeVaryingVolume",
+    SourceDirectory = localFolder,
+    TransferFunction = localFolder .. "transferfunction.txt",
+    Variable = "rho",
+    StepSize = 0.003,
+    Dimensions = { 64, 64, 64 },
+    GridType = "Cartesian",
+    SecondsBefore = 24 * 60 * 60 * 365 * 100,
+    SecondsAfter = 24 * 60 * 60 * 365 * 100,
+    Enabled = false
   },
   GUI = {
     Name = "Mercury Magnetosphere",
@@ -53,12 +48,17 @@ local Magnetosphere = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(localFolder .. "openspace_mercury.ti")
+
   openspace.addSceneGraphNode(Magnetosphere)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Magnetosphere)
+
+  openspace.spice.unloadKernel(localFolder .. "openspace_mercury.ti")
 end)
 
 asset.export(Magnetosphere)

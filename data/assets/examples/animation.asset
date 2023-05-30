@@ -1,6 +1,8 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
+
+
 local model = asset.syncedResource({
   Name = "Animated Box",
   Type = "HttpSynchronization",
@@ -8,10 +10,11 @@ local model = asset.syncedResource({
   Version = 1
 })
 
-local StartTime = "2021 06 01 00:00:00";
 
-local animationLoop = {
-  Identifier = "animationLoop",
+local StartTime = "2021 06 01 00:00:00"
+
+local AnimationLoop = {
+  Identifier = "AnimationLoop",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
     Translation = {
@@ -33,12 +36,12 @@ local animationLoop = {
   GUI = {
     Name = "Animated Model example (LoopFromStart)",
     Path = "/Example",
-    Description = "Simple animated box model with the animation mode 'LoopFromStart'",
+    Description = "Simple animated box model with the animation mode 'LoopFromStart'"
   }
 }
 
-local animationLoopInf = {
-  Identifier = "animationLoopInf",
+local AnimationLoopInf = {
+  Identifier = "AnimationLoopInf",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
     Translation = {
@@ -60,12 +63,12 @@ local animationLoopInf = {
   GUI = {
     Name = "Animated Model example (LoopInfinitely)",
     Path = "/Example",
-    Description = "Simple animated box model with the animation mode 'LoopInfinitely'",
+    Description = "Simple animated box model with the animation mode 'LoopInfinitely'"
   }
 }
 
-local animationOnce = {
-  Identifier = "animationOnce",
+local AnimationOnce = {
+  Identifier = "AnimationOnce",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
     Translation = {
@@ -87,12 +90,12 @@ local animationOnce = {
   GUI = {
     Name = "Animated Model example (Once)",
     Path = "/Example",
-    Description = "Simple animated box model with the animation mode 'Once'",
+    Description = "Simple animated box model with the animation mode 'Once'"
   }
 }
 
-local animationBounceInf = {
-  Identifier = "animationBounceInf",
+local AnimationBounceInf = {
+  Identifier = "AnimationBounceInf",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
     Translation = {
@@ -114,12 +117,12 @@ local animationBounceInf = {
   GUI = {
     Name = "Animated Model example (BounceInfinitely)",
     Path = "/Example",
-    Description = "Simple animated box model with the animation mode 'BounceInfinitely'",
+    Description = "Simple animated box model with the animation mode 'BounceInfinitely'"
   }
 }
 
-local animationBounce = {
-  Identifier = "animationBounce",
+local AnimationBounce = {
+  Identifier = "AnimationBounce",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
     Translation = {
@@ -141,34 +144,36 @@ local animationBounce = {
   GUI = {
     Name = "Animated Model example (BounceFromStart)",
     Path = "/Example",
-    Description = "Simple animated box model with the animation mode 'BounceFromStart'",
+    Description = "Simple animated box model with the animation mode 'BounceFromStart'"
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(animationLoop)
-  openspace.addSceneGraphNode(animationLoopInf)
-  openspace.addSceneGraphNode(animationOnce)
-  openspace.addSceneGraphNode(animationBounceInf)
-  openspace.addSceneGraphNode(animationBounce)
+  openspace.addSceneGraphNode(AnimationLoop)
+  openspace.addSceneGraphNode(AnimationLoopInf)
+  openspace.addSceneGraphNode(AnimationOnce)
+  openspace.addSceneGraphNode(AnimationBounceInf)
+  openspace.addSceneGraphNode(AnimationBounce)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(animationBounce)
-  openspace.removeSceneGraphNode(animationBounceInf)
-  openspace.removeSceneGraphNode(animationOnce)
-  openspace.removeSceneGraphNode(animationLoopInf)
-  openspace.removeSceneGraphNode(animationLoop)
+  openspace.removeSceneGraphNode(AnimationBounce)
+  openspace.removeSceneGraphNode(AnimationBounceInf)
+  openspace.removeSceneGraphNode(AnimationOnce)
+  openspace.removeSceneGraphNode(AnimationLoopInf)
+  openspace.removeSceneGraphNode(AnimationLoop)
 end)
 
 
-asset.export(animationLoop)
-asset.export(animationLoopInf)
-asset.export(animationOnce)
-asset.export(animationBounceInf)
-asset.export(animationBounce)
+asset.export(AnimationLoop)
+asset.export(AnimationLoopInf)
+asset.export(AnimationOnce)
+asset.export(AnimationBounceInf)
+asset.export(AnimationBounce)
 
--- Asset
+
+
 asset.meta = {
   Name = "Animation Example asset",
   Version = "1.0",

@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("../../mars").Mars.Identifier
+local globe = asset.require("../../mars")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Themis_IR_Day_Sweden",
   Name = "Themis IR Day [Sweden]",
   Enabled = asset.enabled,
@@ -18,15 +20,16 @@ local layer = {
     (Description from URL)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

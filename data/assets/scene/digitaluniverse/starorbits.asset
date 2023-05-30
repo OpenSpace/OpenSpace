@@ -2,6 +2,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
+
 local speck = asset.syncedResource({
   Name = "Grids Speck Files",
   Type = "HttpSynchronization",
@@ -9,7 +10,8 @@ local speck = asset.syncedResource({
   Version = 1
 })
 
-local sunOrbit = {
+
+local SunOrbit = {
   Identifier = "SunOrbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -30,7 +32,7 @@ local sunOrbit = {
   }
 }
 
-local barnardsOrbit = {
+local BarnardsOrbit = {
   Identifier = "BarnardsOrbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -52,7 +54,7 @@ local barnardsOrbit = {
   }
 }
 
-local kapteynsOrbit = {
+local KapteynsOrbit = {
   Identifier = "KapteynsOrbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -74,7 +76,7 @@ local kapteynsOrbit = {
   }
 }
 
-local lacaille9352Orbit = {
+local Lacaille9352Orbit = {
   Identifier = "Lacaille9352Orbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -96,7 +98,7 @@ local lacaille9352Orbit = {
   }
 }
 
-local lSR1826Orbit = {
+local LSR1826Orbit = {
   Identifier = "LSR1826Orbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -118,7 +120,7 @@ local lSR1826Orbit = {
   }
 }
 
-local lSRJ0822Orbit = {
+local LSRJ0822Orbit = {
   Identifier = "LSRJ0822Orbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -140,7 +142,7 @@ local lSRJ0822Orbit = {
   }
 }
 
-local pM_J13420Orbit = {
+local PM_J13420Orbit = {
   Identifier = "PM_J13420Orbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -162,27 +164,34 @@ local pM_J13420Orbit = {
   }
 }
 
-local nodes = {
-  sunOrbit, barnardsOrbit, pM_J13420Orbit, lSRJ0822Orbit, lSR1826Orbit,
-  lacaille9352Orbit, kapteynsOrbit
-}
 
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.addSceneGraphNode(SunOrbit)
+  openspace.addSceneGraphNode(BarnardsOrbit)
+  openspace.addSceneGraphNode(KapteynsOrbit)
+  openspace.addSceneGraphNode(Lacaille9352Orbit)
+  openspace.addSceneGraphNode(LSR1826Orbit)
+  openspace.addSceneGraphNode(LSRJ0822Orbit)
+  openspace.addSceneGraphNode(PM_J13420Orbit)
 end)
 
 asset.onDeinitialize(function()
-  for i = #nodes, 1, -1 do
-    local node = nodes[i]
-    openspace.removeSceneGraphNode(node)
-  end
+  openspace.removeSceneGraphNode(PM_J13420Orbit)
+  openspace.removeSceneGraphNode(LSRJ0822Orbit)
+  openspace.removeSceneGraphNode(LSR1826Orbit)
+  openspace.removeSceneGraphNode(Lacaille9352Orbit)
+  openspace.removeSceneGraphNode(KapteynsOrbit)
+  openspace.removeSceneGraphNode(BarnardsOrbit)
+  openspace.removeSceneGraphNode(SunOrbit)
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(SunOrbit)
+asset.export(BarnardsOrbit)
+asset.export(KapteynsOrbit)
+asset.export(Lacaille9352Orbit)
+asset.export(LSR1826Orbit)
+asset.export(LSRJ0822Orbit)
+asset.export(PM_J13420Orbit)
 
 
 

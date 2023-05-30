@@ -1,4 +1,6 @@
-local globeIdentifier = asset.require("../../europa").Europa.Identifier
+local globe = asset.require("../../europa")
+
+
 
 local texturesPath = asset.syncedResource({
   Name = "Europa Textures",
@@ -7,7 +9,8 @@ local texturesPath = asset.syncedResource({
   Version = 2
 })
 
-local layer = {
+
+local Layer = {
   Identifier = "Voyager_Global_Mosaic_Local",
   Name = "Voyager Global Mosaic [Local]",
   Enabled = asset.enabled,
@@ -16,14 +19,14 @@ local layer = {
 }
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Europa.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Europa.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

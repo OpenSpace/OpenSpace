@@ -2,88 +2,182 @@
 -- The insignias are invisible by default, but can be enabled using shown or hidden using
 -- the exported functions `showInsignias(interpolationDuration)` and `hideInsignias(interpolationDuration)`.
 
-local insigniasPath =  asset.syncedResource({
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+
+
+
+local insigniasPath = asset.syncedResource({
   Name = "Apollo Insignias",
   Type = "HttpSynchronization",
   Identifier = "apollo_insignias",
   Version = 1
 })
-local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
-local landingData = {
-  {
-    Identifier = "Apollo11",
-    Name = "Apollo 11",
-    Texture = "apollo11.png",
-    LunarModule = { 0.67409, 23.47298, 0.0 }
+
+local Apollo11 = {
+  Identifier = "Apollo11Insignia",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Latitude = 0.67409,
+      Longitude = 23.47298,
+      Altitude = 110000,
+      UseHeightmap = false
+    }
   },
-  {
-    Identifier = "Apollo12",
-    Name = "Apollo 12",
-    Texture = "apollo12.png",
-    LunarModule = { -3.01381, -23.41930, 0.0 }
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 100000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = insigniasPath .. "apollo11.png",
+    Opacity = 0.0
   },
-  {
-    Identifier = "Apollo14",
-    Name = "Apollo 14",
-    Texture = "apollo14.png",
-    LunarModule = { -3.64544, -17.47139, 0.0 }
-  },
-  {
-    Identifier = "Apollo15",
-    Name = "Apollo 15",
-    Texture = "apollo15.png",
-    LunarModule = { 26.13224, 3.63400, 0.0 }
-  },
-  {
-    Identifier = "Apollo16",
-    Name = "Apollo 16",
-    Texture = "apollo16.png",
-    LunarModule = { -8.97341, 15.49859, 0.0 }
-  },
-  {
-    Identifier = "Apollo17",
-    Name = "Apollo 17",
-    Texture = "apollo17.png",
-    LunarModule = { 20.18809, 30.77475, 0.0 }
+  GUI = {
+    Path = "/Other/Labels",
+    Name = "Apollo 11 Insignia"
   }
 }
 
-local nodes = {}
-local size = 100000;
-
-for i = 1, #landingData do
-  local entry = landingData[i]
-  nodes[i] = {
-    Identifier = entry.Identifier .. "Insignia",
-    Parent = moon.Moon.Identifier,
-    Transform = {
-      Translation = {
-        Type = "GlobeTranslation",
-        Globe = moon.Moon.Identifier,
-        Latitude = entry.LunarModule[1],
-        Longitude = entry.LunarModule[2],
-        Altitude = entry.LunarModule[3] + size * 1.1,
-        UseHeightmap = false
-      }
-    },
-    Renderable = {
-      Type = "RenderablePlaneImageLocal",
-      Size = size,
-      Origin = "Center",
-      Billboard = true,
-      Texture = insigniasPath .. entry.Texture,
-      Opacity = 0.0
-    },
-    GUI = {
-      Path = "/Other/Labels",
-      Name = entry.Name .. " Insignia"
+local Apollo12 = {
+  Identifier = "Apollo12Insignia",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Latitude = -3.01381,
+      Longitude = -23.41930,
+      Altitude = 110000,
+      UseHeightmap = false
     }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 100000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = insigniasPath .. "apollo12.png",
+    Opacity = 0.0
+  },
+  GUI = {
+    Path = "/Other/Labels",
+    Name = "Apollo 12 Insignia"
   }
-end
+}
 
-local show_apollo_labels = {
-  Identifier = "apollo_insignias.show_insignias",
+local Apollo14 = {
+  Identifier = "Apollo14Insignia",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Latitude = -3.64544,
+      Longitude = -17.47139,
+      Altitude = 110000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 100000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = insigniasPath .. "apollo14.png",
+    Opacity = 0.0
+  },
+  GUI = {
+    Path = "/Other/Labels",
+    Name = "Apollo 14 Insignia"
+  }
+}
+
+local Apollo15 = {
+  Identifier = "Apollo15Insignia",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Latitude = 26.13224,
+      Longitude = 3.63400,
+      Altitude = 110000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 100000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = insigniasPath .. "apollo15.png",
+    Opacity = 0.0
+  },
+  GUI = {
+    Path = "/Other/Labels",
+    Name = "Apollo 15 Insignia"
+  }
+}
+
+local Apollo16 = {
+  Identifier = "Apollo16Insignia",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Latitude = -8.97341,
+      Longitude = 15.49859,
+      Altitude = 110000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 100000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = insigniasPath .. "apollo16.png",
+    Opacity = 0.0
+  },
+  GUI = {
+    Path = "/Other/Labels",
+    Name = "Apollo 16 Insignia"
+  }
+}
+
+local Apollo17 = {
+  Identifier = "Apollo17Insignia",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Latitude = 20.18809,
+      Longitude = 30.77475,
+      Altitude = 110000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 100000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = insigniasPath .. "apollo17.png",
+    Opacity = 0.0
+  },
+  GUI = {
+    Path = "/Other/Labels",
+    Name = "Apollo 17 Insignia"
+  }
+}
+
+local ShowInsignias = {
+  Identifier = "os.apollo.ShowInsignias",
   Name = "Show Apollo landing labels",
   Command = [[openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1, 0.5)]],
   Documentation = "Show patches of the Apollo missions on their respective landing sites",
@@ -91,8 +185,8 @@ local show_apollo_labels = {
   IsLocal = true
 }
 
-local hide_apollo_labels = {
-  Identifier = "apollo_insignias.hide_insignias",
+local HideInsignias = {
+  Identifier = "os.apollo.HideInsignias",
   Name = "Hide Apollo landing labels",
   Command = [[openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, 0.5)]],
   Documentation = "Hide patches of the Apollo missions on their respective landing sites",
@@ -100,27 +194,33 @@ local hide_apollo_labels = {
   IsLocal = true
 }
 
-asset.onInitialize(function ()
-  openspace.action.registerAction(show_apollo_labels)
-  openspace.action.registerAction(hide_apollo_labels)
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Apollo11)
+  openspace.addSceneGraphNode(Apollo12)
+  openspace.addSceneGraphNode(Apollo14)
+  openspace.addSceneGraphNode(Apollo15)
+  openspace.addSceneGraphNode(Apollo16)
+
+  openspace.action.registerAction(ShowInsignias)
+  openspace.action.registerAction(HideInsignias)
 end)
 
-asset.onDeinitialize(function ()
-  for i = #nodes, 1, -1 do
-    local node = nodes[i]
-    openspace.removeSceneGraphNode(node)
-  end
+asset.onDeinitialize(function()
+  openspace.action.removeAction(HideInsignias)
+  openspace.action.removeAction(ShowInsignias)
 
-  openspace.action.removeAction(show_apollo_labels)
-  openspace.action.removeAction(hide_apollo_labels)
+  openspace.removeSceneGraphNode(Apollo16)
+  openspace.removeSceneGraphNode(Apollo15)
+  openspace.removeSceneGraphNode(Apollo14)
+  openspace.removeSceneGraphNode(Apollo12)
+  openspace.removeSceneGraphNode(Apollo11)
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Apollo11)
+asset.export(Apollo12)
+asset.export(Apollo14)
+asset.export(Apollo15)
+asset.export(Apollo16)
 
 asset.export("showInsignia", function (missionNumber, interpolationDuration)
   openspace.setPropertyValue("Scene.Apollo" .. missionNumber .. "Insignia.Renderable.Opacity", 1, interpolationDuration)

@@ -40,39 +40,35 @@
   ],
   "keybindings": [
     {
-      "action": "os.missions.apollo8.setup.earthrise",
+      "action": "os.apollo8.SetupEarthrise",
       "key": "E"
     },
     {
-      "action": "os.missions.apollo8.setup.launch",
+      "action": "os.apollo8.SetupLaunch",
       "key": "U"
     },
     {
-      "action": "os.missions.apollo.moon.togglekaguyalayer",
+      "action": "os.apollo.moon.ToggleKaguyaLayer",
       "key": "K"
     },
     {
-      "action": "os.missions.apollo.moon.toggleshading",
-      "key": "S"
-    },
-    {
-      "action": "os.missions.apollo.earth.focus",
+      "action": "os.apollo.FocusEarth",
       "key": "Home"
     },
     {
-      "action": "os.missions.apollo.moon.focus",
+      "action": "os.apollo.FocusMoon",
       "key": "M"
     },
     {
-      "action": "os.missions.apollo17.setup.landingsite",
+      "action": "os.apollo17.setup.LandingSite",
       "key": "F7"
     },
     {
-      "action": "os.missions.apollo.moon.disableapollosites",
+      "action": "os.apollo.DisableApolloSites",
       "key": "F9"
     },
     {
-      "action": "os.missions.apollo11.setup.landingsite",
+      "action": "os.apollo11.setup.LandingSite",
       "key": "F11"
     }
   ],

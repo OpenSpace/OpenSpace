@@ -26,7 +26,8 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-local stars = {
+
+local Stars = {
   Identifier = "Stars",
   Renderable = {
     Type = "RenderableStars",
@@ -48,9 +49,9 @@ local stars = {
       Vz = "vz",
       Speed = "speed"
     },
-    DimInAtmosphere = true,
+    DimInAtmosphere = true
   },
-  Tag = {"daytime_hidden"},
+  Tag = { "daytime_hidden" },
   GUI = {
     Name = "Stars",
     Path = "/Milky Way/Stars",
@@ -60,11 +61,11 @@ local stars = {
       accurately as is possible. (Description from URL) <br><br> Data Reference:
       XHIP: An Extended Hipparcos Compilation (Anderson E., Francis C. 2012);
       Hipparcos Catalog (European Space Agency 1997); Gliese Catalog (Gliese and
-      Jahriess 1991)]],
+      Jahriess 1991)]]
   }
 }
 
-local sunstar = {
+local SunStar = {
   Identifier = "SunStar",
   Renderable = {
     Type = "RenderableStars",
@@ -85,9 +86,9 @@ local sunstar = {
       Vx = "vx",
       Vy = "vy",
       Vz = "vz",
-      Speed = "speed",
+      Speed = "speed"
     },
-    DimInAtmosphere = true,
+    DimInAtmosphere = true
   },
   GUI = {
     Name = "Sun Star",
@@ -97,18 +98,19 @@ local sunstar = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(stars)
-  openspace.addSceneGraphNode(sunstar)
+  openspace.addSceneGraphNode(Stars)
+  openspace.addSceneGraphNode(SunStar)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(sunstar)
-  openspace.removeSceneGraphNode(stars)
+  openspace.removeSceneGraphNode(SunStar)
+  openspace.removeSceneGraphNode(Stars)
 end)
 
-asset.export(stars)
-asset.export(sunstar)
+asset.export(Stars)
+asset.export(SunStar)
 
 
 

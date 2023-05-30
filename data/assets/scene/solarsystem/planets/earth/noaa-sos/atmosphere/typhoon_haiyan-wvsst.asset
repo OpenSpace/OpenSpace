@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Typhoon Haiyan: Water Vapor and SST - Oct - Nov 2013"
@@ -19,7 +20,8 @@ local syncedDirectory = asset.syncedResource({
   UnzipFiles = true
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -28,7 +30,7 @@ local layer = {
   Description = Description
 }
 
-local track = {
+local Track = {
   Identifier = Identifier .. "-track",
   Name = Name .. " (Track)",
   Enabled = asset.enabled,
@@ -36,18 +38,20 @@ local track = {
   Description = Description
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", track)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Track)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", track)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Track)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(track)
+asset.export(Layer)
+asset.export(Track)
+
 
 
 asset.meta = {

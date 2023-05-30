@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Tsunami Locations - 2000 BCE - 2014"
@@ -28,35 +29,36 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local layer_base = {
+
+local LayerBase = {
   Identifier = Identifier,
   Name = Name,
   FilePath = syncedDirectory .. "4096.jpg",
   Description = Description
 }
 
-local layer_gray = {
+local LayerGray = {
   Identifier = Identifier .. "-gray",
   Name = Name .. " (Gray)",
   FilePath = syncedDirectory .. "gray_earth_with_countries_4096.png",
   Description = Description
 }
 
-local layer_neutral = {
+local LayerNeutral = {
   Identifier = Identifier .. "-neutral",
   Name = Name .. " (Neutral)",
   FilePath = syncedDirectory .. "natural_earth_with_countries_4096.png",
   Description = Description
 }
 
-local layer_events = {
+local LayerEvents = {
   Identifier = Identifier .. "-events",
   Name = Name .. " (Events)",
   FilePath = syncedDirectory .. "tsunami_events.png",
   Description = Description
 }
 
-local legend = {
+local Legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
@@ -67,25 +69,27 @@ local legend = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_gray)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_neutral)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_events)
-  openspace.addScreenSpaceRenderable(legend)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerGray)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNeutral)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerEvents)
+  openspace.addScreenSpaceRenderable(Legend)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_gray)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_neutral)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_events)
-  openspace.removeScreenSpaceRenderable(legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerEvents)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNeutral)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerGray)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.removeScreenSpaceRenderable(Legend)
 end)
 
-asset.export(layer_base)
-asset.export(layer_gray)
-asset.export(layer_neutral)
-asset.export(layer_events)
+asset.export(LayerBase)
+asset.export(LayerGray)
+asset.export(LayerNeutral)
+asset.export(LayerEvents)
+asset.export(Legend)
+
 
 
 asset.meta = {

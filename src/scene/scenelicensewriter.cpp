@@ -45,7 +45,6 @@ nlohmann::json SceneLicenseWriter::generateJsonGroupedByLicense() const {
         global::openSpaceEngine->assetManager().allAssets();
 
     int metaTotal = 0;
-    int metaCount = 0;
     for (const Asset* asset : assets) {
         std::optional<Asset::MetaInformation> meta = asset->metaInformation();
         if (!meta.has_value()) {
@@ -99,12 +98,14 @@ nlohmann::json SceneLicenseWriter::generateJsonGroupedByLicense() const {
             assetLicenses[license].push_back(assetJson);
         }
     }
-    
+
     nlohmann::json assetsJson;
     assetsJson["name"] = "Assets";
     assetsJson["type"] = "Licenses";
 
-    for (const std::pair<std::string, nlohmann::json>& assetLicense : assetLicenses) {
+    using K = const std::string;
+    using V = nlohmann::json;
+    for (const std::pair<K, V>& assetLicense : assetLicenses) {
         nlohmann::json entry;
         entry["name"] = assetLicense.first;
         entry["assets"] = assetLicense.second;
@@ -116,7 +117,7 @@ nlohmann::json SceneLicenseWriter::generateJsonGroupedByLicense() const {
     nlohmann::json result;
     result["name"] = "Licenses";
     result["data"] = json;
-    
+
     return result;
 }
 

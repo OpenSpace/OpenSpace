@@ -1,12 +1,14 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local band = {
+
+
+local GalacticBand = {
     Identifier = "GalacticBand",
     Parent = transforms.SolarSystemBarycenter.Name,
     Transform = {
         Scale = {
           Type = "StaticScale",
-          Scale = 9.46377307652E18;
+          Scale = 9.46377307652E18
         }
     },
     Renderable = {
@@ -24,42 +26,44 @@ local band = {
     }
 }
 
-local showAction = {
-  Identifier = "os.nightsky.show_galactic_band",
+
+local ShowGalacticBand = {
+  Identifier = "os.nightsky.ShowGalacticBand",
   Name = "Show galactic band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 1.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.GalacticBand.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.GalacticBand.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.GalacticBand.Renderable.Fade", 1.0, 1.0)
   ]],
   Documentation = "Shows the galactic band",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
-  
-local hideAction = {
-  Identifier = "os.nightsky.hide_galactic_band",
+
+local HideGalacticBand = {
+  Identifier = "os.nightsky.HideGalacticBand",
   Name = "Hide galactic band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 0.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.GalacticBand.Renderable.Fade", 0.0, 1.0)
   ]],
   Documentation = "Hides the galactic band",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(band)
-  openspace.action.registerAction(showAction)
-  openspace.action.registerAction(hideAction)
+  openspace.addSceneGraphNode(GalacticBand)
+  openspace.action.registerAction(ShowGalacticBand)
+  openspace.action.registerAction(HideGalacticBand)
 end)
-  
+
 asset.onDeinitialize(function()
-  openspace.action.removeAction(hideAction)
-  openspace.action.removeAction(showAction)
-  openspace.removeSceneGraphNode(band)
+  openspace.action.removeAction(HideGalacticBand)
+  openspace.action.removeAction(ShowGalacticBand)
+  openspace.removeSceneGraphNode(GalacticBand)
 end)
-  
-asset.export(band)
-asset.export(showAction)
-asset.export(hideAction)
+
+asset.export(GalacticBand)
+asset.export("ShowGalacticBand", ShowGalacticBand.Identifier)
+asset.export("HideGalacticBand", HideGalacticBand.Identifier)

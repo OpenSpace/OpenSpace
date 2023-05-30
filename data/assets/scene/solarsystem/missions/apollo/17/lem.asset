@@ -1,5 +1,7 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
-local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+
+
 
 local model = asset.syncedResource({
   Name = "Apollo Lem Models",
@@ -8,13 +10,14 @@ local model = asset.syncedResource({
   Version = 4
 })
 
+
 local Apollo17Lem = {
   Identifier = "Apollo17Lem",
-  Parent = moon_asset.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon_asset.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Longitude = -329.22833,
       Latitude = 20.19092,
       UseHeightmap = true
@@ -40,7 +43,7 @@ local Apollo17LemModel = {
     Type = "RenderableModel",
     GeometryFile = model .. "LM-2_ver2clean.obj",
     SpecularIntensity = 0.0,
-    RotationVector = { 110.255219,171.229706,126.666664 },
+    RotationVector = { 110.255219, 171.229706, 126.666664 },
     LightSources = {
       sun.LightSource,
       {
@@ -55,6 +58,7 @@ local Apollo17LemModel = {
     Path = "/Solar System/Missions/Apollo/17"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo17Lem)

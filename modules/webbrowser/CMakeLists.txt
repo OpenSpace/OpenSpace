@@ -90,7 +90,9 @@ add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper SYSTEM)
 
 mark_as_advanced(CEF_DEBUG_INFO_FLAG USE_ATL USE_OFFICIAL_BUILD_SANDBOX USE_SANDBOX)
 
-target_compile_options(libcef_dll_wrapper PRIVATE "-w")
+if (UNIX)
+  target_compile_options(libcef_dll_wrapper PRIVATE "-w")
+endif ()
 
 target_precompile_headers(libcef_dll_wrapper PRIVATE
   [["include/cef_client.h"]]

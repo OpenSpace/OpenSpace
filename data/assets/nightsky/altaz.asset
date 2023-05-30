@@ -1,6 +1,8 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
-local gridPosition = {
+
+
+local AltAzGridPosition = {
   Identifier = "AltAzGridPosition",
   Parent = earthAsset.Earth.Identifier,
   Transform = {
@@ -29,9 +31,9 @@ local gridPosition = {
   }
 }
 
-local grid = {
+local AltAzGrid = {
   Identifier = "AltAzGrid",
-  Parent = gridPosition.Identifier,
+  Parent = AltAzGridPosition.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -40,7 +42,7 @@ local grid = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = { -math.pi / 2.0, 0.0, 0.0 }
-    },
+    }
   },
   Renderable = {
     Type = "RenderableSphericalGrid",
@@ -56,33 +58,33 @@ local grid = {
   }
 }
 
-local showAction = {
-  Identifier = "os.nightsky.show_altaz",
+local ShowAltaz = {
+  Identifier = "os.nightsky.ShowAltaz",
   Name = "Show Alt/Az grid",
   Command = [[
-    local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
-    local camera = openspace.navigation.getNavigationState();
-    openspace.setParent('AltAzGridPosition', camera.Anchor)
-    openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Translation.Globe', camera.Anchor);
-    openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Translation.Latitude', lat);
-    openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Translation.Longitude', lon);
-    openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Rotation.Globe', camera.Anchor);
-    openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Rotation.Latitude', lat);
-    openspace.setPropertyValueSingle('Scene.AltAzGridPosition.Rotation.Longitude', lon);
-    openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 1.0, 1.0);
+    local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera()
+    local camera = openspace.navigation.getNavigationState()
+    openspace.setParent("AltAzGridPosition", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Translation.Globe", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Translation.Latitude", lat)
+    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Translation.Longitude", lon)
+    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Rotation.Globe", camera.Anchor)
+    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Rotation.Latitude", lat)
+    openspace.setPropertyValueSingle("Scene.AltAzGridPosition.Rotation.Longitude", lon)
+    openspace.setPropertyValueSingle("Scene.AltAzGrid.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.AltAzGrid.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.AltAzGrid.Renderable.Fade", 1.0, 1.0)
   ]],
   Documentation = "Shows a local Altitude/Azimuth grid centered around your position",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
 
-local hideAction = {
-  Identifier = "os.nightsky.hide_altaz",
+local HideAltaz = {
+  Identifier = "os.nightsky.HideAltaz",
   Name = "Hide Alt/Az grid",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.AltAzGrid.Renderable.Fade', 0, 1);
+    openspace.setPropertyValueSingle("Scene.AltAzGrid.Renderable.Fade", 0, 1)
   ]],
   Documentation = "Hides the Alt/Az grid",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -90,20 +92,21 @@ local hideAction = {
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(gridPosition)
-  openspace.addSceneGraphNode(grid)
-  openspace.action.registerAction(hideAction)
-  openspace.action.registerAction(showAction)
+  openspace.addSceneGraphNode(AltAzGridPosition)
+  openspace.addSceneGraphNode(AltAzGrid)
+  openspace.action.registerAction(ShowAltaz)
+  openspace.action.registerAction(HideAltaz)
 
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(showAction)
-  openspace.action.removeAction(hideAction)
-  openspace.removeSceneGraphNode(grid)
-  openspace.removeSceneGraphNode(gridPosition)
+  openspace.action.removeAction(HideAltaz)
+  openspace.action.removeAction(ShowAltaz)
+  openspace.removeSceneGraphNode(AltAzGrid)
+  openspace.removeSceneGraphNode(AltAzGridPosition)
 end)
 
-asset.export(showAction)
-asset.export(hideAction)
-asset.export(grid)
+asset.export(AltAzGridPosition)
+asset.export(AltAzGrid)
+asset.export("ShowAltaz", ShowAltaz.Identifier)
+asset.export("HideAltaz", HideAltaz.Identifier)

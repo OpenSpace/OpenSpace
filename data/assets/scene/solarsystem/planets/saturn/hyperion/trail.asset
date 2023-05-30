@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
+local kernel = asset.require("../kernels")
 
 
 
@@ -11,8 +11,7 @@ local HyperionTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "HYPERION",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Observer = "SATURN BARYCENTER"
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 21.276,
@@ -25,12 +24,17 @@ local HyperionTrail = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.sat441)
+
   openspace.addSceneGraphNode(HyperionTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HyperionTrail)
+
+  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(HyperionTrail)

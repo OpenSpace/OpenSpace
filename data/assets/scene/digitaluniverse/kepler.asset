@@ -12,7 +12,8 @@ local speck = asset.syncedResource({
   Version = 3
 })
 
-local object = {
+
+local Object = {
   Identifier = "KeplerPlanetaryCandidates",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -40,19 +41,20 @@ local object = {
     good candidates to host planets. Rather than represent them photo-realistically,
     with accurate colors, we choose to visualize them as generic, pure yellow stars.
     (Description from URL) <br><br> Data Reference: NASA Exoplanet Archive
-    (CalTech/NASA)]],
+    (CalTech/NASA)]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

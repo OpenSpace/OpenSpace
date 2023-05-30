@@ -1,6 +1,8 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Saturn Labels",
@@ -9,6 +11,7 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
+
 local Dione = {
   Identifier = "Dione",
   Parent = transforms.SaturnBarycenter.Identifier,
@@ -16,8 +19,7 @@ local Dione = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "DIONE",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Observer = "SATURN BARYCENTER"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -77,6 +79,8 @@ local DioneLabel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.sat441)
+
   openspace.addSceneGraphNode(Dione)
   openspace.addSceneGraphNode(DioneLabel)
 end)
@@ -84,9 +88,12 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(DioneLabel)
   openspace.removeSceneGraphNode(Dione)
+
+  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Dione)
+asset.export(DioneLabel)
 
 
 

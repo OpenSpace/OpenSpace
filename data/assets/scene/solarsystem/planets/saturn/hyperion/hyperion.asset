@@ -1,6 +1,8 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Saturn Labels",
@@ -9,6 +11,7 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
+
 local Hyperion = {
   Identifier = "Hyperion",
   Parent = transforms.SaturnBarycenter.Identifier,
@@ -16,18 +19,16 @@ local Hyperion = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "HYPERION",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Observer = "SATURN BARYCENTER"
     }
     --[[
       The IAU report does not give an orientation model for Hyperion.
-      Hyperion's rotation is in chaotic and is not predictable for
-      long periods.
+      Hyperion's rotation is chaotic and not predictable for long periods.
     ]]--
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 360200, 266000, 205400},
+    Radii = { 360200, 266000, 205400 },
     SegmentsPerPatch = 64,
     Layers = {},
     Labels = {
@@ -49,7 +50,6 @@ local Hyperion = {
     Path = "/Solar System/Planets/Saturn/Major Moons/Hyperion"
   }
 }
-
 
 local HyperionLabel = {
   Identifier = "HyperionLabel",
@@ -78,6 +78,8 @@ local HyperionLabel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.sat441)
+
   openspace.addSceneGraphNode(Hyperion)
   openspace.addSceneGraphNode(HyperionLabel)
 end)
@@ -85,9 +87,12 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HyperionLabel)
   openspace.removeSceneGraphNode(Hyperion)
+
+  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Hyperion)
+asset.export(HyperionLabel)
 
 
 

@@ -1,5 +1,7 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
+
+
 
 local modelFolder = asset.syncedResource({
   Name = "Scale Kuala Lumpur Tower",
@@ -8,25 +10,27 @@ local modelFolder = asset.syncedResource({
   Version = 1
 })
 
-local scaleModel = {
+
+local Location = { 3.152878, 101.703533 }
+
+local ScaleModel = {
   Identifier = "Scale_KualaLumpurTower",
   Parent = earthAsset.Earth.Identifier,
-  --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  -- Note: Lat/Lon/Scale values come from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 3.152878,
-      Longitude = 101.703533,
+      Latitude = Location[1],
+      Longitude = Location[2],
       Altitude = 0.0,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 3.152878,
-      Longitude = 101.703533,
-      UseHeightmap = false
+      Latitude = Location[1],
+      Longitude = Location[2]
     }
   },
   Renderable = {
@@ -40,40 +44,42 @@ local scaleModel = {
   }
 }
 
-local updatePositionAction = {
-  Identifier = "os.scale_models.drop_kuala_lumpur_tower",
+local UpdatePositionAction = {
+  Identifier = "os.scalemodels.DropKualaLumpurTower",
   Name = "Drop Kuala Lumpur Tower under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_KualaLumpurTower')
+    openspace.globebrowsing.setNodePositionFromCamera("Scale_KualaLumpurTower")
   ]],
   Documentation = "Updates the Kuala Lumpur Tower position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
-local resetPositionAction = {
-  Identifier = "os.os.scale_models.reset_kuala_lumpur_tower",
+local ResetPositionAction = {
+  Identifier = "os.scalemodels.ResetKualaLumpurTower",
   Name = "Reset Kuala Lumpur Tower position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_KualaLumpurTower', ']] .. earthAsset.Earth.Identifier .. [[', 3.152878, 101.703533)
-  ]],
-  Documentation = "Resets the Kuala Lumpur Tower back to it's actual location",
+    openspace.globebrowsing.setNodePosition("Scale_KualaLumpurTower", "]] .. earthAsset.Earth.Identifier .. [[", ]] .. Location[1] .. "," .. Location[2] .. ")",
+  Documentation = "Resets the Kuala Lumpur Tower back to its actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(scaleModel)
-  openspace.action.registerAction(updatePositionAction)
-  openspace.action.registerAction(resetPositionAction)
+  openspace.addSceneGraphNode(ScaleModel)
+
+  openspace.action.registerAction(UpdatePositionAction)
+  openspace.action.registerAction(ResetPositionAction)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(resetPositionAction)
-  openspace.action.removeAction(updatePositionAction)
-  openspace.removeSceneGraphNode(scaleModel)
+  openspace.action.removeAction(ResetPositionAction)
+  openspace.action.removeAction(UpdatePositionAction)
+
+  openspace.removeSceneGraphNode(ScaleModel)
 end)
 
-asset.export(scaleModel)
-asset.export(updatePositionAction)
-asset.export(resetPositionAction)
+asset.export(ScaleModel)
+asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
+asset.export("ResetPositionAction", ResetPositionAction.Identifier)

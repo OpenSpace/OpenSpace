@@ -1,7 +1,9 @@
-local transforms = asset.require("../transforms")
 asset.require("spice/base")
 asset.require("./trail")
-local kernel = asset.require("../kernels").jup365
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Jupiter Labels",
@@ -10,6 +12,7 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
+
 local Callisto = {
   Identifier = "Callisto",
   Parent = transforms.JupiterBarycenter.Identifier,
@@ -17,14 +20,12 @@ local Callisto = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_CALLISTO",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernel
+      DestinationFrame = "GALACTIC"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "CALLISTO",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernel
+      Observer = "JUPITER BARYCENTER"
     }
   },
   Renderable = {
@@ -77,7 +78,10 @@ local CallistoLabel = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.jup365)
+
   openspace.addSceneGraphNode(Callisto)
   openspace.addSceneGraphNode(CallistoLabel)
 end)
@@ -85,9 +89,12 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CallistoLabel)
   openspace.removeSceneGraphNode(Callisto)
+
+  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(Callisto)
+asset.export(CallistoLabel)
 
 
 

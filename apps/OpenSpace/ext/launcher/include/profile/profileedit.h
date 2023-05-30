@@ -47,12 +47,14 @@ public:
      * \param profileName The name of the profile to create
      * \param assetBasePath The path to the folder where the assets live
      * \param userAssetBasePath The path to the folder where the user assets live
-     * \param profileName The path to the folder in which all profiles live
+     * \param builtInProfileBasePath The path to the folder in which the built-in profiles
+     *        live
+     * \param profileBasePath The path to the folder in which all profiles live
      * \param parent Pointer to parent Qt widget
      */
     ProfileEdit(openspace::Profile& profile, const std::string& profileName,
         std::string assetBasePath, std::string userAssetBasePath,
-        std::string profileBasePath, QWidget* parent);
+        std::string builtInProfileBasePath, std::string profileBasePath, QWidget* parent);
 
     /**
      * Gets the status of the save when the window is closed; was the file saved?
@@ -99,6 +101,7 @@ private:
     const std::string _assetBasePath;
     const std::string _userAssetBasePath;
     const std::string _profileBasePath;
+    const std::string _builtInProfilesPath;
     bool _saveSelected = false;
 
     QLineEdit* _profileEdit = nullptr;

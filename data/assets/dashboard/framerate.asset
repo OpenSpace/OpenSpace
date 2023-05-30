@@ -1,18 +1,20 @@
-local item = {
+local Item = {
   Type = "DashboardItemFramerate",
   Identifier = "Framerate",
   GuiName = "Framerate"
 }
 
+
 asset.onInitialize(function()
-  openspace.dashboard.addDashboardItem(item)
+  openspace.dashboard.addDashboardItem(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.dashboard.removeDashboardItem(item)
+  openspace.dashboard.removeDashboardItem(Item)
 end)
 
-asset.export(item)
+asset.export(Item)
+
 
 
 asset.meta = {

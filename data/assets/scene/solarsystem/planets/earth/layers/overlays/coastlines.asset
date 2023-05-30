@@ -1,20 +1,23 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Coastlines",
   FilePath = asset.localResource("coastlines.wms"),
   Enabled = asset.enabled
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

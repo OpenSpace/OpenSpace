@@ -1,12 +1,14 @@
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
+
 local trail = asset.syncedResource({
   Name = "Gaia Trail",
   Type = "HttpSynchronization",
   Identifier = "gaia_trail",
   Version = 3
 })
+
 
 local GaiaPosition = {
   Identifier = "GaiaPosition",
@@ -23,13 +25,14 @@ local GaiaPosition = {
         -- End time: 2026-Sep-14 00:00:00 (last data point)
         -- Step size: First file has 40 minutes and seocnd has 1 day step size
       }
-    },
+    }
   },
   GUI = {
     Name = "Position",
     Path = "/Solar System/Missions/Gaia"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GaiaPosition)
@@ -40,6 +43,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(GaiaPosition)
+
 
 
 asset.meta = {

@@ -1,6 +1,6 @@
-local transforms = asset.require("../transforms")
 asset.require("spice/base")
-local kernel = asset.require("../kernels").jup365
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
 
 
 
@@ -12,11 +12,10 @@ local IoTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "IO",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernel
+      Observer = "JUPITER BARYCENTER"
     },
     Color = { 0.4, 0.4, 0.2 },
-    Period =  42.0 / 24.0,
+    Period = 42.0 / 24.0,
     Resolution = 1000
   },
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
@@ -26,12 +25,17 @@ local IoTrail = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.jup365)
+
   openspace.addSceneGraphNode(IoTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(IoTrail)
+
+  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(IoTrail)

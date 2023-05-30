@@ -330,7 +330,7 @@ void WwtDataHandler::loadImages(const std::string& root,
         }
     );
     // Set the identifiers to the correct order
-    for (int i = 0; i < _imageVector.size(); i++) {
+    for (size_t i = 0; i < _imageVector.size(); i++) {
         _images[_imageVector[i].imageUrl].identifier = std::to_string(i);
     }
 

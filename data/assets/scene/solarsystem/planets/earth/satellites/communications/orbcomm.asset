@@ -1,5 +1,7 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
+
+
 local omm = asset.syncedResource({
   Name = "Satellite OMM Data (Orbcomm)",
   Type = "UrlSynchronization",
@@ -9,8 +11,9 @@ local omm = asset.syncedResource({
   Override = true
 })
 
-local satellites = {
-  Identifier = "orbcomm",
+
+local OrbcommSatellites = {
+  Identifier = "OrbcommSatellites",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -28,15 +31,16 @@ local satellites = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(satellites)
+  openspace.addSceneGraphNode(OrbcommSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(satellites)
+  openspace.removeSceneGraphNode(OrbcommSatellites)
 end)
 
-asset.export(satellites)
+asset.export(OrbcommSatellites)
 
 
 

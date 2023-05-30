@@ -1,4 +1,6 @@
-local globeIdentifier = asset.require("../../venus").Venus.Identifier
+local globe = asset.require("../../venus")
+
+
 
 local texturesPath = asset.syncedResource({
   Name = "Venus Textures",
@@ -7,13 +9,14 @@ local texturesPath = asset.syncedResource({
   Version = 2
 })
 
-local clouds = {
+
+local Clouds = {
   Identifier = "Clouds",
   FilePath = texturesPath .. "venus_clouds.jpg",
-  Enabled = asset.enabled,
+  Enabled = asset.enabled
 }
 
-local layer = {
+local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "venus.jpg",
   Enabled = asset.enabled,
@@ -23,18 +26,19 @@ local layer = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", clouds)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Venus.Identifier, "ColorLayers", Clouds)
+  openspace.globebrowsing.addLayer(globe.Venus.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", clouds)
+  openspace.globebrowsing.deleteLayer(globe.Venus.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(globe.Venus.Identifier, "ColorLayers", Clouds)
 end)
 
-asset.export(layer)
-asset.export(clouds)
+asset.export(Layer)
+asset.export(Clouds)
 
 
 

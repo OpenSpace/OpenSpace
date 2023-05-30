@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("../../moon").Moon.Identifier
+local globe = asset.require("../../moon")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "LolaDem_Sweden",
   Name = "Lola DEM [Sweden]",
   Enabled = asset.enabled,
@@ -9,15 +11,16 @@ local layer = {
   Settings = { Multiplier = 0.5 }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Moon.Identifier, "HeightLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Moon.Identifier, "HeightLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

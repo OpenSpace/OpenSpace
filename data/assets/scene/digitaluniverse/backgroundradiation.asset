@@ -12,7 +12,8 @@ local textures = asset.syncedResource({
   Version = 2
 })
 
-local wmap = {
+
+local WMAP = {
   Identifier = "WMAP",
   Transform = {
     Rotation = {
@@ -37,7 +38,7 @@ local wmap = {
   }
 }
 
-local cbe = {
+local CBE = {
   Identifier = "CBE",
   Transform = {
     Rotation = {
@@ -62,7 +63,7 @@ local cbe = {
   }
 }
 
-local planck = {
+local Planck = {
   Identifier = "Planck",
   Transform = {
     Rotation = {
@@ -88,7 +89,7 @@ local planck = {
 }
 
 
-local Halpha = {
+local HAlpha = {
   Identifier = "HAlpha",
   Transform = {
     Rotation = {
@@ -116,23 +117,23 @@ local Halpha = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(wmap)
-  openspace.addSceneGraphNode(cbe)
-  openspace.addSceneGraphNode(planck)
-  openspace.addSceneGraphNode(Halpha)
+  openspace.addSceneGraphNode(WMAP)
+  openspace.addSceneGraphNode(CBE)
+  openspace.addSceneGraphNode(Planck)
+  openspace.addSceneGraphNode(HAlpha)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Halpha)
-  openspace.removeSceneGraphNode(planck)
-  openspace.removeSceneGraphNode(cbe)
-  openspace.removeSceneGraphNode(wmap)
+  openspace.removeSceneGraphNode(HAlpha)
+  openspace.removeSceneGraphNode(Planck)
+  openspace.removeSceneGraphNode(CBE)
+  openspace.removeSceneGraphNode(WMAP)
 end)
 
-asset.export(wmap)
-asset.export(cbe)
-asset.export(planck)
-asset.export(Halpha)
+asset.export(WMAP)
+asset.export(CBE)
+asset.export(Planck)
+asset.export(HAlpha)
 
 
 

@@ -1,5 +1,6 @@
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
-local earthIdentifier = earth.Earth.Identifier
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+
 
 local data = asset.syncedResource({
   Name = "GeoJSON Example Polygon Multiple",
@@ -11,7 +12,8 @@ local data = asset.syncedResource({
   }
 })
 
-local Example_Polygon = {
+
+local ExamplePolygon = {
   Identifier = "Earth-Polygon",
   File = data .. "polygon_multiple.geojson",
   HeightOffset = 20000.0,
@@ -22,7 +24,7 @@ local Example_Polygon = {
   Name = "Polygon (Multiple)"
 }
 
-local Example_Polygon_Diff_Heights = {
+local ExamplePolygonDiffHeights = {
   Identifier = "Earth-Polygon-Different-Heights",
   File = data .. "polygon_different_heights.geojson",
   HeightOffset = 20000.0,
@@ -34,18 +36,19 @@ local Example_Polygon_Diff_Heights = {
   Description = "A GeoJSON test layer with some different heights"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Polygon)
-  openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Polygon_Diff_Heights)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExamplePolygon)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExamplePolygonDiffHeights)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Polygon)
-  openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Polygon_Diff_Heights)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExamplePolygon)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExamplePolygonDiffHeights)
 end)
 
-asset.export(Example_Polygon)
-asset.export(Example_Polygon_Diff_Heights)
+asset.export(ExamplePolygon)
+asset.export(ExamplePolygonDiffHeights)
 
 
 asset.meta = {

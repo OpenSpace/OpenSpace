@@ -45,8 +45,8 @@ uniform sampler2D texture_diffuse;
 uniform sampler2D texture_normal;
 uniform sampler2D texture_specular;
 
-uniform vec3 color_diffuse;
-uniform vec3 color_specular;
+uniform vec4 color_diffuse;
+uniform vec4 color_specular;
 uniform float opacity = 1.0;
 
 uniform int nLightSources;
@@ -83,14 +83,17 @@ Fragment getFragment() {
   }
 
   // Frag color is the values of the normal vector
+  vec3 normal;
   if (has_texture_normal) {
     vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;
     normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);
-    frag.color.rgb = normalize(vs_TBN * normalAlbedo);
+    normal = normalize(vs_TBN * normalAlbedo);
   }
   else {
-    frag.color.rgb = normalize(vs_normalViewSpace);
+    normal = normalize(vs_normalViewSpace);
   }
+  frag.color.rgb = normal;
+  frag.color.a = opacity;
 
   return frag;
 }

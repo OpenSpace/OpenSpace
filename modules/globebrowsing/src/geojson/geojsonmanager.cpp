@@ -71,7 +71,7 @@ bool GeoJsonManager::isReady() const {
 }
 
 void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
-    ZoneScoped
+    ZoneScoped;
 
     try {
         // Parse dictionary
@@ -106,7 +106,7 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
 }
 
 void GeoJsonManager::deleteLayer(const std::string& layerIdentifier) {
-    ZoneScoped
+    ZoneScoped;
 
     for (auto it = _geoJsonObjects.begin(); it != _geoJsonObjects.end(); ++it) {
         if (it->get()->identifier() == layerIdentifier) {
@@ -124,7 +124,7 @@ void GeoJsonManager::deleteLayer(const std::string& layerIdentifier) {
 }
 
 void GeoJsonManager::update() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<GeoJsonComponent>& obj : _geoJsonObjects) {
         if (obj->enabled()) {
@@ -134,7 +134,7 @@ void GeoJsonManager::update() {
 }
 
 void GeoJsonManager::render(const RenderData& data) {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<GeoJsonComponent>& obj : _geoJsonObjects) {
         if (obj->enabled()) {

@@ -6,7 +6,7 @@
     { "type": "navigationstate", 
       "value": "{Anchor='Voyager_1',Pitch=0.289491E-1,Position={9.291557E0,3.604126E0,0.823166E0},ReferenceFrame='Root',Up={0.130390E0,-0.527836E0,0.839278E0},Yaw=-0.997966E-2}"},
     { "type": "action", 
-      "value": "os.fade_down_trails"}, 
+      "value": "os.FadeDownTrails"}, 
     { "type": "script", 
       "value": "openspace.setPropertyValue('Scene.Voyager_1_Trail_*.Enabled',false);"},
     { "type": "wait", 

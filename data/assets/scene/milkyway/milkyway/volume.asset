@@ -9,9 +9,10 @@ local data = asset.syncedResource({
   Version = 1
 })
 
-local kiloparsec = 3.086E19
 
-local MilkyWayVolumeGalaxy = {
+local KiloParsec = 3.086E19
+
+local MilkyWayVolume = {
   Identifier = "MilkyWayVolume",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
@@ -20,7 +21,7 @@ local MilkyWayVolumeGalaxy = {
       -- The center of the Milky Way is approximately 8 kiloparsec from the Sun.
       -- The x-axis of galactic coordinates points from the sun towards the center
       -- of the galaxy.
-      Position = { 8 * kiloparsec, 0, 0 }
+      Position = { 8 * KiloParsec, 0, 0 }
     }
   },
   Renderable = {
@@ -31,16 +32,16 @@ local MilkyWayVolumeGalaxy = {
     Rotation = { math.pi, 3.1248, 4.45741 },
     Volume = {
       Type = "Volume",
-      Filename = openspace.absPath(data .. "MilkyWayRGBAVolume1024x1024x128.raw"),
+      Filename = data .. "MilkyWayRGBAVolume1024x1024x128.raw",
       Dimensions = { 1024, 1024, 128 },
       Size = { 1.2E21, 1.2E21, 0.15E21 },
       Downscale = 0.4,
     },
     Points = {
       Type = "Points",
-      Filename = openspace.absPath(data .. "MilkyWayPoints.off"),
+      Filename = data .. "MilkyWayPoints.off",
       EnabledPointsRatio = 0.3,
-      Texture = openspace.absPath(data .. "halo.png")
+      Texture = data .. "halo.png"
     }
   },
   GUI = {
@@ -50,15 +51,16 @@ local MilkyWayVolumeGalaxy = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(MilkyWayVolumeGalaxy)
+  openspace.addSceneGraphNode(MilkyWayVolume)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MilkyWayVolumeGalaxy)
+  openspace.removeSceneGraphNode(MilkyWayVolume)
 end)
 
-asset.export(MilkyWayVolumeGalaxy)
+asset.export(MilkyWayVolume)
 
 
 

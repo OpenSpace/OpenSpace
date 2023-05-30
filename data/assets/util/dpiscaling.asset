@@ -1,16 +1,16 @@
-asset.onInitialize(function ()
+asset.onInitialize(function()
   local scale = openspace.dpiScaling()
   openspace.printInfo("Setting the DPI scaling factor to " .. tostring(scale))
 
 
   if openspace.modules.isLoaded("CefWebGui") then
-  openspace.setPropertyValueSingle(
+    openspace.setPropertyValueSingle(
       "Modules.CefWebGui.GuiScale",
       openspace.getPropertyValue("Modules.CefWebGui.GuiScale") * scale
     )
   end
 
-  local dashboards = openspace.getProperty("Dashboard.*.FontSize");
+  local dashboards = openspace.getProperty("Dashboard.*.FontSize")
   for _, v in ipairs(dashboards) do
     openspace.setPropertyValueSingle(
       v,
@@ -24,6 +24,8 @@ asset.onInitialize(function ()
     { offset[1] * scale, offset[2] * scale }
   )
 end)
+
+
 
 asset.meta = {
   Name = "DPI Scaling",

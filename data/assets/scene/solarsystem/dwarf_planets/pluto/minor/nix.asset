@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local kernels = asset.require("../kernels").PlutoKernels
 
 
 
@@ -15,7 +14,7 @@ local Nix = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 0.45E5, 0.45E5, 0.45E5 },
+    Radii = { 45000, 45000, 45000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },
@@ -76,6 +75,7 @@ local NixLabel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Nix)
   openspace.addSceneGraphNode(NixTrail)
@@ -90,6 +90,7 @@ end)
 
 asset.export(Nix)
 asset.export(NixTrail)
+asset.export(NixLabel)
 
 
 

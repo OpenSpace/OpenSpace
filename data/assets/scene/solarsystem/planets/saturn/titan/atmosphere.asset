@@ -1,5 +1,7 @@
 local transforms = asset.require("./titan")
 
+
+
 local Atmosphere = {
   Identifier = "TitanAtmosphere",
   Parent = transforms.Titan.Identifier,
@@ -16,7 +18,7 @@ local Atmosphere = {
         -- Wavelengths are given in 10^-9m
         Wavelengths = { 680, 550, 440 },
         -- Reflection coefficients are given in km^-1
-        Scattering = { 5.349578367831898E-3, 12.65595939366191E-3, 31.331782953393245E-3 },
+        Scattering = { 0.005349578367831898, 0.01265595939366191, 0.03133178295339324 }
       },
       -- Thickness of atmosphere if its density were uniform, in Km
       H_R = 20.0
@@ -24,13 +26,14 @@ local Atmosphere = {
     Mie = {
         Coefficients = {
           -- Reflection coefficients are given in km^-1
-          Scattering = { 5e-3, 12e-3, 80e-3 },
+          Scattering = { 0.005, 0.012, 0.08 },
           -- Extinction coefficients are a fraction of the Mie coefficients
-          Extinction = { 4.0e-3/0.37, 4.0e-3/0.37, 4.0e-3/0.37 }
+          Extinction = { 0.004 / 0.37, 0.004 / 0.37, 0.004 / 0.37 }
         },
-        -- Height scale (atmosphere thickness for constant density) in Km
+        -- Height scale (atmosphere thickness for constant density) in km
         H_M = 14.85,
-        -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
+        -- Mie Phase Function Value
+        -- (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
         G = -0.52
     },
     Debug = {
@@ -44,6 +47,7 @@ local Atmosphere = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Atmosphere)
 end)
@@ -53,6 +57,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Atmosphere)
+
 
 
 asset.meta = {

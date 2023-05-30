@@ -5,7 +5,10 @@ local image = asset.syncedResource({
   Version = 1
 })
 
+
 asset.export("image", image)
+
+
 
 asset.meta = {
   Name = "M51 Galaxy",

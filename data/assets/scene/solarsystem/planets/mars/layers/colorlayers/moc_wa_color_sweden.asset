@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("../../mars").Mars.Identifier
+local globe = asset.require("../../mars")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "MOC_WA_Color_LiU",
   Name = "MOC WA Color [Sweden]",
   Enabled = asset.enabled,
@@ -15,15 +17,16 @@ local layer = {
     https://www.jpl.nasa.gov/spaceimages/details.php?id=PIA03467]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

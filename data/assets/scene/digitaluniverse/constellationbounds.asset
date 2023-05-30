@@ -5,11 +5,12 @@ local data = asset.syncedResource({
   Version = 1
 })
 
+
 local zodiacs = {
   "CNC", "TAU", "PSC", "ARI", "LIB", "AQR", "CAP", "SCO", "VIR", "SGR", "GEM", "LEO"
 }
 
-local object = {
+local Object = {
   Identifier = "ConstellationBounds",
   Renderable = {
     Type = "RenderableConstellationBounds",
@@ -33,19 +34,20 @@ local object = {
     Name = "Constellation Bounds",
     Path = "/Milky Way/Constellations",
     Description = [[A Spherical mesh dividing the sky into regions that fit the
-      constellations]],
+      constellations]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

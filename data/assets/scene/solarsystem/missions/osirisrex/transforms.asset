@@ -2,7 +2,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local BENNU_BODY = 2101955
+local BennuBodyId = 2101955
 
 local BennuBarycenter = {
   Identifier = "BennuBarycenter",
@@ -10,7 +10,7 @@ local BennuBarycenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = BENNU_BODY,
+      Target = BennuBodyId,
       Observer = "SSB"
     }
   },
@@ -19,6 +19,7 @@ local BennuBarycenter = {
     Path = "/Solar System/Missions/OSIRIS REx"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(BennuBarycenter)

@@ -1,5 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local kernels = asset.require("./kernels").PlutoKernels
+local kernels = asset.require("./kernels")
 asset.require("spice/base")
 
 
@@ -11,8 +11,7 @@ local PlutoBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "PLUTO BARYCENTER",
-      Observer = "SSB",
-      Kernels = kernels
+      Observer = "SSB"
     }
   },
   GUI = {
@@ -21,12 +20,17 @@ local PlutoBarycenter = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.PlutoKernels)
+
   openspace.addSceneGraphNode(PlutoBarycenter)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoBarycenter)
+
+  openspace.spice.unloadKernel(kernels.PlutoKernels)
 end)
 
 asset.export(PlutoBarycenter)

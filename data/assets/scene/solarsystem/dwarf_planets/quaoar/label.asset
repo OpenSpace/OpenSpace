@@ -1,5 +1,7 @@
 local transforms = asset.require("./transforms")
 
+
+
 local Label = {
   Identifier = "QuaoarLabel",
   Parent = transforms.Position.Identifier,
@@ -25,6 +27,7 @@ local Label = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Label)
 end)
@@ -34,6 +37,8 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("Label", Label)
+
+
 
 asset.meta = {
   Name = "Quaoar Label",

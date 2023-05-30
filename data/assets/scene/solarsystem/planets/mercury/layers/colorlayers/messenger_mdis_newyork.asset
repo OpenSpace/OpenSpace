@@ -1,6 +1,8 @@
-local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+local globe = asset.require("../../mercury")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Messenger_MDIS_NewYork",
   Name = "Messenger MDIS [New York]",
   Enabled = asset.enabled,
@@ -17,15 +19,16 @@ local layer = {
   at 750 nm. The resolution of this mosaic is 250 meters per pixel (m)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

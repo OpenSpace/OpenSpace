@@ -6,7 +6,7 @@
     { "type": "navigationstate", 
       "value": "{Anchor='Sun',Pitch=-0.296905E-2,Position={-5.701493E12,2.431929E13,-4.495678E13},ReferenceFrame='Root',Up={-0.117936E0,0.867082E0,0.484003E0},Yaw=-0.189846E-1}"},
     { "type": "action", 
-      "value": "os.fade_down_trails"}, 
+      "value": "os.FadeDownTrails"}, 
     { "type": "wait", 
       "value": "2"}, 
     { "type": "screenshot", 

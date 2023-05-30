@@ -1,6 +1,6 @@
-local transforms = asset.require("../transforms")
 asset.require("spice/base")
-local kernel = asset.require("../kernels").jup365
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
 
 
 
@@ -12,11 +12,10 @@ local GanymedeTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "GANYMEDE",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernel
+      Observer = "JUPITER BARYCENTER"
     },
     Color = { 0.4, 0.3, 0.3 },
-    Period =  172.0 / 24.0,
+    Period = 172.0 / 24.0,
     Resolution = 1000
   },
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
@@ -26,12 +25,17 @@ local GanymedeTrail = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.jup365)
+
   openspace.addSceneGraphNode(GanymedeTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GanymedeTrail)
+
+  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(GanymedeTrail)

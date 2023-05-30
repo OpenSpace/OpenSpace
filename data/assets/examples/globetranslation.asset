@@ -1,6 +1,7 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local models = asset.syncedResource({
   Name = "New Horizons Model",
@@ -9,8 +10,9 @@ local models = asset.syncedResource({
   Version = 2
 })
 
-local Example_Fixed_Height = {
-  Identifier = "Example_Fixed_Height",
+
+local ExampleFixedHeight = {
+  Identifier = "ExampleFixedHeight",
   Parent = earth.Earth.Identifier,
   Transform = {
     Translation = {
@@ -33,8 +35,8 @@ local Example_Fixed_Height = {
   }
 }
 
-local Example_Adaptive_Height = {
-  Identifier = "Example_Adaptive_Height",
+local ExampleAdaptiveHeight = {
+  Identifier = "ExampleAdaptiveHeight",
   Parent = earth.Earth.Identifier,
   Transform = {
     Translation = {
@@ -57,15 +59,16 @@ local Example_Adaptive_Height = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Example_Fixed_Height)
-  openspace.addSceneGraphNode(Example_Adaptive_Height)
+  openspace.addSceneGraphNode(ExampleFixedHeight)
+  openspace.addSceneGraphNode(ExampleAdaptiveHeight)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Example_Adaptive_Height)
-  openspace.removeSceneGraphNode(Example_Fixed_Height)
+  openspace.removeSceneGraphNode(ExampleAdaptiveHeight)
+  openspace.removeSceneGraphNode(ExampleFixedHeight)
 end)
 
-asset.export(Example_Fixed_Height)
-asset.export(Example_Adaptive_Height)
+asset.export(ExampleFixedHeight)
+asset.export(ExampleAdaptiveHeight)

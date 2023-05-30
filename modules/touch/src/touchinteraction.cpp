@@ -302,12 +302,17 @@ TouchInteraction::TouchInteraction()
         0.01f,
         0.25f
     )
-    , _zoomInBoundarySphereMultiplier(ZoomInBoundarySphereMultiplierInfo, 1.001f, 0.01f, 4e+27)
+    , _zoomInBoundarySphereMultiplier(
+        ZoomInBoundarySphereMultiplierInfo,
+        1.001f,
+        0.01f,
+        4e+27f
+    )
     , _zoomOutBoundarySphereMultiplier(
         ZoomOutBoundarySphereMultiplierInfo,
-        4e+27,
+        4e+27f,
         1.f,
-        4e+27
+        4e+27f
     )
     , _zoomInLimit(ZoomInLimitInfo, -1.0, 0.0, 4e+27)
     , _zoomOutLimit(
@@ -474,7 +479,12 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     std::vector<double> par(6, 0.0);
     par[0] = _lastVel.orbit.x; // use _lastVel for orbit
     par[1] = _lastVel.orbit.y;
-    bool lmSuccess = _directInputSolver.solve(list, _selectedNodeSurfacePoints, &par, *_camera);
+    bool lmSuccess = _directInputSolver.solve(
+        list,
+        _selectedNodeSurfacePoints,
+        &par,
+        *_camera
+    );
     int nDof = _directInputSolver.nDof();
 
     if (lmSuccess && !_unitTest) {
@@ -505,7 +515,8 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     }
 }
 
-void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolder>& list) {
+void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolder>& list)
+{
     _selectedNodeSurfacePoints.clear();
 
     const SceneGraphNode* anchor =

@@ -1,6 +1,8 @@
-local transforms = asset.require("../transforms")
 asset.require("spice/base")
-local kernel = asset.require("../kernels").jup365
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local EuropaTrail = {
   Identifier = "EuropaTrail",
@@ -10,8 +12,7 @@ local EuropaTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "EUROPA",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernel
+      Observer = "JUPITER BARYCENTER"
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 85.0 / 24.0,
@@ -24,12 +25,17 @@ local EuropaTrail = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.jup365)
+
   openspace.addSceneGraphNode(EuropaTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EuropaTrail)
+
+  openspace.spice.unloadKernel(kernel.jup365)
 end)
 
 asset.export(EuropaTrail)

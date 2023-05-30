@@ -12,7 +12,8 @@ local speck = asset.syncedResource({
   Version = 2
 })
 
-local object = {
+
+local Object = {
   Identifier = "SupernovaRemnants",
   Renderable = {
     Type = "RenderableBillboardsCloud",
@@ -30,7 +31,7 @@ local object = {
     Texture = textures .. "point4.png",
     PolygonSides = 7,
     Unit = "pc",
-    ScaleFactor = 424,
+    ScaleFactor = 424.0,
     --CorrectionSizeEndDistance = 17.5,
     --CorrectionSizeFactor = 13.96,
     BillboardMinMaxSize = { 0.0, 500.0 },
@@ -48,14 +49,14 @@ local object = {
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

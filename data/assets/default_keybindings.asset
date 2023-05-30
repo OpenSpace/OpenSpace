@@ -1,0 +1,276 @@
+local propertyHelper = asset.require("util/property_helper")
+
+
+
+local ToggleNativeUi = {
+  Identifier = "os.ToggleNativeUi",
+  Name = "Show native GUI",
+  Command = propertyHelper.invert("Modules.ImGUI.Enabled"),
+  Documentation = "Shows or hides the native UI",
+  GuiPath = "/System/GUI",
+  IsLocal = true
+}
+
+local ToggleShutdown = {
+  Identifier = "os.ToggleShutdown",
+  Name = "Toggle shutdown",
+  Command = "openspace.toggleShutdown()",
+  Documentation = "Toggles the shutdown that will stop OpenSpace after a grace period. Press again to cancel the shutdown during this period",
+  GuiPath = "/System",
+  IsLocal = true
+}
+
+local TakeScreenshot = {
+  Identifier = "os.TakeScreenshot",
+  Name = "Take screenshot",
+  Command = "openspace.takeScreenshot()",
+  Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory",
+  GuiPath = "/System/Rendering",
+  IsLocal = true
+}
+
+local TogglePauseInterpolated = {
+  Identifier = "os.TogglePauseInterpolated",
+  Name = "Toggle pause (interpolate)",
+  Command = "openspace.time.pauseToggleViaKeyboard()",
+  Documentation = "Smoothly starts and stops the simulation time",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local TogglePauseImmediate = {
+  Identifier = "os.TogglePauseImmediate",
+  Name = "Toggle pause (immediate)",
+  Command = "openspace.time.togglePause()",
+  Documentation = "Immediately starts and stops the simulation time",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local ToggleRotationFriction = {
+  Identifier = "os.ToggleRotationFriction",
+  Name = "Toggle rotation friction",
+  Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction"),
+  Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely",
+  GuiPath = "/Navigation",
+  IsLocal = false
+}
+
+local ToggleZoomFriction = {
+  Identifier = "os.ToggleZoomFriction",
+  Name = "Toggle zoom friction",
+  Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction"),
+  Documentation = "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely",
+  GuiPath = "/Navigation",
+  IsLocal = false
+}
+
+local ToggleRollFriction = {
+  Identifier = "os.ToggleRollFriction",
+  Name = "Toggle roll friction",
+  Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RollFriction"),
+  Documentation = "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely",
+  GuiPath = "/Navigation",
+  IsLocal = false
+}
+
+local FadeToBlack = {
+  Identifier = "os.FadeToBlack",
+  Name = "Fade to/from black",
+  Command = [[
+    if openspace.getPropertyValue("RenderEngine.BlackoutFactor") > 0.5 then
+      openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 0.0, 3)
+    else
+      openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1.0, 3)
+    end
+  ]],
+  Documentation = "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds",
+  GuiPath = "/Rendering",
+  IsLocal = false
+}
+
+local ToggleMainGui = {
+  Identifier = "os.ToggleMainGui",
+  Name = "Toggle main GUI",
+  Command = propertyHelper.invert("Modules.CefWebGui.Visible"),
+  Documentation = "Toggles the main GUI",
+  GuiPath = "/System/GUI",
+  IsLocal = true
+}
+
+local ToggleOverlays = {
+  Identifier = "os.ToggleOverlays",
+  Name = "Toggle dashboard and overlays",
+  Command = [[
+    local isEnabled = openspace.getPropertyValue("Dashboard.IsEnabled")
+    openspace.setPropertyValueSingle("Dashboard.IsEnabled", not isEnabled)
+    openspace.setPropertyValueSingle("RenderEngine.ShowLog", not isEnabled)
+    openspace.setPropertyValueSingle("RenderEngine.ShowVersion", not isEnabled)
+    openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)
+  ]],
+  Documentation = "Toggles the dashboard and overlays",
+  GuiPath = "/System/GUI",
+  IsLocal = true
+}
+
+local ToggleMasterRendering = {
+  Identifier = "os.ToggleMasterRendering",
+  Name = "Toggle rendering on master",
+  Command = propertyHelper.invert("RenderEngine.DisableMasterRendering"),
+  Documentation = "Toggles the rendering on master",
+  GuiPath = "/System/Rendering",
+  IsLocal = true
+}
+
+local NextDeltaStepInterpolate = {
+  Identifier = "os.NextDeltaStepInterpolate",
+  Name = "Next simulation time step (interpolate)",
+  Command = "openspace.time.interpolateNextDeltaTimeStep()",
+  Documentation = "Smoothly interpolates the simulation speed to the next simulation time step, if one exists",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local NextDeltaStepImmediate = {
+  Identifier = "os.NextDeltaStepImmediate",
+  Name = "Next simulation time step (immediate)",
+  Command = "openspace.time.setNextDeltaTimeStep()",
+  Documentation = "Immediately set the simulation speed to the next simulation time step, if one exists",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local PreviousDeltaStepInterpolate = {
+  Identifier = "os.PreviousDeltaStepInterpolate",
+  Name = "Previous simulation time step (interpolate)",
+  Command = "openspace.time.interpolatePreviousDeltaTimeStep()",
+  Documentation = "Smoothly interpolates the simulation speed to the previous simulation time step, if one exists",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local PreviousDeltaStepImmediate = {
+  Identifier = "os.PreviousDeltaStepImmediate",
+  Name = "Previous simulation time step (immediate)",
+  Command = "openspace.time.setPreviousDeltaTimeStep()",
+  Documentation = "Immediately set the simulation speed to the previous simulation time step, if one exists",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local ReloadGui = {
+  Identifier = "os.ReloadGui",
+  Name = "Reload GUI",
+  Command = [[openspace.setPropertyValueSingle("Modules.CefWebGui.Reload", nil)]],
+  Documentation = "Reloads the GUI",
+  GuiPath = "/System/GUI",
+  IsLocal = true
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(ToggleNativeUi)
+  openspace.bindKey("F1", ToggleNativeUi.Identifier)
+
+  openspace.action.registerAction(ToggleShutdown)
+  openspace.bindKey("ESC", ToggleShutdown.Identifier)
+
+  openspace.action.registerAction(TakeScreenshot)
+  openspace.bindKey("F12", TakeScreenshot.Identifier)
+  openspace.bindKey("PRINT_SCREEN", TakeScreenshot.Identifier)
+
+  openspace.action.registerAction(TogglePauseInterpolated)
+  openspace.bindKey("SPACE", TogglePauseInterpolated.Identifier)
+
+  openspace.action.registerAction(TogglePauseImmediate)
+  openspace.bindKey("Shift+SPACE", TogglePauseImmediate.Identifier)
+
+  openspace.action.registerAction(ToggleRotationFriction)
+  openspace.bindKey("F", ToggleRotationFriction.Identifier)
+
+  openspace.action.registerAction(ToggleZoomFriction)
+  openspace.bindKey("Shift+F", ToggleZoomFriction.Identifier)
+
+  openspace.action.registerAction(ToggleRollFriction)
+  openspace.bindKey("Ctrl+F", ToggleRollFriction.Identifier)
+
+  openspace.action.registerAction(FadeToBlack)
+  openspace.bindKey("W", FadeToBlack.Identifier)
+
+  openspace.action.registerAction(ToggleMainGui)
+  openspace.bindKey("TAB", ToggleMainGui.Identifier)
+
+  openspace.action.registerAction(ToggleOverlays)
+  openspace.bindKey("Shift+TAB", ToggleOverlays.Identifier)
+
+  openspace.action.registerAction(ToggleMasterRendering)
+  openspace.bindKey("Alt+R", ToggleMasterRendering.Identifier)
+
+  openspace.action.registerAction(NextDeltaStepInterpolate)
+  openspace.bindKey("Right", NextDeltaStepInterpolate.Identifier)
+
+  openspace.action.registerAction(NextDeltaStepImmediate)
+  openspace.bindKey("Shift+Right", NextDeltaStepImmediate.Identifier)
+
+  openspace.action.registerAction(PreviousDeltaStepInterpolate)
+  openspace.bindKey("Left", PreviousDeltaStepInterpolate.Identifier)
+
+  openspace.action.registerAction(PreviousDeltaStepImmediate)
+  openspace.bindKey("Shift+Left", PreviousDeltaStepImmediate.Identifier)
+
+  openspace.action.registerAction(ReloadGui)
+  openspace.bindKey("F5", ReloadGui.Identifier)
+end)
+
+asset.onDeinitialize(function()
+  openspace.clearKey("F5")
+  openspace.action.removeAction(ReloadGui)
+
+  openspace.clearKey("Shift+Left")
+  openspace.action.removeAction(PreviousDeltaStepImmediate)
+
+  openspace.clearKey("Left")
+  openspace.action.removeAction(PreviousDeltaStepInterpolate)
+
+  openspace.clearKey("Shift+Right")
+  openspace.action.removeAction(NextDeltaStepImmediate)
+
+  openspace.clearKey("Right")
+  openspace.action.removeAction(NextDeltaStepInterpolate)
+
+  openspace.clearKey("Alt+R")
+  openspace.action.removeAction(ToggleMasterRendering)
+
+  openspace.clearKey("Shift+TAB")
+  openspace.action.removeAction(ToggleOverlays)
+
+  openspace.clearKey("TAB")
+  openspace.action.removeAction(ToggleMainGui)
+
+  openspace.clearKey("W")
+  openspace.action.removeAction(FadeToBlack)
+
+  openspace.clearKey("Ctrl+F")
+  openspace.action.removeAction(ToggleRollFriction)
+
+  openspace.clearKey("Shift+F")
+  openspace.action.removeAction(ToggleZoomFriction)
+
+  openspace.clearKey("F")
+  openspace.action.removeAction(ToggleRotationFriction)
+
+  openspace.clearKey("Shift+SPACE")
+  openspace.action.removeAction(TogglePauseImmediate)
+
+  openspace.clearKey("SPACE")
+  openspace.action.removeAction(TogglePauseInterpolated)
+
+  openspace.clearKey("F12")
+  openspace.clearKey("PRINT_SCREEN")
+  openspace.action.removeAction(TakeScreenshot)
+
+  openspace.clearKey("ESC")
+  openspace.action.removeAction(ToggleShutdown)
+
+  openspace.clearKey("F1")
+  openspace.action.removeAction(ToggleNativeUi)
+end)

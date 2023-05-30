@@ -35,15 +35,15 @@
   ],
   "keybindings": [
     {
-      "action": "os.missions.insight.setup",
+      "action": "os.insight.Setup",
       "key": "I"
     },
     {
-      "action": "os.missions.insight.setup.disablelayers",
+      "action": "os.insight.DisableLayers",
       "key": "SHIFT+I"
     },
     {
-      "action": "os.missions.perseverance.setup",
+      "action": "os.perseverance.Setup",
       "key": "P"
     }
   ],

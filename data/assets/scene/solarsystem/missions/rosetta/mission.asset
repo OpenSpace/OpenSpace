@@ -15,7 +15,7 @@ local Mission = {
       Date = "2005 MAR 04 00:00:00",
       Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2005/03/moonrise_above_the_pacific_22_06_utc_4_march_2005/9520996-4-eng-GB/Moonrise_above_the_Pacific_22_06_UTC_4_March_2005_pillars.jpg",
       Description = "The Moon rising above the Pacific, three minutes before the point of closest approach during Rosettas first Earth fly-by.",
-      Link = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif" 
+      Link = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/08/approaching_perihelion_animation/15556093-1-eng-GB/Approaching_perihelion_Animation_pillars.gif"
     },
     {
       Name = "Mars gravity assist",
@@ -53,7 +53,7 @@ local Mission = {
       Name = "Arrive at comet",
       Date = "2014 AUG 06 00:00:00",
       Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2014/08/navcam_animation_6_august/14705553-1-eng-GB/NavCam_animation_6_August_pillars.gif",
-      Description = "After ten years, five months and four days travelling towards our destination, looping around the Sun five times and clocking up 6.4 billion kilometres, we are delighted to announce finally we are here, exclaimed Jean-Jacques Dordain, ESA’s Director General."
+      Description = "After ten years, five months and four days travelling towards our destination, looping around the Sun five times and clocking up 6.4 billion kilometres, we are delighted to announce finally we are here, exclaimed Jean-Jacques Dordain, ESA's Director General."
     },
     {
       Name = "Start global mapping",
@@ -64,14 +64,14 @@ local Mission = {
       Name = "Philae lander delivery",
       Date = "2014 NOV 12 00:00:00",
       Image = "https://cdn.sci.esa.int/documents/34878/35534/1567216603810-ESA_Rosetta_OSIRIS_NAC_Farewell_Philae_625.jpg",
-      Description = "Rosetta’s OSIRIS narrow-angle camera captured this parting shot of the Philae lander after separation."
+      Description = "Rosetta's OSIRIS narrow-angle camera captured this parting shot of the Philae lander after separation."
     },
     {
       Name = "Closest approach to Sun (Perihelion)",
       Date = "2015 AUG 13 00:00:00",
       Description = "Perihelion is the closest point a Solar System object gets to the Sun along its orbit (aphelion is the term given to the most distant point).",
       Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2015/03/comet_s_orbit/15317969-1-eng-GB/Comet_s_orbit_pillars.jpg"
-    }, 
+    },
     {
       Name = "Mission end",
       Date = "2016 SEP 30 00:00:00"
@@ -88,7 +88,7 @@ local Mission = {
         {
           Name = "Commissioning of Instruments",
           TimeRange = { Start = "2004 MAR 02 09:14:00", End = "2004 JUN 07 00:00:00" },
-          Description = "The spacecraft is now configured for its long ‘cruise’, with instruments switched off and the Standard Radiation Environment Monitor (SREM) activated for background radiation monitoring."
+          Description = "The spacecraft is now configured for its long 'cruise', with instruments switched off and the Standard Radiation Environment Monitor (SREM) activated for background radiation monitoring."
         },
         {
           Name = "Deep Space Hibernation",
@@ -107,12 +107,11 @@ local Mission = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.loadMission(Mission)
- end)
- 
- asset.onDeinitialize(function()
+end)
+
+asset.onDeinitialize(function()
   openspace.unloadMission(Mission.Name)
- end)
- 
- 
+end)

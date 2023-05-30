@@ -1,36 +1,37 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
+local magnetogramDirectory = asset.require("./magnetogram")
 
--- synced directories
-local magnetogramDirectory = asset.require("./magnetogram").TexturesPath;
-local magnetograms;
 
-local switch_color_layer = {
-  Identifier = "os.events.bastilleday.magnetogramtexture.switchcolorlayer",
+local magnetograms
+
+local SwitchColorLayer = {
+  Identifier = "os.bastilleday.magnetogramtexture.SwitchColorLayer",
   Name = "Next sun texture",
   Command = [[
-    local textureList = openspace.globebrowsing.getLayers("Sun", "ColorLayers");
+    local textureList = openspace.globebrowsing.getLayers("Sun", "ColorLayers")
     if (magnetogramsTextureIndex == -1) then
-      magnetogramsTextureIndex = 2;
-    end;
-    magnetogramsTextureIndex = magnetogramsTextureIndex + 1;
-    if (magnetogramsTextureIndex >= #textureList) then
-      magnetogramsTextureIndex = 0;
+      magnetogramsTextureIndex = 2
     end
-    openspace.setPropertyValue("Scene.Sun.Renderable.Layers.ColorLayers.*.Enabled", false);
+    magnetogramsTextureIndex = magnetogramsTextureIndex + 1
+    if (magnetogramsTextureIndex >= #textureList) then
+      magnetogramsTextureIndex = 0
+    end
+    openspace.setPropertyValue("Scene.Sun.Renderable.Layers.ColorLayers.*.Enabled", false)
     if (magnetogramsTextureIndex == 0) then
-      openspace.setPropertyValueSingle("Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled", true);
+      openspace.setPropertyValueSingle("Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled", true)
     else
-      str = "Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-" .. magnetogramsTextureIndex .. ".Enabled";
-      openspace.setPropertyValueSingle(str, true);
-    end;
+      str = "Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-" .. magnetogramsTextureIndex .. ".Enabled"
+      openspace.setPropertyValueSingle(str, true)
+    end
   ]],
   Documentation = "Display next sun texture in list of textures",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
 
-asset.onInitialize(function ()
-  magnetograms = openspace.walkDirectoryFiles(magnetogramDirectory);
+
+asset.onInitialize(function()
+  magnetograms = openspace.walkDirectoryFiles(magnetogramDirectory.TexturesPath)
   rawset(_G, "magnetogramsTextureIndex", -1)
   for i, imagename in ipairs(magnetograms) do
     openspace.globebrowsing.addLayer(
@@ -46,15 +47,18 @@ asset.onInitialize(function ()
     )
   end
 
-  openspace.action.registerAction(switch_color_layer)
+  openspace.action.registerAction(SwitchColorLayer)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   for i, imagename in ipairs(magnetograms) do
     openspace.globebrowsing.deleteLayer("Sun", "ColorLayers", "magnetogram-" .. i)
   end
-  openspace.action.removeAction(switch_color_layer)
+  openspace.action.removeAction(SwitchColorLayer)
 end)
+
+asset.export("SwitchColorLayer", SwitchColorLayer.Identifier)
+
 
 
 asset.meta = {

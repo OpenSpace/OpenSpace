@@ -71,7 +71,7 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
         json subphaseJson = createPhaseJson(missionPhase);
         phases.push_back(subphaseJson);
     }
-    
+
     json milestones = json::array();
     const std::vector<Milestone>& dates = phase.milestones();
     for (const Milestone& date : dates) {
@@ -79,7 +79,7 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
             { "date", std::string(date.date.ISO8601()) },
             { "name", date.name }
         };
-        
+
         if (date.description.has_value()) {
             jsonDate["description"] = *date.description;;
         }

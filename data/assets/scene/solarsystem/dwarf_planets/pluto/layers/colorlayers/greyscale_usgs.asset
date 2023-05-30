@@ -1,21 +1,25 @@
-local globeIdentifier = asset.require("../../pluto").Pluto.Identifier
+local pluto = asset.require("../../pluto")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Greyscale_USGS",
   Name = "Black & White [USGS]",
   Enabled = asset.enabled,
-  FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/pluto_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_PLUTO_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90,360,90",
+  FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/pluto_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_PLUTO_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90,360,90"
 }
 
-asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(pluto.Pluto.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(pluto.Pluto.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
+
 
 
 asset.meta = {

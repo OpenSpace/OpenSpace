@@ -2,6 +2,8 @@ local constellationsCSV = asset.localResource("constellation_data.csv")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local constellations_helper = asset.require("util/constellations_helper")
 
+
+
 local images = asset.syncedResource({
   Name = "Constellation Images",
   Type = "HttpSynchronization",
@@ -16,27 +18,28 @@ local data = asset.syncedResource({
   Version = 1
 })
 
+
 --function that reads the file
-local createConstellations = function (baseIdentifier, guiPath, constellationfile)
-  local genConstellations = {};
+local function createConstellations(baseIdentifier, guiPath, constellationfile)
+  local genConstellations = {}
   --skip the first line
-  local notFirstLine = false;
+  local notFirstLine = false
   -- define parsec to meters
-  local PARSEC_CONSTANT = 3.0856776E16;
+  local PARSEC_CONSTANT = 3.0856776E16
   -- how many parsecs away do you want the images to be?
   -- this setting puts the billboards at the location of the constellation bounds grid from DU.
   -- but they can really be anywhere since the billboard size will scale with distance.
-  local distanceMultiplier = 3.2;
-  local baseScale = 1e17;
+  local distanceMultiplier = 3.2
+  local baseScale = 1e17
   for line in io.lines(openspace.absPath(constellationfile)) do
     if (notFirstLine) then
       -- describes the data
       local matchstring = "(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$"
       local group, abbreviation, name, x, y, z, scale, imageName, rotX, rotY, rotZ, centerStar = line:match(matchstring)
       local magVec = math.sqrt(x*x + y*y + z*z)
-      local normx = x/magVec
-      local normy = y/magVec
-      local normz = z/magVec
+      local normx = x / magVec
+      local normy = y / magVec
+      local normz = z / magVec
 
       -- Use the full name in the data constellations.dat if possible
       -- Otherwise, use the given name in the constellation_data.csv file
@@ -85,7 +88,7 @@ local createConstellations = function (baseIdentifier, guiPath, constellationfil
           Description = name .. " Image"
         }
       }
-      table.insert(genConstellations, aconstellation);
+      table.insert(genConstellations, aconstellation)
 
     else
       notFirstLine = true
@@ -95,8 +98,8 @@ local createConstellations = function (baseIdentifier, guiPath, constellationfil
 end
 
 
-local show_art = {
-  Identifier = "constellation_art.show_art",
+local ShowArt = {
+  Identifier = "os.constellation_art.ShowArt",
   Name = "Show all",
   Command = [[
     openspace.fadeIn("Scene.ImageConstellation*.Renderable")
@@ -105,10 +108,9 @@ local show_art = {
   GuiPath = "/Constellations/Art",
   IsLocal = false
 }
-asset.export("ShowArtAction", show_art)
 
-local hide_art = {
-  Identifier = "constellation_art.hide_art",
+local HideArt = {
+  Identifier = "os.constellation_art.HideArt",
   Name = "Hide all",
   Command = [[
     openspace.fadeOut("Scene.ImageConstellation*.Renderable")
@@ -117,10 +119,9 @@ local hide_art = {
   GuiPath = "/Constellations/Art",
   IsLocal = false
 }
-asset.export("HideArtAction", hide_art)
 
-local disable_art = {
-  Identifier = "constellation_art.disable_art",
+local DisableArt = {
+  Identifier = "os.constellation_art.DisableArt",
   Name = "Disable all",
   Command = [[
     openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)
@@ -129,10 +130,9 @@ local disable_art = {
   GuiPath = "/Constellations/Art",
   IsLocal = false
 }
-asset.export("DisableArtAction", disable_art)
 
-local show_zodiac_art = {
-  Identifier = "constellation_art.show_zodiac_art",
+local ShowZodiacArt = {
+  Identifier = "os.constellation_art.ShowZodiacArt",
   Name = "Show zodiac",
   Command = [[
     openspace.fadeIn("{zodiac}")
@@ -141,52 +141,56 @@ local show_zodiac_art = {
   GuiPath = "/Constellations/Art",
   IsLocal = false
 }
-asset.export("ShowZodiacArt", show_zodiac_art)
 
-local hide_zodiac_art = {
-  Identifier = "constellation_art.hide_zodiac_art",
+local HideZodiacArt = {
+  Identifier = "os.constellation_art.HideZodiacArt",
   Name = "Hide zodiac",
-  Command =  [[
+  Command = [[
     openspace.fadeOut("{zodiac}")
   ]],
   Documentation = "Fades down zodiac art work",
   GuiPath = "/Constellations/Art",
   IsLocal = false
 }
-asset.export("HideZodiacArt", hide_zodiac_art)
 
 local nodes = {}
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   local constellationsCSV = images .. "constellation_data.csv"
 
   nodes = createConstellations("ImageConstellation", "Constellation Art", constellationsCSV)
   for _, n in ipairs(nodes) do
-    openspace.addSceneGraphNode(n);
+    openspace.addSceneGraphNode(n)
   end
 
-  openspace.action.registerAction(show_art)
-  openspace.action.registerAction(hide_art)
-  openspace.action.registerAction(disable_art)
-  openspace.action.registerAction(show_zodiac_art)
-  openspace.action.registerAction(hide_zodiac_art)
+  openspace.action.registerAction(ShowArt)
+  openspace.action.registerAction(HideArt)
+  openspace.action.registerAction(DisableArt)
+  openspace.action.registerAction(ShowZodiacArt)
+  openspace.action.registerAction(HideZodiacArt)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   for _, n in ipairs(nodes) do
-    openspace.removeSceneGraphNode(n.Identifier);
+    openspace.removeSceneGraphNode(n.Identifier)
   end
 
-  openspace.action.removeAction(hide_zodiac_art)
-  openspace.action.removeAction(show_zodiac_art)
-  openspace.action.removeAction(disable_art)
-  openspace.action.removeAction(hide_art)
-  openspace.action.removeAction(show_art)
+  openspace.action.removeAction(HideZodiacArt)
+  openspace.action.removeAction(ShowZodiacArt)
+  openspace.action.removeAction(DisableArt)
+  openspace.action.removeAction(HideArt)
+  openspace.action.removeAction(ShowArt)
 end)
 
 for _, n in ipairs(nodes) do
   asset.export(n)
 end
+asset.export("ShowArtAction", ShowArt.Identifier)
+asset.export("HideArtAction", HideArt.Identifier)
+asset.export("DisableArtAction", DisableArt.Identifier)
+asset.export("ShowZodiacArt", ShowZodiacArt.Identifier)
+asset.export("HideZodiacArt", HideZodiacArt.Identifier)
 
 asset.meta = {
   Name = "Constellation Images",

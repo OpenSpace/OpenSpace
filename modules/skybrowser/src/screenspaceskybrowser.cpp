@@ -38,8 +38,6 @@
 #include <random>
 
 namespace {
-    constexpr std::string_view _loggerCat = "ScreenSpaceSkyBrowser";
-
     constexpr openspace::properties::Property::PropertyInfo TextureQualityInfo = {
         "TextureQuality",
         "Quality of Texture",
@@ -378,10 +376,6 @@ glm::mat4 ScreenSpaceSkyBrowser::scaleMatrix() {
         glm::vec3(browserRatio() * _scale, _scale, 1.f)
     );
     return scale;
-}
-
-void ScreenSpaceSkyBrowser::setOpacity(float opacity) {
-    _opacity = opacity;
 }
 
 float ScreenSpaceSkyBrowser::opacity() const noexcept {

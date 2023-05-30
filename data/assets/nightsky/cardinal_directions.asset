@@ -1,4 +1,6 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+
+
 
 local textures = asset.syncedResource({
   Name = "Cardinal Direction Textures",
@@ -14,7 +16,8 @@ local textures = asset.syncedResource({
   Override = false
 })
 
-local Position = {
+
+local CardinalDirectionsPosition = {
   Identifier = "CardinalDirectionsPosition",
   Parent = earthAsset.Earth.Identifier,
   Transform = {
@@ -42,14 +45,14 @@ local Position = {
   }
 }
 
-local sphere = {
+local CardinalDirectionSphere = {
   Identifier = "CardinalDirectionSphere",
-  Parent = Position.Identifier,
+  Parent = CardinalDirectionsPosition.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
-    },
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
+    }
   },
   Renderable = {
     Type = "RenderableSphere",
@@ -57,7 +60,7 @@ local sphere = {
     Size = 50000,
     Segments = 80,
     Opacity = 0.9,
-    Texture = textures .. 'sphere.png',
+    Texture = textures .. "sphere.png",
     Orientation = "Inside",
     MirrorTexture = true,
     RenderBinMode = "PostDeferredTransparent"
@@ -69,47 +72,47 @@ local sphere = {
 }
 
 local showCommand = [[
-  local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
-  local camera = openspace.navigation.getNavigationState();
-  openspace.setParent('CardinalDirectionsPosition', camera.Anchor)
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Globe', camera.Anchor);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Latitude', lat);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Longitude', lon);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Globe', camera.Anchor);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Latitude', lat);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Longitude', lon);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Enabled', true);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0.0);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 1.0, 1.0);
+  local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera()
+  local camera = openspace.navigation.getNavigationState()
+  openspace.setParent("CardinalDirectionsPosition", camera.Anchor)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Translation.Globe", camera.Anchor)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Translation.Latitude", lat)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Translation.Longitude", lon)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Rotation.Globe", camera.Anchor)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Rotation.Latitude", lat)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Rotation.Longitude", lon)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Enabled", true)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Fade", 0.0)
+  openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Fade", 1.0, 1.0)
 ]]
 
-local showBandAction = {
-Identifier = "os.nightsky.show_nesw_band",
+local ShowNeswBand = {
+Identifier = "os.nightsky.ShowNeswBand",
   Name = "Show cardinal directions (with ticks)",
-  Command = "openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Texture','"
-  .. textures:gsub("\\","/") .. "sphere5.png')"
-  .. showCommand,
+  Command = [[
+    openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Texture", "]] ..
+    textures:gsub("\\","/") .. [[sphere5.png")]] .. showCommand,
   Documentation = "Shows the cardinal direction sphere with letters and circle with tick marks",
   GuiPath = "/Night Sky/Directions",
   IsLocal = false
 }
 
-local showLettersAction = {
-  Identifier = "os.nightsky.show_nesw_letters",
+local ShowNeswLetters = {
+  Identifier = "os.nightsky.ShowNeswLetters",
   Name = "Show cardinal directions (letters only)",
-  Command = "openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Texture','"
-  .. textures:gsub("\\","/") .. "sphere.png')"
-  .. showCommand,
+  Command = [[
+    openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Texture","]] ..
+    textures:gsub("\\","/") .. [[sphere.png")]] .. showCommand,
   Documentation = "Shows the cardinal direction sphere with letters only",
   GuiPath = "/Night Sky/Directions",
   IsLocal = false
 }
 
-local hideAction = {
-  Identifier = "os.nightsky.hide_nesw",
+local HideNesw = {
+  Identifier = "os.nightsky.HideNesw",
   Name = "Hide cardinal directions",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Fade", 0.0, 1.0)
   ]],
   Documentation = "Hides the cardinal directions",
   GuiPath = "/Night Sky/Directions",
@@ -117,23 +120,23 @@ local hideAction = {
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Position)
-  openspace.addSceneGraphNode(sphere)
-  openspace.action.registerAction(hideAction)
-  openspace.action.registerAction(showBandAction)
-  openspace.action.registerAction(showLettersAction)
+  openspace.addSceneGraphNode(CardinalDirectionsPosition)
+  openspace.addSceneGraphNode(CardinalDirectionSphere)
+  openspace.action.registerAction(ShowNeswBand)
+  openspace.action.registerAction(ShowNeswLetters)
+  openspace.action.registerAction(HideNesw)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(showLettersAction)
-  openspace.action.removeAction(showBandAction)
-  openspace.action.removeAction(hideAction)
-  openspace.removeSceneGraphNode(sphere)
-  openspace.removeSceneGraphNode(Position)
+  openspace.action.removeAction(HideNesw)
+  openspace.action.removeAction(ShowNeswLetters)
+  openspace.action.removeAction(ShowNeswBand)
+  openspace.removeSceneGraphNode(CardinalDirectionSphere)
+  openspace.removeSceneGraphNode(CardinalDirectionsPosition)
 end)
 
-asset.export(showBandAction)
-asset.export(showLettersAction)
-asset.export(hideAction)
-asset.export(sphere)
-asset.export(Position)
+asset.export(CardinalDirectionsPosition)
+asset.export(CardinalDirectionSphere)
+asset.export("ShowNeswBand", ShowNeswBand.Identifier)
+asset.export("ShowNeswLetters", ShowNeswLetters.Identifier)
+asset.export("HideNesw", HideNesw.Identifier)

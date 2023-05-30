@@ -205,7 +205,10 @@ namespace {
         // [[codegen::verbatim(CoordinateOffsetInfo.description)]]
         std::optional<glm::vec2> coordinateOffset;
 
-        enum class [[codegen::map(openspace::globebrowsing::GlobeGeometryFeature::PointRenderMode)]] PointRenderMode {
+        enum class
+        [[codegen::map(openspace::globebrowsing::GlobeGeometryFeature::PointRenderMode)]]
+        PointRenderMode
+        {
             AlignToCameraDir [[codegen::key("Camera Direction")]],
             AlignToCameraPos [[codegen::key("Camera Position")]],
             AlignToGlobeNormal [[codegen::key("Globe Normal")]],
@@ -240,7 +243,6 @@ GeoJsonComponent::SubFeatureProps::SubFeatureProps(
                                        properties::PropertyOwner::PropertyOwnerInfo info)
     : properties::PropertyOwner(info)
     , enabled(EnabledInfo, true)
-    , flyToFeature(FlyToFeatureInfo)
     , centroidLatLong(
         CentroidCoordinateInfo,
         glm::vec2(0.f),
@@ -253,6 +255,7 @@ GeoJsonComponent::SubFeatureProps::SubFeatureProps(
         glm::vec4(-90.f, -180.f, -90.f, -180.f),
         glm::vec4(90.f, 180.f, 90.f, 180.f)
     )
+    , flyToFeature(FlyToFeatureInfo)
 {
     _opacity.setVisibility(openspace::properties::Property::Visibility::AdvancedUser);
     addProperty(Fadeable::_opacity);
@@ -277,7 +280,6 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         dictionary.hasKey(KeyDesc) ? dictionary.value<std::string>(KeyDesc) : ""
     })
     , _enabled(EnabledInfo, true)
-    , _globeNode(globe)
     , _geoJsonFile(FileInfo)
     , _heightOffset(HeightOffsetInfo, 10.f, -1e12f, 1e12f)
     , _latLongOffset(
@@ -288,15 +290,14 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     )
     , _pointSizeScale(PointSizeScaleInfo, 1.f, 0.01f, 100.f)
     , _lineWidthScale(LineWidthScaleInfo, 1.f, 0.01f, 10.f)
-    , _drawWireframe(DrawWireframeInfo, false)
-    , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
-    , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
-    , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
-    , _featuresPropertyOwner({ "Features", "Features" })
     , _pointRenderModeOption(
         PointRenderModeInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , _drawWireframe(DrawWireframeInfo, false)
+    , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
+    , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
+    , _globeNode(globe)
     , _centerLatLong(
         CentroidCoordinateInfo,
         glm::vec2(0.f),
@@ -304,6 +305,8 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         glm::vec2(90.f, 180.f)
     )
     , _flyToFeature(FlyToFeatureInfo)
+    , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
+    , _featuresPropertyOwner({ "Features", "Features" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -680,7 +683,8 @@ void GeoJsonComponent::addMetaPropertiesToFeature(SubFeatureProps& feature, int 
     feature.centroidLatLong = centroidLatLong;
 
     std::unique_ptr<geos::geom::Geometry> boundingbox = geometry->getEnvelope();
-    std::unique_ptr<geos::geom::CoordinateSequence> coords = boundingbox->getCoordinates();
+    std::unique_ptr<geos::geom::CoordinateSequence> coords =
+        boundingbox->getCoordinates();
     glm::vec4 boundingboxLatLong;
     if (boundingbox->isRectangle()) {
         // A rectangle has 5 coordinates, where the first and third are two corners

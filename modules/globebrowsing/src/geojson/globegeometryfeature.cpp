@@ -138,7 +138,9 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
 
     if (isInitializeStep || !_pointTexture) {
         _pointTexture = std::make_unique<TextureComponent>(2);
-        _pointTexture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        _pointTexture->setFilterMode(
+            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+        );
         _pointTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
     }
 
@@ -178,10 +180,11 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
         }
         case geos::geom::GEOS_POLYGON: {
             try {
-                const geos::geom::Polygon* p = dynamic_cast<const geos::geom::Polygon*>(geo);
+                auto p = dynamic_cast<const geos::geom::Polygon*>(geo);
 
                 // Triangles
-                // Note that Constrained Delaunay triangulation supports polygons with holes :)
+                // Note that Constrained Delaunay triangulation supports polygons with
+                // holes :)
                 std::vector<geos::geom::Coordinate> triCoords;
                 TriList<Tri> triangles;
                 using geos::triangulate::polygon::ConstrainedDelaunayTriangulator;
@@ -217,7 +220,8 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
 
                     // Inner bounds (holes)
                     for (int i = 0; i < nHoles; ++i) {
-                        const geos::geom::LinearRing* hole = pNormalized->getInteriorRingN(i);
+                        const geos::geom::LinearRing* hole =
+                            pNormalized->getInteriorRingN(i);
                         std::vector<Geodetic3> ringGeoCoords =
                             geometryhelper::geometryCoordsAsGeoVector(hole);
 
@@ -352,7 +356,6 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
             }
             default:
                 throw ghoul::MissingCaseException();
-                break;
         }
 
         shader->deactivate();
@@ -475,7 +478,8 @@ bool GlobeGeometryFeature::shouldUpdateDueToHeightMapChange() const {
             return false;
         }
 
-        // TODO: Change computation so that we return true immediately if even one height value is different
+        // TODO: Change computation so that we return true immediately if even one height
+        // value is different
 
         // Check if last height values for the control positions have changed
         std::vector<double> newHeights = getCurrentReferencePointsHeights();
@@ -544,11 +548,13 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
     std::vector<std::vector<glm::vec3>> resultPositions;
     resultPositions.reserve(_geoCoordinates.size());
 
-    for (int i = 0; i < _geoCoordinates.size(); ++i) {
+    for (size_t i = 0; i < _geoCoordinates.size(); ++i) {
         std::vector<Vertex> vertices;
         std::vector<glm::vec3> positions;
-        vertices.reserve(_geoCoordinates[i].size() * 3); // TODO: this is not correct anymore
-        positions.reserve(_geoCoordinates[i].size() * 3); // TODO: this is not correct anymore
+        // TODO: this is not correct anymore
+        vertices.reserve(_geoCoordinates[i].size() * 3);
+        // TODO: this is not correct anymore
+        positions.reserve(_geoCoordinates[i].size() * 3);
 
         glm::dvec3 lastPos = glm::dvec3(0.0);
         double lastHeightValue = 0.0;
@@ -591,7 +597,7 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
                     );
 
                 // Don't add the first position. Has been added as last in previous step
-                for (int si = 1; si < subdividedPositions.size(); ++si) {
+                for (size_t si = 1; si < subdividedPositions.size(); ++si) {
                     const geometryhelper::PosHeightPair& pair = subdividedPositions[si];
                     addLinePos(glm::vec3(pair.position));
                 }
@@ -872,7 +878,7 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-};
+}
 
 void GlobeGeometryFeature::bufferDynamicHeightData(const RenderFeature& feature) {
     ghoul_assert(_pointsProgram, "Shader program must be initialized");
@@ -907,6 +913,6 @@ void GlobeGeometryFeature::bufferDynamicHeightData(const RenderFeature& feature)
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-};
+}
 
 } // namespace openspace::globebrowsing

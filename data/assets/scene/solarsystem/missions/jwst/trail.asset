@@ -1,7 +1,9 @@
+asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/L2")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-asset.require("spice/base")
+
+
 
 local kernels = asset.syncedResource({
   Name = "JWST Kernel",
@@ -10,10 +12,11 @@ local kernels = asset.syncedResource({
   Version = 2
 })
 
-local launchTime = "2021 DEC 25 12:20:00"
-local detachTime = "2021 DEC 25 12:50:00"
+
+local LaunchTime = "2021 DEC 25 12:20:00"
+local DetachTime = "2021 DEC 25 12:50:00"
 local L2orbitInsertionTime = "2022 JAN 25 00:00:00"
-local endTime = "2024 JAN 22 00:00:00"
+local EndTime = "2024 JAN 22 00:00:00"
 
 -- Trail of JWST relative the Earth Inertial for the first 30 minutes after launch
 -- Makes histroy of trail to stay at launch site, that a trail relative to Earth Center won't
@@ -22,21 +25,20 @@ local JWSTTrailLaunch = {
   Parent = earthTransforms.EarthIAU.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = launchTime,
-    End = detachTime
+    Start = LaunchTime,
+    End = DetachTime
   },
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
-      Type = 'SpiceTranslation',
+      Type = "SpiceTranslation",
       Target = 170, -- JWST
-      Observer = 'EARTH',
-      Frame = 'IAU_EARTH',
-      Kernels = { kernels .. "webb.bsp" }
+      Observer = "EARTH",
+      Frame = "IAU_EARTH"
     },
     Color = { 0.9, 0.9, 0.0 },
-    StartTime = launchTime,
-    EndTime = detachTime,
+    StartTime = LaunchTime,
+    EndTime = DetachTime,
     SampleInterval = 60 -- Sample rate of once per minute
   },
   GUI = {
@@ -44,7 +46,7 @@ local JWSTTrailLaunch = {
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
       James Webb Space Telescope Launch Trail relative to Earth IAU.
-    ]],
+    ]]
   }
 }
 
@@ -55,20 +57,19 @@ local JWSTTrailCruise = {
   Parent = earthTransforms.EarthCenter.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = detachTime,
+    Start = DetachTime,
     End = L2orbitInsertionTime
   },
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
-      Type = 'SpiceTranslation',
+      Type = "SpiceTranslation",
       Target = 170, -- JWST
-      Observer = 'EARTH',
-      Frame = 'GALACTIC',
-      Kernels = { kernels .. "webb.bsp" }
+      Observer = "EARTH",
+      Frame = "GALACTIC"
     },
     Color = { 0.9, 0.9, 0.0 },
-    StartTime = detachTime,
+    StartTime = DetachTime,
     EndTime = L2orbitInsertionTime,
     SampleInterval = 60 -- Sample rate of once per minute
   },
@@ -77,7 +78,7 @@ local JWSTTrailCruise = {
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
       James Webb Space Telescope Cruise Trail relative to Earth.
-    ]],
+    ]]
   }
 }
 
@@ -90,16 +91,15 @@ local JWSTTrailOrbit = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = L2orbitInsertionTime,
-    End = endTime
+    End = EndTime
   },
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
-      Type = 'SpiceTranslation',
+      Type = "SpiceTranslation",
       Target = 170, -- JWST
       Observer = 392, -- L2
-      Frame = 'GALACTIC',
-      Kernels = { kernels .. "webb.bsp" }
+      Frame = "GALACTIC"
     },
     Color = { 0.863, 0.0, 0.902 },
     Period = 182.621099, -- About 6 months
@@ -110,7 +110,7 @@ local JWSTTrailOrbit = {
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
       James Webb Space Telescope Orbit Trail relative to L2.
-    ]],
+    ]]
   }
 }
 
@@ -122,16 +122,15 @@ local JWSTTrailCoRevOrbit = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = L2orbitInsertionTime,
-    End = endTime
+    End = EndTime
   },
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
-      Type = 'SpiceTranslation',
+      Type = "SpiceTranslation",
       Target = 170, -- JWST
       Observer = 392, -- L2
-      Frame = 'L2_COREV',
-      Kernels = { kernels .. "webb.bsp" }
+      Frame = "L2_COREV"
     },
     Color = { 1.0, 0.663, 0.157 },
     Period = 365.242198, -- About a year, 2 orbits. 1 orbit would be 182.621099 (6 months)
@@ -142,7 +141,7 @@ local JWSTTrailCoRevOrbit = {
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
       James Webb Space Telescope Orbit Trail that Co-revolves with L2.
-    ]],
+    ]]
   }
 }
 
@@ -152,16 +151,15 @@ local JWSTSunTrail = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = L2orbitInsertionTime,
-    End = endTime
+    End = EndTime
   },
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
-      Type = 'SpiceTranslation',
+      Type = "SpiceTranslation",
       Target = 170, -- JWST
-      Observer = 'SSB',
-      Frame = 'GALACTIC',
-      Kernels = { kernels .. "webb.bsp" }
+      Observer = "SSB",
+      Frame = "GALACTIC"
     },
     Color = { 0.0, 0.9, 0.9 },
     Period = 365.242,
@@ -172,11 +170,14 @@ local JWSTSunTrail = {
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
       James Webb Space Telescope Trail relative to the Sun.
-    ]],
+    ]]
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "webb.bsp")
+
   openspace.addSceneGraphNode(JWSTTrailLaunch)
   openspace.addSceneGraphNode(JWSTTrailCruise)
   openspace.addSceneGraphNode(JWSTTrailOrbit)
@@ -190,6 +191,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTTrailOrbit)
   openspace.removeSceneGraphNode(JWSTTrailCruise)
   openspace.removeSceneGraphNode(JWSTTrailLaunch)
+
+  openspace.spice.unloadKernel(kernels .. "webb.bsp")
 end)
 
 asset.export(JWSTTrailLaunch)
@@ -197,6 +200,7 @@ asset.export(JWSTTrailCruise)
 asset.export(JWSTTrailOrbit)
 asset.export(JWSTTrailCoRevOrbit)
 asset.export(JWSTSunTrail)
+
 
 
 asset.meta = {

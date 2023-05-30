@@ -1,5 +1,7 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
+
+
 
 local modelFolder = asset.syncedResource({
   Name = "Scale Gateway Arch",
@@ -10,25 +12,27 @@ local modelFolder = asset.syncedResource({
   Override = false
 })
 
-local scaleModel = {
+
+local Location = { 38.624880, -90.184939 }
+
+local ScaleModel = {
   Identifier = "Scale_GatewayArch",
   Parent = earthAsset.Earth.Identifier,
-  --Note: Lat/Lon/Scale values comes from alignment with Esri World Imagery 2D layer
+  -- Note: Lat/Lon/Scale values come from alignment with Esri World Imagery 2D layer
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 38.624880,
-      Longitude = -90.184939,
+      Latitude = Location[1],
+      Longitude = Location[2],
       Altitude = 0.0,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = earthAsset.Earth.Identifier,
-      Latitude = 38.624880,
-      Longitude = -90.184939,
-      UseHeightmap = false
+      Latitude = Location[1],
+      Longitude = Location[2]
     },
     Scale = {
       Type = "StaticScale",
@@ -38,7 +42,7 @@ local scaleModel = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = modelFolder .. "GatewayArch_fbx.osmodel",
-    RotationVector = { 0.0, 157, 0.0 },
+    RotationVector = { 0.0, 157.0, 0.0 },
     LightSources = { sunAsset.LightSource }
   },
   GUI = {
@@ -47,40 +51,42 @@ local scaleModel = {
   }
 }
 
-local updatePositionAction = {
-  Identifier = "os.scale_models.drop_gateway_arch",
+local UpdatePositionAction = {
+  Identifier = "os.scalemodels.DropGatewayArch",
   Name = "Drop Gateway Arch under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_GatewayArch')
+    openspace.globebrowsing.setNodePositionFromCamera("Scale_GatewayArch")
   ]],
   Documentation = "Updates the Gateway Arch position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
-local resetPositionAction = {
-  Identifier = "os.os.scale_models.reset_gateway_arch",
+local ResetPositionAction = {
+  Identifier = "os.scalemodels.ResetGatewayArch",
   Name = "Reset Gateway Arch position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_GatewayArch', ']] .. earthAsset.Earth.Identifier .. [[', 38.624880, -90.184939)
-  ]],
-  Documentation = "Resets the Gateway Arch back to it's actual location",
+    openspace.globebrowsing.setNodePosition("Scale_GatewayArch", "]] .. earthAsset.Earth.Identifier .. [[", ]] .. Location[1] .. "," .. Location[2] .. ")",
+  Documentation = "Resets the Gateway Arch back to its actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(scaleModel)
-  openspace.action.registerAction(updatePositionAction)
-  openspace.action.registerAction(resetPositionAction)
+  openspace.addSceneGraphNode(ScaleModel)
+
+  openspace.action.registerAction(UpdatePositionAction)
+  openspace.action.registerAction(ResetPositionAction)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(resetPositionAction)
-  openspace.action.removeAction(updatePositionAction)
-  openspace.removeSceneGraphNode(scaleModel)
+  openspace.action.removeAction(ResetPositionAction)
+  openspace.action.removeAction(UpdatePositionAction)
+
+  openspace.removeSceneGraphNode(ScaleModel)
 end)
 
-asset.export(scaleModel)
-asset.export(updatePositionAction)
-asset.export(resetPositionAction)
+asset.export(ScaleModel)
+asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
+asset.export("ResetPositionAction", ResetPositionAction.Identifier)

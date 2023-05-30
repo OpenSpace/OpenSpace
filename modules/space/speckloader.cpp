@@ -154,7 +154,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
         // lines to have a final \r
-        if (line.back() == '\r') {
+        if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
 

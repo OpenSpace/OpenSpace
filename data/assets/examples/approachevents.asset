@@ -1,7 +1,17 @@
 local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local generic_action = {
+
+
+local model = asset.syncedResource({
+  Name = "Animated Box",
+  Type = "HttpSynchronization",
+  Identifier = "animated_box",
+  Version = 1
+})
+
+
+local GenericAction = {
   Identifier = "os.example.generic",
   Name = "Generic example",
   Command = [[
@@ -13,14 +23,7 @@ local generic_action = {
   IsLocal = true
 }
 
-local model = asset.syncedResource({
-  Name = "Animated Box",
-  Type = "HttpSynchronization",
-  Identifier = "animated_box",
-  Version = 1
-})
-
-local obj = {
+local Model = {
   Identifier = "ExampleEventModel",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
@@ -46,17 +49,17 @@ local obj = {
   OnExit = { "os.example.generic" },
   GUI = {
     Name = "Example Event Model",
-    Path = "/Example",
-    Description = "",
+    Path = "/Example"
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(generic_action)
-  openspace.addSceneGraphNode(obj)
+  openspace.action.registerAction(GenericAction)
+  openspace.addSceneGraphNode(Model)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(obj)
-  openspace.action.removeAction(generic_action)
+  openspace.removeSceneGraphNode(Model)
+  openspace.action.removeAction(GenericAction)
 end)

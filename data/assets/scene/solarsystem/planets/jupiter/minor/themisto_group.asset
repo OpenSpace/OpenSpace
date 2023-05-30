@@ -1,96 +1,113 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup344
+local kernel = asset.require("../kernels")
 
 
 
-local parentIdentifier = transforms.JupiterBarycenter.Identifier
-local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_themisto", "moon_minor", "moon_minor_jupiter" }
-local trailColor = { 0.4, 0.3, 0.01 }
-local trailTags = {
-  "moonTrail_solarSystem",
-  "moonTrail_giants",
-  "moonTrail_jupiter",
-  "moonTrail_minor",
-  "moonTrail_minor_jupiter"
-}
-local themistoGroup = {
-  {
-    Identifier = "Themisto",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "THEMISTO",
-    Radii = { 8000, 8000, 8000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 129.87,
-    Kernels = kernel
-  }
-}
-
--- Generate labels for each moon
-local moon_labels = {}
-
-for i, moon in ipairs(themistoGroup) do
-  local moonName = moon.GUI.Name or moon.Identifier
-  moon_labels[i] = {
-    Identifier = moon.Identifier .. "Label",
-    Parent = moon.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabel",
-      Text = moonName,
-      FontSize = 70.0,
-      Size = 7.1,
-      MinMaxSize = { 1, 25 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Additive",
-      EnableFading = true,
-      FadeUnit = "Gm",
-      FadeDistances = { 1.5, 120.0 },
-      FadeWidths = { 0.5, 50.0 }
-    },
-    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
-    GUI = {
-      Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto",
-      Description = "Label for Jupiter's moon " .. moonName .. " (Themisto group)"
+local Themisto = {
+  Identifier = "Themisto",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "THEMISTO",
+      Observer = "JUPITER BARYCENTER"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 8000, 8000, 8000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_themisto",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Themisto",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto"
   }
-end
+}
 
-local nodes = proceduralGlobes.createGlobes(themistoGroup)
+local ThemistoTrail = {
+  Identifier = "ThemistoTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "THEMISTO",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 129.87,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Themisto Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto"
+  }
+}
+
+local ThemistoLabel = {
+  Identifier = "ThemistoLabel",
+  Parent = Themisto.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Themisto",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 120.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Themisto Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto",
+    Description = "Label for Jupiter's moon Themisto (Themisto group)"
+  }
+}
+
 
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernel.jup344)
 
-  for _, moonlabel in ipairs(moon_labels) do
-    openspace.addSceneGraphNode(moonlabel)
-  end
+
+  openspace.addSceneGraphNode(Themisto)
+  openspace.addSceneGraphNode(ThemistoTrail)
+  openspace.addSceneGraphNode(ThemistoLabel)
 end)
 
 asset.onDeinitialize(function()
-  for i = #moon_labels, 1, -1 do
-    openspace.removeSceneGraphNode(moon_labels[i])
-  end
+  openspace.removeSceneGraphNode(ThemistoLabel)
+  openspace.removeSceneGraphNode(ThemistoTrail)
+  openspace.removeSceneGraphNode(Themisto)
 
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+
+  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Themisto)
+asset.export(ThemistoTrail)
+asset.export(ThemistoLabel)
+
 
 
 asset.meta = {

@@ -1,31 +1,116 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local debugHelper = asset.require("util/debug_helper")
-local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
-local sunRadius = 6.957E8
-local earthRadius = 6.371E6
 
-debugHelper.registerCartesianAxes(asset, {
-  Parent = transforms.EarthBarycenter.Identifier,
-  Scale = earthRadius * 3.5
-})
 
-debugHelper.registerCartesianAxes(asset, {
-  Parent = transforms.EarthInertial.Identifier,
-  Scale = earthRadius * 2.5
-})
+local SunRadius = 6.957E8
+local EarthRadius = 6.371E6
 
-debugHelper.registerCartesianAxes(asset, {
-  Parent = transforms.EarthIAU.Identifier,
-  Scale = earthRadius * 1.5
-})
+local EarthBarycenterAxes = {
+  Identifier = "EarthBarycenterAxes",
+  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = EarthRadius * 3.5
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Path = "/Other/Coordinate Systems"
+  }
+}
 
-debugHelper.registerCartesianAxes(asset, {
-    Parent = sun_transforms.SunIAU.Identifier,
-    Scale = sunRadius * 300
-})
+local EarthInertialAxes = {
+  Identifier = "EarthInertialAxes",
+  Parent = earthTransforms.EarthInertial.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = EarthRadius * 2.5
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Path = "/Other/Coordinate Systems"
+  }
+}
 
-debugHelper.registerCartesianAxes(asset, {
-    Parent = sun_transforms.SolarSystemBarycenter.Identifier,
-    Scale = sunRadius * 300
-})
+local EarthIAUAxes = {
+  Identifier = "EarthIAUAxes",
+  Parent = earthTransforms.EarthIAU.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = EarthRadius * 1.5
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+local SunIAUAxes = {
+  Identifier = "SunIAUAxes",
+  Parent = sunTransforms.SunIAU.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = SunRadius * 300
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+local SolarSystemBarycenterAxes = {
+  Identifier = "SolarSystemBarycenterAxes",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = SunRadius * 300
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EarthBarycenterAxes)
+  openspace.addSceneGraphNode(EarthInertialAxes)
+  openspace.addSceneGraphNode(EarthIAUAxes)
+  openspace.addSceneGraphNode(SunIAUAxes)
+  openspace.addSceneGraphNode(SolarSystemBarycenterAxes)
+
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SolarSystemBarycenterAxes)
+  openspace.removeSceneGraphNode(SunIAUAxes)
+  openspace.removeSceneGraphNode(EarthIAUAxes)
+  openspace.removeSceneGraphNode(EarthInertialAxes)
+  openspace.removeSceneGraphNode(EarthBarycenterAxes)
+end)
+
+asset.export(EarthBarycenterAxes)
+asset.export(EarthInertialAxes)
+asset.export(EarthIAUAxes)
+asset.export(SunIAUAxes)
+asset.export(SolarSystemBarycenterAxes)

@@ -9,7 +9,7 @@ local gaia618Destination = asset.syncedResource({
   UnzipFiles = true,
   UnzipFilesDestination = "data"
 })
-local gaia618DestinationExtracted = gaia618Destination .. "data";
+local gaia618DestinationExtracted = gaia618Destination .. "data"
 
 -- Download the full DR2 dataset with 24 values per star (preprocessed with theReadFitsTask (gaia_read.task) into 8 binary files).
 -- From these files new subsets can be created with the ConstructOctreeTask (gaia_octree.task).
@@ -23,6 +23,7 @@ local gaiaFull = asset.syncedResource({
 
 asset.export("GaiaDR2_618M", gaia618DestinationExtracted)
 asset.export("GaiaFullDataset", gaiaFull)
+
 
 
 asset.meta = {

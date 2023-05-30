@@ -5,10 +5,11 @@ local data = asset.syncedResource({
   Version = 1
 })
 
+
 -- Function that returns the full name of a constellation given its abbreviation
 -- The function uses the constellations.dat file to find the name
 -- If the file does not exist or if a match could not be found, it returns nil
-local findFullName = function(abbreviation)
+local function findFullName(abbreviation)
   local namesFile = data .. "constellations.dat"
   local file = io.open(namesFile, "r")
   local fullName = ""

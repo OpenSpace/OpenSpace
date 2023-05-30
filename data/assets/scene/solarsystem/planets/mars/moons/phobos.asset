@@ -1,6 +1,8 @@
-local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
+
+
 
 local model = asset.syncedResource({
   Name = "Phobos Model",
@@ -25,21 +27,19 @@ local Phobos = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_PHOBOS",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels .. "mar097.bsp"
+      DestinationFrame = "GALACTIC"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "PHOBOS",
-      Observer = "MARS BARYCENTER",
-      Kernels = kernels .. "mar097.bsp"
+      Observer = "MARS BARYCENTER"
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/Phobos_1_1000.glb",
-    ModelScale = 'Kilometer',
-    RotationVector = { 90, 0, 90 },
+    GeometryFile = model .. "Phobos_1_1000.glb",
+    ModelScale = "Kilometer",
+    RotationVector = { 90.0, 0.0, 90.0 },
     AmbientIntensity = 0.02,
     SpecularIntensity = 0.0,
     LightSources = {
@@ -63,8 +63,7 @@ local PhobosTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "PHOBOS",
-      Observer = "MARS BARYCENTER",
-      Kernels = kernels .. "mar097.bsp"
+      Observer = "MARS BARYCENTER"
     },
     Color = { 1.0, 0.605, 0.420 },
     Period = 0.31891023,
@@ -103,7 +102,10 @@ local PhobosLabel = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "mar097.bsp")
+
   openspace.addSceneGraphNode(Phobos)
   openspace.addSceneGraphNode(PhobosTrail)
   openspace.addSceneGraphNode(PhobosLabel)
@@ -113,6 +115,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PhobosLabel)
   openspace.removeSceneGraphNode(PhobosTrail)
   openspace.removeSceneGraphNode(Phobos)
+
+  openspace.spice.unloadKernel(kernels .. "mar097.bsp")
 end)
 
 asset.export(Phobos)

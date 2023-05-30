@@ -383,6 +383,8 @@ bool EventHandler::mousePositionCallback(double x, double y) {
     const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     _mousePosition.x = floor(static_cast<float>(x) * dpiScaling.x);
     _mousePosition.y = floor(static_cast<float>(y) * dpiScaling.y);
+    _mousePosition =
+        global::windowDelegate->mousePositionViewportRelative(_mousePosition);
     _browserInstance->sendMouseMoveEvent(mouseEvent());
     global::interactionMonitor->markInteraction();
 

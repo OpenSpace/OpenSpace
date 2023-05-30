@@ -1,160 +1,420 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels").ura111
+local kernel = asset.require("./kernels")
 
 
 
-local parentIdentifier = transforms.UranusBarycenter.Identifier
-local parentSpice = "URANUS BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" }
-local trailColor = { 0.60, 0.65, 0.84 }
-local trailTags = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" }
-
-
-local majorMoons = {
-  {
-    Identifier = "Miranda",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "MIRANDA",
+local Miranda = {
+  Identifier = "Miranda",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MIRANDA",
+      Observer = "URANUS BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
     Radii = { 471600, 468000, 466000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 1.413479,
-    Kernels = kernel
+    SegmentsPerPatch = 64,
+    Layers = {}
   },
-  {
-    Identifier = "Ariel",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "ARIEL",
-    Radii = { 1162000, 1156000, 1155000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 2.520379,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Umbriel",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "UMBRIEL",
-    Radii = { 1169400, 1169400, 1169400 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 4.144177,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Titania",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "TITANIA",
-    Radii = { 1576800, 1576800, 1576800 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 8.705872,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Oberon",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "OBERON",
-    Radii = { 1522800, 1522800, 1522800 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 13.463239,
-    Kernels = kernel
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
+  GUI = {
+    Name = "Miranda",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
   }
 }
 
--- Generate all moon labels
-local moon_labels = {}
-
-for i, moon in ipairs(majorMoons) do
-  local moonName = moon.GUI.Name or moon.Identifier
-  moon_labels[i] = {
-    Identifier = moon.Identifier .. "Label",
-    Parent = moon.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabel",
-      Text = moonName,
-      FontSize = 70.0,
-      Size = 5.9,
-      MinMaxSize = { 1, 25 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Normal",
-      EnableFading = true,
-      FadeUnit = "Mm",
-      FadeDistances = { 175.0, 4000.0 },
-      FadeWidths = { 35.0, 2000.0 }
+local MirandaTrail = {
+  Identifier = "MirandaTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MIRANDA",
+      Observer = "URANUS BARYCENTER"
     },
-    Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
-    GUI = {
-      Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Uranus/Major Moons/" .. moon.Identifier,
-      Description = "Label for Uranus' moon " .. moonName .. " (Major moon)"
-    }
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 1.413479,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
+  GUI = {
+    Name = "Miranda Trail",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
   }
-end
+}
 
-local nodes = proceduralGlobes.createGlobes(majorMoons)
+local MirandaLabel = {
+  Identifier = "MirandaLabel",
+  Parent = Miranda.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Miranda",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Miranda Label",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Miranda",
+    Description = "Label for Uranus' moon Miranda"
+  }
+}
+
+local Ariel = {
+  Identifier = "Ariel",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ARIEL",
+      Observer = "URANUS BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1162000, 1156000, 1155000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
+  GUI = {
+    Name = "Ariel",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
+  }
+}
+
+local ArielTrail = {
+  Identifier = "ArielTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ARIEL",
+      Observer = "URANUS BARYCENTER"
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 2.520379,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
+  GUI = {
+    Name = "Ariel Trail",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
+  }
+}
+
+local ArielLabel = {
+  Identifier = "ArielLabel",
+  Parent = Ariel.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Ariel",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Ariel Label",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Ariel",
+    Description = "Label for Uranus' moon Ariel"
+  }
+}
+
+local Umbriel = {
+  Identifier = "Umbriel",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "UMBRIEL",
+      Observer = "URANUS BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1169400, 1169400, 1169400 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
+  GUI = {
+    Name = "Umbriel",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
+  }
+}
+
+local UmbrielTrail = {
+  Identifier = "UmbrielTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "UMBRIEL",
+      Observer = "URANUS BARYCENTER"
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 4.144177,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
+  GUI = {
+    Name = "Umbriel Trail",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
+  }
+}
+
+local UmbrielLabel = {
+  Identifier = "UmbrielLabel",
+  Parent = Umbriel.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Umbriel",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Umbriel Label",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel",
+    Description = "Label for Uranus' moon Umbriel"
+  }
+}
+
+local Titania = {
+  Identifier = "Titania",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "TITANIA",
+      Observer = "URANUS BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1576800, 1576800, 1576800 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
+  GUI = {
+    Name = "Titania",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
+  }
+}
+
+local TitaniaTrail = {
+  Identifier = "TitaniaTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "TITANIA",
+      Observer = "URANUS BARYCENTER"
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 8.705872,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
+  GUI = {
+    Name = "Titania Trail",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
+  }
+}
+
+local TitaniaLabel = {
+  Identifier = "TitaniaLabel",
+  Parent = Titania.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Titania",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Titania Label",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Titania",
+    Description = "Label for Uranus' moon Titania"
+  }
+}
+
+local Oberon = {
+  Identifier = "Oberon",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "OBERON",
+      Observer = "URANUS BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1522800, 1522800, 1522800 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" },
+  GUI = {
+    Name = "Oberon",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
+  }
+}
+
+local OberonTrail = {
+  Identifier = "OberonTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "OBERON",
+      Observer = "URANUS BARYCENTER"
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 13.463239,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
+  GUI = {
+    Name = "Oberon Trail",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
+  }
+}
+
+local OberonLabel = {
+  Identifier = "OberonLabel",
+  Parent = Oberon.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Oberon",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Oberon Label",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon",
+    Description = "Label for Uranus' moon Oberon"
+  }
+}
+
 
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernel.ura111)
 
-  for _, moon in ipairs(moon_labels) do
-    openspace.addSceneGraphNode(moon)
-  end
+
+  openspace.addSceneGraphNode(Miranda)
+  openspace.addSceneGraphNode(MirandaTrail)
+  openspace.addSceneGraphNode(MirandaLabel)
+
+  openspace.addSceneGraphNode(Ariel)
+  openspace.addSceneGraphNode(ArielTrail)
+  openspace.addSceneGraphNode(ArielLabel)
+
+  openspace.addSceneGraphNode(Umbriel)
+  openspace.addSceneGraphNode(UmbrielTrail)
+  openspace.addSceneGraphNode(UmbrielLabel)
+
+  openspace.addSceneGraphNode(Titania)
+  openspace.addSceneGraphNode(TitaniaTrail)
+  openspace.addSceneGraphNode(TitaniaLabel)
+
+  openspace.addSceneGraphNode(Oberon)
+  openspace.addSceneGraphNode(OberonTrail)
+  openspace.addSceneGraphNode(OberonLabel)
 end)
 
 asset.onDeinitialize(function()
-  for i = #moon_labels, 1, -1 do
-    openspace.removeSceneGraphNode(moon_labels[i])
-  end
+  openspace.removeSceneGraphNode(MirandaLabel)
+  openspace.removeSceneGraphNode(MirandaTrail)
+  openspace.removeSceneGraphNode(Miranda)
 
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.removeSceneGraphNode(ArielLabel)
+  openspace.removeSceneGraphNode(ArielTrail)
+  openspace.removeSceneGraphNode(Ariel)
+
+  openspace.removeSceneGraphNode(UmbrielLabel)
+  openspace.removeSceneGraphNode(UmbrielTrail)
+  openspace.removeSceneGraphNode(Umbriel)
+
+  openspace.removeSceneGraphNode(TitaniaLabel)
+  openspace.removeSceneGraphNode(TitaniaTrail)
+  openspace.removeSceneGraphNode(Titania)
+
+  openspace.removeSceneGraphNode(OberonLabel)
+  openspace.removeSceneGraphNode(OberonTrail)
+  openspace.removeSceneGraphNode(Oberon)
+
+
+  openspace.spice.unloadKernel(kernel.ura111)
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Miranda)
+asset.export(MirandaTrail)
+asset.export(MirandaLabel)
+asset.export(Ariel)
+asset.export(ArielTrail)
+asset.export(ArielLabel)
+asset.export(Umbriel)
+asset.export(UmbrielTrail)
+asset.export(UmbrielLabel)
+asset.export(Titania)
+asset.export(TitaniaTrail)
+asset.export(TitaniaLabel)
+asset.export(Oberon)
+asset.export(OberonTrail)
+asset.export(OberonLabel)
+
 
 
 asset.meta = {

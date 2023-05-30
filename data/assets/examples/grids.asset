@@ -1,12 +1,12 @@
-local scale = 149597870700 -- 1 AU
+local AU = 149597870700 -- 1 AU
 
-local radialGrid = {
+local RadialGrid = {
   Identifier = "ExampleRadialGrid",
   Parent = "Root",
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = scale
+      Scale = AU
     }
   },
   Renderable = {
@@ -15,8 +15,7 @@ local radialGrid = {
     Color = { 0.6, 1.0, 0.7 },
     LineWidth = 3.0,
     GridSegments = { 3, 4 },
-    Radii = { 0.2, 1.0 },
-    Enabled = false
+    Radii = { 0.2, 1.0 }
   },
   GUI = {
     Name = "Example Radial Grid",
@@ -24,12 +23,12 @@ local radialGrid = {
   }
 }
 
-local planarGrid = {
+local PlanarGrid = {
   Identifier = "ExampleGrid",
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = scale
+      Scale = AU
     }
   },
   Renderable = {
@@ -38,8 +37,7 @@ local planarGrid = {
     LineWidth = 2.0,
     Segments = { 6, 10 },
     Size = { 1, 2 },
-    Enabled = false,
-    HighlightColor =  {1.0, 0.8, 0.0 },
+    HighlightColor = { 1.0, 0.8, 0.0 },
     HighlightLineWidth = 3.2,
     HighlightRate = { 3, 3 }
   },
@@ -49,20 +47,19 @@ local planarGrid = {
   }
 }
 
-local sphericalGrid = {
+local SphericalGrid = {
   Identifier = "ExampleSphericalGrid",
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = scale
+      Scale = AU
     }
   },
   Renderable = {
     Type = "RenderableSphericalGrid",
     Color = { 1.0, 0.5, 0.2 },
     LineWidth = 2.0,
-    Segments = 40,
-    Enabled = false
+    Segments = 40
   },
   GUI = {
     Name = "Example Spherical Grid",
@@ -70,12 +67,12 @@ local sphericalGrid = {
   }
 }
 
-local boxGrid = {
+local BoxGrid = {
   Identifier = "ExampleBoxGrid",
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = scale
+      Scale = AU
     }
   },
   Renderable = {
@@ -91,21 +88,22 @@ local boxGrid = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(radialGrid)
-  openspace.addSceneGraphNode(planarGrid)
-  openspace.addSceneGraphNode(sphericalGrid)
-  openspace.addSceneGraphNode(boxGrid)
+  openspace.addSceneGraphNode(RadialGrid)
+  openspace.addSceneGraphNode(PlanarGrid)
+  openspace.addSceneGraphNode(SphericalGrid)
+  openspace.addSceneGraphNode(BoxGrid)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(boxGrid)
-  openspace.removeSceneGraphNode(sphericalGrid)
-  openspace.removeSceneGraphNode(planarGrid)
-  openspace.removeSceneGraphNode(radialGrid)
+  openspace.removeSceneGraphNode(BoxGrid)
+  openspace.removeSceneGraphNode(SphericalGrid)
+  openspace.removeSceneGraphNode(PlanarGrid)
+  openspace.removeSceneGraphNode(RadialGrid)
 end)
 
-asset.export(radialGrid)
-asset.export(sphericalGrid)
-asset.export(planarGrid)
-asset.export(boxGrid)
+asset.export(RadialGrid)
+asset.export(PlanarGrid)
+asset.export(SphericalGrid)
+asset.export(BoxGrid)

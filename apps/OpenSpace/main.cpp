@@ -264,12 +264,12 @@ void checkJoystickStatus() {
 }
 
 bool isGuiWindow(sgct::Window* window) {
-    if (Engine::instance().windows().size() == 1) {
-        // If we only have one window, assume it's also the GUI window.
-        // It might not have been given the 'GUI' tag
-        return true;
+    if (global::windowDelegate->hasGuiWindow()) {
+        return window->hasTag("GUI");
     }
-    return window->hasTag("GUI");
+
+    const sgct::Window* first = Engine::instance().windows().front().get();
+    return window->id() == first->id();
 }
 
 //
@@ -742,13 +742,6 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentSubwindowSize = []() {
         ZoneScoped;
 
-        if (currentWindow->viewports().size() > 1) {
-            const Viewport& viewport = *currentWindow->viewports().front();
-            return glm::ivec2(
-                currentWindow->resolution().x * viewport.size().x,
-                currentWindow->resolution().y * viewport.size().y
-            );
-        }
         switch (currentWindow->stereoMode()) {
             case Window::StereoMode::SideBySide:
             case Window::StereoMode::SideBySideInverted:
@@ -764,25 +757,19 @@ void setSgctDelegateFunctions() {
                 );
             default:
                 return glm::ivec2(
-                    currentWindow->resolution().x,
-                    currentWindow->resolution().y
+                    currentWindow->resolution().x * currentViewport->size().x,
+                    currentWindow->resolution().y * currentViewport->size().y
                 );
         }
     };
     sgctDelegate.currentDrawBufferResolution = []() {
         ZoneScoped;
 
-        Viewport* viewport = currentWindow->viewports().front().get();
+        const Viewport* viewport = dynamic_cast<const Viewport*>(currentViewport);
         if (viewport != nullptr) {
             if (viewport->hasSubViewports() && viewport->nonLinearProjection()) {
                 ivec2 dim = viewport->nonLinearProjection()->cubemapResolution();
                 return glm::ivec2(dim.x, dim.y);
-            }
-            else if (currentWindow->viewports().size() > 1) {
-                // @TODO (abock, 2020-04-09) This should probably be based on the current
-                // viewport?
-                ivec2 dim = currentWindow->finalFBODimensions();
-                return glm::ivec2(dim.x * viewport->size().x, dim.y * viewport->size().y);
             }
             else {
                 ivec2 dim = currentWindow->finalFBODimensions();
@@ -800,11 +787,42 @@ void setSgctDelegateFunctions() {
         }
         return glm::ivec2(-1, -1);
     };
+    sgctDelegate.currentViewportResolution = []() {
+        ZoneScoped;
+
+        if (currentViewport != nullptr) {
+            ivec2 res = currentWindow->resolution();
+            vec2 size = currentViewport->size();
+            return glm::ivec2(size.x * res.x, size.y * res.y);
+        }
+        return glm::ivec2(-1, -1);
+    };
     sgctDelegate.dpiScaling = []() {
         ZoneScoped;
 
         vec2 scale = currentWindow->scale();
         return glm::vec2(scale.x, scale.y);
+    };
+    sgctDelegate.firstWindowResolution = []() {
+        ZoneScoped;
+        sgct::Window* window = Engine::instance().windows().front().get();
+        return glm::ivec2(window->resolution().x, window->resolution().y);
+    };
+    sgctDelegate.guiWindowResolution = []() {
+        ZoneScoped;
+        const Window* guiWindow = nullptr;
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            if (window->hasTag("GUI")) {
+                guiWindow = window.get();
+                break;
+            }
+        }
+
+        if (!guiWindow) {
+            guiWindow = Engine::instance().windows().front().get();
+        }
+
+        return glm::ivec2(guiWindow->resolution().x, guiWindow->resolution().y);
     };
     sgctDelegate.osDpiScaling = []() {
         ZoneScoped;
@@ -901,6 +919,11 @@ void setSgctDelegateFunctions() {
 
         return currentWindow->id();
     };
+    sgctDelegate.firstWindowId = []() {
+        ZoneScoped;
+
+        return Engine::instance().windows().front()->id();
+    };
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
         ZoneScoped;
 
@@ -958,6 +981,35 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.currentNode = []() {
         return ClusterManager::instance().thisNodeId();
+    };
+    sgctDelegate.mousePositionViewportRelative = [](glm::vec2 mousePosition) {
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            if (isGuiWindow(window.get())) {
+                sgct::ivec2 res = window->resolution();
+                for (const std::unique_ptr<Viewport>& viewport : window->viewports()) {
+                    sgct::vec2 pos = viewport->position();
+                    sgct::vec2 size = viewport->size();
+                    glm::vec4 bounds = glm::vec4(
+                        pos.x * res.x,
+                        (1.0 - pos.y - size.y) * res.y,
+                        (pos.x + size.x) * res.x,
+                        (1.0 - pos.y) * res.y
+                    );
+
+                    if (
+                        (mousePosition.x >= bounds.x && mousePosition.x <= bounds.z) &&
+                        (mousePosition.y >= bounds.y && mousePosition.y <= bounds.w)
+                        ) {
+                        return glm::vec2(
+                            res.x * (mousePosition.x - bounds.x) / (bounds.z - bounds.x),
+                            res.y * (mousePosition.y - bounds.y) / (bounds.w - bounds.y)
+                        );
+                    }
+                }
+            }
+        }
+
+        return mousePosition;
     };
 }
 

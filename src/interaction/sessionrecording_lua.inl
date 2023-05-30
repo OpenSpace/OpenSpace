@@ -71,7 +71,8 @@ namespace {
  * stopped.
  */
 [[codegen::luawrap("startPlayback")]] void startPlaybackDefault(std::string file,
-                                                                bool loop = false)
+                                                                bool loop = false,
+                                                          bool shouldWaitForTiles = false)
 {
     using namespace openspace;
 
@@ -82,7 +83,8 @@ namespace {
         file,
         interaction::KeyframeTimeRef::Relative_recordedStart,
         true,
-        loop
+        loop,
+        shouldWaitForTiles
     );
 }
 
@@ -101,6 +103,7 @@ namespace {
     global::sessionRecording->startPlayback(
         file,
         interaction::KeyframeTimeRef::Relative_applicationStart,
+        false,
         false,
         false
     );
@@ -123,7 +126,8 @@ namespace {
         file,
         interaction::KeyframeTimeRef::Relative_recordedStart,
         false,
-        loop
+        loop,
+        false
     );
 }
 
@@ -141,6 +145,7 @@ namespace {
     global::sessionRecording->startPlayback(
         file,
         interaction::KeyframeTimeRef::Absolute_simTimeJ2000,
+        false,
         false,
         false
     );

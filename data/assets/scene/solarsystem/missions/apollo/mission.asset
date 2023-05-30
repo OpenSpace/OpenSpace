@@ -2,13 +2,13 @@ local Mission = {
   Name = "The Apollo Missions",
   Image = "https://solarsystem.nasa.gov/system/downloadable_items/2962_s65-55202.jpg",
   Description = "Apollo was the NASA program that resulted in American astronauts' making a total of 11 spaceflights and walking on the moon. The first four flights tested the equipment used in the Apollo Program. Six of the other seven flights landed on the moon. The first Apollo flight happened in 1968. The first moon landing took place in 1969. The last moon landing was in 1972. A total of 12 astronauts walked on the moon. The astronauts conducted scientific research there. They studied the lunar surface. They collected moon rocks to bring back to Earth.",
-  Actions = { "os.missions.apollo.moon.togglekaguyalayer", "os.missions.apollo.moon.toggleshading", "apollo_insignias.show_insignias", "apollo_insignias.hide_insignias" },
+  Actions = { "os.apollo.moon.ToggleKaguyaLayer", "os.apollo.ToggleMoonShading", "os.apollo.ShowInsignias", "os.apollo.HideInsignias" },
   Milestones = {
     {
       Name = "First image of Earthrise",
       Date = "1968 DEC 24 12:20:00",
       Image = "https://www.nasa.gov/sites/default/files/thumbnails/image/apollo_8_earthrise_1968_as08-14-2383.jpg",
-      Description = "On Dec. 24, 1968, Apollo 8 astronauts Frank Borman, Jim Lovell, and Bill Anders became the first humans to orbit the Moon, and the first to witness the magnificent sight called 'Earthrise'. As the spacecraft was in the process of rotating, Anders took this iconic picture showing Earth rising over the Moon’s horizon.",
+      Description = "On Dec. 24, 1968, Apollo 8 astronauts Frank Borman, Jim Lovell, and Bill Anders became the first humans to orbit the Moon, and the first to witness the magnificent sight called 'Earthrise'. As the spacecraft was in the process of rotating, Anders took this iconic picture showing Earth rising over the Moon's horizon.",
     },
     {
       Name = "One giant leap for mankind",
@@ -30,7 +30,7 @@ local Mission = {
       Description = "Apollo 11 was the first mission to land on the moon. The crew consisted of Neil Armstrong, Commander, Edwin E. 'Buzz' Aldrin Jr., Lunar Module Pilot, and Michael Collins, Command Module Pilot",
       Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/s69-31739orig.jpg",
       Link = "https://www.nasa.gov/mission_pages/apollo/missions/apollo11.html",
-      Actions = { "os.missions.apollo11.setup.landingsite", "os.missions.apollo.moon.disableapollosites" },
+      Actions = { "os.apollo11.setup.LandingSite", "os.apollo.DisableApolloSites" },
     },
     {
       Name = "Apollo Flight 15",
@@ -43,15 +43,16 @@ local Mission = {
       TimeRange = { Start = "1972 DEC 07 05:33:00", End = "1972 DEC 19 19:54:58" },
       Description = "Apollo 17 was the last mission in which humans traveled to the Moon. It was distinguished by extended hardware capability, larger scientific payload capacity and the use of the battery-powered Lunar Roving Vehicle.",
       Image = "https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/as17-147-22526_orig_1.jpg",
-      Actions = { "os.missions.apollo17.setup.landingsite", "os.missions.apollo.moon.disableapollosites" }
+      Actions = { "os.apollo17.setup.LandingSite", "os.apollo.DisableApolloSites" }
     }
   }
 }
 
+
 asset.onInitialize(function()
   openspace.loadMission(Mission)
- end)
- 
- asset.onDeinitialize(function()
+end)
+
+asset.onDeinitialize(function()
   openspace.unloadMission(Mission.Name)
- end)
+end)

@@ -1,27 +1,37 @@
-local globeIdentifier = asset.require("../../mars").Mars.Identifier
+local globe = asset.require("../../mars")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "CTX_blended",
   Name = "CTX Blended",
   Enabled = asset.enabled,
   FilePath = asset.localResource("ctx_blended.vrt"),
   BlendMode = "Color",
-  Description = [[The Bruce Murray Laboratory for Planetary Visualization has completed a 5.7 terapixel mosaic of the surface of Mars rendered at 5.0 m/px. Each pixel in the mosaic is about the size of a typical parking space, providing unprecedented resolution of the martian surface at the global scale.
+  Description = [[The Bruce Murray Laboratory for Planetary Visualization has completed a
+    5.7 terapixel mosaic of the surface of Mars rendered at 5.0 m/px. Each pixel in the
+    mosaic is about the size of a typical parking space, providing unprecedented
+    resolution of the martian surface at the global scale.
 
-  The mosaic covers 99.5% of Mars from 88°S to 88°N. The pixels that make up the mosaic can all be mapped back to their source data, providing full traceability for the entire mosaic. The mosaic is available to stream over the internet and to download, as described below.
+    The mosaic covers 99.5% of Mars from 88°S to 88°N. The pixels that make up the mosaic
+    can all be mapped back to their source data, providing full traceability for the
+    entire mosaic. The mosaic is available to stream over the internet and to download, as
+    described below.
 
-  All data in the mosaic come from the Context Camera (CTX) onboard the Mars Reconnaissance Orbiter (MRO). (Description from URL)]]
+    All data in the mosaic come from the Context Camera (CTX) onboard the Mars
+    Reconnaissance Orbiter (MRO). (Description from URL)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

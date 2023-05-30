@@ -9,6 +9,7 @@ local sync = asset.syncedResource({
   Version = 1
 })
 
+
 local OrionClusterStars = {
   Identifier = "OrionClusterStars",
   Parent = transforms.NebulaPosition.Identifier,
@@ -34,21 +35,22 @@ local OrionClusterStars = {
   GUI = {
     Name = "Orion Nebula Star Cluster",
     Path = "/Milky Way/Orion",
-    Description = [[In order to have an accurate depiction of the Orion nebula, we
-      need to include the star cluster that was birthed from it. We turned to a study of the
-      cluster's stellar population by Lynne Hillenbrand, who was working at the University of
-      California, Berkeley at the time. The catalog from her paper contains more than 1500
-      stars, about half the stars in the actual cluster. The cluster is very crowded, with a
-      peak density of 10000 stars per cubic parsec over a wide range of masses from a tenth the
-      sun's mass up to 50 times its mass. We were presented with one problem: there are no
-      distances. For the stellar distances, we needed to deduce them by statistical methods.
-      Knowing the size of the cluster and approximating the shape to be roughly spherical, we
-      placed each star along a line of sight through this imaginary sphere centered on the
-      cluster. In this sense, these data are observed data and the view from Earth is accurate.
-      But the distance of each star has been derived from this educated-guess approach for the
-      cluster distribution]]
+    Description = [[In order to have an accurate depiction of the Orion nebula, we need to
+      include the star cluster that was birthed from it. We turned to a study of the
+      cluster's stellar population by Lynne Hillenbrand, who was working at the University
+      of California, Berkeley at the time. The catalog from her paper contains more than
+      1500 stars, about half the stars in the actual cluster. The cluster is very crowded,
+      with a peak density of 10000 stars per cubic parsec over a wide range of masses from
+      a tenth the sun's mass up to 50 times its mass. We were presented with one problem:
+      there are no distances. For the stellar distances, we needed to deduce them by
+      statistical methods. Knowing the size of the cluster and approximating the shape to
+      be roughly spherical, we placed each star along a line of sight through this
+      imaginary sphere centered on the cluster. In this sense, these data are observed
+      data and the view from Earth is accurate. But the distance of each star has been
+      derived from this educated-guess approach for the cluster distribution]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(OrionClusterStars)

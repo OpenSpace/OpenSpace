@@ -1,28 +1,40 @@
-local setup_perseverance = {
-  Identifier = "os.missions.perseverance.setup",
+local Setup = {
+  Identifier = "os.perseverance.Setup",
   Name = "Setup and go to Perseverance",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', -1685.5);
-    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset', -1686.0);
-    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Settings.Offset', -1686);
-    openspace.time.setPause(true);
-    openspace.time.setTime('2021 FEB 18 20:32:16');
-    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Enabled', true);
-    openspace.navigation.setNavigationState({Anchor = 'Perseverance',Pitch = 0.567457E-4,Position = { 1.240506E1,-1.369270E1,-2.423553E0 },ReferenceFrame = 'Root',Up = { 0.441211E0,0.247019E0,0.862737E0 },Yaw = -0.446853E-4});
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset", -1685.5)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset", -1686.0)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Settings.Offset", -1686)
+    openspace.time.setPause(true)
+    openspace.time.setTime("2021 FEB 18 20:32:16")
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Enabled", true)
+    openspace.navigation.setNavigationState({
+      Anchor = "Perseverance",
+      Pitch = 0.0000567457,
+      Position = { 12.40506, -13.69270, -2.423553 },
+      ReferenceFrame = "Root",
+      Up = { 0.441211, 0.247019, 0.862737 },
+      Yaw = -0.0000446853
+    })
   ]],
   Documentation = "Sets time and layers for Perseverance landing",
   GuiPath = "/Missions/Perseverance",
   isLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(setup_perseverance)
+  openspace.action.registerAction(Setup)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(setup_perseverance)
+  openspace.action.removeAction(Setup)
 end)
+
+asset.export("Setup", Setup.Identifier)
+
+
 
 asset.meta = {
   Name = "Perseverance Actions",

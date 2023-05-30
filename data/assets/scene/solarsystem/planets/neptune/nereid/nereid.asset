@@ -1,84 +1,99 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").nep101xl_802
+local kernel = asset.require("../kernels")
+
 
 
 local Nereid = {
   Identifier = "Nereid",
-  Parent = {
-    Identifier = transforms.NeptuneBarycenter.Identifier,
-    Spice = "NEPTUNE BARYCENTER"
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NEREID",
+      Observer = "NEPTUNE BARYCENTER"
+    }
   },
-  Spice = "NEREID",
-  Radii = { 357000, 340000, 340000 },
-  Tags = { "moon_solarSystem", "moon_giants", "moon_neptune" },
-  TrailTags = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_neptune" },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 357000, 340000, 340000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_neptune" },
   GUI = {
+    Name = "Nereid",
     Path = "/Solar System/Planets/Neptune/Major Moons/Nereid"
+  }
+}
+
+local NereidTrail = {
+  Identifier = "NereidTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NEREID",
+      Observer = "NEPTUNE BARYCENTER"
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 360.13,
+    Resolution = 1000
   },
-  TrailColor = { 0.2, 0.5, 0.75 },
-  OrbitPeriod = 360.13,
-  Kernels = kernel
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_neptune" },
+  GUI = {
+    Name = "Nereid Trail",
+    Path = "/Solar System/Planets/Neptune/Major Moons/Nereid"
+  }
+}
+
+local NereidLabel = {
+  Identifier = "NereidLabel",
+  Parent = Nereid.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Nereid",
+    FontSize = 50.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 15.0 },
+    FadeWidths = { 1, 15.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Nereid Label",
+    Path = "/Solar System/Planets/Neptune/Major Moons/Nereid",
+    Description = "Label for Neptune's moon Nereid"
+  }
 }
 
 
--- Generate labels for each moon
-local moon_labels = {}
-
-for i, moon in ipairs({ Nereid }) do
-  local moonName = moon.GUI.Name or moon.Identifier
-  moon_labels[i] = {
-    Identifier = moon.Identifier .. "Label",
-    Parent = moon.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabel",
-      Text = moonName,
-      FontSize = 50.0,
-      Size = 7.0,
-      MinMaxSize = { 1, 25 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Additive",
-      EnableFading = true,
-      FadeUnit = "Gm",
-      FadeDistances = { 1, 15.0 },
-      FadeWidths = { 1, 15.0 },
-    },
-    Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
-    GUI = {
-      Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Neptune/Major Moons/" .. moon.Identifier,
-      Description = "Label for Neptune's moon " .. moonName
-    }
-  }
-end
-
-
-local nodes = proceduralGlobes.createGlobes({ Nereid })
-
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernel.nep101xl_802)
 
-  for _, moonlabel in ipairs(moon_labels) do
-    openspace.addSceneGraphNode(moonlabel)
-  end
+
+  openspace.addSceneGraphNode(Nereid)
+  openspace.addSceneGraphNode(NereidTrail)
+  openspace.addSceneGraphNode(NereidLabel)
 end)
 
 asset.onDeinitialize(function()
-  for i = #moon_labels, 1, -1 do
-    openspace.removeSceneGraphNode(moon_labels[i])
-  end
+  openspace.removeSceneGraphNode(NereidLabel)
+  openspace.removeSceneGraphNode(NereidTrail)
+  openspace.removeSceneGraphNode(Nereid)
 
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+
+  openspace.spice.unloadKernel(kernel.nep101xl_802)
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Nereid)
+asset.export(NereidTrail)
+asset.export(NereidLabel)
 
 
 

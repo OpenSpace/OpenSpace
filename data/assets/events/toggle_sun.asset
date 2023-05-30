@@ -1,9 +1,9 @@
-local toggle_sun = {
-  Identifier = "os.toggle_sun",
+local ToggleSun = {
+  Identifier = "os.ToggleSun",
   Name = "Toggle Sun",
   Command = [[
     if not is_declared("args") then
-      openspace.printError("Cannot execute 'os.toggle_sun' manually")
+      openspace.printError("Cannot execute 'os.ToggleSun' manually")
       return
     end
 
@@ -26,16 +26,17 @@ local toggle_sun = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(toggle_sun)
+  openspace.action.registerAction(ToggleSun)
   openspace.event.registerEventAction(
     "CameraFocusTransition",
-    toggle_sun.Identifier,
+    ToggleSun.Identifier,
     { Node = "Sun", Transition = "Approaching" }
   )
   openspace.event.registerEventAction(
     "CameraFocusTransition",
-    toggle_sun.Identifier,
+    ToggleSun.Identifier,
     { Node = "Sun", Transition = "Exiting" }
   )
 end)
@@ -43,16 +44,19 @@ end)
 asset.onDeinitialize(function()
   openspace.event.unregisterEventAction(
     "CameraFocusTransition",
-    toggle_sun.Identifier,
+    ToggleSun.Identifier,
     { Node = "Sun", Transition = "Exiting" }
   )
   openspace.event.unregisterEventAction(
     "CameraFocusTransition",
-    toggle_sun.Identifier,
+    ToggleSun.Identifier,
     { Node = "Sun", Transition = "Approaching" }
   )
-  openspace.action.removeAction(toggle_sun)
+  openspace.action.removeAction(ToggleSun)
 end)
+
+asset.export("ToggleSun", ToggleSun.Identifier)
+
 
 
 asset.meta = {

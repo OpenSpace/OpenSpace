@@ -1,34 +1,39 @@
 asset.require("../apollo_globebrowsing")
 
-local apollo17_setup_landingsite = {
-  Identifier = "os.missions.apollo17.setup.landingsite",
+
+
+local LandingSite = {
+  Identifier = "os.apollo17.setup.LandingSite",
   Name = "Setup for Apollo 17 landing site",
   Command = [[
-    openspace.time.setTime('1972 DEC 12 19:47:11');
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode', 0.000000);
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_LEM.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_LEM.BlendMode', 0.000000);
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_NAC_Alt_p.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_NAC_Alt_p.BlendMode', 0.000000);
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.TargetLodScaleFactor', 20.17);
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo17LemModel');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_station7.BlendMode', 0.000000);
+    openspace.time.setTime("1972 DEC 12 19:47:11")
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode", 0.000000)
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.ColorLayers.A17_LEM.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.ColorLayers.A17_LEM.BlendMode", 0.000000)
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.ColorLayers.A17_NAC_Alt_p.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.ColorLayers.A17_NAC_Alt_p.BlendMode", 0.000000)
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.TargetLodScaleFactor", 20.17)
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Anchor", "Apollo17LemModel")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.ColorLayers.A17_station7.BlendMode", 0.000000)
   ]],
   Documentation = "Setup for Apollo 17 landing site",
   GuiPath = "/Missions/Apollo/17",
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(apollo17_setup_landingsite)
+  openspace.action.registerAction(LandingSite)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(apollo17_setup_landingsite)
+  openspace.action.removeAction(LandingSite)
 end)
+
+
 
 asset.meta = {
   Name = "Apollo 17 Actions",

@@ -60,55 +60,55 @@
   ],
   "keybindings": [
     {
-      "action": "os.solarsystem.earth.togglesatellitetrails",
+      "action": "os.solarsystem.ToggleSatelliteTrails",
       "key": "S"
     },
     {
-      "action": "os.missions.jwst.togglelagrangianpoints",
+      "action": "os.jwst.ToggleLagrangianPoints",
       "key": "P"
     },
     {
-      "action": "os.missions.jwst.togglehudf",
+      "action": "os.jwst.ToggleHudf",
       "key": "U"
     },
     {
-      "action": "os.missions.jwst.togglel2",
+      "action": "os.jwst.ToggleL2",
       "key": "O"
     },
     {
-      "action": "os.missions.jwst.togglefov",
+      "action": "os.jwst.ToggleFov",
       "key": "V"
     },
     {
-      "action": "os.missoins.jwst.setup.launch",
+      "action": "os.jwst.SetupLaunch",
       "key": "J"
     },
     {
-      "action": "os.missions.jwst.togglesuntrail",
+      "action": "os.jwst.ToggleSunTrail",
       "key": "K"
     },
     {
-      "action": "os.missions.jwst.play.forwards",
+      "action": "os.jwst.PlayForwards",
       "key": "M"
     },
     {
-      "action": "os.missions.jwst.play.backwards",
+      "action": "os.jwst.PlayBackwards",
       "key": "N"
     },
     {
-      "action": "os.missions.jwst.play.clear",
+      "action": "os.jwst.ClearTimelapse",
       "key": "B"
     },
     {
-      "action": "os.missions.jwst.toggletrialsexceptmoon",
+      "action": "os.jwst.ToggleTrailsExceptMoon",
       "key": "G"
     },
     {
-      "action": "os.missions.jwst.toggledirection",
+      "action": "os.jwst.ToggleDirection",
       "key": "Y"
     },
     {
-      "action": "os.missions.jwst.togglejwsttrails",
+      "action": "os.jwst.ToggleJwstTrails",
       "key": "T"
     }
   ],

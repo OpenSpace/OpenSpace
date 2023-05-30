@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
+local kernel = asset.require("../kernels")
 
 
 
@@ -11,8 +11,7 @@ local TitanTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "TITAN",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Observer = "SATURN BARYCENTER"
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 16.0,
@@ -22,16 +21,21 @@ local TitanTrail = {
   GUI = {
     Name = "Titan Trail",
     Path = "/Solar System/Planets/Saturn/Major Moons/Titan",
-    Description = "Trail of Saturn's moon Titan as observed by Saturn",
+    Description = "Trail of Saturn's moon Titan as observed by Saturn"
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.sat441)
+
   openspace.addSceneGraphNode(TitanTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TitanTrail)
+
+  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(TitanTrail)

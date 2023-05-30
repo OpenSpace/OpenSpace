@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 -- Circle shapes are not support
@@ -125,6 +126,7 @@ end)
 -- asset.export(SwiCh2)
 asset.export(SwiFull)
 -- asset.export(SwiFullGCO500)
+
 
 
 asset.meta = {

@@ -1,4 +1,6 @@
-local transforms = asset.require('../transforms')
+local transforms = asset.require("../transforms")
+
+
 
 local kernels = asset.syncedResource({
   Name = "Mars Spice Kernels",
@@ -15,14 +17,12 @@ local PhobosGlobe = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_PHOBOS",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels .. "mar097.bsp"
+      DestinationFrame = "GALACTIC"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "PHOBOS",
-      Observer = "MARS BARYCENTER",
-      Kernels = kernels .. "mar097.bsp"
+      Observer = "MARS BARYCENTER"
     }
   },
   Renderable = {
@@ -41,15 +41,21 @@ local PhobosGlobe = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "mar097.bsp")
+
   openspace.addSceneGraphNode(PhobosGlobe)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PhobosGlobe)
+
+  openspace.spice.unloadKernel(kernels .. "mar097.bsp")
 end)
 
 asset.export(PhobosGlobe)
+
 
 
 asset.meta = {

@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Hurricane Harvey: Clouds with Precipitation - 2017"
@@ -21,7 +22,8 @@ local syncedDirectory = asset.syncedResource({
   UnzipFiles = true
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -36,7 +38,7 @@ local layer = {
   Description = Description
 }
 
-local colorbar_rain = {
+local ColorbarRain = {
   Identifier = Identifier .. "-rain",
   Name = Name .. " (Rain)",
   Enabled = asset.enabled,
@@ -46,7 +48,7 @@ local colorbar_rain = {
   CartesianPosition = { -0.5, -0.5, -2.0 }
 }
 
-local colorbar_snow = {
+local ColorbarSnow = {
   Identifier = Identifier .. "-snow",
   Name = Name ..  " (Snow)",
   Type = "ScreenSpaceImageLocal",
@@ -55,21 +57,23 @@ local colorbar_snow = {
   CartesianPosition = { 0.5, -0.5, -2.0 }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar_rain)
-  openspace.addScreenSpaceRenderable(colorbar_snow)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(ColorbarRain)
+  openspace.addScreenSpaceRenderable(ColorbarSnow)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.removeScreenSpaceRenderable(colorbar_rain)
-  openspace.removeScreenSpaceRenderable(colorbar_snow)
+  openspace.removeScreenSpaceRenderable(ColorbarSnow)
+  openspace.removeScreenSpaceRenderable(ColorbarRain)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(colorbar_rain)
-asset.export(colorbar_snow)
+asset.export(Layer)
+asset.export(ColorbarRain)
+asset.export(ColorbarSnow)
+
 
 
 asset.meta = {

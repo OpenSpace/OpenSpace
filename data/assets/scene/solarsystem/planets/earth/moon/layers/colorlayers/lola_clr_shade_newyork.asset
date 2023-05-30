@@ -1,9 +1,12 @@
-local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+local globe = asset.require("../../moon")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Lola_Clr_Shade_NewYork",
   Name = "LRO LOLA Color Shaded Relief 388m v4 [New York]",
   Enabled = asset.enabled,
+  FilePath = asset.localResource("lola_clr_shade_newyork.wms"),
   Description = [[This is a colorized shaded-relief of a original polar digital elevation
     model (DEM) from the Lunar Orbiter Laser Altimeter (LOLA; Smith et al., 2010), an
     instrument on the National Aeronautics and Space Agency (NASA) Lunar Reconnaissance
@@ -11,19 +14,19 @@ local layer = {
     Moon at a resolution 100 meters per pixel (m) based on altimetry data acquired through
     September, 2011 by the LOLA instrument. The ground tracks were interpolated using the
     Generic Mapping Tools programs "surface" and "grdblend". Map values are referred to a
-    radius of 1,737,400 m]],
-  FilePath = asset.localResource("lola_clr_shade_newyork.wms")
+    radius of 1,737,400 m]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Moon.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Moon.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

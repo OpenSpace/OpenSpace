@@ -1,135 +1,301 @@
-local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").jup344
+local kernel = asset.require("../kernels")
 
 
 
-local parentIdentifier = transforms.JupiterBarycenter.Identifier
-local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_other", "moon_minor", "moon_minor_jupiter" }
-local trailColor = { 0.4, 0.3, 0.01 }
-local trailTags = {
-  "moonTrail_solarSystem",
-  "moonTrail_giants",
-  "moonTrail_jupiter",
-  "moonTrail_minor",
-  "moonTrail_minor_jupiter"
-}
-
-local otherGroups = {
-  {
-    Identifier = "Eupheme",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "560",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "Eupheme",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Groups/Eupheme"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 628.06,
-    Kernels = kernel
-  },
-  {
-    Identifier = "S2003J19",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "561",
-    Radii = { 2000, 2000, 2000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "S/2003 J 19",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Groups/S2003J19"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 699.12,
-    Kernels = kernel
-  },
-  {
-    Identifier = "Valetudo",
-    Parent = {
-      Identifier = parentIdentifier,
-      Spice = parentSpice
-    },
-    Spice = "562",
-    Radii = { 1000, 1000, 1000 },
-    Tags = tags,
-    TrailTags = trailTags,
-    GUI = {
-      Name = "Valetudo",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Groups/Valetudo"
-    },
-    TrailColor = trailColor,
-    OrbitPeriod = 527.41,
-    Kernels = kernel
-  }
-}
-
--- Generate labels for each moon
-local moon_labels = {}
-
-for i, moon in ipairs(otherGroups) do
-  local moonName = moon.GUI.Name or moon.Identifier
-  moon_labels[i] = {
-    Identifier = moon.Identifier .. "Label",
-    Parent = moon.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabel",
-      Text = moonName,
-      FontSize = 70.0,
-      Size = 7.1,
-      MinMaxSize = { 1, 25 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Additive",
-      EnableFading = true,
-      FadeUnit = "Gm",
-      FadeDistances = { 1.0, 150.0 },
-      FadeWidths = { 1.0, 50.0 }
-    },
-    Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
-    GUI = {
-      Name = moonName .. " Label",
-      Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Groups/" .. moon.Identifier,
-      Description = "Label for Jupiter's moon " .. moonName .. " (other groups)"
+local Eupheme = {
+  Identifier = "Eupheme",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "560",
+      Observer = "JUPITER BARYCENTER"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Eupheme",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/Eupheme"
   }
-end
+}
 
+local EuphemeTrail = {
+  Identifier = "EuphemeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "560",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 628.06,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Eupheme Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/Eupheme"
+  }
+}
 
-local nodes = proceduralGlobes.createGlobes(otherGroups)
+local EuphemeLabel = {
+  Identifier = "EuphemeLabel",
+  Parent = Eupheme.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Eupheme",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 150.0 },
+    FadeWidths = { 1.0, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Eupheme Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/Eupheme",
+    Description = "Label for Jupiter's moon Eupheme (other group)"
+  }
+}
+
+local S2003J19 = {
+  Identifier = "S2003J19",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "561",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 19",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/S2003J19"
+  }
+}
+
+local S2003J19Trail = {
+  Identifier = "S2003J19Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "561",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 699.12,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 19 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J19"
+  }
+}
+
+local S2003J19Label = {
+  Identifier = "S2003J19Label",
+  Parent = S2003J19.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "S/2003 J 19",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 150.0 },
+    FadeWidths = { 1.0, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2003 J 19 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J19",
+    Description = "Label for Jupiter's moon S/2003 J 19 (other group)"
+  }
+}
+
+local Valetudo = {
+  Identifier = "Valetudo",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "562",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Valetudo",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/Valetudo"
+  }
+}
+
+local ValetudoTrail = {
+  Identifier = "ValetudoTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "562",
+      Observer = "JUPITER BARYCENTER"
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 527.41,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Valetudo Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Valetudo"
+  }
+}
+
+local ValetudoLabel = {
+  Identifier = "ValetudoLabel",
+  Parent = Valetudo.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Valetudo",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 150.0 },
+    FadeWidths = { 1.0, 50.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Valetudo Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Valetudo",
+    Description = "Label for Jupiter's moon Valetudo (other group)"
+  }
+}
+
 
 asset.onInitialize(function()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.spice.loadKernel(kernel.jup344)
 
-  for _, moonlabel in ipairs(moon_labels) do
-    openspace.addSceneGraphNode(moonlabel)
-  end
+
+  openspace.addSceneGraphNode(Eupheme)
+  openspace.addSceneGraphNode(EuphemeTrail)
+  openspace.addSceneGraphNode(EuphemeLabel)
+
+  openspace.addSceneGraphNode(S2003J19)
+  openspace.addSceneGraphNode(S2003J19Trail)
+  openspace.addSceneGraphNode(S2003J19Label)
+
+  openspace.addSceneGraphNode(Valetudo)
+  openspace.addSceneGraphNode(ValetudoTrail)
+  openspace.addSceneGraphNode(ValetudoLabel)
 end)
 
 asset.onDeinitialize(function()
-  for i = #moon_labels, 1, -1 do
-    openspace.removeSceneGraphNode(moon_labels[i])
-  end
+  openspace.removeSceneGraphNode(ValetudoLabel)
+  openspace.removeSceneGraphNode(ValetudoTrail)
+  openspace.removeSceneGraphNode(Valetudo)
 
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.removeSceneGraphNode(S2003J19Label)
+  openspace.removeSceneGraphNode(S2003J19Trail)
+  openspace.removeSceneGraphNode(S2003J19)
+
+  openspace.removeSceneGraphNode(EuphemeLabel)
+  openspace.removeSceneGraphNode(EuphemeTrail)
+  openspace.removeSceneGraphNode(Eupheme)
+
+
+  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
-for _, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Eupheme)
+asset.export(EuphemeTrail)
+asset.export(EuphemeLabel)
+
+asset.export(S2003J19)
+asset.export(S2003J19Trail)
+asset.export(S2003J19Label)
+
+asset.export(Valetudo)
+asset.export(ValetudoTrail)
+asset.export(ValetudoLabel)
+
 
 
 asset.meta = {

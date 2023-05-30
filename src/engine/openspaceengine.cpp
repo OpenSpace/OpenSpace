@@ -44,6 +44,7 @@
 #include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/helper.h>
@@ -938,6 +939,8 @@ void OpenSpaceEngine::deinitializeGL() {
 
     LTRACE("OpenSpaceEngine::deinitializeGL(begin)");
 
+    viewportChanged();
+
     // We want to render an image informing the user that we are shutting down
     global::renderEngine->renderEndscreen();
     global::windowDelegate->swapBuffer();
@@ -1055,17 +1058,17 @@ void OpenSpaceEngine::writeDocumentation() {
     nlohmann::json license = writer.generateJsonGroupedByLicense();
     nlohmann::json sceneProperties = settings.get();
     nlohmann::json sceneGraph = scene.get();
-    
+
     sceneProperties["name"] = "Settings";
     sceneGraph["name"] = "Scene";
-    
+
     // Add this here so that the generateJson function is the same as before to ensure
     // backwards compatibility
     nlohmann::json scriptingResult;
     scriptingResult["name"] = "Scripting API";
     scriptingResult["data"] = scripting;
 
-    nlohmann::json documentation = { 
+    nlohmann::json documentation = {
         sceneGraph, sceneProperties, keybindings, license, scriptingResult, factory
     };
 
@@ -1171,15 +1174,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     bool master = global::windowDelegate->isMaster();
     global::syncEngine->postSynchronization(SyncEngine::IsMaster(master));
 
-    // This probably doesn't have to be done here every frame, but doing it earlier gives
-    // weird results when using side_by_side stereo --- abock
-    using FR = ghoul::fontrendering::FontRenderer;
-    FR::defaultRenderer().setFramebufferSize(global::renderEngine->fontResolution());
-
-    FR::defaultProjectionRenderer().setFramebufferSize(
-        global::renderEngine->renderingResolution()
-    );
-
     if (_shutdown.inShutdown) {
         if (_shutdown.timer <= 0.f) {
             global::eventEngine->publishEvent<events::EventApplicationShutdown>(
@@ -1231,12 +1225,25 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(end)");
 }
 
+void OpenSpaceEngine::viewportChanged() {
+    // Needs to be updated since each render call potentially targets a different
+    // window and/or viewport
+    using FR = ghoul::fontrendering::FontRenderer;
+    FR::defaultRenderer().setFramebufferSize(global::renderEngine->fontResolution());
+
+    FR::defaultProjectionRenderer().setFramebufferSize(
+        global::renderEngine->renderingResolution()
+    );
+}
+
 void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
     ZoneScoped;
     TracyGpuZone("Render");
     LTRACE("OpenSpaceEngine::render(begin)");
+
+    viewportChanged();
 
     global::renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
 
@@ -1253,6 +1260,8 @@ void OpenSpaceEngine::drawOverlays() {
     ZoneScoped;
     TracyGpuZone("Draw2D");
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
+
+    viewportChanged();
 
     const bool isGuiWindow =
         global::windowDelegate->hasGuiWindow() ?
@@ -1451,7 +1460,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         _shutdown.inShutdown = false;
         global::eventEngine->publishEvent<events::EventApplicationShutdown>(
             events::EventApplicationShutdown::State::Aborted
-            );
+        );
     }
 }
 
@@ -1749,6 +1758,15 @@ void setCameraFromProfile(const Profile& p) {
                     geoScript,
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
+            },
+            [](const Profile::CameraGoToNode& node) {
+                using namespace interaction;
+                NodeCameraStateSpec spec;
+                spec.identifier = node.anchor;
+                spec.height = node.height;
+                spec.useTargetUpDirection = true;
+
+                global::navigationHandler->setCameraFromNodeSpecNextFrame(spec);
             }
         },
         p.camera.value()

@@ -1,7 +1,10 @@
+asset.require("spice/base")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-asset.require("spice/base")
-local artemisSpiceId = "-1023"
+
+
+
+local ArtemisSpiceId = "-1023"
 
 local kernels = asset.syncedResource({
   Name = "Artemis Kernels",
@@ -17,10 +20,9 @@ local ArtemisEarthTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = artemisSpiceId,
+      Target = ArtemisSpiceId,
       Observer = "EARTH",
-      Frame = "GALACTIC",
-      Kernels = kernels .. "artemis.bsp"
+      Frame = "GALACTIC"
     },
     Color = { 0.2, 0.78, 0.635 },
     Fade = 7.0,
@@ -31,7 +33,7 @@ local ArtemisEarthTrail = {
   GUI = {
     Name = "Artemis-1 Earth Trail",
     Path = "/Solar System/Missions/Artemis/Trails",
-    Description = "Artemis-1 trail relative to Earth",
+    Description = "Artemis-1 trail relative to Earth"
   }
 }
 
@@ -42,10 +44,9 @@ local ArtemisMoonTrail= {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = artemisSpiceId,
+      Target = ArtemisSpiceId,
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels .. "artemis.bsp"
+      Frame = "IAU_MOON"
     },
     Color = { 0.78, 0.43, 0.20 },
     Fade = 7.0,
@@ -56,11 +57,14 @@ local ArtemisMoonTrail= {
   GUI = {
     Name = "Artemis-1 Moon Trail",
     Path = "/Solar System/Missions/Artemis/Trails",
-    Description = "Artemis-1 trail relative to the Moon",
+    Description = "Artemis-1 trail relative to the Moon"
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "artemis.bsp")
+
   openspace.addSceneGraphNode(ArtemisEarthTrail)
   openspace.addSceneGraphNode(ArtemisMoonTrail)
 end)
@@ -68,10 +72,14 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ArtemisMoonTrail)
   openspace.removeSceneGraphNode(ArtemisEarthTrail)
+
+  openspace.spice.unloadKernel(kernels .. "artemis.bsp")
 end)
 
 asset.export(ArtemisEarthTrail)
 asset.export(ArtemisMoonTrail)
+
+
 
 asset.meta = {
   Name = "Artemis-1 Trails",

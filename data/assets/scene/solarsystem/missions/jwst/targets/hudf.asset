@@ -1,9 +1,11 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local jwstTransforms = asset.require("scene/solarsystem/missions/jwst/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local image = asset.require("./hudf_image").image
+local hudf = asset.require("./hudf_image")
 
-local DISTANCE = 9.2E15;
+
+
+local Distance = 9.2E15
 
 -- ra = 3h32m38.92s
 -- dec = -27d47m29.37s
@@ -15,9 +17,9 @@ local HUDFPosition = {
     Translation = {
       Type = "StaticTranslation",
       Position = {
-        0.53039024 * DISTANCE,
-        0.70802069 * DISTANCE,
-        -0.46625412 * DISTANCE
+        0.53039024 * Distance,
+        0.70802069 * Distance,
+        -0.46625412 * Distance
       }
     }
   },
@@ -27,7 +29,7 @@ local HUDFPosition = {
     Hidden = true,
     Description = [[
       Galactic cartesian position for the Hubble Ultra Deep Field
-    ]],
+    ]]
   }
 }
 
@@ -40,12 +42,12 @@ local HUDFImage = {
   RadiusAzimuthElevation = { 1.0, 0.5, 0.1 },
   UsePerspectiveProjection = false,
   Opacity = 1.0,
-  TexturePath = image .. "Hubble_ultra_deep_field.png",
+  TexturePath = hudf.image .. "Hubble_ultra_deep_field.png",
   Tag = { "mission_jwst_hudf", "mission_jwst_target" },
   Description = [[
     Image of the Hubble Ultra Deep Field by NASA, ESA, and S. Beckwith (STScI) and
     the HUDF Team.
-  ]],
+  ]]
 }
 
 local HUDFJWSTLine = {
@@ -69,9 +71,10 @@ local HUDFJWSTLine = {
     Path = "/Solar System/Missions/JWST/HUDF",
     Description = [[
       Line from the James Webb Space Telescope to the Hubble Ultra Deep Field
-    ]],
+    ]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(HUDFImage)
@@ -91,6 +94,7 @@ end)
 asset.export(HUDFJWSTLine)
 asset.export(HUDFImage)
 asset.export(HUDFPosition)
+
 
 
 asset.meta = {

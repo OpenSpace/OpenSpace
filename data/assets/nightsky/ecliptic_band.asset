@@ -1,5 +1,7 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+
 local textures = asset.syncedResource({
   Name = "Ecliptic Band Textures",
   Type = "HttpSynchronization",
@@ -7,23 +9,24 @@ local textures = asset.syncedResource({
   Version = 1
 })
 
-local eclipticRotationMatrix = {
+
+local EclipticRotationMatrix = {
     -0.05487554,  0.4941095, -0.8676661,
     -0.9938214,  -0.1109906, -0.0003515167,
     -0.09647644,  0.8622859,  0.4971472
 }
 
-local line = {
+local EclipticLine = {
   Identifier = "EclipticLine",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 4.28601E17;
+      Scale = 4.28601E17
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     }
   },
   Renderable = {
@@ -41,13 +44,13 @@ local line = {
   }
 }
 
-local band = {
+local EclipticBand = {
   Identifier = "EclipticBand",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = eclipticRotationMatrix
+      Rotation = EclipticRotationMatrix
     }
   },
   Renderable = {
@@ -66,75 +69,76 @@ local band = {
   }
 }
 
-local showLineAction = {
-  Identifier = "os.nightsky.show_ecliptic_line",
+local ShowEclipticLine = {
+  Identifier = "os.nightsky.ShowEclipticLine",
   Name = "Show ecliptic line",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticLine.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.EclipticLine.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.EclipticLine.Renderable.Fade', 1.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.EclipticLine.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.EclipticLine.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.EclipticLine.Renderable.Fade", 1.0, 1.0)
   ]],
   Documentation = "Shows the ecliptic line",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
 
-local hideLineAction = {
-  Identifier = "os.nightsky.hide_ecliptic_line",
+local HideEclipticLine = {
+  Identifier = "os.nightsky.HideEclipticLine",
   Name = "Hide ecliptic line",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticLine.Renderable.Fade', 0.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.EclipticLine.Renderable.Fade", 0.0, 1.0)
   ]],
   Documentation = "Hides the ecliptic line",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
 
-local showBandAction = {
-  Identifier = "os.nightsky.show_ecliptic_band",
+local ShowEclipticBand = {
+  Identifier = "os.nightsky.ShowEclipticBand",
   Name = "Show ecliptic band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 1.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Fade", 1.0, 1.0)
   ]],
   Documentation = "Shows the ecliptic band",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
 
-local hideBandAction = {
-  Identifier = "os.nightsky.hide_ecliptic_band",
+local HideEclipticBand = {
+  Identifier = "os.nightsky.HideEclipticBand",
   Name = "Hide ecliptic band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 0.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.EclipticBand.Renderable.Fade", 0.0, 1.0)
   ]],
   Documentation = "Hides the ecliptic band",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(line)
-  openspace.addSceneGraphNode(band)
-  openspace.action.registerAction(showLineAction)
-  openspace.action.registerAction(hideLineAction)
-  openspace.action.registerAction(showBandAction)
-  openspace.action.registerAction(hideBandAction)
+  openspace.addSceneGraphNode(EclipticLine)
+  openspace.addSceneGraphNode(EclipticBand)
+  openspace.action.registerAction(ShowEclipticLine)
+  openspace.action.registerAction(HideEclipticLine)
+  openspace.action.registerAction(ShowEclipticBand)
+  openspace.action.registerAction(HideEclipticBand)
 end)
-  
+
 asset.onDeinitialize(function()
-  openspace.action.removeAction(hideLineAction)
-  openspace.action.removeAction(showLineAction)
-  openspace.action.removeAction(hideBandAction)
-  openspace.action.removeAction(showBandAction)
-  openspace.removeSceneGraphNode(band)
-  openspace.removeSceneGraphNode(line)
+  openspace.action.removeAction(HideEclipticBand)
+  openspace.action.removeAction(ShowEclipticBand)
+  openspace.action.removeAction(HideEclipticLine)
+  openspace.action.removeAction(ShowEclipticLine)
+  openspace.removeSceneGraphNode(EclipticBand)
+  openspace.removeSceneGraphNode(EclipticLine)
 end)
-  
-asset.export(band)
-asset.export(line)
-asset.export(showLineAction)
-asset.export(hideLineAction)
-asset.export(showBandAction)
-asset.export(hideBandAction)
+
+asset.export(EclipticLine)
+asset.export(EclipticBand)
+asset.export("ShowEclipticLine", ShowEclipticLine.Identifier)
+asset.export("HideEclipticLine", HideEclipticLine.Identifier)
+asset.export("ShowEclipticBand", ShowEclipticBand.Identifier)
+asset.export("HideEclipticBand", HideEclipticBand.Identifier)

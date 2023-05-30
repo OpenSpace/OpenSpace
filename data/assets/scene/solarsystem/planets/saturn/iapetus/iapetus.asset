@@ -1,6 +1,8 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels")
+
+
 
 local labelsPath = asset.syncedResource({
   Name = "Saturn Labels",
@@ -9,6 +11,7 @@ local labelsPath = asset.syncedResource({
   Version = 1
 })
 
+
 local Iapetus = {
   Identifier = "Iapetus",
   Parent = transforms.SaturnBarycenter.Identifier,
@@ -16,8 +19,7 @@ local Iapetus = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "IAPETUS",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Observer = "SATURN BARYCENTER"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -78,6 +80,8 @@ local IapetusLabel = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.sat441)
+
   openspace.addSceneGraphNode(Iapetus)
   openspace.addSceneGraphNode(IapetusLabel)
 end)
@@ -85,9 +89,12 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(IapetusLabel)
   openspace.removeSceneGraphNode(Iapetus)
+
+  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Iapetus)
+asset.export(IapetusLabel)
 
 
 
