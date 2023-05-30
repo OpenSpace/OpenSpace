@@ -41,7 +41,7 @@ local Object = {
       that are considered good candidates to host planets. Rather than represent them
       photo-realistically, with accurate colors, we choose to visualize them as generic,
       pure yellow stars. (Description from URL) <br><br> Data Reference: NASA Exoplanet
-      Archive (CalTech/NASA)]],
+      Archive (CalTech/NASA)]]
   }
 }
 
