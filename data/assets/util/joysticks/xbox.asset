@@ -25,10 +25,19 @@ local joystickHelper = asset.require("./joystick_helper")
 -- Eighth parameter is the sensitivity for the axis
 
 local XBoxController = {
-  LeftThumbStick = { 0 , 1 },
-  RightThumbStick = { 2, 3 },
+  -- Axes
+  LeftThumbStick = {
+    LeftRight = 0,
+    UpDown = 1
+  },
+  RightThumbStick = {
+    LeftRight = 2,
+    UpDown = 3
+  },
   LeftTrigger = 4,
   RightTrigger = 5,
+
+  -- Buttons
   A = 0,
   B = 1,
   X = 2,
@@ -54,17 +63,17 @@ asset.onInitialize(function()
 
   local deadzoneJoysticks = 0.2
   local deadzoneTriggers = 0.05
-  openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[1], deadzoneJoysticks)
-  openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[2], deadzoneJoysticks)
-  openspace.navigation.setAxisDeadZone(name, controller.RightThumbStick[1], deadzoneJoysticks)
-  openspace.navigation.setAxisDeadZone(name, controller.RightThumbStick[2], deadzoneJoysticks)
+  openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick.LeftRight, deadzoneJoysticks)
+  openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick.UpDown, deadzoneJoysticks)
+  openspace.navigation.setAxisDeadZone(name, controller.RightThumbStick.LeftRight, deadzoneJoysticks)
+  openspace.navigation.setAxisDeadZone(name, controller.RightThumbStick.UpDown, deadzoneJoysticks)
   openspace.navigation.setAxisDeadZone(name, controller.LeftTrigger, deadzoneTriggers)
   openspace.navigation.setAxisDeadZone(name, controller.RightTrigger, deadzoneTriggers)
 
-  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[1], "Orbit X")
-  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[2], "Orbit Y")
-  openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[1], "Pan X", true)
-  openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[2], "Pan Y", true)
+  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick.LeftRight, "Orbit X")
+  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick.UpDown, "Orbit Y")
+  openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick.LeftRight, "Pan X", true)
+  openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick.UpDown, "Pan Y", true)
   openspace.navigation.bindJoystickAxis(name, controller.LeftTrigger, "Zoom Out", false, "TriggerLike")
   openspace.navigation.bindJoystickAxis(name, controller.RightTrigger, "Zoom In", false, "TriggerLike")
 
@@ -72,15 +81,15 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickButton(
     name,
     controller.DPad.Up,
-    joystickHelper.bindLocalRoll(name, controller.RightThumbStick[1]) ..
-    "openspace.navigation.bindJoystickAxis('" .. name .. "', " .. controller.RightThumbStick[2] .. ", 'None')",
+    joystickHelper.bindLocalRoll(name, controller.RightThumbStick.LeftRight) ..
+    "openspace.navigation.bindJoystickAxis('" .. name .. "', " .. controller.RightThumbStick.UpDown .. ", 'None')",
     "Switch to roll mode"
   )
   openspace.navigation.bindJoystickButton(
     name,
     controller.DPad.Up,
-    joystickHelper.unbindRoll(name, controller.RightThumbStick[1]) ..
-    "openspace.navigation.bindJoystickAxis('" .. name .. "', " .. controller.RightThumbStick[2] .. ", 'Pan Y', true)",
+    joystickHelper.unbindRoll(name, controller.RightThumbStick.LeftRight) ..
+    "openspace.navigation.bindJoystickAxis('" .. name .. "', " .. controller.RightThumbStick.UpDown .. ", 'Pan Y', true)",
     "Switch back to normal mode",
     "Release"
   )

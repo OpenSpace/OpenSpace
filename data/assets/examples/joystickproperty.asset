@@ -30,17 +30,26 @@
 -- Seventh - (optional) Should this property change be sent to other connected remote sessions
 
 local XBoxController = {
-  LeftThumbStick = { 0 , 1 },
-  RightThumbStick = { 2, 3 },
+  -- Axes
+  LeftThumbStick = {
+    LeftRight = 0,
+    UpDown = 1
+  },
+  RightThumbStick = {
+    LeftRight = 2,
+    UpDown = 3
+  },
   LeftTrigger = 4,
   RightTrigger = 5,
+
+  -- Buttons
   A = 0,
   B = 1,
   X = 2,
   Y = 3,
   LB = 4,
   RB = 5,
-  Select = 6,
+  Back = 6,
   Start = 7,
   LeftStickButton = 8,
   RightStickButton = 9,

@@ -26,10 +26,19 @@ local joystickHelper = asset.require("./joystick_helper")
 -- Eighth parameter is the sensitivity for the axis
 
 local SpaceMouse = {
-  Push = { 0, 1, 2 }, -- left/right, back/forth, up/down
-  Twist = { 5 }, -- left/right
-  Tilt = { 4, 3 }, -- left/right, back/forth
+  -- Axes
+  Push = {
+    LeftRight = 0,
+    BackForth = 1,
+    UpDown = 2
+  },
+  Twist = 5,
+  Tilt = {
+    LeftRight = 4,
+    BackForth = 3
+  },
 
+  -- Buttons
   LeftButton = 0,
   RightButton = 1
 }
@@ -39,24 +48,24 @@ asset.onInitialize(function()
   local controller = SpaceMouse
   local name = "3Dconnexion Universal Receiver"
 
-  openspace.navigation.bindJoystickAxis(name, controller.Push[1], "Orbit X", false, "JoystickLike", true, false, 40.0)
-  openspace.navigation.bindJoystickAxis(name, controller.Push[2], "Orbit Y", false, "JoystickLike", true, false, 40.0)
-  openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "Pan X", true, "JoystickLike", true, false, 40.0)
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y", false, "JoystickLike", true, false, 35.0)
-  openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom", false, "JoystickLike", true, false, 40.0)
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll", false, "JoystickLike", true, false, 35.0)
+  openspace.navigation.bindJoystickAxis(name, controller.Push.LeftRight, "Orbit X", false, "JoystickLike", true, false, 40.0)
+  openspace.navigation.bindJoystickAxis(name, controller.Push.BackForth, "Orbit Y", false, "JoystickLike", true, false, 40.0)
+  openspace.navigation.bindJoystickAxis(name, controller.Twist, "Pan X", true, "JoystickLike", true, false, 40.0)
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt.BackForth, "Pan Y", false, "JoystickLike", true, false, 35.0)
+  openspace.navigation.bindJoystickAxis(name, controller.Push.UpDown, "Zoom", false, "JoystickLike", true, false, 40.0)
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt.LeftRight, "LocalRoll", false, "JoystickLike", true, false, 35.0)
 
   openspace.navigation.bindJoystickButton(
     name,
     controller.LeftButton,
-    joystickHelper.permaBindLocalRoll(name, controller.Tilt[1]),
+    joystickHelper.permaBindLocalRoll(name, controller.Tilt.LeftRight),
     "Switch to local roll mode"
   )
 
   openspace.navigation.bindJoystickButton(
     name,
     controller.RightButton,
-    joystickHelper.permaBindGlobalRoll(name, controller.Tilt[1]),
+    joystickHelper.permaBindGlobalRoll(name, controller.Tilt.LeftRight),
     "Switch to global roll mode"
   )
 end)
