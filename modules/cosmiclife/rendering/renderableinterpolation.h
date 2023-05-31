@@ -95,6 +95,15 @@ namespace openspace {
             }
         };
 
+        struct DistanceHolders {
+            std::string dataset1;
+            std::string dataset2;
+            std::vector<Vertex> v1;
+            std::vector<Vertex> v2;
+        };
+
+        std::vector<DistanceHolders> _distanceHolders;
+
         std::vector<float> createDataSlice(speck::Dataset& dataset, const RenderData& data);
         void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
             const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
@@ -102,13 +111,15 @@ namespace openspace {
         speck::Dataset::Entry interpol(const speck::Dataset::Entry& e1, const speck::Dataset::Entry& e2, float iv);
         void sort(const speck::Dataset& d1, const speck::Dataset& d2);
 
-        void initializeLines();
+        void initializeMDSLines();
+        void initializeUMAPLines();
         std::vector<float> computeDistances(const speck::Dataset::Entry& e1, const std::vector<speck::Dataset::Entry>& d1);
         std::vector<speck::Dataset::Entry> findPointsOfInterest(const speck::Dataset::Entry& e, const speck::Dataset& d);
-        void ComputeOutliers(const speck::Dataset& d1, const speck::Dataset& d2);
+        std::pair<std::vector<RenderableInterpolation::Vertex>, std::vector<RenderableInterpolation::Vertex>> ComputeOutliers(const speck::Dataset& d1, const speck::Dataset& d2);
         void renderLines(const RenderData& data);
         float fadeObjectDependingOnDistance(const RenderData& data, const speck::Dataset::Entry& e);
         void updateRenderData(const RenderData& data);
+        void storeDistanceHolders(std::map<std::string, speck::Dataset> const & d);
 
         // bool variables
         bool _dataIsDirty = true;
@@ -118,6 +129,8 @@ namespace openspace {
         bool _hasColorMapFile = false;
         bool _isColorMapExact = false;
         bool _hasDatavarSize = false;
+        bool _lineDataIsDirty1 = false;
+        bool _lineDataIsDirty2 = false;
 
 
         GLuint _pTexture = 0;
@@ -143,9 +156,10 @@ namespace openspace {
         properties::OptionProperty _dataSetOneOption;
         properties::OptionProperty _dataSetTwoOption;
         properties::StringProperty _directoryPath;
+        properties::BoolProperty _computeDistances;
+        properties::FloatProperty _percentageOfLines;
 
 
-        //const std::string directory_path = "C:/OpenSpace/OpenSpace/user/data/assets/cosmic_life/morphing/data";
         std::map<std::string, std::string> _filePaths; 
         std::optional<std::string> _uniqueSpecies;
 

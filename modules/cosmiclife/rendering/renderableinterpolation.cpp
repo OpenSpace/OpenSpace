@@ -74,6 +74,10 @@ namespace {
         PositionNormal
     };
 
+    enum FileOption {
+        MDS = 0,
+        UMAP
+    };
 
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
@@ -176,7 +180,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseLinearFiltering = {
         "UseLinearFiltering",
         "Use Linear Filtering",
-        "Determines whether the provided color map should be sampled nearest neighbor "
+        "Determines whether the provided color map should be sampled nearest neighbor"
         "(=off) or linearly (=on)"
     };
 
@@ -189,25 +193,37 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo InterpolationValueInfo = {
         "InterpolationValue",
         "Interpolation value",
-        "Set data interpolation between 0-1 where 0 is the MDS data and 1 is the Umap data"
+        "Set data interpolation between 0-1 where 0 is the MDS data and 1 is the UMAP data."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataSetOneOptionInfo = {
         "DataSetOneOption",
         "DataSet One Option",
-        "This value determines the first dataset that will be morphed"
+        "This value determines the first dataset that will be morphed."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataSetTwoOptionInfo = {
         "DataSetTwoOption",
         "DataSet Two Option",
-        "This value determines the second dataset that will be morphed"
+        "This value determines the second dataset that will be morphed."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DirectoryPathInfo = {
     "DirectoryPathInfo",
     "Directory Path Info",
-    "Directory Paths "
+    "Paths to all directories for the dropdowns."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ComputeDistancesInfo = {
+    "ComputeDistancesInfo",
+    "Compute Distances Info",
+    "Variable that determines if distances should be calculated between the dataset or not"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PercentageOfLinesInfo = {
+    "PercentageOfLinesInfo",
+    "Percentage Of Lines Info",
+    "Float variable of how many distance lines to render"
     };
 
     struct [[codegen::Dictionary(RenderableInterpolation)]] Parameters {
@@ -239,8 +255,16 @@ namespace {
             ViewDirection [[codegen::key("Camera View Direction")]],
             PositionNormal [[codegen::key("Camera Position Normal")]]
         };
+
+        enum class [[codegen::map(FileOption)]] FileOption {
+            MDS [[codegen::key("MDS")]],
+            UMAP [[codegen::key("UMAP")]]
+        };
         // [[codegen::verbatim(RenderOptionInfo.description)]]
         std::optional<RenderOption> renderOption;
+
+        // [[codegen::verbatim(DataSetOneOptionInfo.description)]]
+        std::optional<FileOption> fileOption;
 
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
@@ -300,7 +324,11 @@ namespace {
         // [[codegen::verbatim(DirectoryPathInfo.description)]]
         std::optional<std::string> directoryPath;
 
+        std::optional<bool> computeDistances;
+
         std::optional<std::string> uniqueSpecies;
+
+        std::optional<float> percentageOfLines;
 
 
     };
@@ -345,6 +373,9 @@ namespace openspace {
         , _dataSetOneOption(DataSetOneOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _dataSetTwoOption(DataSetTwoOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _directoryPath(DirectoryPathInfo)
+        , _computeDistances(ComputeDistancesInfo, false)
+        , _percentageOfLines(PercentageOfLinesInfo, 0.0001)
+
     {
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -367,13 +398,22 @@ namespace openspace {
             fileOptionNames.push_back(name);
         }
 
-        _dataSetOneOption.addOptions(fileOptionNames);
-        _dataSetTwoOption.addOptions(fileOptionNames);
+        _dataSetOneOption.addOption(FileOption::MDS, fileOptionNames[0]);
+        _dataSetOneOption.addOption(FileOption::UMAP, fileOptionNames[1]);
 
+        _dataSetOneOption = FileOption::MDS;
+       
+        _dataSetTwoOption.addOption(FileOption::MDS, fileOptionNames[0]);
+        _dataSetTwoOption.addOption(FileOption::UMAP, fileOptionNames[1]);
+
+        _dataSetTwoOption = FileOption::UMAP;
+       
         _uniqueSpecies = p.uniqueSpecies;
         _useFade = p.useFade.value_or(_useFade);
         _maxThreshold = p.maxThreshold.value_or(_maxThreshold);
         _frameColor = p.frameColor.value_or(_frameColor);
+        _computeDistances = p.computeDistances.value_or(_computeDistances);
+        _percentageOfLines = p.percentageOfLines.value_or(_percentageOfLines);
 
         auto func = [this]() {
 
@@ -382,8 +422,29 @@ namespace openspace {
 
              sort(_dataSetOne, _dataSetTwo);
 
-             //ComputeOutliers(_dataSetOne, _dataSetTwo);
-             //initializeLines();
+             if (_computeDistances) {
+                 _vertices1.clear();
+                 _vertices2.clear();
+                 // Find correct outliers
+                 for (int i = 0; i < _distanceHolders.size(); i++) {
+
+                     if (_distanceHolders[i].dataset1 == _datasets.begin()->first && _distanceHolders[i].dataset2 == _datasets.rbegin()->first) {
+
+                         _vertices1 = _distanceHolders[i].v1;
+                         _vertices2 = _distanceHolders[i].v2;
+                     }
+
+                     if (_vertices1.empty()) {
+
+                         _vertices1 = _distanceHolders[i].v2;
+                         _vertices2 = _distanceHolders[i].v1;
+
+                     }
+
+                 }
+                 _lineDataIsDirty1 = true;
+                 _lineDataIsDirty2 = true;
+             }
 
             _dataIsDirty = true;
         };
@@ -399,7 +460,8 @@ namespace openspace {
             _interpolationValue = _interpolationValue.value();
             _dataIsDirty = true;
             LDEBUG(std::to_string(_interpolationValue));
-            //initializeLines();
+            _lineDataIsDirty1 = true;
+            _lineDataIsDirty2 = true;
             });
         addProperty(_interpolationValue); //puts it on the GUI 
 
@@ -568,9 +630,12 @@ namespace openspace {
         return distances;
     }
 
-    void RenderableInterpolation::ComputeOutliers(const speck::Dataset& d1, const speck::Dataset& d2) {
-        _vertices1.clear();
-        _vertices2.clear();
+    std::pair<std::vector<RenderableInterpolation::Vertex>, std::vector<RenderableInterpolation::Vertex>> 
+        RenderableInterpolation::ComputeOutliers(const speck::Dataset& d1, const speck::Dataset& d2) 
+    {
+        
+        std::vector<Vertex> v1;
+        std::vector<Vertex> v2;
 
         std::priority_queue<DistancePoints> maxHeap1;
         std::priority_queue<DistancePoints> maxHeap2;
@@ -595,7 +660,7 @@ namespace openspace {
         }
 
         // Find the top 5% and take their indices to get the correct point in the datasets
-        int numElementsToPop = maxHeap1.size() * 0.0001;
+        int numElementsToPop = maxHeap1.size() * _percentageOfLines;
 
         // Pop the top 10% elements from the max heap and store their indices
         for (int k = 0; k < numElementsToPop; k++) {
@@ -603,21 +668,21 @@ namespace openspace {
             DistancePoints maxValue1 = maxHeap1.top();
             maxHeap1.pop();
 
-            _vertices1.push_back(Vertex{ maxValue1.p1.position.x, maxValue1.p1.position.y, maxValue1.p1.position.z });
-            _vertices1.push_back(Vertex{ maxValue1.p2.position.x, maxValue1.p2.position.y, maxValue1.p2.position.z });
+            v1.push_back(Vertex{ maxValue1.p1.position.x, maxValue1.p1.position.y, maxValue1.p1.position.z });
+            v1.push_back(Vertex{ maxValue1.p2.position.x, maxValue1.p2.position.y, maxValue1.p2.position.z });
 
             DistancePoints maxValue2 = maxHeap2.top();
             maxHeap2.pop();
 
-            _vertices2.push_back(Vertex{ maxValue2.p1.position.x, maxValue2.p1.position.y, maxValue2.p1.position.z });
-            _vertices2.push_back(Vertex{ maxValue2.p2.position.x, maxValue2.p2.position.y, maxValue2.p2.position.z });
+            v2.push_back(Vertex{ maxValue2.p1.position.x, maxValue2.p1.position.y, maxValue2.p1.position.z });
+            v2.push_back(Vertex{ maxValue2.p2.position.x, maxValue2.p2.position.y, maxValue2.p2.position.z });
         }
 
-  
+        return std::make_pair(v1, v2);
+
     }
 
-    void RenderableInterpolation::initializeLines() {
-
+    void RenderableInterpolation::initializeMDSLines() {
 
         if (_vaoLines == 0) {
             glGenVertexArrays(1, &_vaoLines);  // Generate VAO
@@ -628,17 +693,29 @@ namespace openspace {
         glBindBuffer(GL_ARRAY_BUFFER, _vboLines);
 
         // Set VBO data
-        if (_interpolationValue < 0.01) {
-            glBufferData(GL_ARRAY_BUFFER, _vertices1.size() * sizeof(Vertex), _vertices1.data(), GL_DYNAMIC_DRAW);
-        }
-        else if (_interpolationValue > 0.99) {
-            glBufferData(GL_ARRAY_BUFFER, _vertices2.size() * sizeof(Vertex), _vertices2.data(), GL_DYNAMIC_DRAW);
-        }
+        glBufferData(GL_ARRAY_BUFFER, _vertices1.size() * sizeof(Vertex), _vertices1.data(), GL_DYNAMIC_DRAW);
 
         // Enable vertex attribute array and specify layout
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+    }
 
+    void RenderableInterpolation::initializeUMAPLines() {
+
+        if (_vaoLines == 0) {
+            glGenVertexArrays(1, &_vaoLines);  // Generate VAO
+            glBindVertexArray(_vaoLines);  // Bind VAO
+            glGenBuffers(1, &_vboLines);  // Generate and bind VBO
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, _vboLines);
+
+        // Set VBO data
+        glBufferData(GL_ARRAY_BUFFER, _vertices2.size() * sizeof(Vertex), _vertices2.data(), GL_DYNAMIC_DRAW);
+
+        // Enable vertex attribute array and specify layout
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
     }
 
     void RenderableInterpolation::sort(const speck::Dataset& d1, const speck::Dataset& d2) {
@@ -680,6 +757,16 @@ namespace openspace {
         _dataSetTwo = d2_copy;
     }
 
+    void RenderableInterpolation::storeDistanceHolders(std::map<std::string, speck::Dataset> const & d) {
+
+        //std::vector<Vertex> vertices1, vertices2;
+
+        auto vertexPair = ComputeOutliers(d.begin()->second, d.rbegin()->second);
+
+        _distanceHolders.push_back(DistanceHolders{ d.begin()->first, d.rbegin()->first, vertexPair.first, vertexPair.second});
+
+    }
+
     void RenderableInterpolation::initialize() {
         for (const auto& [name, path] : _filePaths) {
             _datasets[name] = speck::data::loadFileWithCache(path);
@@ -694,10 +781,40 @@ namespace openspace {
 
                 _datasets[name].entries = std::move(newdataset);
             }
+
+            if (_datasets.size() == 2 && _computeDistances) {
+                storeDistanceHolders(_datasets);
+            }
+
         }
 
-        //Compute Outliers for all datasets
-        
+        _dataSetOne = _datasets.begin()->second;
+        _dataSetTwo = _datasets.rbegin()->second;
+
+        sort(_dataSetOne, _dataSetTwo);
+
+        if (_computeDistances) {
+            // Find correct outliers
+            for (int i = 0; i < _distanceHolders.size(); i++) {
+
+                if (_distanceHolders[i].dataset1 == _datasets.begin()->first && _distanceHolders[i].dataset2 == _datasets.rbegin()->first) {
+
+                    _vertices1 = _distanceHolders[i].v1;
+                    _vertices2 = _distanceHolders[i].v2;
+                }
+
+                if (_vertices1.empty()) {
+
+                    _vertices1 = _distanceHolders[i].v2;
+                    _vertices2 = _distanceHolders[i].v1;
+
+                }
+
+            }
+            _lineDataIsDirty1 = true;
+            _lineDataIsDirty2 = true;
+        }
+
         if (_hasColorMapFile) {
             _colorMap = speck::color::loadFileWithCache(_colorMapFile);
         }
@@ -724,7 +841,7 @@ namespace openspace {
                 );
             }
         );
-
+       
         _programL = BaseModule::ProgramObjectManager.request(
             "CartesianAxesProgram",
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -869,6 +986,7 @@ namespace openspace {
     }
 
     void RenderableInterpolation::renderLines(const RenderData& data) {
+        
         _programL->activate();
 
         const glm::dmat4 modelTransform =
@@ -907,6 +1025,7 @@ namespace openspace {
         // Restores GL State
         global::renderEngine->openglStateCache().resetBlendState();
         global::renderEngine->openglStateCache().resetLineState();
+        
     }
 
 
@@ -941,7 +1060,9 @@ namespace openspace {
 
         renderPoints(data, modelMatrix, orthoRight, orthoUp);
 
-        //renderLines(data);
+        if (_computeDistances) {
+            renderLines(data);
+        }
   
     }
 
@@ -1135,6 +1256,20 @@ namespace openspace {
     }
 
     void RenderableInterpolation::update(const UpdateData&) {
+
+        if (_computeDistances) {
+
+            if (_interpolationValue < 0.01 && _lineDataIsDirty1) {
+                initializeMDSLines();
+                _lineDataIsDirty1 = false;
+            }
+            else if (_interpolationValue > 0.99 && _lineDataIsDirty2) {
+                initializeUMAPLines();
+                _lineDataIsDirty2 = false;
+            }
+            
+        }
+        
 
         if (_hasSpriteTexture && _spriteTextureIsDirty && !_spriteTexturePath.value().empty())
         {

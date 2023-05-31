@@ -2,10 +2,10 @@ local consensusImages = {
     Identifier = "os.consensusImages",
     Name = "Turn on and off Primates Consensus images",
     Command = [[
-      if (openspace.getPropertyValue("Scene.primates_consensus_species1.Renderable.Opacity") == 1.0) then
-        openspace.setPropertyValue("Scene.primates_consensus_species*.Renderable.Opacity", 0.0)
-      else
+      if (openspace.getPropertyValue("Scene.primates_consensus_species1.Renderable.Opacity") == 0.0) then
         openspace.setPropertyValue("Scene.primates_consensus_species*.Renderable.Opacity", 1.0)
+      else
+        openspace.setPropertyValue("Scene.primates_consensus_species*.Renderable.Opacity", 0.0)
       end
     ]],
     Documentation = [[Turn on and off Primates Consensus images]],

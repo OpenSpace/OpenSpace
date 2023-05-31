@@ -31,7 +31,7 @@ in vec3 vs_positionModelSpace;
 Fragment getFragment() {
   Fragment frag;
 
-  frag.color.rgb = vec3(1.0, 0.0, 0.0);
+  frag.color.rgb = vec3(0.75, 0.75, 0.75);
   frag.color.a = 1.0;
 
   frag.depth = vs_screenSpaceDepth;

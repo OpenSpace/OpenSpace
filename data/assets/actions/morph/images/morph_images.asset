@@ -1,0 +1,30 @@
+local morph_image = {
+  Identifier = "os.morph_image",
+  Name = "Morph all images",
+  Command = [[
+    if (openspace.getPropertyValue("Scene.morphing_primates_consensus_species1.Renderable.InterpolationValue") < 0.01 ) then
+      openspace.setPropertyValueSingle("Scene.morph_sequences.Renderable.InterpolationValue", 1, 5);
+      openspace.setPropertyValue("Scene.morphing_primates_consensus_species*.Renderable.InterpolationValue", 1, 5);
+    else
+      openspace.setPropertyValueSingle("Scene.morph_sequences.Renderable.InterpolationValue", 0, 5);
+      openspace.setPropertyValue("Scene.morphing_primates_consensus_species*.Renderable.InterpolationValue", 0, 5);
+    end
+  ]],
+  Documentation = [[Morph all images]],
+  GuiPath = "/morph/images",
+  IsLocal = true
+}
+asset.export("morph_image", morph_image.Identifier)
+
+asset.onInitialize(function()
+    openspace.action.registerAction(morph_image)
+  end)
+
+  asset.meta = {
+    Name = "Actions - Toggle current Trails",
+    Version = "1.0",
+    Description = "Asset providing actions to toggle trails",
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+  }

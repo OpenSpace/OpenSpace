@@ -1,0 +1,28 @@
+local show_image = {
+  Identifier = "os.show_image",
+  Name = "Show all images",
+  Command = [[
+    if (openspace.getPropertyValue("Scene.morphing_primates_consensus_species1.Renderable.Opacity") == 1.0) then
+      openspace.setPropertyValue("Scene.morphing_primates_consensus_species*.Renderable.Opacity", 0.0)
+    else
+      openspace.setPropertyValue("Scene.morphing_primates_consensus_species*.Renderable.Opacity", 1.0)
+    end
+  ]],
+  Documentation = [[Show all images]],
+  GuiPath = "/morph/images",
+  IsLocal = true
+}
+asset.export("show_image", show_image.Identifier)
+
+asset.onInitialize(function()
+    openspace.action.registerAction(show_image)
+  end)
+
+  asset.meta = {
+    Name = "Actions - Toggle current Trails",
+    Version = "1.0",
+    Description = "Asset providing actions to toggle trails",
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+  }
