@@ -336,24 +336,6 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindVertexArray(0);
-
-    // Updating bounding sphere
-    glm::vec3 maxVertex(-std::numeric_limits<float>::max());
-    glm::vec3 minVertex(std::numeric_limits<float>::max());
-
-    auto setMax = [&maxVertex, &minVertex](const TrailVBOLayout& vertexData) {
-        maxVertex.x = std::max(maxVertex.x, vertexData.x);
-        maxVertex.y = std::max(maxVertex.y, vertexData.y);
-        maxVertex.z = std::max(maxVertex.z, vertexData.z);
-
-        minVertex.x = std::min(minVertex.x, vertexData.x);
-        minVertex.y = std::min(minVertex.y, vertexData.y);
-        minVertex.z = std::min(minVertex.z, vertexData.z);
-    };
-
-    std::for_each(_vertexArray.begin(), _vertexArray.end(), setMax);
-
-    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.f);
 }
 
 RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
@@ -506,6 +488,25 @@ void RenderableTrailOrbit::fullSweep(double time) {
     _primaryRenderInformation.count = _resolution;
 
     _firstPointTime = time + secondsPerPoint;
+
+    // Updating bounding sphere
+    glm::vec3 maxVertex(-std::numeric_limits<float>::max());
+    glm::vec3 minVertex(std::numeric_limits<float>::max());
+
+    auto setMax = [&maxVertex, &minVertex](const TrailVBOLayout& vertexData) {
+        maxVertex.x = std::max(maxVertex.x, vertexData.x);
+        maxVertex.y = std::max(maxVertex.y, vertexData.y);
+        maxVertex.z = std::max(maxVertex.z, vertexData.z);
+
+        minVertex.x = std::min(minVertex.x, vertexData.x);
+        minVertex.y = std::min(minVertex.y, vertexData.y);
+        minVertex.z = std::min(minVertex.z, vertexData.z);
+    };
+
+    std::for_each(_vertexArray.begin(), _vertexArray.end(), setMax);
+
+    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.f);
+
     _needsFullSweep = false;
 }
 
