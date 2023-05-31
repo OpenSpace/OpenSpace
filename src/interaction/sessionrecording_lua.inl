@@ -72,7 +72,7 @@ namespace {
  */
 [[codegen::luawrap("startPlayback")]] void startPlaybackDefault(std::string file,
                                                                 bool loop = false,
-                                                          bool shouldWaitForTiles = false)
+                                                           bool shouldWaitForTiles = true)
 {
     using namespace openspace;
 
