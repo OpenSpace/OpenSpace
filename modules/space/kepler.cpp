@@ -608,6 +608,8 @@ std::vector<Parameters> readSbdbFile(std::filesystem::path file) {
 
     std::string line;
     std::getline(f, line);
+    // Newer versions downloaded from the JPL SBDB website have " around variables
+    line.erase(remove(line.begin(), line.end(), '\"'), line.end());
     if (line != ExpectedHeader) {
         throw ghoul::RuntimeError(fmt::format(
             "Expected JPL SBDB file to start with '{}' but found '{}' instead",
