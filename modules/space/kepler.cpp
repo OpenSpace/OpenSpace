@@ -613,7 +613,7 @@ std::vector<Parameters> readSbdbFile(std::filesystem::path file) {
     if (line != ExpectedHeader) {
         throw ghoul::RuntimeError(fmt::format(
             "Expected JPL SBDB file to start with '{}' but found '{}' instead",
-            ExpectedHeader, line
+            ExpectedHeader, line.substr(0, 100)
         ));
     }
 
