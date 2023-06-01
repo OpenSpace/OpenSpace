@@ -19,37 +19,43 @@ local band = {
         Enabled = asset.enabled
     },
     GUI = {
-        Name = "Galactic Band",
+        Name = "Galactic Equator Line",
         Path = "/Other/Lines"
     }
 }
 
+local uri = "Scene." .. band.Identifier .. ".Renderable"
+
 local showAction = {
   Identifier = "os.nightsky.show_galactic_band",
-  Name = "Show galactic band",
-  Command = [[
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 1.0, 1.0);
-  ]],
-  Documentation = "Shows the galactic band",
-  GuiPath = "/Night Sky/Lines and Grids",
+  Name = "Show galactic equator line",
+  Command = "openspace.fadeIn('" .. uri .. "')",
+  Documentation = "Shows the galactic equator line",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
   
 local hideAction = {
   Identifier = "os.nightsky.hide_galactic_band",
-  Name = "Hide galactic band",
-  Command = [[
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 0.0, 1.0);
-  ]],
-  Documentation = "Hides the galactic band",
+  Name = "Hide galactic equator line",
+  Command = "openspace.fadeOut('" .. uri .. "')",
+  Documentation = "Hides the galactic equator line",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local toggleAction = {
+  Identifier = "os.nightsky.toggle_galactic_band",
+  Name = "Toggle galactic equator line",
+  Command = "openspace.toggleFade('" .. uri .. "')",
+  Documentation = "Toggles the galactic equator line visibilty",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(band)
+  openspace.action.registerAction(toggleAction)
   openspace.action.registerAction(showAction)
   openspace.action.registerAction(hideAction)
 end)
@@ -57,9 +63,11 @@ end)
 asset.onDeinitialize(function()
   openspace.action.removeAction(hideAction)
   openspace.action.removeAction(showAction)
+  openspace.action.registerAction(toggleAction)
   openspace.removeSceneGraphNode(band)
 end)
   
 asset.export(band)
+asset.export(toggleAction)
 asset.export(showAction)
 asset.export(hideAction)

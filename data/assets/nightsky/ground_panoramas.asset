@@ -26,8 +26,8 @@ local position = {
       Latitude = 34.201639,
       Longitude = -118.171319,
       Altitude = 10.0,
-      UseCamera = true,
-      UseCameraAltitude = true
+      UseCamera = false,
+      UseCameraAltitude = false
     },
     Rotation = {
       Type = "GlobeRotation",
@@ -146,12 +146,12 @@ local showDesertAction = {
 
 local hideAction = {
   Identifier = "os.nightsky.hide_ground_pano",
-  Name = "Hide ground panorama",
+  Name = "Hide panorama",
   Command = [[
     -- same position as above
     openspace.setPropertyValueSingle('Scene.GroundPanoSphere.Renderable.Fade', 0.0, 0.5);
   ]],
-  Documentation = "Hides the ground panorama",
+  Documentation = "Hides the panorama",
   GuiPath = "/Night Sky/Panoramas",
   IsLocal = false
 }

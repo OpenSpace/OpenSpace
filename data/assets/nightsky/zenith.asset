@@ -59,35 +59,43 @@ local plane = {
   }
 }
 
+local uri = "Scene." .. plane.Identifier .. ".Renderable"
+
 local showAction = {
   Identifier = "os.nightsky.show_zenith",
   Name = "Show local zenith",
   Command = [[
-    local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
     local camera = openspace.navigation.getNavigationState();
     openspace.setParent('ZenithPosition', camera.Anchor)
     openspace.setPropertyValueSingle('Scene.ZenithPosition.Translation.Globe', camera.Anchor);
-    openspace.setPropertyValueSingle('Scene.ZenithPosition.Translation.Latitude', lat);
-    openspace.setPropertyValueSingle('Scene.ZenithPosition.Translation.Longitude', lon);
     openspace.setPropertyValueSingle('Scene.ZenithPosition.Rotation.Globe', camera.Anchor);
-    openspace.setPropertyValueSingle('Scene.ZenithPosition.Rotation.Latitude', lat);
-    openspace.setPropertyValueSingle('Scene.ZenithPosition.Rotation.Longitude', lon);
-    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 1.0, 1.0);
-  ]],
+    openspace.fadeIn(']] .. uri .. [[')
+    ]],
   Documentation = "Shows a dot for the local zenith",
-  GuiPath = "/Night Sky/Lines and Grids",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
 local hideAction = {
   Identifier = "os.nightsky.hide_zenith",
   Name = "Hide local zenith",
-  Command = [[
-    openspace.setPropertyValueSingle('Scene.ZenithDot.Renderable.Fade', 0.0, 1.0);
-  ]],
+  Command = "openspace.fadeOut('" .. uri .. "')",
   Documentation = "Hides the dot for the local zenith",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local toggleAction = {
+  Identifier = "os.nightsky.toggle_zenith",
+  Name = "Toggle local zenith",
+  Command = [[
+    local camera = openspace.navigation.getNavigationState();
+    openspace.setParent('ZenithPosition', camera.Anchor)
+    openspace.setPropertyValueSingle('Scene.ZenithPosition.Translation.Globe', camera.Anchor);
+    openspace.setPropertyValueSingle('Scene.ZenithPosition.Rotation.Globe', camera.Anchor);
+    openspace.toggleFade(']] .. uri .. [[')
+    ]],
+  Documentation = "Toggles the dot for the local zenith",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
@@ -97,9 +105,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(plane)
   openspace.action.registerAction(hideAction)
   openspace.action.registerAction(showAction)
+  openspace.action.registerAction(toggleAction)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.registerAction(toggleAction)
   openspace.action.removeAction(showAction)
   openspace.action.removeAction(hideAction)
   openspace.removeSceneGraphNode(plane)
@@ -110,3 +120,4 @@ asset.export(position)
 asset.export(plane)
 asset.export(hideAction)
 asset.export(showAction)
+asset.export(toggleAction)

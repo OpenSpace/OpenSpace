@@ -68,16 +68,14 @@ local sphere = {
   }
 }
 
+local uri = "Scene." .. sphere.Identifier .. ".Renderable"
+
+
 local showCommand = [[
-  local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
   local camera = openspace.navigation.getNavigationState();
   openspace.setParent('CardinalDirectionsPosition', camera.Anchor)
   openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Globe', camera.Anchor);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Latitude', lat);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Translation.Longitude', lon);
   openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Globe', camera.Anchor);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Latitude', lat);
-  openspace.setPropertyValueSingle('Scene.CardinalDirectionsPosition.Rotation.Longitude', lon);
   openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Enabled', true);
   openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0.0);
   openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 1.0, 1.0);
@@ -108,9 +106,7 @@ local showLettersAction = {
 local hideAction = {
   Identifier = "os.nightsky.hide_nesw",
   Name = "Hide cardinal directions",
-  Command = [[
-    openspace.setPropertyValueSingle('Scene.CardinalDirectionSphere.Renderable.Fade', 0.0, 1.0);
-  ]],
+  Command = "openspace.fadeOut('" .. uri .. "')",
   Documentation = "Hides the cardinal directions",
   GuiPath = "/Night Sky/Directions",
   IsLocal = false

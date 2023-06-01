@@ -38,9 +38,9 @@ local Venus = {
     Type = "RenderablePlaneImageLocal",
     Enabled = asset.enabled,
     Billboard = true,
-    Size = 6051900 * 500,
+    Size = 6051900 * 700,
     Texture = textures .. "glare.png",
-    MultiplyColor = { 0.608, 0.604, 0.455 },
+    MultiplyColor = { 1.0 , 0.992, 0.757 },
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
@@ -115,21 +115,11 @@ local showAction = {
   Identifier = "os.nightsky.show_night_sky_planets",
   Name = "Show night sky planets",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.NightSkyMercury.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.NightSkyVenus.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.NightSkyMars.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.NightSkyJupiter.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.NightSkySaturn.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.NightSkyMercury.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyVenus.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyMars.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyJupiter.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.NightSkySaturn.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyMercury.Renderable.Fade', 1.0, 0.25);
-    openspace.setPropertyValueSingle('Scene.NightSkyVenus.Renderable.Fade', 1.0, 0.25);
-    openspace.setPropertyValueSingle('Scene.NightSkyMars.Renderable.Fade', 1.0, 0.25);
-    openspace.setPropertyValueSingle('Scene.NightSkyJupiter.Renderable.Fade', 1.0, 0.25);
-    openspace.setPropertyValueSingle('Scene.NightSkySaturn.Renderable.Fade', 1.0, 0.25);
+    openspace.fadeIn('Scene.NightSkyMercury.Renderable')
+    openspace.fadeIn('Scene.NightSkyVenus.Renderable')
+    openspace.fadeIn('Scene.NightSkyMars.Renderable')
+    openspace.fadeIn('Scene.NightSkyJupiter.Renderable')
+    openspace.fadeIn('Scene.NightSkySaturn.Renderable')
   ]],
   Documentation = "Show night sky versions of the planets",
   GuiPath = "/Night Sky/Planets",
@@ -140,17 +130,32 @@ local hideAction = {
   Identifier = "os.nightsky.hide_night_sky_planets",
   Name = "Hide night sky planets",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.NightSkyMercury.Renderable.Fade', 0.0, 1.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyVenus.Renderable.Fade', 0.0, 1.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyMars.Renderable.Fade', 0.0, 1.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyJupiter.Renderable.Fade', 0.0, 1.0);
-    openspace.setPropertyValueSingle('Scene.NightSkySaturn.Renderable.Fade', 0.0, 1.0);
+    openspace.fadeOut('Scene.NightSkyMercury.Renderable')
+    openspace.fadeOut('Scene.NightSkyVenus.Renderable')
+    openspace.fadeOut('Scene.NightSkyMars.Renderable')
+    openspace.fadeOut('Scene.NightSkyJupiter.Renderable')
+    openspace.fadeOut('Scene.NightSkySaturn.Renderable')
   ]],
   Documentation = "Hides night sky versions of the planets",
   GuiPath = "/Night Sky/Planets",
   IsLocal = false
 }
 
+
+local toggleAction = {
+  Identifier = "os.nightsky.toggle_night_sky_planets",
+  Name = "Toggle night sky planets",
+  Command = [[
+    openspace.toggleFade('Scene.NightSkyMercury.Renderable')
+    openspace.toggleFade('Scene.NightSkyVenus.Renderable')
+    openspace.toggleFade('Scene.NightSkyMars.Renderable')
+    openspace.toggleFade('Scene.NightSkyJupiter.Renderable')
+    openspace.toggleFade('Scene.NightSkySaturn.Renderable')
+  ]],
+  Documentation = "Toggles visibility of the night sky versions of the planets",
+  GuiPath = "/Night Sky/Planets",
+  IsLocal = false
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mercury)
@@ -160,9 +165,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Saturn)
   openspace.action.registerAction(showAction)
   openspace.action.registerAction(hideAction)
+  openspace.action.registerAction(toggleAction)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(toggleAction)
   openspace.action.removeAction(hideAction)
   openspace.action.removeAction(showAction)
   openspace.removeSceneGraphNode(Saturn)

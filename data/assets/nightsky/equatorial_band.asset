@@ -34,37 +34,46 @@ local line = {
   }
 }
 
+
+local uri = "Scene." .. line.Identifier .. ".Renderable"
+
 local showLineAction = {
   Identifier = "os.nightsky.show_equatorial_line",
   Name = "Show equatorial line",
-  Command = [[
-    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Fade', 1.0, 1.0);
-  ]],
+  Command = "openspace.fadeIn('" .. uri .. "')",
   Documentation = "Shows the equatorial line",
-  GuiPath = "/Night Sky/Lines and Grids",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
 local hideLineAction = {
   Identifier = "os.nightsky.hide_equatorial_line",
   Name = "Hide equatorial line",
-  Command = [[
-    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Fade', 0.0, 1.0);
-  ]],
+  Command = "openspace.fadeOut('" .. uri .. "')",
   Documentation = "Hides the equatorial line",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local toggleLineAction = {
+  Identifier = "os.nightsky.toggle_equatorial_line",
+  Name = "Toggle equatorial line",
+  Command = "openspace.toggleFade('" .. uri .. "')",
+  Documentation = "Toggles the equatorial line visibilty",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(line)
   openspace.action.registerAction(showLineAction)
   openspace.action.registerAction(hideLineAction)
+  openspace.action.registerAction(toggleLineAction)
 end)
   
 asset.onDeinitialize(function()
+  openspace.action.removeAction(toggleLineAction)
   openspace.action.removeAction(hideLineAction)
   openspace.action.removeAction(showLineAction)
   openspace.removeSceneGraphNode(line)
@@ -73,3 +82,4 @@ end)
 asset.export(line)
 asset.export(showLineAction)
 asset.export(hideLineAction)
+asset.export(toggleLineAction)

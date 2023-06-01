@@ -4,7 +4,7 @@ local textures = asset.syncedResource({
   Name = "Ecliptic Band Textures",
   Type = "HttpSynchronization",
   Identifier = "ecliptic_band_textures",
-  Version = 1
+  Version = 2
 })
 
 local eclipticRotationMatrix = {
@@ -52,7 +52,7 @@ local band = {
   },
   Renderable = {
     Type = "RenderableSphere",
-    Texture = textures .. "band.png",
+    Texture = textures .. "band2x.png",
     Size = 4.28601E17,
     Segments = 50,
     DisableFadeInOut = true,
@@ -66,50 +66,61 @@ local band = {
   }
 }
 
+local uri = "Scene." .. line.Identifier .. ".Renderable"
+
 local showLineAction = {
   Identifier = "os.nightsky.show_ecliptic_line",
   Name = "Show ecliptic line",
-  Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticLine.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.EclipticLine.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.EclipticLine.Renderable.Fade', 1.0, 1.0);
-  ]],
+  Command = "openspace.fadeIn('" .. uri .. "')",
   Documentation = "Shows the ecliptic line",
-  GuiPath = "/Night Sky/Lines and Grids",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
 local hideLineAction = {
   Identifier = "os.nightsky.hide_ecliptic_line",
   Name = "Hide ecliptic line",
-  Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticLine.Renderable.Fade', 0.0, 1.0);
-  ]],
+  Command = "openspace.fadeOut('" .. uri .. "')",
   Documentation = "Hides the ecliptic line",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local toggleLineAction = {
+  Identifier = "os.nightsky.toggle_ecliptic_line",
+  Name = "Toggle ecliptic line",
+  Command = "openspace.toggleFade('" .. uri .. "')",
+  Documentation = "Toggles the ecliptic line visibilty",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
 
+uri = "Scene." .. band.Identifier .. ".Renderable"
+
+
 local showBandAction = {
   Identifier = "os.nightsky.show_ecliptic_band",
   Name = "Show ecliptic band",
-  Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 1.0, 1.0);
-  ]],
+  Command = "openspace.fadeIn('" .. uri .. "')",
   Documentation = "Shows the ecliptic band",
-  GuiPath = "/Night Sky/Lines and Grids",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
   IsLocal = false
 }
 
 local hideBandAction = {
   Identifier = "os.nightsky.hide_ecliptic_band",
   Name = "Hide ecliptic band",
-  Command = [[
-    openspace.setPropertyValueSingle('Scene.EclipticBand.Renderable.Fade', 0.0, 1.0);
-  ]],
+  Command = "openspace.fadeOut('" .. uri .. "')",
   Documentation = "Hides the ecliptic band",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local toggleBandAction = {
+  Identifier = "os.nightsky.toggle_ecliptic_band",
+  Name = "Toggle ecliptic band",
+  Command = "openspace.toggleFade('" .. uri .. "')",
+  Documentation = "Toggles the ecliptic band visibilty",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
@@ -119,13 +130,17 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(band)
   openspace.action.registerAction(showLineAction)
   openspace.action.registerAction(hideLineAction)
+  openspace.action.registerAction(toggleLineAction)
   openspace.action.registerAction(showBandAction)
   openspace.action.registerAction(hideBandAction)
+  openspace.action.registerAction(toggleBandAction)
 end)
   
 asset.onDeinitialize(function()
+  openspace.action.removeAction(toggleLineAction)
   openspace.action.removeAction(hideLineAction)
   openspace.action.removeAction(showLineAction)
+  openspace.action.removeAction(toggleBandAction)
   openspace.action.removeAction(hideBandAction)
   openspace.action.removeAction(showBandAction)
   openspace.removeSceneGraphNode(band)
@@ -136,5 +151,7 @@ asset.export(band)
 asset.export(line)
 asset.export(showLineAction)
 asset.export(hideLineAction)
+asset.export(toggleLineAction)
 asset.export(showBandAction)
 asset.export(hideBandAction)
+asset.export(toggleBandAction)
