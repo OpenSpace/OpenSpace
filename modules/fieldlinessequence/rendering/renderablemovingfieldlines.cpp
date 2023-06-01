@@ -1086,14 +1086,26 @@ namespace openspace {
                 accuracy
             );
 
+
+        // GET NIGHTSIDE POINTS IN DEVELOPMENT
+        bool success = fls::findAndAddNightsideSeedPoints(
+            seedPoints,
+            birthTimes,
+            kameleon.get(),
+            _tracingVariable,
+            _nPointsOnPathLine
+            );
+
         //Hardcoded adding of nightside seedpoints
         //TODO: Make dynamic
         std::filesystem::path filePathNightside = "C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/nightside.txt";
 
+        /* NIGHTSIDE
+        std::filesystem::path filePathNightside = "C:/Dev/OpenSpaceLocalData/nightside.txt";
         double startTimeNightside = 0.0;
-
         std::tuple<std::vector<glm::vec3>, std::vector<double>> nightsideSeedpoints =
             extractSeedPointsFromFile(filePathNightside, seedPoints, birthTimes, startTimeNightside);
+        */
 
         /*std::ofstream output_file("C:/Users/alundkvi/Documents/DataOpenSpace/simon&maans/ON_MODIFIERAD.txt");
 
@@ -1111,6 +1123,7 @@ namespace openspace {
 
         // ALGORITHM
         // TODO: remove just for testing
+
          for (int i = 0; i < seedPoints.size(); i++)
         {
             std::cout << "seedpoint " << i << ": " << seedPoints[i].first << std::endl;
