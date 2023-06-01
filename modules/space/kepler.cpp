@@ -262,12 +262,9 @@ namespace {
         size_t nDashes = std::count_if(
             epoch.begin(),
             epoch.end(),
-            []( char c ) {return c =='-';}
+            [](char c) { return c == '-'; }
         );
-        std::string formatString = "{:4}{:2}{:2}{}";
-        if (nDashes == 2) {
-            formatString = "{:4}-{:2}-{:2}{}";
-        }
+        std::string formatString = (nDashes == 2) ? "{:4}-{:2}-{:2}{}" : "{:4}{:2}{:2}{}";
         auto [res, year, monthNum, dayOfMonthNum, fractionOfDay] =
             scn::scan_tuple<int, int, int, double>(e, formatString);
         if (!res) {
