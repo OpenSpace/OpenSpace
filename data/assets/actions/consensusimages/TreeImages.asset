@@ -1,0 +1,29 @@
+local treeImages = {
+    Identifier = "os.treeImages",
+    Name = "Turn on and off Tree Images",
+    Command = [[
+      if (openspace.getPropertyValue("Scene.tree_images1.Renderable.Opacity") == 1.0) then
+        openspace.setPropertyValue("Scene.tree_images*.Renderable.Opacity", 0.0)
+      else
+        openspace.setPropertyValue("Scene.tree_images*.Renderable.Opacity", 1.0)
+      end
+    ]],
+    Documentation = [[Turn on and off Primates Tree Images]],
+    GuiPath = "/ConsensusImages",
+    IsLocal = true
+  }
+  asset.export("treeImages", treeImages.Identifier)
+  
+  asset.onInitialize(function()
+      openspace.action.registerAction(treeImages)
+    end)
+  
+    asset.meta = {
+      Name = "Actions - Toggle current Trails",
+      Version = "1.0",
+      Description = "Asset providing actions to toggle trails",
+      Author = "OpenSpace Team",
+      URL = "http://openspaceproject.com",
+      License = "MIT license"
+    }
+  

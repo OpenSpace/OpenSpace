@@ -645,8 +645,8 @@ namespace openspace {
         speck::Dataset d1_copy;
         speck::Dataset d2_copy;
         bool found;
-        bool add_item;
 
+        // Merge d1 and d2
         for (int i = 0; i < d1.entries.size(); i++) {
             found = false;
             for (int j = 0; j < d2.entries.size(); j++) {
@@ -663,19 +663,25 @@ namespace openspace {
             }
         }
 
+        // Add unique items from d2 to d1_copy and d2_copy
         for (int i = 0; i < d2.entries.size(); i++) {
-            add_item = true;
+            found = false;
             for (int j = 0; j < d1.entries.size(); j++) {
                 if (d1.entries[j].comment == d2.entries[i].comment) {
-                    add_item = false;
+                    found = true;
                     break;
                 }
             }
-            if (add_item) {
+            if (!found) {
                 d1_copy.entries.push_back(d2.entries[i]);
                 d2_copy.entries.push_back(d2.entries[i]);
             }
         }
+
+
+        // Sort the merged dataset if needed
+
+        // Assign the sorted datasets to _dataSetOne and _dataSetTwo
         _dataSetOne = d1_copy;
         _dataSetTwo = d2_copy;
     }
