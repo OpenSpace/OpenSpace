@@ -180,7 +180,9 @@ namespace openspace::fls {
         return isSuccessful;
     }
 
-    bool findAndAddNightsideSeedPoints (
+    //
+
+    std::vector<std::pair<glm::vec3, std::string>> findAndAddNightsideSeedPoints (
         std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
         std::vector<double>& birthTimes,
         ccmc::Kameleon* kameleon,
@@ -189,6 +191,12 @@ namespace openspace::fls {
     )
     {
         // initialize
+        std::vector<std::pair<glm::vec3, std::string>> nightsideSeedPoints;
+        glm::vec3 imfSeedPointNightside;
+        glm::vec3 closedSeedPointNightside;
+        glm::vec3 onSeedPointNightside;
+        glm::vec3 osSeedPointNightside;
+
         if (tracingVar != "u_perp_b") {
             std::cout << "aint working " << std::endl;
         }
@@ -216,9 +224,9 @@ namespace openspace::fls {
         for (int i = 0; i < seedPoints.size(); i++)
         {
             // for each seed point with the topology open north
-            // lets try and find corresponding nightside seed points
             if (seedPoints[i].second == "OPEN_NORTH")
             {
+                // lets try and find corresponding nightside seed points
 
                 // first, lets trace the open north seed points fieldline
                 std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
@@ -228,10 +236,10 @@ namespace openspace::fls {
                     2
                 );
 
-                // now, lets figure out the edge position of the fieldline
+                // now, lets figure out the edge position of that fieldline
                 glm::vec3 firstPosOfFieldline = fieldlinePositions[0];
 
-                // create a flowline from out new point
+                // trace a flowline from the new point/edge position
                 ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
                     tracingVar,
                     tracer,
@@ -239,24 +247,19 @@ namespace openspace::fls {
                     testNPoints,
                     ccmc::Tracer::Direction::FOWARD);
 
-                // find the last open north fieldline and first IMF of the traced flowline
-                // lets call these fieldlines LONFIMF
-                // trace flowlines from seed point
-                //std::vector<std::vector<glm::vec3>> lonfimfPoints;
-                std::vector<std::vector<glm::vec3>> lastON;
-                std::vector<std::vector<glm::vec3>> firstIMF;
-
                 std::vector<glm::vec3> flowlinePositions
                     = getPositionsFromLine(flowline);
 
+                // find the last open north fieldline and first IMF of the traced flowline
+                std::vector<std::vector<glm::vec3>> lastON;
+                std::vector<std::vector<glm::vec3>> firstIMF;
+
                 std::string previousTopology = "";
-                bool doNotAddFieldline = false;
                 int indexFlowlinePos = 0;
 
-
-                while (indexFlowlinePos < flowlinePositions.size() - 1 && previousTopology != "IMF")
+                while (indexFlowlinePos < flowlinePositions.size() - 1)
                 {
-                    std::cout << "Checking " << indexFlowlinePos + 1 << " position on flowline" << std::endl;
+                    std::cout << "Checking fieldline topology of the " << indexFlowlinePos + 1 << " point out of " << flowlinePositions.size() << " on the flowline" << std::endl;
 
                     std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
                         flowlinePositions[indexFlowlinePos + 1],
@@ -265,7 +268,9 @@ namespace openspace::fls {
                         2
                     );
 
-                    // check if IMF
+                    std::cout << fieldlinePositions[0].z << std::endl;
+
+                    // check if traced fieldline is IMF
                     if (fieldlinePositions[0].z < 0 || fieldlinePositions[fieldlinePositions.size() - 1].z < 0)
                     {
                         if (previousTopology == "OPEN_NORTH")
@@ -274,35 +279,32 @@ namespace openspace::fls {
                                 flowlinePositions[indexFlowlinePos + 1],
                                 kameleon,
                                 innerBoundaryLimit,
-                                testNPoints + 1000
+                                testNPoints
                             );
 
                             std::vector<glm::vec3> fieldlinePositionsON = fls::getFieldlinePositions(
-                                flowlinePositions[indexFlowlinePos + 1 - 1],
+                                flowlinePositions[indexFlowlinePos],
                                 kameleon,
                                 innerBoundaryLimit,
-                                testNPoints + 1000
+                                testNPoints
                             );
                             lastON.push_back(fieldlinePositionsON);
                             firstIMF.push_back(fieldlinePositionsIMF);
-                            previousTopology = "IMF"; // or break
+                            break;
                         }
                     }
                     else {
                         previousTopology = "OPEN_NORTH";
                     }
-
                     indexFlowlinePos++;
                 }
 
                 std::cout << "Finding last ON and first IMF - Complete" << std::endl;
                 std::cout << "Finding IMF Nightside Seed Point" << std::endl;
 
-                // 1. Find IMF point
                 float leastXValue = -1000;
-                glm::vec3 leastXValuePos;
 
-                // find point with least x-value
+                // find point on the imf with smallest x-value (closest to earth)
                 for (int i = 0; i < firstIMF.size(); i++)
                 {
                     for (int j = 0; j < testNPoints; j++)
@@ -310,21 +312,17 @@ namespace openspace::fls {
                         if (firstIMF[i][j].x > leastXValue)
                         {
                             leastXValue = firstIMF[i][j].x;
-                            leastXValuePos = firstIMF[i][j];
+                            imfSeedPointNightside = firstIMF[i][j];
                         }
                     }
                 }
 
                 std::cout << "Finding IMF Nightside Seed Point - Complete" << std::endl;
-
-                // 2. Find ON point
-                // (Closest point on the on fiedline to the leastXValuePos)
-
                 std::cout << "Finding ON Nightside Seed Point" << std::endl;
 
                 double shortestDistance = 1000;
-                glm::vec3 shortestDistancePos;
 
+                // find point on the on fieldline closest to the imfNightsideSeedPoint
                 for (int i = 0; i < lastON.size(); i++)
                 {
                     for (int j = 0; j < testNPoints; j++)
@@ -335,38 +333,28 @@ namespace openspace::fls {
                             lastON[i][j].x,
                             lastON[i][j].y,
                             lastON[i][j].z,
-                            leastXValuePos.x,
-                            leastXValuePos.y,
-                            leastXValuePos.z
+                            imfSeedPointNightside.x,
+                            imfSeedPointNightside.y,
+                            imfSeedPointNightside.z
                         );
 
                         if (distance < shortestDistance)
                         {
                             shortestDistance = distance;
-                            shortestDistancePos = lastON[i][j];
+                            onSeedPointNightside = lastON[i][j];
                         }
                     }
                 }
 
                 std::cout << "Finding ON Nightside Seed Point - Complete" << std::endl;
-
                 std::cout << "Finding OS Nightside Seed Point" << std::endl;
 
-                // 3. Find OS seed point
-                // find this point by mirroring the ON seed point in the z-axis
-
-                glm::vec3 OSSeedPoint;
-
-                OSSeedPoint = shortestDistancePos;
-                OSSeedPoint.z = shortestDistancePos.z * -1;
+                osSeedPointNightside = onSeedPointNightside;
+                osSeedPointNightside.z = onSeedPointNightside.z * -1;
 
                 std::cout << "Finding OS Nightside Seed Point - Complete" << std::endl;
-
                 std::cout << "Finding Closed Nightside Seed Point" << std::endl;
-                // 4. Find the closed seed point
-                // find this by stepping closer towards earth (0, 0, 0)
-                // let the other seed points follow the same vector
-                glm::vec3 closedSeedPoint;
+
                 double factor = 0.01;
 
                 glm::vec3 earthPos;
@@ -375,38 +363,46 @@ namespace openspace::fls {
                 earthPos.z = 0;
 
                 glm::vec3 vectorIE;
-                vectorIE.x = leastXValuePos.x - earthPos.x;
-                vectorIE.y = leastXValuePos.y - earthPos.y;
-                vectorIE.z = leastXValuePos.z - earthPos.z;
+                vectorIE.x = imfSeedPointNightside.x - earthPos.x;
+                vectorIE.y = imfSeedPointNightside.y - earthPos.y;
+                vectorIE.z = imfSeedPointNightside.z - earthPos.z;
 
-                closedSeedPoint.x = leastXValuePos.x - vectorIE.x * 0.06;
-                closedSeedPoint.y = leastXValuePos.y - vectorIE.y * 0.06;
-                closedSeedPoint.z = leastXValuePos.z - vectorIE.z * 0.06;
+                closedSeedPointNightside.x = imfSeedPointNightside.x - vectorIE.x * 0.06;
+                closedSeedPointNightside.y = imfSeedPointNightside.y - vectorIE.y * 0.06;
+                closedSeedPointNightside.z = imfSeedPointNightside.z - vectorIE.z * 0.06;
 
-                while (closedSeedPoint.x < 0)
+                while (closedSeedPointNightside.x < 0)
                 {
                     // move seed point towards earh
-                    closedSeedPoint.x = closedSeedPoint.x - vectorIE.x * factor;
-                    closedSeedPoint.y = closedSeedPoint.y - vectorIE.y * factor;
-                    closedSeedPoint.z = closedSeedPoint.z - vectorIE.z * factor;
+                    closedSeedPointNightside.x = closedSeedPointNightside.x - vectorIE.x * factor;
+                    closedSeedPointNightside.y = closedSeedPointNightside.y - vectorIE.y * factor;
+                    closedSeedPointNightside.z = closedSeedPointNightside.z - vectorIE.z * factor;
 
                     // trace fieldline from closedSeedPoint
                     std::vector<glm::vec3> fieldlinePositions = fls::getFieldlinePositions(
-                        closedSeedPoint,
+                        closedSeedPointNightside,
                         kameleon,
                         innerBoundaryLimit,
                         2
                     );
 
+                    std::cout << "Moving closed seed point closer to Earth " <<
+                        closedSeedPointNightside.x << std::endl;
+
                     // check if closed
                     if (checkIfFieldlineIsClosed(fieldlinePositions))
                     {
+
+                        std::cout << "Closed seed point traced closed fieldline "
+                            << std::endl;
+
+                        std::cout << "Checking so all points on flowline traces closed fiedlines" << std::endl;
 
                         // trace flowline
                         ccmc::Fieldline flowline = traceAndCreateMappedPathLine(
                             tracingVar,
                             tracer,
-                            closedSeedPoint,
+                            closedSeedPointNightside,
                             100,
                             ccmc::Tracer::Direction::FOWARD);
 
@@ -417,7 +413,7 @@ namespace openspace::fls {
                         bool closedSeedPointIsClosedFieldline = true;
                         int indexFlowlinePos2 = 0;
 
-                        while (closedSeedPointIsClosedFieldline && indexFlowlinePos2 < 98)
+                        while (closedSeedPointIsClosedFieldline && indexFlowlinePos2 < 99)
                         {
                             // trace fieldline from closedSeedPoint
                             std::vector<glm::vec3> fieldlinePositions2 = fls::getFieldlinePositions(
@@ -430,8 +426,13 @@ namespace openspace::fls {
                             if (!checkIfFieldlineIsClosed(fieldlinePositions2))
                             {
                                 closedSeedPointIsClosedFieldline = false;
+                                std::cout << indexFlowlinePos2 <<
+                                    "point out of " << "99" << " not approved" << std::endl;
+                                break;
                             }
 
+                            std::cout << indexFlowlinePos2 <<
+                                "point out of " << "99" << " approved" << std::endl;
                             indexFlowlinePos2++;
                         }
 
@@ -444,14 +445,23 @@ namespace openspace::fls {
                     }
                 }
 
-                seedPoints.push_back({ shortestDistancePos, "null" });
-                seedPoints.push_back({ OSSeedPoint, "null" });
-                seedPoints.push_back({ leastXValuePos, "null" });
-                seedPoints.push_back({ closedSeedPoint, "null" });
+                nightsideSeedPoints.push_back({ onSeedPointNightside, "OPEN_NORTH" });
+                nightsideSeedPoints.push_back({ osSeedPointNightside, "OPEN_NORTH" });
+                nightsideSeedPoints.push_back({ imfSeedPointNightside, "IMF" });
+                nightsideSeedPoints.push_back({ closedSeedPointNightside, "CLOSED" });
+            }
+        }
+
+        // add nightside seedpoints to seedPoints that will enter the rendering phace
+        for (int i = 0; i < nightsideSeedPoints.size(); i++)
+        {
+            seedPoints.push_back(nightsideSeedPoints[i]);
+            if ((i+1) % 4 == 0)
+            {
                 birthTimes.push_back(-28000);
             }
         }
-        return true;
+        return nightsideSeedPoints;
     }
 
     double calculateDistance(double x1, double y1, double z1, double x2, double y2, double z2) {

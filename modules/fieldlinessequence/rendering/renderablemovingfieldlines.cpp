@@ -1039,7 +1039,6 @@ namespace openspace {
                 fmt::format("SeedPointFile needs to be a .csv file"));
         }
 
-        // input parameters:
         std::vector<RenderableMovingFieldlines::SetOfSeedPoints> setOfSeedpoints =
             extractSeedPointsFromCSVFile(filePath);
 
@@ -1086,14 +1085,13 @@ namespace openspace {
                 accuracy
             );
 
-
-        // GET NIGHTSIDE POINTS IN DEVELOPMENT
-        bool success = fls::findAndAddNightsideSeedPoints(
-            seedPoints,
-            birthTimes,
-            kameleon.get(),
-            _tracingVariable,
-            _nPointsOnPathLine
+        std::vector<std::pair<glm::vec3, std::string>> nightsideSeedPoints =
+            fls::findAndAddNightsideSeedPoints(
+                seedPoints,
+                birthTimes,
+                kameleon.get(),
+                _tracingVariable,
+                _nPointsOnPathLine
             );
 
         //Hardcoded adding of nightside seedpoints
@@ -1124,6 +1122,8 @@ namespace openspace {
         // ALGORITHM
         // TODO: remove just for testing
 
+        // See the selected and modified seed points
+        // TODO: REMOVE
          for (int i = 0; i < seedPoints.size(); i++)
         {
             std::cout << "seedpoint " << i << ": " << seedPoints[i].first << std::endl;

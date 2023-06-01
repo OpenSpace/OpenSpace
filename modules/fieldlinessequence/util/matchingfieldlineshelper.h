@@ -60,7 +60,7 @@ namespace openspace {
             std::vector<std::string>& seedPointsTopology*/
         );
 
-        bool findAndAddNightsideSeedPoints(
+        std::vector<std::pair<glm::vec3, std::string>> findAndAddNightsideSeedPoints(
             std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
             std::vector<double>& birthTimes,
             ccmc::Kameleon* kameleon,
