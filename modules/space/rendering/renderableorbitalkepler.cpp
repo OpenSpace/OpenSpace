@@ -290,14 +290,11 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 
     glLineWidth(_appearance.lineWidth);
 
-    const size_t nrOrbits = _segmentSize.size();
-    gl::GLint vertices = 0;
-
     //glDepthMask(false);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE)
 
-    GLint* _si = &_startIndex[0];
-    GLint* _ss = &_segmentSize[0];
+    GLint* _si = _startIndex.data();
+    GLint* _ss = _segmentSize.data();
 
     glBindVertexArray(_vertexArray);
     glMultiDrawArrays(GL_LINE_STRIP, _si, _ss, static_cast<GLsizei>(_startIndex.size()));
