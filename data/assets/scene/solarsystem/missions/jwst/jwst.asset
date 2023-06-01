@@ -1,11 +1,9 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./actions")
 asset.require("./mission")
-
-
+local sun = asset.require("scene/solarsystem/sun/sun")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
 
 
 

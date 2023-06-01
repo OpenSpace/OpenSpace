@@ -3,7 +3,6 @@ local transforms = asset.require("./transforms")
 
 
 
-
 local model = asset.syncedResource({
   Name = "JUICE Model",
   Type = "HttpSynchronization",

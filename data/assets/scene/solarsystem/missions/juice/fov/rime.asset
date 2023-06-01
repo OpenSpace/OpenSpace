@@ -3,7 +3,6 @@ local kernels = asset.require("../kernels")
 
 
 
-
 -- Circle shapes are not support
 local RimeBase = {
   Identifier = "JuiceRimeBase",

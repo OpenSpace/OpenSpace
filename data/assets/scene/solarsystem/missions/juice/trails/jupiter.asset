@@ -3,7 +3,6 @@ local kernels = asset.require("../kernels")
 
 
 
-
 local JuiceTrailJupiter = {
   Identifier = "JuiceTrailJupiter",
   Parent = transforms.JupiterBarycenter.Identifier,

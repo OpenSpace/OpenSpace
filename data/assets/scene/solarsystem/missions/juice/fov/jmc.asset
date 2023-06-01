@@ -3,7 +3,6 @@ local kernels = asset.require("../kernels")
 
 
 
-
 local JMC1 = {
   Identifier = "JuiceJMC1",
   Parent = transforms.Juice.Identifier,

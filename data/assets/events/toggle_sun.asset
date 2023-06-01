@@ -59,7 +59,6 @@ asset.export("ToggleSun", ToggleSun.Identifier)
 
 
 
-
 asset.meta = {
   Name = "Actions - Toggle current Trails",
   Version = "1.0",

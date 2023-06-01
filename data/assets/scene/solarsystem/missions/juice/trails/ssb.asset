@@ -3,7 +3,6 @@ local kernels = asset.require("../kernels")
 
 
 
-
 local JuiceTrail = {
   Identifier = "JuiceTrail",
   Parent = transforms.SolarSystemBarycenter.Identifier,

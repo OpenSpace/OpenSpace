@@ -3,7 +3,6 @@ local kernels = asset.require("../kernels")
 
 
 
-
 local MajisVisnir = {
   Identifier = "JuiceMajisVisnir",
   Parent = transforms.Juice.Identifier,

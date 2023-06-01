@@ -2,8 +2,6 @@ local transforms = asset.require("./transforms")
 
 
 
-
-
 -- Datasets created using the script found at:
 -- https://github.com/OpenSpace/scripts/tree/master/juice-gphio-image-conversion
 local data = asset.syncedResource({

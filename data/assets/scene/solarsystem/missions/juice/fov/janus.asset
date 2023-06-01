@@ -3,7 +3,6 @@ local kernels = asset.require("../kernels")
 
 
 
-
 local Janus = {
   Identifier = "JuiceJanus",
   Parent = transforms.Juice.Identifier,

@@ -3,7 +3,6 @@ local kernels = asset.require("../kernels")
 
 
 
-
 local Gala = {
   Identifier = "JuiceGala",
   Parent = transforms.Juice.Identifier,
