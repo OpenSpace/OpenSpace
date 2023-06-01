@@ -27,16 +27,12 @@
 in float vs_screenSpaceDepth;
 in vec4 vs_positionViewSpace;
 in vec3 vs_positionModelSpace;
-
-uniform float lineBrightness;
+in vec3 linecolor;
 
 Fragment getFragment() {
-  Fragment frag;
+  Fragment frag; 
 
-  // Set the line color based on the brightness
-  vec3 lineColor = vec3(lineBrightness);
-
-  frag.color = vec4(lineColor, 1.0);
+  frag.color = vec4(linecolor, 1.0);
 
   frag.depth = vs_screenSpaceDepth;
   frag.gPosition = vs_positionViewSpace;

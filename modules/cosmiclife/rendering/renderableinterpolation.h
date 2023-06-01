@@ -168,12 +168,6 @@ namespace openspace {
         std::vector<Vertex> _vertices1;
         std::vector<Vertex> _vertices2;
 
-        std::vector<float> _lineBrightness;
-
-        // Gradient colors
-        float _darkestIntensity = 0.25f;
-        float _brightestIntensity = 1.0f;
-
         ghoul::opengl::Texture* _spriteTexture = nullptr;
         ghoul::opengl::ProgramObject* _program = nullptr;
         ghoul::opengl::ProgramObject* _programL = nullptr;

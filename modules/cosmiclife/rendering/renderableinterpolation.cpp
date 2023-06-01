@@ -432,6 +432,7 @@ namespace openspace {
 
                          _vertices1 = _distanceHolders[i].v1;
                          _vertices2 = _distanceHolders[i].v2;
+
                      }
 
                      if (_vertices1.empty()) {
@@ -639,8 +640,6 @@ namespace openspace {
 
         std::priority_queue<DistancePoints> maxHeap1;
         std::priority_queue<DistancePoints> maxHeap2;
-
-        _lineBrightness.clear();
             
         for (int i = 0; i < d1.entries.size(); i++) {
             // Find the points of interest
@@ -664,18 +663,13 @@ namespace openspace {
         // Find the top % and take their indices to get the correct point in the datasets
         int numElementsToPop = maxHeap1.size() * _percentageOfLines;
 
-        // Get the maximum diff 
-        DistancePoints topDiff = maxHeap1.top();
-        float maxLength = topDiff.distance;
+        int halfWayIndex = numElementsToPop / 2;
 
         // Pop the top 10% elements from the max heap and store their indices
         for (int k = 0; k < numElementsToPop; k++) {
             
             DistancePoints maxValue1 = maxHeap1.top();
             maxHeap1.pop();
-
-            float brightness = maxValue1.distance / maxLength;
-            _lineBrightness.push_back(brightness);
 
             v1.push_back(Vertex{ maxValue1.p1.position.x, maxValue1.p1.position.y, maxValue1.p1.position.z });
             v1.push_back(Vertex{ maxValue1.p2.position.x, maxValue1.p2.position.y, maxValue1.p2.position.z });
@@ -771,7 +765,7 @@ namespace openspace {
 
         auto vertexPair = ComputeOutliers(d.begin()->second, d.rbegin()->second);
 
-        _distanceHolders.push_back(DistanceHolders{ d.begin()->first, d.rbegin()->first, vertexPair.first, vertexPair.second});
+        _distanceHolders.push_back(DistanceHolders{ d.begin()->first, d.rbegin()->first, vertexPair.first, vertexPair.second });
 
     }
 
@@ -1007,6 +1001,8 @@ namespace openspace {
 
             _programL->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
             _programL->setUniform("projectionTransform", data.camera.projectionMatrix());
+
+            
 
             // Changes GL state:
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
