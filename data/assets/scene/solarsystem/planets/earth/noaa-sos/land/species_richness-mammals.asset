@@ -47,16 +47,16 @@ local Labels = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer8192)
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerWithBackground)
   openspace.addScreenSpaceRenderable(Labels)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer8192)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerWithBackground)
   openspace.removeScreenSpaceRenderable(Labels)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerWithBackground)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer8192)
 end)
 
 asset.export(Layer8192)

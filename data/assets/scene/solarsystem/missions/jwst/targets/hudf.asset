@@ -5,7 +5,7 @@ local hudf = asset.require("./hudf_image")
 
 
 
-local Distance = 9.2E15;
+local Distance = 9.2E15
 
 -- ra = 3h32m38.92s
 -- dec = -27d47m29.37s
@@ -29,7 +29,7 @@ local HUDFPosition = {
     Hidden = true,
     Description = [[
       Galactic cartesian position for the Hubble Ultra Deep Field
-    ]],
+    ]]
   }
 }
 
@@ -47,7 +47,7 @@ local HUDFImage = {
   Description = [[
     Image of the Hubble Ultra Deep Field by NASA, ESA, and S. Beckwith (STScI) and
     the HUDF Team.
-  ]],
+  ]]
 }
 
 local HUDFJWSTLine = {
@@ -71,7 +71,7 @@ local HUDFJWSTLine = {
     Path = "/Solar System/Missions/JWST/HUDF",
     Description = [[
       Line from the James Webb Space Telescope to the Hubble Ultra Deep Field
-    ]],
+    ]]
   }
 }
 

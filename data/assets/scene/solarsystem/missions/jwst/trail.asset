@@ -1,7 +1,7 @@
+asset.require("spice/base")
 local transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/L2")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-asset.require("spice/base")
 
 
 
@@ -34,8 +34,7 @@ local JWSTTrailLaunch = {
       Type = "SpiceTranslation",
       Target = 170, -- JWST
       Observer = "EARTH",
-      Frame = "IAU_EARTH",
-      Kernels = { kernels .. "webb.bsp" }
+      Frame = "IAU_EARTH"
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = LaunchTime,
@@ -67,8 +66,7 @@ local JWSTTrailCruise = {
       Type = "SpiceTranslation",
       Target = 170, -- JWST
       Observer = "EARTH",
-      Frame = "GALACTIC",
-      Kernels = { kernels .. "webb.bsp" }
+      Frame = "GALACTIC"
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = DetachTime,
@@ -101,8 +99,7 @@ local JWSTTrailOrbit = {
       Type = "SpiceTranslation",
       Target = 170, -- JWST
       Observer = 392, -- L2
-      Frame = "GALACTIC",
-      Kernels = { kernels .. "webb.bsp" }
+      Frame = "GALACTIC"
     },
     Color = { 0.863, 0.0, 0.902 },
     Period = 182.621099, -- About 6 months
@@ -133,8 +130,7 @@ local JWSTTrailCoRevOrbit = {
       Type = "SpiceTranslation",
       Target = 170, -- JWST
       Observer = 392, -- L2
-      Frame = "L2_COREV",
-      Kernels = { kernels .. "webb.bsp" }
+      Frame = "L2_COREV"
     },
     Color = { 1.0, 0.663, 0.157 },
     Period = 365.242198, -- About a year, 2 orbits. 1 orbit would be 182.621099 (6 months)
@@ -163,8 +159,7 @@ local JWSTSunTrail = {
       Type = "SpiceTranslation",
       Target = 170, -- JWST
       Observer = "SSB",
-      Frame = "GALACTIC",
-      Kernels = { kernels .. "webb.bsp" }
+      Frame = "GALACTIC"
     },
     Color = { 0.0, 0.9, 0.9 },
     Period = 365.242,
@@ -181,6 +176,8 @@ local JWSTSunTrail = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "webb.bsp")
+
   openspace.addSceneGraphNode(JWSTTrailLaunch)
   openspace.addSceneGraphNode(JWSTTrailCruise)
   openspace.addSceneGraphNode(JWSTTrailOrbit)
@@ -194,6 +191,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTTrailOrbit)
   openspace.removeSceneGraphNode(JWSTTrailCruise)
   openspace.removeSceneGraphNode(JWSTTrailLaunch)
+
+  openspace.spice.unloadKernel(kernels .. "webb.bsp")
 end)
 
 asset.export(JWSTTrailLaunch)

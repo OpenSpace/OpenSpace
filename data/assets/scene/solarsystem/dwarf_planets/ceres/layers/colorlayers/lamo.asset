@@ -6,10 +6,11 @@ local Layer = {
   Identifier = "LAMO_Sweden",
   Name = "LAMO [Sweden]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource('LAMO.wms'),
+  FilePath = asset.localResource("lamo.wms")
 }
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globe.Ceres.Identifier, "ColorLayers", Layer)
 end)
 

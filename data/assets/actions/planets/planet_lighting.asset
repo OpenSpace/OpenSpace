@@ -43,7 +43,7 @@ end]]
   return commandString
 end
 
-local function illuminationAction(node, node_lower, global)
+local function illuminationAction(node, nodeLower, global)
   local actionString = "_standard_illumination"
   local actionName = "standard illumination"
   local actionCommand = illuminationCommand(node, global)
@@ -54,7 +54,7 @@ local function illuminationAction(node, node_lower, global)
   end
 
   local action = {
-    Identifier = "os." .. string.gsub(node_lower, "%s+", "") .. actionString,
+    Identifier = "os." .. string.gsub(nodeLower, "%s+", "") .. actionString,
     Name = node .. " " .. actionName,
     Command = actionCommand,
     Documentation = "Enables " .. string.lower(actionName) .. " for" .. node,
@@ -163,6 +163,6 @@ asset.export("VenusStandard", VenusStandard.Identifier)
 asset.export("TitanGlobal", TitanGlobal.Identifier)
 asset.export("TitanStandard", TitanStandard.Identifier)
 asset.export("SaturnGlobal", SaturnGlobal.Identifier)
-asset.export("TitanStandard", SaturnStandard.Identifier)
+asset.export("SaturnStandard", SaturnStandard.Identifier)
 asset.export("AllGlobesGlobalIllumination", AllGlobesGlobalIllumination.Identifier)
 asset.export("AllGlobesStandardIllumination", AllGlobesStandardIllumination.Identifier)

@@ -95,7 +95,7 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(TerraLabel)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TerraLabel)
   openspace.removeSceneGraphNode(TerraTrail)
   openspace.removeSceneGraphNode(Terra)

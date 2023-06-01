@@ -53,6 +53,7 @@ namespace openspace::interaction {
 
 struct JoystickInputStates;
 struct NavigationState;
+struct NodeCameraStateSpec;
 struct WebsocketInputStates;
 class KeyframeNavigator;
 class OrbitalNavigator;
@@ -146,7 +147,23 @@ public:
 
     void loadNavigationState(const std::string& filepath);
 
-    void setNavigationStateNextFrame(NavigationState state);
+    /**
+     * Set camera state from a provided navigation state next frame. The actual position
+     * will computed from the scene in the same frame as it is set.
+     *
+     * \param state the navigation state to compute a camera positon from
+     */
+    void setNavigationStateNextFrame(const NavigationState& state);
+
+    /**
+     * Set camera state from a provided node based camera specification structure, next
+     * frame. The camera position will be computed to look at the node provided in the
+     * node info. The actual position will computed from the scene in the same frame as
+     * it is set.
+     *
+     * \param spec the node specification from which to compute the resulting camera pose
+     */
+    void setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec);
 
     /**
     * \return The Lua library that contains all Lua functions available to affect the
@@ -155,7 +172,7 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    void applyNavigationState(const NavigationState& ns);
+    void applyPendingState();
     void updateCameraTransitions();
     void clearGlobalJoystickStates();
 
@@ -172,7 +189,7 @@ private:
     KeyframeNavigator _keyframeNavigator;
     PathNavigator _pathNavigator;
 
-    std::optional<NavigationState> _pendingNavigationState;
+    std::optional<std::variant<NodeCameraStateSpec, NavigationState>> _pendingState;
 
     properties::BoolProperty _disableKeybindings;
     properties::BoolProperty _disableMouseInputs;

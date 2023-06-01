@@ -39,15 +39,16 @@ local DensityVolume = {
     TransferFunction = asset.localResource("transferfunctions/mas-mhd-r-squared-old.txt"),
     SourceDirectory = densityDirectory,
     GridType = "Spherical",
-    SecondsBefore = 24*60*60,
-    SecondsAfter = 24*60*60,
+    SecondsBefore = 24 * 60 * 60,
+    SecondsAfter = 24 * 60 * 60,
     Dimensions = { 100, 100, 128 },
     InvertDataAtZ = true
   },
   GUI = {
     Name = "MAS Density",
     Path = "/Solar System/Heliosphere/Bastille Day 2000",
-    Description = "Volumetric rendering for the bastille day CME event. This asset contain data from 2000-07-14 08:33 to 2000-07-14 11:49"
+    Description = [[Volumetric rendering for the bastille day CME event. This asset
+      contain data from 2000-07-14 08:33 to 2000-07-14 11:49]]
   }
 }
 
@@ -79,18 +80,18 @@ local ToggleVolume = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.action.registerAction(ToggleVolume)
   openspace.addSceneGraphNode(DensityVolume)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(DensityVolume)
   openspace.action.removeAction(ToggleVolume)
 end)
 
 asset.export(DensityVolume)
-asset.export("ToggleVolume", ToggleVolume)
+asset.export("ToggleVolume", ToggleVolume.Identifier)
 
 
 

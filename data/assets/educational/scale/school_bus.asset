@@ -1,5 +1,5 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
 
 
@@ -9,6 +9,7 @@ local modelFolder = asset.syncedResource({
   Identifier = "scale_model_school_bus",
   Version = 1
 })
+
 
 local Location = { 40.780671, -73.971701, 0.78 }
 
@@ -48,7 +49,7 @@ local UpdatePositionAction = {
   Identifier = "os.scalemodels.DropSchoolBus",
   Name = "Drop school bus under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_SchoolBus')
+    openspace.globebrowsing.setNodePositionFromCamera("Scale_SchoolBus")
   ]],
   Documentation = "Updates the school bus position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
@@ -59,11 +60,12 @@ local ResetPositionAction = {
   Identifier = "os.scalemodels.ResetSchoolBus",
   Name = "Reset School bus position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_SchoolBus', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",
+    openspace.globebrowsing.setNodePosition("Scale_SchoolBus", "]] .. earthAsset.Earth.Identifier .. [[", ]] .. Location[1] .. "," .. Location[2] .. ")",
   Documentation = "Resets the school bus back to its actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ScaleModel)
@@ -79,5 +81,5 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(ScaleModel)
-asset.export(UpdatePositionAction)
-asset.export(ResetPositionAction)
+asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
+asset.export("ResetPositionAction", ResetPositionAction.Identifier)

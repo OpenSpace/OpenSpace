@@ -78,13 +78,16 @@ private:
         BounceInfinitely
     };
 
+    std::filesystem::path _file;
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
     properties::DoubleProperty _modelScale;
     bool _invertModelScale = false;
     bool _forceRenderInvisible = false;
     bool _notifyInvisibleDropped = true;
+    bool _modelHasAnimation = false;
     std::string _animationStart;
     AnimationMode _animationMode = AnimationMode::Once;
+    double _animationTimeScale = 1.0;
     properties::BoolProperty _enableAnimation;
 
     properties::FloatProperty _ambientIntensity;

@@ -6,7 +6,7 @@ local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
-local insigniasPath =  asset.syncedResource({
+local insigniasPath = asset.syncedResource({
   Name = "Apollo Insignias",
   Type = "HttpSynchronization",
   Identifier = "apollo_insignias",
@@ -194,7 +194,7 @@ local HideInsignias = {
   IsLocal = true
 }
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo11)
   openspace.addSceneGraphNode(Apollo12)
   openspace.addSceneGraphNode(Apollo14)
@@ -205,7 +205,7 @@ asset.onInitialize(function ()
   openspace.action.registerAction(HideInsignias)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.action.removeAction(HideInsignias)
   openspace.action.removeAction(ShowInsignias)
 

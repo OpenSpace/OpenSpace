@@ -12,8 +12,7 @@ local CeresTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "CERES",
-      Observer = "SSB",
-      Kernels = kernels.CeresKernels
+      Observer = "SSB"
     },
     Color = { 0.2, 0.8, 0.3 },
     Period = 1680,
@@ -28,11 +27,15 @@ local CeresTrail = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.CeresKernels)
+
   openspace.addSceneGraphNode(CeresTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CeresTrail)
+
+  openspace.spice.unloadKernel(kernels.CeresKernels)
 end)
 
 asset.export(CeresTrail)

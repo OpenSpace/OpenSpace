@@ -11,7 +11,8 @@ local ScreenSpace = {
   Type = "ScreenSpaceVideo",
   Name = "Screen Space Video Example",
   Video = data .. "/chlorophyll_model_2048.mp4"
-};
+}
+
 
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(ScreenSpace)

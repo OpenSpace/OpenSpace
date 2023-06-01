@@ -1,4 +1,4 @@
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
@@ -48,7 +48,7 @@ local HubbleTrail = {
       Format = "OMM"
     },
     RenderBinMode = "PostDeferredTransparent",
-    Color = { 0.0, 0.902, 0.6},
+    Color = { 0.0, 0.902, 0.6 },
     Fade = 1.5,
     Resolution = 320
   },
@@ -60,7 +60,7 @@ local HubbleTrail = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   local hubble = openspace.space.readKeplerFile(omm .. "hst.txt", "OMM")
   HubbleTrail.Renderable.Period = hubble[1].Period / (60 * 60 * 24)
 
@@ -68,7 +68,7 @@ asset.onInitialize(function ()
   openspace.addSceneGraphNode(HubbleTrail)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HubbleTrail)
   openspace.removeSceneGraphNode(HubblePosition)
 end)

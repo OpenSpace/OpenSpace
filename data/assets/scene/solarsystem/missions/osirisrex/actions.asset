@@ -2,9 +2,9 @@ local FocusOsirisRex = {
   Identifier = "os.osirisrex.FocusOsirisRex",
   Name = "Focus on OsirisREx",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'OsirisRex')
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '')
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Anchor", "OsirisRex")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Sets the focus of the camera on 'OsirisRex'",
   GuiPath = "/Missions/Osiris Rex",
@@ -15,9 +15,9 @@ local FocusBennu = {
   Identifier = "os.osirisrex.FocusBennu",
   Name = "Focus on Bennu",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'BennuBarycenter')
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '')
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Anchor", "BennuBarycenter")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Sets the focus of the camera on 'Bennu'",
   GuiPath = "/Missions/Osiris Rex",
@@ -28,8 +28,8 @@ local SetupBennuApproach = {
   Identifier = "os.osirisrex.SetupBennuApproach",
   Name = "Set Bennu approach time",
   Command = [[
-    openspace.printInfo('Set time: Approach')
-    openspace.time.setTime('2018-SEP-11 21:31:01.183')
+    openspace.printInfo("Set time: Approach")
+    openspace.time.setTime("2018-SEP-11 21:31:01.183")
   ]],
   Documentation = "Sets the time to the approach at Bennu",
   GuiPath = "/Missions/Osiris Rex",
@@ -40,8 +40,8 @@ local SetupBennuSurvey = {
   Identifier = "os.osirisrex.SetupBennuSurvey",
   Name = "Set Bennu survey time",
   Command = [[
-    openspace.printInfo('Set time: Preliminary Survey')
-    openspace.time.setTime('2018-NOV-20 01:13:12.183')
+    openspace.printInfo("Set time: Preliminary Survey")
+    openspace.time.setTime("2018-NOV-20 01:13:12.183")
   ]],
   Documentation = "Sets the time to the preliminary survey of Bennu",
   GuiPath = "/Missions/Osiris Rex",
@@ -52,8 +52,8 @@ local SetupBennuEventB = {
   Identifier = "os.osirisrex.SetupBennuEventB",
   Name = "Set orbital B event time",
   Command = [[
-    openspace.printInfo('Set time: Orbital B')
-    openspace.time.setTime('2019-APR-08 10:35:27.186')
+    openspace.printInfo("Set time: Orbital B")
+    openspace.time.setTime("2019-APR-08 10:35:27.186")
   ]],
   Documentation = "Sets the time to the orbital B event",
   GuiPath = "/Missions/Osiris Rex",
@@ -64,8 +64,8 @@ local SetupBennuReconEvent = {
   Identifier = "os.osirisrex.SetupBennuReconEvent",
   Name = "Set recon event time",
   Command = [[
-    openspace.printInfo('Set time: Recon')
-    openspace.time.setTime('2019-MAY-25 03:50:31.195')
+    openspace.printInfo("Set time: Recon")
+    openspace.time.setTime("2019-MAY-25 03:50:31.195")
   ]],
   Documentation = "Sets the time to the recon event",
   GuiPath = "/Missions/Osiris Rex",
@@ -76,7 +76,10 @@ local ToggleSunMarker = {
   Identifier = "os.osirisrex.ToggleSunMarker",
   Name = "Toggle Sun marker",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.SunMarker.Renderable.Enabled', not openspace.getPropertyValue('Scene.SunMarker.Renderable.Enabled'))
+    openspace.setPropertyValueSingle(
+      "Scene.SunMarker.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.SunMarker.Renderable.Enabled")
+    )
   ]],
   Documentation = "Toggles the visibility of the text marking the location of the Sun",
   GuiPath = "/Missions/Osiris Rex",
@@ -88,8 +91,8 @@ local AimAtBennu = {
   Name = "Look at Bennu from OSIRIS-REx",
   Command = [[
       openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAim", nil)
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", 'OsirisRex')
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", 'BennuBarycenter')
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "OsirisRex")
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "BennuBarycenter")
   ]],
   Documentation = "Look at Bennu from OSIRIS-REx",
   GuiPath = "/Mission",
@@ -107,11 +110,11 @@ local SetLaunchTime = {
       Anchor = "Earth",
       Position = { 10453686.309525654, -10108287.946681349, 5873485.232088189 },
       Up = { -0.020038533874401465, 0.48672729903974776, 0.8733241056616019 },
-      Pitch = 5.201245180910735e-05
+      Pitch = 0.000052012451809107355
     })
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", 'OsirisRex')
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", '')
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "OsirisRex")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
     openspace.time.setDeltaTime(2 * 60)
   ]],
   Documentation = "Look at the launch of OSIRIS-REx",
@@ -123,9 +126,9 @@ local LookImageCapture = {
   Identifier = "os.osirisrex.LookImageCapture",
   Name = "Go to image capture",
   Command = [[
-    openspace.printInfo('Set time: Image Capture')
-    openspace.time.setTime('2018-11-02T04:14:44')
-    openspace.pathnavigation.flyTo('BennuBarycenter')
+    openspace.printInfo("Set time: Image Capture")
+    openspace.time.setTime("2018-11-02T04:14:44")
+    openspace.pathnavigation.flyTo("BennuBarycenter")
     openspace.time.setDeltaTime(60)
   ]],
   Documentation = "Look at the image capture of OSIRIS-REx",
@@ -158,6 +161,17 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(FocusBennu)
   openspace.action.removeAction(FocusOsirisRex)
 end)
+
+asset.export("FocusOsirisRex", FocusOsirisRex.Identifier)
+asset.export("FocusBennu", FocusBennu.Identifier)
+asset.export("SetupBennuApproach", SetupBennuApproach.Identifier)
+asset.export("SetupBennuSurvey", SetupBennuSurvey.Identifier)
+asset.export("SetupBennuEventB", SetupBennuEventB.Identifier)
+asset.export("SetupBennuReconEvent", SetupBennuReconEvent.Identifier)
+asset.export("ToggleSunMarker", ToggleSunMarker.Identifier)
+asset.export("AimAtBennu", AimAtBennu.Identifier)
+asset.export("SetLaunchTime", SetLaunchTime.Identifier)
+asset.export("LookImageCapture", LookImageCapture.Identifier)
 
 
 

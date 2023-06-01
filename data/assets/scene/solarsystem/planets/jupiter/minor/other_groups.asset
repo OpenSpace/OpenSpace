@@ -45,7 +45,7 @@ local EuphemeTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 628.06,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -127,7 +127,7 @@ local S2003J19Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 699.12,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -209,7 +209,7 @@ local ValetudoTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 527.41,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",

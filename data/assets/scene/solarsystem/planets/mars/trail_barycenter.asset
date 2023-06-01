@@ -23,7 +23,7 @@ local MarsBarycenterTrail = {
     Name = "Mars Barycenter Trail",
     Path = "/Solar System/Planets/Mars",
     Description = [[Trail of Mars' Barycenter as observed by the Sun. Data from NASA Spice
-      (see base spice asset)]],
+      (see base spice asset)]]
   }
 }
 

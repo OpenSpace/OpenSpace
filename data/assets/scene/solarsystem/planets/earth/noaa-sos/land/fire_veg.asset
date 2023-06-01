@@ -62,9 +62,9 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
-  openspace.removeScreenSpaceRenderable(ColorbarFire)
   openspace.removeScreenSpaceRenderable(ColorbarVeg)
+  openspace.removeScreenSpaceRenderable(ColorbarFire)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export(Layer)

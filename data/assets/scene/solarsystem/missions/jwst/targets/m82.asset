@@ -15,7 +15,7 @@ local M82Image = {
   Tag = { "mission_jwst_target" },
   Description = [[
     Image of the M82 Galaxy by NASA, ESA and the Hubble Heritage Team (STScI/AURA).
-  ]],
+  ]]
 }
 
 

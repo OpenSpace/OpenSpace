@@ -59,7 +59,7 @@ local Object = {
         are assigned colors while most are gray. The data set also has an arbitrary
         cut-off for completeness, resulting in the rectangular shape of the data set.
         (Description from URL) <br><br> Data Reference: Abell Clusters of Rich
-        Galaxies, Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]],
+        Galaxies, Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]]
   }
 }
 

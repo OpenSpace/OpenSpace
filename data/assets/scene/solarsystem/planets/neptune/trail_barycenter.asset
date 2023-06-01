@@ -12,11 +12,10 @@ local NeptuneBarycenterTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "NEPTUNE BARYCENTER",
-      Observer = "SSB",
-      Kernels = kernel.nep097
+      Observer = "SSB"
     },
     Color = { 0.2, 0.5, 1.0 },
-    Period  = 60266,
+    Period = 60266,
     Resolution = 1000,
     Enabled = false
   },
@@ -30,11 +29,15 @@ local NeptuneBarycenterTrail = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernel.nep097)
+
   openspace.addSceneGraphNode(NeptuneBarycenterTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneBarycenterTrail)
+
+  openspace.spice.unloadKernel(kernel.nep097)
 end)
 
 asset.export(NeptuneBarycenterTrail)

@@ -82,8 +82,7 @@ local RosettaPosition = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "ROSETTA",
-      Observer = "SSB",
-      Kernels = RosettaKernels
+      Observer = "SSB"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -134,8 +133,7 @@ local PhilaePosition = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "PHILAE",
-      Observer = "CHURYUMOV-GERASIMENKO",
-      Kernels = RosettaKernels
+      Observer = "CHURYUMOV-GERASIMENKO"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -274,9 +272,9 @@ local FocusRosetta = {
   Identifier = "os.rosetta.FocusRosetta",
   Name = "Focus on Rosetta",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Rosetta');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Anchor", "Rosetta")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Sets the focus of the camera on Rosetta",
   GuiPath = "/Missions/Rosetta",
@@ -287,7 +285,7 @@ local SetupLanderRelease = {
   Identifier = "os.rosetta.SetupLanderRelease",
   Name = "Set lander release time",
   Command = [[
-    openspace.time.setTime('2014-11-12T08:20:00.00');
+    openspace.time.setTime("2014-11-12T08:20:00.00")
   ]],
   Documentation = "Jumps to the time when the Philae lander is released",
   GuiPath = "/Missions/Rosetta",
@@ -298,7 +296,10 @@ local ToggleImagePlane = {
   Identifier = "os.rosetta.ToggleImagePlane",
   Name = "Toggle image plane",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.ImagePlaneRosetta.Renderable.Enabled', not openspace.getPropertyValue('Scene.ImagePlaneRosetta.Renderable.Enabled'));
+    openspace.setPropertyValueSingle(
+      "Scene.ImagePlaneRosetta.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.ImagePlaneRosetta.Renderable.Enabled")
+    )
   ]],
   Documentation = "Toggles the visibility of the free floating image plane",
   GuiPath = "/Missions/Rosetta",
@@ -309,7 +310,10 @@ local TogglePhilaeTrail = {
   Identifier = "os.rosetta.TogglePhilaeTrail",
   Name = "Toggle Philae trail",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.PhilaeTrail.Renderable.Enabled', not openspace.getPropertyValue('Scene.PhilaeTrail.Renderable.Enabled'));
+    openspace.setPropertyValueSingle(
+      "Scene.PhilaeTrail.Renderable.Enabled",
+      not openspace.getPropertyValue("Scene.PhilaeTrail.Renderable.Enabled")
+    )
   ]],
   Documentation = "Toggles the visibility of Philae's trail",
   GuiPath = "/Missions/Rosetta",
@@ -317,7 +321,9 @@ local TogglePhilaeTrail = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
+  openspace.spice.loadKernel(RosettaKernels)
+
   openspace.addSceneGraphNode(RosettaPosition)
   openspace.addSceneGraphNode(Rosetta)
   openspace.addSceneGraphNode(PhilaePosition)
@@ -334,7 +340,7 @@ asset.onInitialize(function ()
   openspace.action.registerAction(TogglePhilaeTrail)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.action.removeAction(TogglePhilaeTrail)
   openspace.action.removeAction(ToggleImagePlane)
   openspace.action.removeAction(SetupLanderRelease)
@@ -349,6 +355,8 @@ asset.onDeinitialize(function ()
   openspace.removeSceneGraphNode(PhilaePosition)
   openspace.removeSceneGraphNode(Rosetta)
   openspace.removeSceneGraphNode(RosettaPosition)
+
+  openspace.spice.unloadKernel(RosettaKernels)
 end)
 
 asset.export(RosettaPosition)
@@ -359,4 +367,7 @@ asset.export(NavCam)
 asset.export(NavCamFov)
 asset.export(ImagePlane)
 asset.export(RosettaCometTrail)
-asset.export(PhilaeTrail)
+asset.export("FocusRosetta", FocusRosetta.Identifier)
+asset.export("SetupLanderRelease", SetupLanderRelease.Identifier)
+asset.export("ToggleImagePlane", ToggleImagePlane.Identifier)
+asset.export("TogglePhilaeTrail", TogglePhilaeTrail.Identifier)

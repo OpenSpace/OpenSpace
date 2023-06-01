@@ -28,7 +28,7 @@ local VestaModel = {
     AmbientIntensity = 0.0,
     LightSources = {
       sun.LightSource
-    },
+    }
   },
   GUI = {
     Name = "Vesta",
@@ -36,6 +36,7 @@ local VestaModel = {
     Description = "Model of Vesta"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(VestaModel)

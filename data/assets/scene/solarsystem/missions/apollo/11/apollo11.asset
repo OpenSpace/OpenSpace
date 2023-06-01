@@ -3,8 +3,8 @@ asset.require("../actions")
 asset.require("./actions")
 local sun = asset.require("scene/solarsystem/sun/sun")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local descentKeyframes = asset.require("./lem_descent.asset")
-local descentRotationKeyframes = asset.require("./lem_descent_rotation.asset")
+local descentKeyframes = asset.require("./lem_descent")
+local descentRotationKeyframes = asset.require("./lem_descent_rotation")
 local kernels = asset.require("./kernels")
 
 
@@ -41,8 +41,7 @@ local Apollo11Position = {
       Type = "SpiceTranslation",
       Target = ApolloSpiceId,
       Observer = "MOON",
-      Frame = "MOON_ME",
-      Kernels = kernels.kernels
+      Frame = "MOON_ME"
     }
   },
   GUI = {
@@ -93,8 +92,7 @@ local Apollo11MoonTrail = {
       Type = "SpiceTranslation",
       Target = ApolloSpiceId,
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels.kernels
+      Frame = "IAU_MOON"
     },
     Color = { 0.180000,0.510000,0.750000 },
     StartTime = "1969 JUL 19 19:38:29.183",
@@ -120,8 +118,7 @@ local lemTranslation = {
       Type = "SpiceTranslation",
       Target = ApolloLemSpiceId,
       Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels.kernels
+      Frame = "IAU_MOON"
     },
     ["1969 JUL 20 20:14:40"] = {
       Type = "TimelineTranslation",
@@ -148,7 +145,7 @@ local Apollo11LemTrail = {
     EndTime = "1969 JUL 20 20:17:46.183",
     SampleInterval = 2,
     EnableFade = false,
-    Enabled = false,
+    Enabled = false
   },
   GUI = {
     Name = "Apollo 11 Lunar Lander Trail",
@@ -225,7 +222,7 @@ local Apollo11LemLandedModel = {
     Type = "RenderableModel",
     GeometryFile = lemModel .. "LM-2_ver2clean.obj",
     SpecularIntensity = 0.0,
-    RotationVector = { 273.750,28.0,309.85 },
+    RotationVector = { 273.750, 28.0, 309.85 },
     LightSources = {
       sun.LightSource,
       {
@@ -241,7 +238,10 @@ local Apollo11LemLandedModel = {
   }
 }
 
+
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.kernels)
+
   openspace.addSceneGraphNode(Apollo11Position)
   openspace.addSceneGraphNode(Apollo11LemPosition)
   openspace.addSceneGraphNode(Apollo11Model)
@@ -259,6 +259,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo11Model)
   openspace.removeSceneGraphNode(Apollo11LemPosition)
   openspace.removeSceneGraphNode(Apollo11Position)
+
+  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Apollo11Position)

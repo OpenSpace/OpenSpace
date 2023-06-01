@@ -1,7 +1,7 @@
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 asset.require("scene/solarsystem/planets/earth/lagrange_points/L2")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -29,25 +29,22 @@ local JWSTPosition = {
           Type = "SpiceTranslation",
           Target = 170, -- JWST
           Observer = "EARTH",
-          Frame = "IAU_EARTH",
-          Kernels = { kernels .. "webb.bsp" }
+          Frame = "IAU_EARTH"
         },
         [DetachTime] = {
           Type = "SpiceTranslation",
           Target = 170, -- JWST
           Observer = "EARTH",
-          Frame = "GALACTIC",
-          Kernels = { kernels .. "webb.bsp" }
+          Frame = "GALACTIC"
         },
         [L2orbitInsertionTime] = {
           Type = "SpiceTranslation",
           Target = 170, -- JWST
           Observer = 392, -- L2
-          Frame = "GALACTIC",
-          Kernels = { kernels .. "webb.bsp" }
+          Frame = "GALACTIC"
         }
       }
-    },
+    }
   },
   GUI = {
     Name = "JWST Position",
@@ -85,27 +82,29 @@ local JWSTRotation = {
 
 -- Reparent the JWSTPosition node when the data changes
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "webb.bsp")
+
   openspace.addSceneGraphNode(JWSTPosition)
   openspace.addSceneGraphNode(JWSTRotation)
 
   -- Set correct parent during run-time
   openspace.scriptScheduler.loadScheduledScript(
     DetachTime,
-    "openspace.setParent('JWSTPosition', 'EarthCenter')",
-    "openspace.setParent('JWSTPosition', 'EarthIAU')",
+    [[openspace.setParent("JWSTPosition", "EarthCenter")]],
+    [[openspace.setParent("JWSTPosition", "EarthIAU")]],
     "",
     1 -- Not default group, never clear this script
   )
   openspace.scriptScheduler.loadScheduledScript(
     L2orbitInsertionTime,
-    "openspace.setParent('JWSTPosition', 'L2')",
-    "openspace.setParent('JWSTPosition', 'EarthCenter')",
+    [[openspace.setParent("JWSTPosition", "L2")]],
+    [[openspace.setParent("JWSTPosition", "EarthCenter")]],
     "",
     1 -- Not default group, never clear this script
   )
 
   -- Set correct parent at the start
-  local now = openspace.time.currentTime();
+  local now = openspace.time.currentTime()
   if now < openspace.time.convertTime(DetachTime) then
     openspace.setParent("JWSTPosition", "EarthIAU")
   elseif now > openspace.time.convertTime(L2orbitInsertionTime) then
@@ -119,6 +118,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTRotation)
   openspace.removeSceneGraphNode(JWSTPosition)
   openspace.scriptScheduler.clear(1)
+
+  openspace.spice.unloadKernel(kernels .. "webb.bsp")
 end)
 
 asset.export(JWSTPosition)

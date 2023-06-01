@@ -31,7 +31,7 @@ local Object = {
     Texture = textures .. "point4.png",
     PolygonSides = 6,
     Unit = "pc",
-    ScaleFactor = 420,
+    ScaleFactor = 420.0,
     BillboardMinMaxSize = { 0.0, 300.0 },
     EnablePixelSizeControl = false
   },
@@ -51,6 +51,7 @@ local Object = {
       HII Regions (Anderson+, 2014)]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Object)

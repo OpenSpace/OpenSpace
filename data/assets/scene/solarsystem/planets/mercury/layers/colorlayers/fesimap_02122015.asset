@@ -15,8 +15,9 @@ local Layer = {
   Identifier = "fesimap_02122015",
   Enabled = asset.enabled,
   FilePath = texturesPath .. "fesimap_02122015.png",
-  BlendMode = "Multiply",
+  BlendMode = "Multiply"
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)

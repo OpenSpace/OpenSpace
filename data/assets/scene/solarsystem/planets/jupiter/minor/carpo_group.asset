@@ -45,7 +45,7 @@ local CarpoTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 458.62,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -152,7 +152,7 @@ local S2018J4Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 458.62,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",

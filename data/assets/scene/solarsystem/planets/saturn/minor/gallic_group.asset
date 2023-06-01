@@ -45,7 +45,7 @@ local AlbiorixTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 774.58,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -127,7 +127,7 @@ local BebhionnTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 838.77,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -209,7 +209,7 @@ local ErriapusTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 844.89,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -291,7 +291,7 @@ local TarvosTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 944.23,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",

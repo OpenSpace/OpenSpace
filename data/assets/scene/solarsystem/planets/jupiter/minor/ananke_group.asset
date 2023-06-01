@@ -45,7 +45,7 @@ local S2010J2Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 588.36,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -127,7 +127,7 @@ local ThelxinoeTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 597.61,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -209,7 +209,7 @@ local EuantheTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 598.09,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -291,7 +291,7 @@ local IocasteTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 609.43,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -373,7 +373,7 @@ local S2003J16Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 610.36,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -455,7 +455,7 @@ local PraxidikeTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 613.90,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -537,7 +537,7 @@ local HarpalykeTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 624.54,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -619,7 +619,7 @@ local MnemeTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 627.48,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -701,7 +701,7 @@ local HermippeTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 629.81,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -783,7 +783,7 @@ local ThyoneTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 639.80,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -865,7 +865,7 @@ local AnankeTrail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 640.38,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -947,7 +947,7 @@ local S2021J1Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 606.99,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -1029,7 +1029,7 @@ local S2021J2Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 627.96,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -1111,7 +1111,7 @@ local S2021J3Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 643.85,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -1193,7 +1193,7 @@ local S2022J3Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 617.82,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -1275,7 +1275,7 @@ local S2017J3Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 606.3,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -1357,7 +1357,7 @@ local S2017J7Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 602.6,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -1439,7 +1439,7 @@ local S2017J9Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 639.2,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -1521,7 +1521,7 @@ local S2003J2Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 602.02,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -1603,7 +1603,7 @@ local S2003J12Trail = {
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 646.64,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",

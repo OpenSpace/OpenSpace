@@ -68,6 +68,7 @@ local Mission = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.loadMission(Mission)
 end)

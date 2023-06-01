@@ -154,7 +154,7 @@ local EquatorialSphere = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 4.28601E17;
+      Scale = 4.28601E17
     },
     Rotation = {
       Type = "StaticRotation",
@@ -206,7 +206,7 @@ local GalacticSphere = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 9.46377307652E18;
+      Scale = 9.46377307652E18
     }
   },
   Renderable = {
@@ -623,6 +623,7 @@ local Plane20Gly = {
     Path = "/Other/Grids"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(RadioSphere)

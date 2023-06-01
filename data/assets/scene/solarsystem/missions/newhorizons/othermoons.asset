@@ -68,7 +68,7 @@ local KerberosText = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 10^6.3,
+    Size = 19952623.15,
     Origin = "Center",
     Billboard = true,
     Texture = kerberosTextures .. "Kerberos-Text.png",
@@ -85,7 +85,7 @@ local NixText = {
   Parent = Nix.Nix.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 10^6.3,
+    Size = 19952623.15,
     Origin = "Center",
     Billboard = true,
     Texture = nixTextures .. "Nix-Text.png",
@@ -108,7 +108,7 @@ local StyxText = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 10^6.3,
+    Size = 19952623.15,
     Origin = "Center",
     Billboard = true,
     Texture = styxTextures .. "Styx-Text.png",

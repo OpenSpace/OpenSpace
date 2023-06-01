@@ -45,7 +45,7 @@ local AegaeonTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 0.80812,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -127,7 +127,7 @@ local MethoneTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.00957,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -209,7 +209,7 @@ local AntheTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.05089,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -291,7 +291,7 @@ local PalleneTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.370218,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -373,7 +373,7 @@ local TelestoTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.887802,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -455,7 +455,7 @@ local CalypsoTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1.887802,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -537,7 +537,7 @@ local HeleneTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 2.736915,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -619,7 +619,7 @@ local PolydeucesTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 2.736915,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -701,7 +701,7 @@ local S2004S24Trail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 1293.85,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",

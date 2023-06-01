@@ -2,7 +2,7 @@ local kernels = asset.syncedResource({
   Name = "Pluto Kernels",
   Type = "HttpSynchronization",
   Identifier = "pluto_kernels",
-  Version =  1
+  Version = 1
 })
 
 local PlutoKernels = {

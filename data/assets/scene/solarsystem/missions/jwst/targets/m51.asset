@@ -16,7 +16,7 @@ local M51Image = {
   Description = [[
     Image of the M51 Galaxy by NASA, ESA, S. Beckwith (STScI),
     and The Hubble Heritage Team (STScI/AURA).
-  ]],
+  ]]
 }
 
 

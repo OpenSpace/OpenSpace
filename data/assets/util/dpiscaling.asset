@@ -1,4 +1,4 @@
-asset.onInitialize(function ()
+asset.onInitialize(function()
   local scale = openspace.dpiScaling()
   openspace.printInfo("Setting the DPI scaling factor to " .. tostring(scale))
 
@@ -10,7 +10,7 @@ asset.onInitialize(function ()
     )
   end
 
-  local dashboards = openspace.getProperty("Dashboard.*.FontSize");
+  local dashboards = openspace.getProperty("Dashboard.*.FontSize")
   for _, v in ipairs(dashboards) do
     openspace.setPropertyValueSingle(
       v,

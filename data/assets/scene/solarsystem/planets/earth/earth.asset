@@ -80,9 +80,9 @@ local FocusEarth = {
   Identifier = "os.solarsystem.FocusEarth",
   Name = "Focus on Earth",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Set camera focus on the Earth",
   GuiPath = "/Solar System/Earth",
@@ -93,7 +93,7 @@ local ToggleSatelliteTrails = {
   Identifier = "os.solarsystem.ToggleSatelliteTrails",
   Name = "Toggle satellite trails",
   Command = [[
-    local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled');
+    local list = openspace.getProperty("{earth_satellites}.Renderable.Enabled")
     for _,v in pairs(list) do
       openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
     end

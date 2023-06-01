@@ -15,7 +15,7 @@ asset.require("./layers/colorlayers/ghrsst_l4_mur_sea_surface_temperature_tempor
 asset.require("./layers/heightlayers/blue_marble_height", false)
 asset.require("./layers/heightlayers/terrain_tileset", true)
 
- asset.require("./layers/nightlayers/earth_at_night_2012", true)
+asset.require("./layers/nightlayers/earth_at_night_2012", true)
 asset.require("./layers/nightlayers/earth_night_texture", false)
 asset.require("./layers/nightlayers/earth_at_night_temporal", false)
 

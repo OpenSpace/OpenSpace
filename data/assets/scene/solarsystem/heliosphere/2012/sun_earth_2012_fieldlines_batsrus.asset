@@ -1,5 +1,5 @@
-local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere.asset')
-asset.require('scene/solarsystem/heliosphere/2012/reset_loop_action.asset')
+asset.require("scene/solarsystem/heliosphere/2012/reset_loop_action")
+local transforms = asset.require("scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere")
 
 
 
@@ -31,9 +31,9 @@ local LoopBatsrus = {
   Command = [[
     openspace.scriptScheduler.clear()
     openspace.time.setDeltaTime(1400)
-    openspace.time.setTime('2012-JUL-14 06:00:00.00')
-    local StarttimescriptBatsrusLoop = "openspace.time.setTime('2012 JUL 14 06:00:00')"
-    openspace.scriptScheduler.loadScheduledScript('2012 JUL 16 07:30:00', StarttimescriptBatsrusLoop)
+    openspace.time.setTime("2012-JUL-14 06:00:00.000")
+    local StartTimeScriptBatsrusLoop = "openspace.time.setTime('2012 JUL 14 06:00:00')"
+    openspace.scriptScheduler.loadScheduledScript("2012 JUL 16 07:30:00", StartTimeScriptBatsrusLoop)
   ]],
   Documentation = "Sets time to start of data, sets higher delta time and loops back from start, when at end of data",
   GuiPath = "/2012July",
@@ -51,7 +51,7 @@ local colorRanges = {
   { 0, 60 },
   { -0.015, 0.015 },
   { 150, 900 },
-  { 0, 3 },
+  { 0, 3 }
 }
 
 local InteractionSphere = 6380000  -- A value slightly bigger than earth radius
@@ -138,7 +138,8 @@ local BatsrusAsherStaticSeedsFlowLines = {
   }
 }
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   openspace.action.registerAction(LoopBatsrus)
 
   openspace.addSceneGraphNode(BatsrusJ12OpenClosed)
@@ -147,7 +148,7 @@ asset.onInitialize(function ()
 
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(BatsrusAsherStaticSeedsFlowLines)
   openspace.removeSceneGraphNode(BatsrusJ12FlowLines)
   openspace.removeSceneGraphNode(BatsrusJ12OpenClosed)
@@ -155,7 +156,7 @@ asset.onDeinitialize(function ()
   openspace.action.removeAction(LoopBatsrus)
 end)
 
-asset.export("LoopBatsrus", LoopBatsrus)
+asset.export("LoopBatsrus", LoopBatsrus.Identifier)
 asset.export(BatsrusJ12OpenClosed)
 asset.export(BatsrusJ12FlowLines)
 asset.export(BatsrusAsherStaticSeedsFlowLines)

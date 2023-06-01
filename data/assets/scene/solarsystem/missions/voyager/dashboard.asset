@@ -20,6 +20,7 @@ local DistanceVoyager2 = {
   Enabled = asset.enabled
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(DistanceVoyager1)
   openspace.dashboard.addDashboardItem(DistanceVoyager2)

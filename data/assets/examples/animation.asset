@@ -11,7 +11,7 @@ local model = asset.syncedResource({
 })
 
 
-local StartTime = "2021 06 01 00:00:00";
+local StartTime = "2021 06 01 00:00:00"
 
 local AnimationLoop = {
   Identifier = "AnimationLoop",
@@ -147,6 +147,7 @@ local AnimationBounce = {
     Description = "Simple animated box model with the animation mode 'BounceFromStart'"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(AnimationLoop)

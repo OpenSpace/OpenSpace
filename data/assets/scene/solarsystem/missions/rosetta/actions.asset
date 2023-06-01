@@ -2,7 +2,7 @@ local ToggleOuterPlanetaryTrails = {
   Identifier = "os.rosetta.ToggleOuterPlanetaryTrails",
   Name = "Toggle outer planetary trails",
   Command = [[
-    local list = openspace.getProperty('{planetTrail_giants}.Renderable.Enabled')
+    local list = openspace.getProperty("{planetTrail_giants}.Renderable.Enabled")
     for _,v in pairs(list) do
       openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
     end
@@ -20,6 +20,8 @@ end)
 asset.onDeinitialize(function()
   openspace.action.removeAction(ToggleOuterPlanetaryTrails)
 end)
+
+asset.export("ToggleOuterPlanetaryTrails", ToggleOuterPlanetaryTrails.Identifier)
 
 
 

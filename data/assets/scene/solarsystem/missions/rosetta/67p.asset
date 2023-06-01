@@ -135,9 +135,9 @@ local Focus67p = {
   Identifier = "os.rosetta.Focus67p",
   Name = "Focus on 67P",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', '67P')
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '')
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Anchor", "67P")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Sets the focus of the camera on 67P",
   GuiPath = "/Missions/Rosetta",
@@ -148,7 +148,7 @@ local ClearImageProjections = {
   Identifier = "os.rosetta.ClearImageProjections",
   Name = "Clear 67P projections",
   Command = [[
-    openspace.setPropertyValue('Scene.67P.Renderable.ProjectionComponent.ClearAllProjections', true);
+    openspace.setPropertyValue("Scene.67P.Renderable.ProjectionComponent.ClearAllProjections", true)
   ]],
   Documentation = "Removes all image projections from 67P",
   GuiPath = "/Missions/Rosetta",
@@ -159,7 +159,10 @@ local Toggle67pProjection = {
   Identifier = "os.rosetta.Toggle67pProjection",
   Name = "Toggle 67P projection",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.67P.Renderable.ProjectionComponent.PerformProjection', not openspace.getPropertyValue('Scene.67P.Renderable.ProjectionComponent.PerformProjection'));
+    openspace.setPropertyValueSingle(
+      "Scene.67P.Renderable.ProjectionComponent.PerformProjection",
+      not openspace.getPropertyValue("Scene.67P.Renderable.ProjectionComponent.PerformProjection")
+    )
   ]],
   Documentation = "Enables or disables the image projection on 67P",
   GuiPath = "/Missions/Rosetta",
@@ -190,3 +193,6 @@ end)
 asset.export("Barycenter", Barycenter)
 asset.export("Comet67P", Comet67P)
 asset.export(Trail67P)
+asset.export("Focus67p", Focus67p.Identifier)
+asset.export("ClearImageProjections", ClearImageProjections.Identifier)
+asset.export("Toggle67pProjection", Toggle67pProjection.Identifier)

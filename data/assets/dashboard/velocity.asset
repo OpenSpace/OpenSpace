@@ -5,6 +5,7 @@ local Item = {
   GuiName = "Camera Velocity"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

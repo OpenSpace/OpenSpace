@@ -27,8 +27,7 @@ local L5Position = {
     Translation = {
       Type = "SpiceTranslation",
       Target = L5,
-      Observer = "SSB",
-      Kernels = kernels .. "L5_de431.bsp"
+      Observer = "SSB"
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
@@ -52,7 +51,7 @@ local L5 = {
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
   GUI = {
     Name = "L5",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Path = "/Solar System/Planets/Earth/Lagrange points"
   }
 }
 
@@ -79,6 +78,8 @@ local L5Label = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "L5_de431.bsp")
+
   openspace.addSceneGraphNode(L5Position)
   openspace.addSceneGraphNode(L5)
   openspace.addSceneGraphNode(L5Label)
@@ -88,6 +89,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(L5Label)
   openspace.removeSceneGraphNode(L5)
   openspace.removeSceneGraphNode(L5Position)
+
+  openspace.spice.unloadKernel(kernels .. "L5_de431.bsp")
 end)
 
 asset.export(L5Position)

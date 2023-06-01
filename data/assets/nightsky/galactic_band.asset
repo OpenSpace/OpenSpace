@@ -31,9 +31,9 @@ local ShowGalacticBand = {
   Identifier = "os.nightsky.ShowGalacticBand",
   Name = "Show galactic band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 1.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.GalacticBand.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.GalacticBand.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.GalacticBand.Renderable.Fade", 1.0, 1.0)
   ]],
   Documentation = "Shows the galactic band",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -44,12 +44,13 @@ local HideGalacticBand = {
   Identifier = "os.nightsky.HideGalacticBand",
   Name = "Hide galactic band",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.GalacticBand.Renderable.Fade', 0.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.GalacticBand.Renderable.Fade", 0.0, 1.0)
   ]],
   Documentation = "Hides the galactic band",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GalacticBand)
@@ -64,5 +65,5 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(GalacticBand)
-asset.export(ShowGalacticBand)
-asset.export(HideGalacticBand)
+asset.export("ShowGalacticBand", ShowGalacticBand.Identifier)
+asset.export("HideGalacticBand", HideGalacticBand.Identifier)

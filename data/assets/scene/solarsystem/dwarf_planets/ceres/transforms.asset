@@ -9,14 +9,12 @@ local CeresPosition = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "CERES",
-      Observer = "SSB",
-      Kernels = kernels.CeresKernels
+      Observer = "SSB"
     },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_CERES",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels.CeresKernels
+      DestinationFrame = "GALACTIC"
     }
   },
   GUI = {
@@ -28,11 +26,15 @@ local CeresPosition = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.CeresKernels)
+
   openspace.addSceneGraphNode(CeresPosition)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CeresPosition)
+
+  openspace.spice.unloadKernel(kernels.CeresKernels)
 end)
 
 asset.export(CeresPosition)

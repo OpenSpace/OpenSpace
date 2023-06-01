@@ -79,24 +79,24 @@ local Legend = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerCorals)
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerIcerings)
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerOcean)
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerSpeleothem)
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerTreeRings)
-  openspace.addScreenSpaceRenderable(legend)
+  openspace.addScreenSpaceRenderable(Legend)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerCorals)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerIcerings)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerOcean)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerSpeleothem)
+  openspace.removeScreenSpaceRenderable(Legend)
   openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerTreeRings)
-  openspace.removeScreenSpaceRenderable(legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerSpeleothem)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerOcean)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerIcerings)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerCorals)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
 end)
 
 asset.export(LayerBase)

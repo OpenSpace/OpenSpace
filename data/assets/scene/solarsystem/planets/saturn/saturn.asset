@@ -83,7 +83,7 @@ local SaturnLabel = {
   GUI = {
     Name = "Saturn Label",
     Path = "/Solar System/Planets/Saturn",
-    Description = "Main planet label for Saturn",
+    Description = "Main planet label for Saturn"
   }
 }
 

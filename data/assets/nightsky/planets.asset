@@ -1,8 +1,8 @@
-local mercury = asset.require('scene/solarsystem/planets/mercury/transforms')
-local venus = asset.require('scene/solarsystem/planets/venus/transforms')
-local mars = asset.require('scene/solarsystem/planets/mars/transforms')
-local jupiter = asset.require('scene/solarsystem/planets/jupiter/transforms')
-local saturn = asset.require('scene/solarsystem/planets/saturn/transforms')
+local mercury = asset.require("scene/solarsystem/planets/mercury/transforms")
+local venus = asset.require("scene/solarsystem/planets/venus/transforms")
+local mars = asset.require("scene/solarsystem/planets/mars/transforms")
+local jupiter = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local saturn = asset.require("scene/solarsystem/planets/saturn/transforms")
 
 
 
@@ -27,7 +27,7 @@ local Mercury = {
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = { "nightsky_billboard"},
+  Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Mercury",
     Path = "/Other/Night Sky/Planets"
@@ -47,7 +47,7 @@ local Venus = {
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = { "nightsky_billboard"},
+  Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Venus",
     Path = "/Other/Night Sky/Planets"
@@ -67,7 +67,7 @@ local Mars = {
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = { "nightsky_billboard"},
+  Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Mars",
     Path = "/Other/Night Sky/Planets"
@@ -87,7 +87,7 @@ local Jupiter = {
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = { "nightsky_billboard"},
+  Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Jupiter",
     Path = "/Other/Night Sky/Planets"
@@ -107,7 +107,7 @@ local Saturn = {
     DimInAtmosphere = true,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = { "nightsky_billboard"},
+  Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Saturn",
     Path = "/Other/Night Sky/Planets"
@@ -118,21 +118,21 @@ local ShowNightSkyPlanets = {
   Identifier = "os.nightsky.ShowNightSkyPlanets",
   Name = "Show night sky planets",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.NightSkyMercury.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.NightSkyVenus.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.NightSkyMars.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.NightSkyJupiter.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.NightSkySaturn.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.NightSkyMercury.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyVenus.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyMars.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyJupiter.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.NightSkySaturn.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyMercury.Renderable.Fade', 1.0, 0.25);
-    openspace.setPropertyValueSingle('Scene.NightSkyVenus.Renderable.Fade', 1.0, 0.25);
-    openspace.setPropertyValueSingle('Scene.NightSkyMars.Renderable.Fade', 1.0, 0.25);
-    openspace.setPropertyValueSingle('Scene.NightSkyJupiter.Renderable.Fade', 1.0, 0.25);
-    openspace.setPropertyValueSingle('Scene.NightSkySaturn.Renderable.Fade', 1.0, 0.25);
+    openspace.setPropertyValueSingle("Scene.NightSkyMercury.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.NightSkyVenus.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.NightSkyMars.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.NightSkyJupiter.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.NightSkySaturn.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.NightSkyMercury.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.NightSkyVenus.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.NightSkyMars.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.NightSkyJupiter.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.NightSkySaturn.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.NightSkyMercury.Renderable.Fade", 1.0, 0.25)
+    openspace.setPropertyValueSingle("Scene.NightSkyVenus.Renderable.Fade", 1.0, 0.25)
+    openspace.setPropertyValueSingle("Scene.NightSkyMars.Renderable.Fade", 1.0, 0.25)
+    openspace.setPropertyValueSingle("Scene.NightSkyJupiter.Renderable.Fade", 1.0, 0.25)
+    openspace.setPropertyValueSingle("Scene.NightSkySaturn.Renderable.Fade", 1.0, 0.25)
   ]],
   Documentation = "Show night sky versions of the planets",
   GuiPath = "/Night Sky/Planets",
@@ -143,11 +143,11 @@ local HideNightSkyPlanets = {
   Identifier = "os.nightsky.HideNightSkyPlanets",
   Name = "Hide night sky planets",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.NightSkyMercury.Renderable.Fade', 0.0, 1.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyVenus.Renderable.Fade', 0.0, 1.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyMars.Renderable.Fade', 0.0, 1.0);
-    openspace.setPropertyValueSingle('Scene.NightSkyJupiter.Renderable.Fade', 0.0, 1.0);
-    openspace.setPropertyValueSingle('Scene.NightSkySaturn.Renderable.Fade', 0.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.NightSkyMercury.Renderable.Fade", 0.0, 1.0)
+    openspace.setPropertyValueSingle("Scene.NightSkyVenus.Renderable.Fade", 0.0, 1.0)
+    openspace.setPropertyValueSingle("Scene.NightSkyMars.Renderable.Fade", 0.0, 1.0)
+    openspace.setPropertyValueSingle("Scene.NightSkyJupiter.Renderable.Fade", 0.0, 1.0)
+    openspace.setPropertyValueSingle("Scene.NightSkySaturn.Renderable.Fade", 0.0, 1.0)
   ]],
   Documentation = "Hides night sky versions of the planets",
   GuiPath = "/Night Sky/Planets",
@@ -180,5 +180,5 @@ asset.export(Venus)
 asset.export(Mars)
 asset.export(Jupiter)
 asset.export(Saturn)
-asset.export(ShowNightSkyPlanets)
-asset.export(HideNightSkyPlanets)
+asset.export("ShowNightSkyPlanets", ShowNightSkyPlanets.Identifier)
+asset.export("HideNightSkyPlanets", HideNightSkyPlanets.Identifier)

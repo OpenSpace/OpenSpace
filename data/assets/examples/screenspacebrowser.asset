@@ -3,7 +3,8 @@ local Browser = {
   Identifier = "ScreenSpaceBrowserExample",
   Name = "Screen Space Browser Example",
   Url = "https://www.openspaceproject.com/"
-};
+}
+
 
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(Browser)

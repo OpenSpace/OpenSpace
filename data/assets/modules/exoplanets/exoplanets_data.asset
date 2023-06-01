@@ -2,7 +2,7 @@ local dataPath = asset.syncedResource({
   Name = "Exoplanet Data Files",
   Type = "HttpSynchronization",
   Identifier = "exoplanets_data",
-  Version = 4
+  Version = 5
 })
 
 local colormaps = asset.syncedResource({
@@ -13,15 +13,15 @@ local colormaps = asset.syncedResource({
 })
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   -- Set the default data files used for the exoplanet system creation
   -- (Check if already set, to not override value set in another file)
-  local p1 = "Modules.Exoplanets.DataFolder";
+  local p1 = "Modules.Exoplanets.DataFolder"
   if (openspace.getPropertyValue(p1) == "") then
     openspace.setPropertyValueSingle(p1, dataPath)
   end
 
-  local p2 = "Modules.Exoplanets.BvColormap";
+  local p2 = "Modules.Exoplanets.BvColormap"
   if (openspace.getPropertyValue(p2) == "") then
     openspace.setPropertyValueSingle(p2, colormaps .. "colorbv.cmap")
   end
@@ -33,7 +33,7 @@ asset.export("DataPath", dataPath)
 
 asset.meta = {
   Name = "Exoplanet Data",
-  Version = "4.0",
+  Version = "5.0",
   Description = [[The data that is used for the exoplanet systems. The data has been
     derived from the 'Planetary Systems Composite Data' dataset from the NASA Exoplanet
     Archive]],

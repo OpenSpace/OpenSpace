@@ -46,8 +46,7 @@ local Voyager2 = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -126,8 +125,7 @@ local VoyagerTrailCruiseEarthJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1977-AUG-20 16:07:06.535",
@@ -152,8 +150,7 @@ local VoyagerTrailEncounterJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     Color = { 0.70, 0.50, 0.20 },
     EnableFade = false,
@@ -178,8 +175,7 @@ local VoyagerTrailCruiseJupiterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -204,8 +200,7 @@ local VoyagerTrailEncounterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -230,8 +225,7 @@ local VoyagerTrailCruiseSaturnUranus = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -256,8 +250,7 @@ local VoyagerTrailEncounterUranus = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -282,8 +275,7 @@ local VoyagerTrailCruiseUranusNeptune = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -308,8 +300,7 @@ local VoyagerTrailEncounterNeptune = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -334,8 +325,7 @@ local VoyagerTrailCruiseNeptuneInf = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -355,9 +345,9 @@ local FocusVoyager2 = {
   Identifier = "os.voyager.FocusVoyager2",
   Name = "Focus on Voyager 2",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Voyager_2');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Voyager_2")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
   ]],
   Documentation = "Set camera focus to Voyager 2",
   GuiPath = "/Missions/Voyager",
@@ -366,6 +356,10 @@ local FocusVoyager2 = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(Kernels)
+
+  openspace.action.registerAction(FocusVoyager2)
+
   openspace.addSceneGraphNode(Voyager2)
   openspace.addSceneGraphNode(Voyager2Main)
   openspace.addSceneGraphNode(Voyager2Antenna)
@@ -378,8 +372,6 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(VoyagerTrailCruiseUranusNeptune)
   openspace.addSceneGraphNode(VoyagerTrailEncounterNeptune)
   openspace.addSceneGraphNode(VoyagerTrailCruiseNeptuneInf)
-
-  openspace.action.registerAction(FocusVoyager2)
 end)
 
 asset.onDeinitialize(function()
@@ -397,6 +389,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Voyager2)
 
   openspace.action.removeAction(FocusVoyager2)
+
+  openspace.spice.unloadKernel(Kernels)
 end)
 
 asset.export(Voyager2)

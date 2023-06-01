@@ -2,7 +2,7 @@ local transforms = asset.require("./transforms_magnetosphere")
 
 
 
-local transferFunction = asset.localResource("./CMR-illuminance2.txt")
+local transferFunction = asset.localResource("CMR-illuminance2.txt")
 
 local fieldlinesDirectory = asset.syncedResource({
   Name = "Magnetosphere 2012 event",
@@ -26,8 +26,8 @@ local EarthMagnetosphere = {
     MaskingRanges = { { -0, 0 } },  --closed only
     ColorMethod = "By Quantity",
     ColorQuantity = 4, -- speed
-    ColorTableRanges = {{50, 300}},
-    ColorTablePaths = {transferFunction},
+    ColorTableRanges = { { 50, 300 } },
+    ColorTablePaths = { transferFunction },
     LoadAtRuntime = true,
     ScaleToMeters = 1.0,
     Color = { 1.0, 0.725, 0.75, 0.8 }
@@ -35,7 +35,7 @@ local EarthMagnetosphere = {
   GUI = {
     Path = "/Solar System/Planets/Earth",
     Name = "Magnetosphere"
-  },
+  }
 }
 
 

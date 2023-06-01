@@ -59,6 +59,7 @@ local ExampleAdaptiveHeight = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ExampleFixedHeight)
   openspace.addSceneGraphNode(ExampleAdaptiveHeight)

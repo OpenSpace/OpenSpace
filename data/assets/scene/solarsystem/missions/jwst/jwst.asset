@@ -7,6 +7,8 @@ asset.require("./mission")
 
 
 
+
+
 local models = asset.syncedResource({
   Name = "JWST Model",
   Type = "HttpSynchronization",
@@ -37,7 +39,7 @@ local JWSTBand = {
     Rotation = {
       Type = "FixedRotation",
       Attached = "JWSTBand",
-      XAxis = { 1, 0, 0 },
+      XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
       ZAxis = sunTransforms.SolarSystemBarycenter.Identifier
     }
@@ -113,7 +115,7 @@ local JWSTFov = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = { 0, 0, math.rad(30) }
-    },
+    }
   },
   Tag = { "mission_jwst_fov" },
   GUI = {
@@ -150,6 +152,7 @@ local JWSTLabel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTBand)
   openspace.addSceneGraphNode(JWSTModel)
@@ -170,6 +173,8 @@ asset.export(JWSTBand)
 asset.export(JWSTModel)
 asset.export(JWSTFov)
 asset.export(JWSTLabel)
+
+
 
 asset.meta = {
   Name = "James Webb Space Telescope",

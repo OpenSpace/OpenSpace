@@ -45,7 +45,7 @@ local MargaretTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 1694.8,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",

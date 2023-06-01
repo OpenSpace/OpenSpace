@@ -1,5 +1,5 @@
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
@@ -21,25 +21,28 @@ local ArtemisPosition = {
       Type = "SpiceTranslation",
       Target = ArtemisSpiceId,
       Observer = "EARTH",
-      Frame = "GALACTIC",
-      Kernels = kernels .. "artemis.bsp"
-    },
+      Frame = "GALACTIC"
+    }
   },
   GUI = {
     Name = "Artemis-1 Position",
     Path = "/Solar System/Missions/Artemis",
     Hidden = true,
-    Description = "Artemis-1 position relative to Earth",
+    Description = "Artemis-1 position relative to Earth"
   }
 }
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "artemis.bsp")
+
   openspace.addSceneGraphNode(ArtemisPosition)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ArtemisPosition)
+
+  openspace.spice.unloadKernel(kernels .. "artemis.bsp")
 end)
 
 asset.export(ArtemisPosition)

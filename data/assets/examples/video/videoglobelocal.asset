@@ -5,7 +5,8 @@ local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local Layer = {
   Identifier = "ExampleVideoLocal",
   Type = "VideoTileLayer",
-  Video = <Edit this field: insert a path to a video here>,
+  Enabled = true,
+  Video = asset.localResource("examplevideo.mp4"),
   Name = "Example Video Local"
 }
 
@@ -19,6 +20,8 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("layer", Layer)
+
+
 
 asset.meta = {
   Name = "Video Player Test",

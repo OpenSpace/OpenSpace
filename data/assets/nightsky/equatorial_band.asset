@@ -41,9 +41,9 @@ local ShowEquatorialLine = {
   Identifier = "os.nightsky.ShowEquatorialLine",
   Name = "Show equatorial line",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Fade', 0.0);
-    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Fade', 1.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.EquatorialLine.Renderable.Fade", 0.0)
+    openspace.setPropertyValueSingle("Scene.EquatorialLine.Renderable.Enabled", true)
+    openspace.setPropertyValueSingle("Scene.EquatorialLine.Renderable.Fade", 1.0, 1.0)
   ]],
   Documentation = "Shows the equatorial line",
   GuiPath = "/Night Sky/Lines and Grids",
@@ -54,12 +54,13 @@ local HideEquatorialLine = {
   Identifier = "os.nightsky.HideEquatorialLine",
   Name = "Hide equatorial line",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.EquatorialLine.Renderable.Fade', 0.0, 1.0);
+    openspace.setPropertyValueSingle("Scene.EquatorialLine.Renderable.Fade", 0.0, 1.0)
   ]],
   Documentation = "Hides the equatorial line",
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EquatorialLine)
@@ -74,5 +75,5 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(EquatorialLine)
-asset.export(ShowEquatorialLine)
-asset.export(HideEquatorialLine)
+asset.export("ShowEquatorialLine", ShowEquatorialLine.Identifier)
+asset.export("HideEquatorialLine", HideEquatorialLine.Identifier)

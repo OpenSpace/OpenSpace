@@ -1,4 +1,5 @@
-asset.require("./messenger")
+local mercury = asset.require("scene/solarsystem/planets/mercury/mercury")
+local messenger = asset.require("./messenger")
 
 
 
@@ -7,10 +8,11 @@ local Distance = {
   Identifier = "MessengerDistance",
   GuiName = "Messenger - Mercury Distance",
   SourceType = "Node",
-  SourceNodeName = "Messenger",
+  SourceNodeName = messenger.Messenger.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = "Mercury"
+  DestinationNodeName = mercury.Mercury.Identifier
 }
+
 
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Distance)

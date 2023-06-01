@@ -43,8 +43,7 @@ local Voyager1 = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -124,8 +123,7 @@ local VoyagerTrailCruiseEarthJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1977 SEP 05",
@@ -149,8 +147,7 @@ local VoyagerTrailEncounterJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     Color = { 0.70, 0.50, 0.20 },
     EnableFade = false,
@@ -175,8 +172,7 @@ local VoyagerTrailCruiseJupiterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -201,8 +197,7 @@ local VoyagerTrailEncounterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -227,8 +222,7 @@ local VoyagerTrailCruiseSaturnInf = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SSB",
-      Kernels = Kernels
+      Observer = "SSB"
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
@@ -249,9 +243,9 @@ local FocusVoyager1 = {
   Identifier = "os.voyager.FocusVoyager1",
   Name = "Focus on Voyager 1",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Voyager_1');
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Voyager_1")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
   ]],
   Documentation = "Set camera focus to Voyager 1",
   GuiPath = "/Missions/Voyager",
@@ -260,6 +254,8 @@ local FocusVoyager1 = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(Kernels)
+
   openspace.addSceneGraphNode(Voyager1)
   openspace.addSceneGraphNode(Voyager1Main)
   openspace.addSceneGraphNode(Voyager1Antenna)
@@ -283,6 +279,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Voyager1Antenna)
   openspace.removeSceneGraphNode(Voyager1Main)
   openspace.removeSceneGraphNode(Voyager1)
+
+  openspace.spice.unloadKernel(Kernels)
 end)
 
 asset.export(Voyager1)

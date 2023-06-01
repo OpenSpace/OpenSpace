@@ -23,7 +23,7 @@ function addSlide(deck, path)
     Identifier = identifier,
     Name = identifier,
     TexturePath = path
-  };
+  }
 
   for key, value in pairs(deck.DefaultRenderableProperties) do
     spec[key] = value

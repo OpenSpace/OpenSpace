@@ -13,9 +13,9 @@ References:
 [3]     Source :    SPICE kernel data coverage
         Date :      2016-08-23
         Comment :   The spice data is split up into across different files. These files
-                    seems to represent different phases. A script was used to extract the 
+                    seems to represent different phases. A script was used to extract the
                     SPICE coverage from all .bc files and use the names of the files as
-                    mission names and associate the name with the time coverage. 
+                    mission names and associate the name with the time coverage.
                     Script used: support/mission/ckbrief2mission.js
 
 [4]     Source :    Visual interpretation of SPICE kernel data coverage
@@ -301,6 +301,7 @@ local Mission = {
   -- End of [1]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.loadMission(Mission)

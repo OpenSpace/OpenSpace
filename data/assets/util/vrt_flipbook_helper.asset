@@ -14,7 +14,7 @@ function nextFlipbookPage(flipbook)
   end
 
   if (flipbook.CurrentFlipIndex < flipbook.TotalCount - 1) then
-    flipbook.CurrentFlipIndex = flipbook.CurrentFlipIndex + 1;
+    flipbook.CurrentFlipIndex = flipbook.CurrentFlipIndex + 1
     local assetString = flipbook.AssetPrefix .. flipbook.CurrentFlipIndex
     openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetString .. ".Enabled", true)
   end
@@ -29,7 +29,7 @@ function previousFlipbookPage(flipbook)
 
   local assetString = flipbook.AssetPrefix .. localIndex
   openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetString .. ".Enabled", false)
-  localIndex = localIndex - 1;
+  localIndex = localIndex - 1
 
   if (localIndex >= 0 ) then
     assetString = flipbook.AssetPrefix .. localIndex

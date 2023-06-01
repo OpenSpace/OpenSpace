@@ -49,7 +49,7 @@ local Reefs = {
   Name = Name .. " (Reefs)",
   Enabled = asset.enabled,
   FilePath = syncedDirectory .. "reefs.png",
-  Description = Description,
+  Description = Description
 }
 
 local Colorbar = {

@@ -45,6 +45,7 @@ local ExampleGlobeRotation = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ExampleGlobeRotation)
 end)

@@ -10,4 +10,4 @@ asset.require("./othermoons")
 
 asset.require("./actions")
 
-asset.require('./mission')
+asset.require("./mission")

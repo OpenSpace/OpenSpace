@@ -1,5 +1,5 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
 
 
@@ -11,6 +11,7 @@ local modelFolder = asset.syncedResource({
   Filename = "Burj_Khalifa.osmodel",
   Override = false
 })
+
 
 local Location = { 25.196715, 55.273972, -3.0 }
 
@@ -50,7 +51,7 @@ local UpdatePositionAction = {
   Identifier = "os.scalemodels.DropBurjKhalifa",
   Name = "Drop Burj Khalifa under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_BurjKhalifa')
+    openspace.globebrowsing.setNodePositionFromCamera("Scale_BurjKhalifa")
   ]],
   Documentation = "Updates the Burj Khalifa position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
@@ -61,11 +62,12 @@ local ResetPositionAction = {
   Identifier = "os.scalemodels.ResetBurjKhalifa",
   Name = "Reset Burj Khalifa position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_BurjKhalifa', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",
+    openspace.globebrowsing.setNodePosition("Scale_BurjKhalifa", "]] .. earthAsset.Earth.Identifier .. [[", ]] .. Location[1] .. "," .. Location[2] .. ")",
   Documentation = "Resets the Burj Khalifa back to its actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ScaleModel)
@@ -81,5 +83,5 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(ScaleModel)
-asset.export(UpdatePositionAction)
-asset.export(ResetPositionAction)
+asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
+asset.export("ResetPositionAction", ResetPositionAction.Identifier)

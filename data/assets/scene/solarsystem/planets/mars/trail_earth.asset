@@ -22,9 +22,10 @@ local MarsTrailEarth = {
   GUI = {
     Name = "Mars trail from Earth",
     Path = "/Solar System/Planets/Mars",
-    Description = "Trail of Mars as observed by the Earth",
+    Description = "Trail of Mars as observed by the Earth"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MarsTrailEarth)

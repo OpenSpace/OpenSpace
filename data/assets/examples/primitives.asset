@@ -44,6 +44,7 @@ local Ellipse = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Circle)
   openspace.addSceneGraphNode(Ellipse)

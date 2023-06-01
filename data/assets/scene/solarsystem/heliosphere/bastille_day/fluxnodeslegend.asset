@@ -49,7 +49,15 @@ local ToggleLegend = {
 local HideLegend = {
   Identifier = "os.bastilleday.fluxnodelegend.HideLegend",
   Name = "Hides the legend image",
-  Command = [[openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade", 0.0, openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"), "Linear", 'openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", false)')]],
+  Command = [[
+    openspace.setPropertyValueSingle(
+      "ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade",
+      0.0,
+      openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+      "Linear",
+      'openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", false)'
+    )
+  ]],
   Documentation = "Hides the legend image",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
@@ -62,15 +70,15 @@ asset.onInitialize(function()
   openspace.action.registerAction(HideLegend)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.action.removeAction(HideLegend)
   openspace.action.removeAction(ToggleLegend)
   openspace.removeScreenSpaceRenderable(Legend)
 end)
 
 asset.export(Legend)
-asset.export("ToggleLegend", ToggleLegend)
-asset.export("HideLegend", HideLegend)
+asset.export("ToggleLegend", ToggleLegend.Identifier)
+asset.export("HideLegend", HideLegend.Identifier)
 
 
 

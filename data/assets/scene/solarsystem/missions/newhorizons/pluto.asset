@@ -42,8 +42,7 @@ local PlutoProjection = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "PLUTO",
-      Observer = "PLUTO BARYCENTER",
-      Kernels = kernels.NewHorizonsKernels
+      Observer = "PLUTO BARYCENTER"
     },
     Rotation = {
       Type = "SpiceRotation",
@@ -70,7 +69,7 @@ local PlutoProjection = {
     Projection = {
       Sequence = images,
       EventFile = assets .. "core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
-      -- SequenceType   = "hybrid",
+      -- SequenceType = "hybrid",
       SequenceType = "image-sequence",
       Observer = "NEW HORIZONS",
       Target = "PLUTO",
@@ -202,12 +201,12 @@ local PlutoText = {
   Transform = {
     Translation = {
       Type = "StaticTranslation",
-      Position = {0, -2000000.0, 0}
+      Position = { 0, -2000000.0, 0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 10^6.3,
+    Size = 19952623.15,
     Origin = "Center",
     Billboard = true,
     Texture = encounterTextures .. "Pluto-Text.png",
@@ -240,6 +239,8 @@ local PlutoShadow = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.NewHorizonsKernels)
+
   openspace.addSceneGraphNode(PlutoProjection)
   openspace.addSceneGraphNode(PlutoBarycenterLabel)
   openspace.addSceneGraphNode(PlutoText)
@@ -251,6 +252,8 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoText)
   openspace.removeSceneGraphNode(PlutoBarycenterLabel)
   openspace.removeSceneGraphNode(PlutoProjection)
+
+  openspace.spice.unloadKernel(kernels.NewHorizonsKernels)
 end)
 
 asset.export(PlutoProjection)

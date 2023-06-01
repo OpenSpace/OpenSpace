@@ -15,7 +15,7 @@ local OrionImage = {
   Tag = { "mission_jwst_target" },
   Description = [[
     Image of the Orion Nebula by Bill Schoening/NOIRLab/NSF/AURA.
-  ]],
+  ]]
 }
 
 

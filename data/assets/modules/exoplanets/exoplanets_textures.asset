@@ -1,6 +1,6 @@
 local habitableZoneTextures = asset.require(
   "scene/milkyway/habitable_zones/habitable_zone_textures"
-).TexturesPath
+)
 
 
 
@@ -19,38 +19,38 @@ local texturesPath = asset.syncedResource({
 })
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   local starTexture = texturesPath .. "sun.jpg"
   local noDataTexture = texturesPath .. "grid-32.png"
   local discTexture = texturesPath .. "disc_bw_texture.png"
 
   local starGlareTexture = sunTextures .. "halo.png"
 
-  local hzTexture = habitableZoneTextures .. "hot_to_cold_faded.png"
+  local hzTexture = habitableZoneTextures.TexturesPath .. "hot_to_cold_faded.png"
 
   -- Set the default textures used for the exoplanet system creation
   -- (Check if already set, to not override value set in another file)
-  local p1 = "Modules.Exoplanets.StarTexture";
+  local p1 = "Modules.Exoplanets.StarTexture"
   if (openspace.getPropertyValue(p1) == "") then
     openspace.setPropertyValueSingle(p1, starTexture)
   end
 
-  local p2 = "Modules.Exoplanets.StarGlareTexture";
+  local p2 = "Modules.Exoplanets.StarGlareTexture"
   if (openspace.getPropertyValue(p2) == "") then
     openspace.setPropertyValueSingle(p2, starGlareTexture)
   end
 
-  local p3 = "Modules.Exoplanets.NoDataTexture";
+  local p3 = "Modules.Exoplanets.NoDataTexture"
   if (openspace.getPropertyValue(p3) == "") then
     openspace.setPropertyValueSingle(p3, noDataTexture)
   end
 
-  local p4 = "Modules.Exoplanets.OrbitDiscTexture";
+  local p4 = "Modules.Exoplanets.OrbitDiscTexture"
   if (openspace.getPropertyValue(p4) == "") then
     openspace.setPropertyValueSingle(p4, discTexture)
   end
 
-  local p5 = "Modules.Exoplanets.HabitableZoneTexture";
+  local p5 = "Modules.Exoplanets.HabitableZoneTexture"
   if (openspace.getPropertyValue(p5) == "") then
     openspace.setPropertyValueSingle(p5, hzTexture)
   end
@@ -67,5 +67,5 @@ asset.meta = {
     visualizations]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
+  License = "MIT license"
 }

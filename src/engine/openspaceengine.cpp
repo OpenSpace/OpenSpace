@@ -44,6 +44,7 @@
 #include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/helper.h>
@@ -1757,6 +1758,15 @@ void setCameraFromProfile(const Profile& p) {
                     geoScript,
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
+            },
+            [](const Profile::CameraGoToNode& node) {
+                using namespace interaction;
+                NodeCameraStateSpec spec;
+                spec.identifier = node.anchor;
+                spec.height = node.height;
+                spec.useTargetUpDirection = true;
+
+                global::navigationHandler->setCameraFromNodeSpecNextFrame(spec);
             }
         },
         p.camera.value()

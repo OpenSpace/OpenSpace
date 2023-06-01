@@ -2,7 +2,7 @@ local Kernels = asset.syncedResource({
   Name = "New Horizons Kernels",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_kernels",
-  Version =  1
+  Version = 1
 })
 
 
@@ -34,7 +34,7 @@ local NewHorizonsKernels = {
   Kernels .. "nh_astr_v000.ti",
   Kernels .. "nh_fss_v000.ti",
   Kernels .. "nh_soc_misc_v001.tf",
-  Kernels .. "nh_stars.bsp",
+  Kernels .. "nh_stars.bsp"
 }
 
 local PlutoKernels = {

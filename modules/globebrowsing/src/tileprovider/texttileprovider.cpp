@@ -86,6 +86,7 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
 
         GLsizei w = static_cast<GLsizei>(texture->width());
         GLsizei h = static_cast<GLsizei>(texture->height());
+        global::renderEngine->openglStateCache().loadCurrentGLState();
         glViewport(0, 0, w, h);
         glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -98,7 +99,7 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
         // Reset FBO, shader program and viewport
         glUseProgram(prevProgram);
         glBindFramebuffer(GL_FRAMEBUFFER, prevFBO);
-        global::renderEngine->openglStateCache().resetViewportState();
+        global::renderEngine->openglStateCache().resetCachedStates();
     }
     return tile;
 }

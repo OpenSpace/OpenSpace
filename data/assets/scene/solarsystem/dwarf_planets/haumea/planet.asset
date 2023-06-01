@@ -23,12 +23,12 @@ local Planet = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = modelFolder .. 'Haumea_1_1000.glb',
+    GeometryFile = modelFolder .. "Haumea_1_1000.glb",
     SpecularIntensity = 0.0,
     AmbientIntensity = 0.0,
     LightSources = {
       sun.LightSource
-    },
+    }
   },
   GUI = {
     Name = "Haumea",
@@ -37,6 +37,7 @@ local Planet = {
       Applications and Development (VTAD)."]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Planet)

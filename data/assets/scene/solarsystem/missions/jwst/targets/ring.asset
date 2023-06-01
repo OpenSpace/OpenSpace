@@ -16,7 +16,7 @@ local RingImage = {
   Description = [[
     Image of the Ring Nebula by NASA, ESA, C.R. O'Dell (Vanderbilt University), and
     D. Thompson (Large Binocular Telescope Observatory).
-  ]],
+  ]]
 }
 
 

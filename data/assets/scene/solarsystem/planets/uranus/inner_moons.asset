@@ -45,7 +45,7 @@ local CordeliaTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.335034,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -127,7 +127,7 @@ local OpheliaTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.3764,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -209,7 +209,7 @@ local BiancaTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.434579,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -291,7 +291,7 @@ local CressidaTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.463570,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -373,7 +373,7 @@ local DesdemonaTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.473650,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -455,7 +455,7 @@ local JulietTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.493065,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -537,7 +537,7 @@ local PortiaTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.513196,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -619,7 +619,7 @@ local RosalindTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.55846,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -701,7 +701,7 @@ local CupidTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.618,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -783,7 +783,7 @@ local BelindaTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.623527,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -865,7 +865,7 @@ local PerditaTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.638,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -947,7 +947,7 @@ local PuckTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.761833,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",
@@ -1029,7 +1029,7 @@ local MabTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.923,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = {
     "moonTrail_solarSystem",

@@ -16,8 +16,8 @@ local HEEQ180ReferenceFrame = {
       Type = "SpiceRotation",
       SourceFrame = "HEEQ180",
       DestinationFrame = "GALACTIC",
-      Kernels = asset.localResource("./kernels/HEEQ180.tf")
-    },
+      Kernels = asset.localResource("kernels/HEEQ180.tf")
+    }
   },
   GUI = {
     Name = "HEEQ180 Reference Frame",

@@ -1,5 +1,5 @@
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
 
 
@@ -11,6 +11,7 @@ local modelFolder = asset.syncedResource({
   Filename = "GatewayArch_fbx.osmodel",
   Override = false
 })
+
 
 local Location = { 38.624880, -90.184939 }
 
@@ -41,7 +42,7 @@ local ScaleModel = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = modelFolder .. "GatewayArch_fbx.osmodel",
-    RotationVector = { 0.0, 157, 0.0 },
+    RotationVector = { 0.0, 157.0, 0.0 },
     LightSources = { sunAsset.LightSource }
   },
   GUI = {
@@ -54,7 +55,7 @@ local UpdatePositionAction = {
   Identifier = "os.scalemodels.DropGatewayArch",
   Name = "Drop Gateway Arch under camera",
   Command = [[
-    openspace.globebrowsing.setNodePositionFromCamera('Scale_GatewayArch')
+    openspace.globebrowsing.setNodePositionFromCamera("Scale_GatewayArch")
   ]],
   Documentation = "Updates the Gateway Arch position based on the globe location of the camera",
   GuiPath = "/Scale Objects",
@@ -65,11 +66,12 @@ local ResetPositionAction = {
   Identifier = "os.scalemodels.ResetGatewayArch",
   Name = "Reset Gateway Arch position",
   Command = [[
-    openspace.globebrowsing.setNodePosition('Scale_GatewayArch', ']] .. earthAsset.Earth.Identifier .. [[', ]] .. Location[1] .. "," .. Location[2] .. ")",
+    openspace.globebrowsing.setNodePosition("Scale_GatewayArch", "]] .. earthAsset.Earth.Identifier .. [[", ]] .. Location[1] .. "," .. Location[2] .. ")",
   Documentation = "Resets the Gateway Arch back to its actual location",
   GuiPath = "/Scale Objects",
   IsLocal = false
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ScaleModel)
@@ -86,5 +88,5 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(ScaleModel)
-asset.export(UpdatePositionAction)
-asset.export(ResetPositionAction)
+asset.export("UpdatePositionAction", UpdatePositionAction.Identifier)
+asset.export("ResetPositionAction", ResetPositionAction.Identifier)

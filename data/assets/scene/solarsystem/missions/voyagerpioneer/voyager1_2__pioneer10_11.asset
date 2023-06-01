@@ -13,7 +13,7 @@ local pioneer_horizons = asset.syncedResource({
 })
 
 
-local SampleInterval = 24*60*60
+local SampleInterval = 24 * 60 * 60
 
 local Voyager1 = {
   Identifier = "Voyager1",

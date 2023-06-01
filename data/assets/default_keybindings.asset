@@ -101,12 +101,13 @@ local ToggleMainGui = {
 local ToggleOverlays = {
   Identifier = "os.ToggleOverlays",
   Name = "Toggle dashboard and overlays",
-  Command =
-[[local isEnabled = openspace.getPropertyValue("Dashboard.IsEnabled");
-openspace.setPropertyValueSingle("Dashboard.IsEnabled", not isEnabled);
-openspace.setPropertyValueSingle("RenderEngine.ShowLog", not isEnabled);
-openspace.setPropertyValueSingle("RenderEngine.ShowVersion", not isEnabled);
-openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
+  Command = [[
+    local isEnabled = openspace.getPropertyValue("Dashboard.IsEnabled")
+    openspace.setPropertyValueSingle("Dashboard.IsEnabled", not isEnabled)
+    openspace.setPropertyValueSingle("RenderEngine.ShowLog", not isEnabled)
+    openspace.setPropertyValueSingle("RenderEngine.ShowVersion", not isEnabled)
+    openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)
+  ]],
   Documentation = "Toggles the dashboard and overlays",
   GuiPath = "/System/GUI",
   IsLocal = true
@@ -160,7 +161,7 @@ local PreviousDeltaStepImmediate = {
 local ReloadGui = {
   Identifier = "os.ReloadGui",
   Name = "Reload GUI",
-  Command = "openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)",
+  Command = [[openspace.setPropertyValueSingle("Modules.CefWebGui.Reload", nil)]],
   Documentation = "Reloads the GUI",
   GuiPath = "/System/GUI",
   IsLocal = true
@@ -220,7 +221,7 @@ asset.onInitialize(function()
   openspace.bindKey("F5", ReloadGui.Identifier)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.clearKey("F5")
   openspace.action.removeAction(ReloadGui)
 

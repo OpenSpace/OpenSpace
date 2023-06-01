@@ -88,9 +88,9 @@ local FocusMoon = {
   Identifier = "os.earth.FocusMoon",
   Name = "Focus on Moon",
   Command = [[
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon')
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Moon")
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Set camera focus on the Moon",
   GuiPath = "/Solar System/Earth/Moon",
@@ -101,7 +101,10 @@ local ToggleMoonShading = {
   Identifier = "os.earth.ToggleMoonShading",
   Name = "Toggle Moon shading",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.PerformShading', not openspace.getPropertyValue('Scene.Moon.Renderable.PerformShading'))
+    openspace.setPropertyValueSingle(
+      "Scene.Moon.Renderable.PerformShading",
+      not openspace.getPropertyValue("Scene.Moon.Renderable.PerformShading")
+    )
   ]],
   Documentation = "Toggles the shading of the Moon",
   GuiPath = "/Solar System/Earth/Moon",
@@ -126,6 +129,9 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Moon)
+asset.export(MoonLabel)
+asset.export("FocusMoon", FocusMoon.Identifier)
+asset.export("ToggleMoonShading", ToggleMoonShading.Identifier)
 
 
 

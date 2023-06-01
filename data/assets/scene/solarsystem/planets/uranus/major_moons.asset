@@ -38,7 +38,7 @@ local MirandaTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 1.413479,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
   GUI = {
@@ -62,7 +62,7 @@ local MirandaLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 1, 250.0 },
-    FadeWidths = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -107,7 +107,7 @@ local ArielTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 2.520379,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
   GUI = {
@@ -131,7 +131,7 @@ local ArielLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 1, 250.0 },
-    FadeWidths = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -176,7 +176,7 @@ local UmbrielTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 4.144177,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
   GUI = {
@@ -200,7 +200,7 @@ local UmbrielLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 1, 250.0 },
-    FadeWidths = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -245,7 +245,7 @@ local TitaniaTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 8.705872,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
   GUI = {
@@ -269,7 +269,7 @@ local TitaniaLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 1, 250.0 },
-    FadeWidths = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
@@ -314,7 +314,7 @@ local OberonTrail = {
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 13.463239,
-    Resolution = 1000,
+    Resolution = 1000
   },
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" },
   GUI = {
@@ -338,7 +338,7 @@ local OberonLabel = {
     EnableFading = true,
     FadeUnit = "Gm",
     FadeDistances = { 1, 250.0 },
-    FadeWidths = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
   },
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {

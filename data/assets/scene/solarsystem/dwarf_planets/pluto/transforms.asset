@@ -11,8 +11,7 @@ local PlutoBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "PLUTO BARYCENTER",
-      Observer = "SSB",
-      Kernels = kernels.PlutoKernels
+      Observer = "SSB"
     }
   },
   GUI = {
@@ -23,11 +22,15 @@ local PlutoBarycenter = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels.PlutoKernels)
+
   openspace.addSceneGraphNode(PlutoBarycenter)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoBarycenter)
+
+  openspace.spice.unloadKernel(kernels.PlutoKernels)
 end)
 
 asset.export(PlutoBarycenter)

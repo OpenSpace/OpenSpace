@@ -13,7 +13,7 @@ local Styx = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 0.45E5, 0.45E5, 0.45E5 },
+    Radii = { 45000, 45000, 45000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },
@@ -73,6 +73,7 @@ local StyxLabel = {
     Description = "Label for Pluto's moon Styx"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Styx)

@@ -91,6 +91,7 @@ local SolarSystemBarycenterAxes = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthBarycenterAxes)
   openspace.addSceneGraphNode(EarthInertialAxes)

@@ -28,7 +28,7 @@ local PointJwst = {
     end
 
     local function length(v)
-      return math.sqrt(v[1]*v[1] + v[2]*v[2]+ v[3]*v[3])
+      return math.sqrt(v[1]*v[1] + v[2]*v[2] + v[3]*v[3])
     end
 
     local function normalize(v)
@@ -103,13 +103,12 @@ local PointJwst = {
         newYAngle = -op2
       end
 
-      local res = { newXAngle, newYAngle }
-      return res
+      return { newXAngle, newYAngle }
     end
 
     local coordinates = convertRaDec(ra, dec)
-    local JWSTPosition = openspace.worldPosition('JWSTModel')
-    local JWSTRotation = openspace.worldRotation('JWSTRotation')
+    local JWSTPosition = openspace.worldPosition("JWSTModel")
+    local JWSTRotation = openspace.worldRotation("JWSTRotation")
 
     local JWSTtoCoord = {
       coordinates[1] - JWSTPosition[1],
@@ -123,12 +122,12 @@ local PointJwst = {
     -- Check if the new angle violate the sunshield
     -- -45 deg to 5 deg is valid in x rotation
     if JWSTAngles[1] < math.rad(-45) or JWSTAngles[1] > math.rad(5) then
-      openspace.printWarning('Coordinate violates the sunshield')
+      openspace.printWarning("Coordinate violates the sunshield")
     end
 
     openspace.setPropertyValueSingle(
-      'Scene.JWSTModel.Rotation.Rotation',
-      { JWSTAngles[1], JWSTAngles[2],  0.0},
+      "Scene.JWSTModel.Rotation.Rotation",
+      { JWSTAngles[1], JWSTAngles[2],  0.0 },
       duration
     )
   ]],
@@ -139,6 +138,7 @@ local PointJwst = {
   GuiPath = "/JWST/Events",
   IsLocal = true
 }
+
 
 asset.onInitialize(function()
   openspace.action.registerAction(PointJwst)

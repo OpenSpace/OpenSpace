@@ -11,7 +11,7 @@ asset.syncedResource({
   Identifier = "example_multiple",
   Url = {
     "http://celestrak.com/NORAD/elements/stations.txt",
-    "http://celestrak.com/NORAD/elements/gps-ops.txt",
+    "http://celestrak.com/NORAD/elements/gps-ops.txt"
   }
 })
 

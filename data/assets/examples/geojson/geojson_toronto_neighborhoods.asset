@@ -1,4 +1,4 @@
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
@@ -22,6 +22,7 @@ local ExampleToronto = {
   Name = "Toronto Neighbourhoods"
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExampleToronto)
 end)
@@ -31,6 +32,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(ExampleToronto)
+
 
 
 asset.meta = {

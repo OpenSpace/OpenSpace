@@ -62,16 +62,17 @@ local ToggleEuv = {
 }
 
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.action.registerAction(ToggleEuv)
   openspace.addSceneGraphNode(EUVLayer)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EUVLayer)
   openspace.action.removeAction(ToggleEuv)
 end)
 
+asset.export("ToggleEuv", ToggleEuv.Identifier)
 asset.export(EUVLayer)
 
 

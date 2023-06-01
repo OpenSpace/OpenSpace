@@ -128,7 +128,7 @@ for i,v in ipairs(layers_names) do
     Identifier = Identifier .. "-" .. v,
     Name = Name .. " " .. v,
     Enabled = asset.enabled,
-    FilePath = imagesDestination .. '/' .. v .. ".jpg",
+    FilePath = imagesDestination .. "/" .. v .. ".jpg",
     Description = Description
   }
 

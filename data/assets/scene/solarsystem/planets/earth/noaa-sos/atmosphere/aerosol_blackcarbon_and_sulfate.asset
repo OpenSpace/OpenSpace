@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
 
 
@@ -51,12 +51,12 @@ local Colorbar = {
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
-  openspace.addScreenSpaceRenderable(Colorbar);
+  openspace.addScreenSpaceRenderable(Colorbar)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
   openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export(Layer)

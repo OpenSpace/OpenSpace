@@ -15,7 +15,7 @@ local Planet = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 910.0E3, 910.0E3, 917.0E3 },
+    Radii = { 910000, 910000, 917000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },

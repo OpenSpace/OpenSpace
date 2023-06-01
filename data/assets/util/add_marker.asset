@@ -13,6 +13,7 @@ local marker = {
   TexturePath = icons .. "target.png"
 }
 
+
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(marker)
 end)

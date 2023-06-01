@@ -1,4 +1,4 @@
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
@@ -35,6 +35,7 @@ local ExamplePolygonDiffHeights = {
   Name = "Polygon (Different heights)",
   Description = "A GeoJSON test layer with some different heights"
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExamplePolygon)

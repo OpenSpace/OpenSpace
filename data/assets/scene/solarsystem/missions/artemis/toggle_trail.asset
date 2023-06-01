@@ -27,7 +27,7 @@ local ToggleTrail = {
       end
     else
       visibility = not (
-        (openspace.getPropertyValue("Scene." .. earthTrail .. ".Renderable.Fade") == 1) or 
+        (openspace.getPropertyValue("Scene." .. earthTrail .. ".Renderable.Fade") == 1) or
         (openspace.getPropertyValue("Scene." .. moonTrail .. ".Renderable.Fade") == 1)
       )
     end
@@ -35,7 +35,7 @@ local ToggleTrail = {
     if visibility then
       openspace.fadeIn("Scene." .. earthTrail .. ".Renderable")
       openspace.fadeIn("Scene." .. moonTrail .. ".Renderable")
-    else 
+    else
       openspace.fadeOut("Scene." .. earthTrail .. ".Renderable")
       openspace.fadeOut("Scene." .. moonTrail .. ".Renderable")
     end

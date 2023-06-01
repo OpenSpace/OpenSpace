@@ -17,7 +17,7 @@ local UranusBarycenter = {
     Name = "Uranus Barycenter",
     Path = "/Solar System/Planets/Uranus",
     Hidden = true,
-    Description = "Uranus Barycenter position",
+    Description = "Uranus Barycenter position"
   }
 }
 

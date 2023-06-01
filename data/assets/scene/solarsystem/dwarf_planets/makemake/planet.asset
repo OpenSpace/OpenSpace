@@ -23,12 +23,12 @@ local Planet = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = modelFolder .. 'Makemake_1_1430.glb',
+    GeometryFile = modelFolder .. "Makemake_1_1430.glb",
     SpecularIntensity = 0.0,
     AmbientIntensity = 0.0,
     LightSources = {
       sun.LightSource
-    },
+    }
   },
   GUI = {
     Name = "Makemake",
