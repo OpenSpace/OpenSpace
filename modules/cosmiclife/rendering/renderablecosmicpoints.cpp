@@ -650,7 +650,7 @@ namespace openspace {
 
     void RenderableCosmicPoints::updateRenderData(const RenderData& data) {
 
-        if (_hasSpeckFile) {
+        if (_dataIsDirty && _hasSpeckFile) {
             ZoneScopedN("Data dirty")
                 TracyGpuZone("Data dirty")
                 LDEBUG("Regenerating data");

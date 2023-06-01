@@ -1,0 +1,29 @@
+local scaledImages = {
+    Identifier = "os.scaledImages",
+    Name = "Turn on and off Scaled Images",
+    Command = [[
+      if (openspace.getPropertyValue("Scene.scaled_consensus_images1.Renderable.Opacity") == 1.0) then
+        openspace.setPropertyValue("Scene.scaled_consensus_images*.Renderable.Opacity", 0.0)
+      else
+        openspace.setPropertyValue("Scene.scaled_consensus_images*.Renderable.Opacity", 1.0)
+      end
+    ]],
+    Documentation = [[Turn on and off Primates Scaled Images]],
+    GuiPath = "/ConsensusImages",
+    IsLocal = true
+  }
+  asset.export("scaledImages", scaledImages.Identifier)
+  
+  asset.onInitialize(function()
+      openspace.action.registerAction(scaledImages)
+    end)
+  
+    asset.meta = {
+      Name = "Actions - Toggle current Trails",
+      Version = "1.0",
+      Description = "Asset providing actions to toggle trails",
+      Author = "OpenSpace Team",
+      URL = "http://openspaceproject.com",
+      License = "MIT license"
+    }
+  
