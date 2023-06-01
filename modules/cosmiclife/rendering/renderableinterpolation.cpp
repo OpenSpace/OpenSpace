@@ -639,6 +639,8 @@ namespace openspace {
 
         std::priority_queue<DistancePoints> maxHeap1;
         std::priority_queue<DistancePoints> maxHeap2;
+
+        _lineBrightness.clear();
             
         for (int i = 0; i < d1.entries.size(); i++) {
             // Find the points of interest
@@ -659,14 +661,21 @@ namespace openspace {
             }
         }
 
-        // Find the top 5% and take their indices to get the correct point in the datasets
+        // Find the top % and take their indices to get the correct point in the datasets
         int numElementsToPop = maxHeap1.size() * _percentageOfLines;
+
+        // Get the maximum diff 
+        DistancePoints topDiff = maxHeap1.top();
+        float maxLength = topDiff.distance;
 
         // Pop the top 10% elements from the max heap and store their indices
         for (int k = 0; k < numElementsToPop; k++) {
             
             DistancePoints maxValue1 = maxHeap1.top();
             maxHeap1.pop();
+
+            float brightness = maxValue1.distance / maxLength;
+            _lineBrightness.push_back(brightness);
 
             v1.push_back(Vertex{ maxValue1.p1.position.x, maxValue1.p1.position.y, maxValue1.p1.position.z });
             v1.push_back(Vertex{ maxValue1.p2.position.x, maxValue1.p2.position.y, maxValue1.p2.position.z });
@@ -682,40 +691,41 @@ namespace openspace {
 
     }
 
-    void RenderableInterpolation::initializeMDSLines() {
+    void RenderableInterpolation::initializeLines() {
 
         if (_vaoLines == 0) {
             glGenVertexArrays(1, &_vaoLines);  // Generate VAO
-            glBindVertexArray(_vaoLines);  // Bind VAO
-            glGenBuffers(1, &_vboLines);  // Generate and bind VBO
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, _vboLines);
-
-        // Set VBO data
-        glBufferData(GL_ARRAY_BUFFER, _vertices1.size() * sizeof(Vertex), _vertices1.data(), GL_DYNAMIC_DRAW);
-
-        // Enable vertex attribute array and specify layout
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-    }
-
-    void RenderableInterpolation::initializeUMAPLines() {
-
-        if (_vaoLines == 0) {
-            glGenVertexArrays(1, &_vaoLines);  // Generate VAO
-            glBindVertexArray(_vaoLines);  // Bind VAO
-            glGenBuffers(1, &_vboLines);  // Generate and bind VBO
+        if (_vboLines == 0) {
+            glGenBuffers(1, &_vboLines);  // Generate VBO
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, _vboLines);
+        if (_interpolationValue < 0.01) {
+            glBindVertexArray(_vaoLines);  // Bind VAO
+            glBindBuffer(GL_ARRAY_BUFFER, _vboLines);
 
-        // Set VBO data
-        glBufferData(GL_ARRAY_BUFFER, _vertices2.size() * sizeof(Vertex), _vertices2.data(), GL_DYNAMIC_DRAW);
+            // Set VBO data
+            glBufferData(GL_ARRAY_BUFFER, _vertices1.size() * sizeof(Vertex), _vertices1.data(), GL_DYNAMIC_DRAW);
+            // Enable vertex attribute array and specify layout
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+            
+            glBindVertexArray(0);
+        }
+        else if (_interpolationValue > 0.99) {
+            glBindVertexArray(_vaoLines);  // Bind VAO
+            glBindBuffer(GL_ARRAY_BUFFER, _vboLines);
 
-        // Enable vertex attribute array and specify layout
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+            // Set VBO data
+            glBufferData(GL_ARRAY_BUFFER, _vertices1.size() * sizeof(Vertex), _vertices2.data(), GL_DYNAMIC_DRAW);
+            // Enable vertex attribute array and specify layout
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+
+            glBindVertexArray(0);
+        }
+
     }
 
     void RenderableInterpolation::sort(const speck::Dataset& d1, const speck::Dataset& d2) {
@@ -759,8 +769,6 @@ namespace openspace {
 
     void RenderableInterpolation::storeDistanceHolders(std::map<std::string, speck::Dataset> const & d) {
 
-        //std::vector<Vertex> vertices1, vertices2;
-
         auto vertexPair = ComputeOutliers(d.begin()->second, d.rbegin()->second);
 
         _distanceHolders.push_back(DistanceHolders{ d.begin()->first, d.rbegin()->first, vertexPair.first, vertexPair.second});
@@ -790,7 +798,7 @@ namespace openspace {
 
         _dataSetOne = _datasets.begin()->second;
         _dataSetTwo = _datasets.rbegin()->second;
-
+        
         sort(_dataSetOne, _dataSetTwo);
 
         if (_computeDistances) {
@@ -857,8 +865,6 @@ namespace openspace {
 
     }
 
-    // vao = vertex array object
-    // vbo = vertex buffer object
     void RenderableInterpolation::deinitializeGL() {
         glDeleteBuffers(1, &_vbo);
         _vbo = 0;
@@ -986,48 +992,75 @@ namespace openspace {
     }
 
     void RenderableInterpolation::renderLines(const RenderData& data) {
-        
-        _programL->activate();
-
-        const glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            glm::dmat4(data.modelTransform.rotation) *
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-        const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-            modelTransform;
-
-        _programL->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-        _programL->setUniform("projectionTransform", data.camera.projectionMatrix());
-
-        // Changes GL state:
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnablei(GL_BLEND, 0);
-        glEnable(GL_LINE_SMOOTH);
-        glLineWidth(1.0);
-
-        // Bind VAO
-        glBindVertexArray(_vaoLines);
 
         // Render lines
         if (_interpolationValue < 0.01) {
+            _programL->activate();
+
+            const glm::dmat4 modelTransform =
+                glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+                glm::dmat4(data.modelTransform.rotation) *
+                glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+            const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
+                modelTransform;
+
+            _programL->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+            _programL->setUniform("projectionTransform", data.camera.projectionMatrix());
+
+            // Changes GL state:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnablei(GL_BLEND, 0);
+            glEnable(GL_LINE_SMOOTH);
+            glLineWidth(4.0);
+
+            glBindVertexArray(_vaoLines);
+
             glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_vertices1.size()));
+            // Unbind VAO
+            glBindVertexArray(0);
+
+            _programL->deactivate();
+
+            // Restores GL State
+            global::renderEngine->openglStateCache().resetBlendState();
+            global::renderEngine->openglStateCache().resetLineState();
+
+            
         }
         else if (_interpolationValue > 0.99) {
+            _programL->activate();
+
+            const glm::dmat4 modelTransform =
+                glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+                glm::dmat4(data.modelTransform.rotation) *
+                glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+            const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
+                modelTransform;
+
+            _programL->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+            _programL->setUniform("projectionTransform", data.camera.projectionMatrix());
+
+            // Changes GL state:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnablei(GL_BLEND, 0);
+            glEnable(GL_LINE_SMOOTH);
+            glLineWidth(5.0);
+
+            glBindVertexArray(_vaoLines);
             glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_vertices2.size()));
+            // Unbind VAO
+            glBindVertexArray(0);
+
+            _programL->deactivate();
+
+            // Restores GL State
+            global::renderEngine->openglStateCache().resetBlendState();
+            global::renderEngine->openglStateCache().resetLineState();
         }
-
-        // Unbind VAO
-        glBindVertexArray(0);
-
-        _programL->deactivate();
-
-        // Restores GL State
-        global::renderEngine->openglStateCache().resetBlendState();
-        global::renderEngine->openglStateCache().resetLineState();
         
     }
-
 
     void RenderableInterpolation::render(const RenderData& data, RendererTasks&) {
 
@@ -1258,18 +1291,8 @@ namespace openspace {
     void RenderableInterpolation::update(const UpdateData&) {
 
         if (_computeDistances) {
-
-            if (_interpolationValue < 0.01 && _lineDataIsDirty1) {
-                initializeMDSLines();
-                _lineDataIsDirty1 = false;
-            }
-            else if (_interpolationValue > 0.99 && _lineDataIsDirty2) {
-                initializeUMAPLines();
-                _lineDataIsDirty2 = false;
-            }
-            
+            initializeLines();
         }
-        
 
         if (_hasSpriteTexture && _spriteTextureIsDirty && !_spriteTexturePath.value().empty())
         {

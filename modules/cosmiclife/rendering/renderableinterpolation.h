@@ -111,8 +111,7 @@ namespace openspace {
         speck::Dataset::Entry interpol(const speck::Dataset::Entry& e1, const speck::Dataset::Entry& e2, float iv);
         void sort(const speck::Dataset& d1, const speck::Dataset& d2);
 
-        void initializeMDSLines();
-        void initializeUMAPLines();
+        void initializeLines();
         std::vector<float> computeDistances(const speck::Dataset::Entry& e1, const std::vector<speck::Dataset::Entry>& d1);
         std::vector<speck::Dataset::Entry> findPointsOfInterest(const speck::Dataset::Entry& e, const speck::Dataset& d);
         std::pair<std::vector<RenderableInterpolation::Vertex>, std::vector<RenderableInterpolation::Vertex>> ComputeOutliers(const speck::Dataset& d1, const speck::Dataset& d2);
@@ -168,6 +167,12 @@ namespace openspace {
 
         std::vector<Vertex> _vertices1;
         std::vector<Vertex> _vertices2;
+
+        std::vector<float> _lineBrightness;
+
+        // Gradient colors
+        float _darkestIntensity = 0.25f;
+        float _brightestIntensity = 1.0f;
 
         ghoul::opengl::Texture* _spriteTexture = nullptr;
         ghoul::opengl::ProgramObject* _program = nullptr;
