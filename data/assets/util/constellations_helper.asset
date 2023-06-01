@@ -15,7 +15,6 @@ local function findFullName(abbreviation)
   local fullName = ""
 
   if file == nil then
-    file:close()
     return nil
   end
 
