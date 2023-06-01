@@ -2,7 +2,7 @@ local speck = asset.syncedResource({
   Name = "Stars Speck Files",
   Type = "HttpSynchronization",
   Identifier = "stars_du",
-  Version = 4
+  Version = 5
 })
 
 local sunspeck = asset.syncedResource({
@@ -55,13 +55,13 @@ local Stars = {
   GUI = {
     Name = "Stars",
     Path = "/Milky Way/Stars",
-    Description = [[Census:  117,003 stars with 321 labels.<br> DU Version 7.8. This
+    Description = [[Census:  116,584 stars with 321 labels.<br> DU Version 8.10. This
       star catalog is a combination of all available star catalogs, wherein we
       choose the best distance available to place the stars around the Sun as
       accurately as is possible. (Description from URL) <br><br> Data Reference:
-      XHIP: An Extended Hipparcos Compilation (Anderson E., Francis C. 2012);
-      Hipparcos Catalog (European Space Agency 1997); Gliese Catalog (Gliese and
-      Jahriess 1991)]]
+      Gaia Data Release 3 (Gaia Collaboration, 2022); XHIP: An Extended Hipparcos
+      Compilation (Anderson E., Francis C. 2012); Hipparcos Catalog (European Space Agency
+      1997); Gliese Catalog (Gliese and Jahriess 1991)]]
   }
 }
 

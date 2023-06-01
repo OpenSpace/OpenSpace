@@ -9,7 +9,7 @@ local speck = asset.syncedResource({
   Name = "Exoplanets Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_exoplanets_speck",
-  Version = 2
+  Version = 3
 })
 
 
@@ -39,7 +39,7 @@ local Object = {
   GUI = {
     Name = "Exoplanets",
     Path = "/Milky Way/Exoplanets",
-    Description = [[Census: 4,055 planets in 3,023 systems. DU Version 20.11. <br>
+    Description = [[Census: 5,361 planets in 3,982 systems. DU Version 20.12. <br>
       Extrasolar planets, or exoplanets, are a relatively new phenomenon in
       astronomy. While many astronomers believed in their existence, no
       observational evidence was available until 1995. Since that time, scientists

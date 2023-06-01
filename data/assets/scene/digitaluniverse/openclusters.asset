@@ -9,7 +9,7 @@ local speck = asset.syncedResource({
   Name = "Open Clusters Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_openclusters_speck",
-  Version = 2
+  Version = 3
 })
 
 
@@ -38,7 +38,7 @@ local Object = {
   GUI = {
     Name = "Open Star Clusters",
     Path = "/Milky Way",
-    Description = [[Census: 2,040 clusters. DU Version 5.7. <br> An open star cluster is a
+    Description = [[Census: 1,867 clusters. DU Version 7.8. <br> An open star cluster is a
       loose assemblage of stars numbering from hundreds to thousands that are bound by
       their mutual gravitation. Astronomers know from their stellar spectra that stars in
       open clusters are typically young. (With a star's spectrum, we can determine the
@@ -49,7 +49,7 @@ local Object = {
       night sky. Because of this, open clusters were originally known as Galactic
       clusters, but this term fell out of favor once astronomers began to understand that
       the Galaxy includes objects beyond the Milky Way's disk. <br><br> Data Reference:
-      Optically visible open clusters and Candidates (Dias+ 2002-2015)]]
+      Galactic spiral structure revealed by Gaia EDR3 (Poggio+, 2021)]]
   }
 }
 

@@ -6,7 +6,7 @@ local speck = asset.syncedResource({
   Name = "Constellation Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_constellations_data",
-  Version = 1
+  Version = 2
 })
 
 
@@ -85,7 +85,7 @@ local Constellations = {
   GUI = {
     Name = "Constellations",
     Path = "/Milky Way/Constellations",
-    Description = [[Census 88 constellations and labels. DU Version 2.3. <br> These
+    Description = [[Census 88 constellations and labels. DU Version 3.4. <br> These
       modern constellations are largely based on those of the Babylonians and
       Greeks; however, most cultures have their own figures and stories of the sky.
       More than half the official constellations adopted by scientists in 1930 were
