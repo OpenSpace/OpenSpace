@@ -48,4 +48,16 @@ int UIntProperty::typeLua() const {
     return LUA_TNUMBER;
 }
 
+unsigned int UIntProperty::fromLuaConversion(lua_State* state) const {
+    if (ghoul::lua::hasValue<double>(state)) {
+        return static_cast<int>(ghoul::lua::value<double>(state));
+    }
+    else if (ghoul::lua::hasValue<unsigned int>(state)) {
+        return ghoul::lua::value<unsigned int>(state);
+    }
+    else {
+        throw ghoul::RuntimeError(fmt::format("Error extracting value in UIntProperty"));
+    }
+}
+
 } // namespace openspace::properties
