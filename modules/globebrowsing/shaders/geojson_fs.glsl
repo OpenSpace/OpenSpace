@@ -28,7 +28,10 @@ in float vs_depth;
 flat in vec3 vs_normal;
 in vec4 vs_positionViewSpace;
 
-uniform vec3 color;
+flat in vec3 vs_color;
+flat in float vs_opacity;
+flat in float vs_isExtrusion;
+
 uniform float opacity;
 
 uniform float ambientIntensity = 0.2;
@@ -44,10 +47,16 @@ const vec3 LightColor = vec3(1.0);
 Fragment getFragment() {
   Fragment frag;
 
-  if (opacity == 0.0) {
+  vec3 color = vs_color;
+  float combinedOpacity = opacity * vs_opacity;
+
+  if (combinedOpacity == 0.0) {
     discard;
   }
-  frag.color = vec4(color, opacity);
+  frag.color = vec4(color, combinedOpacity);
+
+  // TEMP! Should discard pixels which are extrusion features
+  frag.color.r *= vs_isExtrusion;
 
   // Simple diffuse phong shading based on light sources
   if (performShading && nLightSources > 0) {

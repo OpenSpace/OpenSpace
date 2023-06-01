@@ -26,11 +26,18 @@
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
-layout(location = 2) in float in_height;
+layout(location = 2) in vec3 in_color;
+layout(location = 3) in float in_opacity;
+layout(location = 4) in float in_isExtrusion;
+layout(location = 5) in float in_height;
 
 out float vs_depth;
 out vec3 vs_normal;
 out vec4 vs_positionViewSpace;
+
+out vec3 vs_color;
+out float vs_opacity;
+out float vs_isExtrusion;
 
 uniform dmat4 modelTransform;
 uniform dmat4 viewTransform;
@@ -58,6 +65,11 @@ void main() {
     vs_depth = positionScreenSpace.w;
     vs_normal = normalize(normalTransform * in_normal);
     gl_Position = positionScreenSpace;
+
+    // Just pass coloring parameters to the fragment shader
+    vs_color = in_color;
+    vs_opacity = in_opacity;
+    vs_isExtrusion = in_isExtrusion;
 
     // Set z to 0 to disable near and far plane, unique handling for perspective in space
     gl_Position.z = 0.0;

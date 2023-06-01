@@ -58,7 +58,17 @@ public:
         GeoJsonProperties& defaultProperties,
         GeoJsonOverrideProperties& overrideProperties);
 
-    using Vertex = rendering::helper::VertexXYZNormal;
+    struct Vec3 {
+        GLfloat xyz[3];
+    };
+
+    struct VertexLinePoly {
+        Vec3 pos;
+        Vec3 normal = { 0.f, 0.f, 0.f }; // No normal per default
+        Vec3 color = { 1.f, 1.f, 1.f };
+        GLfloat opacity = 1.f;
+        GLfloat isExtrusion; // 0 is false, 1 is true
+    };
 
     // TODO: Use instead of numbers
     //enum class RenderPass {
@@ -89,11 +99,9 @@ public:
 
     // Each geometry feature might translate into several render features
     struct RenderFeature {
-        void initializeBuffers();
+        //void initializeBuffers();
 
         RenderType type = RenderType::Uninitialized;
-        GLuint vaoId = 0;
-        GLuint vboId = 0;
         size_t nVertices = 0;
         bool isExtrusionFeature = false;
 
@@ -172,7 +180,7 @@ private:
     void createPolygonGeometry();
 
     void initializeRenderFeature(RenderFeature& feature,
-        const std::vector<Vertex>& vertices);
+        const std::vector<rendering::helper::VertexXYZNormal>& vertices);
 
     /// Get the distance that shall be used for tesselation, based on the properties
     float tessellationStepSize() const;
@@ -182,7 +190,10 @@ private:
 
     /// Buffer the static data for the vertices
     void bufferVertexData(const RenderFeature& feature,
-        const std::vector<Vertex>& vertexData);
+        const std::vector<VertexLinePoly>& vertexData);
+
+    /// Buffer the static data for the lines
+    void bufferPolygonVertexData();
 
     /// Buffer the dynamic height data for the vertices, based on the height map
     void bufferDynamicHeightData(const RenderFeature& feature);
@@ -199,6 +210,10 @@ private:
     std::vector<Geodetic3> _triangleCoordinates;
 
     std::vector<RenderFeature> _renderFeatures;
+    std::vector<RenderFeature> _polyFeatures;
+
+    std::vector<VertexLinePoly> _appendedPolyVertices;
+    std::vector<float> _appendedPolyHeightData;
 
     // lat, long, distance (meters). Passed from parent on property change
     glm::vec3 _offsets = glm::vec3(0.f);
@@ -212,6 +227,13 @@ private:
 
     bool _hasTexture = false;
     std::unique_ptr<TextureComponent> _pointTexture;
+
+    GLuint _polyVaoId = 0;
+    GLuint _polyVboId = 0;
+
+    // wait with points and lines
+    //GLuint _pointsVaoId = 0;
+    //GLuint _pointsVboId = 0;
 
     ghoul::opengl::ProgramObject* _linesAndPolygonsProgram = nullptr;
     ghoul::opengl::ProgramObject* _pointsProgram = nullptr;
