@@ -29,14 +29,23 @@ layout(location = 0) in vec3 in_position;
 out float vs_screenSpaceDepth;
 out vec4 vs_positionViewSpace;
 out vec3 vs_positionModelSpace;
+out vec3 linecolor;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
+// uniform int halfway;
 
 const double PARSEC = 0.308567756e17LF;
 
 
 void main() {
+  int currentIdx = gl_VertexID;
+  if(currentIdx < (50 * 2)) {
+    linecolor = vec3(1, 0, 0);
+  }
+  else {
+    linecolor = vec3(0, 1, 0);
+  }
 
   vec4 positionViewSpace = modelViewTransform * vec4(in_position * 1E3, 1.0);
   vec4 positionClipSpace = projectionTransform * positionViewSpace;
