@@ -51,7 +51,7 @@ namespace openspace {
             const size_t nPointsOnPathLine,
             const size_t nPointsOnFieldLines);
 
-        std::vector<std::vector<glm::vec3>> getAllFieldlinesPositionsOfSeedPoints(
+        std::vector<std::pair<glm::vec3, std::string>> validateAndModifyAllSeedPoints(
             std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
             const std::string& tracingVar,
             ccmc::Kameleon* kameleon,
