@@ -350,11 +350,11 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         lua_pop(state, 1);
     }
 
+    library.documentations.clear();
     for (const std::filesystem::path& script : library.scripts) {
         // First we run the script to set its values in the current state
         ghoul::lua::runScriptFile(state, script.string());
 
-        library.documentations.clear();
 
         // Then, we extract the documentation information from the file
         ghoul::lua::push(state, "documentation");
