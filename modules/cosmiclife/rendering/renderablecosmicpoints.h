@@ -97,6 +97,8 @@ namespace openspace {
         bool _isColorMapExact = false;
         bool _hasDatavarSize = false;
 
+        std::vector<float> _result;
+
 
 
         GLuint _pTexture = 0;
@@ -137,6 +139,7 @@ namespace openspace {
         std::shared_ptr<ghoul::fontrendering::Font> _font;
 
         std::optional<std::string> _uniqueSpecies;
+        std::vector<float> _cachedDataSlice;
 
         // String variables
         std::string _speckFile;

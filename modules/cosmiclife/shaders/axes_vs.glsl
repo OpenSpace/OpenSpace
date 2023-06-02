@@ -33,18 +33,23 @@ out vec3 linecolor;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
-// uniform int halfway;
+uniform int vertexSize;
 
 const double PARSEC = 0.308567756e17LF;
 
 
 void main() {
-  int currentIdx = gl_VertexID;
-  if(currentIdx < (50 * 2)) {
+  int currentIdx = gl_VertexID / 2;
+  int lineSize = vertexSize / 2;
+  
+  if(currentIdx < 1) {
     linecolor = vec3(1, 0, 0);
   }
+  else if(currentIdx < (lineSize/2)) {
+    linecolor = vec3(1, 0, 1);
+  }
   else {
-    linecolor = vec3(0, 1, 0);
+    linecolor = vec3(0, 1, 1);
   }
 
   vec4 positionViewSpace = modelViewTransform * vec4(in_position * 1E3, 1.0);

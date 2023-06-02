@@ -417,6 +417,9 @@ namespace openspace {
 
         auto func = [this]() {
 
+            std::string dataSetOneName = _dataSetOneOption.getDescriptionByValue(_dataSetOneOption.value());
+            std::string dataSetTwoName = _dataSetTwoOption.getDescriptionByValue(_dataSetTwoOption.value());
+
             _dataSetOne =_datasets[_dataSetOneOption.getDescriptionByValue(_dataSetOneOption.value())];
             _dataSetTwo =_datasets[_dataSetTwoOption.getDescriptionByValue(_dataSetTwoOption.value())];
 
@@ -428,19 +431,20 @@ namespace openspace {
                  // Find correct outliers
                  for (int i = 0; i < _distanceHolders.size(); i++) {
 
-                     if (_distanceHolders[i].dataset1 == _datasets.begin()->first && _distanceHolders[i].dataset2 == _datasets.rbegin()->first) {
+                     if (_distanceHolders[i].dataset1 == dataSetOneName && _distanceHolders[i].dataset2 == dataSetTwoName) {
 
                          _vertices1 = _distanceHolders[i].v1;
                          _vertices2 = _distanceHolders[i].v2;
-
+                         break;
                      }
 
-                     if (_vertices1.empty()) {
+                     if (_distanceHolders[i].dataset1 == dataSetTwoName && _distanceHolders[i].dataset2 == dataSetOneName) {
 
                          _vertices1 = _distanceHolders[i].v2;
                          _vertices2 = _distanceHolders[i].v1;
-
+                         break;
                      }
+
 
                  }
                  _lineDataIsDirty1 = true;
@@ -663,8 +667,6 @@ namespace openspace {
         // Find the top % and take their indices to get the correct point in the datasets
         int numElementsToPop = maxHeap1.size() * _percentageOfLines;
 
-        int halfWayIndex = numElementsToPop / 2;
-
         // Pop the top 10% elements from the max heap and store their indices
         for (int k = 0; k < numElementsToPop; k++) {
             
@@ -771,7 +773,7 @@ namespace openspace {
 
         auto vertexPair = ComputeOutliers(d.begin()->second, d.rbegin()->second);
 
-        _distanceHolders.push_back(DistanceHolders{ d.begin()->first, d.rbegin()->first, vertexPair.first, vertexPair.second });
+        _distanceHolders.push_back(DistanceHolders{ d.begin()->first, d.rbegin()->first, vertexPair.first, vertexPair.second});
 
     }
 
@@ -796,8 +798,11 @@ namespace openspace {
 
         }
 
-        _dataSetOne = _datasets.begin()->second;
-        _dataSetTwo = _datasets.rbegin()->second;
+        std::string dataSetOneName = _dataSetOneOption.getDescriptionByValue(_dataSetOneOption.value());
+        std::string dataSetTwoName = _dataSetTwoOption.getDescriptionByValue(_dataSetTwoOption.value());
+
+        _dataSetOne = _datasets[_dataSetOneOption.getDescriptionByValue(_dataSetOneOption.value())];
+        _dataSetTwo = _datasets[_dataSetTwoOption.getDescriptionByValue(_dataSetTwoOption.value())];
         
         sort(_dataSetOne, _dataSetTwo);
 
@@ -805,20 +810,23 @@ namespace openspace {
             // Find correct outliers
             for (int i = 0; i < _distanceHolders.size(); i++) {
 
-                if (_distanceHolders[i].dataset1 == _datasets.begin()->first && _distanceHolders[i].dataset2 == _datasets.rbegin()->first) {
+                if (_distanceHolders[i].dataset1 == dataSetOneName && _distanceHolders[i].dataset2 == dataSetTwoName) {
 
                     _vertices1 = _distanceHolders[i].v1;
                     _vertices2 = _distanceHolders[i].v2;
+                    break;
                 }
 
-                if (_vertices1.empty()) {
+                if (_distanceHolders[i].dataset1 == dataSetTwoName && _distanceHolders[i].dataset2 == dataSetOneName) {
 
                     _vertices1 = _distanceHolders[i].v2;
                     _vertices2 = _distanceHolders[i].v1;
-
+                    break;
                 }
 
+
             }
+
             _lineDataIsDirty1 = true;
             _lineDataIsDirty2 = true;
         }
@@ -1007,14 +1015,13 @@ namespace openspace {
 
             _programL->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
             _programL->setUniform("projectionTransform", data.camera.projectionMatrix());
-
-            
+            _programL->setUniform("vertexSize", static_cast<GLsizei>(_vertices1.size()));
 
             // Changes GL state:
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnablei(GL_BLEND, 0);
             glEnable(GL_LINE_SMOOTH);
-            glLineWidth(4.0);
+            glLineWidth(2.0);
 
             glBindVertexArray(_vaoLines);
 
@@ -1043,6 +1050,7 @@ namespace openspace {
 
             _programL->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
             _programL->setUniform("projectionTransform", data.camera.projectionMatrix());
+            _programL->setUniform("vertexSize", static_cast<GLsizei>(_vertices2.size()));
 
             // Changes GL state:
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

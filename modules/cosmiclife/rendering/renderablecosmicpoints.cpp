@@ -650,10 +650,7 @@ namespace openspace {
 
     void RenderableCosmicPoints::updateRenderData(const RenderData& data) {
 
-        if (_dataIsDirty && _hasSpeckFile) {
-            ZoneScopedN("Data dirty")
-                TracyGpuZone("Data dirty")
-                LDEBUG("Regenerating data");
+        if (_hasSpeckFile) {
 
             std::vector<float> slice = createDataSlice(data);
 
@@ -812,6 +809,7 @@ namespace openspace {
             glBindVertexArray(0);
             _dataIsDirty = false;
         }
+        
     }
 
     void RenderableCosmicPoints::update(const UpdateData&) {
@@ -844,19 +842,17 @@ namespace openspace {
         }
     }
 
-
     std::vector<float> RenderableCosmicPoints::createDataSlice(const RenderData& data) {
 
         if (_dataset.entries.empty()) {
             return std::vector<float>();
         }
 
-        std::vector<float> result;
         if (_hasColorMapFile) {
-            result.reserve(8 * _dataset.entries.size());
+            _result.reserve(8 * _dataset.entries.size());
         }
         else {
-            result.reserve(4 * _dataset.entries.size());
+            _result.reserve(4 * _dataset.entries.size());
         }
 
         // what datavar in use for the index color
@@ -883,6 +879,7 @@ namespace openspace {
         double maxRadius = 0.0;
 
         float biggestCoord = -1.f;
+
         for (const speck::Dataset::Entry& e : _dataset.entries) {
             glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::vec4(
                 e.position, 1.0
@@ -924,103 +921,116 @@ namespace openspace {
             const double r = glm::length(p);
             maxRadius = std::max(maxRadius, r);
 
-            if (_hasColorMapFile) {
-                for (int j = 0; j < 4; ++j) {
-                    result.push_back(position[j]);
-                }
-                biggestCoord = std::max(biggestCoord, glm::compMax(position));
-                // Note: if exact colormap option is not selected, the first color and the
-                // last color in the colormap file are the outliers colors.
-                float variableColor = e.data[colorMapInUse];
-
-                float cmax, cmin;
-                if (_colorRangeData.empty()) {
-                    cmax = maxColorIdx; // Max value of datavar used for the index color
-                    cmin = minColorIdx; // Min value of datavar used for the index color
-                }
-                else {
-                    glm::vec2 currentColorRange = _colorRangeData[_colorOption.value()];
-                    cmax = currentColorRange.y;
-                    cmin = currentColorRange.x;
-                }
-
-                if (_isColorMapExact) {
-                    int colorIndex = static_cast<int>(variableColor + cmin);
+            if (_dataIsDirty) {
+                if (_hasColorMapFile) {
                     for (int j = 0; j < 4; ++j) {
-                        result.push_back(_colorMap.entries[colorIndex][j]);
+                        _result.push_back(position[j]);
                     }
-                }
-                else {
-                    if (_useLinearFiltering) {
-                        float valueT = (variableColor - cmin) / (cmax - cmin); // in [0, 1)
-                        valueT = std::clamp(valueT, 0.f, 1.f);
+                    biggestCoord = std::max(biggestCoord, glm::compMax(position));
+                    // Note: if exact colormap option is not selected, the first color and the
+                    // last color in the colormap file are the outliers colors.
+                    float variableColor = e.data[colorMapInUse];
 
-                        const float idx = valueT * (_colorMap.entries.size() - 1);
-                        const int floorIdx = static_cast<int>(std::floor(idx));
-                        const int ceilIdx = static_cast<int>(std::ceil(idx));
+                    float cmax, cmin;
+                    if (_colorRangeData.empty()) {
+                        cmax = maxColorIdx; // Max value of datavar used for the index color
+                        cmin = minColorIdx; // Min value of datavar used for the index color
+                    }
+                    else {
+                        glm::vec2 currentColorRange = _colorRangeData[_colorOption.value()];
+                        cmax = currentColorRange.y;
+                        cmin = currentColorRange.x;
+                    }
 
-                        const glm::vec4 floorColor = _colorMap.entries[floorIdx];
-                        const glm::vec4 ceilColor = _colorMap.entries[ceilIdx];
-
-                        if (floorColor != ceilColor) {
-                            const glm::vec4 c = floorColor + idx * (ceilColor - floorColor);
-                            result.push_back(c.r);
-                            result.push_back(c.g);
-                            result.push_back(c.b);
-                            result.push_back(c.a);
-                        }
-                        else {
-                            result.push_back(floorColor.r);
-                            result.push_back(floorColor.g);
-                            result.push_back(floorColor.b);
-                            result.push_back(floorColor.a);
+                    if (_isColorMapExact) {
+                        int colorIndex = static_cast<int>(variableColor + cmin);
+                        for (int j = 0; j < 4; ++j) {
+                            _result.push_back(_colorMap.entries[colorIndex][j]);
                         }
                     }
                     else {
-                        float ncmap = static_cast<float>(_colorMap.entries.size());
-                        float normalization = ((cmax != cmin) && (ncmap > 2.f)) ?
-                            (ncmap - 2.f) / (cmax - cmin) : 0;
-                        int colorIndex = static_cast<int>(
-                            (variableColor - cmin) * normalization + 1.f
-                            );
-                        colorIndex = colorIndex < 0 ? 0 : colorIndex;
-                        colorIndex = colorIndex >= ncmap ?
-                            static_cast<int>(ncmap - 1.f) : colorIndex;
+                        if (_useLinearFiltering) {
+                            float valueT = (variableColor - cmin) / (cmax - cmin); // in [0, 1)
+                            valueT = std::clamp(valueT, 0.f, 1.f);
 
-                        for (int j = 0; j < 4; ++j) {
-                            result.push_back(_colorMap.entries[colorIndex][j]);
+                            const float idx = valueT * (_colorMap.entries.size() - 1);
+                            const int floorIdx = static_cast<int>(std::floor(idx));
+                            const int ceilIdx = static_cast<int>(std::ceil(idx));
+
+                            const glm::vec4 floorColor = _colorMap.entries[floorIdx];
+                            const glm::vec4 ceilColor = _colorMap.entries[ceilIdx];
+
+                            if (floorColor != ceilColor) {
+                                const glm::vec4 c = floorColor + idx * (ceilColor - floorColor);
+                                _result.push_back(c.r);
+                                _result.push_back(c.g);
+                                _result.push_back(c.b);
+                                _result.push_back(c.a);
+                            }
+                            else {
+                                _result.push_back(floorColor.r);
+                                _result.push_back(floorColor.g);
+                                _result.push_back(floorColor.b);
+                                _result.push_back(floorColor.a);
+                            }
                         }
+                        else {
+                            float ncmap = static_cast<float>(_colorMap.entries.size());
+                            float normalization = ((cmax != cmin) && (ncmap > 2.f)) ?
+                                (ncmap - 2.f) / (cmax - cmin) : 0;
+                            int colorIndex = static_cast<int>(
+                                (variableColor - cmin) * normalization + 1.f
+                                );
+                            colorIndex = colorIndex < 0 ? 0 : colorIndex;
+                            colorIndex = colorIndex >= ncmap ?
+                                static_cast<int>(ncmap - 1.f) : colorIndex;
+
+                            for (int j = 0; j < 4; ++j) {
+                                _result.push_back(_colorMap.entries[colorIndex][j]);
+                            }
+                        }
+                    }
+
+                    if (_hasDatavarSize) {
+                        _result.push_back(e.data[sizeScalingInUse]);
+                    }
+                }
+                else if (_hasDatavarSize) {
+                    for (int j = 0; j < 4; ++j) {
+                        _result.push_back(position[j]);
+                    }
+                    _result.push_back(e.data[sizeScalingInUse]);
+                }
+                else {
+                    for (int j = 0; j < 4; ++j) {
+                        _result.push_back(position[j]);
                     }
                 }
 
-                if (_hasDatavarSize) {
-                    result.push_back(e.data[sizeScalingInUse]);
+                if (_useFade) {
+                    float fade = fadeObjectDependingOnDistance(data, e);
+                    _result.push_back(fade);
                 }
-            }
-            else if (_hasDatavarSize) {
-                for (int j = 0; j < 4; ++j) {
-                    result.push_back(position[j]);
+                else {
+                    _result.push_back(1);
                 }
-                result.push_back(e.data[sizeScalingInUse]);
             }
             else {
-                for (int j = 0; j < 4; ++j) {
-                    result.push_back(position[j]);
-                }
-            }
-
-            if (_useFade) {
                 float fade = fadeObjectDependingOnDistance(data, e);
-                result.push_back(fade);
-            }
-            else {
-                result.push_back(1);
-            }
 
+                // Update the fade value in the result vector
+                if (_useFade) {
+                    // Find the position of the fade value in the result vector
+                    size_t fadePosition = _result.size() - 1;
+
+                    // Replace the fade value with the updated value
+                    _result[fadePosition] = fade;
+                }
+            }
         }
 
         setBoundingSphere(maxRadius);
-        return result;
+        return _result;
     }
 
     void RenderableCosmicPoints::renderToTexture(GLuint textureToRenderTo,

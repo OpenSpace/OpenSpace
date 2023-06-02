@@ -131,7 +131,6 @@ namespace openspace {
         bool _lineDataIsDirty1 = false;
         bool _lineDataIsDirty2 = false;
 
-
         GLuint _pTexture = 0;
 
         properties::FloatProperty _scaleFactor;
