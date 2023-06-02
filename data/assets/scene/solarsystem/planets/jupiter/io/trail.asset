@@ -18,7 +18,7 @@ local IoTrail = {
     Period = 42.0 / 24.0,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter", "moonTrail_major_jupiter" },
   GUI = {
     Name = "Io Trail",
     Path = "/Solar System/Planets/Jupiter/Major Moons/Io"

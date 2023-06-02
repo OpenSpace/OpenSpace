@@ -8,7 +8,7 @@ asset.require("./minor/shepherd_group")
 
 local SaturnMinorMoonsOn = {
   Identifier = "os.solarsystem.SaturnMinorMoonsOn",
-  Name = "Turn on minor moons and trails",
+  Name = "Turn ON minor moons and trails",
   Command = [[
     local trails = openspace.getProperty("{moonTrail_minor_saturn}.Renderable.Enabled")
     local trails_fade = openspace.getProperty("{moonTrail_minor_saturn}.Renderable.Fade")
@@ -33,7 +33,7 @@ local SaturnMinorMoonsOn = {
 
 local SaturnMinorMoonsOff = {
   Identifier = "os.solarsystem.SaturnMinorMoonsOff",
-  Name = "Turn off minors moon and trails",
+  Name = "Turn OFF minors moon and trails",
   Command = [[
     local trails = openspace.getProperty("{moonTrail_minor_saturn}.Renderable.Enabled")
     local trails_fade = openspace.getProperty("{moonTrail_minor_saturn}.Renderable.Fade")

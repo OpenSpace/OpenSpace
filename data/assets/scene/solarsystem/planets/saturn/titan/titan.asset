@@ -45,7 +45,7 @@ local Titan = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
   GUI = {
     Name = "Titan",
     Path = "/Solar System/Planets/Saturn/Major Moons/Titan",

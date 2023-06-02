@@ -10,9 +10,85 @@ asset.require("./titan/atmosphere")
 
 
 
+local SaturnMajorMoonsOn = {
+  Identifier = "os.solarsystem.SaturnMajorMoonsOn",
+  Name = "Turn ON major moons and trails",
+  Command = [[
+    local trails = openspace.getProperty("{moonTrail_major_saturn}.Renderable.Enabled")
+    local trails_fade = openspace.getProperty("{moonTrail_major_saturn}.Renderable.Fade")
+
+    local moons = openspace.getProperty("{moon_major_saturn}.Renderable.Enabled")
+    local moons_fade = openspace.getProperty("{moon_major_saturn}.Renderable.Fade")
+
+    for i, v in pairs(trails_fade) do
+      openspace.setPropertyValueSingle(trails[i], true)
+      openspace.setPropertyValueSingle(v, 1, 2, "Linear")
+    end
+
+    for i, v in pairs(moons_fade) do
+      openspace.setPropertyValueSingle(moons[i], true)
+      openspace.setPropertyValueSingle(v, 1, 2, "Linear")
+    end
+  ]],
+  Documentation = "Turn ON Saturn's major moons and their trails",
+  GuiPath = "/Solar System/Saturn",
+  IsLocal = true
+}
+
+local SaturnMajorMoonsOff = {
+  Identifier = "os.solarsystem.SaturnMajorMoonsOff",
+  Name = "Turn OFF majors moon and trails",
+  Command = [[
+    local trails = openspace.getProperty("{moonTrail_major_saturn}.Renderable.Enabled")
+    local trails_fade = openspace.getProperty("{moonTrail_major_saturn}.Renderable.Fade")
+
+    local moons = openspace.getProperty("{moon_major_saturn}.Renderable.Enabled")
+    local moons_fade = openspace.getProperty("{moon_major_saturn}.Renderable.Fade")
+
+    for i, v in pairs(trails_fade) do
+      openspace.setPropertyValueSingle(
+        v,
+        0,
+        2,
+        "Linear",
+        "openspace.setPropertyValueSingle('" .. trails[i] .. "', false)"
+      )
+    end
+
+    for i, v in pairs(moons_fade) do
+      openspace.setPropertyValueSingle(
+        v,
+        0,
+        2,
+        "Linear",
+        "openspace.setPropertyValueSingle('" .. moons[i] .. "', false)"
+      )
+    end
+  ]],
+  Documentation = "Turn OFF Saturn's major moons and their trails",
+  GuiPath = "/Solar System/Saturn",
+  IsLocal = true
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(SaturnMajorMoonsOn)
+  openspace.action.registerAction(SaturnMajorMoonsOff)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(SaturnMajorMoonsOff)
+  openspace.action.removeAction(SaturnMajorMoonsOn)
+end)
+
+asset.export("SaturnMajorMoonsOn", SaturnMajorMoonsOn.Identifier)
+asset.export("SaturnMajorMoonsOff", SaturnMajorMoonsOff.Identifier)
+
+
+
 asset.meta = {
   Name = "Saturn Major Moons",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Meta asset containing Saturn's major moons: Dione, Enceladus, Hyperion,
     Iapetus, Mimas, Rhea, Tethys, and Titan]],
   Author = "OpenSpace Team",
