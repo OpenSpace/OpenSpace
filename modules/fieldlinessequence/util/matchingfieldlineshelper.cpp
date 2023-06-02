@@ -560,7 +560,7 @@ namespace openspace::fls {
 
                     if (checkIfFieldlineIsClosed(fieldlinePositions))
                     {
-                        float stepLength = 3;
+                        float stepLength = 5;
 
                         std::cout << "CLOSED! - Move seed point" << std::endl;
                         glm::vec3 modifiedSeedpoint = modifySeedpoint(
@@ -582,7 +582,7 @@ namespace openspace::fls {
                     }
                     else if(checkIfFieldlineIsIMF(fieldlinePositions))
                     {
-                        float stepLength = 0.3;
+                        float stepLength = 5;
 
                         std::cout << "IMF! - Move seed point closer to critical point" << std::endl;
                         glm::vec3 modifiedSeedpoint = modifySeedpoint(
@@ -595,7 +595,7 @@ namespace openspace::fls {
                             _nPointsOnFieldLine,
                             stepLength,
                             accuracy,
-                            false
+                            true
                         );
 
                         seedPoints[i].first = modifiedSeedpoint;
@@ -643,29 +643,22 @@ namespace openspace::fls {
 
                     seedPoints[i].first = modifiedSeedpoint;
                 }
-                //else //If it is a Closed fieldline
-                //{
-                //    float stepLength = 0.1;
-                //    glm::vec3 modifiedSeedpoint = modifySeedpointClosed(
-                //        seedPoints[i],
-                //        tracingVar,
-                //        tracer,
-                //        nPointsOnPathLine,
-                //        kameleon,
-                //        innerBoundaryLimit,
-                //        _nPointsOnFieldLine,
-                //        stepLength,
-                //        accuracy,
-                //        false
-                //    );
-
-
-                //    float newOpenXvalue = (seedPoints[i].first.x + seedPoints[i - 1].first.x) / 2;
-                //    seedPoints[i + 1].first.x = newOpenXvalue;
-                //    seedPoints[i + 2].first.x = newOpenXvalue;
-
-                //    seedPoints[i].first = modifiedSeedpoint;
-                //}
+                else //If it is a Closed fieldline
+                {
+                    float stepLength = 0.1;
+                    glm::vec3 modifiedSeedpoint = modifySeedpointClosed(
+                        seedPoints[i],
+                        tracingVar,
+                        tracer,
+                        nPointsOnPathLine,
+                        kameleon,
+                        innerBoundaryLimit,
+                        _nPointsOnFieldLine,
+                        stepLength,
+                        accuracy,
+                        false
+                    );
+                }
 
                 float newOpenXvalue = (seedPoints[i].first.x + seedPoints[i - 1].first.x) / 2;
                 seedPoints[i + 1].first.x = newOpenXvalue;
