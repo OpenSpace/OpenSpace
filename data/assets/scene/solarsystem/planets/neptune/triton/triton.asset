@@ -37,7 +37,7 @@ local TritonTrail = {
       Observer = "NEPTUNE BARYCENTER"
     },
     Color = { 0.2, 0.5, 0.75 },
-    Period = 360.13,
+    Period = 5.875,
     Resolution = 1000
   },
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_neptune" },
