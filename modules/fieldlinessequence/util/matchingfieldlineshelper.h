@@ -60,6 +60,14 @@ namespace openspace {
             std::vector<std::string>& seedPointsTopology*/
         );
 
+        std::vector<std::pair<glm::vec3, std::string>> findAndAddNightsideSeedPoints(
+            std::vector<std::pair<glm::vec3, std::string>>& seedPoints,
+            std::vector<double>& birthTimes,
+            ccmc::Kameleon* kameleon,
+            const std::string& tracingVar,
+            const size_t nPointsOnPathLine
+        );
+
         std::vector<glm::vec3> getFieldlinePositions(
             glm::vec3& seedPoint,
             ccmc::Kameleon* kameleon,
