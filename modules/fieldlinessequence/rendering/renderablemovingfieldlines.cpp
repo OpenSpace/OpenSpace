@@ -1076,8 +1076,8 @@ namespace openspace {
 
         float accuracy = 0.3;
 
-        std::vector<std::vector<glm::vec3>> testFieldlinePositions =
-            fls::getAllFieldlinesPositionsOfSeedPoints(
+       seedPoints =
+            fls::validateAndModifyAllSeedPoints(
                 seedPoints,
                 _tracingVariable,
                 kameleon.get(),
