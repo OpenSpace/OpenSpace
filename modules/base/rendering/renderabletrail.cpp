@@ -438,18 +438,18 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         _primaryRenderInformation.first;
 
     // Culling
-    const glm::dvec3 trailPosWorld = glm::dvec3(
-        modelTransform * _primaryRenderInformation._localTransform *
-        glm::dvec4(0.0, 0.0, 0.0, 1.0)
-    );
-    const double distance = glm::distance(trailPosWorld, data.camera.eyePositionVec3());
+    //const glm::dvec3 trailPosWorld = glm::dvec3(
+    //    modelTransform * _primaryRenderInformation._localTransform *
+    //    glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    //);
+    //const double distance = glm::distance(trailPosWorld, data.camera.eyePositionVec3());
 
-    if (distance > boundingSphere() * DISTANCE_CULLING_RADII) {
-        // Reset
-        global::renderEngine->openglStateCache().resetBlendState();
-        global::renderEngine->openglStateCache().resetDepthState();
-        return;
-    }
+    //if (distance > boundingSphere() * DISTANCE_CULLING_RADII) {
+    //    // Reset
+    //    global::renderEngine->openglStateCache().resetBlendState();
+    //    global::renderEngine->openglStateCache().resetDepthState();
+    //    return;
+    //}
 
     // Render the primary batch of vertices
     internalRender(

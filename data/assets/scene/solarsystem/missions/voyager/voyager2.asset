@@ -305,7 +305,7 @@ local VoyagerTrailEncounterNeptune = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
-    StartTime = "1989 AUG 23 23:30:00",
+    StartTime = "1989 AUG 23 22:30:00",
     EndTime = "1989 AUG 26",
     SampleInterval = 100
   },
