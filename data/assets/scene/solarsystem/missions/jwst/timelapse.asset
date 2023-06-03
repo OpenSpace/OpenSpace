@@ -496,113 +496,14 @@ local function createBackwardTimelapse()
 end
 
 
-local PlayForwards = {
-  Identifier = "os.jwst.PlayForwards",
-  Name = "Play JWST from start",
-  Command = [[
-    openspace.scriptScheduler.clear(0)
-    openspace.time.setDeltaTime(1)
-    openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
-    openspace.time.setTime("]] .. advance(LaunchTime, 0, 0, 0, 1) .. [[")
-    ]] .. createForwardTimelapse() .. [[
-    openspace.time.setDeltaTime(1)
-  ]],
-  Documentation = "Jump to the JWST launch time and play the timelapse of deployment forward",
-  GuiPath = "/JWST",
-  IsLocal = false
-}
-
-local PlayDetach = {
-  Identifier = "os.jwst.PlayDetach",
-  Name = "Play JWST from detach",
-  Command = [[
-    openspace.scriptScheduler.clear(0)
-    openspace.time.setDeltaTime(1)
-    openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
-    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma", 1.0)
-    openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", true)
-    openspace.time.setTime("]] .. DetachTime .. [[")
-    ]] .. createForwardTimelapse() .. [[
-    openspace.time.setDeltaTime(1)
-  ]],
-  Documentation = "Jump to the JWST detach time and play the timelapse of deployment forward",
-  GuiPath = "/JWST",
-  IsLocal = false
-}
-
-local PlayBackwards = {
-  Identifier = "os.jwst.PlayBackwards",
-  Name = "Play JWST from end",
-  Command = [[
-    openspace.scriptScheduler.clear(0)
-    openspace.time.setDeltaTime(-1)
-    openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
-    openspace.time.setTime("2022 JAN 09 07:20:01")
-    ]] .. createBackwardTimelapse() .. [[
-    openspace.time.setDeltaTime(-1)
-  ]],
-  Documentation = "Jump to the end of JWST deployment time and play the timelapse of deployment in reverse",
-  GuiPath = "/JWST",
-  IsLocal = false
-}
-
-local ClearTimelapse = {
-  Identifier = "os.jwst.ClearTimelapse",
-  Name = "Clear JWST timelapse",
-  Command = [[
-    openspace.scriptScheduler.clear(0)
-    openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
-    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma", 1.0)
-    openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", true)
-    local deltaTime = openspace.time.deltaTime()
-    if deltaTime >= 0 then
-      openspace.time.setDeltaTime(1)
-    else
-      openspace.time.setDeltaTime(-1)
-    end
-  ]],
-  Documentation = "Set delta time back to realtime and clear the JWST deployment timelapse",
-  GuiPath = "/JWST",
-  IsLocal = false
-}
-
-local ToggleDirection = {
-  Identifier = "os.jwst.ToggleDirection",
-  Name = "Toggle forwards / backwards",
-  Command = [[
-    -- Flip deltatime
-    local deltaTime = openspace.time.deltaTime()
-    openspace.time.setDeltaTime(-deltaTime)
-
-    -- Switch timelapse script
-    if deltaTime < 0 then
-      -- Going backwards and switching to forwards
-      openspace.scriptScheduler.clear(0)
-      ]] .. createForwardTimelapse() .. [[
-    else
-      -- Going forwards and switching to backwards
-      openspace.scriptScheduler.clear(0)
-      ]] .. createBackwardTimelapse() .. [[
-    end
-
-    -- Update the dashboard text
-    local text = openspace.getPropertyValue("Dashboard.JWSTStateText.Text")
-    if string.len(text) > 14 then
-      local newText = ""
-      if text:sub(13, 13) == "-" then
-        newText = text:sub(1,12) .. text:sub(14)
-      else
-        newText = text:sub(1,12) .. "-" .. text:sub(13)
-      end
-      openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", newText)
-    else
-      openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
-    end
-  ]],
-  Documentation = "Toggle deployment timelapse direction between forwards and backwards",
-  GuiPath = "/JWST",
-  IsLocal = false
-}
+-- We have define the actual content of these actions in the onInitialize function since
+-- the `advanceTime` function is not available at Asset load time and we have to wait
+-- until the initialize function for it
+local PlayForwards
+local PlayDetach
+local PlayBackwards
+local ClearTimelapse
+local ToggleDirection
 
 local Text = {
   Type = "DashboardItemText",
@@ -613,6 +514,114 @@ local Text = {
 
 
 asset.onInitialize(function()
+  PlayForwards = {
+    Identifier = "os.jwst.PlayForwards",
+    Name = "Play JWST from start",
+    Command = [[
+      openspace.scriptScheduler.clear(0)
+      openspace.time.setDeltaTime(1)
+      openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
+      openspace.time.setTime("]] .. advance(LaunchTime, 0, 0, 0, 1) .. [[")
+      ]] .. createForwardTimelapse() .. [[
+      openspace.time.setDeltaTime(1)
+    ]],
+    Documentation = "Jump to the JWST launch time and play the timelapse of deployment forward",
+    GuiPath = "/JWST",
+    IsLocal = false
+  }
+
+  PlayDetach = {
+    Identifier = "os.jwst.PlayDetach",
+    Name = "Play JWST from detach",
+    Command = [[
+      openspace.scriptScheduler.clear(0)
+      openspace.time.setDeltaTime(1)
+      openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
+      openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma", 1.0)
+      openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", true)
+      openspace.time.setTime("]] .. DetachTime .. [[")
+      ]] .. createForwardTimelapse() .. [[
+      openspace.time.setDeltaTime(1)
+    ]],
+    Documentation = "Jump to the JWST detach time and play the timelapse of deployment forward",
+    GuiPath = "/JWST",
+    IsLocal = false
+  }
+
+  PlayBackwards = {
+    Identifier = "os.jwst.PlayBackwards",
+    Name = "Play JWST from end",
+    Command = [[
+      openspace.scriptScheduler.clear(0)
+      openspace.time.setDeltaTime(-1)
+      openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
+      openspace.time.setTime("2022 JAN 09 07:20:01")
+      ]] .. createBackwardTimelapse() .. [[
+      openspace.time.setDeltaTime(-1)
+    ]],
+    Documentation = "Jump to the end of JWST deployment time and play the timelapse of deployment in reverse",
+    GuiPath = "/JWST",
+    IsLocal = false
+  }
+
+  ClearTimelapse = {
+    Identifier = "os.jwst.ClearTimelapse",
+    Name = "Clear JWST timelapse",
+    Command = [[
+      openspace.scriptScheduler.clear(0)
+      openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
+      openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma", 1.0)
+      openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", true)
+      local deltaTime = openspace.time.deltaTime()
+      if deltaTime >= 0 then
+        openspace.time.setDeltaTime(1)
+      else
+        openspace.time.setDeltaTime(-1)
+      end
+    ]],
+    Documentation = "Set delta time back to realtime and clear the JWST deployment timelapse",
+    GuiPath = "/JWST",
+    IsLocal = false
+  }
+
+  ToggleDirection = {
+    Identifier = "os.jwst.ToggleDirection",
+    Name = "Toggle forwards / backwards",
+    Command = [[
+      -- Flip deltatime
+      local deltaTime = openspace.time.deltaTime()
+      openspace.time.setDeltaTime(-deltaTime)
+
+      -- Switch timelapse script
+      if deltaTime < 0 then
+        -- Going backwards and switching to forwards
+        openspace.scriptScheduler.clear(0)
+        ]] .. createForwardTimelapse() .. [[
+      else
+        -- Going forwards and switching to backwards
+        openspace.scriptScheduler.clear(0)
+        ]] .. createBackwardTimelapse() .. [[
+      end
+
+      -- Update the dashboard text
+      local text = openspace.getPropertyValue("Dashboard.JWSTStateText.Text")
+      if string.len(text) > 14 then
+        local newText = ""
+        if text:sub(13, 13) == "-" then
+          newText = text:sub(1,12) .. text:sub(14)
+        else
+          newText = text:sub(1,12) .. "-" .. text:sub(13)
+        end
+        openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", newText)
+      else
+        openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
+      end
+    ]],
+    Documentation = "Toggle deployment timelapse direction between forwards and backwards",
+    GuiPath = "/JWST",
+    IsLocal = false
+  }
+
   openspace.action.registerAction(PlayForwards)
   openspace.action.registerAction(PlayDetach)
   openspace.action.registerAction(PlayBackwards)
